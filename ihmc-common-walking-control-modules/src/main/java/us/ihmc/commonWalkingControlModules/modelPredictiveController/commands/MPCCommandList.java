@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.List;
  * A {@code MPCCommandList} gathers several commands to be submitted to the MPC
  * core.
  * <p>
- * These commands eventually get processed by the {@link us.ihmc.commonWalkingControlModules.modelPredictiveController.LinearMPCQPSolver} to compute
+ * These commands eventually get processed by the {@link LinearMPCQPSolver} to compute
  * the desired motion function coefficients.
  * </p>
  * <p>

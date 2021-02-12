@@ -4,6 +4,15 @@ import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCSolutionInspection;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SegmentPointViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
@@ -27,7 +36,7 @@ import java.util.List;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
 
-import static us.ihmc.commonWalkingControlModules.modelPredictiveController.MPCQPInputCalculator.sufficientlyLongTime;
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
 
 public class CoMTrajectoryModelPredictiveController
 {
@@ -97,7 +106,7 @@ public class CoMTrajectoryModelPredictiveController
    private final ExecutionTimer mpcQPTime = new ExecutionTimer("mpcQPTime", registry);
    private final ExecutionTimer mpcExtractionTime = new ExecutionTimer("mpcExtractionTime", registry);
    final LinearMPCQPSolver qpSolver;
-   private final TrajectoryAndCornerPointCalculator cornerPointCalculator = new TrajectoryAndCornerPointCalculator();
+   private final MPCCornerPointCalculator cornerPointCalculator = new MPCCornerPointCalculator();
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
 
    private final DoubleConsumer initialComPositionConsumer = initialCoMPositionCostToGo::set;
@@ -228,7 +237,7 @@ public class CoMTrajectoryModelPredictiveController
       if (solutionCoefficients != null)
          trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, omega.getValue());
 
-      cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity, omega.getValue());
+      cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity);
 
       if (trajectoryViewer != null)
       {

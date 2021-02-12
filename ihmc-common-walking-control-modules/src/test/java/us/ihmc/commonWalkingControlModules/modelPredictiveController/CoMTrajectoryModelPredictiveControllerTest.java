@@ -4,6 +4,10 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.CoMMPCVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -829,9 +833,9 @@ public class CoMTrajectoryModelPredictiveControllerTest
    {
       for (int i = 0; i < 6; i++)
       {
-         assertEquals("Col " + i + " wrong", solution.get(0, i), trajectoryHandler.xCoefficientVector.get(i), epsilon);
-         assertEquals("Col " + i + " wrong", solution.get(1, i), trajectoryHandler.yCoefficientVector.get(i), epsilon);
-         assertEquals("Col " + i + " wrong", solution.get(2, i), trajectoryHandler.zCoefficientVector.get(i), epsilon);
+         assertEquals("Col " + i + " wrong", solution.get(0, i), trajectoryHandler.getXCoefficientVector().get(i), epsilon);
+         assertEquals("Col " + i + " wrong", solution.get(1, i), trajectoryHandler.getYCoefficientVector().get(i), epsilon);
+         assertEquals("Col " + i + " wrong", solution.get(2, i), trajectoryHandler.getZCoefficientVector().get(i), epsilon);
       }
    }
 }
