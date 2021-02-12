@@ -12,8 +12,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SegmentPointViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
@@ -109,7 +108,7 @@ public class CoMTrajectoryModelPredictiveController
    private final ExecutionTimer mpcQPTime = new ExecutionTimer("mpcQPTime", registry);
    private final ExecutionTimer mpcExtractionTime = new ExecutionTimer("mpcExtractionTime", registry);
    final LinearMPCQPSolver qpSolver;
-   private final MPCCornerPointCalculator cornerPointCalculator = new MPCCornerPointCalculator();
+   private MPCCornerPointViewer cornerPointViewer = null;
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
 
    private final DoubleConsumer initialComPositionConsumer = initialCoMPositionCostToGo::set;
@@ -148,9 +147,9 @@ public class CoMTrajectoryModelPredictiveController
       parentRegistry.addChild(registry);
    }
 
-   public void setCornerPointViewer(SegmentPointViewer viewer)
+   public void setCornerPointViewer(MPCCornerPointViewer viewer)
    {
-      cornerPointCalculator.setViewer(viewer);
+      cornerPointViewer = viewer;
    }
 
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -248,7 +247,8 @@ public class CoMTrajectoryModelPredictiveController
             throw new RuntimeException("Somehow these didn't match up.");
       }
 
-      cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity);
+      if (cornerPointViewer != null)
+         cornerPointViewer.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence());
 
       if (trajectoryViewer != null)
       {

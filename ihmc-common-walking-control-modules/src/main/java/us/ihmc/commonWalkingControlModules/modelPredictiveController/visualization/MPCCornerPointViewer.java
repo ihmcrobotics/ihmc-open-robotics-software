@@ -1,7 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -13,7 +14,9 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SegmentPointViewer
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
+
+public class MPCCornerPointViewer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -29,12 +32,12 @@ public class SegmentPointViewer
 
    private static final String name = "Corner Points";
 
-   public SegmentPointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public MPCCornerPointViewer(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(false, true, registry, yoGraphicsListRegistry);
    }
 
-   public SegmentPointViewer(boolean artifactsOnly, boolean viewCoM, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public MPCCornerPointViewer(boolean artifactsOnly, boolean viewCoM, YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       for (int i = 0; i < maxPoints; i++)
       {
@@ -53,7 +56,11 @@ public class SegmentPointViewer
          vrpStartPoints.add(vrpStartPoint);
          vrpEndPoints.add(vrpEndPoint);
 
-         YoGraphicPosition dcmStartPointGraphic = new YoGraphicPosition("dcmStartPoint" + i, dcmEndPoint, size, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition dcmStartPointGraphic = new YoGraphicPosition("dcmStartPoint" + i,
+                                                                        dcmEndPoint,
+                                                                        size,
+                                                                        YoAppearance.Blue(),
+                                                                        GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition dcmEndPointGraphic = new YoGraphicPosition("dcmEndPoint" + i, dcmEndPoint, size, YoAppearance.Blue(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition vrpStartPointGraphic = new YoGraphicPosition("vrpStartPoint" + i, vrpStartPoint, size, YoAppearance.Green(), GraphicType.BALL);
          YoGraphicPosition vrpEndPointGraphic = new YoGraphicPosition("vrpEndPoint" + i, vrpEndPoint, size, YoAppearance.Green(), GraphicType.SOLID_BALL);
@@ -90,63 +97,39 @@ public class SegmentPointViewer
                yoGraphicsListRegistry.registerYoGraphic(name, comEndPointGraphic);
             }
          }
-
-
       }
    }
 
-   public void updateDCMCornerPoints(List<LineSegment3D> dcmCornerPoints)
+   public void updateCornerPoints(LinearMPCTrajectoryHandler trajectoryHandler, List<? extends ContactStateProvider> contactSequence)
    {
-      int i = 0;
-      int size = Math.min(dcmCornerPoints.size(), this.dcmStartPoints.size());
-
-      for (; i < size; i++)
+      int segmentId = 0;
+      for (; segmentId < Math.min(contactSequence.size(), comStartPoints.size()); segmentId++)
       {
-         this.dcmStartPoints.get(i).set(dcmCornerPoints.get(i).getFirstEndpoint());
-         this.dcmEndPoints.get(i).set(dcmCornerPoints.get(i).getSecondEndpoint());
+         double startTime = contactSequence.get(segmentId).getTimeInterval().getStartTime();
+         double endTime = Math.min(contactSequence.get(segmentId).getTimeInterval().getEndTime(), startTime + sufficientlyLongTime);
+
+         startTime += 1e-6;
+         endTime -= 1e-6;
+
+         trajectoryHandler.compute(startTime);
+         comStartPoints.get(segmentId).set(trajectoryHandler.getDesiredCoMPosition());
+         dcmStartPoints.get(segmentId).set(trajectoryHandler.getDesiredDCMPosition());
+         vrpStartPoints.get(segmentId).set(trajectoryHandler.getDesiredVRPPosition());
+
+         trajectoryHandler.compute(endTime);
+         comEndPoints.get(segmentId).set(trajectoryHandler.getDesiredCoMPosition());
+         dcmEndPoints.get(segmentId).set(trajectoryHandler.getDesiredDCMPosition());
+         vrpEndPoints.get(segmentId).set(trajectoryHandler.getDesiredVRPPosition());
       }
 
-      for (; i < this.dcmStartPoints.size(); i++)
+      for (; segmentId < dcmStartPoints.size(); segmentId++)
       {
-         this.dcmStartPoints.get(i).setToNaN();
-         this.dcmEndPoints.get(i).setToNaN();
+         comStartPoints.get(segmentId).setToNaN();
+         comEndPoints.get(segmentId).setToNaN();
+         dcmStartPoints.get(segmentId).setToNaN();
+         dcmEndPoints.get(segmentId).setToNaN();
+         vrpStartPoints.get(segmentId).setToNaN();
+         vrpEndPoints.get(segmentId).setToNaN();
       }
-   }
-
-   public void updateCoMCornerPoints(List<LineSegment3D> comCornerPoints)
-   {
-      int i = 0;
-      int size = Math.min(comCornerPoints.size(), this.comStartPoints.size());
-
-      for (; i < size; i++)
-      {
-         this.comStartPoints.get(i).set(comCornerPoints.get(i).getFirstEndpoint());
-         this.comEndPoints.get(i).set(comCornerPoints.get(i).getSecondEndpoint());
-      }
-
-      for (; i < this.comStartPoints.size(); i++)
-      {
-         this.comStartPoints.get(i).setToNaN();
-         this.comEndPoints.get(i).setToNaN();
-      }
-   }
-
-   public void updateVRPWaypoints(List<LineSegment3D> vrpSegments)
-   {
-      int i = 0;
-      int size = Math.min(vrpSegments.size(), this.vrpStartPoints.size());
-
-      for (; i < size; i++)
-      {
-         vrpStartPoints.get(i).set(vrpSegments.get(i).getFirstEndpoint());
-         vrpEndPoints.get(i).set(vrpSegments.get(i).getSecondEndpoint());
-      }
-
-      for (; i < vrpStartPoints.size(); i++)
-      {
-         vrpStartPoints.get(i).setToNaN();
-         vrpEndPoints.get(i).setToNaN();
-      }
-
    }
 }
