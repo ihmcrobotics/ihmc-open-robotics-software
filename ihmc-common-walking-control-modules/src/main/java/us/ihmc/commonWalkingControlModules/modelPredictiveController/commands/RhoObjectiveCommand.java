@@ -13,7 +13,7 @@ import java.util.List;
  *
  * Can be used to both specify a direct value, as well as upper and lower bounds for those forces.
  */
-public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCommand>
+public abstract class RhoObjectiveCommand implements MPCCommand<RhoObjectiveCommand>
 {
    private int commandId;
    /**
@@ -63,6 +63,8 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       segmentNumber = -1;
       timeOfObjective = Double.NaN;
    }
+
+   public abstract int getDerivativeOrder();
 
    /**
     * Adds a contact that contain the contact points that define the direction of the generalized contact forces.
@@ -180,7 +182,7 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
    }
 
    @Override
-   public void set(RhoValueObjectiveCommand other)
+   public void set(RhoObjectiveCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
@@ -214,9 +216,9 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       {
          return true;
       }
-      else if (object instanceof RhoValueObjectiveCommand)
+      else if (object instanceof RhoObjectiveCommand)
       {
-         RhoValueObjectiveCommand other = (RhoValueObjectiveCommand) object;
+         RhoObjectiveCommand other = (RhoObjectiveCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)

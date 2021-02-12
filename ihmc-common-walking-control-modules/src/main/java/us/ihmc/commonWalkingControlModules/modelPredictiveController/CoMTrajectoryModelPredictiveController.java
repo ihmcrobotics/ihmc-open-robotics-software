@@ -308,9 +308,9 @@ public class CoMTrajectoryModelPredictiveController
                                                             initialDuration,
                                                             vrpTrackingConsumer0));
          if (includeRhoMinInequality)
-            mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
          if (includeRhoMaxInequality)
-            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
       }
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
@@ -328,9 +328,9 @@ public class CoMTrajectoryModelPredictiveController
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
             if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
+               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
             if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
+               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
 
@@ -348,9 +348,9 @@ public class CoMTrajectoryModelPredictiveController
                                                                nextDuration,
                                                                costToGoConsumer));
             if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
             if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
          }
       }
 
@@ -369,9 +369,9 @@ public class CoMTrajectoryModelPredictiveController
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
       if (includeRhoMinInequality)
-         mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
+         mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
       if (includeRhoMaxInequality)
-         mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
+         mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -432,7 +432,7 @@ public class CoMTrajectoryModelPredictiveController
       return continuityObjectiveToPack;
    }
 
-   private MPCCommand<?> computeMinRhoObjective(RhoValueObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMinForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
    {
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
@@ -449,7 +449,7 @@ public class CoMTrajectoryModelPredictiveController
       return valueObjective;
    }
 
-   private MPCCommand<?> computeMaxRhoObjective(RhoValueObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMaxForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
    {
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());

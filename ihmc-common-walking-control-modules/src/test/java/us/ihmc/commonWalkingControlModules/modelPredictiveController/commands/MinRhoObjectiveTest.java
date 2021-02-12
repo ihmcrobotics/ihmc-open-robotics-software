@@ -44,7 +44,7 @@ public class MinRhoObjectiveTest
       double timeOfConstraint = 0.7;
       double minRho = 0.001;
 
-      RhoValueObjectiveCommand command = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand command = new RhoAccelerationObjectiveCommand();
 
       command.setOmega(omega);
       command.setTimeOfObjective(timeOfConstraint);
@@ -62,24 +62,26 @@ public class MinRhoObjectiveTest
 
       solver.solve();
 
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
       DMatrixRMaj solvedObjectivePosition = new DMatrixRMaj(3, 1);
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
 
+      DMatrixRMaj rhoValueVector = MPCTestHelper.computeRhoAccelerationVector(timeOfConstraint, omega, solution, contactPlaneHelper);
+
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
 
       helper.computeMatrices(timeOfConstraint, omega);
-      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVector);
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectivePosition);
+      CommonOps_DDRM.mult(MPCTestHelper.getContactValueJacobian(timeOfConstraint, omega, contactPlaneHelper), solution, solvedObjectivePosition);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(16, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(16, 1);
       CommonOps_DDRM.fill(taskObjectiveExpected, minRho);
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
+
+      EjmlUnitTests.assertEquals(MPCTestHelper.getContactAccelerationJacobian(timeOfConstraint, omega, contactPlaneHelper), solver.qpInputTypeA.taskJacobian, 1e-5);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
       double omega2 = omega * omega;
 
@@ -104,8 +106,7 @@ public class MinRhoObjectiveTest
          taskJacobianExpected.set(rhoIdx, startColIdx + 3, a3);
       }
 
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
+
 
       CommonOps_DDRM.scale(-1.0, taskJacobianExpected);
       CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
@@ -148,7 +149,7 @@ public class MinRhoObjectiveTest
       double timeOfConstraint = 0.7;
       double minRho = 0.001;
 
-      RhoValueObjectiveCommand commandStart = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand commandStart = new RhoAccelerationObjectiveCommand();
 
       commandStart.setOmega(omega);
       commandStart.setTimeOfObjective(0.0);
@@ -158,7 +159,7 @@ public class MinRhoObjectiveTest
       commandStart.setUseScalarObjective(true);
       commandStart.addContactPlaneHelper(contactPlaneHelper);
 
-      RhoValueObjectiveCommand commandEnd = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand commandEnd = new RhoAccelerationObjectiveCommand();
       commandEnd.setOmega(omega);
       commandEnd.setTimeOfObjective(timeOfConstraint);
       commandEnd.setSegmentNumber(0);
@@ -176,23 +177,28 @@ public class MinRhoObjectiveTest
 
       solver.solve();
 
-      DMatrixRMaj rhoValueVectorStart = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), 1);
-      DMatrixRMaj rhoValueVectorEnd = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), 1);
 
       DMatrixRMaj solution = solver.getSolution();
       DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
 
       MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
 
-      helper.computeMatrices(0.0, omega);
-      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVectorStart);
-      helper.computeMatrices(timeOfConstraint, omega);
-      CommonOps_DDRM.mult(helper.getPositionJacobianMatrix(), rhoSolution, rhoValueVectorEnd);
+      DMatrixRMaj rhoValueVectorStart = MPCTestHelper.computeRhoAccelerationVector(0.0, omega, solution, contactPlaneHelper);
+      DMatrixRMaj rhoValueVectorEnd = MPCTestHelper.computeRhoAccelerationVector(timeOfConstraint, omega, solution, contactPlaneHelper);
+
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), 1);
       CommonOps_DDRM.fill(taskObjectiveExpected, minRho);
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(2 * rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize());
+
+      MatrixTools.setMatrixBlock(taskJacobianExpected, 0, 0, MPCTestHelper.getContactAccelerationJacobian(0.0, omega, contactPlaneHelper), 0, 0, rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize(), 1.0);
+      MatrixTools.setMatrixBlock(taskJacobianExpected, rhoHelper.getRhoSize(), 0, MPCTestHelper.getContactAccelerationJacobian(timeOfConstraint, omega, contactPlaneHelper), 0, 0, rhoHelper.getRhoSize(), indexHandler.getTotalProblemSize(), 1.0);
+
+      CommonOps_DDRM.scale(-1.0, taskJacobianExpected);
+      CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
+      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Ain, 1e-5);
+      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverInput_bin, 1e-5);
 
       double omega2 = omega * omega;
 
@@ -217,37 +223,9 @@ public class MinRhoObjectiveTest
          rhoValueEnd += a2End * solution.get(startColIdx + 2, 0);
          rhoValueEnd += a3End * solution.get(startColIdx + 3, 0);
 
-         int rhoIdxEnd = rhoIdx + rhoHelper.getRhoSize();
-
          assertTrue(rhoValueStart >= rhoValueVectorStart.get(rhoIdx));
-         assertTrue(rhoValueEnd >= rhoValueVectorEnd.get(rhoIdxEnd));
-
-         taskJacobianExpected.set(rhoIdx, startColIdx, a0Start);
-         taskJacobianExpected.set(rhoIdx, startColIdx + 1, a1Start);
-         taskJacobianExpected.set(rhoIdx, startColIdx + 2, a2Start);
-         taskJacobianExpected.set(rhoIdx, startColIdx + 3, a3Start);
-
-         taskJacobianExpected.set(rhoIdxEnd, startColIdx, a0End);
-         taskJacobianExpected.set(rhoIdxEnd, startColIdx + 1, a1End);
-         taskJacobianExpected.set(rhoIdxEnd, startColIdx + 2, a2End);
-         taskJacobianExpected.set(rhoIdxEnd, startColIdx + 3, a3End);
+         assertTrue(rhoValueEnd >= rhoValueVectorEnd.get(rhoIdx));
       }
-
-//      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInput.taskJacobian, 1e-5);
-//      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInput.taskObjective, 1e-5);
-
-      CommonOps_DDRM.scale(-1.0, taskJacobianExpected);
-      CommonOps_DDRM.scale(-1.0, taskObjectiveExpected);
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Ain, 1e-5);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverInput_bin, 1e-5);
-
-      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
-      DMatrixRMaj solverInput_f_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), 1);
-
-      MatrixTools.addDiagonal(solverInput_H_Expected, regularization);
-
-      EjmlUnitTests.assertEquals(solverInput_H_Expected, solver.solverInput_H, 1e-10);
-      EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
    }
 
    @Test
@@ -277,7 +255,7 @@ public class MinRhoObjectiveTest
       double timeOfConstraint = 0.7;
       double minRho = 0.001;
 
-      RhoValueObjectiveCommand commandStart1 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand commandStart1 = new RhoAccelerationObjectiveCommand();
       commandStart1.setOmega(omega);
       commandStart1.setTimeOfObjective(0.0);
       commandStart1.setSegmentNumber(0);
@@ -286,7 +264,7 @@ public class MinRhoObjectiveTest
       commandStart1.setUseScalarObjective(true);
       commandStart1.addContactPlaneHelper(contactPlaneHelper);
 
-      RhoValueObjectiveCommand commandEnd1 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand commandEnd1 = new RhoAccelerationObjectiveCommand();
       commandEnd1.setOmega(omega);
       commandEnd1.setTimeOfObjective(timeOfConstraint);
       commandEnd1.setSegmentNumber(0);
@@ -295,7 +273,7 @@ public class MinRhoObjectiveTest
       commandEnd1.setUseScalarObjective(true);
       commandEnd1.addContactPlaneHelper(contactPlaneHelper);
 
-      RhoValueObjectiveCommand commandStart2 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand commandStart2 = new RhoAccelerationObjectiveCommand();
       commandStart2.setOmega(omega);
       commandStart2.setTimeOfObjective(0.0);
       commandStart2.setSegmentNumber(1);
@@ -304,7 +282,7 @@ public class MinRhoObjectiveTest
       commandStart2.setUseScalarObjective(true);
       commandStart2.addContactPlaneHelper(contactPlaneHelper);
 
-      RhoValueObjectiveCommand commandEnd2 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand commandEnd2 = new RhoAccelerationObjectiveCommand();
       commandEnd2.setOmega(omega);
       commandEnd2.setTimeOfObjective(timeOfConstraint);
       commandEnd2.setSegmentNumber(1);

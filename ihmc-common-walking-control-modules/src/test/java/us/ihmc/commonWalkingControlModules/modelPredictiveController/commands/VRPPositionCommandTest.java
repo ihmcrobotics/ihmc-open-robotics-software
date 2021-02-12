@@ -110,7 +110,7 @@ public class VRPPositionCommandTest
       }
       solvedPositionAtConstraint.scaleAdd(0.5 * timeOfConstraint * timeOfConstraint - 1.0 / omega2, gravityVector, solvedPositionAtConstraint);
 
-      EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
+      EjmlUnitTests.assertEquals(MPCTestHelper.getVRPPositionJacobian(timeOfConstraint, omega, contactPlaneHelper), solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
       CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);

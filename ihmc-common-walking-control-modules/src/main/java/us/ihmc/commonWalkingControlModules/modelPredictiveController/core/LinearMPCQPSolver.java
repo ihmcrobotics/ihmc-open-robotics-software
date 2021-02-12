@@ -274,7 +274,7 @@ public class LinearMPCQPSolver
             submitMPCCommandList((MPCCommandList) command);
             break;
          case RHO_VALUE:
-            submitRhoValueCommand((RhoValueObjectiveCommand) command);
+            submitRhoValueCommand((RhoObjectiveCommand) command);
             break;
          case VRP_TRACKING:
             submitVRPTrackingCommand((VRPTrackingCommand) command);
@@ -284,7 +284,7 @@ public class LinearMPCQPSolver
       }
    }
 
-   public void submitRhoValueCommand(RhoValueObjectiveCommand command)
+   public void submitRhoValueCommand(RhoObjectiveCommand command)
    {
       int offset = inputCalculator.calculateCompactRhoValueCommand(qpInputTypeA, command);
       if (offset != -1)

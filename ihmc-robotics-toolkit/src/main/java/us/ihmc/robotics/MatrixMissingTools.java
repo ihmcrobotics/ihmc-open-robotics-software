@@ -7,6 +7,7 @@ import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixMissingTools
 {
@@ -176,4 +177,13 @@ public class MatrixMissingTools
       matrix.data[ row * matrix.numCols + col ] += value;
    }
 
+   public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src)
+   {
+      addMatrixBlock(dest, destStartRow, destStartColumn, src, 1.0);
+   }
+
+   public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src, double scale)
+   {
+      MatrixTools.addMatrixBlock(dest, destStartRow, destStartColumn, src, 0, 0, src.getNumRows(), src.getNumCols(), scale);
+   }
 }

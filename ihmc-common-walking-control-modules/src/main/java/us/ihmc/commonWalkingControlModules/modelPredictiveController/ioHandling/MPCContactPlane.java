@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotati
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.matrixlib.MatrixTools;
@@ -212,6 +213,28 @@ public class MPCContactPlane
       // Should not get there as long as the number of contact points of the contactable body is less or equal to maxNumberOfContactPoints.
       for (; contactPointIndex < maxNumberOfContactPoints; contactPointIndex++)
          clear(contactPointIndex);
+   }
+
+   /**
+    * Convenience function for getting the basis vector for iterating.
+    * @param basisIdx
+    * @return
+    */
+   public FrameVector3DReadOnly getBasisVector(int basisIdx)
+   {
+      int pastBases = 0;
+      for (int pointIdx = 0; pointIdx < getNumberOfContactPoints(); pointIdx++)
+      {
+         int localIdx = basisIdx - pastBases;
+         MPCContactPoint contactPoint = getContactPointHelper(pointIdx);
+
+         if (localIdx < contactPoint.getRhoSize())
+            return contactPoint.getBasisVector(localIdx);
+
+         pastBases += contactPoint.getRhoSize();
+      }
+
+      return null;
    }
 
 

@@ -312,15 +312,16 @@ public class ContactPlaneJacobianCalculator
 
          for (int basisVectorIndex = 0; basisVectorIndex < contactPoint.getRhoSize(); basisVectorIndex++)
          {
-            rhoJacobianToPack.unsafe_set(basisVectorIndex, columnStart, firstCoefficient);
-            rhoJacobianToPack.unsafe_set(basisVectorIndex, columnStart + 1, secondCoefficient);
+            rhoJacobianToPack.unsafe_set(rowStart + basisVectorIndex, columnStart, firstCoefficient);
+            rhoJacobianToPack.unsafe_set(rowStart + basisVectorIndex, columnStart + 1, secondCoefficient);
 
-            rhoJacobianToPack.unsafe_set(basisVectorIndex, columnStart + 2, thirdCoefficient);
-            rhoJacobianToPack.unsafe_set(basisVectorIndex, columnStart + 3, fourthCoefficient);
+            rhoJacobianToPack.unsafe_set(rowStart + basisVectorIndex, columnStart + 2, thirdCoefficient);
+            rhoJacobianToPack.unsafe_set(rowStart + basisVectorIndex, columnStart + 3, fourthCoefficient);
+
+            columnStart += LinearMPCIndexHandler.coefficientsPerRho;
          }
 
          rowStart += contactPoint.getRhoSize();
-         columnStart += contactPoint.getCoefficientsSize();
       }
    }
 }

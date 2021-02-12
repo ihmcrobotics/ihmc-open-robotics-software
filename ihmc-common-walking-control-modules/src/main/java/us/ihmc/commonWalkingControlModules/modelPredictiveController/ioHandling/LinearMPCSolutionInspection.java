@@ -49,7 +49,7 @@ public class LinearMPCSolutionInspection
                inspectSolution((MPCCommandList) command, solution);
                break;
             case RHO_VALUE:
-               inspectRhoValueCommand((RhoValueObjectiveCommand) command, solution);
+               inspectRhoValueCommand((RhoObjectiveCommand) command, solution);
                break;
             case VRP_TRACKING:
                inspectVRPTrackingObjective((VRPTrackingCommand) command, solution);
@@ -60,7 +60,7 @@ public class LinearMPCSolutionInspection
       }
    }
 
-   public void inspectRhoValueCommand(RhoValueObjectiveCommand command, DMatrixRMaj solution)
+   public void inspectRhoValueCommand(RhoObjectiveCommand command, DMatrixRMaj solution)
    {
       int offset = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
       if (offset != -1)
