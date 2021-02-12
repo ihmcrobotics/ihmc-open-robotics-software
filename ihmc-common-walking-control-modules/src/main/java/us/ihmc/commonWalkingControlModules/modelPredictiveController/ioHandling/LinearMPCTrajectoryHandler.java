@@ -102,16 +102,7 @@ public class LinearMPCTrajectoryHandler
    {
       positionInitializationCalculator.solveForTrajectory(fullContactSequence);
 
-      /*
-      comTrajectory.clear();
-      for (int i = 0; i < positionInitializationCalculator.getCoMTrajectory().getCurrentNumberOfSegments(); i++)
-         comTrajectory.appendSegment(positionInitializationCalculator.getCoMTrajectory().getSegment(i));
-      comTrajectory.initialize();
-
-      vrpTrajectories.clear();
-      for (int i = 0; i < positionInitializationCalculator.getVRPTrajectories().size(); i++)
-         vrpTrajectories.add().set(positionInitializationCalculator.getVRPTrajectories().get(i));
-       */
+//      overwriteTrajectoryOutsidePreviewWindow(positionInitializationCalculator.getOmega());
    }
 
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
@@ -179,6 +170,8 @@ public class LinearMPCTrajectoryHandler
          startRow += CoMTrajectoryPlannerIndexHandler.polynomialCoefficientsPerSegment;
       }
 
+//      overwriteTrajectoryOutsidePreviewWindow(omega);
+
       MultipleCoMSegmentTrajectoryGenerator comTrajectoryOutsideWindow = positionInitializationCalculator.getCoMTrajectory();
       List<Polynomial3DReadOnly> vrpTrajectoryOutsideWindow = positionInitializationCalculator.getVRPTrajectories();
       if (comTrajectory.getEndTime() < comTrajectoryOutsideWindow.getEndTime())
@@ -224,13 +217,68 @@ public class LinearMPCTrajectoryHandler
          }
       }
       comTrajectory.initialize();
-
       if (vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
    }
 
-   private void overwriteTrajectoryOutsidePreviewWindow()
+   private void overwriteTrajectoryOutsidePreviewWindow(double omega)
    {
+      if (planningWindowForSolution.size() > 0 && fullContactSet.size() > 0)
+      {
+         while (fullContactSet.getLast().getTimeInterval().getEndTime() > planningWindowForSolution.getLast().getTimeInterval().getEndTime())
+         {
+            int lastIndx = fullContactSet.size() - 1;
+            fullContactSet.remove(lastIndx);
+            vrpTrajectories.remove(lastIndx);
+            comTrajectory.removeSegment(lastIndx);
+         }
+      }
+
+      MultipleCoMSegmentTrajectoryGenerator comTrajectoryOutsideWindow = positionInitializationCalculator.getCoMTrajectory();
+      List<Polynomial3DReadOnly> vrpTrajectoryOutsideWindow = positionInitializationCalculator.getVRPTrajectories();
+      if (comTrajectory.getEndTime() < comTrajectoryOutsideWindow.getEndTime())
+      {
+         int segmentIndexToAdd = getSegmentIndexContainingTime(comTrajectory.getEndTime() + 1e-5, positionInitializationCalculator.getCoMTrajectory());
+         if (segmentIndexToAdd == -1)
+            throw new RuntimeException("oops.");
+
+         CoMTrajectorySegment segmentToAdd = comTrajectoryOutsideWindow.getSegment(segmentIndexToAdd);
+         CoMTrajectorySegment lastSegmentOfPreview = comTrajectory.getSegment(comTrajectory.getCurrentNumberOfSegments() - 1);
+         if (MathTools.epsilonEquals(lastSegmentOfPreview.getTimeInterval().getEndTime(), segmentToAdd.getTimeInterval().getStartTime(), 1e-3))
+         {
+            comTrajectory.appendSegment(segmentToAdd);
+            vrpTrajectories.add().set(vrpTrajectoryOutsideWindow.get(segmentIndexToAdd));
+         }
+         else
+         {
+            double durationToRemove = lastSegmentOfPreview.getTimeInterval().getEndTime() - segmentToAdd.getTimeInterval().getStartTime();
+            segmentToAppend.set(segmentToAdd);
+            segmentToAppend.shiftStartOfSegment(durationToRemove);
+            comTrajectory.appendSegment(segmentToAppend);
+
+            // TODO make this cleaner
+            double duration = Math.min(segmentToAppend.getTimeInterval().getDuration(), sufficientlyLongTime);
+            computeVRPBoundaryConditionsFromCoefficients(segmentToAppend,
+                                                         duration,
+                                                         omega,
+                                                         vrpStartPosition,
+                                                         vrpStartVelocity,
+                                                         vrpEndPosition,
+                                                         vrpEndVelocity);
+            Polynomial3DBasics vrpTrajectory = vrpTrajectories.add();
+            vrpTrajectory.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
+            vrpTrajectory.getTimeInterval().setInterval(0.0, segmentToAppend.getTimeInterval().getDuration());
+         }
+
+
+         segmentIndexToAdd++;
+         for (;segmentIndexToAdd < comTrajectoryOutsideWindow.getCurrentNumberOfSegments(); segmentIndexToAdd++)
+         {
+            comTrajectory.appendSegment(comTrajectoryOutsideWindow.getSegment(segmentIndexToAdd));
+            vrpTrajectories.add().set(vrpTrajectoryOutsideWindow.get(segmentIndexToAdd));
+         }
+      }
+      comTrajectory.initialize();
 
    }
 
