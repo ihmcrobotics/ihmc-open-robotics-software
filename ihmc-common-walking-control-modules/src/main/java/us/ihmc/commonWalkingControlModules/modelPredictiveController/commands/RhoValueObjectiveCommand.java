@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
    /**
     * Contact planes containing the generalized contact force vectors.
     */
-   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    /**
     * Segment numbers for those forces.
@@ -67,7 +67,7 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
    /**
     * Adds a contact that contain the contact points that define the direction of the generalized contact forces.
     */
-   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -163,7 +163,7 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       return objectiveVector;
    }
 
-   public ContactPlaneHelper getContactPlaneHelper(int i)
+   public MPCContactPlane getContactPlaneHelper(int i)
    {
       return contactPlaneHelpers.get(i);
    }

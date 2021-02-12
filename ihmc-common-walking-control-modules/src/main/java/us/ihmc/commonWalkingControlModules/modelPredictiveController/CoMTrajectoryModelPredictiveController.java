@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCSolutionInspection;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
@@ -95,7 +96,7 @@ public class CoMTrajectoryModelPredictiveController
    private final YoDouble vrpTrackingCostToGo1 = new YoDouble("vrpTrackingCostToGo1", registry);
    private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
 
-   final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
+   final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler trajectoryHandler;
@@ -134,7 +135,7 @@ public class CoMTrajectoryModelPredictiveController
       comHeight.set(nominalCoMHeight);
 
       FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
-      Supplier<ContactPlaneHelper> contactPlaneHelperProvider = () -> new ContactPlaneHelper(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
+      Supplier<MPCContactPlane> contactPlaneHelperProvider = () -> new MPCContactPlane(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
@@ -162,7 +163,7 @@ public class CoMTrajectoryModelPredictiveController
       contactPlaneHelperPool.clear();
       for (int i = 0; i < 2; i++)
       {
-         RecyclingArrayList<ContactPlaneHelper> helpers = contactPlaneHelperPool.add();
+         RecyclingArrayList<MPCContactPlane> helpers = contactPlaneHelperPool.add();
          helpers.clear();
          for (int j = 0; j < 6; j++)
          {
@@ -266,13 +267,13 @@ public class CoMTrajectoryModelPredictiveController
          ContactPlaneProvider contact = contactSequence.get(sequenceId);
          double duration = contact.getTimeInterval().getDuration();
 
-         RecyclingArrayList<ContactPlaneHelper> contactPlaneHelpers = contactPlaneHelperPool.add();
+         RecyclingArrayList<MPCContactPlane> contactPlaneHelpers = contactPlaneHelperPool.add();
          contactPlaneHelpers.clear();
 
          double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.add();
+            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.add();
             contactPlaneHelper.setMaxNormalForce(maxContactForce);
             contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
             contactPlaneHelper.computeAccelerationIntegrationMatrix(duration, omega.getValue(), objectiveForce);
@@ -458,7 +459,7 @@ public class CoMTrajectoryModelPredictiveController
       int objectiveSize = 0;
       for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
-         ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
+         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
          objectiveSize += contactPlaneHelper.getRhoSize();
          valueObjective.addContactPlaneHelper(contactPlaneHelper);
       }
@@ -468,7 +469,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveVector.reshape(objectiveSize, 1);
       for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
-         ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
+         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
          MatrixTools.setMatrixBlock(objectiveVector, rowStart, 0, contactPlaneHelper.getRhoMaxMatrix(), 0, 0, contactPlaneHelper.getRhoSize(), 1, 1.0);
 
          rowStart += contactPlaneHelper.getRhoSize();

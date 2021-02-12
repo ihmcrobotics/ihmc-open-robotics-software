@@ -1,9 +1,8 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPointForceViewer;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,15 +12,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.mecano.spatial.SpatialForce;
-import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
 
-public class ContactPointHelper
+public class MPCContactPoint
 {
    private final int numberOfBasisVectorsPerContactPoint;
    private final int coefficientsSize;
@@ -49,7 +46,7 @@ public class ContactPointHelper
 
    private ContactPointForceViewer viewer;
 
-   public ContactPointHelper(int numberOfBasisVectorsPerContactPoint)
+   public MPCContactPoint(int numberOfBasisVectorsPerContactPoint)
    {
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
       coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * numberOfBasisVectorsPerContactPoint;
@@ -490,9 +487,9 @@ public class ContactPointHelper
       {
          return true;
       }
-      else if (object instanceof ContactPointHelper)
+      else if (object instanceof MPCContactPoint)
       {
-         ContactPointHelper other = (ContactPointHelper) object;
+         MPCContactPoint other = (MPCContactPoint) object;
          if (numberOfBasisVectorsPerContactPoint != other.numberOfBasisVectorsPerContactPoint)
             return false;
          if (coefficientsSize != other.coefficientsSize)
