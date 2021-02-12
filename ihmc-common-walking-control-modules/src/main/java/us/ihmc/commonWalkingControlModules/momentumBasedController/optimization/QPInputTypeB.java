@@ -49,6 +49,7 @@ public class QPInputTypeB
       reshape(initialTaskSize);
    }
 
+
    public void reshape(int taskSize)
    {
       taskJacobian.reshape(taskSize, numberOfVariables);
