@@ -37,6 +37,7 @@ public class LinearMPCTrajectoryHandler
    private final CoMTrajectoryPlanner positionInitializationCalculator;
 
    protected final List<ContactPlaneProvider> planningWindow = new ArrayList<>();
+   private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
    private final LinearMPCIndexHandler indexHandler;
    private final double gravityZ;
@@ -68,6 +69,7 @@ public class LinearMPCTrajectoryHandler
    {
       comTrajectory.clear();
       vrpTrajectories.clear();
+      fullContactSet.clear();
    }
 
    /**
@@ -100,6 +102,7 @@ public class LinearMPCTrajectoryHandler
    {
       positionInitializationCalculator.solveForTrajectory(fullContactSequence);
 
+      /*
       comTrajectory.clear();
       for (int i = 0; i < positionInitializationCalculator.getCoMTrajectory().getCurrentNumberOfSegments(); i++)
          comTrajectory.appendSegment(positionInitializationCalculator.getCoMTrajectory().getSegment(i));
@@ -108,6 +111,7 @@ public class LinearMPCTrajectoryHandler
       vrpTrajectories.clear();
       for (int i = 0; i < positionInitializationCalculator.getVRPTrajectories().size(); i++)
          vrpTrajectories.add().set(positionInitializationCalculator.getVRPTrajectories().get(i));
+       */
    }
 
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
@@ -125,6 +129,7 @@ public class LinearMPCTrajectoryHandler
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
                                                List<? extends List<MPCContactPlane>> contactPlaneHelpers,
+                                               List<ContactPlaneProvider> fullContactSequence,
                                                double omega)
    {
       int numberOfPhases = planningWindow.size();
@@ -146,6 +151,10 @@ public class LinearMPCTrajectoryHandler
       MatrixTools.setMatrixBlock(coefficientArray, 0, 2, zCoefficientVector, 0, 0, numRows, 1, 1.0);
 
       clearTrajectory();
+
+      this.fullContactSet.clear();
+      for (int i = 0; i < fullContactSequence.size(); i++)
+         this.fullContactSet.add().set(fullContactSequence.get(i));
 
       int startRow = 0;
       for (int i = 0; i < planningWindow.size(); i++)
@@ -215,6 +224,9 @@ public class LinearMPCTrajectoryHandler
          }
       }
       comTrajectory.initialize();
+
+      if (vrpTrajectories.size() != fullContactSet.size())
+         throw new RuntimeException("Somehow these didn't match up.");
    }
 
    private int getSegmentIndexContainingTime(double time, MultipleCoMSegmentTrajectoryGenerator trajectory)
@@ -234,9 +246,39 @@ public class LinearMPCTrajectoryHandler
       comTrajectory.compute(timeInPhase);
    }
 
+   public void computeOutsidePreview(double timeInPhase)
+   {
+      positionInitializationCalculator.compute(timeInPhase);
+   }
+
+   public FramePoint3DReadOnly getDesiredCoMPositionOutsidePreview()
+   {
+      return positionInitializationCalculator.getDesiredCoMPosition();
+   }
+
+   public FrameVector3DReadOnly getDesiredCoMVelocityOutsidePreview()
+   {
+      return positionInitializationCalculator.getDesiredCoMVelocity();
+   }
+
+   public FramePoint3DReadOnly getDesiredDCMPositionOutsidePreview()
+   {
+      return positionInitializationCalculator.getDesiredDCMPosition();
+   }
+
+   public FramePoint3DReadOnly getDesiredVRPPositionOutsidePreview()
+   {
+      return positionInitializationCalculator.getDesiredVRPPosition();
+   }
+
    public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
+   }
+
+   public List<ContactPlaneProvider> getFullPlanningSequence()
+   {
+      return fullContactSet;
    }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()

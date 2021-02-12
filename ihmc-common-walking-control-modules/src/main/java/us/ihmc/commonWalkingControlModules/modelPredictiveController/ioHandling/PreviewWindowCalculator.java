@@ -34,6 +34,8 @@ public class PreviewWindowCalculator
    private final RecyclingArrayList<ContactPlaneProvider> previewWindowContacts = new RecyclingArrayList<>(ContactPlaneProvider::new);
    private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
+   private final RecyclingArrayList<ContactPlaneProvider> fullContactSetWithSolution = new RecyclingArrayList<>(ContactPlaneProvider::new);
+
    public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
       activeSegment.set(-1);

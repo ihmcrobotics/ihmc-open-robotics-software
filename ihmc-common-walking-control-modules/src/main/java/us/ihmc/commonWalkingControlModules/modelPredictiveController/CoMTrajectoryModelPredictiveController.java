@@ -203,12 +203,12 @@ public class CoMTrajectoryModelPredictiveController
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
 
       trajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
-      trajectoryHandler.compute(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime());
+      trajectoryHandler.computeOutsidePreview(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime());
 
-      comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPosition());
-      comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocity());
-      dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPosition());
-      vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPosition());
+      comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPositionOutsidePreview());
+      comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocityOutsidePreview());
+      dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPositionOutsidePreview());
+      vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPositionOutsidePreview());
 
       if (previewWindowCalculator.activeSegmentChanged())
       {
@@ -241,13 +241,8 @@ public class CoMTrajectoryModelPredictiveController
       mpcExtractionTime.startMeasurement();
       if (solutionCoefficients != null)
       {
-         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, omega.getValue());
-         if (trajectoryHandler.getVrpTrajectories().size() != previewWindowCalculator.getFullPlanningSequence().size())
-            throw new RuntimeException("Somehow these didn't match up.");
+         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, previewWindowCalculator.getFullPlanningSequence(), omega.getValue());
       }
-
-      if (trajectoryHandler.getVrpTrajectories().size() != previewWindowCalculator.getFullPlanningSequence().size())
-         throw new RuntimeException("Somehow these didn't match up.");
 
       if (cornerPointViewer != null)
          cornerPointViewer.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence());
@@ -384,7 +379,6 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
       objectiveToPack.setCostToGoConsumer(initialComPositionConsumer);
-      //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -724,6 +718,6 @@ public class CoMTrajectoryModelPredictiveController
 
    public List<ContactPlaneProvider> getContactStateProviders()
    {
-      return previewWindowCalculator.getFullPlanningSequence();
+      return trajectoryHandler.getFullPlanningSequence();
    }
 }
