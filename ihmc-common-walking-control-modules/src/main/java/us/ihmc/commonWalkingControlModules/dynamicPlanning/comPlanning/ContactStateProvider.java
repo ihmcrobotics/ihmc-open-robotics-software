@@ -40,18 +40,4 @@ public interface ContactStateProvider extends TimeIntervalProvider
     * Specifies whether the current state is in contact or not.
     */
    ContactState getContactState();
-
-   List<String> getBodiesInContact();
-
-   default int getNumberOfBodiesInContact()
-   {
-      return getBodiesInContact().size();
-   }
-
-   default Vector3DReadOnly getSurfaceNormal()
-   {
-      Vector3D vector3D = new Vector3D();
-      vector3D.setToNaN();
-      return vector3D;
-   }
 }
