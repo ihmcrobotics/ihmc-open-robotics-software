@@ -135,6 +135,9 @@ public class LQRJumpMomentumController
 
    public void setVRPTrajectory(List<? extends Polynomial3DReadOnly> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
    {
+      if (vrpTrajectory.size() != contactStateProviders.size())
+         throw new IllegalArgumentException("The contacts don't match the trajectory.");
+
       relativeVRPTrajectories.clear();
       this.contactStateProviders.clear();
 

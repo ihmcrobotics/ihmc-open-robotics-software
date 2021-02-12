@@ -19,7 +19,6 @@ public class MPCQPInputCalculator
 
    private final VRPTrackingCostCalculator vrpTrackingCostCalculator;
 
-   private final DMatrixRMaj tempCoefficientJacobian = new DMatrixRMaj(0, 0);
    private final double gravityZ;
 
    public MPCQPInputCalculator(LinearMPCIndexHandler indexHandler, double gravityZ)

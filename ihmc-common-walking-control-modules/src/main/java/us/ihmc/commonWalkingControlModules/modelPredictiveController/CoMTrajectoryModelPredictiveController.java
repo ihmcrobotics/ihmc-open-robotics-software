@@ -48,7 +48,6 @@ public class CoMTrajectoryModelPredictiveController
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfBasisVectorsPerContactPoint = 4;
-   private static final int maxCapacity = 10;
    private static final double minRhoValue = 0.0;//05;
    private final double maxContactForce;
 
@@ -246,6 +245,9 @@ public class CoMTrajectoryModelPredictiveController
          if (trajectoryHandler.getVrpTrajectories().size() != previewWindowCalculator.getFullPlanningSequence().size())
             throw new RuntimeException("Somehow these didn't match up.");
       }
+
+      if (trajectoryHandler.getVrpTrajectories().size() != previewWindowCalculator.getFullPlanningSequence().size())
+         throw new RuntimeException("Somehow these didn't match up.");
 
       if (cornerPointViewer != null)
          cornerPointViewer.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence());
