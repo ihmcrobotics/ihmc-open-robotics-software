@@ -183,17 +183,8 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(firstSegmentDuration, omega);
+         contactPlaneHelper.computeLinearJacobian(firstSegmentDuration, omega, objective.getDerivativeOrder(), startCol, inputToPack.getTaskJacobian());
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                    0,
-                                    startCol,
-                                    contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
-                                    0,
-                                    0,
-                                    3,
-                                    contactPlaneHelper.getCoefficientSize(),
-                                    1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
@@ -201,17 +192,8 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(0.0, omega);
+         contactPlaneHelper.computeLinearJacobian(0.0, omega, objective.getDerivativeOrder(), startCol, inputToPack.getTaskJacobian());
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                    0,
-                                    startCol,
-                                    contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
-                                    0,
-                                    0,
-                                    3,
-                                    contactPlaneHelper.getCoefficientSize(),
-                                    -1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
@@ -262,15 +244,9 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getFirstSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getFirstSegmentContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(firstSegmentDuration, omega);
 
-         tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
-         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
-                            -1.0 / omega2,
-                            contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
-                            tempCoefficientJacobian);
-
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, startCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         contactPlaneHelper.computeLinearJacobian(firstSegmentDuration, omega, objective.getDerivativeOrder(), startCol, inputToPack.getTaskJacobian());
+         contactPlaneHelper.computeLinearJacobian(-1.0 / omega2, firstSegmentDuration, omega, objective.getDerivativeOrder() + 2, startCol, inputToPack.getTaskJacobian());
 
          startCol += contactPlaneHelper.getCoefficientSize();
       }
@@ -279,23 +255,10 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getSecondSegmentNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getSecondSegmentContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(0.0, omega);
 
-         tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
-         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
-                            -1.0 / omega2,
-                            contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
-                            tempCoefficientJacobian);
+         contactPlaneHelper.computeLinearJacobian(-1.0, 0.0, omega, objective.getDerivativeOrder(), startCol, inputToPack.getTaskJacobian());
+         contactPlaneHelper.computeLinearJacobian(1.0 / omega2, 0.0, omega, objective.getDerivativeOrder() + 2, startCol, inputToPack.getTaskJacobian());
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                    0,
-                                    startCol,
-                                    tempCoefficientJacobian,
-                                    0,
-                                    0,
-                                    3,
-                                    contactPlaneHelper.getCoefficientSize(),
-                                    -1.0);
          startCol += contactPlaneHelper.getCoefficientSize();
       }
 
@@ -486,12 +449,10 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
-         DMatrixRMaj jacobian = contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder());
+         contactPlaneHelper.computeLinearJacobian(timeOfObjective, omega, objective.getDerivativeOrder(), rhoStartCol, inputToPack.getTaskJacobian());
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, rhoStartCol, jacobian, 0, 0, jacobian.getNumRows(), jacobian.getNumCols(), 1.0);
-         rhoStartCol += jacobian.getNumCols();
+         rhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
 
       objective.getObjective().get(inputToPack.getTaskObjective());
@@ -523,14 +484,9 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
-         tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
-         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objectiveOrder),
-                            1.0 / omega,
-                            contactPlaneHelper.getLinearJacobian(objectiveHigherOrder),
-                            tempCoefficientJacobian);
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, rhoStartCol, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
+         contactPlaneHelper.computeLinearJacobian(timeOfObjective, omega, objectiveOrder, rhoStartCol, inputToPack.getTaskJacobian());
+         contactPlaneHelper.computeLinearJacobian(1.0 / omega, timeOfObjective, omega, objectiveHigherOrder, rhoStartCol, inputToPack.getTaskJacobian());
 
          rhoStartCol += contactPlaneHelper.getCoefficientSize();
       }
@@ -568,15 +524,10 @@ public class MPCQPInputCalculator
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = objective.getContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
-         tempCoefficientJacobian.reshape(3, contactPlaneHelper.getCoefficientSize());
-         CommonOps_DDRM.add(contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder()),
-                            -1.0 / omega2,
-                            contactPlaneHelper.getLinearJacobian(objective.getDerivativeOrder() + 2),
-                            tempCoefficientJacobian);
+         contactPlaneHelper.computeLinearJacobian(timeOfObjective, omega, objective.getDerivativeOrder(), rhoStartIdx, inputToPack.getTaskJacobian());
+         contactPlaneHelper.computeLinearJacobian(-1.0 / omega2, timeOfObjective, omega, objective.getDerivativeOrder() + 2, rhoStartIdx, inputToPack.getTaskJacobian());
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, rhoStartIdx, tempCoefficientJacobian, 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
          rhoStartIdx += contactPlaneHelper.getCoefficientSize();
       }
 
@@ -654,17 +605,9 @@ public class MPCQPInputCalculator
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
          ContactPlaneHelper contactPlaneHelper = command.getContactPlaneHelper(i);
-         contactPlaneHelper.computeJacobians(timeOfObjective, omega);
 
-         MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(),
-                                    startRow,
-                                    startCol,
-                                    contactPlaneHelper.getRhoJacobian(2),
-                                    0,
-                                    0,
-                                    contactPlaneHelper.getRhoSize(),
-                                    contactPlaneHelper.getCoefficientSize(),
-                                    1.0);
+         contactPlaneHelper.computeRhoJacobian(timeOfObjective, omega, 2, startRow, startCol, inputToPack.getTaskJacobian());
+
          startRow += contactPlaneHelper.getRhoSize();
          startCol += contactPlaneHelper.getCoefficientSize();
       }

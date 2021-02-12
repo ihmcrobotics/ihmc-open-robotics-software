@@ -92,7 +92,6 @@ public class ContactPlaneHelper
       contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
    }
 
-
    public void setContactPointForceViewer(ContactPlaneForceViewer viewer)
    {
       this.viewer = viewer;
@@ -103,6 +102,7 @@ public class ContactPlaneHelper
 
    /**
     * Sets the net maximum force allowed for the entire contact plane.
+    *
     * @param maxNormalForce maximum normal force.
     */
    public void setMaxNormalForce(double maxNormalForce)
@@ -114,8 +114,9 @@ public class ContactPlaneHelper
 
    /**
     * Gets the total number of generalized contact force vectors in this plane.
-    *
+    * <p>
     * This value should be equal to {@code numberOfBasisVectorsPerContactPoint} times {@link #getNumberOfContactPoints()}}.
+    *
     * @return total number of vectors
     */
    public int getRhoSize()
@@ -125,8 +126,9 @@ public class ContactPlaneHelper
 
    /**
     * Gets the total number of coefficients in the generalized contact forces in this plane.
-    *
+    * <p>
     * This value should be equal to {@link LinearMPCIndexHandler#coefficientsPerRho} times {@link #getRhoSize()}.
+    *
     * @return total number of coefficients.
     */
    public int getCoefficientSize()
@@ -136,6 +138,7 @@ public class ContactPlaneHelper
 
    /**
     * Gets the total number of contact points in this plane.
+    *
     * @return number of contact points.
     */
    public int getNumberOfContactPoints()
@@ -145,6 +148,7 @@ public class ContactPlaneHelper
 
    /**
     * Gets the {@link ContactPointHelper} for the {@param index}th contact point.
+    *
     * @param index contact point query.
     * @return {@link ContactPointHelper} for the {@param index} point.
     */
@@ -244,6 +248,7 @@ public class ContactPlaneHelper
    /**
     * Returns a vector of the maximum generalized contact values that are allowed to achieve the maximum total contact force specified by
     * {@link #setMaxNormalForce(double)}
+    *
     * @return vector of maximum generalized contact values.
     */
    public DMatrixRMaj getRhoMaxMatrix()
@@ -253,8 +258,9 @@ public class ContactPlaneHelper
 
    /**
     * Gets the quadratic cost hessian for the cost term that aims at tracking a desired acceleration value over the segment duration.
-    *
+    * <p>
     * The returned matrix should always be square of size {@link #getCoefficientSize()}.
+    *
     * @return quadratic cost hessian.
     */
    public DMatrixRMaj getAccelerationIntegrationHessian()
@@ -264,8 +270,9 @@ public class ContactPlaneHelper
 
    /**
     * Gets the quadratic cost gradient for the cost term that aims at tracking a desired acceleration value over the segment duration.
-    *
+    * <p>
     * The returned matrix should always be a vector of size {@link #getCoefficientSize()}.
+    *
     * @return quadratic cost gradient.
     */
    public DMatrixRMaj getAccelerationIntegrationGradient()
@@ -332,7 +339,7 @@ public class ContactPlaneHelper
 
    /**
     * Computes the Jacobians at time {@param time} that map from the coefficient values to the motion function value.
-    *
+    * <p>
     * If this has been called for the same time and the same basis vectors, the Jacobians are not recomputed to save computation.
     *
     * @param time time to compute the function
@@ -393,8 +400,56 @@ public class ContactPlaneHelper
       timeOfContact = time;
    }
 
+   public void computeLinearJacobian(double time, double omega, int derivativeOrder, int columnStart, DMatrixRMaj linearJacobianToPack)
+   {
+      computeLinearJacobian(1.0, time, omega, derivativeOrder, columnStart, linearJacobianToPack);
+   }
+
+   public void computeLinearJacobian(double scale, double time, double omega, int derivativeOrder, int columnStart, DMatrixRMaj linearJacobianToPack)
+   {
+      for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
+      {
+         ContactPointHelper contactPoint = contactPoints[contactPointIdx];
+         contactPoint.computeJacobians(time, omega);
+
+         MatrixTools.addMatrixBlock(linearJacobianToPack,
+                                    0,
+                                    columnStart,
+                                    contactPoint.getLinearJacobian(derivativeOrder),
+                                    0,
+                                    0,
+                                    3,
+                                    contactPoint.getCoefficientsSize(),
+                                    scale);
+         columnStart += contactPoint.getCoefficientsSize();
+      }
+   }
+
+   public void computeRhoJacobian(double time, double omega, int derivativeOrder, int rowStart, int columnStart, DMatrixRMaj rhoJacobianToPack)
+   {
+      for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
+      {
+         ContactPointHelper contactPoint = contactPoints[contactPointIdx];
+         contactPoint.computeJacobians(time, omega);
+
+         MatrixTools.setMatrixBlock(rhoJacobianToPack,
+                                    rowStart,
+                                    columnStart,
+                                    contactPoint.getRhoJacobian(derivativeOrder),
+                                    0,
+                                    0,
+                                    contactPoint.getRhoSize(),
+                                    contactPoint.getCoefficientsSize(),
+                                    1.0);
+         rowStart += contactPoint.getRhoSize();
+         columnStart += contactPoint.getCoefficientsSize();
+      }
+   }
+
    /**
-    * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the plane over some time
+    * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the plane over
+    * some time
+    *
     * @param duration duration for the integration
     * @param omega time constant for the motion function
     * @param goalValueForPlane nominal value for the acceleration to track.
@@ -434,6 +489,7 @@ public class ContactPlaneHelper
 
    /**
     * Computes the equivalent quadratic cost function components that minimize the integral of the jerk over the duration
+    *
     * @param duration duration for the integration
     * @param omega time constant for the motion function
     */
@@ -461,13 +517,13 @@ public class ContactPlaneHelper
 
    /**
     * Rests the indicated contact point
+    *
     * @param contactPointIndex contact point index to reset
     */
    private void clear(int contactPointIndex)
    {
       contactPoints[contactPointIndex].clear();
    }
-
 
    /**
     * Computes the collapsed wrench function. That is, it adds all the generalized contact force functions together in Euclidean space to get a much more
@@ -492,6 +548,7 @@ public class ContactPlaneHelper
    /**
     * Returns the collapsed wrench function. This is the sum of all the generalized contact forces in Euclidean space. This function should be a 3x4 matrix,
     * where the rows match the corresponding Euclidean coordinate axis.
+    *
     * @return contact wrench matrix
     */
    public DMatrixRMaj getContactWrenchCoefficientMatrix()
