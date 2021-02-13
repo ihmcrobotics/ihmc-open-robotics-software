@@ -44,6 +44,7 @@ public class RosTools
    public static final String L515_COLOR_CAMERA_INFO = "/camera/color/camera_info";
    public static final String L515_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = "/camera/depth/image_rect_raw";
+   public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
 
    public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
