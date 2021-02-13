@@ -13,6 +13,7 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.input.GDXInputMultiplexer;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -24,7 +25,7 @@ import java.util.HashSet;
  */
 public class GDX3DSceneManager
 {
-   private InputMultiplexer inputMultiplexer;
+   private GDXInputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
    private Viewport viewport;
@@ -39,7 +40,6 @@ public class GDX3DSceneManager
    private final HashSet<GDXRenderable> renderables = new HashSet<>();
 
    private boolean firstRenderStarted = false;
-
    private boolean addFocusSphere = true;
 
    public void create()
@@ -58,13 +58,14 @@ public class GDX3DSceneManager
       // we could set shader options or even swap out the shader here
       modelBatch = new ModelBatch(new DefaultShaderProvider(defaultShaderConfig));
 
-      inputMultiplexer = new InputMultiplexer();
+      inputMultiplexer = new GDXInputMultiplexer();
       Gdx.input.setInputProcessor(inputMultiplexer);
 
       camera3D = new FocusBasedGDXCamera();
+      inputMultiplexer.addProcessor(camera3D.getInputAdapter());
+
       if (addFocusSphere)
          addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
-      inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
 
       GDX3DSceneTools.glClearGray();
@@ -94,6 +95,7 @@ public class GDX3DSceneManager
       modelBatch.begin(camera3D);
 
       Gdx.gl.glViewport(x, y, width, height);
+      GDX3DSceneTools.glClearGray();
 
       renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
    }
@@ -179,6 +181,11 @@ public class GDX3DSceneManager
       renderables.add(new GDXRenderable(renderableProvider, sceneLevel));
    }
 
+   public void setViewportBoundsToWindow()
+   {
+      setViewportBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+   }
+
    /**
     * Coordinates in xy bottom left
     */
@@ -205,7 +212,7 @@ public class GDX3DSceneManager
       return camera3D;
    }
 
-   public InputMultiplexer getInputMultiplexer()
+   public GDXInputMultiplexer getInputMultiplexer()
    {
       return inputMultiplexer;
    }
