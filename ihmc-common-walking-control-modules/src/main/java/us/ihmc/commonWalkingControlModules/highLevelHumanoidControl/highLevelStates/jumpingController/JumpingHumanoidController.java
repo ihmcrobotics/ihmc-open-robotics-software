@@ -321,7 +321,7 @@ public class JumpingHumanoidController implements JointLoadStatusProvider
          return;
 
       controllerToolbox.updateBipedSupportPolygons();
-      balanceManager.computeCoMPlanForStanding();
+//      balanceManager.computeCoMPlanForStanding();
    }
 
    public void updateFailureDetection()

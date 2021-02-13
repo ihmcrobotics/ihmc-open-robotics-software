@@ -138,7 +138,6 @@ public class QuadrupedContactPhase implements ContactStateProvider
       return feetInContact;
    }
 
-   @Override
    public List<String> getBodiesInContact()
    {
       return feetNamesInContact;

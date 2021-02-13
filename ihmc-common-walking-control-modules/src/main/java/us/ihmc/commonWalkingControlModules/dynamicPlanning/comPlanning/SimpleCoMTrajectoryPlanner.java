@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.LineSegment3D;
@@ -253,6 +252,6 @@ public class SimpleCoMTrajectoryPlanner implements CoMTrajectoryProvider
    @Override
    public MultipleSegmentPositionTrajectoryGenerator<?> getCoMTrajectory()
    {
-      throw new NotImplementedException();
+      throw new IllegalArgumentException();
    }
 }

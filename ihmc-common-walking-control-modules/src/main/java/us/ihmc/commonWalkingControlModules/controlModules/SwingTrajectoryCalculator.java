@@ -31,10 +31,10 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.List;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 public class SwingTrajectoryCalculator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
 
    private final MovingReferenceFrame soleFrame;
@@ -430,8 +430,7 @@ public class SwingTrajectoryCalculator
       }
 
       modifyFinalOrientationForTouchdown(finalOrientation);
-      if (initializeOptimizer)
-         swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
+      swingTrajectoryOptimizer.getFinalVelocity(finalLinearVelocity);
       swingTrajectory.appendPositionWaypoint(swingDuration.getDoubleValue(), finalPosition, finalLinearVelocity);
       swingTrajectory.appendOrientationWaypoint(swingDuration.getDoubleValue(), finalOrientation, finalAngularVelocity);
    }

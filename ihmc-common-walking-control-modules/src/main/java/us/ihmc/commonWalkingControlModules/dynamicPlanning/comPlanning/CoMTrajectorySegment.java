@@ -172,6 +172,35 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
       sixthCoefficient.set(frame, x, y, z);
    }
 
+   private final FramePoint3D modifiedFourthCoefficient = new FramePoint3D();
+   private final FramePoint3D modifiedFifthCoefficient = new FramePoint3D();
+   private final FramePoint3D modifiedSixthCoefficient = new FramePoint3D();
+
+   public void shiftStartOfSegment(double durationToShift)
+   {
+      double originalDuration = getTimeInterval().getDuration();
+      if (durationToShift > originalDuration)
+         throw new IllegalArgumentException("New start time " + durationToShift + " must be less than end time " + originalDuration);
+
+      double d2 = durationToShift * durationToShift;
+      double d3 = d2 * durationToShift;
+      double startTime = getTimeInterval().getStartTime();
+      getTimeInterval().setInterval(startTime + durationToShift, getTimeInterval().getEndTime());
+      double exponential = Math.exp(omega * durationToShift);
+      firstCoefficient.scale(exponential);
+      secondCoefficient.scale(1.0 / exponential);
+      modifiedFourthCoefficient.scaleAdd(3.0 * durationToShift, thirdCoefficient, fourthCoefficient);
+      modifiedFifthCoefficient.scaleAdd(3.0 * d2, thirdCoefficient, fifthCoefficient);
+      modifiedFifthCoefficient.scaleAdd(2.0 * durationToShift, fourthCoefficient, modifiedFifthCoefficient);
+      modifiedSixthCoefficient.scaleAdd(d3, thirdCoefficient, sixthCoefficient);
+      modifiedSixthCoefficient.scaleAdd(d2, fourthCoefficient, modifiedSixthCoefficient);
+      modifiedSixthCoefficient.scaleAdd(durationToShift, fifthCoefficient, modifiedSixthCoefficient);
+
+      fourthCoefficient.set(modifiedFourthCoefficient);
+      fifthCoefficient.set(modifiedFifthCoefficient);
+      sixthCoefficient.set(modifiedSixthCoefficient);
+   }
+
    public void setOmega(double omega)
    {
       this.omega = omega;
@@ -284,6 +313,51 @@ public class CoMTrajectorySegment implements FixedFramePositionTrajectoryGenerat
    public FramePoint3DReadOnly getDCMPosition()
    {
       return dcmPosition;
+   }
+
+   public FrameVector3DReadOnly getDCMVelocity()
+   {
+      return dcmVelocity;
+   }
+
+   public FramePoint3DReadOnly getVRPPosition()
+   {
+      return vrpPosition;
+   }
+
+   public FrameVector3DReadOnly getVRPVelocity()
+   {
+      return vrpVelocity;
+   }
+
+   public FramePoint3DReadOnly getFirstCoefficient()
+   {
+      return firstCoefficient;
+   }
+
+   public FramePoint3DReadOnly getSecondCoefficient()
+   {
+      return secondCoefficient;
+   }
+
+   public FramePoint3DReadOnly getThirdCoefficient()
+   {
+      return thirdCoefficient;
+   }
+
+   public FramePoint3DReadOnly getFourthCoefficient()
+   {
+      return fourthCoefficient;
+   }
+
+   public FramePoint3DReadOnly getFifthCoefficient()
+   {
+      return fifthCoefficient;
+   }
+
+   public FramePoint3DReadOnly getSixthCoefficient()
+   {
+      return sixthCoefficient;
    }
 
    @Override

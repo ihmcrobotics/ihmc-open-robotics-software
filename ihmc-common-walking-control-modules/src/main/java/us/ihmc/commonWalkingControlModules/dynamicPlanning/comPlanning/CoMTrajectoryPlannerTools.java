@@ -15,7 +15,7 @@ public class CoMTrajectoryPlannerTools
    private static final boolean SET_ZERO_VALUES = false;
    public static final double minDuration = 1.0e-5;
    public static final double sufficientlyLarge = 1.0e10;
-   public static final double sufficientlyLongTime = 1.0e2;
+   public static final double sufficientlyLongTime = 1.0e1;
 
    public static final CoefficientProvider comPositionCoefficientProvider = CoMTrajectoryPlannerTools::getCoMPositionCoefficientTimeFunction;
    private static final CoefficientProvider comVelocityCoefficientProvider = CoMTrajectoryPlannerTools::getCoMVelocityCoefficientTimeFunction;

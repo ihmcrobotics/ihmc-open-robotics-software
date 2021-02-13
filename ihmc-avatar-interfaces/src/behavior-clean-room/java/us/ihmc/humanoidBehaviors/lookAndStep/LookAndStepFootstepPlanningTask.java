@@ -237,7 +237,9 @@ public class LookAndStepFootstepPlanningTask
       if (lastStanceSide != null)
       {
          // if planner failed last time, do not switch sides
-         stanceSide = plannerFailedLastTime.get() ? lastStanceSide : lastStanceSide.getOppositeSide();
+//         stanceSide = plannerFailedLastTime.get() ? lastStanceSide : lastStanceSide.getOppositeSide();
+         // Actually look and step can get stuck if you don't switch sides
+         stanceSide = lastStanceSide.getOppositeSide();
       }
       else // if first step, step with furthest foot from the goal
       {
@@ -277,6 +279,7 @@ public class LookAndStepFootstepPlanningTask
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
 
+      statusLogger.info("Stance side: {}", stanceSide.name());
       statusLogger.info("Planning footsteps with {}...", swingPlannerType.name());
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       statusLogger.info("Footstep planner completed with {}, {} step(s)",
