@@ -3,7 +3,6 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -55,7 +54,7 @@ public class GDXVRDemo
 
          vrManager.render(sceneManager);
 
-         GDX3DSceneTools.glClearGray();
+         sceneManager.setViewportBoundsToWindow();
          sceneManager.render();
       }
 

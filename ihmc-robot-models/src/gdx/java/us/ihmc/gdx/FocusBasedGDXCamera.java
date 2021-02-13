@@ -2,7 +2,6 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -22,12 +21,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.gdx.input.DragFixedInputAdapter;
+import us.ihmc.gdx.input.GDXInputAdapter;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class FocusBasedGDXCamera extends Camera
 {
-   private final DragFixedInputAdapter dragFixedInputAdapter;
+   private final GDXInputAdapter gdxInputAdapter;
 
    private final FramePose3D cameraPose = new FramePose3D();
 
@@ -102,7 +101,7 @@ public class FocusBasedGDXCamera extends Camera
       updateCameraPose();
       update(true);
 
-      dragFixedInputAdapter = new DragFixedInputAdapter()
+      gdxInputAdapter = new GDXInputAdapter()
       {
          @Override
          public boolean scrolled(float amountX, float amountY)
@@ -111,7 +110,7 @@ public class FocusBasedGDXCamera extends Camera
          }
 
          @Override
-         public boolean touchDragged(int deltaX, int deltaY)
+         public boolean touchDraggedDelta(int deltaX, int deltaY)
          {
             return FocusBasedGDXCamera.this.touchDragged(deltaX, deltaY);
          }
@@ -186,7 +185,7 @@ public class FocusBasedGDXCamera extends Camera
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
    }
 
-   public boolean touchDragged(int deltaX, int deltaY)
+   private boolean touchDragged(int deltaX, int deltaY)
    {
       if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
       {
@@ -199,7 +198,7 @@ public class FocusBasedGDXCamera extends Camera
       return false;
    }
 
-   public boolean scrolled(float amountX, float amountY)
+   private boolean scrolled(float amountX, float amountY)
    {
       zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
       return true;
@@ -261,11 +260,6 @@ public class FocusBasedGDXCamera extends Camera
       }
    }
 
-   public InputProcessor getInputProcessor()
-   {
-      return dragFixedInputAdapter.getInputProcessor();
-   }
-
    public void dispose()
    {
       focusPointModel.dispose();
@@ -274,5 +268,10 @@ public class FocusBasedGDXCamera extends Camera
    private double getTranslateSpeedFactor()
    {
       return translateSpeedFactor * zoom;
+   }
+
+   public GDXInputAdapter getInputAdapter()
+   {
+      return gdxInputAdapter;
    }
 }

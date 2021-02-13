@@ -1,7 +1,6 @@
 package us.ihmc.gdx;
 
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
-import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 
 public class GDX3DDemo
@@ -23,7 +22,7 @@ public class GDX3DDemo
          @Override
          public void render()
          {
-            GDX3DSceneTools.glClearGray();
+            sceneManager.setViewportBoundsToWindow();
             sceneManager.render();
          }
       }, "GDX3DDemo", 1100, 800);
