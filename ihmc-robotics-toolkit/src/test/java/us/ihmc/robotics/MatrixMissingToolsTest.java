@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -44,7 +45,7 @@ public class MatrixMissingToolsTest
    }
 
    @Test
-   public void testFastInverse()
+   public void testFast2x2Inverse()
    {
       int iters = 500;
       double epsilon = 1e-8;
@@ -62,4 +63,5 @@ public class MatrixMissingToolsTest
          MatrixTestTools.assertMatrixEquals(matrixInverseExpected, matrixInverse, epsilon);
       }
    }
+
 }

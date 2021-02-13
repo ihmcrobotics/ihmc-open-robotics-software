@@ -858,7 +858,7 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
    }
 
    @Override
-   public MultipleSegmentPositionTrajectoryGenerator<?> getCoMTrajectory()
+   public MultipleCoMSegmentTrajectoryGenerator getCoMTrajectory()
    {
       if (!hasTrajectories())
          throw new RuntimeException("CoM Trajectories are not calculated");

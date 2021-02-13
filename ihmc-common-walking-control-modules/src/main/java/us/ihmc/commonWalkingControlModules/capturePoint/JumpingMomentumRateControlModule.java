@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
@@ -56,7 +57,7 @@ public class JumpingMomentumRateControlModule
    private double totalMass;
    private double timeInContactPhase;
 
-   private List<Polynomial3DReadOnly> vrpTrajectories;
+   private List<? extends Polynomial3DReadOnly> vrpTrajectories;
    private List<? extends ContactStateProvider> contactStateProviders;
 
    private final ReferenceFrame centerOfMassFrame;
@@ -103,10 +104,12 @@ public class JumpingMomentumRateControlModule
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition desiredVRPViz = new YoGraphicPosition("Desired VRP", yoDesiredVRP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
 
-         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.01, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition dcmViz = new YoGraphicPosition("DCM", controllerToolbox.getYoCapturePoint(), 0.01, Blue(), GraphicType.BALL_WITH_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredVRPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", dcmViz.createArtifact());
       }
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
@@ -142,8 +145,8 @@ public class JumpingMomentumRateControlModule
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
-//      inverseDynamicsCommandList.addCommand(momentumRateCommand);
-      inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
+      inverseDynamicsCommandList.addCommand(momentumRateCommand);
+//      inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
       return inverseDynamicsCommandList;
    }
 
@@ -199,12 +202,19 @@ public class JumpingMomentumRateControlModule
    private void computeDesiredLinearMomentumRateOfChange()
    {
       lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
-      lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
+      lqrMomentumController.computeControlInput(currentState, 0.0);//timeInContactPhase);
 
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
       else
+      {
+//         vrpTrajectories.get(0).compute(0.0);
+//         yoDesiredVRP.set(vrpTrajectories.get(0).getPosition());
+//         linearMomentumRateOfChange.setToZero(worldFrame);
+//         linearMomentumRateOfChange.sub(yoCenterOfMass, yoDesiredVRP);
+//         linearMomentumRateOfChange.scale(omega0 * omega0);
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+      }
 
       // TODO double check the momentum rate command here is the same
       controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
