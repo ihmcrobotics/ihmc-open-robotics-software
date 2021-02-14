@@ -22,15 +22,24 @@ public class GDXApplicationCreator
       Lwjgl3ApplicationConfiguration applicationConfiguration = new Lwjgl3ApplicationConfiguration();
       applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
+      // TODO: These options are work in progress. Not sure what is the best setting for everyone.
       if (Boolean.parseBoolean(System.getProperty("enable.vr")))
       {
          applicationConfiguration.useVsync(false); // important to disable vsync for VR
-         applicationConfiguration.setIdleFPS(90);
+         applicationConfiguration.setIdleFPS(240);
+         applicationConfiguration.setForegroundFPS(240);
+      }
+      else if (Boolean.parseBoolean(System.getProperty("gdx.free.spin")))
+      {
+         applicationConfiguration.setIdleFPS(Integer.MAX_VALUE);
+         applicationConfiguration.setForegroundFPS(Integer.MAX_VALUE);
       }
       else
       {
-         applicationConfiguration.useVsync(true);
+         applicationConfiguration.setIdleFPS(30); // probably need to implement pause before idle FPS does anything
+         applicationConfiguration.setForegroundFPS(240);
       }
+      applicationConfiguration.useVsync(false); // vsync on seems to limit FPS to 30 so keep off
       applicationConfiguration.setBackBufferConfig(8, 8, 8, 8, 16, 0, 4);
       applicationConfiguration.useOpenGL3(true, 3, 2);
       return applicationConfiguration;
