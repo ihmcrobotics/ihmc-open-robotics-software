@@ -1,14 +1,12 @@
 package us.ihmc.gdx.sceneManager;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -28,7 +26,7 @@ public class GDX3DSceneManager
    private GDXInputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
-   private Viewport viewport;
+   private ScreenViewport viewport;
    private ModelBatch modelBatch;
 
    private int x = 0;
@@ -67,6 +65,7 @@ public class GDX3DSceneManager
       if (addFocusSphere)
          addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
       viewport = new ScreenViewport(camera3D);
+      viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
       GDX3DSceneTools.glClearGray();
       Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
