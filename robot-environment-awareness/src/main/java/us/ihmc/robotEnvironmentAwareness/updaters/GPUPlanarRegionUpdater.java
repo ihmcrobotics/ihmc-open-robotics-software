@@ -26,6 +26,17 @@ public class GPUPlanarRegionUpdater
 
    private ConcaveHullFactoryParameters concaveHullFactoryParameters;
    private PolygonizerParameters polygonizerParameters;
+
+   public ConcaveHullFactoryParameters getConcaveHullFactoryParameters()
+   {
+      return concaveHullFactoryParameters;
+   }
+
+   public PolygonizerParameters getPolygonizerParameters()
+   {
+      return polygonizerParameters;
+   }
+
    private final PlanarRegionSegmentationDataExporter dataExporter = EXPORT_SEGMENTATION_ON_EXCEPTION
          ? new PlanarRegionSegmentationDataExporter(new File("DataThrowingException/Segmentation"))
          : null;
