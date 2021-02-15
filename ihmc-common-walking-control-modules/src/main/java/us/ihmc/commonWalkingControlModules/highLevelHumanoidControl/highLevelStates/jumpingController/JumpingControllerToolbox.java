@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -355,6 +356,11 @@ public class JumpingControllerToolbox
       return yoCapturePoint;
    }
 
+   public YoFramePoint3D getYoCapturePoint()
+   {
+      return yoCapturePoint;
+   }
+
    public double getStandingHeight()
    {
       return standingHeight.getDoubleValue();
@@ -603,6 +609,11 @@ public class JumpingControllerToolbox
          contactPoints.get(i).setMatchingFrame(tempPosition);
       }
       contactState.notifyContactStateHasChanged();
+   }
+
+   public ConvexPolygon2DReadOnly getDefaultFootPolygon()
+   {
+      return defaultFootPolygons.get(RobotSide.LEFT);
    }
 
    public double getOmega0()

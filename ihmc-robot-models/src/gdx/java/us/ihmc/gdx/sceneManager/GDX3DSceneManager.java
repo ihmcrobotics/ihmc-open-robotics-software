@@ -1,17 +1,18 @@
 package us.ihmc.gdx.sceneManager;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.InputMultiplexer;
-import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import com.badlogic.gdx.utils.viewport.Viewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.input.GDXInputMode;
+import us.ihmc.gdx.input.GDXInputMultiplexer;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -23,11 +24,12 @@ import java.util.HashSet;
  */
 public class GDX3DSceneManager
 {
-   private InputMultiplexer inputMultiplexer;
+   private GDXInputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
-   private Viewport viewport;
+   private ScreenViewport viewport;
    private ModelBatch modelBatch;
+   private GDXInputMode inputMode;
 
    private int x = 0;
    private int y = 0;
@@ -38,31 +40,40 @@ public class GDX3DSceneManager
    private final HashSet<GDXRenderable> renderables = new HashSet<>();
 
    private boolean firstRenderStarted = false;
-
    private boolean addFocusSphere = true;
 
    public void create()
    {
-      create(GDX3DSceneTools.createDefaultEnvironment());
+      create(GDX3DSceneTools.createDefaultEnvironment(), GDXInputMode.libGDX);
    }
 
-   public void create(Environment environment)
+   public void create(GDXInputMode inputMode)
    {
+      create(GDX3DSceneTools.createDefaultEnvironment(), inputMode);
+   }
+
+   public void create(Environment environment, GDXInputMode inputMode)
+   {
+      this.inputMode = inputMode;
       new GLProfiler(Gdx.graphics).enable();
       GDXTools.syncLogLevelWithLogTools();
 
       this.environment = environment;
 
-      modelBatch = new ModelBatch();
+      DefaultShader.Config defaultShaderConfig = new DefaultShader.Config();
+      // we could set shader options or even swap out the shader here
+      modelBatch = new ModelBatch(new DefaultShaderProvider(defaultShaderConfig));
 
-      inputMultiplexer = new InputMultiplexer();
+      inputMultiplexer = new GDXInputMultiplexer();
       Gdx.input.setInputProcessor(inputMultiplexer);
 
-      camera3D = new FocusBasedGDXCamera();
+      camera3D = new FocusBasedGDXCamera(inputMode);
+      inputMultiplexer.addProcessor(camera3D.getInputAdapter());
+
       if (addFocusSphere)
          addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
-      inputMultiplexer.addProcessor(camera3D.getInputProcessor());
       viewport = new ScreenViewport(camera3D);
+      viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
       GDX3DSceneTools.glClearGray();
       Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
@@ -91,6 +102,7 @@ public class GDX3DSceneManager
       modelBatch.begin(camera3D);
 
       Gdx.gl.glViewport(x, y, width, height);
+      GDX3DSceneTools.glClearGray();
 
       renderRegisteredObjectsWithEnvironment(modelBatch, sceneLevel);
    }
@@ -176,9 +188,9 @@ public class GDX3DSceneManager
       renderables.add(new GDXRenderable(renderableProvider, sceneLevel));
    }
 
-   public void addInputProcessor(InputProcessor inputProcessor)
+   public void setViewportBoundsToWindow()
    {
-      inputMultiplexer.addProcessor(inputProcessor);
+      setViewportBounds(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
    }
 
    /**
@@ -190,8 +202,6 @@ public class GDX3DSceneManager
       this.y = y;
       this.width = width;
       this.height = height;
-
-      camera3D.setInputBounds(x, x + width, getCurrentWindowHeight() - y - height, getCurrentWindowHeight() - y);
    }
 
    public int getCurrentWindowWidth()
@@ -207,6 +217,11 @@ public class GDX3DSceneManager
    public FocusBasedGDXCamera getCamera3D()
    {
       return camera3D;
+   }
+
+   public GDXInputMultiplexer getInputMultiplexer()
+   {
+      return inputMultiplexer;
    }
 
    public ModelBatch getModelBatch()

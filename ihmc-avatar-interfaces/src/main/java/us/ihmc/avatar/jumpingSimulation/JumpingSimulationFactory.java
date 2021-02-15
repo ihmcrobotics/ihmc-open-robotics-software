@@ -50,7 +50,9 @@ public class JumpingSimulationFactory
                                                                                          graphicsListRegistry,
                                                                                          gravityZ,
                                                                                          getClass().getResourceAsStream(parameterResourceName));
-      humanoidRobot.setController(simulationController);
+
+      int controlTicksPerSimulate = ((int) (robotModel.getControllerDT() / robotModel.getSimulateDT()));
+      humanoidRobot.setController(simulationController, controlTicksPerSimulate);
 
 
       GroundProfile3D groundProfile = new FlatGroundProfile();
@@ -80,7 +82,7 @@ public class JumpingSimulationFactory
       scs.addYoGraphic(pushRobotController.getForceVisualizer());
       pushRobotController.setPushDuration(0.05);
       pushRobotController.setPushForceDirection(new Vector3D(1.0, 0.0, 0.0));
-      pushRobotController.setPushForceMagnitude(5000.0);
+      pushRobotController.setPushForceMagnitude(600.0);
       pushRobotController.addPushButtonToSCS(scs);
 
       return scs;

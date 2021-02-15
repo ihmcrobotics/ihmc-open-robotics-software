@@ -13,7 +13,6 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
@@ -157,18 +156,18 @@ public class GDXDepthSensorSimulator
       depthWindowEnabledOptimization = false;
    }
 
-   public void renderImGuiDepthWindow(GDX3DSceneManager sceneManager)
+   public void renderImGuiDepthWindow()
    {
-      renderImGuiWindow(depthWindowName, depthWindowTexture.getTextureObjectHandle(), false, sceneManager);
+      renderImGuiWindow(depthWindowName, depthWindowTexture.getTextureObjectHandle(), false);
       depthWindowEnabledOptimization = true;
    }
 
-   public void renderImGuiColorWindow(GDX3DSceneManager sceneManager)
+   public void renderImGuiColorWindow()
    {
-      renderImGuiWindow(colorWindowName, frameBuffer.getColorTexture().getTextureObjectHandle(), true, sceneManager);
+      renderImGuiWindow(colorWindowName, frameBuffer.getColorTexture().getTextureObjectHandle(), true);
    }
 
-   private void renderImGuiWindow(String name, int textureId, boolean flipY, GDX3DSceneManager sceneManager)
+   private void renderImGuiWindow(String name, int textureId, boolean flipY)
    {
       ImGui.begin(name);
 
@@ -205,7 +204,6 @@ public class GDXDepthSensorSimulator
 
       ImGui.getWindowDrawList().addImage(textureId, startX, startY, endX, endY);
 
-      sceneManager.getCamera3D().addInputExclusionBox(ImGuiTools.windowBoundingBox());
       ImGui.end();
    }
 

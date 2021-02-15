@@ -67,6 +67,7 @@ public class JumpingControlManagerFactory
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
    private JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters;
+   private JumpingParameters jumpingParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -103,6 +104,11 @@ public class JumpingControlManagerFactory
    public void setJumpingCoPTrajectoryParameters(JumpingCoPTrajectoryParameters jumpingCopTrajectoryParameters)
    {
       this.jumpingCopTrajectoryParameters = jumpingCopTrajectoryParameters;
+   }
+
+   public void setJumpingParameters(JumpingParameters jumpingCopTrajectoryParameters)
+   {
+      this.jumpingParameters = jumpingCopTrajectoryParameters;
    }
 
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
@@ -218,7 +224,7 @@ public class JumpingControlManagerFactory
       if (!hasJumpingCoPTrajectoryParameters(JumpingBalanceManager.class))
          return null;
 
-      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, jumpingCopTrajectoryParameters, registry);
+      balanceManager = new JumpingBalanceManager(controllerToolbox, copTrajectoryParameters, jumpingCopTrajectoryParameters, jumpingParameters, registry);
 
       return balanceManager;
    }
