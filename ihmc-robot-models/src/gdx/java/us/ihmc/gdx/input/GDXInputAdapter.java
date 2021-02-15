@@ -1,9 +1,11 @@
 package us.ihmc.gdx.input;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
 import imgui.ImGui;
+import org.lwjgl.glfw.GLFW;
 
 /**
  * This class provides input for IHMC GDX based apps. There are
@@ -14,6 +16,8 @@ import imgui.ImGui;
  */
 public class GDXInputAdapter
 {
+   private static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
+
    PrivateInputProcessor firstInputProcessor;
    InputProcessor secondInputProcessor;
 
@@ -59,7 +63,7 @@ public class GDXInputAdapter
       }
       else
       {
-         return ImGui.getIO().getKeysDown(key);
+         return ImGui.getIO().getKeysDown(key + GDX_TO_IMGUI_KEY_CODE_OFFSET);
       }
    }
 
