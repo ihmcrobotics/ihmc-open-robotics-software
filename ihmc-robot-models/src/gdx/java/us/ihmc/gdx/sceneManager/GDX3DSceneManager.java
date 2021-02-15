@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.input.GDXInputMultiplexer;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
@@ -28,6 +29,7 @@ public class GDX3DSceneManager
    private Environment environment;
    private ScreenViewport viewport;
    private ModelBatch modelBatch;
+   private GDXInputMode inputMode;
 
    private int x = 0;
    private int y = 0;
@@ -42,11 +44,17 @@ public class GDX3DSceneManager
 
    public void create()
    {
-      create(GDX3DSceneTools.createDefaultEnvironment());
+      create(GDX3DSceneTools.createDefaultEnvironment(), GDXInputMode.libGDX);
    }
 
-   public void create(Environment environment)
+   public void create(GDXInputMode inputMode)
    {
+      create(GDX3DSceneTools.createDefaultEnvironment(), inputMode);
+   }
+
+   public void create(Environment environment, GDXInputMode inputMode)
+   {
+      this.inputMode = inputMode;
       new GLProfiler(Gdx.graphics).enable();
       GDXTools.syncLogLevelWithLogTools();
 
@@ -59,7 +67,7 @@ public class GDX3DSceneManager
       inputMultiplexer = new GDXInputMultiplexer();
       Gdx.input.setInputProcessor(inputMultiplexer);
 
-      camera3D = new FocusBasedGDXCamera();
+      camera3D = new FocusBasedGDXCamera(inputMode);
       inputMultiplexer.addProcessor(camera3D.getInputAdapter());
 
       if (addFocusSphere)

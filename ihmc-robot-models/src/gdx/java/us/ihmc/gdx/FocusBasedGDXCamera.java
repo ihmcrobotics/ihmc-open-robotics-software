@@ -22,6 +22,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.input.GDXInputAdapter;
+import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class FocusBasedGDXCamera extends Camera
@@ -61,7 +62,7 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
-   public FocusBasedGDXCamera()
+   public FocusBasedGDXCamera(GDXInputMode inputMode)
    {
       fieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
@@ -101,7 +102,7 @@ public class FocusBasedGDXCamera extends Camera
       updateCameraPose();
       update(true);
 
-      gdxInputAdapter = new GDXInputAdapter()
+      gdxInputAdapter = new GDXInputAdapter(inputMode)
       {
          @Override
          public boolean scrolled(float amountX, float amountY)
@@ -185,9 +186,9 @@ public class FocusBasedGDXCamera extends Camera
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
    }
 
-   private boolean touchDragged(int deltaX, int deltaY)
+   public boolean touchDragged(int deltaX, int deltaY)
    {
-      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+      if (gdxInputAdapter.isButtonPressed(Input.Buttons.LEFT))
       {
          latitude -= latitudeSpeed * deltaY;
          longitude += longitudeSpeed * deltaX;
@@ -198,7 +199,7 @@ public class FocusBasedGDXCamera extends Camera
       return false;
    }
 
-   private boolean scrolled(float amountX, float amountY)
+   public boolean scrolled(float amountX, float amountY)
    {
       zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
       return true;
@@ -211,27 +212,27 @@ public class FocusBasedGDXCamera extends Camera
    {
       float tpf = Gdx.app.getGraphics().getDeltaTime();
 
-      if (Gdx.input.isKeyPressed(Input.Keys.W))
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.W))
       {
          focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
       }
-      if (Gdx.input.isKeyPressed(Input.Keys.S))
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.S))
       {
          focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
       }
-      if (Gdx.input.isKeyPressed(Input.Keys.A))
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.A))
       {
          focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
       }
-      if (Gdx.input.isKeyPressed(Input.Keys.D))
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.D))
       {
          focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
       }
-      if (Gdx.input.isKeyPressed(Input.Keys.Q))
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.Q))
       {
          focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
       }
-      if (Gdx.input.isKeyPressed(Input.Keys.Z))
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.Z))
       {
          focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
       }
