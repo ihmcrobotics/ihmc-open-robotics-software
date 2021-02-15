@@ -34,28 +34,28 @@ public class GDXImGuiWindowAndDockSystem
       {
          throw new IllegalStateException("Unable to initialize GLFW");
       }
-      //         glfwDefaultWindowHints();
-      //         if (SystemUtils.IS_OS_MAC) {
-      //            glslVersion = "#version 150";
-      //            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-      //            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-      //            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
-      //            glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // Required on Mac
-      //         } else {
-      //            glslVersion = "#version 130";
-      //            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-      //            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-      //         }
-
-      //         GL.createCapabilities();
+//               glfwDefaultWindowHints();
+//               if (SystemUtils.IS_OS_MAC) {
+//                  glslVersion = "#version 150";
+//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
+//                  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);  // 3.2+ only
+//                  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL20.GL_TRUE);            // Required on Mac
+//               } else {
+//                  glslVersion = "#version 130";
+//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//                  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+//               }
+//
+//               GL.createCapabilities();
 
       ImGui.createContext();
 
       final ImGuiIO io = ImGui.getIO();
       io.setIniFilename(null); // We don't want to save .ini file
-      //         io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
+//               io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
       io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
-      //         io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
+      io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
       io.setConfigViewportsNoTaskBarIcon(true);
       io.setConfigWindowsMoveFromTitleBarOnly(true);
 
@@ -98,11 +98,13 @@ public class GDXImGuiWindowAndDockSystem
       ImGui.render();
       imGuiGl3.renderDrawData(ImGui.getDrawData());
 
-      //         ImGui.updatePlatformWindows();
-   }
+      if (imgui.ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+         final long backupWindowPtr = glfwGetCurrentContext();
+         imgui.ImGui.updatePlatformWindows();
+         imgui.ImGui.renderPlatformWindowsDefault();
+         glfwMakeContextCurrent(backupWindowPtr);
+      }
 
-   public void afterGDXRender()
-   {
       glfwSwapBuffers(windowHandle);
       glfwPollEvents();
 
