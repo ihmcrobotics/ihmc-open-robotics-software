@@ -85,6 +85,7 @@ public class LQRJumpMomentumController
    final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
    private boolean shouldUpdateP = true;
+   private boolean shouldUpdateCosts = true;
 
    private final HashMap<Polynomial3D, S1Function> s1Functions = new HashMap<>();
    private final List<S1Function> reversedS1FunctionList = new ArrayList<>();
@@ -152,6 +153,12 @@ public class LQRJumpMomentumController
 
          this.contactStateProviders.add().set(contactStateProviders.get(i));
       }
+
+      if (shouldUpdateP)
+         computeP();
+
+      computeS1Segments();
+      computeS2Segments();
    }
 
    void computeP()
@@ -318,13 +325,10 @@ public class LQRJumpMomentumController
       yoK2.set(k2);
    }
 
+
    public void computeControlInput(DMatrixRMaj currentState, double time)
    {
-      if (shouldUpdateP)
-         computeP();
-
-      computeS1Segments();
-      computeS2Segments();
+      shouldUpdateCosts = true;
 
       computeS1AndK1(time);
       computeS2AndK2(time);
@@ -450,8 +454,27 @@ public class LQRJumpMomentumController
       return feedbackVRPPosition;
    }
 
+   private void computeMomentumRateCostCommand()
+   {
+      double massInverse = 1.0 / totalMass;
+
+      CommonOps_DDRM.multTransA(-2.0 * massInverse, k2, lqrCommonValues.getR1(), linearMomentumRateGradient);
+      CommonOps_DDRM.multAddTransAB(2.0 * massInverse, relativeState, Nb, linearMomentumRateGradient);
+      CommonOps_DDRM.scale(2.0 * massInverse * massInverse, lqrCommonValues.getR1(), linearMomentumRateHessian);
+
+      momentumRateCostCommand.setLinearMomentumRateGradient(linearMomentumRateGradient);
+      momentumRateCostCommand.setLinearMomentumRateHessian(linearMomentumRateHessian);
+   }
+
    public LinearMomentumRateCostCommand getMomentumRateCostCommand()
    {
+      if (shouldUpdateCosts)
+      {
+         shouldUpdateCosts = false;
+
+         computeMomentumRateCostCommand();
+      }
+
       return momentumRateCostCommand;
    }
 }

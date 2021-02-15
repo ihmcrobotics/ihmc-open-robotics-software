@@ -11,8 +11,7 @@ import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class CoMTrajectorySegmentTest
 {
@@ -116,6 +115,45 @@ public class CoMTrajectorySegmentTest
             EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(originalSegment.getVelocity(), segmentToSet.getVelocity(), 1e-8);
             EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(originalSegment.getAcceleration(), segmentToSet.getAcceleration(), 1e-8);
             EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(originalSegment.getDCMPosition(), segmentToSet.getDCMPosition(), 1e-8);
+         }
+      }
+   }
+
+   @Test
+   public void testCropBeginningOfSegment()
+   {
+      Random random = new Random(1738L);
+
+      for (int iter = 0; iter < iters; iter++)
+      {
+         CoMTrajectorySegment originalSegment = new CoMTrajectorySegment();
+         originalSegment.setOmega(RandomNumbers.nextDouble(random, 0.1, 3.0));
+         double duration = RandomNumbers.nextDouble(random, 0.0, 3.0);
+         originalSegment.getTimeInterval().setInterval(0.0, duration);
+         originalSegment.setFirstCoefficient(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame()));
+         originalSegment.setSecondCoefficient(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame()));
+         originalSegment.setThirdCoefficient(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame()));
+         originalSegment.setFourthCoefficient(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame()));
+         originalSegment.setFifthCoefficient(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame()));
+         originalSegment.setSixthCoefficient(EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame()));
+
+         double timeToCrop = RandomNumbers.nextDouble(random, 0.0, duration);
+
+         CoMTrajectorySegment segmentToCrop = getRandomSegment(random);
+         segmentToCrop.set(originalSegment);
+         segmentToCrop.shiftStartOfSegment(timeToCrop);
+
+         for (double time = timeToCrop; time <= duration; time += 1e-3)
+         {
+            double timeInCropped = time - timeToCrop;
+            originalSegment.compute(time);
+            segmentToCrop.compute(timeInCropped);
+
+            String failureMessage = "Failed at time " + time;
+            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(failureMessage, originalSegment.getPosition(), segmentToCrop.getPosition(), 1e-8);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(failureMessage, originalSegment.getVelocity(), segmentToCrop.getVelocity(), 1e-8);
+            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(failureMessage, originalSegment.getAcceleration(), segmentToCrop.getAcceleration(), 1e-8);
+            EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(failureMessage, originalSegment.getDCMPosition(), segmentToCrop.getDCMPosition(), 1e-8);
          }
       }
    }

@@ -7,6 +7,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import us.ihmc.gdx.input.GDXInputAdapter;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -38,7 +39,7 @@ public class GDX3DWith2DUIDemo
             boxes = new BoxesDemoModel().newInstance();
 
             stage = new Stage(new ScreenViewport());
-            sceneManager.addInputProcessor(stage);
+            sceneManager.getInputMultiplexer().addProcessor(new GDXInputAdapter(stage));
 
             table = new Table();
             table.setFillParent(true);
