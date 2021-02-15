@@ -77,7 +77,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().keyDown(keycode))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().keyDown(keycode))
                return true;
       }
       finally
@@ -93,7 +93,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().keyUp(keycode))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().keyUp(keycode))
                return true;
       }
       finally
@@ -109,7 +109,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().keyTyped(character))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().keyTyped(character))
                return true;
       }
       finally
@@ -125,7 +125,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().touchDown(screenX, screenY, pointer, button))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().touchDown(screenX, screenY, pointer, button))
                return true;
       }
       finally
@@ -141,7 +141,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().touchUp(screenX, screenY, pointer, button))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().touchUp(screenX, screenY, pointer, button))
                return true;
       }
       finally
@@ -157,7 +157,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().touchDragged(screenX, screenY, pointer))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().touchDragged(screenX, screenY, pointer))
                return true;
       }
       finally
@@ -189,7 +189,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().mouseMoved(screenX, screenY))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().mouseMoved(screenX, screenY))
                return true;
       }
       finally
@@ -205,7 +205,7 @@ public class GDXInputMultiplexer implements InputProcessor
       try
       {
          for (int i = 0, n = processors.size; i < n; i++)
-            if (((GDXInputAdapter) items[i]).getInputProcessor().scrolled(amountX, amountY))
+            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().scrolled(amountX, amountY))
                return true;
       }
       finally

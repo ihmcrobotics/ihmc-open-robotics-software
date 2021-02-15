@@ -1,7 +1,9 @@
 package us.ihmc.gdx.input;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.InputProcessor;
+import imgui.ImGui;
 
 /**
  * This class provides input for IHMC GDX based apps. There are
@@ -18,15 +20,47 @@ public class GDXInputAdapter
    private volatile int lastDragX = 0;
    private volatile int lastDragY = 0;
 
-   public GDXInputAdapter()
+   private GDXInputMode mode;
+
+   public GDXInputAdapter(GDXInputMode mode)
    {
-      this(new InputAdapter());
+      this(new InputAdapter(), mode);
    }
 
    public GDXInputAdapter(InputProcessor inputProcessor)
    {
+      this(inputProcessor, GDXInputMode.libGDX);
+   }
+
+   private GDXInputAdapter(InputProcessor inputProcessor, GDXInputMode mode)
+   {
+      this.mode = mode;
       firstInputProcessor = new PrivateInputProcessor(this);
       secondInputProcessor = inputProcessor;
+   }
+
+   public boolean isButtonPressed(int mouseButton)
+   {
+      if (mode == GDXInputMode.libGDX)
+      {
+         return Gdx.input.isButtonPressed(mouseButton);
+      }
+      else
+      {
+         return ImGui.getIO().getMouseDown(mouseButton);
+      }
+   }
+
+   public boolean isKeyPressed(int key)
+   {
+      if (mode == GDXInputMode.libGDX)
+      {
+         return Gdx.input.isKeyPressed(key);
+      }
+      else
+      {
+         return ImGui.getIO().getKeysDown(key);
+      }
    }
 
    public boolean keyDown(int keycode)
@@ -71,29 +105,29 @@ public class GDXInputAdapter
 
    class PrivateInputProcessor implements InputProcessor
    {
-      private final GDXInputAdapter GDXInputAdapter;
+      private final GDXInputAdapter gdxInputAdapter;
 
-      public PrivateInputProcessor(GDXInputAdapter GDXInputAdapter)
+      public PrivateInputProcessor(GDXInputAdapter gdxInputAdapter)
       {
-         this.GDXInputAdapter = GDXInputAdapter;
+         this.gdxInputAdapter = gdxInputAdapter;
       }
 
       @Override
       public boolean keyDown(int keycode)
       {
-         return GDXInputAdapter.keyDown(keycode);
+         return gdxInputAdapter.keyDown(keycode);
       }
 
       @Override
       public boolean keyUp(int keycode)
       {
-         return GDXInputAdapter.keyUp(keycode);
+         return gdxInputAdapter.keyUp(keycode);
       }
 
       @Override
       public boolean keyTyped(char character)
       {
-         return GDXInputAdapter.keyTyped(character);
+         return gdxInputAdapter.keyTyped(character);
       }
 
       @Override
@@ -101,13 +135,13 @@ public class GDXInputAdapter
       {
          lastDragX = screenX;
          lastDragY = screenY;
-         return GDXInputAdapter.mouseMoved(screenX, screenY);
+         return gdxInputAdapter.mouseMoved(screenX, screenY);
       }
 
       @Override
       public boolean touchUp(int screenX, int screenY, int pointer, int button)
       {
-         return GDXInputAdapter.mouseMoved(screenX, screenY);
+         return gdxInputAdapter.mouseMoved(screenX, screenY);
       }
 
       @Override
@@ -117,24 +151,31 @@ public class GDXInputAdapter
          int deltaY = screenY - lastDragY;
          lastDragX = screenX;
          lastDragY = screenY;
-         return GDXInputAdapter.touchDraggedDelta(deltaX, deltaY);
+         return gdxInputAdapter.touchDraggedDelta(deltaX, deltaY);
       }
 
       @Override
       public boolean mouseMoved(int screenX, int screenY)
       {
-         return GDXInputAdapter.mouseMoved(screenX, screenY);
+         return gdxInputAdapter.mouseMoved(screenX, screenY);
       }
 
       @Override
       public boolean scrolled(float amountX, float amountY)
       {
-         return GDXInputAdapter.scrolled(amountX, amountY);
+         return gdxInputAdapter.scrolled(amountX, amountY);
       }
    }
 
-   public InputProcessor getInputProcessor()
+   public InputProcessor getFirstInputProcessor()
    {
       return firstInputProcessor;
    }
+
+   public InputProcessor getSecondInputProcessor()
+   {
+      return secondInputProcessor;
+   }
+
+
 }
