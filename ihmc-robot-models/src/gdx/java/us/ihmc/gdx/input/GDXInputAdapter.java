@@ -180,6 +180,4 @@ public class GDXInputAdapter
    {
       return secondInputProcessor;
    }
-
-
 }
