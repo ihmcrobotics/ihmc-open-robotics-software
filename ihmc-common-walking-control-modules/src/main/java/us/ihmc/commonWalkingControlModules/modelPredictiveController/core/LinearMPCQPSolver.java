@@ -55,7 +55,7 @@ public class LinearMPCQPSolver
    public final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
 
-   private final DMatrixRMaj solverOutput;
+   protected final DMatrixRMaj solverOutput;
 
    private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveMPCVariables", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfMPCIterations", registry);
@@ -78,7 +78,7 @@ public class LinearMPCQPSolver
    private final LinearMPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
 
-   private final double dt;
+   protected final double dt;
 
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {

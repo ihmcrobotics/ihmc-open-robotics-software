@@ -14,8 +14,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiscreteOrientationCommand
+public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientationCommand>
 {
+   private int commandId;
+
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion();
    private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D();
 
@@ -33,11 +35,149 @@ public class DiscreteOrientationCommand
    private final Vector3D currentAxisAngleError = new Vector3D();
    private final FrameVector3D currentBodyAngularMomentumAboutFixedPoint = new FrameVector3D();
 
-   private int segmentId;
+   private int segmentNumber;
    private int endDiscreteTickId;
    private double durationOfHold;
    private double timeOfConstraint;
    private double omega;
+
+   public MPCCommandType getCommandType()
+   {
+      return MPCCommandType.ORIENTATION_DYNAMICS;
+   }
+
+   public void clear()
+   {
+      segmentNumber = -1;
+      endDiscreteTickId = -1;
+      timeOfConstraint = Double.NaN;
+      durationOfHold = Double.NaN;
+
+      desiredBodyOrientation.setToNaN();
+      desiredBodyAngularVelocity.setToNaN();
+
+      desiredNetAngularMomentum.setToNaN();
+      desiredInternalAngularMomentum.setToNaN();
+      desiredInternalAngularMomentumRate.setToNaN();
+
+      momentOfInertiaInBodyFrame.setToNaN();
+
+      desiredCoMPosition.setToNaN();
+      desiredCoMVelocity.setToNaN();
+
+      contactPlaneHelpers.clear();
+
+      currentAxisAngleError.setToNaN();
+      currentBodyAngularMomentumAboutFixedPoint.setToNaN();
+   }
+
+   public void setSegmentNumber(int segmentNumber)
+   {
+      this.segmentNumber = segmentNumber;
+   }
+
+   public void setEndingDiscreteTickId(int tickId)
+   {
+      this.endDiscreteTickId = tickId;
+   }
+
+   public void setDurationOfHold(double durationOfHold)
+   {
+      this.durationOfHold = durationOfHold;
+   }
+
+   public void setTimeOfConstraint(double timeOfConstraint)
+   {
+      this.timeOfConstraint = timeOfConstraint;
+   }
+
+   public void setOmega(double omega)
+   {
+      this.omega = omega;
+   }
+
+   public void setDesiredBodyOrientation(FrameOrientation3DReadOnly desiredBodyOrientation)
+   {
+      this.desiredBodyOrientation.setIncludingFrame(desiredBodyOrientation);
+   }
+
+   public void setDesiredBodyAngularVelocityInBodyFrame(FrameVector3DReadOnly desiredBodyAngularVelocity)
+   {
+      this.desiredBodyAngularVelocity.setIncludingFrame(desiredBodyAngularVelocity);
+   }
+
+   public void setDesiredNetAngularMomentum(FrameVector3DReadOnly desiredNetAngularMomentum)
+   {
+      this.desiredNetAngularMomentum.setIncludingFrame(desiredNetAngularMomentum);
+   }
+
+   public void setDesiredInternalAngularMomentum(FrameVector3DReadOnly desiredInternalAngularMomentum)
+   {
+      this.desiredInternalAngularMomentum.setIncludingFrame(desiredInternalAngularMomentum);
+   }
+
+   public void setDesiredInternalAngularMomentumRate(FrameVector3DReadOnly desiredInternalAngularMomentumRate)
+   {
+      this.desiredInternalAngularMomentumRate.setIncludingFrame(desiredInternalAngularMomentumRate);
+   }
+
+   public void setMomentOfInertiaInBodyFrame(Matrix3DReadOnly momentOfInertiaInBodyFrame)
+   {
+      this.momentOfInertiaInBodyFrame.set(momentOfInertiaInBodyFrame);
+   }
+
+   public void setDesiredCoMPosition(FramePoint3DReadOnly desiredCoMPosition)
+   {
+      this.desiredCoMPosition.setIncludingFrame(desiredCoMPosition);
+   }
+
+   public void setDesiredCoMVelocity(FrameVector3DReadOnly desiredCoMVelocity)
+   {
+      this.desiredCoMVelocity.setIncludingFrame(desiredCoMVelocity);
+   }
+
+   public void addContactPlaneHelper(MPCContactPlane contactPlaneHelper)
+   {
+      this.contactPlaneHelpers.add(contactPlaneHelper);
+   }
+
+   public void setCurrentAxisAngleError(Vector3DReadOnly currentAxisAngleError)
+   {
+      this.currentAxisAngleError.set(currentAxisAngleError);
+   }
+
+   public void setCurrentBodyAngularMomentumAboutFixedPoint(FrameVector3DReadOnly currentBodyAngularMomentumAboutFixedPoint)
+   {
+      this.currentBodyAngularMomentumAboutFixedPoint.setIncludingFrame(currentBodyAngularMomentumAboutFixedPoint);
+   }
+
+   @Override
+   public void set(DiscreteOrientationCommand other)
+   {
+      clear();
+      setCommandId(other.getCommandId());
+      setSegmentNumber(other.getSegmentNumber());
+      setTimeOfConstraint(other.getTimeOfConstraint());
+      setDurationOfHold(other.getDurationOfHold());
+
+      setDesiredBodyOrientation(other.getDesiredBodyOrientation());
+      setDesiredBodyAngularVelocityInBodyFrame(other.getDesiredBodyAngularVelocity());
+
+      setDesiredNetAngularMomentum(other.getDesiredNetAngularMomentum());
+      setDesiredInternalAngularMomentum(other.getDesiredInternalAngularMomentum());
+      setDesiredInternalAngularMomentumRate(other.getDesiredInternalAngularMomentumRate());
+
+      setMomentOfInertiaInBodyFrame(other.getMomentOfInertiaInBodyFrame());
+
+      setDesiredCoMPosition(other.getDesiredCoMPosition());
+      setDesiredCoMVelocity(other.getDesiredCoMVelocity());
+
+      setCurrentAxisAngleError(other.getCurrentAxisAngleError());
+      setCurrentBodyAngularMomentumAboutFixedPoint(other.getCurrentBodyAngularMomentumAboutFixedPoint());
+
+      for (int i = 0; i < other.getNumberOfContacts(); i++)
+         addContactPlaneHelper(other.getContactPlaneHelper(i));
+   }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()
    {
@@ -89,9 +229,9 @@ public class DiscreteOrientationCommand
       return currentBodyAngularMomentumAboutFixedPoint;
    }
 
-   public int getSegmentId()
+   public int getSegmentNumber()
    {
-      return segmentId;
+      return segmentNumber;
    }
 
    public double getDurationOfHold()
@@ -124,4 +264,91 @@ public class DiscreteOrientationCommand
       return contactPlaneHelpers.get(i);
    }
 
+   @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object == this)
+      {
+         return true;
+      }
+      else if (object instanceof DiscreteOrientationCommand)
+      {
+         DiscreteOrientationCommand other = (DiscreteOrientationCommand) object;
+         if (commandId != other.commandId)
+            return false;
+         if (segmentNumber != other.segmentNumber)
+            return false;
+         if (endDiscreteTickId != other.endDiscreteTickId)
+            return false;
+         if (durationOfHold != other.durationOfHold)
+            return false;
+         if (timeOfConstraint != other.timeOfConstraint)
+            return false;
+         if (omega != other.omega)
+            return false;
+         if (!desiredBodyOrientation.equals(other.desiredBodyOrientation))
+            return false;
+         if (!desiredBodyAngularVelocity.equals(other.desiredBodyAngularVelocity))
+            return false;
+         if (!desiredNetAngularMomentum.equals(other.desiredNetAngularMomentum))
+            return false;
+         if (!desiredInternalAngularMomentum.equals(other.desiredInternalAngularMomentum))
+            return false;
+         if (!desiredInternalAngularMomentumRate.equals(other.desiredInternalAngularMomentumRate))
+            return false;
+         if (!momentOfInertiaInBodyFrame.equals(other.momentOfInertiaInBodyFrame))
+            return false;
+         if (!desiredCoMPosition.equals(other.desiredCoMPosition))
+            return false;
+         if (!desiredCoMVelocity.equals(other.desiredCoMVelocity))
+            return false;
+         if (endDiscreteTickId == 0)
+         {
+            if (!currentAxisAngleError.equals(other.currentAxisAngleError))
+               return false;
+            if (!currentBodyAngularMomentumAboutFixedPoint.equals(other.currentBodyAngularMomentumAboutFixedPoint))
+               return false;
+         }
+         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         for (int i = 0; i < contactPlaneHelpers.size(); i++)
+         {
+            if (!contactPlaneHelpers.get(i).equals(other.contactPlaneHelpers.get(i)))
+               return false;
+         }
+         return true;
+      }
+      else
+      {
+         return false;
+      }
+   }
+
+   /*
+   @Override
+   public String toString()
+   {
+      String string = getClass().getSimpleName() + ": value: " + getValueType() + ", derivative order: " + getDerivativeOrder() + ", segment number: "
+                      + segmentNumber + ", constraint type: " + constraintType + ", time of objective: " + timeOfObjective + ", omega: " + omega + ", weight: "
+                      + weight + ", objective: " + objective + ".";
+      for (int i = 0; i < getNumberOfContacts(); i++)
+      {
+         string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);
+      }
+      return string;
+   }
+
+    */
 }
