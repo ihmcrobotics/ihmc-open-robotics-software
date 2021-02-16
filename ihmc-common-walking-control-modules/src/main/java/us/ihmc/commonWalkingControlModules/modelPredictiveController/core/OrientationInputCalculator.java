@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -77,7 +76,7 @@ public class OrientationInputCalculator
       MatrixMissingTools.toSkewSymmetricMatrix(gravityVector, skewGravity);
    }
 
-   public void compute(QPInputTypeA inputToPack, DiscreteOrientationCommand command)
+   public boolean compute(QPInputTypeA inputToPack, DiscreteOrientationCommand command)
    {
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape(6);
@@ -100,6 +99,8 @@ public class OrientationInputCalculator
          setUpConstraintForFirstTick(inputToPack, command);
       else
          setUpConstraintForRegularTick(inputToPack, command);
+
+      return true;
    }
 
    private void reset(DiscreteOrientationCommand command)
@@ -147,8 +148,8 @@ public class OrientationInputCalculator
    {
       double timeOfConstraint = command.getTimeOfConstraint();
       double omega = command.getOmega();
-      int comStartIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentId());
-      int rhoStartIndex = indexHandler.getRhoCoefficientStartIndex(command.getSegmentId());
+      int comStartIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
+      int rhoStartIndex = indexHandler.getRhoCoefficientStartIndex(command.getSegmentNumber());
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartIndex, timeOfConstraint, comPositionJacobian, 0, 1.0);
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartIndex, timeOfConstraint, comVelocityJacobian, 1, 1.0);

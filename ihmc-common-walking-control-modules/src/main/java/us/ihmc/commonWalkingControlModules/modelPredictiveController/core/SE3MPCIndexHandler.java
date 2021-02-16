@@ -68,6 +68,16 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       }
    }
 
+   public int getOrientationStartIndices(int segment)
+   {
+      return orientationStartIndices.get(segment);
+   }
+
+   public int getOrientationTicksInSegment(int segment)
+   {
+      return orientationTicksInSegment.get(segment);
+   }
+
    public int getOrientationTickStartIndex(int tick)
    {
       return orientationTickStartIndex.get(tick);
