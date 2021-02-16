@@ -109,6 +109,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
    private final Point3D scsCameraFix = new Point3D(-0.44, -0.17, 0.75);
 
+   private HighLevelControllerName initialStateEnum = HighLevelControllerName.WALKING;
    private final List<HighLevelControllerStateFactory> highLevelControllerFactories = new ArrayList<>();
    private final List<ControllerStateTransitionFactory<HighLevelControllerName>> controllerTransitionFactories = new ArrayList<>();
    private final ArrayList<ControllerFailureListener> controllerFailureListeners = new ArrayList<>();
@@ -157,6 +158,12 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
    {
       this.pubSubImplementation = pubSubImplementation;
+   }
+
+   public void setInitialStateEnum(HighLevelControllerName initialStateEnum)
+   {
+      checkIfSimulationIsAlreadyCreated();
+      this.initialStateEnum = initialStateEnum;
    }
 
    /**
@@ -485,7 +492,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       for (int i = 0; i < controllerTransitionFactories.size(); i++)
          controllerFactory.addCustomStateTransition(controllerTransitionFactories.get(i));
 
-      controllerFactory.setInitialState(HighLevelControllerName.WALKING);
+      controllerFactory.setInitialState(initialStateEnum);
 
       controllerFactory.createQueuedControllerCommandGenerator(controllerCommands);
 
