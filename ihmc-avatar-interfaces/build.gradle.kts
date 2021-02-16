@@ -54,6 +54,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
    api("us.ihmc:simulation-construction-set-tools:source")
+   api("us.ihmc:simulation-construction-set-2-simulation:source")
+   api("us.ihmc:simulation-construction-set-2-session-visualizer-jfx:source")
 }
 
 testDependencies {
