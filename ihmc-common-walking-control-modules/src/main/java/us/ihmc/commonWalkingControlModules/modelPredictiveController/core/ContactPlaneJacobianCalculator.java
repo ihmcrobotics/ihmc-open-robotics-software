@@ -324,4 +324,150 @@ public class ContactPlaneJacobianCalculator
          rowStart += contactPoint.getRhoSize();
       }
    }
+
+   public static void computeContactPointJacobian(double scale,
+                                         int derivativeOrder,
+                                         double time,
+                                         double omega,
+                                         int startRow,
+                                         int startColumn,
+                                         MPCContactPlane contactPlane,
+                                         DMatrixRMaj jacobianToPack)
+   {
+      switch (derivativeOrder)
+      {
+         case 0:
+            computeContactPointMagnitudeJacobian(scale, time, omega, startRow, startColumn, contactPlane, jacobianToPack);
+            return;
+         case 1:
+            computeContactPointRateJacobian(scale, time, omega, startRow, startColumn, contactPlane, jacobianToPack);
+            return;
+         case 2:
+            computeContactPointAccelerationJacobian(scale, time, omega, startRow, startColumn, contactPlane, jacobianToPack);
+            return;
+         case 3:
+            computeContactPointJerkJacobian(scale, time, omega, startRow, startColumn, contactPlane, jacobianToPack);
+            return;
+         default:
+            throw new IllegalArgumentException("Derivative order must be less than 4.");
+      }
+   }
+
+   public static void computeContactPointMagnitudeJacobian(double scale,
+                                                  double time,
+                                                  double omega,
+                                                  int startRow,
+                                                  int startColumn,
+                                                  MPCContactPlane contactPlane,
+                                                  DMatrixRMaj positionJacobianToPack)
+   {
+      double t2 = scale * time * time;
+      double t3 = time * t2;
+      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+      double negativeExponential = scale / positiveExponential;
+
+      setContactPointJacobianCoefficients(contactPlane, scale * positiveExponential, negativeExponential, t3, t2, startRow, startColumn, positionJacobianToPack);
+   }
+
+   public static void computeContactPointRateJacobian(double scale,
+                                             double time,
+                                             double omega,
+                                             int startRow,
+                                             int startColumn,
+                                             MPCContactPlane contactPlane,
+                                             DMatrixRMaj velocityJacobianToPack)
+   {
+      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+      double scaleOmega = scale * omega;
+      double firstVelocityCoefficient = scaleOmega * positiveExponential;
+      double secondVelocityCoefficient = -scaleOmega / positiveExponential;
+      double thirdVelocityCoefficient = scale * 3 * time * time;
+      double fourthVelocityCoefficient = scale * 2 * time;
+
+      setContactPointJacobianCoefficients(contactPlane,
+                                          firstVelocityCoefficient,
+                                          secondVelocityCoefficient,
+                                          thirdVelocityCoefficient,
+                                          fourthVelocityCoefficient,
+                                          startRow,
+                                          startColumn,
+                                          velocityJacobianToPack);
+   }
+
+   public static void computeContactPointAccelerationJacobian(double scale,
+                                                         double time,
+                                                         double omega,
+                                                         int startRow,
+                                                         int startColumn,
+                                                         MPCContactPlane contactPlane,
+                                                         DMatrixRMaj accelerationJacobianToPack)
+   {
+      double scaleOmega2 = scale * omega * omega;
+      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+      double firstVelocityCoefficient = scaleOmega2 * positiveExponential;
+      double secondVelocityCoefficient = scaleOmega2 / positiveExponential;
+      double thirdVelocityCoefficient = scale * 6 * time;
+      double fourthVelocityCoefficient = scale * 2;
+
+      setContactPointJacobianCoefficients(contactPlane,
+                                          firstVelocityCoefficient,
+                                          secondVelocityCoefficient,
+                                          thirdVelocityCoefficient,
+                                          fourthVelocityCoefficient,
+                                          startRow,
+                                          startColumn,
+                                          accelerationJacobianToPack);
+   }
+
+   public static void computeContactPointJerkJacobian(double scale,
+                                                 double time,
+                                                 double omega,
+                                                 int startRow,
+                                                 int startColumn,
+                                                 MPCContactPlane contactPlane,
+                                                 DMatrixRMaj jerkJacobianToPack)
+   {
+      double scaleOmega3 = scale * omega * omega * omega;
+      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+      double firstVelocityCoefficient = scaleOmega3 * positiveExponential;
+      double secondVelocityCoefficient = -scaleOmega3 / positiveExponential;
+      double thirdVelocityCoefficient = scale * 6;
+      double fourthVelocityCoefficient = 0.0;
+
+      setContactPointJacobianCoefficients(contactPlane,
+                                          firstVelocityCoefficient,
+                                          secondVelocityCoefficient,
+                                          thirdVelocityCoefficient,
+                                          fourthVelocityCoefficient,
+                                          startRow,
+                                          startColumn,
+                                          jerkJacobianToPack);
+   }
+
+
+   private static void setContactPointJacobianCoefficients(MPCContactPlane contactPlane,
+                                                           double firstCoefficient,
+                                                           double secondCoefficient,
+                                                           double thirdCoefficient,
+                                                           double fourthCoefficient,
+                                                           int rowStart,
+                                                           int columnStart,
+                                                           DMatrixRMaj contactForceJacobianToPack)
+   {
+      for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
+      {
+         MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+
+         for (int basisVectorIndex = 0; basisVectorIndex < contactPoint.getRhoSize(); basisVectorIndex++)
+         {
+            contactForceJacobianToPack.unsafe_set(rowStart + contactPointIdx, columnStart, firstCoefficient);
+            contactForceJacobianToPack.unsafe_set(rowStart + contactPointIdx, columnStart + 1, secondCoefficient);
+
+            contactForceJacobianToPack.unsafe_set(rowStart + contactPointIdx, columnStart + 2, thirdCoefficient);
+            contactForceJacobianToPack.unsafe_set(rowStart + contactPointIdx, columnStart + 3, fourthCoefficient);
+
+            columnStart += LinearMPCIndexHandler.coefficientsPerRho;
+         }
+      }
+   }
 }

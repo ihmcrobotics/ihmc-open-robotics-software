@@ -180,6 +180,22 @@ public class MatrixMissingTools
       return skewSymmetric;
    }
 
+
+   public static void toSkewSymmetricMatrix(DMatrix1Row vector, DMatrixRMaj skewSymmetricToPack)
+   {
+      skewSymmetricToPack.set(0, 0, 0.0);
+      skewSymmetricToPack.set(0, 1, -vector.get(2));
+      skewSymmetricToPack.set(0, 2, vector.get(1));
+
+      skewSymmetricToPack.set(1, 0, vector.get(2));
+      skewSymmetricToPack.set(1, 1, 0.0);
+      skewSymmetricToPack.set(1, 2, -vector.get(0));
+
+      skewSymmetricToPack.set(2, 0, -vector.get(1));
+      skewSymmetricToPack.set(2, 1, vector.get(0));
+      skewSymmetricToPack.set(2, 2, 0.0);
+   }
+
    public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
    {
       matrix.data[ row * matrix.numCols + col ] += value;
