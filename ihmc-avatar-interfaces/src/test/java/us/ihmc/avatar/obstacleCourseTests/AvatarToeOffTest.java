@@ -70,7 +70,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    {
       setupTest();
 
-      walkForward(getStepLength(), getNumberOfSteps());
+      walkForward(getStepLength(), getNumberOfSteps(), 0.0);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 
@@ -85,7 +85,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
-   private void walkForward(double stepLength, int steps) throws SimulationExceededMaximumTimeException
+   private void walkForward(double stepLength, int steps, double initialXPosition) throws SimulationExceededMaximumTimeException
    {
       double stepWidth = 0.14;
 
@@ -98,7 +98,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       {
          robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
-         footstepX = stepLength * i;
+         footstepX = stepLength * i + initialXPosition;
          FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
          location.changeFrame(ReferenceFrame.getWorldFrame());
          location.setZ(0.0);
@@ -109,7 +109,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       // closing step
       robotSide = robotSide.getOppositeSide();
       footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
-      footstepX = stepLength * steps;
+      footstepX = stepLength * steps + initialXPosition;
       FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
       location.changeFrame(ReferenceFrame.getWorldFrame());
       location.setZ(0.0);
