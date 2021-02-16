@@ -38,6 +38,8 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
    public abstract double getStepLength();
 
+   public abstract double getMaxStepLength();
+
    public abstract int getNumberOfSteps();
 
    @BeforeEach
