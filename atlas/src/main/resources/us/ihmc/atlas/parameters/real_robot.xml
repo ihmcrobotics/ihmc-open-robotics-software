@@ -58,14 +58,8 @@
                     </registry>
                     <registry name="HighLevelControlManagerFactory">
                         <registry name="FeetManager">
-                            <registry name="leftFootControlModule">
-<parameter name="leftFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.25"/>
-<parameter name="leftFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
-                            </registry>
-                            <registry name="rightFootControlModule">
-<parameter name="rightFootTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.25"/>
-<parameter name="rightFootTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
-                            </registry>
+                            <parameter name="FootSwingTouchdownVelocityZ" type="DoubleParameter" min="0.0" max="1.0" value="-0.25"/>
+                            <parameter name="FootSwingTouchdownAccelerationZ" type="DoubleParameter" min="0.0" max="1.0" value="-2.0"/>
                             <registry name="ToeOffManager">
 <parameter name="lookAtTwoStepCapturabilityForToeOff" type="BooleanParameter" value="false"/>
                             </registry>
@@ -107,6 +101,8 @@
                             <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.98"/>
                             <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.135"/>
                         </registry>
+                        <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
+                        <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="RecoveryLinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
                         <parameter name="RecoveryLinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.3"/>
                     </registry>

@@ -14,7 +14,6 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -43,6 +42,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
@@ -87,7 +87,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private HighLevelControllerParameters highLevelControllerParameters;
    private ValkyrieCalibrationParameters calibrationParameters;
 
-   private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
    private WalkingControllerParameters walkingControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
@@ -459,6 +458,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public ValkyrieSensorSuiteManager getSensorSuiteManager()
    {
+      return getSensorSuiteManager(null);
+   }
+
+   @Override
+   public ValkyrieSensorSuiteManager getSensorSuiteManager(ROS2NodeInterface ros2Node)
+   {
       if (sensorSuiteManager == null)
       {
          sensorSuiteManager = new ValkyrieSensorSuiteManager(getSimpleRobotName(),
@@ -467,7 +472,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
                                                              getROSClockCalculator(),
                                                              getSensorInformation(),
                                                              getJointMap(),
-                                                             target);
+                                                             target,
+                                                             ros2Node);
       }
       return sensorSuiteManager;
    }
@@ -538,13 +544,23 @@ public class ValkyrieRobotModel implements DRCRobotModel
       switch (target)
       {
          case SCS:
-            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+            return getClass().getResourceAsStream(getSimulationParameterResourceName());
          case GAZEBO:
          case REAL_ROBOT:
-            return getClass().getResourceAsStream("/us/ihmc/valkyrie/parameters/controller_hardware.xml");
+            return getClass().getResourceAsStream(getHardwareParameterResourceName());
          default:
             throw new UnsupportedOperationException("Unsupported target: " + target);
       }
+   }
+
+   public static String getSimulationParameterResourceName()
+   {
+      return "/us/ihmc/valkyrie/parameters/controller_simulation.xml";
+   }
+   
+   public static String getHardwareParameterResourceName()
+   {
+      return "/us/ihmc/valkyrie/parameters/controller_hardware.xml";
    }
 
    @Override
@@ -606,14 +622,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
    {
       return new ValkyrieFootstepPlanningParameters();
-   }
-
-   @Override
-   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-   {
-      if (capturePointPlannerParameters == null)
-         capturePointPlannerParameters = new ValkyrieSmoothCMPPlannerParameters(getRobotPhysicalProperties(), target);
-      return capturePointPlannerParameters;
    }
 
    @Override

@@ -1,7 +1,6 @@
 package us.ihmc.atlas.sensors;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.text.DecimalFormat;
 import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,7 +44,7 @@ public class AtlasSLAMModule extends SLAMModule
 
    public AtlasSLAMModule(ROS2Node ros2Node, Messager messager, DRCRobotModel drcRobotModel, File configurationFile)
    {
-      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToDepthCamera, configurationFile);
+      super(ros2Node, messager, AtlasSensorInformation.transformPelvisToD435DepthCamera, configurationFile);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
@@ -60,7 +59,7 @@ public class AtlasSLAMModule extends SLAMModule
       estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                     StampedPosePacket.class,
                                                                     ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
-      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
+      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
@@ -79,7 +78,7 @@ public class AtlasSLAMModule extends SLAMModule
 
       estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StampedPosePacket.class,
                                                                     ROS2Tools.getControllerInputTopic(drcRobotModel.getSimpleRobotName()));
-      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
+      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToD435DepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);

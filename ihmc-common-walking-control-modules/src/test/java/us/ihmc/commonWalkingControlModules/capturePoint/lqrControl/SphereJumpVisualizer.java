@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -216,14 +215,15 @@ public class SphereJumpVisualizer
       {
          SettableContactStateProvider newContact = new SettableContactStateProvider();
          newContact.getTimeInterval().set(contact.getTimeInterval());
-         FramePoint2D start = new FramePoint2D(contact.getCopStartPosition());
-         FramePoint2D end = new FramePoint2D(contact.getCopEndPosition());
+         FramePoint2D start = new FramePoint2D(contact.getECMPStartPosition());
+         FramePoint2D end = new FramePoint2D(contact.getECMPEndPosition());
 
          start.add(shift.getX(), shift.getY());
          end.add(shift.getX(), shift.getY());
 
-         newContact.setStartCopPosition(start);
-         newContact.setEndCopPosition(end);
+         newContact.setStartECMPPosition(start, 0.0);
+         newContact.setEndECMPPosition(end, 0.0);
+         newContact.setLinearECMPVelocity();
          newContact.setContactState(contact.getContactState());
 
          newContacts.add(newContact);
@@ -253,8 +253,9 @@ public class SphereJumpVisualizer
       double width = stepWidth;
       us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider initialContactStateProvider = new us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider();
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
-      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setLinearECMPVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -265,9 +266,10 @@ public class SphereJumpVisualizer
       {
          us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider contactStateProvider = new us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider();
 
-         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
-         contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
+         contactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+         contactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
+         contactStateProvider.setLinearECMPVelocity();
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
          contacts.add(contactStateProvider);
@@ -279,9 +281,10 @@ public class SphereJumpVisualizer
       }
 
       us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider finalStateProvider = new us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider();
-      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
-      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      finalStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearECMPVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);
@@ -298,8 +301,9 @@ public class SphereJumpVisualizer
       double width = stepWidth;
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
       initialContactStateProvider.getTimeInterval().setInterval(0.0, initialTransferDuration);
-      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      initialContactStateProvider.setLinearECMPVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(initialContactStateProvider);
@@ -310,10 +314,11 @@ public class SphereJumpVisualizer
       {
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
-         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
-         contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
+         contactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+         contactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, -width, 0.0));
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
+         contactStateProvider.setLinearECMPVelocity();
 
          contacts.add(contactStateProvider);
 
@@ -334,9 +339,10 @@ public class SphereJumpVisualizer
       }
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
-      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
-      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      finalStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, width, 0.0));
+      finalStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearECMPVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);
@@ -351,8 +357,9 @@ public class SphereJumpVisualizer
 
       SettableContactStateProvider fakeState = new SettableContactStateProvider();
       fakeState.getTimeInterval().setInterval(0.0, 5.0);
-      fakeState.setStartCopPosition(new FramePoint2D());
-      fakeState.setEndCopPosition(new FramePoint2D());
+      fakeState.setStartECMPPosition(new FramePoint3D());
+      fakeState.setEndECMPPosition(new FramePoint3D());
+      fakeState.setLinearECMPVelocity();
       List<ContactStateProvider> fakeProvider = new ArrayList<>();
       fakeProvider.add(fakeState);
 

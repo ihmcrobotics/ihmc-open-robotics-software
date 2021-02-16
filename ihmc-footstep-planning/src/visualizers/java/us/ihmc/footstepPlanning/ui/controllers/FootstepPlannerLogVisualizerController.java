@@ -74,7 +74,12 @@ public class FootstepPlannerLogVisualizerController
    private static final List<TableColumn> parentTableDefaultColumns = createDefaultColumns();
    private static final List<TableColumn> childTableDefaultColumns = createDefaultColumns();
 
-   private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("stepLength", "stepWidth", "stepHeight", "edgeCost", "heuristicCost");
+   private static final List<String> additionalDefaultColumnsIfPresent = Arrays.asList("stepLength",
+                                                                                       "stepWidth",
+                                                                                       "stepHeight",
+                                                                                       "edgeCost",
+                                                                                       "heuristicCost",
+                                                                                       "rejectionReason");
    private boolean additionalColumnsLoaded = false;
 
    @FXML

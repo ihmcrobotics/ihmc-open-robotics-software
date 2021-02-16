@@ -38,6 +38,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final AtomicReference<FootstepPlanningToolboxOutputStatus> plannerResult = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final AtomicDouble desiredHeading = new AtomicDouble();
+   private boolean squareUpEndSteps = true;
 
    private final FootstepListBehavior footstepListBehavior;
    private PlanPathToLocationBehavior planPathToLocationBehavior;
@@ -97,6 +98,11 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    public void setHeading(double desiredHeading)
    {
       this.desiredHeading.set(desiredHeading);
+   }
+
+   public void setSquareUpEndSteps(boolean squareUpEndSteps)
+   {
+      this.squareUpEndSteps = squareUpEndSteps;
    }
 
    public void setPlanBodyPath(boolean planBodyPath)
@@ -165,7 +171,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             }
 
            
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get());
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get(), squareUpEndSteps);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
 
@@ -222,6 +228,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
       factory.addTransition(WalkToLocationStates.WAIT_FOR_GOAL, WalkToLocationStates.PLAN_PATH, t -> currentGoalPose.get() != null);
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.WALK_PATH, t -> isPlanPathComplete() && hasValidPlanPath());
+      factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_FAILED, t -> isPlanPathComplete() && !hasValidPlanPath());
+
       factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
       factory.addTransition(WalkToLocationStates.WALK_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
 

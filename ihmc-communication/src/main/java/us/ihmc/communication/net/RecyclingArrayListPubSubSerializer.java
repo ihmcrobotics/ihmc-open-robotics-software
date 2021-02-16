@@ -113,7 +113,7 @@ public class RecyclingArrayListPubSubSerializer extends Serializer<RecyclingArra
    }
 
    @SuppressWarnings("unchecked")
-   public RecyclingArrayList read(Kryo kryo, Input input, Class<RecyclingArrayList> type)
+   public RecyclingArrayList read(Kryo kryo, Input input, Class<? extends RecyclingArrayList> type)
    {
       if (genericType != null)
       {

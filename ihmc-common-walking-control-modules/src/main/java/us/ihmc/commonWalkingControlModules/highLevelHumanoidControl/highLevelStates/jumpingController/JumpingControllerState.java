@@ -73,7 +73,7 @@ public class JumpingControllerState extends HighLevelControllerState
                                  JumpingCoPTrajectoryParameters jumpingCoPTrajectoryParameters,
                                  JumpingParameters jumpingParameters)
    {
-      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
+      super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class));
 
       this.commandInputManager = commandInputManager;
       this.controllerToolbox = controllerToolbox;
@@ -147,7 +147,7 @@ public class JumpingControllerState extends HighLevelControllerState
       momentumRateControlModule.computeControllerCoreCommands();
 
       ControllerCoreCommand controllerCoreCommand = jumpingController.getControllerCoreCommand();
-      controllerCoreCommand.addInverseDynamicsCommand(momentumRateControlModule.getMomentumRateCommand());
+      controllerCoreCommand.addInverseDynamicsCommand(momentumRateControlModule.getInverseDynamicsCommand());
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
 

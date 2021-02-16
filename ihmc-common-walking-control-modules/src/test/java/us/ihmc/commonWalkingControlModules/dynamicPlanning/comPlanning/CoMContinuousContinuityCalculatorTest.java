@@ -48,12 +48,14 @@ public class CoMContinuousContinuityCalculatorTest
       midpoint.subZ(height);
       finalDesiredDCM.subZ(height);
 
-      contact1.setStartCopPosition(initialCoM);
-      contact1.setEndCopPosition(midpoint);
-      contact2.setStartCopPosition(midpoint);
-      contact2.setEndCopPosition(finalDesiredDCM);
+      contact1.setStartECMPPosition(initialCoM);
+      contact1.setEndECMPPosition(midpoint);
+      contact2.setStartECMPPosition(midpoint);
+      contact2.setEndECMPPosition(finalDesiredDCM);
       contact1.getTimeInterval().setInterval(0.0, firstDuration);
       contact2.getTimeInterval().setInterval(firstDuration, firstDuration + secondDuration);
+      contact1.setLinearECMPVelocity();
+      contact2.setLinearECMPVelocity();
 
       initialCoM.addZ(height);
       midpoint.addZ(height);
@@ -111,9 +113,9 @@ public class CoMContinuousContinuityCalculatorTest
       assertEquals(CoMTrajectoryPlannerTools.getVRPPositionFifthCoefficientTimeFunction(0.0), calculator.coefficientMultipliersSparse.get(row, 4), epsilon);
       assertEquals(CoMTrajectoryPlannerTools.getVRPPositionSixthCoefficientTimeFunction(), calculator.coefficientMultipliersSparse.get(row, 5), epsilon);
 
-      assertEquals(contact1.getCopStartPosition().getX(), calculator.xEquivalents.get(row, 0), epsilon);
-      assertEquals(contact1.getCopStartPosition().getY(), calculator.yEquivalents.get(row, 0), epsilon);
-      assertEquals(contact1.getCopStartPosition().getZ() + height, calculator.zEquivalents.get(row, 0), epsilon);
+      assertEquals(contact1.getECMPStartPosition().getX(), calculator.xEquivalents.get(row, 0), epsilon);
+      assertEquals(contact1.getECMPStartPosition().getY(), calculator.yEquivalents.get(row, 0), epsilon);
+      assertEquals(contact1.getECMPStartPosition().getZ() + height, calculator.zEquivalents.get(row, 0), epsilon);
 
       // set the VRP velocity at the beginning being equivalent to the end of the segment
       row = 3;

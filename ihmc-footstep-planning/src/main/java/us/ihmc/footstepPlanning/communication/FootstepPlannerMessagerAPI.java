@@ -61,14 +61,15 @@ public class FootstepPlannerMessagerAPI
    // REA data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
    public static final Topic<Boolean> AcceptNewPlanarRegions = topic("AcceptNewPlanarRegions");
+   public static final Topic<OcTreeKeyListMessage> OcTreeData = topic("OcTreeData");
 
    // UI control
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
    public static final Topic<Boolean> GlobalReset = topic("GlobalReset");
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
    public static final Topic<Boolean> HaltPlanning = topic("HaltPlanning");
-   public static final Topic<Boolean> PostProcessPlan = topic("PostProcessPlan");
    public static final Topic<Boolean> BindStartToRobot = topic("BindStartToRobot");
+   public static final Topic<Boolean> ReplanSwing = topic("ReplanSwing");
 
    // Override planned path
    public static final Topic<Boolean> OverrideStepTimings = topic("overrideStepTimings");
@@ -93,6 +94,7 @@ public class FootstepPlannerMessagerAPI
    // Graphics control
    public static final Topic<Boolean> ShowRobot = topic("ShowRobot");
    public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
+   public static final Topic<Boolean> ShowOcTree = topic("ShowOcTree");
    public static final Topic<Boolean> ShowStart = topic("ShowStart");
    public static final Topic<Boolean> ShowGoal = topic("ShowGoal");
    public static final Topic<Boolean> ShowCoordinateSystem = topic("ShowCoordinateSystem");

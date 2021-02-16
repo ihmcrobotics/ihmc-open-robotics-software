@@ -180,6 +180,7 @@ public class JumpingSimulationController implements RobotController
       managerFactory.setCoPTrajectoryParameters(robotModel.getCoPTrajectoryParameters());
       managerFactory.setWalkingControllerParameters(robotModel.getWalkingControllerParameters());
       managerFactory.setJumpingCoPTrajectoryParameters(jumpingCoPTrajectoryParameters);
+      managerFactory.setJumpingParameters(jumpingParameters);
 
       controller = new JumpingControllerState(commandInputManager,
                                               managerFactory,

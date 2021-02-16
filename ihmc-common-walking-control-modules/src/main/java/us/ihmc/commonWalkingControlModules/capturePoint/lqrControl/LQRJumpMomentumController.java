@@ -2,13 +2,15 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -39,6 +41,7 @@ public class LQRJumpMomentumController
    private static final double discreteDt = 5e-3;
    private static final double gravityZ = -9.81;
 
+   private final double totalMass;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoFrameVector3D yoK2 = new YoFrameVector3D("k2", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D feedbackForce = new YoFrameVector3D("feedbackForce", ReferenceFrame.getWorldFrame(), registry);
@@ -48,8 +51,8 @@ public class LQRJumpMomentumController
    private final YoFramePoint3D referenceVRPPosition = new YoFramePoint3D("referenceVRPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D feedbackVRPPosition = new YoFramePoint3D("feedbackVRPPosition", ReferenceFrame.getWorldFrame(), registry);
 
-   static final double defaultVrpTrackingWeight = 1e2;
-   static final double defaultMomentumRateWeight = 1e-4;
+   static final double defaultVrpTrackingWeight = 1e6;
+   static final double defaultMomentumRateWeight = 1e-5;
 
    private double vrpTrackingWeight = defaultVrpTrackingWeight;
    private double momentumRateWeight = defaultMomentumRateWeight;
@@ -75,24 +78,32 @@ public class LQRJumpMomentumController
    private final DMatrixRMaj relativeState = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj relativeDesiredVRP = new DMatrixRMaj(3, 1);
 
-   final RecyclingArrayList<Trajectory3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   private final DMatrixRMaj linearMomentumRateGradient = new DMatrixRMaj(1, 3);
+   private final DMatrixRMaj linearMomentumRateHessian = new DMatrixRMaj(3, 3);
+
+   final RecyclingArrayList<Polynomial3D> relativeVRPTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
    final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
    private boolean shouldUpdateP = true;
+   private boolean shouldUpdateCosts = true;
 
-   private final HashMap<Trajectory3D, S1Function> s1Functions = new HashMap<>();
+   private final HashMap<Polynomial3D, S1Function> s1Functions = new HashMap<>();
    private final List<S1Function> reversedS1FunctionList = new ArrayList<>();
    private final List<S1Function> s1FunctionList = new ArrayList<>();
    private final List<S2Segment> reversedS2FunctionList = new ArrayList<>();
    private final List<S2Segment> s2FunctionList = new ArrayList<>();
 
-   public LQRJumpMomentumController(DoubleProvider omega)
+   private final LinearMomentumRateCostCommand momentumRateCostCommand = new LinearMomentumRateCostCommand();
+
+   public LQRJumpMomentumController(DoubleProvider omega, double totalMass)
    {
-      this(omega, null);
+      this(omega, totalMass, null);
    }
 
-   public LQRJumpMomentumController(DoubleProvider omega, YoRegistry parentRegistry)
+   public LQRJumpMomentumController(DoubleProvider omega, double totalMass, YoRegistry parentRegistry)
    {
+      this.totalMass = totalMass;
+
       computeDynamicsMatrix(omega.getValue());
 
       computeP();
@@ -122,26 +133,32 @@ public class LQRJumpMomentumController
       shouldUpdateP = true;
    }
 
-   public void setVRPTrajectory(List<Trajectory3D> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
+   public void setVRPTrajectory(List<? extends Polynomial3DReadOnly> vrpTrajectory, List<? extends ContactStateProvider> contactStateProviders)
    {
       relativeVRPTrajectories.clear();
       this.contactStateProviders.clear();
 
-      Trajectory3D lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
-      lastTrajectory.compute(Math.min(sufficientlyLongTime, lastTrajectory.getFinalTime()));
+      Polynomial3DReadOnly lastTrajectory = vrpTrajectory.get(vrpTrajectory.size() - 1);
+      lastTrajectory.compute(Math.min(sufficientlyLongTime, lastTrajectory.getTimeInterval().getEndTime()));
       finalVRPPosition.set(lastTrajectory.getPosition());
       finalVRPPosition.get(finalVRPState);
 
       for (int i = 0; i < vrpTrajectory.size(); i++)
       {
-         Trajectory3D trajectory = vrpTrajectory.get(i);
-         Trajectory3D relativeTrajectory = relativeVRPTrajectories.add();
+         Polynomial3DReadOnly trajectory = vrpTrajectory.get(i);
+         Polynomial3DBasics relativeTrajectory = relativeVRPTrajectories.add();
 
          relativeTrajectory.set(trajectory);
-         relativeTrajectory.offsetTrajectoryPosition(-finalVRPPosition.getX(), -finalVRPPosition.getY(), -finalVRPPosition.getZ());
+         relativeTrajectory.shiftTrajectory(-finalVRPPosition.getX(), -finalVRPPosition.getY(), -finalVRPPosition.getZ());
 
          this.contactStateProviders.add().set(contactStateProviders.get(i));
       }
+
+      if (shouldUpdateP)
+         computeP();
+
+      computeS1Segments();
+      computeS2Segments();
    }
 
    void computeP()
@@ -167,7 +184,7 @@ public class LQRJumpMomentumController
       }
       else
       {
-         Trajectory3D nextVRPTrajectory = relativeVRPTrajectories.get(numberOfSegments);
+         Polynomial3D nextVRPTrajectory = relativeVRPTrajectories.get(numberOfSegments);
          finalS1Function.compute(0.0, S1);
          s1Functions.put(nextVRPTrajectory, finalS1Function);
          reversedS1FunctionList.add(finalS1Function);
@@ -176,7 +193,7 @@ public class LQRJumpMomentumController
 
          for (int j = numberOfSegments - 1; j >= 0; j--)
          {
-            Trajectory3D thisVRPTrajectory = relativeVRPTrajectories.get(j);
+            Polynomial3D thisVRPTrajectory = relativeVRPTrajectories.get(j);
 
             if (contactStateProviders.get(j).getContactState().isLoadBearing())
             {
@@ -184,7 +201,7 @@ public class LQRJumpMomentumController
                if (hasHadSwitch)
                {
                   DifferentialS1Segment s1Segment = new DifferentialS1Segment(discreteDt);
-                  s1Segment.set(lqrCommonValues, S1, thisVRPTrajectory.getDuration());
+                  s1Segment.set(lqrCommonValues, S1, thisVRPTrajectory.getTimeInterval().getDuration());
                   thisS1Trajectory = s1Segment;
                }
                else
@@ -227,7 +244,7 @@ public class LQRJumpMomentumController
          j--;
       }
 
-      List<Trajectory3D> endingContactVRPs = new ArrayList<>();
+      List<Polynomial3D> endingContactVRPs = new ArrayList<>();
       for (j = numberOfSegments - numberOfEndingContactSegments; j < numberOfSegments; j++)
          endingContactVRPs.add(relativeVRPTrajectories.get(j));
 
@@ -247,7 +264,7 @@ public class LQRJumpMomentumController
 
       for (j = numberOfSegments - numberOfEndingContactSegments - 1; j >= 0; j--)
       {
-         Trajectory3D trajectorySegment = relativeVRPTrajectories.get(j);
+         Polynomial3D trajectorySegment = relativeVRPTrajectories.get(j);
 
          if (contactStateProviders.get(j).getContactState().isLoadBearing())
          {
@@ -259,9 +276,9 @@ public class LQRJumpMomentumController
          }
          else
          {
-            s1Functions.get(trajectorySegment).compute(trajectorySegment.getDuration(), S1);
+            s1Functions.get(trajectorySegment).compute(trajectorySegment.getTimeInterval().getDuration(), S1);
             FlightS2Function s2Function = new FlightS2Function(gravityZ);
-            s2Function.set(S1, s2, trajectorySegment.getDuration());
+            s2Function.set(S1, s2, trajectorySegment.getTimeInterval().getDuration());
 
             s2Function.compute(0.0, s2);
             reversedS2FunctionList.add(s2Function);
@@ -308,13 +325,10 @@ public class LQRJumpMomentumController
       yoK2.set(k2);
    }
 
+
    public void computeControlInput(DMatrixRMaj currentState, double time)
    {
-      if (shouldUpdateP)
-         computeP();
-
-      computeS1Segments();
-      computeS2Segments();
+      shouldUpdateCosts = true;
 
       computeS1AndK1(time);
       computeS2AndK2(time);
@@ -337,6 +351,15 @@ public class LQRJumpMomentumController
 
       feedbackVRPPosition.set(relativeDesiredVRP);
       feedbackVRPPosition.add(finalVRPPosition);
+
+      double massInverse = 1.0 / totalMass;
+
+      CommonOps_DDRM.multTransA(-2.0 * massInverse, k2, lqrCommonValues.getR1(), linearMomentumRateGradient);
+      CommonOps_DDRM.multAddTransAB(2.0 * massInverse, relativeState, Nb, linearMomentumRateGradient);
+      CommonOps_DDRM.scale(2.0 * massInverse * massInverse, lqrCommonValues.getR1(), linearMomentumRateHessian);
+
+      momentumRateCostCommand.setLinearMomentumRateGradient(linearMomentumRateGradient);
+      momentumRateCostCommand.setLinearMomentumRateHessian(linearMomentumRateHessian);
    }
 
    public DMatrixRMaj getU()
@@ -429,5 +452,29 @@ public class LQRJumpMomentumController
    public FramePoint3DReadOnly getFeedbackVRPPosition()
    {
       return feedbackVRPPosition;
+   }
+
+   private void computeMomentumRateCostCommand()
+   {
+      double massInverse = 1.0 / totalMass;
+
+      CommonOps_DDRM.multTransA(-2.0 * massInverse, k2, lqrCommonValues.getR1(), linearMomentumRateGradient);
+      CommonOps_DDRM.multAddTransAB(2.0 * massInverse, relativeState, Nb, linearMomentumRateGradient);
+      CommonOps_DDRM.scale(2.0 * massInverse * massInverse, lqrCommonValues.getR1(), linearMomentumRateHessian);
+
+      momentumRateCostCommand.setLinearMomentumRateGradient(linearMomentumRateGradient);
+      momentumRateCostCommand.setLinearMomentumRateHessian(linearMomentumRateHessian);
+   }
+
+   public LinearMomentumRateCostCommand getMomentumRateCostCommand()
+   {
+      if (shouldUpdateCosts)
+      {
+         shouldUpdateCosts = false;
+
+         computeMomentumRateCostCommand();
+      }
+
+      return momentumRateCostCommand;
    }
 }

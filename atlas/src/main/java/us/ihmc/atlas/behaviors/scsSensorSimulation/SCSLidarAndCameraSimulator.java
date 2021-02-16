@@ -71,9 +71,7 @@ public class SCSLidarAndCameraSimulator
    {
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "lidar_and_camera");
 
-      robotConfigurationData = new ROS2Input<>(ros2Node,
-                                               RobotConfigurationData.class,
-                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withInput());
+      robotConfigurationData = new ROS2Input<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
 
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
@@ -114,10 +112,8 @@ public class SCSLidarAndCameraSimulator
 
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
-                                                                                 RobotConfigurationData.class,
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
-                                                                                                              .withOutput());
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
+                                                                                 ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, ROS2Tools.VIDEO);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       scs.setupCamera(cameraConfiguration);
@@ -133,6 +129,8 @@ public class SCSLidarAndCameraSimulator
 
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
+      scs.skipLoadingDefaultConfiguration();
+      scs.setupGraph("t");
 
       scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(0.25));
       scs.startOnAThread();

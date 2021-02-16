@@ -9,7 +9,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.quadrupedRobotics.parameters.QuadrupedSitDownParameters;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -105,7 +105,7 @@ public class QuadrupedSitDownControllerState extends HighLevelControllerState
          YoDouble desiredPosition = trajectoryData.getDesiredJointConfiguration();
 
          trajectory.compute(timeInTrajectory);
-         desiredPosition.set(trajectory.getPosition());
+         desiredPosition.set(trajectory.getValue());
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();

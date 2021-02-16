@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class ManagedROS2Node implements ROS2NodeInterface
 {
-   private final ROS2Node ros2Node;
+   private final ROS2NodeInterface ros2Node;
    private final AtomicBoolean enabled = new AtomicBoolean(true);
 
-   public ManagedROS2Node(ROS2Node ros2Node)
+   public ManagedROS2Node(ROS2NodeInterface ros2Node)
    {
       this.ros2Node = ros2Node;
    }
@@ -39,6 +39,14 @@ public class ManagedROS2Node implements ROS2NodeInterface
    private <T> ManagedROS2Publisher<T> createManagedPublisher(ROS2PublisherBasics<T> publisher)
    {
       return new ManagedROS2Publisher<>(publisher, enabled::get);
+   }
+
+   @Override
+   public <T> QueuedROS2Subscription<T> createQueuedSubscription(TopicDataType<T> topicDataType, String topicName, ROS2QosProfile qosProfile, int queueSize)
+         throws IOException
+   {
+      throw new RuntimeException("This funtionality is so far unimplemented. Implement me!");
+//      return ros2Node.createQueuedSubscription(topicDataType, topicName, qosProfile, queueSize);
    }
 
    @Override

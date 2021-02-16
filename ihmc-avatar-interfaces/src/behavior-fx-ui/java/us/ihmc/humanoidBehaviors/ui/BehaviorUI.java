@@ -12,11 +12,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
-import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
+import us.ihmc.humanoidBehaviors.ui.behaviors.BehaviorDirectRobotUI;
 import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
+import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -44,29 +46,47 @@ public class BehaviorUI
    private final Messager behaviorMessager;
    private final ROS2Node ros2Node;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
+   private final Map<String, Boolean> enabledUIs = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
    private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
    private LocalParameterServer parameterServer;
+   private FocusBasedCameraMouseEventHandler camera;
    private JavaFXRemoteRobotVisualizer robotVisualizer;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    @FXML private ChoiceBox<String> behaviorSelector;
+   @FXML private CheckBox trackRobot;
    @FXML private Button startRecording;
    @FXML private Button stopRecording;
-   @FXML private DirectRobotUIController directRobotUIController;
+   private BehaviorDirectRobotUI behaviorDirectRobotUI;
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
-      return new BehaviorUI(behaviorUIRegistry,
-                            RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress),
-                            robotModel,
-                            PubSubImplementation.FAST_RTPS);
+      return create(behaviorUIRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS, behaviorModuleAddress, null);
    }
 
    public static BehaviorUI createIntraprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
    {
-      return new BehaviorUI(behaviorUIRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
+      return create(behaviorUIRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, null, behaviorSharedMemoryMessager);
+   }
+
+   public static BehaviorUI create(BehaviorUIRegistry behaviorUIRegistry,
+                                   DRCRobotModel robotModel,
+                                   CommunicationMode ros2CommunicationMode,
+                                   CommunicationMode messagerCommunicationMode,
+                                   String behaviorModuleAddress,
+                                   Messager behaviorSharedMemoryMessager)
+   {
+
+      if (messagerCommunicationMode == CommunicationMode.INTRAPROCESS && behaviorSharedMemoryMessager == null)
+         throw new RuntimeException("Must pass shared Messager for Messager intraprocess mode.");
+      else if (messagerCommunicationMode == CommunicationMode.INTERPROCESS && behaviorModuleAddress == null)
+         throw new RuntimeException("Must pass address for Messager interprocess mode.");
+
+      Messager messager = messagerCommunicationMode == CommunicationMode.INTRAPROCESS
+            ? behaviorSharedMemoryMessager : RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress);
+      return new BehaviorUI(behaviorUIRegistry, messager, robotModel, ros2CommunicationMode.getPubSubImplementation());
    }
 
    public BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
@@ -87,21 +107,15 @@ public class BehaviorUI
       {
          mainPane = JavaFXMissingTools.loadFromFXML(this);
 
-         BorderPane bottom = (BorderPane) mainPane.getBottom();
-         TabPane tabPane = (TabPane) bottom.getCenter();
-
-         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
-         {
-            BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
-            behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
-            Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
-            tabPane.getTabs().add(tab);
-         }
-
          AnchorPane mainAnchorPane = new AnchorPane();
 
          View3DFactory view3DFactory = View3DFactory.createSubscene();
-         view3DFactory.addCameraController(0.05, 2000.0, true);
+         camera = view3DFactory.addCameraController(0.05, 2000.0, true);
+         double isoZoomOut = 7.0;
+         camera.changeCameraPosition(-isoZoomOut, -isoZoomOut, isoZoomOut);
+         camera.getTranslate().setX(isoZoomOut / 5.0);
+         camera.getTranslate().setY(0.0);
+         camera.getTranslate().setZ(0.0);
          view3DFactory.addWorldCoordinateSystem(0.3);
          view3DFactory.addDefaultLighting();
          SubScene subScene3D = view3DFactory.getSubScene();
@@ -115,7 +129,41 @@ public class BehaviorUI
 
          VBox sideVisualizationArea = new VBox();
 
-         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
+         BorderPane bottom = (BorderPane) mainPane.getBottom();
+         TabPane uiTabPane = new TabPane();
+         uiTabPane.setTabClosingPolicy(TabPane.TabClosingPolicy.UNAVAILABLE);
+         Node uisPane = uiTabPane;
+
+         behaviorDirectRobotUI = new BehaviorDirectRobotUI();
+         bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
+
+         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
+         {
+            if (uiDefinitionEntry.getBehaviorUISupplier() != null)
+            {
+               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().create(subScene3D,
+                                                                                                          sideVisualizationArea,
+                                                                                                          ros2Node,
+                                                                                                          behaviorMessager,
+                                                                                                          robotModel);
+               behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
+
+               if (behaviorUIRegistry.getNumberOfUIs() == 1)
+               {
+                  uisPane = behaviorUIInterface.getPane();
+               }
+               else
+               {
+                  Tab tab = new Tab(uiDefinitionEntry.getName(), behaviorUIInterface.getPane());
+                  uiTabPane.getTabs().add(tab);
+               }
+               view3DFactory.addNodeToView(behaviorUIInterface.get3DGroup());
+            }
+         }
+
+         bottom.setCenter(uisPane);
+
+         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager, ros2Node);
 
          stopRecording.setDisable(true);
 
@@ -127,17 +175,12 @@ public class BehaviorUI
             behaviorSelector.getItems().add(behaviorDefinition.getName());
          }
 
-         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
-         {
-            behaviorUIInterface.init(subScene3D, sideVisualizationArea, ros2Node, behaviorMessager, robotModel);
-            view3DFactory.addNodeToView(behaviorUIInterface);
-         }
-
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUIController.init(mainAnchorPane, subScene3D, ros2Node, robotModel);
-         view3DFactory.addNodeToView(directRobotUIController);
+         behaviorDirectRobotUI.init(mainAnchorPane, ros2Node, robotModel);
+         view3DFactory.addNodeToView(behaviorDirectRobotUI);
          robotVisualizer = new JavaFXRemoteRobotVisualizer(robotModel, ros2Node);
+         robotVisualizer.setTrackRobot(camera, true);
          view3DFactory.addNodeToView(robotVisualizer);
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
@@ -174,9 +217,24 @@ public class BehaviorUI
             destroy();
          });
 
+         if (behaviorUIRegistry.getNumberOfUIs() == 1)
+         {
+            behaviorSelector.valueProperty().setValue(behaviorUIRegistry.getNameOfOnlyUIBehavior());
+         }
+
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();
       });
+   }
+
+   public void selectBehavior(BehaviorDefinition behaviorDefinition)
+   {
+      Platform.runLater(() -> behaviorSelector.valueProperty().setValue(behaviorDefinition.getName()));
+   }
+
+   @FXML public void trackRobot()
+   {
+      robotVisualizer.setTrackRobot(camera, trackRobot.isSelected());
    }
 
    @FXML public void startRecording()
@@ -211,13 +269,12 @@ public class BehaviorUI
 
       for (String behaviorName : behaviorUIInterfaces.keySet())
       {
-         if (newValue.equals(behaviorName))
+         boolean enabled = newValue.equals(behaviorName);
+
+         if (enabledUIs.computeIfAbsent(behaviorName, key -> false) != enabled)
          {
-            behaviorUIInterfaces.get(behaviorName).setEnabled(true);
-         }
-         else
-         {
-            behaviorUIInterfaces.get(behaviorName).setEnabled(false);
+            enabledUIs.put(behaviorName, enabled);
+            behaviorUIInterfaces.get(behaviorName).setEnabled(enabled);
          }
       }
    }
@@ -245,7 +302,7 @@ public class BehaviorUI
       {
          behaviorUIInterface.destroy();
       }
-      directRobotUIController.destroy();
+      behaviorDirectRobotUI.destroy();
       ros2Node.destroy();
    }
 }

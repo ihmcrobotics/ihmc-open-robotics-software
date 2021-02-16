@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.LocalVideoPacket;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 
 /**
@@ -22,7 +22,7 @@ public class SCSCameraDataReceiver extends CameraDataReceiver implements ObjectC
 
    public SCSCameraDataReceiver(RobotSide robotSide, FullRobotModelFactory fullRobotModelFactory, String sensorNameInSdf,
                                 RobotConfigurationDataBuffer robotConfigurationDataBuffer, ObjectCommunicator scsSensorsCommunicator,
-                                ROS2Node ros2Node, LongUnaryOperator robotMonotonicTimeCalculator)
+                                ROS2NodeInterface ros2Node, LongUnaryOperator robotMonotonicTimeCalculator)
    {
       super(fullRobotModelFactory, sensorNameInSdf, robotConfigurationDataBuffer, new VideoPacketHandler(ros2Node), robotMonotonicTimeCalculator);
       

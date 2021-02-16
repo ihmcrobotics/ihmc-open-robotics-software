@@ -9,7 +9,7 @@ import java.util.List;
  */
 public class CoMTrajectoryPlannerIndexHandler
 {
-   private static final int polynomialCoefficientsPerSegment = 6;
+   public static final int polynomialCoefficientsPerSegment = 6;
    private static final int vrpConstraintsPerSegment = 4;
 
    private int totalNumberOfCoefficients;
@@ -50,7 +50,7 @@ public class CoMTrajectoryPlannerIndexHandler
 
    public int getContactSequenceStartIndex(int sequenceNumber)
    {
-      return 6 * sequenceNumber;
+      return polynomialCoefficientsPerSegment * sequenceNumber;
    }
 
    public int getVRPWaypointStartPositionIndex(int sequenceNumber)

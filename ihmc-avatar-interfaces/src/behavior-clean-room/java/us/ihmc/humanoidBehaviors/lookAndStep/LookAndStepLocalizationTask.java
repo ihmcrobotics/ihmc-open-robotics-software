@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -16,33 +17,43 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.string.StringTools;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.ClosestPointForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
 public class LookAndStepLocalizationTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
-   protected LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
+   protected Consumer<ROS2Topic<Empty>> ros2EmptyPublisher;
+   protected LookAndStepBodyPathPlanning bodyPathPlanning;
+   protected LookAndStepSteppingTask.LookAndStepStepping stepping;
+   protected AtomicBoolean isBeingReset;
+   protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected RemoteSyncedRobotModel syncedRobot;
-   protected Runnable clearAndActivateBodyPathPlanning;
-   protected Runnable broadcastReachedGoal;
-   protected Consumer<LookAndStepLocalizationResult> footstepPlanningOutput;
+   protected Consumer<LookAndStepBodyPathLocalizationResult> bodyPathLocalizationOutput;
    protected Notification finishedWalkingNotification;
+   protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;
+   protected ControllerStatusTracker controllerStatusTracker;
 
-   public static class LookAndStepLocalization extends LookAndStepLocalizationTask
+   public static class LookAndStepBodyPathLocalization extends LookAndStepLocalizationTask
    {
       private SingleThreadSizeOneQueueExecutor executor;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -50,25 +61,21 @@ public class LookAndStepLocalizationTask
       private final Input swingSleepCompleteInput = new Input();
       private SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
 
-      public void initialize(StatusLogger statusLogger,
-                             UIPublisher uiPublisher,
-                             LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
-                             RemoteSyncedRobotModel syncedRobot,
-                             Notification finishedWalkingNotification,
-                             Runnable clearAndActivateBodyPathPlanning,
-                             Runnable broadcastReachedGoal,
-                             SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps,
-                             Consumer<LookAndStepLocalizationResult> footstepPlanningOutput)
+      public void initialize(LookAndStepBehavior lookAndStep)
       {
-         this.lastCommandedFootsteps = lastCommandedFootsteps;
-         this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
-         this.finishedWalkingNotification = finishedWalkingNotification;
-         this.clearAndActivateBodyPathPlanning = clearAndActivateBodyPathPlanning;
-         this.broadcastReachedGoal = broadcastReachedGoal;
-         this.footstepPlanningOutput = footstepPlanningOutput;
-         this.statusLogger = statusLogger;
-         this.uiPublisher = uiPublisher;
-         this.syncedRobot = syncedRobot;
+         lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
+         lookAndStepParameters = lookAndStep.lookAndStepParameters;
+         finishedWalkingNotification = lookAndStep.helper.createWalkingCompletedNotification();
+         ros2EmptyPublisher = lookAndStep.helper::publishROS2;
+         bodyPathPlanning = lookAndStep.bodyPathPlanning;
+         behaviorStateReference = lookAndStep.behaviorStateReference;
+         bodyPathLocalizationOutput = lookAndStep.footstepPlanning::acceptLocalizationResult;
+         statusLogger = lookAndStep.statusLogger;
+         uiPublisher = lookAndStep.helper::publishToUI;
+         syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
+         isBeingReset = lookAndStep.isBeingReset;
+         stepping = lookAndStep.stepping;
+         controllerStatusTracker = lookAndStep.controllerStatusTracker;
 
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
@@ -162,29 +169,35 @@ public class LookAndStepLocalizationTask
 
       Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       double distanceToExactGoal = closestPointAlongPath.distanceXY(terminalGoal.getPosition());
-      boolean reachedGoalZone = distanceToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionRadius();
+      boolean reachedGoalZone = distanceToExactGoal < lookAndStepParameters.getGoalSatisfactionRadius();
       double yawToExactGoal = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFeetPose.getYaw(), terminalGoal.getYaw()));
-      reachedGoalZone &= yawToExactGoal < lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta();
+      reachedGoalZone &= yawToExactGoal < lookAndStepParameters.getGoalSatisfactionOrientationDelta();
 
       statusLogger.info(StringTools.format("Eventual pose: {}", StringTools.zUpPoseString(eventualPoseAlongPath)));
       statusLogger.info(StringTools.format("Remaining distanceXY: {} < {} yaw: {} < {}",
                                            FormattingTools.getFormattedDecimal3D(distanceToExactGoal),
-                                           lookAndStepBehaviorParameters.getGoalSatisfactionRadius(),
+                                           lookAndStepParameters.getGoalSatisfactionRadius(),
                                            FormattingTools.getFormattedDecimal3D(yawToExactGoal),
-                                           lookAndStepBehaviorParameters.getGoalSatisfactionOrientationDelta()));
+                                           lookAndStepParameters.getGoalSatisfactionOrientationDelta()));
       if (reachedGoalZone)
       {
          statusLogger.info("Eventual pose reaches goal.");
-         clearAndActivateBodyPathPlanning.run();
+         if ((!isBeingReset.get()))
+         {
+            ros2EmptyPublisher.accept(SLAMModuleAPI.CLEAR);
+            bodyPathPlanning.acceptGoal(null);
+            behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+         }
          ThreadTools.startAsDaemon(this::reachedGoalPublicationThread, "BroadcastReachedGoalWhenDoneWalking");
       }
       else
       {
-         LookAndStepLocalizationResult result = new LookAndStepLocalizationResult(closestPointAlongPath,
-                                                                                  closestSegmentIndex,
-                                                                                  midFeetPose,
-                                                                                  bodyPathPlan, eventualStanceFeet);
-         footstepPlanningOutput.accept(result);
+         LookAndStepBodyPathLocalizationResult result = new LookAndStepBodyPathLocalizationResult(closestPointAlongPath,
+                                                                                                  closestSegmentIndex,
+                                                                                                  midFeetPose,
+                                                                                                  bodyPathPlan,
+                                                                                                  eventualStanceFeet);
+         bodyPathLocalizationOutput.accept(result);
       }
    }
 
@@ -193,8 +206,12 @@ public class LookAndStepLocalizationTask
    {
       statusLogger.info("Waiting for walking to complete...");
       finishedWalkingNotification.poll();
-      finishedWalkingNotification.blockingPoll();
+      if (controllerStatusTracker.isWalking())
+      {
+         finishedWalkingNotification.blockingPoll();
+      }
+      stepping.reset();
       statusLogger.info("Goal reached.");
-      broadcastReachedGoal.run();
+      ros2EmptyPublisher.accept(REACHED_GOAL);
    }
 }

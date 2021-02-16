@@ -2,7 +2,6 @@
 #define __controller_msgs__msg__FootstepPlanningRequestPacket__idl__
 
 #include "controller_msgs/msg/./PlanarRegionsListMessage_.idl"
-#include "geometry_msgs/msg/./Point_.idl"
 #include "geometry_msgs/msg/./Pose_.idl"
 module controller_msgs
 {
@@ -47,14 +46,6 @@ module controller_msgs
          * Starting right foot pose
          */
         geometry_msgs::msg::dds::Pose start_right_foot_pose;
-        /**
-         * Starting left foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-         */
-        sequence<geometry_msgs::msg::dds::Point, 10> initial_left_contact_points_2d;
-        /**
-         * Starting right foothold. This field is optional and only should be populated when the initial stance foot has a partial foothold
-         */
-        sequence<geometry_msgs::msg::dds::Point, 10> initial_right_contact_points_2d;
         /**
          * Goal left foot pose
          */

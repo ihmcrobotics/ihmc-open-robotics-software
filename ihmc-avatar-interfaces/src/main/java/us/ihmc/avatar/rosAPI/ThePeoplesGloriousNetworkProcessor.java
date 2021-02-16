@@ -159,7 +159,7 @@ public class ThePeoplesGloriousNetworkProcessor
    {
       //      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       //      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      //      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      //      HumanoidJointNameMap jointMap = robotModel.getJointMap();
       //
       //      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
       //

@@ -2,7 +2,7 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class TransferFunctionMatrix
 {
@@ -24,7 +24,7 @@ public class TransferFunctionMatrix
       }
    }
 
-   public TransferFunctionMatrix(Polynomial[][] numerators, Polynomial denominator)
+   public TransferFunctionMatrix(ObsoletePolynomial[][] numerators, ObsoletePolynomial denominator)
    {
       int rows = numerators.length;
       int columns = numerators[0].length;

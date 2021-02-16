@@ -3,6 +3,7 @@ package us.ihmc.quadrupedRobotics.planning.trajectory;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,7 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.quadrupedBasics.gait.QuadrupedTimedStep;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.robotics.math.trajectories.YoFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -39,8 +40,9 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
 
    private final QuadrupedPiecewiseConstantCopTrajectory piecewiseConstantCopTrajectory;
    private final PiecewiseReverseDcmTrajectory dcmTrajectory;
-   private final YoFrameTrajectory3D dcmFirstSpline;
-   private final YoFrameTrajectory3D dcmSecondSpline;
+
+   private final YoFramePolynomial3D dcmFirstSpline;
+   private final YoFramePolynomial3D dcmSecondSpline;
 
    private final DoubleParameter initialTransitionDuration = new DoubleParameter("initialTransitionDuration", registry, 0.25);
    private final DoubleParameter minimumSplineDuration = new DoubleParameter("minimumSplineDuration", registry, 0.05);
@@ -108,8 +110,8 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
    {
       this.supportFrame = supportFrame;
       this.soleFrames = soleFrames;
-      this.dcmFirstSpline = new YoFrameTrajectory3D("dcmFirstSpline", 4, supportFrame, registry);
-      this.dcmSecondSpline = new YoFrameTrajectory3D("dcmSecondSpline", 4, supportFrame, registry);
+      this.dcmFirstSpline = new YoFramePolynomial3D("dcmFirstSpline", 4, supportFrame, registry);
+      this.dcmSecondSpline = new YoFramePolynomial3D("dcmSecondSpline", 4, supportFrame, registry);
 
       comHeight.addListener(v ->
                                                  omega.set(Math.sqrt(gravity / comHeight.getDoubleValue())));
@@ -237,7 +239,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          updateSplines();
 
          dcmFirstSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getFramePosition());
+         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getPosition());
          return;
       }
       else if (firstSequenceDuration < firstSplineDurationOnEntryCMP + secondSplineDurationOnEntryCMP)
@@ -251,7 +253,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       updateSplines();
 
       dcmSecondSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getFramePosition());
+      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getPosition());
    }
 
    private void computeTransitionTrajectory()
@@ -274,7 +276,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          updateSplines();
 
          dcmFirstSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getFramePosition());
+         dcmAtEndOfState.setMatchingFrame(dcmFirstSpline.getPosition());
          return;
       }
       else if (firstSequenceDuration < firstSplineDurationOnEntryCMP + secondSplineDurationOnEntryCMP)
@@ -290,7 +292,7 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
       updateSplines();
 
       dcmSecondSpline.compute(piecewiseConstantCopTrajectory.getTimeAtEndOfInterval(0));
-      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getFramePosition());
+      dcmAtEndOfState.setMatchingFrame(dcmSecondSpline.getPosition());
    }
 
    private void setFirstSplineStartFromCurrentState()
@@ -366,21 +368,21 @@ public class ContinuousDCMPlanner implements DCMPlannerInterface
          else
             computeTransitionTrajectory();
 
-         if (dcmFirstSpline.timeIntervalContains(currentTime))
+         if (MathTools.intervalContains(currentTime, firstSplineStartTime.getDoubleValue(), firstSplineEndTime.getDoubleValue(), Epsilons.ONE_MILLIONTH))
          {
             isInFirstSpline.set(true);
             isInSecondSpline.set(false);
             dcmFirstSpline.compute(currentTime);
-            desiredDCMPosition.setMatchingFrame(dcmFirstSpline.getFramePosition());
-            desiredDCMVelocity.setMatchingFrame(dcmFirstSpline.getFrameVelocity());
+            desiredDCMPosition.setMatchingFrame(dcmFirstSpline.getPosition());
+            desiredDCMVelocity.setMatchingFrame(dcmFirstSpline.getVelocity());
          }
-         else if (dcmSecondSpline.timeIntervalContains(currentTime))
+         else if (MathTools.intervalContains(currentTime, secondSplineStartTime.getDoubleValue(), secondSplineEndTime.getDoubleValue(), Epsilons.ONE_MILLIONTH))
          {
             isInFirstSpline.set(false);
             isInSecondSpline.set(true);
             dcmSecondSpline.compute(currentTime);
-            desiredDCMPosition.setMatchingFrame(dcmSecondSpline.getFramePosition());
-            desiredDCMVelocity.setMatchingFrame(dcmSecondSpline.getFrameVelocity());
+            desiredDCMPosition.setMatchingFrame(dcmSecondSpline.getPosition());
+            desiredDCMVelocity.setMatchingFrame(dcmSecondSpline.getVelocity());
          }
          else
          {

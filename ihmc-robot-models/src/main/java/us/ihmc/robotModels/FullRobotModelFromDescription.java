@@ -15,6 +15,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -23,6 +26,8 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.description.InvertedFourBarJointDescription;
 import us.ihmc.robotics.partNames.JointNameMap;
 import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -35,10 +40,13 @@ import us.ihmc.robotics.robotDescription.IMUSensorDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
+import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.OneDoFJointDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 
@@ -50,7 +58,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    protected final EnumMap<NeckJointName, OneDoFJointBasics> neckJoints = new EnumMap<>(NeckJointName.class);
    protected final EnumMap<SpineJointName, OneDoFJointBasics> spineJoints = new EnumMap<>(SpineJointName.class);
    protected final String[] sensorLinksToTrack;
-//   protected final SDFLinkHolder rootLink;
+   //   protected final SDFLinkHolder rootLink;
    protected RigidBodyBasics head;
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -81,7 +89,8 @@ public class FullRobotModelFromDescription implements FullRobotModel
       this(description, sdfJointNameMap, sensorLinksToTrack, false);
    }
 
-   public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack, boolean makeReferenceFramesAlignWithTheJoints)
+   public FullRobotModelFromDescription(RobotDescription description, JointNameMap sdfJointNameMap, String[] sensorLinksToTrack,
+                                        boolean makeReferenceFramesAlignWithTheJoints)
    {
       super();
       this.description = description;
@@ -106,7 +115,11 @@ public class FullRobotModelFromDescription implements FullRobotModel
       //      System.out.println("Adding rigid body " + rootLink.getName() + "; Mass: " + rootLink.getMass() + "; ixx: " + rootLink.getInertia().m00 + "; iyy: " + rootLink.getInertia().m11
       //            + "; izz: " + rootLink.getInertia().m22 + "; COM Offset: " + rootLink.getCoMOffset());
       LinkDescription rootLinkDescription = rootJointDescription.getLink();
-      rootLink = new RigidBody(rootJointDescription.getName(), rootJoint, rootLinkDescription.getMomentOfInertiaCopy(), rootLinkDescription.getMass(), rootLinkDescription.getCenterOfMassOffset());
+      rootLink = new RigidBody(rootJointDescription.getName(),
+                               rootJoint,
+                               rootLinkDescription.getMomentOfInertiaCopy(),
+                               rootLinkDescription.getMass(),
+                               rootLinkDescription.getCenterOfMassOffset());
 
       checkLinkIsNeededForSensor(rootJoint, rootJointDescription);
       addSensorDefinitions(rootJoint, rootJointDescription);
@@ -120,6 +133,11 @@ public class FullRobotModelFromDescription implements FullRobotModel
       for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
       {
          addJointsRecursively((OneDoFJointDescription) jointDescription, rootLink);
+      }
+
+      for (JointDescription jointDescription : rootJointDescription.getChildrenJoints())
+      {
+         addLoopClosureConstraintRecursive(jointDescription, rootLink);
       }
 
       oneDoFJointsAsArray = new OneDoFJointBasics[oneDoFJoints.size()];
@@ -155,7 +173,9 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
       for (CameraSensorDescription cameraSensor : jointDescription.getCameraSensors())
       {
-         ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(cameraSensor.getName(), joint.getFrameAfterJoint(), cameraSensor.getTransformToJoint());
+         ReferenceFrame cameraFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(cameraSensor.getName(),
+                                                                                                        joint.getFrameAfterJoint(),
+                                                                                                        cameraSensor.getTransformToJoint());
          cameraFrames.put(cameraFrame.getName(), cameraFrame);
       }
 
@@ -333,7 +353,7 @@ public class FullRobotModelFromDescription implements FullRobotModel
    @Override
    public ReferenceFrame getHeadBaseFrame()
    {
-      if(head != null)
+      if (head != null)
       {
          JointBasics headJoint = head.getParentJoint();
          return headJoint.getFrameAfterJoint();
@@ -343,103 +363,244 @@ public class FullRobotModelFromDescription implements FullRobotModel
 
    protected void checkLinkIsNeededForSensor(JointBasics joint, JointDescription jointDescription)
    {
-      if(sensorLinksToTrack != null)
+      if (sensorLinksToTrack != null)
       {
-         for(int i = 0; i < sensorLinksToTrack.length; i++)
+         for (int i = 0; i < sensorLinksToTrack.length; i++)
          {
-            if(sensorLinksToTrack[i].equalsIgnoreCase(jointDescription.getName()));
+            if (sensorLinksToTrack[i].equalsIgnoreCase(jointDescription.getName()))
             {
-               sensorFrames.put(jointDescription.getName(),joint.getFrameAfterJoint());
+               sensorFrames.put(jointDescription.getName(), joint.getFrameAfterJoint());
             }
-         }         
+         }
       }
    }
 
    public ReferenceFrame getSensorReferenceFrameByLink(String linkName)
    {
-      if(linkName == null)
+      if (linkName == null)
       {
-         System.err.println("SDFFullRobotModel getSensorReferenceFrameByLink: Passed in NULL link name for Sensor pose" );
+         System.err.println("SDFFullRobotModel getSensorReferenceFrameByLink: Passed in NULL link name for Sensor pose");
          return null;
       }
       linkName = linkName.replace("/", "");
-      if(!sensorFrames.containsKey(linkName))
+      if (!sensorFrames.containsKey(linkName))
       {
          System.err.println("SDFFullRobotModel getSensorReferenceFrameByLink: got null for linkName: " + linkName);
       }
       return sensorFrames.get(linkName);
    }
 
-   protected void addJointsRecursively(OneDoFJointDescription joint, RigidBodyBasics parentBody)
+   protected void addJointsRecursively(OneDoFJointDescription jointDescription, RigidBodyBasics parentBody)
    {
-      Vector3D jointAxis = new Vector3D();
-      joint.getJointAxis(jointAxis);
+      OneDoFJointBasics joint = createOneDoFJoint(jointDescription, parentBody);
 
-      Vector3D offset = new Vector3D();
-      joint.getOffsetFromParentJoint(offset);
+      oneDoFJoints.put(jointDescription.getName(), joint);
 
-      OneDoFJointBasics inverseDynamicsJoint;
+      checkLinkIsNeededForSensor(joint, jointDescription);
 
-      if (joint instanceof PinJointDescription)
+      RigidBodyBasics rigidBody = createRigidBody(jointDescription.getLink(), joint);
+
+      totalMass += rigidBody.getInertia().getMass();
+
+      mapRigidBody(jointDescription, joint, rigidBody);
+      addSensorDefinitions(joint, jointDescription);
+
+      for (ForceSensorDescription sdfForceSensor : jointDescription.getForceSensors())
       {
-         inverseDynamicsJoint = new RevoluteJoint(joint.getName(), parentBody, offset, jointAxis);
-      }
-      else if (joint instanceof SliderJointDescription)
-      {
-         inverseDynamicsJoint = new PrismaticJoint(joint.getName(), parentBody, offset, jointAxis);
-      }
-      else
-      {
-         throw new RuntimeException("Must be either Pin or Slider here!");
-      }
-
-      inverseDynamicsJoint.setEffortLimits(-joint.getEffortLimit(), joint.getEffortLimit());
-      inverseDynamicsJoint.setVelocityLimits(-joint.getVelocityLimit(), joint.getVelocityLimit());
-
-      if (joint.containsLimitStops())
-      {
-         double[] limitStopParameters = joint.getLimitStopParameters();
-         inverseDynamicsJoint.setJointLimitLower(limitStopParameters[0]);
-         inverseDynamicsJoint.setJointLimitUpper(limitStopParameters[1]);
-      }
-
-      oneDoFJoints.put(joint.getName(), inverseDynamicsJoint);
-
-      LinkDescription childLink = joint.getLink();
-
-      checkLinkIsNeededForSensor(inverseDynamicsJoint, joint);
-
-      double mass = childLink.getMass();
-      totalMass += mass;
-      Vector3D comOffset = new Vector3D(childLink.getCenterOfMassOffset());
-      Matrix3D inertia = childLink.getMomentOfInertiaCopy();
-
-      RigidBodyBasics rigidBody = new RigidBody(childLink.getName(), inverseDynamicsJoint, inertia, mass, comOffset);
-      //      System.out.println("Adding rigid body " + childLink.getName() + "; Mass: " + childLink.getMass() + "; ixx: " + childLink.getInertia().m00 + "; iyy: " + childLink.getInertia().m11
-      //            + "; izz: " + childLink.getInertia().m22 + "; COM Offset: " + childLink.getCoMOffset());
-
-
-      mapRigidBody(joint, inverseDynamicsJoint, rigidBody);
-      addSensorDefinitions(inverseDynamicsJoint, joint);
-
-
-      for(ForceSensorDescription sdfForceSensor : joint.getForceSensors())
-      {
-         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sdfForceSensor.getTransformToJoint());
-         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), inverseDynamicsJoint.getSuccessor(), sensorFrame);
+         ReferenceFrame sensorFrame = ForceSensorDefinition.createSensorFrame(sdfForceSensor.getName(),
+                                                                              joint.getSuccessor(),
+                                                                              sdfForceSensor.getTransformToJoint());
+         ForceSensorDefinition forceSensorDefinition = new ForceSensorDefinition(sdfForceSensor.getName(), joint.getSuccessor(), sensorFrame);
          forceSensorDefinitions.add(forceSensorDefinition);
       }
 
-//      for(SDFContactSensor sdfContactSensor : joint.getContactSensors())
-//      {
-//         ContactSensorDefinition contactSensorDefinition = new ContactSensorDefinition(sdfContactSensor.getName(), inverseDynamicsJoint.getSuccessor(),sdfContactSensor.getSensorType());
-//         contactSensorDefinitions.add(contactSensorDefinition);
-//      }
-
-      for (JointDescription sdfJoint : joint.getChildrenJoints())
+      for (JointDescription sdfJoint : jointDescription.getChildrenJoints())
       {
          addJointsRecursively((OneDoFJointDescription) sdfJoint, rigidBody);
       }
+   }
+
+   public static RigidBodyBasics createRigidBody(LinkDescription linkDescription, OneDoFJointBasics parentJoint)
+   {
+      double mass = linkDescription.getMass();
+      Vector3D comOffset = new Vector3D(linkDescription.getCenterOfMassOffset());
+      Matrix3D inertia = linkDescription.getMomentOfInertiaCopy();
+      return new RigidBody(linkDescription.getName(), parentJoint, inertia, mass, comOffset);
+   }
+
+   public static OneDoFJointBasics createOneDoFJoint(OneDoFJointDescription jointDescription, RigidBodyBasics predecessor)
+   {
+      if (jointDescription instanceof InvertedFourBarJointDescription)
+      {
+         return createInvertedFourBarJoint(jointDescription, predecessor);
+      }
+      else
+      {
+         Vector3D jointAxis = new Vector3D();
+         jointDescription.getJointAxis(jointAxis);
+
+         Vector3D offset = new Vector3D();
+         jointDescription.getOffsetFromParentJoint(offset);
+
+         OneDoFJointBasics inverseDynamicsJoint;
+
+         if (jointDescription instanceof PinJointDescription)
+         {
+            inverseDynamicsJoint = new RevoluteJoint(jointDescription.getName(), predecessor, offset, jointAxis);
+         }
+         else if (jointDescription instanceof SliderJointDescription)
+         {
+            inverseDynamicsJoint = new PrismaticJoint(jointDescription.getName(), predecessor, offset, jointAxis);
+         }
+         else
+         {
+            throw new RuntimeException("Must be either Pin or Slider here!");
+         }
+
+         inverseDynamicsJoint.setEffortLimits(-jointDescription.getEffortLimit(), jointDescription.getEffortLimit());
+         inverseDynamicsJoint.setVelocityLimits(-jointDescription.getVelocityLimit(), jointDescription.getVelocityLimit());
+
+         if (jointDescription.containsLimitStops())
+         {
+            double[] limitStopParameters = jointDescription.getLimitStopParameters();
+            inverseDynamicsJoint.setJointLimitLower(limitStopParameters[0]);
+            inverseDynamicsJoint.setJointLimitUpper(limitStopParameters[1]);
+         }
+
+         return inverseDynamicsJoint;
+      }
+   }
+
+   private static OneDoFJointBasics createInvertedFourBarJoint(OneDoFJointDescription jointDescription, RigidBodyBasics predecessor)
+   {
+      InvertedFourBarJointDescription fourBarDescription = (InvertedFourBarJointDescription) jointDescription;
+
+      RevoluteJoint jointA = null, jointB = null, jointC = null, jointD = null;
+      PinJointDescription jointADescription = null, jointBDescription = null, jointCDescription = null, jointDDescription = null;
+
+      PinJointDescription[] fourBarJoints = fourBarDescription.getFourBarJoints();
+      PinJointDescription masterJointDescription = fourBarDescription.getFourBarJoints()[fourBarDescription.getMasterJointIndex()];
+
+      for (PinJointDescription pinJointDescription : fourBarJoints)
+      {
+         if (pinJointDescription.getParentJoint().getLink().getName().equals(predecessor.getName()))
+         {
+            if (jointA == null)
+            {
+               jointADescription = pinJointDescription;
+               jointA = (RevoluteJoint) createOneDoFJoint(jointADescription, predecessor);
+            }
+            else
+            {
+               jointBDescription = pinJointDescription;
+               jointB = (RevoluteJoint) createOneDoFJoint(jointBDescription, predecessor);
+            }
+         }
+      }
+
+      for (PinJointDescription pinJointDescription : fourBarJoints)
+      {
+         if (pinJointDescription.getParentJoint() == jointADescription)
+            jointDDescription = pinJointDescription;
+         else if (pinJointDescription.getParentJoint() == jointBDescription)
+            jointCDescription = pinJointDescription;
+      }
+
+      RigidBodyBasics bodyAD = createRigidBody(jointADescription.getLink(), jointA);
+      RigidBodyBasics bodyCD = null;
+
+      if (jointDDescription != null)
+      {
+         jointD = (RevoluteJoint) createOneDoFJoint(jointDDescription, bodyAD);
+         bodyCD = createRigidBody(jointDDescription.getLink(), jointD);
+      }
+
+      RigidBodyBasics bodyBC = createRigidBody(jointBDescription.getLink(), jointB);
+
+      if (jointCDescription != null)
+      {
+         jointC = (RevoluteJoint) createOneDoFJoint(jointCDescription, bodyBC);
+         bodyCD = createRigidBody(jointCDescription.getLink(), jointC);
+      }
+
+      if ((jointC == null) == (jointD == null))
+         throw new IllegalStateException("Unexpected four-bar configuration");
+
+      if (jointC == null)
+      {
+         LoopClosurePinConstraintDescription jointCConstraint = fourBarDescription.getFourBarClosure();
+         if (jointCConstraint.getParentJoint() == jointDDescription)
+            jointC = createLoopClosureJoint(bodyCD, bodyBC, jointCConstraint);
+         else
+            jointC = createLoopClosureJoint(bodyBC, bodyCD, jointCConstraint);
+      }
+      else
+      {
+         LoopClosurePinConstraintDescription jointDConstraint = fourBarDescription.getFourBarClosure();
+         if (jointDConstraint.getParentJoint() == jointCDescription)
+            jointD = createLoopClosureJoint(bodyCD, bodyAD, jointDConstraint);
+         else
+            jointD = createLoopClosureJoint(bodyAD, bodyCD, jointDConstraint);
+      }
+
+      RevoluteJoint[] fourBarRevoluteJoints = new RevoluteJoint[] {jointA, jointB, jointC, jointD};
+      int masterJointIndex = -1;
+      if (masterJointDescription == jointADescription)
+         masterJointIndex = 0;
+      else if (masterJointDescription == jointBDescription)
+         masterJointIndex = 1;
+      else if (masterJointDescription == jointCDescription)
+         masterJointIndex = 2;
+      else if (masterJointDescription == jointDDescription)
+         masterJointIndex = 3;
+      return new InvertedFourBarJoint(fourBarDescription.getName(), fourBarRevoluteJoints, masterJointIndex);
+   }
+
+   protected void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
+   {
+      JointBasics joint = parentBody.getChildrenJoints().stream().filter(child -> child.getName().equals(jointDescription.getName())).findFirst().get();
+      RigidBodyBasics constraintPredecessor = joint.getSuccessor();
+
+      List<LoopClosureConstraintDescription> constraintDescriptions = jointDescription.getChildrenConstraintDescriptions();
+
+      for (LoopClosureConstraintDescription constraintDescription : constraintDescriptions)
+      {
+         RigidBodyBasics constraintSuccessor = MultiBodySystemTools.getRootBody(parentBody).subtreeStream()
+                                                                   .filter(body -> body.getName().equals(constraintDescription.getLink().getName())).findFirst()
+                                                                   .get();
+         RevoluteJoint constraintJoint = createLoopClosureJoint(constraintPredecessor, constraintSuccessor, constraintDescription);
+         if (constraintJoint != null)
+            oneDoFJoints.put(constraintJoint.getName(), constraintJoint);
+      }
+
+      for (JointDescription childJoint : jointDescription.getChildrenJoints())
+         addLoopClosureConstraintRecursive(childJoint, constraintPredecessor);
+   }
+
+   public static RevoluteJoint createLoopClosureJoint(RigidBodyBasics predecessor, RigidBodyBasics successor,
+                                                      LoopClosureConstraintDescription constraintDescription)
+   {
+      RevoluteJoint constraintJoint;
+      String name = constraintDescription.getName();
+      Vector3DBasics offsetFromParentJoint = constraintDescription.getOffsetFromParentJoint();
+      Vector3DBasics offsetFromLinkParentJoint = constraintDescription.getOffsetFromLinkParentJoint();
+
+      if (constraintDescription instanceof LoopClosurePinConstraintDescription)
+      {
+         Vector3DBasics axis = ((LoopClosurePinConstraintDescription) constraintDescription).getAxis();
+         if (!constraintDescription.getParentJoint().getName().equals(predecessor.getParentJoint().getName()))
+            throw new RuntimeException("Constraint predecessor mismatch.");
+         if (!constraintDescription.getLink().getName().equals(successor.getName()))
+            throw new RuntimeException("Constraint successor mismatch.");
+         constraintJoint = new RevoluteJoint(name, predecessor, offsetFromParentJoint, axis);
+         constraintJoint.setupLoopClosure(successor, new RigidBodyTransform(new Quaternion(), offsetFromLinkParentJoint));
+      }
+      else
+      {
+         LogTools.error("The constraint type {} is not handled, skipping it.", constraintDescription.getClass().getSimpleName());
+         constraintJoint = null;
+      }
+      return constraintJoint;
    }
 
    protected void mapRigidBody(JointDescription joint, OneDoFJointBasics inverseDynamicsJoint, RigidBodyBasics rigidBody)
@@ -450,28 +611,28 @@ public class FullRobotModelFromDescription implements FullRobotModel
       }
 
       Set<String> endEffectorJoints = sdfJointNameMap.getEndEffectorJoints();
-      if(endEffectorJoints != null && endEffectorJoints.contains(inverseDynamicsJoint.getName()))
+      if (endEffectorJoints != null && endEffectorJoints.contains(inverseDynamicsJoint.getName()))
       {
          Enum<?> endEffectorRobotSegment = sdfJointNameMap.getEndEffectorsRobotSegment(inverseDynamicsJoint.getName());
          endEffectors.put(endEffectorRobotSegment, rigidBody);
       }
 
       JointRole jointRole = sdfJointNameMap.getJointRole(joint.getName());
-      if(jointRole != null)
+      if (jointRole != null)
       {
          switch (jointRole)
          {
-         //TODO: Should armJointLists use legJoingName.first or armJointName.first?? looks backwards
-         case NECK:
-            NeckJointName neckJointName = sdfJointNameMap.getNeckJointName(joint.getName());
-            neckJoints.put(neckJointName, inverseDynamicsJoint);
-            break;
-         case SPINE:
-            SpineJointName spineJointName = sdfJointNameMap.getSpineJointName(joint.getName());
-            spineJoints.put(spineJointName, inverseDynamicsJoint);
-            break;
-         default:
-            break;
+            //TODO: Should armJointLists use legJoingName.first or armJointName.first?? looks backwards
+            case NECK:
+               NeckJointName neckJointName = sdfJointNameMap.getNeckJointName(joint.getName());
+               neckJoints.put(neckJointName, inverseDynamicsJoint);
+               break;
+            case SPINE:
+               SpineJointName spineJointName = sdfJointNameMap.getSpineJointName(joint.getName());
+               spineJoints.put(spineJointName, inverseDynamicsJoint);
+               break;
+            default:
+               break;
          }
       }
    }

@@ -72,18 +72,21 @@ public class JumpingTestHelper
       initialSetup.initializeRobot(humanoidRobot, robotModel.getJointMap());
       initialSetup.initializeFullRobotModel(fullRobotModel);
 
-      scs = new SimulationConstructionSet(humanoidRobot);
+      scs = new SimulationConstructionSet(humanoidRobot, simulationTestingParameters);
       scsInitialSetup.initializeSimulation(scs);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setDT(robotModel.getSimulateDT(), 1);
 
       shouldBeSquatting = ((YoBoolean) scs.findVariable("ShouldBeSquatting"));
 
-      SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
-      plotterFactory.setShowOnStart(true);
-      plotterFactory.setVariableNameToTrack("centerOfMass");
-      plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
-      plotterFactory.createOverheadPlotter();
+      if (scs.getGUI() != null)
+      {
+         SimulationOverheadPlotterFactory plotterFactory = scs.createSimulationOverheadPlotterFactory();
+         plotterFactory.setShowOnStart(true);
+         plotterFactory.setVariableNameToTrack("centerOfMass");
+         plotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
+         plotterFactory.createOverheadPlotter();
+      }
 
       PushRobotController pushRobotController = new PushRobotController(humanoidRobot, fullRobotModel);
       scs.addYoGraphic(pushRobotController.getForceVisualizer());

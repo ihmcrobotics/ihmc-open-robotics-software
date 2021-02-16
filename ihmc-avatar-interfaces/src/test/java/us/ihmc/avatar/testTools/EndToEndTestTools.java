@@ -5,7 +5,12 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointControlHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyJointspaceControlState;
@@ -39,10 +44,18 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SO3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.tools.YoGeometryNameTools;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class EndToEndTestTools
 {
@@ -606,5 +619,40 @@ public class EndToEndTestTools
       }
 
       return footstepDataListMessage;
+   }
+
+   public static double computeWalkingDuration(FootstepDataListMessage footsteps, WalkingControllerParameters walkingControllerParameters)
+   {
+      double defaultSwingDuration = getDuration(footsteps.getDefaultSwingDuration(), walkingControllerParameters.getDefaultSwingTime());
+      double defaultTransferDuration = getDuration(footsteps.getDefaultTransferDuration(), walkingControllerParameters.getDefaultTransferTime());
+      double defaultInitialTransferDuration = walkingControllerParameters.getDefaultInitialTransferTime();
+      double defaultFinalTransferDuration = walkingControllerParameters.getDefaultFinalTransferTime();
+
+      double walkingDuration = 0.0;
+
+      for (int i = 0; i < footsteps.getFootstepDataList().size(); i++)
+      {
+         if (i == 0)
+            walkingDuration += computeStepDuration(footsteps.getFootstepDataList().get(i), defaultSwingDuration, defaultInitialTransferDuration);
+         else
+            walkingDuration += computeStepDuration(footsteps.getFootstepDataList().get(i), defaultSwingDuration, defaultTransferDuration);
+      }
+
+      walkingDuration += getDuration(footsteps.getFinalTransferDuration(), defaultFinalTransferDuration);
+
+      return walkingDuration;
+   }
+
+   public static double computeStepDuration(FootstepDataMessage footstep, double defaultSwingDuration, double defaultTransferDuration)
+   {
+      return getDuration(footstep.getSwingDuration(), defaultSwingDuration) + getDuration(footstep.getTransferDuration(), defaultTransferDuration);
+   }
+
+   private static double getDuration(double duration, double defaultDuration)
+   {
+      if (duration <= 0.0 || !Double.isFinite(duration))
+         return defaultDuration;
+      else
+         return duration;
    }
 }

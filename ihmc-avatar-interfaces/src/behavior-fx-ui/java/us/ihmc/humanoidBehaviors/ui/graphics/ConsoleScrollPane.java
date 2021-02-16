@@ -5,10 +5,12 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.javafx.JavaFXMissingTools;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.List;
 
@@ -18,14 +20,16 @@ public class ConsoleScrollPane extends ScrollPane
    private static final String[] FONT_PREFERENCE = {"Courier New", "Liberation Mono"};
 
    private final Messager behaviorMessager;
+   private final ROS2NodeInterface ros2Node;
    private final TextFlow textFlow;
    private final String fontName;
 
    private boolean customScrollSeen = false;
 
-   public ConsoleScrollPane(Messager behaviorMessager)
+   public ConsoleScrollPane(Messager behaviorMessager, ROS2NodeInterface ros2Node)
    {
       this.behaviorMessager = behaviorMessager;
+      this.ros2Node = ros2Node;
       this.fontName = selectFontName();
 
       setVmin(0.0);
@@ -61,6 +65,8 @@ public class ConsoleScrollPane extends ScrollPane
    public void setupAtEnd()
    {
       behaviorMessager.registerTopicListener(BehaviorModule.API.StatusLog, logEntry -> Platform.runLater(() -> receivedMessageForTopic(logEntry)));
+      new IHMCROS2Callback<>(ros2Node, ROS2Tools.TEXT_STATUS, textStatus ->
+            Platform.runLater(() -> receivedMessageForTopic(Pair.of(400, textStatus.getTextToSpeakAsString()))));
    }
 
    private void receivedMessageForTopic(Pair<Integer, String> logEntry)

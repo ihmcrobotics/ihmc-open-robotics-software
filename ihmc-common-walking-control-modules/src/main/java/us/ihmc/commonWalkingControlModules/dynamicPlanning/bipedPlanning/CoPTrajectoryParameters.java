@@ -189,6 +189,11 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
       }
    };
 
+   public int getMaxNumberOfStepsToConsider()
+   {
+      return 3;
+   }
+
    public double getMinimumDistanceInsidePolygon()
    {
       return minimumDistanceInsidePolygon.getValue();

@@ -13,12 +13,13 @@ import us.ihmc.jMonkeyEngineToolkit.GPULidar;
 import us.ihmc.jMonkeyEngineToolkit.GPULidarListener;
 import us.ihmc.jMonkeyEngineToolkit.Graphics3DAdapter;
 import us.ihmc.robotics.lidar.LidarScanParameters;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
 import us.ihmc.tools.TimestampProvider;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class DRCLidar
 {
@@ -45,7 +46,7 @@ public class DRCLidar
    }
 
    public static void setupDRCRobotLidar(FloatingRootJointRobot robot, Graphics3DAdapter graphics3dAdapter, LocalObjectCommunicator objectCommunicator,
-                                         DRCRobotJointMap jointMap, AvatarRobotLidarParameters lidarParams, TimestampProvider timestampProvider,
+                                         HumanoidJointNameMap jointMap, AvatarRobotLidarParameters lidarParams, TimestampProvider timestampProvider,
                                          boolean startLidar)
    {
       if (graphics3dAdapter != null)

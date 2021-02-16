@@ -5,7 +5,7 @@ import static us.ihmc.robotics.Assert.*;
 import org.junit.jupiter.api.*;
 
 import Jama.Matrix;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class TransferFunctionMatrixTest
 {
@@ -151,8 +151,8 @@ public class TransferFunctionMatrixTest
          {
             TransferFunction resultTF = result.get(m, n);
             TransferFunction originalTF = transferFunctionMatrix.get(m, n);
-            Polynomial originalNumeratorCopy = new Polynomial(originalTF.getNumeratorCoefficients());
-            Polynomial originalDenominatorCopy = new Polynomial(originalTF.getDenominatorCoefficients());
+            ObsoletePolynomial originalNumeratorCopy = new ObsoletePolynomial(originalTF.getNumeratorCoefficients());
+            ObsoletePolynomial originalDenominatorCopy = new ObsoletePolynomial(originalTF.getDenominatorCoefficients());
 
 
             /*
@@ -209,12 +209,12 @@ public class TransferFunctionMatrixTest
          {
             TransferFunction resultTF = result.get(m, n);
             TransferFunction originalTFOne = transferFunctionMatrix.get(m, n);
-            Polynomial originalNumeratorOneCopy = new Polynomial(originalTFOne.getNumeratorCoefficients());
-            Polynomial originalDenominatorOneCopy = new Polynomial(originalTFOne.getDenominatorCoefficients());
+            ObsoletePolynomial originalNumeratorOneCopy = new ObsoletePolynomial(originalTFOne.getNumeratorCoefficients());
+            ObsoletePolynomial originalDenominatorOneCopy = new ObsoletePolynomial(originalTFOne.getDenominatorCoefficients());
 
             TransferFunction originalTFTwo = testMatrix.get(m, n);
-            Polynomial originalNumeratorTwoCopy = new Polynomial(originalTFTwo.getNumeratorCoefficients());
-            Polynomial originalDenominatorTwoCopy = new Polynomial(originalTFTwo.getDenominatorCoefficients());
+            ObsoletePolynomial originalNumeratorTwoCopy = new ObsoletePolynomial(originalTFTwo.getNumeratorCoefficients());
+            ObsoletePolynomial originalDenominatorTwoCopy = new ObsoletePolynomial(originalTFTwo.getDenominatorCoefficients());
 
             /*
              * Different way of calculating the sum of TF1 and TF2:

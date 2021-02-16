@@ -9,13 +9,13 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
@@ -45,7 +45,6 @@ import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvi
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-import java.nio.file.Paths;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -343,7 +342,8 @@ public class AtlasLookAndStepBehaviorTest
                                                       runRealsenseSLAM,
                                                       false,
                                                       runLidarREA,
-                                                      createRobotModel());
+                                                      createRobotModel(),
+                                                      Fidelity.HIGH);
    }
 
    private void dynamicsSimulation(EnvironmentInitialSetup environment, Notification finishedSettingUp)
@@ -360,7 +360,7 @@ public class AtlasLookAndStepBehaviorTest
                                                           COMMUNICATION_MODE.getPubSubImplementation(),
                                                           recordFrequencySpeedup,
                                                           scsDataBufferSize,
-                                                          !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+                                                          true);
       dynamicsSimulation.simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();
@@ -371,11 +371,7 @@ public class AtlasLookAndStepBehaviorTest
       LogTools.info("Creating kinematics  simulation");
       HumanoidKinematicsSimulationParameters kinematicsSimulationParameters = new HumanoidKinematicsSimulationParameters();
       kinematicsSimulationParameters.setPubSubImplementation(COMMUNICATION_MODE.getPubSubImplementation());
-      kinematicsSimulationParameters.setLogToFile(!ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
-      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
-      {
-         kinematicsSimulationParameters.setIncomingLogsDirectory(Paths.get("/opt/BambooVideos")); // TODO: Get logging on Bamboo working
-      }
+      kinematicsSimulationParameters.setLogToFile(true);
       kinematicsSimulationParameters.setCreateYoVariableServer(false);
       kinematicsSimulationParameters.setInitialGroundHeight(environment.getGroundZ());
       kinematicsSimulationParameters.setInitialRobotYaw(environment.getInitialYaw());

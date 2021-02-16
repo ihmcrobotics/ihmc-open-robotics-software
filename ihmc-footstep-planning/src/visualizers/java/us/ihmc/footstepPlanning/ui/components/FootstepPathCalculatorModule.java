@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.ui.components;
 import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.commons.lang3.tuple.Triple;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -10,8 +11,10 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -154,6 +157,20 @@ public class FootstepPathCalculatorModule
          planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));
 
          FootstepPlannerOutput output = planningModule.handleRequest(request);
+
+         LogTools.info("Footstep planner completed with {}, {} step(s)",
+                       output.getFootstepPlanningResult(),
+                       output.getFootstepPlan().getNumberOfSteps());
+         if (output.getFootstepPlan().getNumberOfSteps() < 1) // failed
+         {
+            FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(planningModule);
+            rejectionReasonReport.update();
+            for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
+            {
+               double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
+               LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+            }
+         }
 
          messager.submitMessage(BodyPathPlanningResultTopic, output.getBodyPathPlanningResult());
          messager.submitMessage(FootstepPlanningResultTopic, output.getFootstepPlanningResult());

@@ -123,7 +123,7 @@ public class DiscreteFootstepTools
       return distanceBetweenPolygons(footPolygonA, footPolygonB);
    }
 
-   public static boolean arePolygonsIntersecting(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
+   public static boolean arePolygonsIntersecting(ConvexPolygon2DReadOnly polygonA, ConvexPolygon2DReadOnly polygonB)
    {
       for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
       {

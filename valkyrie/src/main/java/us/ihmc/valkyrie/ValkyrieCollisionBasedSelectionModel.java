@@ -17,7 +17,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 /**
  * Implementation of a collision model that can be used to select rigid bodies via a GUI.
@@ -28,9 +28,9 @@ import us.ihmc.wholeBodyController.DRCRobotJointMap;
  */
 public class ValkyrieCollisionBasedSelectionModel implements RobotCollisionModel
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
-   public ValkyrieCollisionBasedSelectionModel(DRCRobotJointMap jointMap)
+   public ValkyrieCollisionBasedSelectionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
 import us.ihmc.commonWalkingControlModules.controlModules.foot.LegSingularityAndKneeCollapseAvoidanceControlModule;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 public abstract class SwingTrajectoryParameters
 {
@@ -59,6 +61,16 @@ public abstract class SwingTrajectoryParameters
 
    /** Useful to force the swing foot accelerate towards the ground once the desired final position is reached but the foot has not touched the ground yet. */
    public abstract double getDesiredTouchdownAcceleration();
+
+   /**
+    * Useful to relax the desired touchdown velocity when computing the swing trajectory.
+    * 
+    * @return the weight to used with the swing final desired velocity.
+    */
+   public Tuple3DReadOnly getTouchdownVelocityWeight()
+   {
+      return new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   }
 
    /** Z-offset used for footsteps that have height that is to be recomputed. The new height will be the one of the support sole frame plus this offset. */
    public double getBlindFootstepsHeightOffset()

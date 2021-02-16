@@ -61,8 +61,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test first contact state
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(0).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(), contactSequence.get(0).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(), contactSequence.get(0).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(), contactSequence.get(0).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(new Point3D(), contactSequence.get(0).getECMPEndPosition(), epsilon);
       assertEquals(2, contactSequence.get(0).getFeetInContact().size());
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.RIGHT));
@@ -105,8 +105,8 @@ public class BipedContactSequenceUpdaterTest
       finalStance.interpolate(leftFootFirstStep, rightFootFirstStance, 0.5);
       // test first contact state, initial contact, center of feet
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(0).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(centerOfFirstStance, contactSequence.get(0).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(centerOfFirstStance, contactSequence.get(0).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getECMPEndPosition(), epsilon);
       assertEquals(2, contactSequence.get(0).getFeetInContact().size());
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.RIGHT));
@@ -115,8 +115,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test second contact state, right foot stance
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(1).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPEndPosition(), epsilon);
       assertEquals(1, contactSequence.get(1).getFeetInContact().size());
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotSide.RIGHT));
       assertEquals(0.5, contactSequence.get(1).getTimeInterval().getStartTime(), epsilon);
@@ -127,8 +127,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(2, contactSequence.get(2).getFeetInContact().size());
       assertTrue(contactSequence.get(2).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(2).getFeetInContact().contains(RobotSide.RIGHT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(2).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(2).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(2).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(2).getECMPEndPosition(), epsilon);
       assertEquals(1.0, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
 
@@ -141,8 +141,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test first contact state
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(0).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(centerOfFirstStance, contactSequence.get(0).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(centerOfFirstStance, contactSequence.get(0).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getECMPEndPosition(), epsilon);
       assertEquals(2, contactSequence.get(0).getFeetInContact().size());
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.RIGHT));
@@ -151,8 +151,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test second contact state
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(1).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPEndPosition(), epsilon);
       assertEquals(1, contactSequence.get(1).getFeetInContact().size());
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotSide.RIGHT));
       assertEquals(0.5 - timeInPhase, contactSequence.get(1).getTimeInterval().getStartTime(), epsilon);
@@ -163,8 +163,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(2, contactSequence.get(2).getFeetInContact().size());
       assertTrue(contactSequence.get(2).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(2).getFeetInContact().contains(RobotSide.RIGHT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(2).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(2).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(2).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(2).getECMPEndPosition(), epsilon);
       assertEquals(1.0 - timeInPhase, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
    }
@@ -218,8 +218,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test first contact state, initial contact, center of feet
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(0).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialStance, contactSequence.get(0).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialStance, contactSequence.get(0).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getECMPEndPosition(), epsilon);
       assertEquals(2, contactSequence.get(0).getFeetInContact().size());
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.RIGHT));
@@ -228,8 +228,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test second contact state, right foot stance
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(1).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPEndPosition(), epsilon);
       assertEquals(1, contactSequence.get(1).getFeetInContact().size());
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotSide.RIGHT));
       assertEquals(0.5, contactSequence.get(1).getTimeInterval().getStartTime(), epsilon);
@@ -240,8 +240,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(2, contactSequence.get(2).getFeetInContact().size());
       assertTrue(contactSequence.get(2).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(2).getFeetInContact().contains(RobotSide.RIGHT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(2).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(2).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(2).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(2).getECMPEndPosition(), epsilon);
       assertEquals(1.0, contactSequence.get(2).getTimeInterval().getStartTime(), epsilon);
       assertEquals(1.5, contactSequence.get(2).getTimeInterval().getEndTime(), epsilon);
 
@@ -249,8 +249,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(3).getContactState());
       assertEquals(1, contactSequence.get(3).getFeetInContact().size());
       assertTrue(contactSequence.get(3).getFeetInContact().contains(RobotSide.LEFT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getECMPEndPosition(), epsilon);
       assertEquals(1.5, contactSequence.get(3).getTimeInterval().getStartTime(), epsilon);
       assertEquals(2.0, contactSequence.get(3).getTimeInterval().getEndTime(), epsilon);
 
@@ -259,8 +259,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(2, contactSequence.get(4).getFeetInContact().size());
       assertTrue(contactSequence.get(4).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(4).getFeetInContact().contains(RobotSide.RIGHT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(4).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(4).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(4).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(4).getECMPEndPosition(), epsilon);
       assertEquals(2.0, contactSequence.get(4).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(4).getTimeInterval().getEndTime(), epsilon);
    }
@@ -313,8 +313,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test first contact state, initial contact, center of feet
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(0).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialStance, contactSequence.get(0).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialStance, contactSequence.get(0).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(0).getECMPEndPosition(), epsilon);
       assertEquals(2, contactSequence.get(0).getFeetInContact().size());
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(0).getFeetInContact().contains(RobotSide.RIGHT));
@@ -323,8 +323,8 @@ public class BipedContactSequenceUpdaterTest
 
       // test second contact state, right foot stance
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(1).getContactState());
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(rightFootFirstStance, contactSequence.get(1).getECMPEndPosition(), epsilon);
       assertEquals(1, contactSequence.get(1).getFeetInContact().size());
       assertTrue(contactSequence.get(1).getFeetInContact().contains(RobotSide.RIGHT));
       assertEquals(0.5, contactSequence.get(1).getTimeInterval().getStartTime(), epsilon);
@@ -342,8 +342,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(ContactState.IN_CONTACT, contactSequence.get(3).getContactState());
       assertEquals(1, contactSequence.get(3).getFeetInContact().size());
       assertTrue(contactSequence.get(3).getFeetInContact().contains(RobotSide.LEFT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(3).getECMPEndPosition(), epsilon);
       assertEquals(1.0, contactSequence.get(3).getTimeInterval().getStartTime(), epsilon);
       assertEquals(1.3, contactSequence.get(3).getTimeInterval().getEndTime(), epsilon);
 
@@ -352,8 +352,8 @@ public class BipedContactSequenceUpdaterTest
       assertEquals(2, contactSequence.get(4).getFeetInContact().size());
       assertTrue(contactSequence.get(4).getFeetInContact().contains(RobotSide.LEFT));
       assertTrue(contactSequence.get(4).getFeetInContact().contains(RobotSide.RIGHT));
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(4).getCopStartPosition(), epsilon);
-      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(4).getCopEndPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(leftFootSecondStance, contactSequence.get(4).getECMPStartPosition(), epsilon);
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(finalStance, contactSequence.get(4).getECMPEndPosition(), epsilon);
       assertEquals(1.3, contactSequence.get(4).getTimeInterval().getStartTime(), epsilon);
       assertEquals(Double.POSITIVE_INFINITY, contactSequence.get(4).getTimeInterval().getEndTime(), epsilon);
    }

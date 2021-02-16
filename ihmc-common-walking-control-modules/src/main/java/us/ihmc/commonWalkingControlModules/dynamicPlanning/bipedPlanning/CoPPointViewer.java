@@ -16,7 +16,7 @@ public class CoPPointViewer
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double size = 0.01;
+   private static final double size = 0.0075;
    private static final int maxPoints = 20;
 
    private final List<YoFramePoint3D> copStartPoints = new ArrayList<>();
@@ -37,8 +37,8 @@ public class CoPPointViewer
          copStartPoints.add(copStartPoint);
          copEndPoints.add(copEndPoint);
 
-         YoGraphicPosition copStartPointGraphic = new YoGraphicPosition("copStartPoint" + i, copStartPoint, size, YoAppearance.DarkRed(), GraphicType.BALL);
-         YoGraphicPosition copEndPointGraphic = new YoGraphicPosition("copEndPoint" + i, copEndPoint, size, YoAppearance.DarkRed(), GraphicType.SOLID_BALL);
+         YoGraphicPosition copStartPointGraphic = new YoGraphicPosition("copStartPoint" + i, copStartPoint, size, YoAppearance.DarkRed(), GraphicType.CROSS);
+         YoGraphicPosition copEndPointGraphic = new YoGraphicPosition("copEndPoint" + i, copEndPoint, size, YoAppearance.DarkRed(), GraphicType.ROTATED_CROSS);
 
          yoGraphicsListRegistry.registerYoGraphic(name, copStartPointGraphic);
          yoGraphicsListRegistry.registerYoGraphic(name, copEndPointGraphic);
@@ -55,8 +55,8 @@ public class CoPPointViewer
 
       for (;i < Math.min(vrpSegments.size(), maxPoints); i++)
       {
-         copStartPoints.get(i).set(vrpSegments.get(i).getCopStartPosition());
-         copEndPoints.get(i).set(vrpSegments.get(i).getCopEndPosition());
+         copStartPoints.get(i).set(vrpSegments.get(i).getECMPStartPosition());
+         copEndPoints.get(i).set(vrpSegments.get(i).getECMPEndPosition());
       }
       for (;i < maxPoints; i++)
       {

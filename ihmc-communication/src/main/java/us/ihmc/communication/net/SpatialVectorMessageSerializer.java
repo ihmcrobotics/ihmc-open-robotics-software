@@ -31,7 +31,7 @@ public class SpatialVectorMessageSerializer extends Serializer<SpatialVectorMess
    }
 
    @Override
-   public SpatialVectorMessage read(Kryo kryo, Input input, Class<SpatialVectorMessage> type)
+   public SpatialVectorMessage read(Kryo kryo, Input input, Class<? extends SpatialVectorMessage> type)
    {
       SpatialVectorMessage message = new SpatialVectorMessage();
 

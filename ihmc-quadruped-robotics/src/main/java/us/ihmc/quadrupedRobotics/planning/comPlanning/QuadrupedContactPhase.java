@@ -4,7 +4,10 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
@@ -22,6 +25,7 @@ public class QuadrupedContactPhase implements ContactStateProvider
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
    private final List<String> feetNamesInContact = new ArrayList<>();
    private final FramePoint3D copPosition = new FramePoint3D();
+   private final FrameVector3DReadOnly zeroVector = new FrameVector3D();
    private ContactState contactState = ContactState.IN_CONTACT;
 
    private final QuadrantDependentList<FramePoint3D> solePositions = new QuadrantDependentList<>();
@@ -100,15 +104,27 @@ public class QuadrupedContactPhase implements ContactStateProvider
    }
 
    @Override
-   public FramePoint3DReadOnly getCopStartPosition()
+   public FramePoint3DReadOnly getECMPStartPosition()
    {
       return copPosition;
    }
 
    @Override
-   public FramePoint3DReadOnly getCopEndPosition()
+   public FramePoint3DReadOnly getECMPEndPosition()
    {
       return copPosition;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getECMPStartVelocity()
+   {
+      return zeroVector;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getECMPEndVelocity()
+   {
+      return zeroVector;
    }
 
    @Override
@@ -122,7 +138,6 @@ public class QuadrupedContactPhase implements ContactStateProvider
       return feetInContact;
    }
 
-   @Override
    public List<String> getBodiesInContact()
    {
       return feetNamesInContact;

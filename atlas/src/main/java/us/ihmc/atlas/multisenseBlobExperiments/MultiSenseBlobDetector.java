@@ -62,7 +62,7 @@ public class MultiSenseBlobDetector
 
 //      CollisionBoxProvider collisionBoxProvider = robotModel.getCollisionBoxProvider();
 //      PPSTimestampOffsetProvider ppsTimestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
-//      DRCRobotJointMap jointMap = robotModel.getJointMap();
+//      HumanoidJointNameMap jointMap = robotModel.getJointMap();
 //      RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 //      PacketCommunicator sensorSuitePacketCommunicatorServer = PacketCommunicator
 //            .createIntraprocessPacketCommunicator(NetworkPorts.SENSOR_MANAGER, new IHMCCommunicationKryoNetClassList());
