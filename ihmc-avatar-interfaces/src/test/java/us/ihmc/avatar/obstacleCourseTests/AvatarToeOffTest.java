@@ -122,4 +122,19 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
+
+   private void setYoVariablesToDoToeOffInSS(double icpProximity, double icpPercentLengthToLeadingFoot, double ecmpProximity)
+   {
+      YoDouble yoICPProximity, yoICPPercent, yoECMPProximity;
+
+      YoBoolean toeOffInSS = (YoBoolean) drcSimulationTestHelper.getYoVariable("doToeOffIfPossibleInSingleSupport");
+      yoICPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("icpProximityForToeOff");
+      yoICPPercent = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPercentOfStanceForSSToeOff");
+      yoECMPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("ecmpProximityForToeOff");
+
+      toeOffInSS.set(true);
+      yoICPProximity.set(icpProximity);
+      yoICPPercent.set(icpPercentLengthToLeadingFoot);
+      yoECMPProximity.set(ecmpProximity);
+   }
 }
