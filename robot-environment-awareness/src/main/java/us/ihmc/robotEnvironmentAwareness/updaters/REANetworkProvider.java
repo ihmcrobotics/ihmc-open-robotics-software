@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.NewMessageListener;
 
@@ -61,7 +62,7 @@ public interface REANetworkProvider
    {
    }
 
-   void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated);
+   void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated, NormalOcTree ocTree);
 
    void publishCurrentState();
 

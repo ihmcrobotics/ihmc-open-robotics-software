@@ -30,6 +30,7 @@ import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
+import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
@@ -68,7 +69,10 @@ public class ValkyrieWholeBodyPositionControlSimulation
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DefaultCommonAvatarEnvironment());
       simulationStarter.setUsePerfectSensors(true);
-      simulationStarter.setRobotInitialSetup(ValkyrieInitialSetupFactories.newCrawl1(jointMap));
+      ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newCrawl1(jointMap);
+      initialSetup.rootJointOrientation.prependYawRotation(1.35);
+      initialSetup.rootJointPosition.add(0.2, 0.1, 0);
+      simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       simulationStarter.getSCSInitialSetup().setRecordFrequency(10);
       simulationStarter.registerHighLevelControllerState(new HighLevelControllerStateFactory()

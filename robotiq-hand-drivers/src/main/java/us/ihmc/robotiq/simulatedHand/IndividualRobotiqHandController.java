@@ -8,7 +8,7 @@ import java.util.List;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -850,7 +850,7 @@ public class IndividualRobotiqHandController implements RobotController
          currentTrajectoryTime.set(MathTools.clamp(currentTrajectoryTime.getDoubleValue(), 0.0, trajectoryTime.getDoubleValue()));
       }
       yoPolynomial.compute(currentTrajectoryTime.getDoubleValue());
-      double alpha = MathTools.clamp(yoPolynomial.getPosition(), 0.0, 1.0);
+      double alpha = MathTools.clamp(yoPolynomial.getValue(), 0.0, 1.0);
 
       for (int i = 0; i < allFingerJoints.size(); i++)
       {

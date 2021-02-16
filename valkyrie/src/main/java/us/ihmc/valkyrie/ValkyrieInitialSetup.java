@@ -17,7 +17,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -49,13 +49,13 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       setActuatorPositions(robot, jointMap);
       positionRobotInWorld(robot);
    }
 
-   private void setActuatorPositions(FloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   private void setActuatorPositions(FloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {

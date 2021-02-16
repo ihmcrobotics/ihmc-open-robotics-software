@@ -17,7 +17,7 @@ public class LookAndStepBehaviorAPI
 {
    private static final ROS2Topic<?> LOOK_AND_STEP_BEHAVIOR = ROS2Tools.IHMC_ROOT.withModule(ROS2Tools.BEHAVIOR_MODULE_NAME + "/look_and_step");
 
-   public static final ROS2Topic<PlanarRegionsListMessage> REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.REALSENSE_SLAM_REGIONS;
+   public static final ROS2Topic<PlanarRegionsListMessage> REGIONS_FOR_FOOTSTEP_PLANNING = ROS2Tools.MAPSENSE_REGIONS;
 
    /**
     * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
@@ -45,6 +45,9 @@ public class LookAndStepBehaviorAPI
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
+   /** Starts the look and step behavior onto a precomputed body path */
+   public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathInput = topic("BodyPathInput");
+
    /*
     * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
     */
@@ -59,6 +62,7 @@ public class LookAndStepBehaviorAPI
 
    // Visualization only topics
    public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
+   public static final MessagerAPIFactory.Topic<Boolean> ToggleAllVisualization = topic("ToggleAllVisualization");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> FootstepPlanForUI = topic("FootstepPlanForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<MinimalFootstep>> LastCommandedFootsteps = topic("LastCommandedFootsteps");

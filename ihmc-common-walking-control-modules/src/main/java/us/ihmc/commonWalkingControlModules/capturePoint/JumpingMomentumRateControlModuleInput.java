@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
-import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 
 import java.util.List;
 
@@ -10,10 +13,11 @@ public class JumpingMomentumRateControlModuleInput
 {
    private double omega0;
    private double timeInState;
+   private double timeAtStartOfSignal;
    private boolean minimizeAngularMomentumRate;
    private boolean inFlight;
-   private List<Trajectory3D> vrpTrajectories;
-   private List<? extends ContactStateProvider> contactStateProviders;
+   private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(6));
+   private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
    public void setOmega0(double omega0)
    {
@@ -55,19 +59,23 @@ public class JumpingMomentumRateControlModuleInput
       return inFlight;
    }
 
-   public void setVrpTrajectories(List<Trajectory3D> vrpTrajectories)
+   public void setVrpTrajectories(List<? extends Polynomial3DReadOnly> vrpTrajectories)
    {
-      this.vrpTrajectories = vrpTrajectories;
+      this.vrpTrajectories.clear();
+      for (int i = 0; i < vrpTrajectories.size(); i++)
+         this.vrpTrajectories.add().set(vrpTrajectories.get(i));
    }
 
-   public List<Trajectory3D> getVrpTrajectories()
+   public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
    }
 
    public void setContactStateProvider(List<? extends ContactStateProvider> contactStateProviders)
    {
-      this.contactStateProviders = contactStateProviders;
+      this.contactStateProviders.clear();
+      for (int i = 0; i < contactStateProviders.size(); i++)
+         this.contactStateProviders.add().set(contactStateProviders.get(i));
    }
 
    public List<? extends ContactStateProvider> getContactStateProviders()
@@ -80,8 +88,8 @@ public class JumpingMomentumRateControlModuleInput
       omega0 = other.omega0;
       timeInState = other.timeInState;
       inFlight = other.inFlight;
-      vrpTrajectories = other.vrpTrajectories;
-      contactStateProviders = other.contactStateProviders;
+      setVrpTrajectories(other.vrpTrajectories);
+      setContactStateProvider(other.contactStateProviders);
       minimizeAngularMomentumRate = other.minimizeAngularMomentumRate;
    }
 

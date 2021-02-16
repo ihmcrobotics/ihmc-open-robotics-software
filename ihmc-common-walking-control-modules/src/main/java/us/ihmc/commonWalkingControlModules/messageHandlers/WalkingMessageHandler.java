@@ -183,9 +183,15 @@ public class WalkingMessageHandler
                   // If we queued a command and the previous already finished, just continue as if everything is normal
                   break;
                }
-               else
+               else if (lastCommandID.getValue() == 0L)
                {
                   LogTools.warn("Can not queue footsteps if no footsteps are present. Send an override message instead. Command ignored.");
+
+               }
+               else
+               {
+                  LogTools.warn("Queued footstep previous command id {} != controller's previous command id {}."
+                                + " Send an override message instead. Command ignored.", command.getPreviousCommandId(), lastCommandID.getValue());
                }
                return;
             }

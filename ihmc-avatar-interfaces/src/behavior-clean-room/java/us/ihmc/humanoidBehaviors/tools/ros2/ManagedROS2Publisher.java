@@ -17,12 +17,14 @@ public class ManagedROS2Publisher<T> implements ROS2PublisherBasics<T>
    }
 
    @Override
-   public void publish(T data) throws IOException
+   public boolean publish(T data) throws IOException
    {
       if (enabled.get())
       {
          publisher.publish(data);
+         return true;
       }
+      return false;
    }
 
    @Override

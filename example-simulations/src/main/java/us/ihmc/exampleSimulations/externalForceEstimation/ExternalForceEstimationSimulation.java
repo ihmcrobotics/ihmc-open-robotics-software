@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
-import org.ejml.data.DMatrixRMaj;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.ForceEstimatorDynamicMatrixUpdater;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.PredefinedContactExternalForceSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -22,9 +22,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
-
 /*package private*/ class ExternalForceEstimationSimulation
 {
    private static double controlDT = 5.0e-5;
@@ -36,20 +33,19 @@ import java.util.function.Consumer;
    private ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", registry);
    private final Vector3D externalForcePointOffset = new Vector3D();
 
-   private BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
+   private ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
    public ExternalForceEstimationSimulation()
    {
 //      robot = setupFixedBaseArmRobot();
       robot = setupMovingBaseRobotArm();
 
-      Consumer<DMatrixRMaj> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      ExternalWrenchEstimator externalWrenchEstimator = new ExternalWrenchEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
-      externalWrenchEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
-      robot.setController(externalWrenchEstimator);
+      PredefinedContactExternalForceSolver externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
+      externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
+      robot.setController(externalForceSolver);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);
@@ -79,11 +75,12 @@ import java.util.function.Consumer;
    private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox)
    {
       DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
-      this.dynamicMatrixSetter = (m, c) ->
+      this.dynamicMatrixUpdater = (m, cqg, tau) ->
       {
          dynamicsMatrixCalculator.compute();
          dynamicsMatrixCalculator.getBodyMassMatrix(m);
-         dynamicsMatrixCalculator.getBodyCoriolisMatrix(c);
+         dynamicsMatrixCalculator.getBodyCoriolisMatrix(cqg);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
    }
 

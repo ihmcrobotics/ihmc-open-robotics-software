@@ -21,7 +21,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -125,9 +126,9 @@ public class ModifiedOptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvi
    private final RecyclingArrayList<FramePoint3D> dcmCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> comCornerPoints = new RecyclingArrayList<>(FramePoint3D::new);
 
-   private final RecyclingArrayList<Trajectory3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Trajectory3D(4));
+   private final RecyclingArrayList<Polynomial3D> vrpTrajectoryPool = new RecyclingArrayList<>(() -> new Polynomial3D(4));
    private final RecyclingArrayList<LineSegment3D> vrpSegments = new RecyclingArrayList<>(LineSegment3D::new);
-   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private final List<Polynomial3D> vrpTrajectories = new ArrayList<>();
 
    private CornerPointViewer viewer = null;
    private BagOfBalls comTrajectoryViewer = null;
@@ -365,7 +366,7 @@ public class ModifiedOptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvi
          compute(segmentId, duration, comPositionToThrowAway, comVelocityToThrowAway, comAccelerationToThrowAway, dcmPositionToThrowAway,
                  dcmVelocityToThrowAway, vrpEndPosition, vrpEndVelocity, ecmpPositionToThrowAway);
 
-         Trajectory3D trajectory3D = vrpTrajectoryPool.add();
+         Polynomial3D trajectory3D = vrpTrajectoryPool.add();
          trajectory3D.setCubic(0.0, duration, vrpStartPosition, vrpStartVelocity, vrpEndPosition, vrpEndVelocity);
          vrpTrajectories.add(trajectory3D);
 
@@ -617,8 +618,14 @@ public class ModifiedOptimizedCoMTrajectoryPlanner implements CoMTrajectoryProvi
    }
 
    @Override
-   public List<Trajectory3D> getVRPTrajectories()
+   public List<Polynomial3D> getVRPTrajectories()
    {
       return vrpTrajectories;
+   }
+
+   @Override
+   public MultipleSegmentPositionTrajectoryGenerator<?> getCoMTrajectory()
+   {
+      throw new UnsupportedOperationException();
    }
 }

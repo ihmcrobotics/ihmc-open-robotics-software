@@ -11,7 +11,7 @@ import us.ihmc.quadrupedRobotics.planning.ContactState;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedCenterOfPressureTools;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactPhase;
 import us.ihmc.quadrupedRobotics.planning.QuadrupedTimedContactSequence;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.robotSide.*;
 import us.ihmc.robotics.time.TimeInterval;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -273,7 +273,7 @@ public class QuadrupedPiecewisePolynomialCopTrajectory
             if (currentTime >= startTime && currentTime <= endTime)
             {
                polynomial.compute(currentTime - startTime);
-               double normalizedLeftSidePressure = polynomial.getPosition();
+               double normalizedLeftSidePressure = polynomial.getValue();
                double numberOfEndContacts = getNumberOfEndContacts(robotEnd, contactStateAtCurrentTime);
                double numberOfOppositeEndContacts = getNumberOfEndContacts(robotEnd.getOppositeEnd(), contactStateAtCurrentTime);
                if (numberOfEndContacts == 0)

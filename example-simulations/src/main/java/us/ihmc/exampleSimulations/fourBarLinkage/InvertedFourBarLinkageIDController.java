@@ -9,6 +9,7 @@ import java.util.Random;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -28,6 +30,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.spatial.SpatialVector;
+import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.GainCalculator;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -39,6 +43,7 @@ import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
+import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -53,6 +58,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class InvertedFourBarLinkageIDController implements RobotController
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean APPLY_EXTERNAL_FORCE = true;
+   private static final Vector3D externalForcePointOffset = new Vector3D(0.05, 0.0, 0.05);
+   private static final SpatialVector externalSpatialForce = new SpatialVector(worldFrame, new Vector3D(0, 10, 0), new Vector3D(100, 0, 0));
+
    private final YoRegistry registry = new YoRegistry(getName());
    private final RigidBodyBasics rootBody;
    private final FourBarKinematicLoopFunction fourBarKinematicLoop;
@@ -80,6 +90,8 @@ public class InvertedFourBarLinkageIDController implements RobotController
    private final YoDouble[] controllerJointVelocities;
    private final YoDouble[] desiredJointAccelerations;
    private final YoDouble[] inverseDynamicsJointEfforts;
+
+   private ExternalForcePoint wristExternalForcePoint = null;
 
    public InvertedFourBarLinkageIDController(InvertedFourBarLinkageRobotDescription robotDescription, Robot robot)
    {
@@ -130,6 +142,14 @@ public class InvertedFourBarLinkageIDController implements RobotController
          wristFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
          wristFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
          wristFunctionGenerator.setOffset(EuclidCoreRandomTools.nextDouble(random, 0.5 * wristRange - wristFunctionGenerator.amplitude.getValue()));
+
+         if (APPLY_EXTERNAL_FORCE)
+         {
+            wristExternalForcePoint = new ExternalForcePoint("disturbancePoint", externalForcePointOffset, robot);
+            wristExternalForcePoint.getYoForce().set(externalSpatialForce.getLinearPart());
+            wristExternalForcePoint.getYoMoment().set(externalSpatialForce.getAngularPart());
+            robot.getJoint(robotDescription.getWristJointName()).addExternalForcePoint(wristExternalForcePoint);
+         }
       }
       else
       {
@@ -196,6 +216,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
       readState();
       fourBarKinematicLoop.updateState(true, false);
       rootBody.updateFramesRecursively();
+      inverseDynamicsCalculator.setExternalWrenchesToZero();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -236,6 +257,18 @@ public class InvertedFourBarLinkageIDController implements RobotController
          double qd_wrist = wristJoint.getQd();
          double qdd_d_wrist = kp.getValue() * (q_d_wrist - q_wrist) + kd * (qd_d_wrist - qd_wrist) + wristFunctionGenerator.getAcceleration();
          wristJoint.setQdd(qdd_d_wrist);
+
+         if (APPLY_EXTERNAL_FORCE)
+         {
+            RigidBodyBasics hand = wristJoint.getSuccessor();
+            MovingReferenceFrame jointFrame = wristJoint.getFrameAfterJoint();
+            SpatialVector spatialVector = new SpatialVector(externalSpatialForce);
+            spatialVector.changeFrame(jointFrame);
+            Wrench externalWrench = new Wrench(hand.getBodyFixedFrame(), jointFrame);
+            externalWrench.set(spatialVector.getAngularPart(), spatialVector.getLinearPart(), new FramePoint3D(jointFrame, externalForcePointOffset));
+            externalWrench.changeFrame(hand.getBodyFixedFrame());
+            inverseDynamicsCalculator.setExternalWrench(hand, externalWrench);
+         }
       }
 
       fourBarKinematicLoop.updateState(true, true);
@@ -276,7 +309,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
    static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)
    {
-      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      RigidBody rootBody = new RigidBody("elevator", worldFrame);
       for (JointDescription rootJoint : description.getRootJoints())
          addJointRecursive(rootJoint, rootBody);
       for (JointDescription rootJoint : description.getRootJoints())
@@ -285,6 +318,15 @@ public class InvertedFourBarLinkageIDController implements RobotController
    }
 
    static void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
+   {
+      JointBasics joint = createJoint(jointDescription, parentBody);
+      RigidBody successor = createRigidBody(joint, jointDescription.getLink());
+
+      for (JointDescription childJoint : jointDescription.getChildrenJoints())
+         addJointRecursive(childJoint, successor);
+   }
+
+   static JointBasics createJoint(JointDescription jointDescription, RigidBodyBasics parentBody)
    {
       JointBasics joint;
       String name = jointDescription.getName();
@@ -319,17 +361,16 @@ public class InvertedFourBarLinkageIDController implements RobotController
       {
          throw new IllegalStateException("Joint type not handled.");
       }
+      return joint;
+   }
 
-      LinkDescription linkDescription = jointDescription.getLink();
-
+   static RigidBody createRigidBody(JointBasics joint, LinkDescription linkDescription)
+   {
       String bodyName = linkDescription.getName();
       Matrix3DReadOnly momentOfInertia = linkDescription.getMomentOfInertiaCopy();
       double mass = linkDescription.getMass();
       Tuple3DReadOnly centerOfMassOffset = linkDescription.getCenterOfMassOffset();
-      RigidBody successor = new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
-
-      for (JointDescription childJoint : jointDescription.getChildrenJoints())
-         addJointRecursive(childJoint, successor);
+      return new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
    }
 
    static void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)

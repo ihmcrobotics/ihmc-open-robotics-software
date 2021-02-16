@@ -14,8 +14,6 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
@@ -25,21 +23,11 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
-import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
-import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanWithTextGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
-import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
-import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
+import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
-
-import java.util.ArrayList;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
@@ -48,25 +36,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(LookAndStepBehavior.DEFINITION, LookAndStepBehaviorUI::new);
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
-   private FootstepPlannerParametersBasics footstepPlannerParameters;
-   private SwingPlannerParametersBasics swingPlannerParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
 
-   private Messager behaviorMessager;
-   private ROS2PublisherMap ros2Publisher;
-   private FootstepPlanWithTextGraphic commandedFootsteps;
-   private FootstepPlanWithTextGraphic footstepPlanGraphic;
-   private FootstepPlanWithTextGraphic startAndGoalFootPoses;
-   private LivePlanarRegionsGraphic planarRegionsRegionsGraphic;
-   private PoseGraphic closestPointAlongPathGraphic;
-   private PoseGraphic subGoalGraphic;
-   private BodyPathPlanGraphic bodyPathPlanGraphic;
-   private PoseGraphic goalGraphic;
-   private volatile boolean reviewingBodyPath = true;
-
-   private SnappedPositionEditor snappedPositionEditor;
-   private OrientationYawEditor orientationYawEditor;
-
-   private FXUIActionMap placeGoalActionMap;
+   private final ROS2PublisherMap ros2Publisher;
+   private final LookAndStepVisualizationGroup lookAndStepVisualizationGroup;
+   private final WalkingGoalPlacementEditor walkingGoalPlacementEditor = new WalkingGoalPlacementEditor();
 
    @FXML private Button placeGoalButton;
    @FXML private Button publishSupportRegions;
@@ -76,10 +51,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TableView footstepPlannerParameterTable;
    @FXML private TableView swingPlannerParameterTable;
 
-   @Override
-   public void init(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public LookAndStepBehaviorUI(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
-      this.behaviorMessager = behaviorMessager;
+      super(sceneNode, visualizationPane, ros2Node, behaviorMessager, robotModel);
       ros2Publisher = new ROS2PublisherMap(ros2Node);
 
       View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
@@ -93,45 +67,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       rectangle.setFill(Color.BLUE);
       view2DGroup.getChildren().add(rectangle);
 
-      startAndGoalFootPoses = new FootstepPlanWithTextGraphic();
-      startAndGoalFootPoses.setColor(RobotSide.LEFT, Color.BLUE);
-      startAndGoalFootPoses.setColor(RobotSide.RIGHT, Color.BLUE);
-      startAndGoalFootPoses.setTransparency(0.4);
-      behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
-      commandedFootsteps = new FootstepPlanWithTextGraphic();
-      behaviorMessager.registerTopicListener(LastCommandedFootsteps, commandedFootsteps::generateMeshesAsynchronously);
-      footstepPlanGraphic = new FootstepPlanWithTextGraphic();
-      footstepPlanGraphic.setTransparency(0.2);
-      behaviorMessager.registerTopicListener(FootstepPlanForUI, footsteps ->
-      {
-         reviewingBodyPath = false;
-         footstepPlanGraphic.generateMeshesAsynchronously(footsteps);
-      });
-
-      planarRegionsRegionsGraphic = new LivePlanarRegionsGraphic(false);
-      behaviorMessager.registerTopicListener(PlanarRegionsForUI, planarRegions -> {
-         planarRegionsRegionsGraphic.acceptPlanarRegions(planarRegions);
-      });
-
-      goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
-
-      closestPointAlongPathGraphic = new PoseGraphic("Closest", Color.BLUE, 0.027);
-      behaviorMessager.registerTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
-      subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
-      behaviorMessager.registerTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
-
-      bodyPathPlanGraphic = new BodyPathPlanGraphic();
-      behaviorMessager.registerTopicListener(BodyPathPlanForUI,
-      bodyPathPlan ->
-      {
-         reviewingBodyPath = true;
-         ArrayList<Point3DReadOnly> bodyPathAsPoints = new ArrayList<>();
-         for (Pose3D pose3D : bodyPathPlan)
-         {
-            bodyPathAsPoints.add(pose3D.getPosition());
-         }
-         Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathAsPoints));
-      });
+      lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, behaviorMessager);
+      get3DGroup().getChildren().add(lookAndStepVisualizationGroup);
 
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
@@ -147,33 +84,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
       behaviorMessager.registerTopicListener(OperatorReviewEnabledToUI, enabled -> Platform.runLater(() -> operatorReviewCheckBox.setSelected(enabled)));
 
-      snappedPositionEditor = new SnappedPositionEditor(sceneNode);
-      orientationYawEditor = new OrientationYawEditor(sceneNode);
+      walkingGoalPlacementEditor.init(sceneNode, placeGoalButton, placedGoal -> ros2Publisher.publish(GOAL_INPUT, placedGoal));
 
-      placeGoalActionMap = new FXUIActionMap(startAction ->
-      {
-         placeGoalButton.setDisable(true);
-         snappedPositionEditor.edit(EditMode.BOTH, goalGraphic, exitType ->
-         {
-            placeGoalActionMap.triggerAction(exitType);
-         });
-      });
-      placeGoalActionMap.mapAction(FXUITrigger.POSITION_LEFT_CLICK, trigger ->
-      {
-         orientationYawEditor.edit(goalGraphic, exitType -> placeGoalActionMap.triggerAction(exitType));
-      });
-      placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
-      {
-         ros2Publisher.publish(GOAL_INPUT, new Pose3D(goalGraphic.getPose()));
-
-         placeGoalButton.setDisable(false);
-      });
-      placeGoalActionMap.mapAction(FXUITrigger.RIGHT_CLICK, trigger ->
-      {
-         placeGoalButton.setDisable(false);
-      });
-
-      behaviorMessager.registerTopicListener(ResetForUI, message -> clearGraphics());
+      behaviorMessager.registerTopicListener(ResetForUI, message -> lookAndStepVisualizationGroup.clearGraphics());
 
       // TODO Add joystick support
    }
@@ -181,38 +94,15 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @Override
    public void setEnabled(boolean enabled)
    {
+      lookAndStepVisualizationGroup.setEnabled(enabled);
       if (!enabled)
       {
-         clearGraphics();
-         Platform.runLater(() -> getChildren().remove(closestPointAlongPathGraphic));
-         Platform.runLater(() -> getChildren().remove(subGoalGraphic));
-         Platform.runLater(() -> getChildren().remove(goalGraphic));
-         Platform.runLater(() -> getChildren().remove(bodyPathPlanGraphic));
-         Platform.runLater(() -> getChildren().remove(planarRegionsRegionsGraphic));
-         Platform.runLater(() -> getChildren().remove(startAndGoalFootPoses));
-         Platform.runLater(() -> getChildren().remove(footstepPlanGraphic));
-         Platform.runLater(() -> getChildren().remove(commandedFootsteps));
+         Platform.runLater(() -> get3DGroup().getChildren().remove(walkingGoalPlacementEditor));
       }
       else
       {
-         Platform.runLater(() -> getChildren().add(closestPointAlongPathGraphic));
-         Platform.runLater(() -> getChildren().add(subGoalGraphic));
-         Platform.runLater(() -> getChildren().add(goalGraphic));
-         Platform.runLater(() -> getChildren().add(bodyPathPlanGraphic));
-         Platform.runLater(() -> getChildren().add(planarRegionsRegionsGraphic));
-         Platform.runLater(() -> getChildren().add(startAndGoalFootPoses));
-         Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
-         Platform.runLater(() -> getChildren().add(commandedFootsteps));
+         Platform.runLater(() -> get3DGroup().getChildren().add(walkingGoalPlacementEditor));
       }
-   }
-
-   private void clearGraphics()
-   {
-      planarRegionsRegionsGraphic.clear();
-      startAndGoalFootPoses.clear();
-      footstepPlanGraphic.clear();
-      commandedFootsteps.clear();
-      closestPointAlongPathGraphic.clear();
    }
 
    private void publishLookAndStepParameters()
@@ -224,31 +114,31 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private void publishFootstepPlanningParameters()
    {
-      behaviorMessager.submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
+      getBehaviorMessager().submitMessage(FootstepPlannerParameters, footstepPlannerParameters.getAllAsStrings());
    }
 
    private void publishSwingPlanningParameters()
    {
-      behaviorMessager.submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
+      getBehaviorMessager().submitMessage(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings());
    }
 
    @FXML public void placeGoalButton()
    {
-      placeGoalActionMap.start();
+      walkingGoalPlacementEditor.startGoalPlacement();
    }
 
    @FXML public void approve()
    {
-      behaviorMessager.submitMessage(ReviewApproval, true);
+      getBehaviorMessager().submitMessage(ReviewApproval, true);
    }
 
    @FXML public void reject()
    {
-      behaviorMessager.submitMessage(ReviewApproval, false);
-      if (reviewingBodyPath)
-         bodyPathPlanGraphic.clear();
+      getBehaviorMessager().submitMessage(ReviewApproval, false);
+      if (lookAndStepVisualizationGroup.isReviewingBodyPath())
+         lookAndStepVisualizationGroup.clearBodyPathPlanGraphic();
       else
-         footstepPlanGraphic.clear();
+         lookAndStepVisualizationGroup.clearFootstepPlanGraphic();
    }
 
    @FXML public void saveLookAndStepParameters()
@@ -268,12 +158,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void publishSupportRegions()
    {
-      behaviorMessager.submitMessage(PublishSupportRegions, new Object());
+      getBehaviorMessager().submitMessage(PublishSupportRegions, new Object());
    }
 
    @FXML public void operatorReviewCheckBox()
    {
-      behaviorMessager.submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
+      getBehaviorMessager().submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
    }
 
    @FXML public void reset()
@@ -284,10 +174,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @Override
    public void destroy()
    {
-      planarRegionsRegionsGraphic.destroy();
-      footstepPlanGraphic.destroy();
-      commandedFootsteps.destroy();
-      startAndGoalFootPoses.destroy();
-      bodyPathPlanGraphic.destroy();
+      lookAndStepVisualizationGroup.destroy();
    }
 }

@@ -2,31 +2,31 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRJumpMomentumController;
-import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.orientationControl.VariationalLQRController;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -48,6 +48,7 @@ public class JumpingMomentumRateControlModule
 
    private final YoFrameVector3D controlledCoMAcceleration;
 
+   private final InverseDynamicsCommandList inverseDynamicsCommandList = new InverseDynamicsCommandList();
    private final MomentumRateCommand momentumRateCommand = new MomentumRateCommand();
    private final SelectionMatrix6D selectionMatrix = new SelectionMatrix6D();
 
@@ -56,7 +57,7 @@ public class JumpingMomentumRateControlModule
    private double totalMass;
    private double timeInContactPhase;
 
-   private List<Trajectory3D> vrpTrajectories;
+   private List<? extends Polynomial3DReadOnly> vrpTrajectories;
    private List<? extends ContactStateProvider> contactStateProviders;
 
    private final ReferenceFrame centerOfMassFrame;
@@ -89,7 +90,7 @@ public class JumpingMomentumRateControlModule
       this.controllerToolbox = controllerToolbox;
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight", momentumOptimizationSettings.getLinearMomentumWeight(), registry);
+      linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight1", new Vector3D(10, 10, 10), registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
 
       minimizeAngularMomentumRate.set(true);
@@ -103,15 +104,17 @@ public class JumpingMomentumRateControlModule
          YoGraphicPosition achievedCMPViz = new YoGraphicPosition("Achieved CMP", yoAchievedCMP, 0.005, DarkRed(), GraphicType.BALL_WITH_CROSS);
          YoGraphicPosition desiredVRPViz = new YoGraphicPosition("Desired VRP", yoDesiredVRP, 0.012, Purple(), GraphicType.BALL_WITH_CROSS);
 
-         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.006, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition centerOfMassViz = new YoGraphicPosition("Center Of Mass", yoCenterOfMass, 0.01, Black(), GraphicType.BALL_WITH_CROSS);
+         YoGraphicPosition dcmViz = new YoGraphicPosition("DCM", controllerToolbox.getYoCapturePoint(), 0.01, Blue(), GraphicType.BALL_WITH_CROSS);
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", desiredVRPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", achievedCMPViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact("LinearMomentum", centerOfMassViz.createArtifact());
+         yoGraphicsListRegistry.registerArtifact("LinearMomentum", dcmViz.createArtifact());
       }
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
 
-      lqrMomentumController = new LQRJumpMomentumController(controllerToolbox.getOmega0Provider(), registry);
+      lqrMomentumController = new LQRJumpMomentumController(controllerToolbox.getOmega0Provider(), totalMass, registry);
       orientationController = new VariationalLQRController();
       orientationController.setInertia(controllerToolbox.getFullRobotModel().getChest().getInertia());
 
@@ -139,9 +142,12 @@ public class JumpingMomentumRateControlModule
       controllerCoreOutput.getLinearMomentumRate(achievedLinearMomentumRate);
    }
 
-   public MomentumRateCommand getMomentumRateCommand()
+   public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
-      return momentumRateCommand;
+      inverseDynamicsCommandList.clear();
+      inverseDynamicsCommandList.addCommand(momentumRateCommand);
+//      inverseDynamicsCommandList.addCommand(lqrMomentumController.getMomentumRateCostCommand());
+      return inverseDynamicsCommandList;
    }
 
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
@@ -158,12 +164,17 @@ public class JumpingMomentumRateControlModule
       computeDesiredAngularMomentumRateOfChange();
 
       selectionMatrix.resetSelection();
+//      selectionMatrix.clearLinearSelection();
       if (!minimizeAngularMomentumRate.getBooleanValue())
-         selectionMatrix.setToLinearSelectionOnly();
+         selectionMatrix.clearAngularSelection();
 
       momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
+
+      LinearMomentumRateCostCommand momentumRateCostCommand = lqrMomentumController.getMomentumRateCostCommand();
+      momentumRateCostCommand.setSelectionMatrixToIdentity();
+      momentumRateCostCommand.setWeights(linearMomentumRateWeight);
    }
 
    public void computeAchievedCMP()
@@ -191,13 +202,21 @@ public class JumpingMomentumRateControlModule
    private void computeDesiredLinearMomentumRateOfChange()
    {
       lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
-      lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
+      lqrMomentumController.computeControlInput(currentState, 0.0);//timeInContactPhase);
 
       if (inFlight)
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
       else
+      {
+//         vrpTrajectories.get(0).compute(0.0);
+//         yoDesiredVRP.set(vrpTrajectories.get(0).getPosition());
+//         linearMomentumRateOfChange.setToZero(worldFrame);
+//         linearMomentumRateOfChange.sub(yoCenterOfMass, yoDesiredVRP);
+//         linearMomentumRateOfChange.scale(omega0 * omega0);
          linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+      }
 
+      // TODO double check the momentum rate command here is the same
       controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
 
       linearMomentumRateOfChange.changeFrame(worldFrame);
@@ -216,6 +235,7 @@ public class JumpingMomentumRateControlModule
 //      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
 //      orientationController.getDesiredTorque(angularMomentumRateOfChange);
+
       angularMomentumRateOfChange.changeFrame(worldFrame);
    }
 

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class LinearDynamicSystemTest
 {
@@ -183,22 +183,22 @@ public class LinearDynamicSystemTest
       TransferFunctionMatrix sIMinusAInverseMatrix = linearDynamicSystem.getTransferFunctionMatrix();
 
       // Expected transfer functions:
-      Polynomial sMinusOne = new Polynomial(new double[] {1.0, -1.0});
-      Polynomial sMinusThree = new Polynomial(new double[] {1.0, -3.0});
-      Polynomial sPlusTwo = new Polynomial(new double[] {1.0, 2.0});
+      ObsoletePolynomial sMinusOne = new ObsoletePolynomial(new double[] {1.0, -1.0});
+      ObsoletePolynomial sMinusThree = new ObsoletePolynomial(new double[] {1.0, -3.0});
+      ObsoletePolynomial sPlusTwo = new ObsoletePolynomial(new double[] {1.0, 2.0});
 
       // Note: There is pole/zero cancellation. Using cofactors for inverse does not currently discover them!
       //      Polynomial denominatorOne = sMinusOne.times(sMinusThree);
-      Polynomial denominatorTwo = sMinusOne.times(sMinusThree).times(sPlusTwo);
-      Polynomial numerator00 = new Polynomial(1.0, 0.0, -4.0); // new Polynomial(new double[]{1.0, -2.0});
-      Polynomial numerator01 = new Polynomial(-2.0, 7.0);
-      Polynomial numerator02 = new Polynomial(3.0, -5.0);
-      Polynomial numerator10 = new Polynomial(1.0, 2.0); // = new Polynomial(new double[]{1.0});
-      Polynomial numerator11 = new Polynomial(1.0, -1.0, -5.0);
-      Polynomial numerator12 = new Polynomial(1.0, 1.0);
-      Polynomial numerator20 = new Polynomial(1.0, 2.0); // new Polynomial(new double[]{1.0});
-      Polynomial numerator21 = new Polynomial(3.0, -8.0);
-      Polynomial numerator22 = new Polynomial(1.0, -3.0, 4.0);
+      ObsoletePolynomial denominatorTwo = sMinusOne.times(sMinusThree).times(sPlusTwo);
+      ObsoletePolynomial numerator00 = new ObsoletePolynomial(1.0, 0.0, -4.0); // new Polynomial(new double[]{1.0, -2.0});
+      ObsoletePolynomial numerator01 = new ObsoletePolynomial(-2.0, 7.0);
+      ObsoletePolynomial numerator02 = new ObsoletePolynomial(3.0, -5.0);
+      ObsoletePolynomial numerator10 = new ObsoletePolynomial(1.0, 2.0); // = new Polynomial(new double[]{1.0});
+      ObsoletePolynomial numerator11 = new ObsoletePolynomial(1.0, -1.0, -5.0);
+      ObsoletePolynomial numerator12 = new ObsoletePolynomial(1.0, 1.0);
+      ObsoletePolynomial numerator20 = new ObsoletePolynomial(1.0, 2.0); // new Polynomial(new double[]{1.0});
+      ObsoletePolynomial numerator21 = new ObsoletePolynomial(3.0, -8.0);
+      ObsoletePolynomial numerator22 = new ObsoletePolynomial(1.0, -3.0, 4.0);
       TransferFunction t00 = new TransferFunction(numerator00, denominatorTwo); // denominatorOne);
       TransferFunction t01 = new TransferFunction(numerator01, denominatorTwo);
       TransferFunction t02 = new TransferFunction(numerator02, denominatorTwo);
@@ -240,10 +240,10 @@ public class LinearDynamicSystemTest
       linearDynamicSystem.setMatrixC(matrixC);
 
       TransferFunctionMatrix matrixG = linearDynamicSystem.getTransferFunctionMatrix();
-      Polynomial numeratorG00 = new Polynomial(new double[] {7.0, -8.0});
-      Polynomial numeratorG01 = new Polynomial(new double[] {1.0, 6.0, -14.0});
-      Polynomial numeratorG10 = new Polynomial(new double[] {1.0, 2.0, -2.0});
-      Polynomial numeratorG11 = new Polynomial(new double[] {3.0, 4.0});
+      ObsoletePolynomial numeratorG00 = new ObsoletePolynomial(new double[] {7.0, -8.0});
+      ObsoletePolynomial numeratorG01 = new ObsoletePolynomial(new double[] {1.0, 6.0, -14.0});
+      ObsoletePolynomial numeratorG10 = new ObsoletePolynomial(new double[] {1.0, 2.0, -2.0});
+      ObsoletePolynomial numeratorG11 = new ObsoletePolynomial(new double[] {3.0, 4.0});
       TransferFunction tG00 = new TransferFunction(numeratorG00, denominatorTwo);
       TransferFunction tG01 = new TransferFunction(numeratorG01, denominatorTwo);
       TransferFunction tG10 = new TransferFunction(numeratorG10, denominatorTwo);
@@ -288,33 +288,33 @@ public class LinearDynamicSystemTest
       //      System.out.println("transferFunctionMatrix = \n" + transferFunctionMatrix);
       //      System.out.println("\ntransferFunctionMatrix(1, 3) = \n" + transferFunctionMatrix.get(1,3));
       // Expected transfer functions:
-      Polynomial denominator = new Polynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
+      ObsoletePolynomial denominator = new ObsoletePolynomial(new double[] {1.0, 0.0, 2.0, 0.0, 0.0});
       TransferFunction[][] expectedTransferFunctions = new TransferFunction[4][4];
 
-      expectedTransferFunctions[0][0] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0, 0.0), denominator);
-      expectedTransferFunctions[0][1] = new TransferFunction(new Polynomial(1.0, 0.0), denominator);
-      expectedTransferFunctions[0][2] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0), denominator);
-      expectedTransferFunctions[0][3] = new TransferFunction(new Polynomial(1.0), denominator);
-      expectedTransferFunctions[1][0] = new TransferFunction(new Polynomial(1.0, 0.0), denominator);
-      expectedTransferFunctions[1][1] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0, 0.0), denominator);
-      expectedTransferFunctions[1][2] = new TransferFunction(new Polynomial(1.0), denominator);
-      expectedTransferFunctions[1][3] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0), denominator);
-      expectedTransferFunctions[2][0] = new TransferFunction(new Polynomial(-1.0, 0.0, 0.0), denominator);
-      expectedTransferFunctions[2][1] = new TransferFunction(new Polynomial(1.0, 0.0, 0.0), denominator);
-      expectedTransferFunctions[2][2] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0, 0.0), denominator);
-      expectedTransferFunctions[2][3] = new TransferFunction(new Polynomial(1.0, 0.0), denominator);
-      expectedTransferFunctions[3][0] = new TransferFunction(new Polynomial(1.0, 0.0, 0.0), denominator);
-      expectedTransferFunctions[3][1] = new TransferFunction(new Polynomial(-1.0, 0.0, 0.0), denominator);
-      expectedTransferFunctions[3][2] = new TransferFunction(new Polynomial(1.0, 0.0), denominator);
-      expectedTransferFunctions[3][3] = new TransferFunction(new Polynomial(1.0, 0.0, 1.0, 0.0), denominator);
+      expectedTransferFunctions[0][0] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 1.0, 0.0), denominator);
+      expectedTransferFunctions[0][1] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0), denominator);
+      expectedTransferFunctions[0][2] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 1.0), denominator);
+      expectedTransferFunctions[0][3] = new TransferFunction(new ObsoletePolynomial(1.0), denominator);
+      expectedTransferFunctions[1][0] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0), denominator);
+      expectedTransferFunctions[1][1] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 1.0, 0.0), denominator);
+      expectedTransferFunctions[1][2] = new TransferFunction(new ObsoletePolynomial(1.0), denominator);
+      expectedTransferFunctions[1][3] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 1.0), denominator);
+      expectedTransferFunctions[2][0] = new TransferFunction(new ObsoletePolynomial(-1.0, 0.0, 0.0), denominator);
+      expectedTransferFunctions[2][1] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 0.0), denominator);
+      expectedTransferFunctions[2][2] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 1.0, 0.0), denominator);
+      expectedTransferFunctions[2][3] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0), denominator);
+      expectedTransferFunctions[3][0] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 0.0), denominator);
+      expectedTransferFunctions[3][1] = new TransferFunction(new ObsoletePolynomial(-1.0, 0.0, 0.0), denominator);
+      expectedTransferFunctions[3][2] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0), denominator);
+      expectedTransferFunctions[3][3] = new TransferFunction(new ObsoletePolynomial(1.0, 0.0, 1.0, 0.0), denominator);
 
       TransferFunctionMatrix expectedTransferFunctionMatrix = new TransferFunctionMatrix(expectedTransferFunctions);
       boolean passed = expectedTransferFunctionMatrix.epsilonEquals(transferFunctionMatrix, 1e-7);
 
       assertTrue(passed);
 
-      Polynomial numerator0 = new Polynomial(new double[] {1.0});
-      Polynomial numerator1 = new Polynomial(new double[] {1.0, 0.0, 1.0});
+      ObsoletePolynomial numerator0 = new ObsoletePolynomial(new double[] {1.0});
+      ObsoletePolynomial numerator1 = new ObsoletePolynomial(new double[] {1.0, 0.0, 1.0});
       TransferFunction t0 = new TransferFunction(numerator0, denominator);
       TransferFunction t1 = new TransferFunction(numerator1, denominator);
       TransferFunction[][] expectedTransferFunctionsWithBAndC = new TransferFunction[][] {{t0, t1}};
@@ -339,7 +339,7 @@ public class LinearDynamicSystemTest
       closedLoopSystem.getMatrixA();
 
       TransferFunctionMatrix closedLoopMatrix = closedLoopSystem.getTransferFunctionMatrix();
-      Polynomial characteristicEquation = closedLoopMatrix.get(0, 0).getDenominatorPolynomial();
+      ObsoletePolynomial characteristicEquation = closedLoopMatrix.get(0, 0).getDenominatorPolynomial();
 
       if (VERBOSE)
       {
@@ -347,7 +347,7 @@ public class LinearDynamicSystemTest
       }
 
       // Verify the roots of the characteristic equation are where the poles where place at:
-      Polynomial expectedCharacteristicEquation = new Polynomial(new double[] {1.0, 12.0, 46.0, 60.0, 25.0});
+      ObsoletePolynomial expectedCharacteristicEquation = new ObsoletePolynomial(new double[] {1.0, 12.0, 46.0, 60.0, 25.0});
 
       assertTrue(characteristicEquation.epsilonEquals(expectedCharacteristicEquation, 1e-7));
 

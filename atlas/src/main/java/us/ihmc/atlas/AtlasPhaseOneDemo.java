@@ -1,10 +1,9 @@
 package us.ihmc.atlas;
 
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.atlas.behaviors.coordinator.AtlasBuildingExplorationBehaviorUI;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorCoordinator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.environments.PhaseOneDemoEnvironment;
+import us.ihmc.avatar.environments.PhaseOneDemoEnvironment.StartingLocation;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
@@ -12,7 +11,6 @@ import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
@@ -41,34 +39,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class AtlasPhaseOneDemo
 {
    private static boolean START_LOOK_AND_STEP_UI = Boolean.parseBoolean(System.getProperty("start.look.and.step.ui"));
-   private static int STARTING_LOCATION = Integer.parseInt(System.getProperty("starting.location", "0"));
+   private static int STARTING_LOCATION = Integer.parseInt(System.getProperty("starting.location", "1"));
    private static boolean CREATE_PUSH_DOOR = Boolean.parseBoolean(System.getProperty("create.push.door", "true"));
    private static boolean CREATE_PULL_DOOR = Boolean.parseBoolean(System.getProperty("create.pull.door", "true"));
-   private static boolean CREATE_DEBRIS = Boolean.parseBoolean(System.getProperty("create.debris", "false"));
+   private static boolean CREATE_DEBRIS = Boolean.parseBoolean(System.getProperty("create.debris", "true"));
    private static boolean CREATE_BARREL = Boolean.parseBoolean(System.getProperty("create.barrel", "false"));
    private static boolean CREATE_STAIRS = Boolean.parseBoolean(System.getProperty("create.stairs", "true"));
    private static boolean CREATE_CINDER_BLOCK_FIELD = Boolean.parseBoolean(System.getProperty("create.cinder.block.field", "true"));
-
-   private enum StartingLocation
-   {
-      STARTING_BLOCK(-2.0, -1.0, 0.3, Math.toRadians(20.0)),
-      DEBRIS_PLATFORM(3.0, 0.0, 0.575, 0.0),
-      PUSH_DOOR(6.3, 0.0, 0.0, 0.0),
-      PULL_DOOR(8.8, 0.0, 0.0, 0.0),
-      STAIRS(11.75, 0.0, 0.0, 0.0);
-
-      private final Pose3D startingPose = new Pose3D();
-
-      StartingLocation(double x, double y, double z, double yaw)
-      {
-         startingPose.set(x, y, z, yaw, 0.0, 0.0);
-      }
-
-      Pose3D getPose()
-      {
-         return startingPose;
-      }
-   }
 
    private final AtomicBoolean ignoreDebris = new AtomicBoolean(false);
    private final PhaseOneDemoEnvironment environment;
@@ -145,28 +122,14 @@ public class AtlasPhaseOneDemo
    {
       // Publish planar regions
       PlanarRegionsList environmentWithoutDebrisRegions = environment.getEnvironmentRegions();
-      PlanarRegionsList debrisRegions = environment.getDebrisRegions();
-      PlanarRegionsList environmentWithDebrisRegions = new PlanarRegionsList();
-
-      for (int i = 0; i < environmentWithoutDebrisRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = environmentWithoutDebrisRegions.getPlanarRegion(i);
-         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
-         environmentWithDebrisRegions.addPlanarRegion(region);
-      }
-      for (int i = 0; i < debrisRegions.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion region = debrisRegions.getPlanarRegion(i);
-         region.setRegionId(environmentWithDebrisRegions.getNumberOfPlanarRegions());
-         environmentWithDebrisRegions.addPlanarRegion(region);
-      }
+      PlanarRegionsList environmentWithDebrisRegions = environment.getEnvironmentWithDebrisRegions();
 
       ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
       PlanarRegionSLAMMapper realsensePlanarRegionSLAM = new PlanarRegionSLAMMapper();
 
       AtlasRobotModel robotModel = createRobotModel();
-      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentWithDebrisRegions, robotModel, ros2Node);
+      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentWithDebrisRegions, robotModel, ros2Node, 20.0, 50000);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environmentWithDebrisRegions, robotModel, ros2Node);
 
       // might be a weird delay with threads at 0.5 hz depending on each other

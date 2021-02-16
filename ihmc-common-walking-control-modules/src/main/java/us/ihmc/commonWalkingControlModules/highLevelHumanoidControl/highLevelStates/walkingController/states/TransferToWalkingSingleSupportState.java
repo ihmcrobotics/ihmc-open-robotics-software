@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -30,9 +29,9 @@ public class TransferToWalkingSingleSupportState extends TransferState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfFootstepsToConsider = 3;
-   private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
-   private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+   private final int numberOfFootstepsToConsider;
+   private final Footstep[] footsteps;
+   private final FootstepTiming[] footstepTimings;
 
    private final DoubleProvider minimumTransferTime;
 
@@ -66,6 +65,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
+
+      numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
+      footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
+      footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
    }
 
    @Override
@@ -130,10 +133,15 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      feetManager.updateSwingTrajectoryPreview(transferToSide.getOppositeSide());
+      balanceManager.setSwingFootTrajectory(feetManager.getSwingTrajectory(transferToSide.getOppositeSide()));
       balanceManager.computeICPPlan();
 
       if (!doManualLiftOff())
-         switchToToeOffIfPossible();
+      {
+         if (switchToToeOffIfPossible())
+            feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+      }
 
       super.doAction(timeInState);
 
@@ -172,6 +180,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onEntry();
 
+      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 
       updateFootPlanOffset();

@@ -2,6 +2,8 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTree;
 
 import java.util.function.BooleanSupplier;
 
+import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+
 /**
  * A behavior tree action that draws from a boolean supplier.
  */
@@ -26,11 +28,11 @@ public class BehaviorTreeCondition implements BehaviorTreeAction
 
       if (success)
       {
-         return BehaviorTreeNodeStatus.SUCCESS;
+         return SUCCESS;
       }
       else
       {
-         return BehaviorTreeNodeStatus.FAILURE;
+         return FAILURE;
       }
    }
 }

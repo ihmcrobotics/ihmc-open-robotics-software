@@ -143,4 +143,10 @@ public class ExampleIndividualToEvaluateTwo extends IndividualToEvaluate
 
       return ret;
    }
+
+
+   @Override
+   public void replay()
+   {      
+   }
 }

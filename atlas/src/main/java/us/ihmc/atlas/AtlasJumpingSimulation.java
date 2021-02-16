@@ -12,8 +12,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -76,7 +76,7 @@ public class AtlasJumpingSimulation
       scs.simulate();
    }
 
-   private static MomentumOptimizationSettings getTestMomentumOptimizationSettings(DRCRobotJointMap jointMap, int numberOfContactableBodies)
+   private static MomentumOptimizationSettings getTestMomentumOptimizationSettings(HumanoidJointNameMap jointMap, int numberOfContactableBodies)
    {
       double jointAccelerationWeight = 1e-10;
       double jointJerkWeight = 0.0;

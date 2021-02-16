@@ -23,6 +23,7 @@ public class ROS2Tools
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
    public static final String REA_NODE_NAME = "REA_module";
+   public static final String GPU_REA_NODE_NAME = "GPU_based_REA_module";
    public static final String MAPPING_MODULE_NODE_NAME = "mapping_module";
    public static final String STEREO_REA_NODE_NAME = "SREA_module";
    public static final String LLAMA_NODE_NAME = "llama_network";
@@ -53,9 +54,11 @@ public class ROS2Tools
    public static final String REA_MODULE_NAME = "rea";
    public static final String MAPPING_MODULE_NAME = "map";
    public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
+   public static final String MAPSENSE_MODULE_NAME = "mapsense";
 
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
+   public static final String L515_NAME = "l515";
    public static final String T265_NAME = "t265";
    public static final String MULTISENSE_NAME = "multisense";
    public static final String INPUT = ROS2Topic.INPUT;
@@ -86,6 +89,9 @@ public class ROS2Tools
    public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
    public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
    public static final ROS2Topic<?> REALSENSE_SLAM_MODULE = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
+   public static final ROS2Topic<?> MAPSENSE_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
+
+   public static final ROS2Topic<TextToSpeechPacket> TEXT_STATUS = IHMC_ROOT.withTypeName(TextToSpeechPacket.class);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT
@@ -94,6 +100,7 @@ public class ROS2Tools
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");
+   public static final ROS2Topic<VideoPacket> L515_VIDEO = IHMC_ROOT.withModule(L515_NAME).withType(VideoPacket.class).withSuffix("video");
 
    public static final ROS2Topic<LidarScanMessage> MULTISENSE_LIDAR_SCAN = IHMC_ROOT.withTypeName(LidarScanMessage.class);
    public static final ROS2Topic<StereoVisionPointCloudMessage> MULTISENSE_LIDAR_POINT_CLOUD
@@ -103,6 +110,8 @@ public class ROS2Tools
 
    public static final ROS2Topic<StereoVisionPointCloudMessage> D435_POINT_CLOUD = IHMC_ROOT.withSuffix(D435_NAME)
                                                                                             .withTypeName(StereoVisionPointCloudMessage.class);
+   public static final ROS2Topic<StereoVisionPointCloudMessage> L515_POINT_CLOUD = IHMC_ROOT.withSuffix(L515_NAME)
+                                                                                            .withTypeName(StereoVisionPointCloudMessage.class);
    public static final ROS2Topic<StampedPosePacket> T265_POSE = IHMC_ROOT.withSuffix(T265_NAME).withTypeName(StampedPosePacket.class);
 
    /** Output regions from Lidar (Multisense) from REA */
@@ -111,6 +120,7 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> BIPEDAL_SUPPORT_REGIONS = REA_SUPPORT_REGIONS.withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from Atlas Realsense SLAM module */
    public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> MAPSENSE_REGIONS = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
 
@@ -149,6 +159,11 @@ public class ROS2Tools
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
    {
       return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
+   }
+
+   public static ROS2Topic<StampedPosePacket> getPoseCorrectionTopic(String robotName)
+   {
+      return getControllerInputTopic(robotName).withTypeName(StampedPosePacket.class);
    }
 
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
@@ -235,6 +250,16 @@ public class ROS2Tools
          exceptionHandler.handleException(e);
          return null;
       }
+   }
+
+   public static ROS2Node createInterprocessROS2Node(String nodeName)
+   {
+      return createROS2Node(PubSubImplementation.FAST_RTPS, nodeName, RUNTIME_EXCEPTION);
+   }
+
+   public static ROS2Node createIntraprocessROS2Node(String nodeName)
+   {
+      return createROS2Node(PubSubImplementation.INTRAPROCESS, nodeName, RUNTIME_EXCEPTION);
    }
 
    public static ROS2Node createROS2Node(PubSubImplementation pubSubImplementation, String nodeName)

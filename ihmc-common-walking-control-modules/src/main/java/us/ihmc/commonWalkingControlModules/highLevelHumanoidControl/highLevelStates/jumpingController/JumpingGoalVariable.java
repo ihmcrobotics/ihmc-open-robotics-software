@@ -63,4 +63,19 @@ public class JumpingGoalVariable extends YoSaveableModuleState
    {
       return flightDuration.getDoubleValue();
    }
+
+   public double getGoalHeight()
+   {
+      return goalHeight.getDoubleValue();
+   }
+
+   public double getGoalRotation()
+   {
+      return goalRotation.getDoubleValue();
+   }
+
+   public double getGoalFootWidth()
+   {
+      return goalFootWidth.getDoubleValue();
+   }
 }

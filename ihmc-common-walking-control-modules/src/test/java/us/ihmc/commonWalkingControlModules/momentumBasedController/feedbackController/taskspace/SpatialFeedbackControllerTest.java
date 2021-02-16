@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.RobotJointVelocityAccelerationIntegrator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MotionQPInputCalculator;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.convexOptimization.quadraticProgram.OASESConstrainedQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
@@ -96,7 +96,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
-      QPInput motionQPInput = new QPInput(MultiBodySystemTools.computeDegreesOfFreedom(joints));
+      QPInputTypeA motionQPInput = new QPInputTypeA(MultiBodySystemTools.computeDegreesOfFreedom(joints));
       DMatrixRMaj jointAccelerations = new DMatrixRMaj(0, 0);
       double damping = 0.001;
       RobotJointVelocityAccelerationIntegrator integrator = new RobotJointVelocityAccelerationIntegrator(controlDT);
@@ -173,7 +173,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      QPInput motionQPInput = new QPInput(numberOfDoFs);
+      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -276,7 +276,7 @@ public final class SpatialFeedbackControllerTest
       spatialFeedbackController.setEnabled(true);
 
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(jointsToOptimizeFor);
-      QPInput motionQPInput = new QPInput(numberOfDoFs);
+      QPInputTypeA motionQPInput = new QPInputTypeA(numberOfDoFs);
       LinearSolverDense<DMatrixRMaj> pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       DMatrixRMaj jInverse = new DMatrixRMaj(numberOfDoFs, 6);
       MotionQPInputCalculator motionQPInputCalculator = toolbox.getMotionQPInputCalculator();

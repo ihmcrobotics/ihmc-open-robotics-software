@@ -8,8 +8,6 @@ import java.util.Properties;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.SystemUtils;
-import org.fusesource.jansi.AnsiPrintStream;
-import org.fusesource.jansi.WindowsAnsiPrintStream;
 
 public class ProcessTools
 {
@@ -90,18 +88,19 @@ public class ProcessTools
 
    public static PrintStream createJansiFilteredStream(Path outputFile) throws IOException
    {
-      return createJansiFilteredStream(Files.newOutputStream(outputFile));
+      return new PrintStream(Files.newOutputStream(outputFile));
    }
 
-   public static PrintStream createJansiFilteredStream(OutputStream outputStream) throws IOException
-   {
-      if (SystemUtils.IS_OS_WINDOWS)
-      {
-         return new WindowsAnsiPrintStream(new PrintStream(outputStream));
-      }
-      else
-      {
-         return new AnsiPrintStream(new PrintStream(outputStream));
-      }
-   }
+//   public static PrintStream createJansiFilteredStream(OutputStream outputStream) throws IOException
+//   {
+//      return new AnsiProcessor(outputStream);
+//      if (SystemUtils.IS_OS_WINDOWS)
+//      {
+//         return new WindowsAnsiPrintStream(new PrintStream(outputStream));
+//      }
+//      else
+//      {
+//         return new AnsiPrintStream(new PrintStream(outputStream), true);
+//      }
+//   }
 }

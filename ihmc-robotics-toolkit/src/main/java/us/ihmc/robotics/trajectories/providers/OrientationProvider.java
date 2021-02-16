@@ -1,8 +1,8 @@
 package us.ihmc.robotics.trajectories.providers;
 
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 
 public interface OrientationProvider
 {
-   public abstract void getOrientation(FrameQuaternion orientationToPack);
+   Orientation3DReadOnly getOrientation();
 }

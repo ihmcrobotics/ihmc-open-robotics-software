@@ -15,7 +15,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.robotics.math.trajectories.Trajectory;
+import us.ihmc.robotics.math.trajectories.core.Polynomial;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 
 /**
@@ -250,10 +250,10 @@ public class WholeBodyTrajectoryPointCalculator
             velocityFW.write(String.format("%.4f (%d)", time, indexOfTrajectory));
             for (String jointName : jointNames)
             {
-               Trajectory trajectory = jointNameToTrajectoryHolderMap.get(jointName).getTrajectory(indexOfTrajectory);
+               Polynomial trajectory = jointNameToTrajectoryHolderMap.get(jointName).getTrajectory(indexOfTrajectory);
                trajectory.compute(time);
 
-               positionFW.write(String.format("\t%.4f", trajectory.getPosition()));
+               positionFW.write(String.format("\t%.4f", trajectory.getValue()));
                velocityFW.write(String.format("\t%.4f", trajectory.getVelocity()));
             }
 
@@ -276,7 +276,7 @@ public class WholeBodyTrajectoryPointCalculator
       private final TDoubleArrayList positions = new TDoubleArrayList();
       private final TDoubleArrayList velocities = new TDoubleArrayList();
 
-      private final List<Trajectory> trajectories = new ArrayList<Trajectory>();
+      private final List<Polynomial> trajectories = new ArrayList<Polynomial>();
 
       private double velocityUpperBounds;
       private double velocityLowerBounds;
@@ -302,7 +302,7 @@ public class WholeBodyTrajectoryPointCalculator
          trajectories.clear();
          for (int i = 0; i < positions.size() - 1; i++)
          {
-            Trajectory cubic = new Trajectory(4);
+            Polynomial cubic = new Polynomial(4);
             cubic.setCubic(keyFrameTimes.get(i), keyFrameTimes.get(i + 1), positions.get(i), velocities.get(i), positions.get(i + 1), velocities.get(i + 1));
             trajectories.add(cubic);
          }
@@ -317,7 +317,7 @@ public class WholeBodyTrajectoryPointCalculator
          for (int i = 0; i < numberOfTicks; i++)
          {
             int indexOfTrajectory = findTrajectoryIndex(time);
-            Trajectory trajectory = trajectories.get(indexOfTrajectory);
+            Polynomial trajectory = trajectories.get(indexOfTrajectory);
             trajectory.compute(time);
             velocities.add(trajectory.getVelocity());
 
@@ -347,7 +347,7 @@ public class WholeBodyTrajectoryPointCalculator
          return velocities.get(i);
       }
 
-      public Trajectory getTrajectory(int i)
+      public Polynomial getTrajectory(int i)
       {
          return trajectories.get(i);
       }

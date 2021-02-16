@@ -6,9 +6,11 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersMessageHelper;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
@@ -25,6 +27,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> depthRegionPublisher;
+   private final IHMCROS2Publisher<OcTreeKeyListMessage> ocTreePublisher;
 
    private REACurrentStateProvider currentStateProvider = null;
    private AtomicReference<Boolean> isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
@@ -56,6 +59,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
       lidarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic);
       stereoRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic);
       depthRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, depthOutputTopic);
+      ocTreePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, OcTreeKeyListMessage.class, outputTopic);
    }
 
    public void registerMessager(Messager messager)
@@ -82,24 +86,27 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    }
 
    @Override
-   public void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated)
+   public void update(RegionFeaturesProvider regionFeaturesProvider, boolean planarRegionsHaveBeenUpdated, NormalOcTree ocTree)
    {
-      if (regionFeaturesProvider.getPlanarRegionsList() == null)
-         return;
+      if (regionFeaturesProvider.getPlanarRegionsList() != null && !regionFeaturesProvider.getPlanarRegionsList().isEmpty())
+      {
+         if (planarRegionsHaveBeenUpdated)
+            lastPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
 
-      if (regionFeaturesProvider.getPlanarRegionsList().isEmpty())
-         return;
+         planarRegionPublisher.publish(lastPlanarRegionsListMessage);
+         if (isUsingLidar.get())
+            lidarRegionPublisher.publish(lastPlanarRegionsListMessage);
+         if (isUsingStereoVision.get())
+            stereoRegionPublisher.publish(lastPlanarRegionsListMessage);
+         if (isUsingDepthCloud.get())
+            depthRegionPublisher.publish(lastPlanarRegionsListMessage);
+      }
 
-      if (planarRegionsHaveBeenUpdated)
-         lastPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
-
-      planarRegionPublisher.publish(lastPlanarRegionsListMessage);
-      if (isUsingLidar.get())
-         lidarRegionPublisher.publish(lastPlanarRegionsListMessage);
-      if (isUsingStereoVision.get())
-         stereoRegionPublisher.publish(lastPlanarRegionsListMessage);
-      if (isUsingDepthCloud.get())
-         depthRegionPublisher.publish(lastPlanarRegionsListMessage);
+      if (ocTree != null && ocTree.getRoot() != null)
+      {
+         OcTreeKeyListMessage ocTreeMessage = OcTreeMessageConverter.createOcTreeDataMessage(ocTree);
+         ocTreePublisher.publish(ocTreeMessage);
+      }
    }
 
    @Override

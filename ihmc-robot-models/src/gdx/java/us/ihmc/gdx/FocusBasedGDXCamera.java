@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
@@ -20,9 +21,14 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.gdx.input.GDXInputAdapter;
+import us.ihmc.gdx.input.GDXInputMode;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class FocusBasedGDXCamera extends Camera
 {
+   private final GDXInputAdapter gdxInputAdapter;
+
    private final FramePose3D cameraPose = new FramePose3D();
 
    private final Vector3D euclidDirection = new Vector3D();
@@ -40,7 +46,7 @@ public class FocusBasedGDXCamera extends Camera
    private double zoomSpeedFactor = 0.1;
    private double latitudeSpeed = 0.005;
    private double longitudeSpeed = 0.005;
-   private double translateSpeed = 5.0;
+   private double translateSpeedFactor = 0.5;
 
    private final FramePose3D focusPointPose = new FramePose3D();
    private double latitude = 0.0;
@@ -48,6 +54,7 @@ public class FocusBasedGDXCamera extends Camera
    private double roll;
    private double zoom = 10.0;
 
+   private final Model focusPointModel;
    private final ModelInstance focusPointSphere;
 
    private final Vector3D cameraOffsetUp;
@@ -55,7 +62,7 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
-   public FocusBasedGDXCamera()
+   public FocusBasedGDXCamera(GDXInputMode inputMode)
    {
       fieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
@@ -87,15 +94,28 @@ public class FocusBasedGDXCamera extends Camera
       material.set(TextureAttribute.createDiffuse(paletteTexture));
       material.set(ColorAttribute.createDiffuse(com.badlogic.gdx.graphics.Color.WHITE));
       modelBuilder.part(meshPart, material);
-      focusPointSphere = new ModelInstance(modelBuilder.end());
+      focusPointModel = modelBuilder.end();
+      focusPointSphere = new ModelInstance(focusPointModel);
 
       changeCameraPosition(-2.0, 0.7, 1.0);
 
       updateCameraPose();
+      update(true);
 
-      GDXFunctionalInputAdapter inputAdapter = new GDXFunctionalInputAdapter();
-      inputAdapter.setScrolled(this::scrolled);
-      inputAdapter.setTouchDragged(this::touchDragged);
+      gdxInputAdapter = new GDXInputAdapter(inputMode)
+      {
+         @Override
+         public boolean scrolled(float amountX, float amountY)
+         {
+            return FocusBasedGDXCamera.this.scrolled(amountX, amountY);
+         }
+
+         @Override
+         public boolean touchDraggedDelta(int deltaX, int deltaY)
+         {
+            return FocusBasedGDXCamera.this.touchDragged(deltaX, deltaY);
+         }
+      };
    }
 
    public ModelInstance getFocusPointSphere()
@@ -164,54 +184,25 @@ public class FocusBasedGDXCamera extends Camera
       position.set(cameraPose.getPosition().getX32(), cameraPose.getPosition().getY32(), cameraPose.getPosition().getZ32());
       direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
-
-      update(); // TODO: skip updating frustrum?
    }
 
-   public void render()
+   public boolean touchDragged(int deltaX, int deltaY)
    {
-      float tpf = Gdx.app.getGraphics().getDeltaTime();
-
-      if (Gdx.input.isKeyPressed(Input.Keys.W))
-      {
-         focusPointPose.appendTranslation(translateSpeed * tpf, 0.0, 0.0);
-      }
-      if (Gdx.input.isKeyPressed(Input.Keys.S))
-      {
-         focusPointPose.appendTranslation(-translateSpeed * tpf, 0.0, 0.0);
-      }
-      if (Gdx.input.isKeyPressed(Input.Keys.A))
-      {
-         focusPointPose.appendTranslation(0.0, translateSpeed * tpf, 0.0);
-      }
-      if (Gdx.input.isKeyPressed(Input.Keys.D))
-      {
-         focusPointPose.appendTranslation(0.0, -translateSpeed * tpf, 0.0);
-      }
-      if (Gdx.input.isKeyPressed(Input.Keys.Q))
-      {
-         focusPointPose.appendTranslation(0.0, 0.0, translateSpeed * tpf);
-      }
-      if (Gdx.input.isKeyPressed(Input.Keys.Z))
-      {
-         focusPointPose.appendTranslation(0.0, 0.0, -translateSpeed * tpf);
-      }
-
-      updateCameraPose();
-   }
-
-   public void touchDragged(int deltaX, int deltaY)
-   {
-      if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
+      if (gdxInputAdapter.isButtonPressed(Input.Buttons.LEFT))
       {
          latitude -= latitudeSpeed * deltaY;
          longitude += longitudeSpeed * deltaX;
+
+         return true;
       }
+
+      return false;
    }
 
-   public void scrolled(int amount)
+   public boolean scrolled(float amountX, float amountY)
    {
-      zoom = zoom + Math.signum(amount) * zoom * zoomSpeedFactor;
+      zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
+      return true;
    }
 
    // Taken from GDX PerspectiveCamera
@@ -219,6 +210,35 @@ public class FocusBasedGDXCamera extends Camera
    @Override
    public void update()
    {
+      float tpf = Gdx.app.getGraphics().getDeltaTime();
+
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.W))
+      {
+         focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+      }
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.S))
+      {
+         focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
+      }
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.A))
+      {
+         focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
+      }
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.D))
+      {
+         focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
+      }
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.Q))
+      {
+         focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
+      }
+      if (gdxInputAdapter.isKeyPressed(Input.Keys.Z))
+      {
+         focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
+      }
+
+      updateCameraPose();
+
       update(true);
    }
 
@@ -233,10 +253,26 @@ public class FocusBasedGDXCamera extends Camera
       combined.set(projection);
       Matrix4.mul(combined.val, view.val);
 
-      if (updateFrustum) {
+      if (updateFrustum)
+      {
          invProjectionView.set(combined);
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
       }
+   }
+
+   public void dispose()
+   {
+      focusPointModel.dispose();
+   }
+
+   private double getTranslateSpeedFactor()
+   {
+      return translateSpeedFactor * zoom;
+   }
+
+   public GDXInputAdapter getInputAdapter()
+   {
+      return gdxInputAdapter;
    }
 }

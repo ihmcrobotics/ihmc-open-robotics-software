@@ -5,7 +5,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -291,22 +290,13 @@ public class HumanoidKinematicsSimulation
       if (kinematicsSimulationParameters.getLogToFile())
       {
          Path incomingLogsDirectory;
-         if (kinematicsSimulationParameters.getIncomingLogsDirectory() == null)
-         {
-            incomingLogsDirectory = IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY;
-         }
-         else
-         {
-            incomingLogsDirectory = kinematicsSimulationParameters.getIncomingLogsDirectory();
-         }
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          registry,
                                                                          fullRobotModel.getElevator(),
                                                                          yoGraphicsListRegistry,
                                                                          100000,
-                                                                         0.01,
-                                                                         incomingLogsDirectory);
+                                                                         0.01);
          intraprocessYoVariableLogger.start();
       }
       if (kinematicsSimulationParameters.getCreateYoVariableServer())

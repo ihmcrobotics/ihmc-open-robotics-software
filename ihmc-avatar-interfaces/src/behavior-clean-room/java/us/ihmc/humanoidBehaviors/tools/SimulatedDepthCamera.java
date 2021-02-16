@@ -28,6 +28,7 @@ public class SimulatedDepthCamera
    private final double verticalFOV;
    private final double horizontalFOV;
    private final double range;
+   private final int numberOfPointsToGenerate;
    private final HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
    private final FramePose3D tempCameraPose = new FramePose3D();
    private final Point2D tempCircleOrigin = new Point2D();
@@ -36,8 +37,18 @@ public class SimulatedDepthCamera
 
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, double range, ReferenceFrame cameraFrame)
    {
+      this(verticalFOV, horizontalFOV, range, 50000, cameraFrame);
+   }
+
+   public SimulatedDepthCamera(double verticalFOV,
+                               double horizontalFOV,
+                               double range,
+                               int numberOfPointsToGenerate,
+                               ReferenceFrame cameraFrame)
+   {
       this.cameraFrame = cameraFrame;
       this.range = range;
+      this.numberOfPointsToGenerate = numberOfPointsToGenerate;
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;
 
@@ -87,8 +98,7 @@ public class SimulatedDepthCamera
       tempCameraPose.setToZero(cameraFrame);
       tempCameraPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      int numberOfPointsToGenerate = 50000;
-      double sphereRadius = 5.0;
+      double sphereRadius = 1.0;
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), sphereRadius, numberOfPointsToGenerate);
 
       ArrayList<Point3D> pointsInView = new ArrayList<>();;

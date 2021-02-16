@@ -1,9 +1,6 @@
 package us.ihmc.javaFXVisualizers;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleToIntFunction;
-import java.util.function.IntToDoubleFunction;
-import java.util.function.ToDoubleBiFunction;
 import java.util.function.ToDoubleFunction;
 import java.util.zip.CRC32;
 
@@ -11,12 +8,9 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -36,12 +30,12 @@ public class JavaFXRobotVisualizer
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] allJoints;
    private final int jointNameHash;
-   private final AtomicReference<RigidBodyTransform> newRootJointPoseReference = new AtomicReference<>(null);
-   private final AtomicReference<float[]> newJointConfigurationReference = new AtomicReference<>(null);
+   private final AtomicReference<Configuration> newConfigurationReference = new AtomicReference<>(null);
 
    private Runnable robotLoadedCallback;
    private boolean isRobotLoaded = false;
    private final Group rootNode = new Group();
+   private boolean isRobotConfigurationInitialized = false;
 
    private final AnimationTimer animationTimer;
 
@@ -50,9 +44,8 @@ public class JavaFXRobotVisualizer
       fullRobotModel = fullRobotModelFactory.createFullRobotModel();
 
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      
-      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(),
-                                                                           fullRobotModel.getIMUDefinitions());
+
+      jointNameHash = calculateJointNameHash(allJoints, fullRobotModel.getForceSensorDefinitions(), fullRobotModel.getIMUDefinitions());
 
       new Thread(() -> loadRobotModelAndGraphics(fullRobotModelFactory), "RobotVisualizerLoading").start();
 
@@ -66,16 +59,18 @@ public class JavaFXRobotVisualizer
             else if (rootNode.getChildren().isEmpty())
                rootNode.getChildren().add(robotRootNode);
 
-            RigidBodyTransform newRootJointPose = newRootJointPoseReference.getAndSet(null);
-            if (newRootJointPose != null)
-               fullRobotModel.getRootJoint().setJointConfiguration(newRootJointPose);
+            Configuration newConfiguration = newConfigurationReference.getAndSet(null);
 
-            float[] newJointConfiguration = newJointConfigurationReference.getAndSet(null);
-            if (newJointConfiguration != null)
+            if (newConfiguration != null)
             {
+               isRobotConfigurationInitialized = true;
+
+               fullRobotModel.getRootJoint().setJointConfiguration(newConfiguration.rootJointPose);
+
                for (int i = 0; i < allJoints.length; i++)
-                  allJoints[i].setQ(newJointConfiguration[i]);
+                  allJoints[i].setQ(newConfiguration.jointAngles[i]);
             }
+
             fullRobotModel.getElevator().updateFramesRecursively();
             graphicsRobot.update();
             robotRootNode.update();
@@ -93,20 +88,20 @@ public class JavaFXRobotVisualizer
       {
          crc.update(joint.getName().getBytes());
       }
-   
+
       for (ForceSensorDefinition forceSensorDefinition : forceSensorDefinitions)
       {
          crc.update(forceSensorDefinition.getSensorName().getBytes());
       }
-   
+
       for (IMUDefinition imuDefinition : imuDefinitions)
       {
          crc.update(imuDefinition.getName().getBytes());
       }
-   
+
       return (int) crc.getValue();
    }
-   
+
    private void loadRobotModelAndGraphics(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
       RobotDescription robotDescription = fullRobotModelFactory.getRobotDescription();
@@ -141,25 +136,17 @@ public class JavaFXRobotVisualizer
       if (robotConfigurationData.getJointNameHash() != jointNameHash)
          throw new RuntimeException("Joint names do not match for RobotConfigurationData");
 
-      newRootJointPoseReference.set(new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation()));
-      newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
+      newConfigurationReference.set(new Configuration(robotConfigurationData));
    }
 
    public void submitNewConfiguration(RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointAngles)
    {
-      newRootJointPoseReference.set(rootJointTransform);
-      float[] jointAngleArray = new float[allJoints.length];
-      for (int i = 0; i < allJoints.length; i++)
-      {
-         jointAngleArray[i] = (float) jointAngles.applyAsDouble(allJoints[i].getName());
-      }
-      newJointConfigurationReference.set(jointAngleArray);
+      newConfigurationReference.set(new Configuration(allJoints, rootJointTransform, jointAngles));
    }
 
    public void submitNewConfiguration(Tuple3DReadOnly rootJointTranslation, Orientation3DReadOnly rootJointOrientation, float[] jointAngles)
    {
-      newRootJointPoseReference.set(new RigidBodyTransform(rootJointOrientation, rootJointTranslation));
-      newJointConfigurationReference.set(jointAngles);
+      newConfigurationReference.set(new Configuration(rootJointTranslation, rootJointOrientation, jointAngles));
    }
 
    public void setRobotLoadedCallback(Runnable robotLoadedCallback)
@@ -175,5 +162,38 @@ public class JavaFXRobotVisualizer
    public Node getRootNode()
    {
       return rootNode;
+   }
+
+   public boolean isRobotConfigurationInitialized()
+   {
+      return isRobotConfigurationInitialized;
+   }
+
+   private static class Configuration
+   {
+      private final RigidBodyTransform rootJointPose;
+      private final float[] jointAngles;
+
+      public Configuration(RobotConfigurationData robotConfigurationData)
+      {
+         rootJointPose = new RigidBodyTransform(robotConfigurationData.getRootOrientation(), robotConfigurationData.getRootTranslation());
+         jointAngles = robotConfigurationData.getJointAngles().toArray();
+      }
+
+      public Configuration(OneDoFJointBasics[] allJoints, RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointNameToAngleFunction)
+      {
+         rootJointPose = rootJointTransform;
+         jointAngles = new float[allJoints.length];
+         for (int i = 0; i < allJoints.length; i++)
+         {
+            jointAngles[i] = (float) jointNameToAngleFunction.applyAsDouble(allJoints[i].getName());
+         }
+      }
+
+      public Configuration(Tuple3DReadOnly rootJointTranslation, Orientation3DReadOnly rootJointOrientation, float[] jointAngles)
+      {
+         rootJointPose = new RigidBodyTransform(rootJointOrientation, rootJointTranslation);
+         this.jointAngles = jointAngles;
+      }
    }
 }

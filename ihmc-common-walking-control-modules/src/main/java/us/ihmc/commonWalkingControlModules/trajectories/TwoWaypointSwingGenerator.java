@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -12,13 +11,16 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -58,8 +60,16 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final ArrayList<FramePoint3D> waypointPositions = new ArrayList<>();
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
 
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAcceleration = new FrameVector3D();
+
+   private final Vector3D initialPositionWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final Vector3D initialVelocityWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final Vector3D finalPositionWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private final Vector3D finalVelocityWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+
    private final FrameVector3D initialVelocityNoTimeDimension = new FrameVector3D();
-   private final FrameVector3D finalVelocityNoTimeDiemension = new FrameVector3D();
+   private final FrameVector3D finalVelocityNoTimeDimension = new FrameVector3D();
    private final FrameVector3D tempWaypointVelocity;
 
    private final FramePoint3D tempPoint3D = new FramePoint3D();
@@ -72,6 +82,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble minDistanceToStance;
    private final YoBoolean needToAdjustedSwingForSelfCollision;
    private final YoBoolean crossOverStep;
+
+   private boolean visualize = true;
 
    public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight,
                                     YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -137,6 +149,18 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.initialVelocity.setIncludingFrame(initialVelocity);
    }
 
+   public void setInitialConditionWeights(Tuple3DReadOnly initialPositionWeight, Tuple3DReadOnly initialVelocityWeight)
+   {
+      if (initialPositionWeight == null)
+         this.initialPositionWeight.set(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      else
+         this.initialPositionWeight.set(initialPositionWeight);
+      if (initialVelocityWeight == null)
+         this.initialVelocityWeight.set(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      else
+         this.initialVelocityWeight.set(initialVelocityWeight);
+   }
+
    @Override
    public void setFinalConditions(FramePoint3DReadOnly finalPosition, FrameVector3DReadOnly finalVelocity)
    {
@@ -144,17 +168,29 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.finalVelocity.setIncludingFrame(finalVelocity);
    }
 
+   public void setFinalConditionWeights(Tuple3DReadOnly finalPositionWeight, Tuple3DReadOnly finalVelocityWeight)
+   {
+      if (finalPositionWeight == null)
+         this.finalPositionWeight.set(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      else
+         this.finalPositionWeight.set(finalPositionWeight);
+      if (finalVelocityWeight == null)
+         this.finalVelocityWeight.set(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+      else
+         this.finalVelocityWeight.set(finalVelocityWeight);
+   }
+
    @Override
    public void setTrajectoryType(TrajectoryType trajectoryType, RecyclingArrayList<FramePoint3D> waypoints)
    {
       if (trajectoryType == TrajectoryType.CUSTOM && waypoints == null)
       {
-         PrintTools.warn("Recieved no waypoints but trajectory type is custom. Using default trajectory.");
+         LogTools.warn("Received no waypoints but trajectory type is custom. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else if (trajectoryType == TrajectoryType.CUSTOM && waypoints.size() != numberWaypoints)
       {
-         PrintTools.warn("Recieved unexpected amount of waypoints. Using default trajectory.");
+         LogTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
       else
@@ -262,16 +298,26 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       }
 
       initialVelocityNoTimeDimension.setIncludingFrame(initialVelocity);
-      finalVelocityNoTimeDiemension.setIncludingFrame(finalVelocity);
+      finalVelocityNoTimeDimension.setIncludingFrame(finalVelocity);
 
       initialVelocityNoTimeDimension.scale(stepTime.getDoubleValue());
-      finalVelocityNoTimeDiemension.scale(stepTime.getDoubleValue());
+      finalVelocityNoTimeDimension.scale(stepTime.getDoubleValue());
 
-      trajectory.setEndpointConditions(initialPosition, initialVelocityNoTimeDimension, finalPosition, finalVelocityNoTimeDiemension);
+      trajectory.setEndpointConditions(initialPosition, initialVelocityNoTimeDimension, finalPosition, finalVelocityNoTimeDimension);
+      trajectory.setEndpointWeights(initialPositionWeight, initialVelocityWeight, finalPositionWeight, finalVelocityWeight);
       trajectory.setWaypoints(waypointPositions);
       trajectory.initialize();
 
-      visualize();
+      if (visualize)
+         visualize();
+      else
+         hide();
+   }
+
+   public void setShouldVisualize(boolean visualize)
+   {
+      this.visualize = visualize;
+      trajectory.setShouldVisualize(visualize);
    }
 
    private final FrameVector2D xyDistanceToStance = new FrameVector2D();
@@ -378,6 +424,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       }
    }
 
+   public void hide()
+   {
+      if (waypointViz == null)
+         return;
+      waypointViz.reset();
+   }
+
    @Override
    public boolean doOptimizationUpdate()
    {
@@ -404,32 +457,28 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      trajectory.getPosition(positionToPack);
+      return trajectory.getPosition();
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      trajectory.getVelocity(velocityToPack);
-      velocityToPack.scale(1.0 / stepTime.getDoubleValue());
+      desiredVelocity.set(trajectory.getVelocity());
+      desiredVelocity.scale(1.0 / stepTime.getDoubleValue());
+
+      return desiredVelocity;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      trajectory.getAcceleration(accelerationToPack);
-      accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
-      accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
-   }
+      desiredAcceleration.set(trajectory.getAcceleration());
+      desiredAcceleration.scale(1.0 / stepTime.getDoubleValue());
+      desiredAcceleration.scale(1.0 / stepTime.getDoubleValue());
 
-   @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
+      return desiredAcceleration;
    }
 
    @Override
@@ -470,6 +519,62 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       waypointDataToPack.setTime(waypointTime);
       waypointDataToPack.setPosition(waypointPositions.get(waypointIndex));
       waypointDataToPack.setLinearVelocity(tempWaypointVelocity);
+   }
+
+   /**
+    * Computes the initial position from the optimized splines.
+    * <p>
+    * This is only useful when the endpoint conditions have been set up with actual weights such that
+    * the condition can differ from the given input in
+    * {@link #setInitialConditions(FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    */
+   public void getInitialPosition(FrameVector3DBasics initialPositionToPack)
+   {
+      trajectory.getInitialPosition(initialPositionToPack);
+      initialPositionToPack.scale(1.0 / stepTime.getValue());
+   }
+
+   /**
+    * Computes the initial velocity from the optimized splines.
+    * <p>
+    * This is only useful when the endpoint conditions have been set up with actual weights such that
+    * the condition can differ from the given input in
+    * {@link #setInitialConditions(FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    */
+   public void getInitialVelocity(FrameVector3DBasics initialVelocityToPack)
+   {
+      trajectory.getInitialVelocity(initialVelocityToPack);
+      initialVelocityToPack.scale(1.0 / stepTime.getValue());
+   }
+
+   /**
+    * Computes the final position from the optimized splines.
+    * <p>
+    * This is only useful when the endpoint conditions have been set up with actual weights such that
+    * the condition can differ from the given input in
+    * {@link #setFinalConditions(FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    */
+   public void getFinalPosition(FrameVector3DBasics finalPositionToPack)
+   {
+      trajectory.getFinalPosition(finalPositionToPack);
+      finalPositionToPack.scale(1.0 / stepTime.getValue());
+   }
+
+   /**
+    * Computes the final velocity from the optimized splines.
+    * <p>
+    * This is only useful when the endpoint conditions have been set up with actual weights such that
+    * the condition can differ from the given input in
+    * {@link #setFinalConditions(FramePoint3DReadOnly, FrameVector3DReadOnly)}.
+    * </p>
+    */
+   public void getFinalVelocity(FrameVector3DBasics finalVelocityToPack)
+   {
+      trajectory.getFinalVelocity(finalVelocityToPack);
+      finalVelocityToPack.scale(1.0 / stepTime.getValue());
    }
 
    public FramePoint3DReadOnly getWaypoint(int index)

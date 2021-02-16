@@ -8,23 +8,42 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 public class ValkyriePositionControlledRobotSimulationEndToEndTest extends HumanoidPositionControlledRobotSimulationEndToEndTest
 {
-   private ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+   private final double dt = 8.0e-4;
+   private ValkyrieRobotModel robotModel;
 
    @Override
-   public DRCRobotModel getRobotModel()
+   public ValkyrieRobotModel getRobotModel()
    {
+      if (robotModel == null)
+      {
+         robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+         robotModel.setSimulationLowLevelControllerFactory(new ValkyrieSimulationLowLevelControllerFactory(robotModel.getJointMap(), dt));
+         robotModel.setSimulateDT(dt);
+         robotModel.setControllerDT(dt);
+         robotModel.setEstimatorDT(dt);
+      }
       return robotModel;
+   }
+
+   @Override
+   protected DRCRobotModel getGhostRobotModel()
+   {
+      return new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
    }
 
    @Override
    protected HighLevelControllerParameters getPositionControlParameters(HighLevelControllerName positionControlState)
    {
-      return new ValkyrieSimulationPositionControlParameters(robotModel.getHighLevelControllerParameters(), robotModel.getJointMap(), positionControlState);
+      return new ValkyrieSimulationPositionControlParameters(getRobotModel().getHighLevelControllerParameters(),
+                                                             getRobotModel().getJointMap(),
+                                                             positionControlState);
    }
 
    @Test
@@ -39,5 +58,14 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
    public void testPositionController(TestInfo testInfo) throws Exception
    {
       super.testPositionController(testInfo);
+   }
+
+   @Test
+   public void testCrawl1ToDabScript(TestInfo testInfo) throws Exception
+   {
+      runProcessedScriptTest(testInfo,
+                             ValkyrieRobotModel.class.getClassLoader().getResourceAsStream("multiContact/scripts/20200930_144631_Crawl1ToDab.json"),
+                             ValkyrieInitialSetupFactories.newCrawl1(getRobotModel().getJointMap()),
+                             new FlatGroundEnvironment());
    }
 }

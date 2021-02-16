@@ -2,14 +2,16 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.YoSaveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -20,19 +22,29 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+   private final RecyclingArrayList<ContactPlaneProvider> contactStateProviders = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
-   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
-   private final FramePoint2D footMidpoint = new FramePoint2D();
+   private final FramePoint3D tempFramePoint = new FramePoint3D();
+   private final FramePoint3D footMidpoint = new FramePoint3D();
 
-   private final FramePoint2D goalMidpoint = new FramePoint2D();
+   private final FramePose3D midFootPose = new FramePose3D();
    private final FramePose3D midstancePose = new FramePose3D();
    private final PoseReferenceFrame midstanceFrame = new PoseReferenceFrame("midstanceFrame", worldFrame);
    private final ZUpFrame midstanceZUpFrame = new ZUpFrame(worldFrame, midstanceFrame, "midstanceZUpFrame");
 
-   public JumpingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters, JumpingCoPTrajectoryParameters jumpingParameters, YoRegistry parentRegistry)
+   private final JumpingParameters regularParameters;
+   private final ConvexPolygon2DReadOnly defaultSupportPolygon;
+
+   public JumpingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
+                                        ConvexPolygon2DReadOnly defaultSupportPolygon,
+                                        JumpingCoPTrajectoryParameters jumpingParameters,
+                                        JumpingParameters regularParameters,
+                                        YoRegistry parentRegistry)
    {
       super(JumpingCoPTrajectoryGenerator.class, parentRegistry);
+
+      this.regularParameters = regularParameters;
+      this.defaultSupportPolygon = defaultSupportPolygon;
 
       this.parameters = parameters;
       this.jumpingParameters = jumpingParameters;
@@ -56,19 +68,22 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
    {
       clear();
 
-      footMidpoint.setIncludingFrame(state.getFootPolygonInSole(RobotSide.LEFT).getCentroid());
-      footMidpoint.changeFrameAndProjectToXYPlane(worldFrame);
-      tempFramePoint2D.setIncludingFrame(state.getFootPolygonInSole(RobotSide.RIGHT).getCentroid());
-      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-      footMidpoint.interpolate(tempFramePoint2D, 0.5);
+      footMidpoint.setIncludingFrame(state.getFootPolygonInSole(RobotSide.LEFT).getCentroid(), 0.0);
+      footMidpoint.changeFrame(worldFrame);
+      tempFramePoint.setIncludingFrame(state.getFootPolygonInSole(RobotSide.RIGHT).getCentroid(), 0.0);
+      tempFramePoint.changeFrame(worldFrame);
+      footMidpoint.interpolate(tempFramePoint, 0.5);
 
       midstancePose.interpolate(state.getFootPose(RobotSide.LEFT), state.getFootPose(RobotSide.RIGHT), 0.5);
       midstanceFrame.setPoseAndUpdate(midstancePose);
       midstanceZUpFrame.update();
 
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartTime(0.0);
-      contactState.setStartCopPosition(state.getInitialCoP());
+      contactState.setStartECMPPosition(state.getInitialCoP());
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
 
       computeForSupport();
       computeForFlight();
@@ -78,63 +93,114 @@ public class JumpingCoPTrajectoryGenerator extends YoSaveableModule<JumpingCoPTr
 
    private void computeForSupport()
    {
-      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
+      ContactPlaneProvider previousContactState = contactStateProviders.getLast();
 
       double supportDuration = state.getJumpingGoal().getSupportDuration();
       double segmentDuration = jumpingParameters.getFractionSupportForShift() * supportDuration;
-      previousContactState.setEndCopPosition(footMidpoint);
+      previousContactState.setEndECMPPosition(footMidpoint);
       previousContactState.setDuration(segmentDuration);
+      previousContactState.setLinearECMPVelocity();
 
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(footMidpoint);
+      contactState.setEndECMPPosition(footMidpoint);
       contactState.setDuration(supportDuration - segmentDuration);
+      contactState.setLinearECMPVelocity();
+      for (RobotSide robotSide : RobotSide.values)
+         contactState.addContact(state.getFootPose(robotSide), state.getFootPolygonInSole(robotSide));
    }
 
    private void computeForFlight()
    {
       double flightDuration = state.getJumpingGoal().getFlightDuration();
 
-      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      SettableContactStateProvider contactSate = contactStateProviders.add();
+      ContactPlaneProvider previousContactState = contactStateProviders.getLast();
+      ContactPlaneProvider contactSate = contactStateProviders.add();
       contactSate.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactSate.setDuration(flightDuration);
       contactSate.setContactState(ContactState.FLIGHT);
    }
 
+   private final FramePose3D goalPose = new FramePose3D();
+   private final PoseReferenceFrame goalPoseFrame = new PoseReferenceFrame("goalPoseFrame", ReferenceFrame.getWorldFrame());
+   private final SideDependentList<FramePose3D> footGoalPoses = new SideDependentList<>(new FramePose3D(), new FramePose3D());
+
    private void computeForFinalTransfer()
    {
-      SettableContactStateProvider previousContactState = contactStateProviders.getLast();
-      SettableContactStateProvider contactState = contactStateProviders.add();
+      ContactPlaneProvider previousContactState = contactStateProviders.getLast();
+      ContactPlaneProvider contactState = contactStateProviders.add();
 
       double goalLength = state.getJumpingGoal().getGoalLength();
       goalLength = Double.isNaN(goalLength) ? 0.0 : goalLength;
 
-      goalMidpoint.setToZero(midstanceZUpFrame);
-      goalMidpoint.setX(goalLength);
-      goalMidpoint.changeFrameAndProjectToXYPlane(worldFrame);
+      midFootPose.setToZero(midstanceZUpFrame);
+      goalPose.setIncludingFrame(midFootPose);
+      goalPose.setX(goalLength);
+      if (!Double.isNaN(state.getJumpingGoal().getGoalHeight()))
+         goalPose.setZ(state.getJumpingGoal().getGoalHeight());
+      if (!Double.isNaN(state.getJumpingGoal().getGoalRotation()))
+         goalPose.getOrientation().setToYawOrientation(state.getJumpingGoal().getGoalRotation());
+      goalPose.changeFrame(ReferenceFrame.getWorldFrame());
+      goalPoseFrame.setPoseAndUpdate(goalPose);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FramePose3D footGoalPose = footGoalPoses.get(robotSide);
+         footGoalPose.setToZero(goalPoseFrame);
+         double width;
+         if (!Double.isNaN(state.getJumpingGoal().getGoalFootWidth()))
+            width = 0.5 * state.getJumpingGoal().getGoalFootWidth();
+         else
+            width = 0.5 * regularParameters.getDefaultFootWidth();
+         width = robotSide.negateIfRightSide(width);
+
+         footGoalPose.setY(width);
+         footGoalPose.changeFrame(worldFrame);
+      }
 
       double segmentDuration = parameters.getDefaultFinalTransferSplitFraction() * state.getFinalTransferDuration();
-      contactState.setStartCopPosition(goalMidpoint);
-      contactState.setEndCopPosition(goalMidpoint);
+      contactState.reset();
+      contactState.setStartECMPPosition(goalPose.getPosition());
+      contactState.setEndECMPPosition(goalPose.getPosition());
       contactState.setStartTime(previousContactState.getTimeInterval().getEndTime());
       contactState.setDuration(segmentDuration);
+      contactState.setLinearECMPVelocity();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         contactState.addContact(footGoalPoses.get(robotSide), defaultSupportPolygon);
+      }
 
       previousContactState = contactState;
       segmentDuration = state.getFinalTransferDuration() - segmentDuration;
       contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(goalMidpoint);
+      contactState.setEndECMPPosition(goalPose.getPosition());
       contactState.setDuration(segmentDuration);
+      contactState.setLinearECMPVelocity();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         contactState.addContact(footGoalPoses.get(robotSide), defaultSupportPolygon);
+      }
+
 
       previousContactState = contactState;
       contactState = contactStateProviders.add();
+      contactState.reset();
       contactState.setStartFromEnd(previousContactState);
-      contactState.setEndCopPosition(previousContactState.getCopStartPosition());
+      contactState.setEndECMPPosition(previousContactState.getECMPStartPosition());
       contactState.setDuration(Double.POSITIVE_INFINITY);
+      contactState.setLinearECMPVelocity();
+      // TODO contact pose
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         contactState.addContact(footGoalPoses.get(robotSide), defaultSupportPolygon);
+      }
+
    }
 
-   public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
+   public RecyclingArrayList<ContactPlaneProvider> getContactStateProviders()
    {
       return contactStateProviders;
    }

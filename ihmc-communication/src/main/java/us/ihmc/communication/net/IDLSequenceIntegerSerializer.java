@@ -31,7 +31,7 @@ public class IDLSequenceIntegerSerializer extends Serializer<IDLSequence.Integer
          output.writeInt(collection.get(i));
    }
 
-   public IDLSequence.Integer read(Kryo kryo, Input input, Class<IDLSequence.Integer> type)
+   public IDLSequence.Integer read(Kryo kryo, Input input, Class<? extends IDLSequence.Integer> type)
    {
       int length = input.readInt(true);
       IDLSequence.Integer resultList = new IDLSequence.Integer(length, TYPE_CODE);
