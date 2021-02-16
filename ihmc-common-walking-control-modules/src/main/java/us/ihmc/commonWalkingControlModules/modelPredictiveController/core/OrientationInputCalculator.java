@@ -66,6 +66,8 @@ public class OrientationInputCalculator
    private final SE3MPCIndexHandler indexHandler;
    private final double mass;
 
+   private static final DMatrixRMaj identity = CommonOps_DDRM.identity(6);
+
    public OrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
       this.indexHandler = indexHandler;
@@ -93,6 +95,11 @@ public class OrientationInputCalculator
 
       computeAffineTimeInvariantTerms(command.getTimeOfConstraint());
       computeDiscreteAffineTimeInvariantTerms(command.getDurationOfHold());
+
+      if (command.getEndDiscreteTickId() == 0)
+         setUpConstraintForFirstTick(inputToPack, command);
+      else
+         setUpConstraintForRegularTick(inputToPack, command);
    }
 
    private void reset(DiscreteOrientationCommand command)
@@ -221,5 +228,32 @@ public class OrientationInputCalculator
 
       CommonOps_DDRM.scale(duration, B, Bd);
       CommonOps_DDRM.scale(duration, C, Cd);
+   }
+
+   private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);
+
+   private void setUpConstraintForFirstTick(QPInputTypeA inputToPack,
+                                            DiscreteOrientationCommand command)
+   {
+      command.getCurrentBodyAngularMomentumAboutFixedPoint().get(initialStateVector);
+      command.getCurrentAxisAngleError().get(3, initialStateVector);
+
+      CommonOps_DDRM.mult(Ad, initialStateVector, inputToPack.getTaskObjective());
+      CommonOps_DDRM.addEquals(inputToPack.getTaskObjective(), Cd);
+
+      CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
+
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()), identity, 0, 0, 6, 6, 1.0);
+   }
+
+   private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,
+                                              DiscreteOrientationCommand command)
+   {
+      inputToPack.getTaskObjective().set(Cd);
+
+      CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()), identity, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId() - 1), Ad, 0, 0, 6, 6, -1.0);
+
    }
 }
