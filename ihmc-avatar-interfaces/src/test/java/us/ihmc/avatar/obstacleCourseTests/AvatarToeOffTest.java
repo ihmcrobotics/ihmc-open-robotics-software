@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -78,6 +79,37 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
       walkForward(getStepLength(), getNumberOfSteps(), 0.0);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
+   }
+
+   @Test
+   @Disabled
+   public void testToeOffWithDifferentStepLengths() throws SimulationExceededMaximumTimeException
+   {
+      int numberOfSteps = 3;
+      double torsoAngle = 0.0;
+
+      double icpProximity = 0.0;
+      double icpPercentLengthToLeadingFoot = 0.26;
+      double ecmpProximity = 0.045;
+
+      setupTest();
+
+      double initialXPosition = 0.0;
+      for(double stepLength = getStepLength(); stepLength <= getMaxStepLength(); stepLength += 0.25)
+      {
+         // adjust toe off parameters
+         swingTime += 0.1;
+         icpPercentLengthToLeadingFoot += 0.04;
+         ecmpProximity += 0.005;
+         torsoAngle += Math.toRadians(4.0);
+         pitchTorso(torsoAngle);
+         setYoVariablesToDoToeOffInSS(icpProximity, icpPercentLengthToLeadingFoot, ecmpProximity);
+
+         // take steps
+         walkForward(stepLength, numberOfSteps, initialXPosition);
+         initialXPosition += numberOfSteps*stepLength;
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps*(transferTime+swingTime) + 3.0));
+      }
    }
 
    private void setupTest() throws SimulationExceededMaximumTimeException
