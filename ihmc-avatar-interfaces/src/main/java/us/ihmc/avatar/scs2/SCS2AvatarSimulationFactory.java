@@ -152,7 +152,7 @@ public class SCS2AvatarSimulationFactory
       if (scsInitialSetup.get().usePerfectSensors())
       {
          double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         sensorReaderFactory = new DRCPerfectSensorReaderFactory(humanoidFloatingRootJointRobot, estimatorDT);
+         sensorReaderFactory = new SCS2SensorReadFactory(robot.getControllerManager().getControllerInput(), scsInitialSetup.get().usePerfectSensors());
       }
       else
       {
