@@ -16,6 +16,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
    private final TIntArrayList orientationStartIndices = new TIntArrayList();
    private final TDoubleArrayList orientationTickDuration = new TDoubleArrayList();
    private final TIntArrayList orientationTicksInSegment = new TIntArrayList();
+   private final TIntArrayList orientationTickStartIndex = new TIntArrayList();
 
    protected final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
 
@@ -34,6 +35,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       orientationStartIndices.clear();
       orientationTickDuration.clear();
       orientationTicksInSegment.clear();
+      orientationTickStartIndex.clear();
 
       double remainingOrientationWindowDuration = orientationWindowDuration;
       for (int i = 0; i < previewWindowContactSequence.size(); i++)
@@ -42,9 +44,16 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
          int ticksInSegment = (int) Math.floor(previewWindowContactSequence.get(i).getTimeInterval().getDuration() / nominalOrientationDt);
          double tickDuration = segmentDuration / ticksInSegment;
 
-         orientationStartIndices.add(rhoStartIndices.get(i) + rhoCoefficientsInSegment.get(i));
+         int orientationIndex = rhoStartIndices.get(i) + rhoCoefficientsInSegment.get(i);
+         orientationStartIndices.add(orientationIndex);
          orientationTickDuration.add(tickDuration);
          orientationTicksInSegment.add(ticksInSegment);
+
+         for (int tick = 0; tick < ticksInSegment; tick++)
+         {
+            orientationTickStartIndex.add(orientationIndex);
+            orientationIndex += variablesPerOrientationTick;
+         }
 
          int orientationCoefficientsInSegment = ticksInSegment * variablesPerOrientationTick;
          // shift the remaining segments
@@ -57,5 +66,10 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
          totalProblemSize += orientationCoefficientsInSegment;
          remainingOrientationWindowDuration -= segmentDuration;
       }
+   }
+
+   public int getOrientationTickStartIndex(int tick)
+   {
+      return orientationTickStartIndex.get(tick);
    }
 }
