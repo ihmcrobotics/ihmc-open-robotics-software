@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 
@@ -26,7 +26,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    /**
     * Contact planes to be used to track the VRP
     */
-   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    /**
     * Segment that is trying to track the VRP
@@ -109,7 +109,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    /**
     * Adds a contact that the MPC can use to try and track the desired VRP
     */
-   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -160,7 +160,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
       return contactPlaneHelpers.size();
    }
 
-   public ContactPlaneHelper getContactPlaneHelper(int i)
+   public MPCContactPlane getContactPlaneHelper(int i)
    {
       return contactPlaneHelpers.get(i);
    }

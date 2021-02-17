@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPTrackingCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.VRPTrackingCostCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -26,7 +27,7 @@ public class VRPTrackingCostCalculatorTest
 
       int numberOfBases = 1;
 
-      ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, numberOfBases, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, numberOfBases, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBases);
       VRPTrackingCostCalculator costCalculator = new VRPTrackingCostCalculator(indexHandler, gravityZ);
@@ -234,7 +235,7 @@ public class VRPTrackingCostCalculatorTest
 
       int numberOfBases = 2;
 
-      ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, numberOfBases, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, numberOfBases, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBases);
       VRPTrackingCostCalculator costCalculator = new VRPTrackingCostCalculator(indexHandler, gravityZ);
