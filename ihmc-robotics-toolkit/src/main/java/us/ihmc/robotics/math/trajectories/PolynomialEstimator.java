@@ -267,8 +267,9 @@ public class PolynomialEstimator implements TimeIntervalProvider, Settable<Polyn
       velocity = 0.0;
       acceleration = 0.0;
 
-      time = MathTools.clamp(time, getTimeInterval().getStartTime(), getTimeInterval().getEndTime());
+//      time = MathTools.clamp(time, getTimeInterval().getStartTime(), getTimeInterval().getEndTime());
       time -= getTimeInterval().getStartTime();
+      time = Math.min(time, getTimeInterval().getDuration());
       double timeI = 1.0;
 
       int idx = 0;
