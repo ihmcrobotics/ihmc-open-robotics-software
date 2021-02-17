@@ -111,8 +111,10 @@ public class OrientationMPCTrajectoryHandler
 
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                MultipleCoMSegmentTrajectoryGenerator comTrajectorySolution,
-                                               double currentTimeInState)
+                                               double currentTimeInState,
+                                               double previewWindowDuration)
    {
+      previewWindowEndTime.set(currentTimeInState + previewWindowDuration);
       extractSolutionVectors(solutionCoefficients);
 
       clearTrajectory();

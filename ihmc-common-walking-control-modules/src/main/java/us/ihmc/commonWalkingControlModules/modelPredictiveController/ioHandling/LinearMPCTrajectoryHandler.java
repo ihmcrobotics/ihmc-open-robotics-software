@@ -322,6 +322,11 @@ public class LinearMPCTrajectoryHandler
       return positionInitializationCalculator.getDesiredVRPPosition();
    }
 
+   public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()
+   {
+      return comTrajectory;
+   }
+
    public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
