@@ -4,7 +4,6 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.time.TimeInterval;
@@ -267,7 +266,6 @@ public class PolynomialEstimator implements TimeIntervalProvider, Settable<Polyn
       velocity = 0.0;
       acceleration = 0.0;
 
-//      time = MathTools.clamp(time, getTimeInterval().getStartTime(), getTimeInterval().getEndTime());
       time -= getTimeInterval().getStartTime();
       time = Math.min(time, getTimeInterval().getDuration());
       double timeI = 1.0;
