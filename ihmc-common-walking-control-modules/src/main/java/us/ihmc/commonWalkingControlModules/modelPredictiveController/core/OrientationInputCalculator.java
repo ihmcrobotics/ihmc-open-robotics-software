@@ -203,22 +203,23 @@ public class OrientationInputCalculator
 
    private void computeAffineTimeInvariantTerms(double timeOfConstraint)
    {
-      MatrixTools.setMatrixBlock(A, 3, 0, a3, 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(A, 3, 3, a4, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 0, a3, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 3, a4, 0, 0, 3, 3, 1.0);
 
       B.reshape(6, indexHandler.getTotalProblemSize());
       B.zero();
 
-      MatrixTools.multAddBlock(-mass, skewGravity, comPositionJacobian, B, 0, 0);
-      MatrixTools.multAddBlock(contactForceToOriginTorqueJacobian, contactForceJacobian, B, 0, 0);
+      MatrixTools.multAddBlock(a1, comPositionJacobian, B, 0, 0);
+      MatrixTools.multAddBlock(a2, comVelocityJacobian, B, 0, 0);
 
-      MatrixTools.multAddBlock(a1, comPositionJacobian, B, 3, 0);
-      MatrixTools.multAddBlock(a2, comVelocityJacobian, B, 3, 0);
+      MatrixTools.multAddBlock(-mass, skewGravity, comPositionJacobian, B, 3, 0);
+      MatrixTools.multAddBlock(contactForceToOriginTorqueJacobian, contactForceJacobian, B, 3, 0);
 
-      CommonOps_DDRM.scale(-1.0, desireInternalAngularMomentumRate, C);
-      MatrixTools.setMatrixBlock(C, 3, 0, a0, 0, 0, 3, 1, 1.0);
-      MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, a1, gravityVector, C, 3, 0);
-      MatrixTools.multAddBlock(timeOfConstraint, a2, gravityVector, C, 3, 0);
+      MatrixTools.setMatrixBlock(C, 3, 0, desireInternalAngularMomentumRate, 0, 0, 3, 1, -1.0);
+      MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, a1, gravityVector, C, 0, 0);
+      MatrixTools.multAddBlock(timeOfConstraint, a2, gravityVector, C, 0, 0);
+
+      MatrixTools.setMatrixBlock(C, 0, 0, a0, 0, 0, 3, 1, 1.0);
    }
 
    private void computeDiscreteAffineTimeInvariantTerms(double duration)
