@@ -808,8 +808,6 @@ public class BalanceManager
 
    public void initializeICPPlanForStanding()
    {
-      LogTools.info("initializing for standing.");
-
       if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
       {
          requestICPPlannerToHoldCurrentCoM();
