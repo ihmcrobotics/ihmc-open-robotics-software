@@ -11,20 +11,32 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.StateEstimatorSensorDefinitions;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class SCS2SensorReadFactory implements SensorReaderFactory
+public class SCS2SensorReaderFactory implements SensorReaderFactory
 {
-   private StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions;
    private ForceSensorDataHolder forceSensorDataHolderToUpdate;
-   private SCS2SensorReader perfectSensorReader;
+   private SCS2SensorReader sensorReader;
 
    private final SimControllerInput controllerInput;
+   private final SensorProcessingConfiguration sensorProcessingConfiguration;
    private final boolean usePerfectSensors;
 
-   public SCS2SensorReadFactory(SimControllerInput controllerInput, boolean usePerfectSensors)
+   public static SCS2SensorReaderFactory newSensorReaderFactory(SimControllerInput controllerInput, SensorProcessingConfiguration sensorProcessingConfiguration)
+   {
+      return new SCS2SensorReaderFactory(controllerInput, sensorProcessingConfiguration, false);
+   }
+
+   public static SCS2SensorReaderFactory newPerfectSensorReaderFactory(SimControllerInput controllerInput)
+   {
+      return new SCS2SensorReaderFactory(controllerInput, null, true);
+   }
+
+   private SCS2SensorReaderFactory(SimControllerInput controllerInput, SensorProcessingConfiguration sensorProcessingConfiguration, boolean usePerfectSensors)
    {
       this.controllerInput = controllerInput;
+      this.sensorProcessingConfiguration = sensorProcessingConfiguration;
       this.usePerfectSensors = usePerfectSensors;
    }
 
@@ -38,21 +50,25 @@ public class SCS2SensorReadFactory implements SensorReaderFactory
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions, ForceSensorDefinition[] forceSensorDefinitions,
                      JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoRegistry parentRegistry)
    {
-      perfectSensorReader = new SCS2SensorReader(controllerInput, rootJoint, usePerfectSensors);
-      Stream.of(imuDefinitions).forEach(perfectSensorReader::addIMUSensor);
-      perfectSensorReader.addWrenchSensors(forceSensorDataHolderToUpdate);
+      if (usePerfectSensors)
+         sensorReader = SCS2SensorReader.newPerfectSensorReader(controllerInput, rootJoint);
+      else
+         sensorReader = SCS2SensorReader.newSensorReader(controllerInput, rootJoint, sensorProcessingConfiguration);
+
+      Stream.of(imuDefinitions).forEach(sensorReader::addIMUSensor);
+      sensorReader.addWrenchSensors(forceSensorDataHolderToUpdate);
    }
 
    @Override
    public SensorReader getSensorReader()
    {
-      return perfectSensorReader;
+      return sensorReader;
    }
 
    @Override
    public StateEstimatorSensorDefinitions getStateEstimatorSensorDefinitions()
    {
-      return stateEstimatorSensorDefinitions;
+      return sensorReader.getStateEstimatorSensorDefinitions();
    }
 
    @Override
