@@ -293,8 +293,8 @@ public class ThreePotatoAngularMomentumCalculator
 
          double duration = Math.min(timeInterval.getDuration(), 10.0);
 
-         angularMomentumEstimator.getTimeInterval().set(timeInterval);
-         scaledAngularMomentumEstimator.getTimeInterval().set(timeInterval);
+         angularMomentumEstimator.getTimeInterval().setInterval(timeInterval.getStartTime(), timeInterval.getStartTime() + duration);
+         scaledAngularMomentumEstimator.getTimeInterval().setInterval(timeInterval.getStartTime(), timeInterval.getStartTime() + duration);
 
          double minDt = duration / maxAngularMomentumSamplesPerSegment.getValue();
          double maxDt = duration / minAngularMomentumSamplesPerSegment.getValue();
