@@ -9,17 +9,14 @@ import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.AvatarEstimatorThreadFactory;
-import us.ihmc.avatar.BarrierSchedulerTools;
 import us.ihmc.avatar.ControllerTask;
 import us.ihmc.avatar.EstimatorTask;
-import us.ihmc.avatar.SimulationRobotVisualizer;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.factory.BarrierScheduledRobotController;
 import us.ihmc.avatar.factory.DisposableRobotController;
 import us.ihmc.avatar.factory.HumanoidRobotControlTask;
 import us.ihmc.avatar.factory.RobotDefinitionTools;
-import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.factory.SingleThreadedRobotController;
 import us.ihmc.avatar.factory.TerrainObjectDefinitionTools;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
@@ -34,7 +31,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicator;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
 import us.ihmc.log.LogTools;
@@ -49,25 +45,19 @@ import us.ihmc.scs2.definition.robot.RobotDefinition;
 import us.ihmc.scs2.definition.terrain.TerrainObjectDefinition;
 import us.ihmc.scs2.simulation.SimulationSession;
 import us.ihmc.scs2.simulation.robot.Robot;
+import us.ihmc.scs2.simulation.robot.controller.SimControllerInput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
-import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
-import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReaderFactory;
-import us.ihmc.sensorProcessing.simulatedSensors.SimulatedSensorHolderAndReaderFromRobotFactory;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationToolkit.controllers.PIDLidarTorqueController;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
-import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
-import us.ihmc.wholeBodyController.DRCOutputProcessor;
 
 public class SCS2AvatarSimulationFactory
 {
@@ -94,7 +84,6 @@ public class SCS2AvatarSimulationFactory
    private SimulationSession simulationSession;
    private SensorReaderFactory sensorReaderFactory;
    private JointDesiredOutputWriter simulationOutputWriter;
-   private DRCOutputProcessor simulationOutputProcessor;
    private AvatarEstimatorThread estimatorThread;
    private AvatarControllerThread controllerThread;
    private DisposableRobotController robotController;
@@ -149,33 +138,24 @@ public class SCS2AvatarSimulationFactory
    private void setupSensorReaderFactory()
    {
       StateEstimatorParameters stateEstimatorParameters = robotModel.get().getStateEstimatorParameters();
+      SimControllerInput controllerInput = robot.getControllerManager().getControllerInput();
       if (scsInitialSetup.get().usePerfectSensors())
-      {
-         double estimatorDT = stateEstimatorParameters.getEstimatorDT();
-         sensorReaderFactory = new SCS2SensorReadFactory(robot.getControllerManager().getControllerInput(), scsInitialSetup.get().usePerfectSensors());
-      }
+         sensorReaderFactory = SCS2SensorReaderFactory.newPerfectSensorReaderFactory(controllerInput);
       else
-      {
-         sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(humanoidFloatingRootJointRobot, stateEstimatorParameters);
-      }
+         sensorReaderFactory = SCS2SensorReaderFactory.newSensorReaderFactory(controllerInput, stateEstimatorParameters);
    }
 
    private void setupSimulationOutputWriter()
    {
-      simulationOutputWriter = robotModel.get().getCustomSimulationOutputWriter(humanoidFloatingRootJointRobot, masterContext);
-   }
-
-   private void setupSimulationOutputProcessor()
-   {
-      simulationOutputProcessor = robotModel.get().getCustomSimulationOutputProcessor(humanoidFloatingRootJointRobot);
+      simulationOutputWriter = new SCS2OutputWriter(robot.getControllerManager().getControllerOutput(), true);
    }
 
    private void setupStateEstimationThread()
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic<?> outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic<?> inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
@@ -213,7 +193,7 @@ public class SCS2AvatarSimulationFactory
                                                     robotModel.get().getSensorInformation(),
                                                     highLevelHumanoidControllerFactory.get(),
                                                     contextDataFactory,
-                                                    simulationOutputProcessor,
+                                                    null,
                                                     realtimeROS2Node.get(),
                                                     gravity.get(),
                                                     robotModel.get().getEstimatorDT());
@@ -260,11 +240,6 @@ public class SCS2AvatarSimulationFactory
             if (estimatorThread.getHumanoidRobotContextData().getControllerRan())
                simulationOutputWriter.writeBefore(estimatorThread.getHumanoidRobotContextData().getTimestamp());
          });
-      }
-      // Previously done in controller thread write
-      if (simulationOutputProcessor != null)
-      {
-         controllerTask.addRunnableOnSchedulerThread(BarrierSchedulerTools.createProcessorUpdater(simulationOutputProcessor, controllerThread));
       }
 
       List<HumanoidRobotControlTask> tasks = new ArrayList<HumanoidRobotControlTask>();
@@ -324,22 +299,20 @@ public class SCS2AvatarSimulationFactory
           * need to move to where the robot itself determines coordinates, and the sensors are all in the
           * robot-determined world coordinates..
           */
-         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
+         HumanoidFloatingRootJointRobot tempRobot = robotModel.get().createHumanoidFloatingRootJointRobot(false);
+         robotInitialSetup.get().initializeRobot(tempRobot, robotModel.get().getJointMap());
          try
          {
-            humanoidFloatingRootJointRobot.update();
-            humanoidFloatingRootJointRobot.doDynamicsButDoNotIntegrate();
-            humanoidFloatingRootJointRobot.update();
+            tempRobot.update();
+            tempRobot.doDynamicsButDoNotIntegrate();
+            tempRobot.update();
          }
          catch (UnreasonableAccelerationException e)
          {
             throw new RuntimeException("UnreasonableAccelerationException");
          }
 
-         Point3D initialCoMPosition = new Point3D();
-         humanoidFloatingRootJointRobot.computeCenterOfMass(initialCoMPosition);
-
-         initializeEstimator(humanoidFloatingRootJointRobot, estimatorThread);
+         initializeEstimator(tempRobot, estimatorThread);
       }
    }
 
@@ -358,68 +331,13 @@ public class SCS2AvatarSimulationFactory
 
    private void setupThreadedRobotController()
    {
-      humanoidFloatingRootJointRobot.setController(robotController);
-   }
-
-   private void setupLidarController()
-   {
-      AvatarRobotLidarParameters lidarParameters = robotModel.get().getSensorInformation().getLidarParameters(0);
-      if (lidarParameters != null && lidarParameters.getLidarSpindleJointName() != null)
-      {
-         PIDLidarTorqueController pidLidarTorqueController = new PIDLidarTorqueController(humanoidFloatingRootJointRobot,
-                                                                                          lidarParameters.getLidarSpindleJointName(),
-                                                                                          lidarParameters.getLidarSpindleVelocity(),
-                                                                                          robotModel.get().getSimulateDT());
-         humanoidFloatingRootJointRobot.setController(pidLidarTorqueController);
-      }
-   }
-
-   private void setupPositionControlledJointsForSimulation()
-   {
-      RobotController lowLevelController = robotModel.get().getSimulationLowLevelControllerFactory()
-                                                     .createLowLevelController(controllerThread.getFullRobotModel(),
-                                                                               humanoidFloatingRootJointRobot,
-                                                                               controllerThread.getDesiredJointDataHolder());
-      if (lowLevelController != null)
-         humanoidFloatingRootJointRobot.setController(lowLevelController);
+      robot.getControllerManager().addController(() -> robotController.doControl());
    }
 
    private void setupSimulatedRobotTimeProvider()
    {
       simulatedRobotTimeProvider = new SimulatedDRCRobotTimeProvider(robotModel.get().getSimulateDT());
-      humanoidFloatingRootJointRobot.setController(simulatedRobotTimeProvider);
-   }
-
-   private void initializeSimulationConstructionSet()
-   {
-      if (simulationConstructionSet != null)
-      {
-         simulationConstructionSet.setParameterRootPath(robotController.getYoRegistry());
-
-         humanoidFloatingRootJointRobot.setDynamicIntegrationMethod(scsInitialSetup.get().getDynamicIntegrationMethod());
-         scsInitialSetup.get().initializeSimulation(simulationConstructionSet);
-
-         if (guiInitialSetup.get().isGuiShown())
-         {
-            SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = simulationConstructionSet.createSimulationOverheadPlotterFactory();
-            simulationOverheadPlotterFactory.setShowOnStart(guiInitialSetup.get().isShowOverheadView());
-            simulationOverheadPlotterFactory.setVariableNameToTrack("centerOfMass");
-            simulationOverheadPlotterFactory.addYoGraphicsListRegistries(controllerThread.getYoGraphicsListRegistry());
-            simulationOverheadPlotterFactory.addYoGraphicsListRegistries(estimatorThread.getYoGraphicsListRegistry());
-            simulationOverheadPlotterFactory.addYoGraphicsListRegistries(actualCMPComputer.getYoGraphicsListRegistry());
-            simulationOverheadPlotterFactory.createOverheadPlotter();
-            guiInitialSetup.get().initializeGUI(simulationConstructionSet, humanoidFloatingRootJointRobot, robotModel.get());
-         }
-
-         if (commonAvatarEnvironment.get() != null && commonAvatarEnvironment.get().getTerrainObject3D() != null)
-         {
-            simulationConstructionSet.addStaticLinkGraphics(commonAvatarEnvironment.get().getTerrainObject3D().getLinkGraphics());
-         }
-
-         scsInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get(), null);
-         robotInitialSetup.get().initializeRobot(humanoidFloatingRootJointRobot, robotModel.get().getJointMap());
-         humanoidFloatingRootJointRobot.update();
-      }
+      robot.getControllerManager().addController(() -> simulatedRobotTimeProvider.doControl());
    }
 
    public SCS2AvatarSimulation createAvatarSimulation()
@@ -434,16 +352,13 @@ public class SCS2AvatarSimulationFactory
       setupYoVariableServer();
       setupSimulationConstructionSet();
       setupSensorReaderFactory();
+      setupSimulationOutputWriter();
       setupStateEstimationThread();
       setupControllerThread();
       setupMultiThreadedRobotController();
       initializeStateEstimatorToActual();
       setupThreadedRobotController();
-      setupLidarController();
-      setupPositionControlledJointsForSimulation();
       setupSimulatedRobotTimeProvider();
-
-      initializeSimulationConstructionSet();
 
       SCS2AvatarSimulation avatarSimulation = new SCS2AvatarSimulation();
       avatarSimulation.setRobotModel(robotModel.get());
