@@ -16,6 +16,7 @@ import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultip
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
@@ -311,9 +312,20 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
-   public void getLastWaypoint(FrameSO3TrajectoryPoint pointToPack)
+   public void getLastWaypoint(FrameSO3TrajectoryPointBasics pointToPack)
    {
       pointToPack.set(waypoints.get(numberOfWaypoints.getIntegerValue() - 1));
+   }
+
+   public FrameSO3TrajectoryPointBasics getWaypoint(int index)
+   {
+      return waypoints.get(index);
+   }
+
+   public void removeWaypoint(int index)
+   {
+      waypoints.remove(index);
+      numberOfWaypoints.decrement();
    }
 
    @Override

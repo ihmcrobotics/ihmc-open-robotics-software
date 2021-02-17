@@ -82,4 +82,9 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
    {
       return orientationTickStartIndex.get(tick);
    }
+
+   public double getOrientationTickDuration(int tick)
+   {
+      return orientationTickDuration.get(tick);
+   }
 }
