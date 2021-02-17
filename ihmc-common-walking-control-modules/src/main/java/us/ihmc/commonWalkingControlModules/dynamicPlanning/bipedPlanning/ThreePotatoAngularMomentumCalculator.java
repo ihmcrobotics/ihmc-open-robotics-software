@@ -22,6 +22,7 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTr
 import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -101,6 +102,9 @@ public class ThreePotatoAngularMomentumCalculator
 
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final SideDependentList<MovingReferenceFrame> soleFrames;
+
+   private final ExecutionTimer angularMomentumEstimationTimer = new ExecutionTimer("angularMomentumEstimation", registry);
+   private final ExecutionTimer angularMomentumPredictionTimer = new ExecutionTimer("angularMomentumPrediction", registry);
 
    private final double gravityZ;
 
@@ -182,6 +186,8 @@ public class ThreePotatoAngularMomentumCalculator
 
    public void computeAngularMomentum(double time)
    {
+      angularMomentumPredictionTimer.startMeasurement();
+
       angularMomentumTrajectory.compute(time);
       heightScaledAngularMomentumTrajectory.compute(time);
 
@@ -218,11 +224,15 @@ public class ThreePotatoAngularMomentumCalculator
       totalTorque.setToZero();
 
       if (predictedCoMTrajectory == null)
+      {
+         angularMomentumPredictionTimer.stopMeasurement();
          return;
+      }
 
       if (time > predictedCoMTrajectory.getEndTime() || time > predictedLeftFootTrajectory.getLastWaypointTime()
           || time > predictedRightFootTrajectory.getLastWaypointTime())
       {
+         angularMomentumPredictionTimer.stopMeasurement();
          return;
       }
 
@@ -249,6 +259,8 @@ public class ThreePotatoAngularMomentumCalculator
 
       predictedAngularMomentum.set(totalAngularMomentum);
       predictedAngularMomentumRate.set(totalTorque);
+
+      angularMomentumPredictionTimer.stopMeasurement();
    }
 
    public FrameVector3DReadOnly getDesiredAngularMomentum()
@@ -274,6 +286,8 @@ public class ThreePotatoAngularMomentumCalculator
    public void computeAngularMomentumTrajectories(List<? extends TimeIntervalProvider> timeIntervals,
                                                   MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories)
    {
+      angularMomentumEstimationTimer.startMeasurement();
+
       potatoMass.set(potatoMassFraction.getValue() * totalMass);
 
       this.predictedCoMTrajectory = comTrajectories;
@@ -350,6 +364,8 @@ public class ThreePotatoAngularMomentumCalculator
       heightScaledAngularMomentumTrajectory.initialize();
 
       visualize(comTrajectories, predictedLeftFootTrajectory, predictedRightFootTrajectory);
+
+      angularMomentumEstimationTimer.stopMeasurement();
    }
 
    private void visualize(MultipleSegmentPositionTrajectoryGenerator<?> comTrajectories,
