@@ -1,9 +1,8 @@
-package us.ihmc.commonWalkingControlModules.modelPredictiveController;
+package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPointForceViewer;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,12 +12,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
 
-public class ContactPointHelper
+public class MPCContactPoint
 {
    private final int numberOfBasisVectorsPerContactPoint;
    private final int coefficientsSize;
@@ -34,16 +34,6 @@ public class ContactPointHelper
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
-   private final DMatrixRMaj linearPositionJacobianMatrix;
-   private final DMatrixRMaj linearVelocityJacobianMatrix;
-   private final DMatrixRMaj linearAccelerationJacobianMatrix;
-   private final DMatrixRMaj linearJerkJacobianMatrix;
-
-   private final DMatrixRMaj rhoMagnitudeJacobianMatrix;
-   private final DMatrixRMaj rhoRateJacobianMatrix;
-   private final DMatrixRMaj rhoAccelerationJacobianMatrix;
-   private final DMatrixRMaj rhoJerkJacobianMatrix;
-
    private final DMatrixRMaj accelerationIntegrationHessian;
    private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
@@ -56,7 +46,7 @@ public class ContactPointHelper
 
    private ContactPointForceViewer viewer;
 
-   public ContactPointHelper(int numberOfBasisVectorsPerContactPoint)
+   public MPCContactPoint(int numberOfBasisVectorsPerContactPoint)
    {
       this.numberOfBasisVectorsPerContactPoint = numberOfBasisVectorsPerContactPoint;
       coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * numberOfBasisVectorsPerContactPoint;
@@ -71,16 +61,6 @@ public class ContactPointHelper
       basisMagnitudes = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
-
-      linearPositionJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-      linearVelocityJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-      linearAccelerationJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-      linearJerkJacobianMatrix = new DMatrixRMaj(3, coefficientsSize);
-
-      rhoMagnitudeJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
-      rhoRateJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
-      rhoAccelerationJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
-      rhoJerkJacobianMatrix = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint, coefficientsSize);
 
       accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
       accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
@@ -186,107 +166,6 @@ public class ContactPointHelper
       }
    }
 
-   /**
-    * Computes the Jacobians at time {@param time} that map from the coefficient values to the motion function value.
-    *
-    * If this has been called for the same time and the same basis vectors, the Jacobians are not recomputed to save computation.
-    *
-    * @param time time to compute the function
-    * @param omega time constant for the motion function
-    */
-   public void computeJacobians(double time, double omega)
-   {
-      if (MathTools.epsilonEquals(time, timeOfContact, 1e-5))
-         return;
-
-      time = Math.min(time, sufficientlyLongTime);
-
-      linearPositionJacobianMatrix.zero();
-      linearVelocityJacobianMatrix.zero();
-      linearAccelerationJacobianMatrix.zero();
-      linearJerkJacobianMatrix.zero();
-
-      rhoMagnitudeJacobianMatrix.zero();
-      rhoRateJacobianMatrix.zero();
-      rhoAccelerationJacobianMatrix.zero();
-      rhoJerkJacobianMatrix.zero();
-
-      double t2 = time * time;
-      double t3 = time * t2;
-      double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
-      double negativeExponential = 1.0 / positiveExponential;
-      double firstVelocityCoefficient = omega * positiveExponential;
-      double secondVelocityCoefficient = -omega * negativeExponential;
-      double firstAccelerationCoefficient = omega * firstVelocityCoefficient;
-      double secondAccelerationCoefficient = -omega * secondVelocityCoefficient;
-      double firstJerkCoefficient = omega * firstAccelerationCoefficient;
-      double secondJerkCoefficient = -omega * secondAccelerationCoefficient;
-      boolean setTimeCoefficients = !MathTools.epsilonEquals(time, 0.0, 1e-4);
-      double thirdVelocityCoefficient = 3 * t2;
-      double fourthVelocityCoefficient = 2 * time;
-      double thirdAccelerationCoefficient = 6 * time;
-
-      for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
-      {
-         int startColumn = basisVectorIndex * LinearMPCIndexHandler.coefficientsPerRho;
-         FrameVector3DReadOnly basisVector = basisVectors[basisVectorIndex];
-
-         rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn, positiveExponential);
-         rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn + 1, negativeExponential);
-
-         rhoRateJacobianMatrix.set(basisVectorIndex, startColumn, firstVelocityCoefficient);
-         rhoRateJacobianMatrix.set(basisVectorIndex, startColumn + 1, secondVelocityCoefficient);
-
-         rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn, firstAccelerationCoefficient);
-         rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn + 1, secondAccelerationCoefficient);
-         rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn + 3, 2.0);
-
-         rhoJerkJacobianMatrix.set(basisVectorIndex, startColumn, firstJerkCoefficient);
-         rhoJerkJacobianMatrix.set(basisVectorIndex, startColumn + 1, secondJerkCoefficient);
-         rhoJerkJacobianMatrix.set(basisVectorIndex, startColumn + 2, 6.0);
-
-         if (setTimeCoefficients)
-         {
-            rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn + 2, t3);
-            rhoMagnitudeJacobianMatrix.set(basisVectorIndex, startColumn + 3, t2);
-
-            rhoRateJacobianMatrix.set(basisVectorIndex, startColumn + 2, thirdVelocityCoefficient);
-            rhoRateJacobianMatrix.set(basisVectorIndex, startColumn + 3, fourthVelocityCoefficient);
-
-            rhoAccelerationJacobianMatrix.set(basisVectorIndex, startColumn + 2, thirdAccelerationCoefficient);
-         }
-
-         for (int ordinal = 0; ordinal < 3; ordinal++)
-         {
-            linearPositionJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * positiveExponential);
-            linearPositionJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * negativeExponential);
-
-            linearVelocityJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstVelocityCoefficient);
-            linearVelocityJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondVelocityCoefficient);
-
-            linearAccelerationJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstAccelerationCoefficient);
-            linearAccelerationJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondAccelerationCoefficient);
-            linearAccelerationJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * 2.0);
-
-            linearJerkJacobianMatrix.set(ordinal, startColumn, basisVector.getElement(ordinal) * firstJerkCoefficient);
-            linearJerkJacobianMatrix.set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondJerkCoefficient);
-            linearJerkJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * 6.0);
-
-            if (setTimeCoefficients)
-            {
-               linearPositionJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * t3);
-               linearPositionJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * t2);
-
-               linearVelocityJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdVelocityCoefficient);
-               linearVelocityJacobianMatrix.set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthVelocityCoefficient);
-
-               linearAccelerationJacobianMatrix.set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdAccelerationCoefficient);
-            }
-         }
-      }
-
-      timeOfContact = time;
-   }
 
    /**
     * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the point over some time
@@ -330,27 +209,27 @@ public class ContactPointHelper
 
          FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
 
-         accelerationIntegrationHessian.set(startIdxI, startIdxI, c00);
-         accelerationIntegrationHessian.set(startIdxI, startIdxI + 1, c01);
-         accelerationIntegrationHessian.set(startIdxI, startIdxI + 2, c02);
-         accelerationIntegrationHessian.set(startIdxI, startIdxI + 2, c03);
-         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI, c01);
-         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI + 1, c11);
-         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI + 2, c12);
-         accelerationIntegrationHessian.set(startIdxI + 1, startIdxI + 3, c13);
-         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI, c02);
-         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI + 1, c12);
-         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI + 2, c22);
-         accelerationIntegrationHessian.set(startIdxI + 2, startIdxI + 3, c23);
-         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI, c03);
-         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI + 1, c13);
-         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI + 2, c23);
-         accelerationIntegrationHessian.set(startIdxI + 3, startIdxI + 3, c33);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c02);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c03);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI, c01);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 3, c13);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI, c02);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 3, c23);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI, c03);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 1, c13);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 2, c23);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 3, c33);
 
-         accelerationIntegrationGradient.set(startIdxI, 0, g0);
-         accelerationIntegrationGradient.set(startIdxI + 1, 0, g1);
-         accelerationIntegrationGradient.set(startIdxI + 2, 0, g2);
-         accelerationIntegrationGradient.set(startIdxI + 3, 0, g3);
+         accelerationIntegrationGradient.unsafe_set(startIdxI, 0, g0);
+         accelerationIntegrationGradient.unsafe_set(startIdxI + 1, 0, g1);
+         accelerationIntegrationGradient.unsafe_set(startIdxI + 2, 0, g2);
+         accelerationIntegrationGradient.unsafe_set(startIdxI + 3, 0, g3);
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
@@ -360,40 +239,40 @@ public class ContactPointHelper
 
             int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
-            accelerationIntegrationHessian.add(startIdxI, startIdxJ, basisDot * c00);
-            accelerationIntegrationHessian.add(startIdxI, startIdxJ + 1, basisDot * c01);
-            accelerationIntegrationHessian.add(startIdxI, startIdxJ + 2, basisDot * c02);
-            accelerationIntegrationHessian.add(startIdxI, startIdxJ + 3, basisDot * c03);
-            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ, basisDot * c01);
-            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ + 1, basisDot * c11);
-            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ + 2, basisDot * c12);
-            accelerationIntegrationHessian.add(startIdxI + 1, startIdxJ + 3, basisDot * c13);
-            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ, basisDot * c02);
-            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ + 1, basisDot * c12);
-            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ + 2, basisDot * c22);
-            accelerationIntegrationHessian.add(startIdxI + 2, startIdxJ + 3, basisDot * c23);
-            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ, basisDot * c03);
-            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ + 1, basisDot * c13);
-            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ + 2, basisDot * c23);
-            accelerationIntegrationHessian.add(startIdxI + 3, startIdxJ + 3, basisDot * c33);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ, basisDot * c00);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 1, basisDot * c01);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 2, basisDot * c02);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 3, basisDot * c03);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ, basisDot * c01);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 3, basisDot * c13);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ, basisDot * c02);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 3, basisDot * c23);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ, basisDot * c03);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 1, basisDot * c13);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 2, basisDot * c23);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 3, basisDot * c33);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            accelerationIntegrationHessian.add(startIdxJ, startIdxI, basisDot * c00);
-            accelerationIntegrationHessian.add(startIdxJ, startIdxI + 1, basisDot * c01);
-            accelerationIntegrationHessian.add(startIdxJ, startIdxI + 2, basisDot * c02);
-            accelerationIntegrationHessian.add(startIdxJ, startIdxI + 3, basisDot * c03);
-            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI, basisDot * c01);
-            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI + 1, basisDot * c11);
-            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI + 2, basisDot * c12);
-            accelerationIntegrationHessian.add(startIdxJ + 1, startIdxI + 3, basisDot * c13);
-            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI, basisDot * c02);
-            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI + 1, basisDot * c12);
-            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI + 2, basisDot * c22);
-            accelerationIntegrationHessian.add(startIdxJ + 2, startIdxI + 3, basisDot * c23);
-            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI, basisDot * c03);
-            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI + 1, basisDot * c13);
-            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI + 2, basisDot * c23);
-            accelerationIntegrationHessian.add(startIdxJ + 3, startIdxI + 3, basisDot * c33);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI, basisDot * c00);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 1, basisDot * c01);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 2, basisDot * c02);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 3, basisDot * c03);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI, basisDot * c01);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 3, basisDot * c13);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI, basisDot * c02);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 3, basisDot * c23);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI, basisDot * c03);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 1, basisDot * c13);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 2, basisDot * c23);
+            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 3, basisDot * c33);
          }
       }
    }
@@ -429,15 +308,15 @@ public class ContactPointHelper
 
          FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
 
-         jerkIntegrationHessian.set(startIdxI, startIdxI, c00);
-         jerkIntegrationHessian.set(startIdxI, startIdxI + 1, c01);
-         jerkIntegrationHessian.set(startIdxI, startIdxI + 2, c02);
-         jerkIntegrationHessian.set(startIdxI + 1, startIdxI, c01);
-         jerkIntegrationHessian.set(startIdxI + 1, startIdxI + 1, c11);
-         jerkIntegrationHessian.set(startIdxI + 1, startIdxI + 2, c12);
-         jerkIntegrationHessian.set(startIdxI + 2, startIdxI, c02);
-         jerkIntegrationHessian.set(startIdxI + 2, startIdxI + 1, c12);
-         jerkIntegrationHessian.set(startIdxI + 2, startIdxI + 2, c22);
+         jerkIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
+         jerkIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
+         jerkIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c02);
+         jerkIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI, c01);
+         jerkIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
+         jerkIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
+         jerkIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI, c02);
+         jerkIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
+         jerkIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
@@ -447,25 +326,25 @@ public class ContactPointHelper
 
             int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
-            jerkIntegrationHessian.add(startIdxI, startIdxJ, basisDot * c00);
-            jerkIntegrationHessian.add(startIdxI, startIdxJ + 1, basisDot * c01);
-            jerkIntegrationHessian.add(startIdxI, startIdxJ + 2, basisDot * c02);
-            jerkIntegrationHessian.add(startIdxI + 1, startIdxJ, basisDot * c01);
-            jerkIntegrationHessian.add(startIdxI + 1, startIdxJ + 1, basisDot * c11);
-            jerkIntegrationHessian.add(startIdxI + 1, startIdxJ + 2, basisDot * c12);
-            jerkIntegrationHessian.add(startIdxI + 2, startIdxJ, basisDot * c02);
-            jerkIntegrationHessian.add(startIdxI + 2, startIdxJ + 1, basisDot * c12);
-            jerkIntegrationHessian.add(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI, startIdxJ, basisDot * c00);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI, startIdxJ + 1, basisDot * c01);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI, startIdxJ + 2, basisDot * c02);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI + 1, startIdxJ, basisDot * c01);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI + 2, startIdxJ, basisDot * c02);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxI + 2, startIdxJ + 2, basisDot * c22);
 
-            jerkIntegrationHessian.add(startIdxJ, startIdxI, basisDot * c00);
-            jerkIntegrationHessian.add(startIdxJ, startIdxI + 1, basisDot * c01);
-            jerkIntegrationHessian.add(startIdxJ, startIdxI + 2, basisDot * c02);
-            jerkIntegrationHessian.add(startIdxJ + 1, startIdxI, basisDot * c01);
-            jerkIntegrationHessian.add(startIdxJ + 1, startIdxI + 1, basisDot * c11);
-            jerkIntegrationHessian.add(startIdxJ + 1, startIdxI + 2, basisDot * c12);
-            jerkIntegrationHessian.add(startIdxJ + 2, startIdxI, basisDot * c02);
-            jerkIntegrationHessian.add(startIdxJ + 2, startIdxI + 1, basisDot * c12);
-            jerkIntegrationHessian.add(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ, startIdxI, basisDot * c00);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ, startIdxI + 1, basisDot * c01);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ, startIdxI + 2, basisDot * c02);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ + 1, startIdxI, basisDot * c01);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ + 2, startIdxI, basisDot * c02);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            MatrixMissingTools.unsafe_add(jerkIntegrationHessian, startIdxJ + 2, startIdxI + 2, basisDot * c22);
          }
       }
    }
@@ -510,97 +389,9 @@ public class ContactPointHelper
       basisVectorToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   /**
-    * Returns the Jacobian that maps from the generalized contact value coefficients to the corresponding linear Euclidean motion function value for all the
-    * coefficients in this contact point.
-    *
-    * @param derivativeOrder order of the Euclidean motion function Jacobian to return, where position is zero.
-    * @return Euclidean motion function Jacobian.
-    */
-   public DMatrixRMaj getLinearJacobian(int derivativeOrder)
-   {
-      switch (derivativeOrder)
-      {
-         case 0:
-            return getLinearPositionJacobian();
-         case 1:
-            return getLinearVelocityJacobian();
-         case 2:
-            return getLinearAccelerationJacobian();
-         case 3:
-            return getLinearJerkJacobian();
-         default:
-            throw new IllegalArgumentException("Derivative order must be less than 4.");
-      }
-   }
-
-   /**
-    * Returns the Jacobian that maps from the generalized contact value coefficients to a vector of generalized contact force values for all the coefficients
-    * in this contact point.
-    *
-    * @param derivativeOrder order of the generalized contact forces to return, where position is zero.
-    * @return vector of generalized contact values.
-    */
-   public DMatrixRMaj getRhoJacobian(int derivativeOrder)
-   {
-      switch (derivativeOrder)
-      {
-         case 0:
-            return getRhoMagnitudeJacobian();
-         case 1:
-            return getRhoRateJacobian();
-         case 2:
-            return getRhoAccelerationJacobian();
-         case 3:
-            return getRhoJerkJacobian();
-         default:
-            throw new IllegalArgumentException("Derivative order must be less than 4.");
-      }
-   }
-
    public DMatrixRMaj getRhoMaxMatrix()
    {
       return rhoMaxMatrix;
-   }
-
-   private DMatrixRMaj getLinearPositionJacobian()
-   {
-      return linearPositionJacobianMatrix;
-   }
-
-   private DMatrixRMaj getLinearVelocityJacobian()
-   {
-      return linearVelocityJacobianMatrix;
-   }
-
-   private DMatrixRMaj getLinearAccelerationJacobian()
-   {
-      return linearAccelerationJacobianMatrix;
-   }
-
-   private DMatrixRMaj getLinearJerkJacobian()
-   {
-      return linearJerkJacobianMatrix;
-   }
-
-   private DMatrixRMaj getRhoMagnitudeJacobian()
-   {
-      return rhoMagnitudeJacobianMatrix;
-   }
-
-   private DMatrixRMaj getRhoRateJacobian()
-   {
-      return rhoRateJacobianMatrix;
-   }
-
-   private DMatrixRMaj getRhoAccelerationJacobian()
-   {
-      return rhoAccelerationJacobianMatrix;
-   }
-
-   private DMatrixRMaj getRhoJerkJacobian()
-   {
-      return rhoJerkJacobianMatrix;
    }
 
    public DMatrixRMaj getAccelerationIntegrationHessian()
@@ -696,9 +487,9 @@ public class ContactPointHelper
       {
          return true;
       }
-      else if (object instanceof ContactPointHelper)
+      else if (object instanceof MPCContactPoint)
       {
-         ContactPointHelper other = (ContactPointHelper) object;
+         MPCContactPoint other = (MPCContactPoint) object;
          if (numberOfBasisVectorsPerContactPoint != other.numberOfBasisVectorsPerContactPoint)
             return false;
          if (coefficientsSize != other.coefficientsSize)
