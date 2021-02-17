@@ -27,6 +27,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
    private final YoBoolean reinitialize = new YoBoolean("standPrepReinitialize", registry);
+   private final YoBoolean continuousUpdate = new YoBoolean("standPrepContinuousUpdate", registry);
    private final YoDouble splineStartTime = new YoDouble("standPrepSplineStartTime", registry);
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
@@ -70,6 +71,7 @@ public class StandPrepControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
+      continuousUpdate.set(false);
       reinitialize.set(false);
       initializeSplines(0.0);
    }
@@ -103,7 +105,12 @@ public class StandPrepControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      if (reinitialize.getValue())
+      if (continuousUpdate.getValue())
+      {
+         reinitialize.set(false);
+         initializeSplines(splineStartTime.getValue());
+      }
+      else if (reinitialize.getValue())
       {
          reinitialize.set(false);
          initializeSplines(timeInState);
