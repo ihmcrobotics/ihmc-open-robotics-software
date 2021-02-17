@@ -176,7 +176,8 @@ public class SCS2SensorReader implements SensorReader
       try
       {
          simIMUSensors.add(sensorList.stream().filter(candidate -> candidate.getName().equals(definition.getName())).findFirst().get());
-         controllerIMUSensors.add(new IMUSensor(definition, null));
+         if (usePerfectSensor)
+            controllerIMUSensors.add(new IMUSensor(definition, null));
          stateEstimatorSensorDefinitions.addIMUSensorDefinition(definition);
       }
       catch (Exception e)
@@ -198,7 +199,8 @@ public class SCS2SensorReader implements SensorReader
    {
       simWrenchSensors.add(controllerInput.getInput().findRigidBody(definition.getRigidBody().getName()).getParentJoint().getAuxialiryData().getWrenchSensors()
                                           .stream().filter(candidate -> candidate.getName().equals(definition.getSensorName())).findFirst().get());
-      controllerWrenchSensors.add(sensorDataToUpdate);
+      if (usePerfectSensor)
+         controllerWrenchSensors.add(sensorDataToUpdate);
       stateEstimatorSensorDefinitions.addForceSensorDefinition(definition);
    }
 
