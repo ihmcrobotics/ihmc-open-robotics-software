@@ -34,7 +34,7 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
    private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    private final Vector3D currentAxisAngleError = new Vector3D();
-   private final FrameVector3D currentBodyAngularMomentumAboutFixedPoint = new FrameVector3D();
+   private final Vector3D currentBodyAngularMomentumAboutFixedPoint = new Vector3D();
 
    private int segmentNumber;
    private int endDiscreteTickId;
@@ -147,9 +147,9 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
       this.currentAxisAngleError.set(currentAxisAngleError);
    }
 
-   public void setCurrentBodyAngularMomentumAboutFixedPoint(FrameVector3DReadOnly currentBodyAngularMomentumAboutFixedPoint)
+   public void setCurrentBodyAngularMomentumAboutFixedPoint(Vector3DReadOnly currentBodyAngularMomentumAboutFixedPoint)
    {
-      this.currentBodyAngularMomentumAboutFixedPoint.setIncludingFrame(currentBodyAngularMomentumAboutFixedPoint);
+      this.currentBodyAngularMomentumAboutFixedPoint.set(currentBodyAngularMomentumAboutFixedPoint);
    }
 
    @Override
@@ -225,7 +225,7 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
       return currentAxisAngleError;
    }
 
-   public FrameVector3DReadOnly getCurrentBodyAngularMomentumAboutFixedPoint()
+   public Vector3DReadOnly getCurrentBodyAngularMomentumAboutFixedPoint()
    {
       return currentBodyAngularMomentumAboutFixedPoint;
    }

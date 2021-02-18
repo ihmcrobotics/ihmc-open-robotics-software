@@ -21,10 +21,10 @@ public class OrientationInputCalculator
    private final DMatrixRMaj desireInternalAngularMomentumRate = new DMatrixRMaj(3, 1);
 
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj skewGravity = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj skewGravity = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj rotatedBodyAngularMomentum = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj skewRotatedBodyAngularMomentum = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj skewRotatedBodyAngularMomentum = new DMatrixRMaj(3, 3);
 
    private final CommonMatrix3DBasics tempRotationMatrix = new RotationMatrix();
    private final DMatrixRMaj desiredRotationMatrix = new DMatrixRMaj(3, 3);
@@ -35,6 +35,7 @@ public class OrientationInputCalculator
    private final DMatrixRMaj comCoriolisForce = new DMatrixRMaj(3, 1);
 
    private final DMatrixRMaj desiredBodyAngularVelocity = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj skewDesiredBodyAngularVelocity = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj desiredCoMPosition = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj desiredCoMVelocity = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewDesiredCoMPosition = new DMatrixRMaj(3, 3);
@@ -180,9 +181,10 @@ public class OrientationInputCalculator
 
       CommonOps_DDRM.mult(desiredRotationMatrix, desiredBodyAngularMomentumVector, rotatedBodyAngularMomentum);
       MatrixMissingTools.toSkewSymmetricMatrix(rotatedBodyAngularMomentum, skewRotatedBodyAngularMomentum);
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocity, skewDesiredBodyAngularVelocity);
 
       CommonOps_DDRM.mult(inverseInertia, skewRotatedBodyAngularMomentum, a4);
-      CommonOps_DDRM.subtractEquals(a4, desiredBodyAngularVelocity);
+      CommonOps_DDRM.subtractEquals(a4, skewDesiredBodyAngularVelocity);
    }
 
 
