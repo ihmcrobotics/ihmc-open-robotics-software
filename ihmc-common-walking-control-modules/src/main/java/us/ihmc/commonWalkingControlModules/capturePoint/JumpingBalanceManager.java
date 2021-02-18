@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SegmentPointViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -102,7 +102,7 @@ public class JumpingBalanceManager
 
       if (yoGraphicsListRegistry != null)
       {
-         comTrajectoryPlanner.setCornerPointViewer(new SegmentPointViewer(false, true, registry, yoGraphicsListRegistry));
+         comTrajectoryPlanner.setCornerPointViewer(new MPCCornerPointViewer(false, true, registry, yoGraphicsListRegistry));
          comTrajectoryPlanner.setupCoMTrajectoryViewer(yoGraphicsListRegistry);
 
          YoGraphicPosition desiredDCMViz = new YoGraphicPosition("Desired DCM",
@@ -162,7 +162,6 @@ public class JumpingBalanceManager
 
       jumpingMomentumRateControlModuleInput.setOmega0(omega0);
       jumpingMomentumRateControlModuleInput.setTimeInState(0.0);
-      jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setMinimizeAngularMomentumRate(minimizeAngularMomentumRate.getBooleanValue());
    }
 
@@ -200,8 +199,11 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      if (comTrajectoryPlanner.getContactStateProviders().size() != comTrajectoryPlanner.getVRPTrajectories().size())
+         throw new IllegalArgumentException("What?");
+
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
-      jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
+      jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }
@@ -240,8 +242,10 @@ public class JumpingBalanceManager
 
       comPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
 
+      if (comTrajectoryPlanner.getContactStateProviders().size() != comTrajectoryPlanner.getVRPTrajectories().size())
+         throw new IllegalArgumentException("What?");
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
-      jumpingMomentumRateControlModuleInput.setContactStateProvider(comTrajectoryPlanner.getContactStateProviders());
+      jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       plannerTimer.stopMeasurement();
    }

@@ -49,7 +49,7 @@ public class LinearMPCSolutionInspection
                inspectSolution((MPCCommandList) command, solution);
                break;
             case RHO_VALUE:
-               inspectRhoValueCommand((RhoValueObjectiveCommand) command, solution);
+               inspectRhoValueCommand((RhoObjectiveCommand) command, solution);
                break;
             case VRP_TRACKING:
                inspectVRPTrackingObjective((VRPTrackingCommand) command, solution);
@@ -60,31 +60,31 @@ public class LinearMPCSolutionInspection
       }
    }
 
-   public void inspectRhoValueCommand(RhoValueObjectiveCommand command, DMatrixRMaj solution)
+   public void inspectRhoValueCommand(RhoObjectiveCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
-      if (success)
+      int offset = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
+      if (offset != -1)
          inspectInput(qpInputTypeA, solution);
    }
 
    public void inspectMPCValueObjective(MPCValueCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateValueObjective(qpInputTypeA, command);
-      if (success)
+      int offset = inputCalculator.calculateValueObjective(qpInputTypeA, command);
+      if (offset != -1)
          command.setCostToGo(inspectInput(qpInputTypeA, solution));
    }
 
    public void inspectCoMContinuityObjective(MPCContinuityCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
-      if (success)
+      int offset = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
+      if (offset != -1)
          inspectInput(qpInputTypeA, solution);
    }
 
    public void inspectVRPTrackingObjective(VRPTrackingCommand command, DMatrixRMaj solution)
    {
-      boolean success = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
-      if (success)
+      int offset = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
          command.setCostToGo(inspectInput(qpInputTypeC, solution));
    }
 
@@ -144,7 +144,7 @@ public class LinearMPCSolutionInspection
       solverInput_H.zero();
       solverInput_f.zero();
 
-      LinearMPCQPSolver.addObjective(taskJacobian, taskObjective, taskWeight, problemSize, solverInput_H, solverInput_f);
+      LinearMPCQPSolver.addObjective(taskJacobian, taskObjective, taskWeight, problemSize, 0, solverInput_H, solverInput_f);
 
       CommonOps_DDRM.mult(solverInput_H, solution, Hx);
       CommonOps_DDRM.multTransA(solution, Hx, cost);
@@ -197,7 +197,7 @@ public class LinearMPCSolutionInspection
       solverInput_Ain.reshape(0, problemSize);
       solverInput_bin.reshape(0, 1);
 
-      LinearMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+      LinearMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Ain, solverInput_bin);
 
       solverOutput_bin.reshape(constraints, problemSize);
       solverOutput_bin.zero();
@@ -222,7 +222,7 @@ public class LinearMPCSolutionInspection
       solverInput_Ain.zero();
       solverInput_bin.zero();
 
-      LinearMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Ain, solverInput_bin);
+      LinearMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Ain, solverInput_bin);
 
       solverOutput_bin.reshape(constraints, problemSize);
       solverOutput_bin.zero();
