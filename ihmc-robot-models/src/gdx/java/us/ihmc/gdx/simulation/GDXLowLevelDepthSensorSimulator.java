@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.simulation;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.*;
@@ -25,7 +25,7 @@ import java.util.Random;
 /**
  * Lidar could be simulated with a viewportHeight of 1 and rotating the camera
  */
-public class GDXDepthSensorSimulator
+public class GDXLowLevelDepthSensorSimulator
 {
    private final String depthWindowName = "Depth";
    private final String colorWindowName = "Color";
@@ -55,7 +55,7 @@ public class GDXDepthSensorSimulator
 
    private boolean depthWindowEnabledOptimization = true;
 
-   public GDXDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
+   public GDXLowLevelDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
       this.fieldOfViewY = (float) fieldOfViewY;
       this.imageWidth = imageWidth;
