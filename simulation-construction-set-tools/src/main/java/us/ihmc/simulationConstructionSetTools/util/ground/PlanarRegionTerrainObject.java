@@ -17,6 +17,9 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
  */
@@ -26,6 +29,9 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final double allowablePenetrationThickness;
    private final Graphics3DObject linkGraphics;
    private final AppearanceDefinition appearance;
+
+   private final ArrayList<ConvexPolytope3D> planarCollisionMesh = new ArrayList<>();
+   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
 
    private final Point3D tempPoint3dForCheckInside = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private final Vector3D terrainNormal = new Vector3D();
@@ -41,6 +47,9 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       this.allowablePenetrationThickness = allowablePenetrationThickness;
       this.appearance = appearance;
       this.linkGraphics = setupLinkGraphics();
+
+      transformToWorld.set(planarRegion.getTransformToWorld());
+      this.planarCollisionMesh.add(extrudePolygon(planarRegion, transformToWorld, 0.1));
 
       this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
 
@@ -166,6 +175,12 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+
+   @Override
+   public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
+   {
+      return planarCollisionMesh;
    }
 
    private Graphics3DObject setupLinkGraphics()
