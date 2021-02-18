@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 import java.util.ArrayList;
@@ -19,11 +20,11 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
    private int commandId;
 
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion();
-   private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D();
+   private final Vector3DBasics desiredBodyAngularVelocity = new Vector3D();
 
-   private final FrameVector3DBasics desiredNetAngularMomentum = new FrameVector3D();
-   private final FrameVector3DBasics desiredInternalAngularMomentum = new FrameVector3D();
-   private final FrameVector3DBasics desiredInternalAngularMomentumRate = new FrameVector3D();
+   private final Vector3D desiredNetAngularMomentum = new Vector3D();
+   private final Vector3D desiredInternalAngularMomentum = new Vector3D();
+   private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
 
    private final Matrix3DBasics momentOfInertiaInBodyFrame = new Matrix3D();
 
@@ -101,24 +102,24 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
       this.desiredBodyOrientation.setIncludingFrame(desiredBodyOrientation);
    }
 
-   public void setDesiredBodyAngularVelocityInBodyFrame(FrameVector3DReadOnly desiredBodyAngularVelocity)
+   public void setDesiredBodyAngularVelocityInBodyFrame(Vector3DReadOnly desiredBodyAngularVelocity)
    {
-      this.desiredBodyAngularVelocity.setIncludingFrame(desiredBodyAngularVelocity);
+      this.desiredBodyAngularVelocity.set(desiredBodyAngularVelocity);
    }
 
-   public void setDesiredNetAngularMomentum(FrameVector3DReadOnly desiredNetAngularMomentum)
+   public void setDesiredNetAngularMomentum(Vector3DReadOnly desiredNetAngularMomentum)
    {
-      this.desiredNetAngularMomentum.setIncludingFrame(desiredNetAngularMomentum);
+      this.desiredNetAngularMomentum.set(desiredNetAngularMomentum);
    }
 
-   public void setDesiredInternalAngularMomentum(FrameVector3DReadOnly desiredInternalAngularMomentum)
+   public void setDesiredInternalAngularMomentum(Vector3DReadOnly desiredInternalAngularMomentum)
    {
-      this.desiredInternalAngularMomentum.setIncludingFrame(desiredInternalAngularMomentum);
+      this.desiredInternalAngularMomentum.set(desiredInternalAngularMomentum);
    }
 
-   public void setDesiredInternalAngularMomentumRate(FrameVector3DReadOnly desiredInternalAngularMomentumRate)
+   public void setDesiredInternalAngularMomentumRate(Vector3DReadOnly desiredInternalAngularMomentumRate)
    {
-      this.desiredInternalAngularMomentumRate.setIncludingFrame(desiredInternalAngularMomentumRate);
+      this.desiredInternalAngularMomentumRate.set(desiredInternalAngularMomentumRate);
    }
 
    public void setMomentOfInertiaInBodyFrame(Matrix3DReadOnly momentOfInertiaInBodyFrame)
@@ -189,17 +190,17 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
       return desiredCoMVelocity;
    }
 
-   public FrameVector3DReadOnly getDesiredNetAngularMomentum()
+   public Vector3DReadOnly getDesiredNetAngularMomentum()
    {
       return desiredNetAngularMomentum;
    }
 
-   public FrameVector3DReadOnly getDesiredInternalAngularMomentum()
+   public Vector3DReadOnly getDesiredInternalAngularMomentum()
    {
       return desiredInternalAngularMomentum;
    }
 
-   public FrameVector3DReadOnly getDesiredInternalAngularMomentumRate()
+   public Vector3DReadOnly getDesiredInternalAngularMomentumRate()
    {
       return desiredInternalAngularMomentumRate;
    }
@@ -209,7 +210,7 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
       return desiredBodyOrientation;
    }
 
-   public FrameVector3DReadOnly getDesiredBodyAngularVelocity()
+   public Vector3DReadOnly getDesiredBodyAngularVelocity()
    {
       return desiredBodyAngularVelocity;
    }

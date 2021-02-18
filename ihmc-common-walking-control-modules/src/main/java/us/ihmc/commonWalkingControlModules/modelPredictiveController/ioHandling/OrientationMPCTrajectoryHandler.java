@@ -14,6 +14,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
 import us.ihmc.robotics.time.TimeIntervalProvider;
@@ -47,7 +49,7 @@ public class OrientationMPCTrajectoryHandler
    private final Matrix3DBasics momentOfInertiaMatrix = new Matrix3D();
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectory;
 
-   private final Polynomial3D internalAngularMomentumTrajectory = new Polynomial3D(3);
+   private final FramePolynomial3D internalAngularMomentumTrajectory = new FramePolynomial3D(3, ReferenceFrame.getWorldFrame());
    private final YoDouble previewWindowEndTime;
 
    private final double mass;
@@ -211,6 +213,7 @@ public class OrientationMPCTrajectoryHandler
    public void compute(double timeInPhase)
    {
       orientationTrajectory.compute(timeInPhase);
+      internalAngularMomentumTrajectory.compute(timeInPhase);
    }
 
    public void computeOutsidePreview(double timeInPhase)
@@ -228,7 +231,6 @@ public class OrientationMPCTrajectoryHandler
       return orientationInitializationCalculator.getDesiredAngularVelocity();
    }
 
-
    public FrameOrientation3DReadOnly getDesiredBodyOrientation()
    {
       return orientationTrajectory.getOrientation();
@@ -242,5 +244,15 @@ public class OrientationMPCTrajectoryHandler
    public FrameVector3DReadOnly getDesiredAngularAcceleration()
    {
       return orientationTrajectory.getAngularAcceleration();
+   }
+
+   public FramePoint3DReadOnly getDesiredInternalAngularMomentum()
+   {
+      return internalAngularMomentumTrajectory.getPosition();
+   }
+
+   public FrameVector3DReadOnly getDesiredInternalAngularMomentumRate()
+   {
+      return internalAngularMomentumTrajectory.getVelocity();
    }
 }
