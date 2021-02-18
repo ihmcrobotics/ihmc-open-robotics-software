@@ -96,7 +96,6 @@ public class OrientationMPCTrajectoryHandler
       desiredAngularVelocity.clear();
       desiredBodyAngularMomentaAboutPoint.clear();
 
-      int tickIndex = 0;
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
          for (int i = 0; i < indexHandler.getOrientationTicksInSegment(segment); i++)
@@ -107,8 +106,6 @@ public class OrientationMPCTrajectoryHandler
 
             desiredOrientation.add().set(orientationTrajectory.getOrientation());
             desiredAngularVelocity.add().set(orientationTrajectory.getAngularVelocity());
-
-            tickIndex++;
          }
       }
    }

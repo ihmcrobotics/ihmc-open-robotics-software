@@ -1,15 +1,20 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
+import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicEllipsoid;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SE3MPCVisualizer
@@ -20,8 +25,12 @@ public class SE3MPCVisualizer
    private final YoFramePoint3D desiredVRP;
    private final YoFramePoint3D desiredDCM;
    private final YoFramePoint3D desiredCoM;
+   private final YoFrameYawPitchRoll desiredBodyOrientation;
+   private final YoFramePoseUsingYawPitchRoll desiredBodyPose;
 
    private final YoFrameVector3D desiredCoMVelocity;
+
+   private final SideDependentList<ContactPlaneForceViewer> forceViewers = new SideDependentList<>();
 
    public SE3MPCVisualizer(SE3ModelPredictiveController mpc, SimulationConstructionSet scs,
                            YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
@@ -38,9 +47,21 @@ public class SE3MPCVisualizer
       desiredCoM = new YoFramePoint3D("DesiredCoMVis", ReferenceFrame.getWorldFrame(), registry);
       desiredCoMVelocity = new YoFrameVector3D("DesiredCoMVelocityVis", ReferenceFrame.getWorldFrame(), registry);
 
+      desiredBodyOrientation = new YoFrameYawPitchRoll("DesiredBodyOrientation", ReferenceFrame.getWorldFrame(), registry);
+
+      desiredBodyPose = new YoFramePoseUsingYawPitchRoll(desiredCoM, desiredBodyOrientation);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         forceViewers.put(robotSide, new ContactPlaneForceViewer(robotSide.getCamelCaseName(), 4, registry, graphicsListRegistry));
+      }
+
       YoGraphicPosition vrpVis = new YoGraphicPosition("DesiredVRPVis", desiredVRP, 0.05, YoAppearance.Green());
       YoGraphicPosition dcmVis = new YoGraphicPosition("DesiredDCMVis", desiredDCM, 0.05, YoAppearance.Blue());
       YoGraphicPosition comVis = new YoGraphicPosition("DesiredCoMVis", desiredCoM, 0.05, YoAppearance.White());
+      AppearanceDefinition bodyVisAppearance = YoAppearance.Green();
+      bodyVisAppearance.setTransparency(0.5);
+      YoGraphicEllipsoid bodyVis = new YoGraphicEllipsoid("DesiredBodyVis", desiredBodyPose, bodyVisAppearance, new Vector3D(0.05, 0.05, 0.1));
 
       YoGraphicVector comVelocityVis = new YoGraphicVector("DesiredCoMVelocityVis", desiredCoM, desiredCoMVelocity, 0.05, YoAppearance.White());
 
@@ -49,12 +70,13 @@ public class SE3MPCVisualizer
       graphicsListRegistry.registerYoGraphic(name, dcmVis);
       graphicsListRegistry.registerYoGraphic(name, comVis);
       graphicsListRegistry.registerYoGraphic(name, comVelocityVis);
+      graphicsListRegistry.registerYoGraphic(name, bodyVis);
    }
 
    int contactPlaneViewer = 0;
    private ContactPlaneForceViewer getNextContactPlaneForceViewer(YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
-      return new ContactPlaneForceViewer("plane" + contactPlaneViewer++, 6, registry, graphicsListRegistry);
+      return new ContactPlaneForceViewer("plane" + contactPlaneViewer++, 4, registry, graphicsListRegistry);
    }
 
    public void visualize(double duration)
@@ -62,6 +84,12 @@ public class SE3MPCVisualizer
       for (double time = 0.0; time <= duration; time += 0.005)
       {
          mpc.compute(time);
+         int currentSegment = 0;
+         for (int i = 0; i < mpc.contactPlaneHelperPool.get(currentSegment).size(); i++)
+         {
+            mpc.contactPlaneHelperPool.get(currentSegment).get(i).computeContactForce(3.0, time);
+         }
+
 
          desiredCoM.setMatchingFrame(mpc.getDesiredCoMPosition());
          desiredDCM.setMatchingFrame(mpc.getDesiredDCMPosition());
@@ -69,6 +97,9 @@ public class SE3MPCVisualizer
 
          desiredCoMVelocity.setMatchingFrame(mpc.getDesiredCoMVelocity());
 
+         desiredBodyOrientation.setMatchingFrame(mpc.getDesiredBodyOrientation());
+
+         scs.setTime(time);
          scs.tickAndUpdate();
       }
    }

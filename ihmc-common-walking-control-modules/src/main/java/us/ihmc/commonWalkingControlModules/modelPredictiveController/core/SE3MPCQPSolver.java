@@ -53,9 +53,19 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int start = indexHandler.getOrientationStartIndices(segmentId);
-         int end = start + indexHandler.getOrientationTicksInSegment(segmentId) * SE3MPCIndexHandler.variablesPerOrientationTick;
+         int ticks = indexHandler.getOrientationTicksInSegment(segmentId);
+         int end = start + ticks * SE3MPCIndexHandler.variablesPerOrientationTick;
          for (int i = start; i < end; i++)
             solverInput_H.add(i, i, orientationVariableRegularization.getDoubleValue());
+         for (int tick = 0; tick < ticks; tick++)
+         {
+            int var = start + SE3MPCIndexHandler.variablesPerOrientationTick * tick;
+            for (int i = 0; i < 3; i++)
+            {
+               solverInput_H.add(var + i, var + i, 1e-2);
+            }
+
+         }
       }
    }
 
