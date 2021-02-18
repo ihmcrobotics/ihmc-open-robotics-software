@@ -5,7 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -47,7 +47,7 @@ public class LinearMPCQPSolverTest
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
 
-      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -337,8 +337,8 @@ public class LinearMPCQPSolverTest
       EuclidCoreTestTools.assertTuple3DEquals(comStartVelocity, reconstructedCoMVelocityAtStart, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedDCMAtStart, 5e-3);
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedDCMAtEnd, 5e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtStart, 5e-3);
-      EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtEnd, 6e-3);
+      EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtStart, 7e-3);
+      EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtEnd, 8e-3);
    }
 
 
@@ -352,8 +352,8 @@ public class LinearMPCQPSolverTest
 
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
-      ContactPlaneHelper contactPlaneHelper1 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
-      ContactPlaneHelper contactPlaneHelper2 = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper2 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -371,7 +371,7 @@ public class LinearMPCQPSolverTest
       double timeOfConstraint = 0.7;
       double minRho = 0.001;
 
-      RhoValueObjectiveCommand rhoCommandStart1 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandStart1 = new RhoAccelerationObjectiveCommand();
       rhoCommandStart1.setOmega(omega);
       rhoCommandStart1.setTimeOfObjective(0.0);
       rhoCommandStart1.setSegmentNumber(0);
@@ -380,7 +380,7 @@ public class LinearMPCQPSolverTest
       rhoCommandStart1.setUseScalarObjective(true);
       rhoCommandStart1.addContactPlaneHelper(contactPlaneHelper1);
 
-      RhoValueObjectiveCommand rhoCommandEnd1 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandEnd1 = new RhoAccelerationObjectiveCommand();
       rhoCommandEnd1.setOmega(omega);
       rhoCommandEnd1.setTimeOfObjective(timeOfConstraint);
       rhoCommandEnd1.setSegmentNumber(0);
@@ -389,7 +389,7 @@ public class LinearMPCQPSolverTest
       rhoCommandEnd1.setUseScalarObjective(true);
       rhoCommandEnd1.addContactPlaneHelper(contactPlaneHelper1);
 
-      RhoValueObjectiveCommand rhoCommandStart2 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandStart2 = new RhoAccelerationObjectiveCommand();
       rhoCommandStart2.setOmega(omega);
       rhoCommandStart2.setTimeOfObjective(0.0);
       rhoCommandStart2.setSegmentNumber(1);
@@ -398,7 +398,7 @@ public class LinearMPCQPSolverTest
       rhoCommandStart2.setUseScalarObjective(true);
       rhoCommandStart2.addContactPlaneHelper(contactPlaneHelper2);
 
-      RhoValueObjectiveCommand rhoCommandEnd2 = new RhoValueObjectiveCommand();
+      RhoAccelerationObjectiveCommand rhoCommandEnd2 = new RhoAccelerationObjectiveCommand();
       rhoCommandEnd2.setOmega(omega);
       rhoCommandEnd2.setTimeOfObjective(timeOfConstraint);
       rhoCommandEnd2.setSegmentNumber(1);

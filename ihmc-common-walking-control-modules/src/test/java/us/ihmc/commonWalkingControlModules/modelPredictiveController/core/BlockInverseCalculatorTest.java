@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
-import jdk.nashorn.internal.ir.Block;
 import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;

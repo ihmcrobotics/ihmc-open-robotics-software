@@ -71,7 +71,7 @@ public class JumpingMomentumRateControlModuleInput
       return vrpTrajectories;
    }
 
-   public void setContactStateProvider(List<? extends ContactStateProvider> contactStateProviders)
+   public void setContactStateProviders(List<? extends ContactStateProvider> contactStateProviders)
    {
       this.contactStateProviders.clear();
       for (int i = 0; i < contactStateProviders.size(); i++)
@@ -89,7 +89,7 @@ public class JumpingMomentumRateControlModuleInput
       timeInState = other.timeInState;
       inFlight = other.inFlight;
       setVrpTrajectories(other.vrpTrajectories);
-      setContactStateProvider(other.contactStateProviders);
+      setContactStateProviders(other.contactStateProviders);
       minimizeAngularMomentumRate = other.minimizeAngularMomentumRate;
    }
 
