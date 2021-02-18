@@ -31,7 +31,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
    public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, YoRegistry parentRegistry)
    {
-      this(indexHandler, dt, gravityZ, mass, true, parentRegistry);
+      this(indexHandler, dt, gravityZ, mass, false, parentRegistry);
    }
 
    public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, boolean useBlockInverse, YoRegistry parentRegistry)

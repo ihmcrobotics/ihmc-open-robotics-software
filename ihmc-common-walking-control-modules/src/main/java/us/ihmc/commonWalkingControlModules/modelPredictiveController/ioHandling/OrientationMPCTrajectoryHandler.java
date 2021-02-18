@@ -9,6 +9,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -46,7 +47,7 @@ public class OrientationMPCTrajectoryHandler
    private final RecyclingArrayList<FrameQuaternionBasics> orientationSolution = new RecyclingArrayList<>(FrameQuaternion::new);
    private final RecyclingArrayList<FrameVector3DBasics> angularVelocitySolution = new RecyclingArrayList<>(FrameVector3D::new);
 
-   private final Matrix3DBasics momentOfInertiaMatrix = new Matrix3D();
+   private final Matrix3DReadOnly momentOfInertiaMatrix;
    private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectory;
 
    private final FramePolynomial3D internalAngularMomentumTrajectory = new FramePolynomial3D(3, ReferenceFrame.getWorldFrame());
@@ -54,16 +55,17 @@ public class OrientationMPCTrajectoryHandler
 
    private final double mass;
 
-   public OrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, double mass, YoRegistry registry)
+   public OrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, Matrix3DReadOnly momentOfInertiaMatrix, double mass, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
+      this.momentOfInertiaMatrix = momentOfInertiaMatrix;
       this.mass = mass;
 
       previewWindowEndTime = new YoDouble("orientationPreviewWindowEndTime", registry);
       internalAngularMomentumTrajectory.setConstant(new Point3D());
 
       orientationInitializationCalculator = new OrientationTrajectoryCalculator(registry);
-      orientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("desiredCoMTrajectory", ReferenceFrame.getWorldFrame(), registry);
+      orientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("desiredCoMTrajectory", 100, ReferenceFrame.getWorldFrame(), registry);
    }
 
    /**
@@ -99,7 +101,7 @@ public class OrientationMPCTrajectoryHandler
       {
          for (int i = 0; i < indexHandler.getOrientationTicksInSegment(segment); i++)
          {
-            currentTimeInState += indexHandler.getOrientationTickDuration(tickIndex);
+            currentTimeInState += indexHandler.getOrientationTickDuration(segment);
 
             orientationTrajectory.compute(currentTimeInState);
 
@@ -124,25 +126,30 @@ public class OrientationMPCTrajectoryHandler
       orientationSolution.clear();
       angularVelocitySolution.clear();
 
-      for (int i = 0; i < axisAngleErrorSolution.size(); i++)
+      int globalTick = 0;
+      for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
-         currentTimeInState += indexHandler.getOrientationTickDuration(i);
+         int end = globalTick + indexHandler.getOrientationTicksInSegment(segment);
+         for (;globalTick < end; globalTick++)
+         {
+            currentTimeInState += indexHandler.getOrientationTickDuration(segment);
 
-         FrameQuaternionBasics orientation = orientationSolution.add();
-         orientation.set(desiredOrientation.get(i));
-         orientation.append(axisAngleErrorSolution.get(i));
+            FrameQuaternionBasics orientation = orientationSolution.add();
+            orientation.set(desiredOrientation.get(globalTick));
+            orientation.append(axisAngleErrorSolution.get(globalTick));
 
-         internalAngularMomentumTrajectory.compute(currentTimeInState);
-         comTrajectorySolution.compute(currentTimeInState);
+            internalAngularMomentumTrajectory.compute(currentTimeInState);
+            comTrajectorySolution.compute(currentTimeInState);
 
-         FrameVector3DBasics angularVelocity = angularVelocitySolution.add();
-         angularVelocity.cross(comTrajectorySolution.getPosition(), comTrajectorySolution.getVelocity());
-         angularVelocity.scaleAdd(-mass, internalAngularMomentumTrajectory.getPosition());
+            FrameVector3DBasics angularVelocity = angularVelocitySolution.add();
+            angularVelocity.cross(comTrajectorySolution.getPosition(), comTrajectorySolution.getVelocity());
+            angularVelocity.scaleAdd(-mass, internalAngularMomentumTrajectory.getPosition());
 
-         orientation.inverseTransform(angularVelocity);
-         momentOfInertiaMatrix.inverseTransform(angularVelocity);
+            orientation.inverseTransform(angularVelocity);
+            momentOfInertiaMatrix.inverseTransform(angularVelocity);
 
-         orientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
+            orientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
+         }
       }
 
       overwriteTrajectoryOutsidePreviewWindow();

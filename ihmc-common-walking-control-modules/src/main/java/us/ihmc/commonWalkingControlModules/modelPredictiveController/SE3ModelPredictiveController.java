@@ -26,6 +26,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
@@ -34,6 +35,7 @@ import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -65,6 +67,7 @@ public class SE3ModelPredictiveController
    private final DoubleProvider omega;
    private final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
+   private final double mass;
 
    private static final double mu = 0.8;
 
@@ -108,6 +111,9 @@ public class SE3ModelPredictiveController
    private final YoDouble vrpTrackingCostToGo1 = new YoDouble("vrpTrackingCostToGo1", registry);
    private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
 
+   private final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
+   private final YoVector3D currentBodyAngularMomentum = new YoVector3D("currentBodyAngularMomentum", registry);
+
    final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
@@ -133,21 +139,23 @@ public class SE3ModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
 
-   public SE3ModelPredictiveController(RigidBodyReadOnly body,
+   public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
                                        double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.omega = omega;
+      this.mass = mass;
 
-      momentOfInertia = body.getInertia().getMomentOfInertia();
+//      momentOfInertia = body.getInertia().getMomentOfInertia();
+      this.momentOfInertia = momentOfInertia;
       this.indexHandler = new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
 
       orientationPreviewWindowDuration.set(0.25);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       positionTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
-      orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler, mass, registry);
+      orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler, momentOfInertia, mass, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
@@ -219,6 +227,8 @@ public class SE3ModelPredictiveController
       previewWindowCalculator.compute(contactSequence, currentTimeInState.getDoubleValue());
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
 
+      indexHandler.initialize(planningWindow, orientationPreviewWindowDuration.getDoubleValue());
+
       positionTrajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
       positionTrajectoryHandler.computeOutsidePreview(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime());
 
@@ -233,8 +243,6 @@ public class SE3ModelPredictiveController
          qpSolver.notifyResetActiveSet();
          qpSolver.resetRateRegularization();
       }
-
-      indexHandler.initialize(planningWindow, orientationPreviewWindowDuration.getDoubleValue());
 
       CoMTrajectoryPlannerTools.computeVRPWaypoints(comHeight.getDoubleValue(),
                                                     gravityZ,
@@ -396,6 +404,10 @@ public class SE3ModelPredictiveController
          mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
       if (includeRhoMaxInequality)
          mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
+
+
+      mpcCommands.addCommand(computeInitialDiscreteOrientationObjective(commandProvider.getNextDiscreteOrientationCommand()));
+      mpcCommands.addCommandList(computeDiscreteOrientationObjectives());
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -434,7 +446,12 @@ public class SE3ModelPredictiveController
       return objectiveToPack;
    }
 
+   private final Matrix3D desiredRotation = new Matrix3D();
+   private final Matrix3D transformedDesiredRotation = new Matrix3D();
+   private final Matrix3D currentRotation = new Matrix3D();
+   private final Matrix3D transformedCurrentRotation = new Matrix3D();
    private final Vector3D tempVector = new Vector3D();
+   private final Vector3D currentAngularMomentumAboutFixedPoint = new Vector3D();
 
    private MPCCommand<?> computeInitialDiscreteOrientationObjective(DiscreteOrientationCommand objectiveToPack)
    {
@@ -465,8 +482,27 @@ public class SE3ModelPredictiveController
       objectiveToPack.setDesiredCoMPosition(currentCoMPosition);
       objectiveToPack.setDesiredCoMVelocity(currentCoMVelocity);
 
-      objectiveToPack.setCurrentAxisAngleError();
-      objectiveToPack.setCurrentBodyAngularMomentumAboutFixedPoint();
+      desiredOrientation.get(desiredRotation);
+      currentBodyOrientation.get(currentRotation);
+
+      desiredOrientation.inverseTransform(currentRotation, transformedCurrentRotation);
+      currentRotation.inverseTransform(desiredRotation, transformedDesiredRotation);
+      transformedCurrentRotation.sub(transformedDesiredRotation);
+      transformedCurrentRotation.scale(0.5);
+      currentBodyAxisAngleError.setX(transformedCurrentRotation.getM21());
+      currentBodyAxisAngleError.setY(transformedCurrentRotation.getM02());
+      currentBodyAxisAngleError.setZ(transformedCurrentRotation.getM10());
+
+      objectiveToPack.setCurrentAxisAngleError(currentBodyAxisAngleError);
+
+      currentBodyOrientation.inverseTransform(currentBodyAngularVelocity, tempVector);
+      momentOfInertia.transform(tempVector);
+      currentBodyOrientation.transform(tempVector, currentBodyAngularMomentum);
+
+      tempVector.cross(currentCoMPosition, currentCoMVelocity);
+      currentAngularMomentumAboutFixedPoint.scaleAdd(-mass, tempVector, currentBodyAngularMomentum);
+
+      objectiveToPack.setCurrentBodyAngularMomentumAboutFixedPoint(currentAngularMomentumAboutFixedPoint);
 
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
@@ -492,13 +528,13 @@ public class SE3ModelPredictiveController
          {
             DiscreteOrientationCommand objective = commandProvider.getNextDiscreteOrientationCommand();
 
-            localTime += indexHandler.getOrientationTickDuration(tick - 1);
-            globalTime += indexHandler.getOrientationTickDuration(tick - 1);
+            localTime += indexHandler.getOrientationTickDuration(segment);
+            globalTime += indexHandler.getOrientationTickDuration(segment);
 
             objective.clear();
             objective.setOmega(omega.getValue());
             objective.setSegmentNumber(segment);
-            objective.setDurationOfHold(indexHandler.getOrientationTickDuration(tick));
+            objective.setDurationOfHold(indexHandler.getOrientationTickDuration(segment));
             objective.setTimeOfConstraint(localTime);
             objective.setEndingDiscreteTickId(tick);
 
