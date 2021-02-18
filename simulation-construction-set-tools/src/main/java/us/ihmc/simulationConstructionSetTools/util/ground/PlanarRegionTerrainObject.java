@@ -71,6 +71,11 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       return extrudedPolygon;
    }
 
+   public void updateCollisionMeshLocation(RigidBodyTransform transformToApply)
+   {
+      planarCollisionMesh.get(0).applyTransform(transformToApply);
+   }
+
    @Override
    public double heightAt(double x, double y, double z)
    {
