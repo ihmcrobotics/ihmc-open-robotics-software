@@ -322,9 +322,9 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       return waypoints.get(index);
    }
 
-   public void removeWaypoint(int index)
+   public void removeLastWaypoint()
    {
-      waypoints.remove(index);
+      waypoints.get(numberOfWaypoints.getIntegerValue() - 1).setToNaN();
       numberOfWaypoints.decrement();
    }
 
