@@ -1,6 +1,10 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -44,6 +48,27 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
 
       if(terrainNormal.getZ() < 0.0)
          terrainNormal.negate();
+   }
+
+   private ConvexPolytope3D extrudePolygon(PlanarRegion planarRegion, RigidBodyTransform transform, double thickness)
+   {
+      ConvexPolytope3D extrudedPolygon = new ConvexPolytope3D();
+      Point2D tmpVertex2D;
+      Point3D tmpVertex = new Point3D();
+
+      extrudedPolygon.applyTransform(transform);
+
+      int numberOfVertices = planarRegion.getConcaveHullSize();
+      for(int i = 0; i < numberOfVertices; i++)
+      {
+         tmpVertex2D = planarRegion.getConcaveHullVertex(i);
+         tmpVertex.set(tmpVertex2D.getX(), tmpVertex2D.getY(), thickness/2.0);
+         extrudedPolygon.addVertex(tmpVertex);
+         tmpVertex.setZ(-thickness/2.0);
+         extrudedPolygon.addVertex(tmpVertex);
+      }
+
+      return extrudedPolygon;
    }
 
    @Override
