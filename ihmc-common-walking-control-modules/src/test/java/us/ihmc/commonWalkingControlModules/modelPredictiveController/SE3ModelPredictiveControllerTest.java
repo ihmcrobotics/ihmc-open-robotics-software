@@ -37,7 +37,7 @@ import static us.ihmc.robotics.Assert.assertNotEquals;
 public class SE3ModelPredictiveControllerTest
 {
    private static final double epsilon = 1e-3;
-   private static final boolean visualize = false;
+   private static final boolean visualize = true;
 
    @Test
    public void testSimpleStanding()
@@ -162,6 +162,8 @@ public class SE3ModelPredictiveControllerTest
       ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
       rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, 0.8);
 
+
+
       DMatrixRMaj solutionCoefficients = mpc.qpSolver.getSolution();
 
       DMatrixRMaj expectedSolutionMatrix = MPCTestHelper.getVectorOfCoefficients(gravityZ, rhoHelper, solutionCoefficients);
@@ -172,9 +174,12 @@ public class SE3ModelPredictiveControllerTest
 
 //      assertCoefficientsEqual(expectedSolutionMatrix, mpc.trajectoryHandler);
 
+      visualize(mpc, contactProviders, duration);
+
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredVRPPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
+
 
       mpc.compute(duration - 0.01);
 
@@ -184,7 +189,6 @@ public class SE3ModelPredictiveControllerTest
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredDCMVelocity(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredVRPVelocity(), epsilon);
 
-      visualize(mpc, contactProviders, duration);
    }
 
    @Test
@@ -565,11 +569,15 @@ public class SE3ModelPredictiveControllerTest
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
       }
 
+      visualize(mpc, contactProviders, duration);
+
+
       Random random = new Random(1738L);
       FramePoint3D modifiedCoM = new FramePoint3D();
       FrameQuaternion modifiedOrientation = new FrameQuaternion();
 
-      for (double time = 0.0; time < duration; time += 0.01)
+      double time = 0.0;
+      for (; time < 0.49; time += 0.01)
       {
          modifiedCoM.set(initialCoMPosition);
          modifiedCoM.add(EuclidCoreRandomTools.nextVector3D(random, -0.05, 0.05));
@@ -581,12 +589,31 @@ public class SE3ModelPredictiveControllerTest
          mpc.solveForTrajectory(contactProviders);
          mpc.compute(time);
 
-         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(modifiedCoM, mpc.getDesiredCoMPosition(), epsilon);
+         String errorMessage = "failed at time " + time;
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(errorMessage, modifiedCoM, mpc.getDesiredCoMPosition(), epsilon);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
+      }
+
+      for (; time < duration; time += 0.01)
+      {
+         modifiedCoM.set(initialCoMPosition);
+         modifiedCoM.add(EuclidCoreRandomTools.nextVector3D(random, -0.05, 0.05));
+
+         modifiedOrientation.set(initialOrientation);
+         modifiedOrientation.append(EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame()));
+
+         mpc.setCurrentState(modifiedCoM, initialCoMVelocity, modifiedOrientation, initialAngularVelocity, time);
+         mpc.solveForTrajectory(contactProviders);
+         mpc.compute(time);
+
+         String errorMessage = "failed at time " + time;
+
+         EuclidCoreTestTools.assertPoint3DGeometricallyEquals(errorMessage, modifiedCoM, mpc.getDesiredCoMPosition(), epsilon);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
       }
 
 
-      visualize(mpc, contactProviders, duration);
    }
 
    @Test

@@ -23,6 +23,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -87,6 +88,8 @@ public class SE3ModelPredictiveController
    private final FixedFrameVector3DBasics desiredVRPVelocity = new FrameVector3D(worldFrame);
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
+   private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
+
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
@@ -114,7 +117,7 @@ public class SE3ModelPredictiveController
    private final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
    private final YoVector3D currentBodyAngularMomentum = new YoVector3D("currentBodyAngularMomentum", registry);
 
-   final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
+   public final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler positionTrajectoryHandler;
@@ -519,11 +522,12 @@ public class SE3ModelPredictiveController
       commandList.clear();
 
       int tick = 1;
+      int endTick = 0;
       double globalTime = currentTimeInState.getDoubleValue();
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
+         endTick += indexHandler.getOrientationTicksInSegment(segment);
          double localTime = 0.0;
-         int endTick = tick + indexHandler.getOrientationTicksInSegment(segment);
          for (; tick < endTick; tick++)
          {
             DiscreteOrientationCommand objective = commandProvider.getNextDiscreteOrientationCommand();
@@ -539,12 +543,13 @@ public class SE3ModelPredictiveController
             objective.setEndingDiscreteTickId(tick);
 
             positionTrajectoryHandler.compute(globalTime);
-            orientationTrajectoryHandler.compute(globalTime);
+            orientationTrajectoryHandler.computeOutsidePreview(globalTime);
 
-            FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
+
+            FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview();
             objective.setDesiredBodyOrientation(desiredOrientation);
             // angular velocity in body frame
-            tempVector.set(orientationTrajectoryHandler.getDesiredAngularVelocity());
+            tempVector.set(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
             desiredOrientation.transform(tempVector);
             objective.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
@@ -563,6 +568,8 @@ public class SE3ModelPredictiveController
             {
                objective.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
             }
+
+            commandList.addCommand(objective);
          }
       }
 
@@ -790,6 +797,8 @@ public class SE3ModelPredictiveController
       vrpPositionToPack.setMatchingFrame(positionTrajectoryHandler.getDesiredVRPPosition());
       vrpVelocityToPack.setMatchingFrame(positionTrajectoryHandler.getDesiredVRPVelocity());
 
+      desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
+
       ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
       double nominalHeight = gravityZ / MathTools.square(omega.getValue());
       ecmpPositionToPack.set(desiredVRPPosition);
@@ -878,6 +887,11 @@ public class SE3ModelPredictiveController
    public FramePoint3DReadOnly getDesiredECMPPosition()
    {
       return desiredECMPPosition;
+   }
+
+   public FrameOrientation3DReadOnly getDesiredBodyOrientation()
+   {
+      return desiredBodyOrientation;
    }
 
    public List<? extends Polynomial3DReadOnly> getVRPTrajectories()

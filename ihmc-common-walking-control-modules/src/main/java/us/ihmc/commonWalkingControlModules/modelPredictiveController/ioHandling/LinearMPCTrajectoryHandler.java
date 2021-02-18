@@ -53,7 +53,6 @@ public class LinearMPCTrajectoryHandler
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
 
    private final CoMTrajectorySegment comSegmentToAppend = new CoMTrajectorySegment();
-   private final ContactPlaneProvider contactPlaneToAppend = new ContactPlaneProvider();
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
 
    public LinearMPCTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)

@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
@@ -346,6 +347,14 @@ public class MPCContactPlane
    public DMatrixRMaj getContactWrenchCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
+   }
+
+   public void computeContactForce(double omega, double time)
+   {
+      for (MPCContactPoint contactPoint : contactPoints)
+      {
+         contactPoint.computeContactForce(omega, time);
+      }
    }
 
    @Override

@@ -448,6 +448,7 @@ public class MPCContactPoint
       return contactWrenchCoefficientMatrix;
    }
 
+
    public void computeContactForce(double omega, double time)
    {
       double omega2 = omega * omega;
