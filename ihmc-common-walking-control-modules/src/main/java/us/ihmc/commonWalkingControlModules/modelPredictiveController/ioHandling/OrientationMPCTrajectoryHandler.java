@@ -181,7 +181,7 @@ public class OrientationMPCTrajectoryHandler
    {
       while (orientationTrajectory.getCurrentNumberOfWaypoints() > 0 && orientationTrajectory.getLastWaypointTime() > previewWindowEndTime.getValue())
       {
-         orientationTrajectory.removeWaypoint(orientationTrajectory.getCurrentNumberOfWaypoints() - 1);
+         orientationTrajectory.removeLastWaypoint();
       }
    }
 
