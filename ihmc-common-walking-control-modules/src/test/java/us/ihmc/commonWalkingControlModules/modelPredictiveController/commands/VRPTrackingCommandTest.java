@@ -3,11 +3,9 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.CoMCoefficientJacobianCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -31,7 +29,9 @@ public class VRPTrackingCommandTest
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
+      CoefficientJacobianMatrixHelper jacobianHelper = new CoefficientJacobianMatrixHelper(4, 4);
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -86,19 +86,21 @@ public class VRPTrackingCommandTest
          assembledValue.setY(time * solution.get(2, 0) + solution.get(3, 0));
          assembledValue.setZ(time * solution.get(4, 0) + solution.get(5, 0));
 
-         contactPlaneHelper.computeJacobians(time, omega);
+         rhoHelper.computeMatrices(contactPolygon, contactPose1, 0, 0, mu);
+         jacobianHelper.computeMatrices(time, omega);
 
          jacobian.zero();
 
          CoMCoefficientJacobianCalculator.calculateVRPJacobian(0, omega, time, jacobian, 0, 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearJacobian(0), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, 6, contactPlaneHelper.getLinearJacobian(2), 0, 0, 3, contactPlaneHelper.getCoefficientSize(), -1.0 / omega);
+
+         MatrixTools.multAddBlock(rhoHelper.getLinearJacobianInWorldFrame(), jacobianHelper.getPositionJacobianMatrix(), jacobian, 0, 6);
+         MatrixTools.multAddBlock(-1.0 / omega2, rhoHelper.getLinearJacobianInWorldFrame(), jacobianHelper.getAccelerationJacobianMatrix(), jacobian, 0, 6);
 
          CommonOps_DDRM.mult(jacobian, solution, solutionPosition);
 
          for (int pointIdx = 0; pointIdx < contactPlaneHelper.getNumberOfContactPoints(); pointIdx++)
          {
-            ContactPointHelper pointHelper = contactPlaneHelper.getContactPointHelper(pointIdx);
+            MPCContactPoint pointHelper = contactPlaneHelper.getContactPointHelper(pointIdx);
 
             for (int rhoIdx = 0; rhoIdx < pointHelper.getRhoSize(); rhoIdx++)
             {

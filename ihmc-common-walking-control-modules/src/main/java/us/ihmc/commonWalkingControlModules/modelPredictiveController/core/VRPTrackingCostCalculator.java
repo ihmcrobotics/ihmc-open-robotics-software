@@ -1,10 +1,9 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPointHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.VRPTrackingCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
@@ -43,7 +42,23 @@ public class VRPTrackingCostCalculator
    public boolean calculateVRPTrackingObjective(DMatrixRMaj costHessianToPack, DMatrixRMaj costGradientToPack, VRPTrackingCommand objective)
    {
       int segmentNumber = objective.getSegmentNumber();
+      int startCoMIdx = indexHandler.getComCoefficientStartIndex(segmentNumber, 0);
+      int startRhoIdx = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
 
+      return calculateVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, startCoMIdx, startRhoIdx);
+   }
+
+   public boolean calculateCompactVRPTrackingObjective(DMatrixRMaj costHessianToPack, DMatrixRMaj costGradientToPack, VRPTrackingCommand objective)
+   {
+      return calculateVRPTrackingObjectiveInternal(costHessianToPack, costGradientToPack, objective, 0, LinearMPCIndexHandler.comCoefficientsPerSegment);
+   }
+
+   private boolean calculateVRPTrackingObjectiveInternal(DMatrixRMaj costHessianToPack,
+                                                        DMatrixRMaj costGradientToPack,
+                                                        VRPTrackingCommand objective,
+                                                        int startCoMIdx,
+                                                        int startRhoIdx)
+   {
       double omega = objective.getOmega();
       double w2 = omega * omega;
       double w4 = w2 * w2;
@@ -59,11 +74,8 @@ public class VRPTrackingCostCalculator
       double c0c0 = t3 / 3.0;
       double c0c1 = 0.5 * t2;
 
-
       double gc0 = t4 / 8.0 - 0.5 * t2 / w2;
       double gc1 = t3 / 6.0 - t / w2;
-
-      int startCoMIdx = indexHandler.getComCoefficientStartIndex(segmentNumber, 0);
 
       costHessianToPack.set(startCoMIdx, startCoMIdx, c0c0);
       costHessianToPack.set(startCoMIdx, startCoMIdx + 1, c0c1);
@@ -86,10 +98,10 @@ public class VRPTrackingCostCalculator
       allBasisVectors.clear();
       for (int contactPlaneIdx = 0; contactPlaneIdx < objective.getNumberOfContacts(); contactPlaneIdx++)
       {
-         ContactPlaneHelper contactPlane = objective.getContactPlaneHelper(contactPlaneIdx);
+         MPCContactPlane contactPlane = objective.getContactPlaneHelper(contactPlaneIdx);
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
-            ContactPointHelper contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
             for (int i = 0; i < contactPoint.getRhoSize(); i++)
             {
                allBasisVectors.add(contactPoint.getBasisVector(i));
@@ -97,9 +109,6 @@ public class VRPTrackingCostCalculator
          }
       }
 
-
-
-      int startRhoIdx = indexHandler.getRhoCoefficientStartIndex(segmentNumber);
       double a2a2 = t7 / 7.0 - 12.0 * t5 / (5.0 * w2) + 12.0 / w4 * t3;
       double a2a3 = t6/ 6.0 - 2.0 * t4 / w2 + 6.0 / w4 * t2;
       double a3a3 = t5 / 5.0 - 4.0 / 3.0 * t3 / w2 + 4.0 / w4 * t;

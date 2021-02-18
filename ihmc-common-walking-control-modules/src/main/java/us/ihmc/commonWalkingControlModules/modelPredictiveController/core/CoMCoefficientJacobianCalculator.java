@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrix;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
+import org.ejml.data.DMatrixSparseCSC;
 import us.ihmc.commons.MathTools;
 
 /**
@@ -73,6 +74,9 @@ public class CoMCoefficientJacobianCalculator
 
    private static void calculatePositionJacobian(int startIndex, double time, DMatrix positionJacobianToPack, double scale)
    {
+      if (positionJacobianToPack.getNumRows() < 3 || startIndex < 0 || positionJacobianToPack.getNumCols() < startIndex + 6)
+         throw new IllegalArgumentException("Outside of matrix bounds");
+
       double c1 = scale;
 
       add(positionJacobianToPack, 0, startIndex + 1, c1);
@@ -91,6 +95,9 @@ public class CoMCoefficientJacobianCalculator
 
    private static void calculateVelocityJacobian(int startIndex, DMatrix velocityJacobianToPack, double scale)
    {
+      if (velocityJacobianToPack.getNumRows() < 3 || startIndex < 0 || velocityJacobianToPack.getNumCols() < startIndex + 6)
+         throw new IllegalArgumentException("Outside of matrix bounds");
+
       add(velocityJacobianToPack, 0, startIndex, scale);
       add(velocityJacobianToPack, 1, startIndex + 2, scale);
       add(velocityJacobianToPack, 2, startIndex + 4, scale);
@@ -109,6 +116,6 @@ public class CoMCoefficientJacobianCalculator
     */
    private static void add(DMatrix matrixToPack, int row, int col, double value)
    {
-      matrixToPack.set(row, col, value + matrixToPack.get(row, col));
+      matrixToPack.unsafe_set(row, col, value + matrixToPack.unsafe_get(row, col));
    }
 }

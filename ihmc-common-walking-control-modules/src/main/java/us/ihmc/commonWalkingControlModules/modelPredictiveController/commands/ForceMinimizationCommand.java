@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
    /**
     * Defines the contact planes to be used in the force minimization.
     */
-   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    /**
     * Specifies the segment corresponding to these contacts.
@@ -68,7 +68,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
    /**
     * Adds a contact whose force should be minimized
     */
-   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -109,7 +109,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
       return contactPlaneHelpers.size();
    }
 
-   public ContactPlaneHelper getContactPlaneHelper(int i)
+   public MPCContactPlane getContactPlaneHelper(int i)
    {
       return contactPlaneHelpers.get(i);
    }
