@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ParameterizedPDController;
@@ -83,10 +84,16 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       for (String jointToIgnore : toolbox.getWalkingControllerParameters().getJointsToIgnoreInController())
       {
-         for (int i = controlledJoints.size() - 1; i >= 0; i--)
+         controlledJoints.removeIf(entry -> entry.getKey().getName().equals(jointToIgnore));
+      }
+
+      if (toolbox.getFullRobotModel().getLidarSensorNames() != null)
+      {
+         for (String lidarSensorName : fullRobotModel.getLidarSensorNames())
          {
-            if (controlledJoints.first(i).getName().equals(jointToIgnore))
-               controlledJoints.remove(i);
+            JointBasics lidarJoint = fullRobotModel.getLidarJoint(lidarSensorName);
+            if (lidarJoint != null)
+               controlledJoints.removeIf(entry -> entry.getKey().getName().equals(lidarJoint.getName()));
          }
       }
 
@@ -98,15 +105,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       {
          String jointName = controlledJoints.get(i).getKey().getName();
          JointDesiredBehaviorReadOnly jointDesiredBehavior = jointBehaviorMap.get(jointName);
-
-         Objects.requireNonNull(jointBehaviorMap, "No desired behavior for the joint: " + jointName);
-         JointDesiredOutputBasics jointDesiredOutput = controlledJoints.get(i).getRight();
-
-         if (!jointDesiredOutput.hasStiffness())
-            throw new IllegalArgumentException("Behavior for the joint: " + jointName + " is missing stiffness.");
-         if (!jointDesiredOutput.hasDamping())
-            throw new IllegalArgumentException("Behavior for the joint: " + jointName + " is missing damping.");
-
+         Objects.requireNonNull(jointDesiredBehavior, "No desired behavior for the joint: " + jointName);
          jointDesiredBehaviors[i] = jointDesiredBehavior;
       }
 
@@ -140,7 +139,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          jointDesiredVelocityMap.put(joint, jointDesiredVelocity);
          jointDesiredTauMap.put(joint, jointDesiredTau);
       }
-   
+
       if (diagnosticParameters.enableLogging())
       {
          diagnosticTaskExecutor.setupForLogging();

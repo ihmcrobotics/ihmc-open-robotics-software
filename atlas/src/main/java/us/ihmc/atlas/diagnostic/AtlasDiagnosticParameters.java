@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
@@ -59,6 +60,7 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, EFFORT, 10.0, 1.0);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SECOND_WRIST_PITCH, EFFORT, 0.5, 0.05);
 
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, EFFORT, 50.0, 5.0);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, EFFORT, 400.0, 40.0);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, EFFORT, 400.0, 40.0);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, EFFORT, 400.0, 40.0);
