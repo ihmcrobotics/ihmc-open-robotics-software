@@ -29,13 +29,23 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    private final static boolean visualize = true;
    private final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private static final boolean useExperimentalPhysicsEngine = true;
+   private boolean useExperimentalPhysicsEngine = false;
 
    @BeforeEach
    public void setup()
    {
       simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       simulationTestingParameters.setRunMultiThreaded(false);
+   }
+
+   public void setUseExperimentalPhysicsEngine(boolean flag)
+   {
+      useExperimentalPhysicsEngine = flag;
+   }
+
+   public boolean getUseExperimentalPhysicsEngine()
+   {
+      return useExperimentalPhysicsEngine;
    }
 
    @Test
