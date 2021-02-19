@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 
 public abstract class MomentumOptimizationSettings implements ControllerCoreOptimizationSettings
 {
