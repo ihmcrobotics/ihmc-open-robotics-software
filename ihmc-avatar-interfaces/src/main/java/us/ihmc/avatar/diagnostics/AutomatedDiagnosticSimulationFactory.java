@@ -108,16 +108,14 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       YoDouble yoTime = simulatedRobot.getYoTime();
-      double dt = robotModel.getEstimatorDT();
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
       DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters();
 
       JointDesiredOutputList lowLevelOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
-      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
-                                                                                                                          stateEstimatorParameters,
-                                                                                                                          lowLevelOutput);
+      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = diagnosticParameters.getOrCreateSensorProcessingConfiguration(stateEstimatorParameters,
+                                                                                                                                            lowLevelOutput);
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
 
@@ -127,8 +125,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                                                                 diagnosticParameters,
                                                                                                 walkingControllerParameters,
                                                                                                 yoTime,
-                                                                                                dt,
-                                                                                                sensorProcessingConfiguration,
                                                                                                 simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, simulationRegistry);
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
