@@ -300,7 +300,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void useDefaultStandTransitionControlState(HighLevelControllerName startState, HighLevelControllerName endState)
    {
-      StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory();
+      StandTransitionControllerStateFactory controllerStateFactory = new StandTransitionControllerStateFactory(startState, endState);
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.STAND_TRANSITION_STATE, controllerStateFactory);
