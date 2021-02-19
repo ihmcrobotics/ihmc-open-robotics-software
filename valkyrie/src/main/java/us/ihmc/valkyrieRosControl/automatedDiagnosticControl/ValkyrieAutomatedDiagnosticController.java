@@ -13,7 +13,6 @@ import java.util.Map;
 import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -185,12 +184,10 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       /*
        * Create diagnostic controller
        */
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel,
                                                                             estimatorDesiredJointDataHolder,
                                                                             processedSensorOutputMap,
                                                                             diagnosticParameters,
-                                                                            walkingControllerParameters,
                                                                             diagnosticControllerTime,
                                                                             registry);
 
