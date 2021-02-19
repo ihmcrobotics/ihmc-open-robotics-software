@@ -49,19 +49,19 @@ public class DiagnosticControllerToolbox
                                       DiagnosticParameters diagnosticParameters,
                                       WalkingControllerParameters walkingControllerParameters,
                                       YoDouble yoTime,
-                                      double dt,
-                                      DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration,
                                       YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.lowLevelOutput = lowLevelOutput;
       this.yoTime = yoTime;
-      this.dt = dt;
 
       this.sensorOutputMap = sensorOutputMap;
       this.diagnosticParameters = diagnosticParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
+      DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = diagnosticParameters.getOrCreateSensorProcessingConfiguration(null,
+                                                                                                                                                      null);
+      dt = diagnosticSensorProcessingConfiguration.getEstimatorDT();
       jointSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getJointSensorValidityCheckers();
       imuSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getIMUSensorValidityCheckers();
       wrenchSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getWrenchSensorValidityCheckers();

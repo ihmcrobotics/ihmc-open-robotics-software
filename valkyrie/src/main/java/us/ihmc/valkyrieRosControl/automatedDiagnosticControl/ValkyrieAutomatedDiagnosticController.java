@@ -153,9 +153,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
 
       DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters();
-      DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
-                                                                                                                                    stateEstimatorParameters,
-                                                                                                                                    estimatorDesiredJointDataHolder);
+      DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = diagnosticParameters.getOrCreateSensorProcessingConfiguration(stateEstimatorParameters,
+                                                                                                                                                      estimatorDesiredJointDataHolder);
 
       HashMap<String, PositionJointHandle> emptyPositionJointHandles = new HashMap<>();
       HashMap<String, JointStateHandle> emptyJointStateHandles = new HashMap<>();
@@ -193,8 +192,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                                             diagnosticParameters,
                                                                             walkingControllerParameters,
                                                                             diagnosticControllerTime,
-                                                                            diagnosticControllerDT,
-                                                                            diagnosticSensorProcessingConfiguration,
                                                                             registry);
 
       diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox, registry);

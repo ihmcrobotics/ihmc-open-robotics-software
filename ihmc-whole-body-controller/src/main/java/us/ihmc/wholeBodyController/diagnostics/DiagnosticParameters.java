@@ -6,11 +6,27 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
 
 public abstract class DiagnosticParameters
 {
+   private DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = null;
+
    public DiagnosticParameters()
    {
+   }
+
+   public DiagnosticSensorProcessingConfiguration getOrCreateSensorProcessingConfiguration(SensorProcessingConfiguration sensorProcessingConfiguration,
+                                                                                           JointDesiredOutputListReadOnly jointDesiredOutput)
+   {
+      if (this.sensorProcessingConfiguration == null)
+      {
+         if (sensorProcessingConfiguration == null || jointDesiredOutput == null)
+            throw new IllegalStateException("The configuration has not been created yet. It needs to be created and used to configure the SensorProcessing first.");
+         this.sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(this, sensorProcessingConfiguration, jointDesiredOutput);
+      }
+      return this.sensorProcessingConfiguration;
    }
 
    public abstract List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors();
