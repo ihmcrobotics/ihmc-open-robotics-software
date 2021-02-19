@@ -26,13 +26,8 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
 
    private final AtlasDiagnosticSetpoints setpoints;
 
-   public AtlasDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment,
-                                    AtlasJointMap jointMap,
-                                    HumanoidRobotSensorInformation sensorInformation,
-                                    boolean runningOnRealRobot)
+   public AtlasDiagnosticParameters(AtlasJointMap jointMap, HumanoidRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
    {
-      super(diagnosticEnvironment, runningOnRealRobot);
-
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
       pelvisIMUName = sensorInformation.getPrimaryBodyImu();
@@ -43,6 +38,12 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
    public String getPelvisIMUName()
    {
       return pelvisIMUName;
+   }
+
+   @Override
+   public double getInitialJointSplineDuration()
+   {
+      return runningOnRealRobot ? 10.0 : 1.0;
    }
 
    @Override

@@ -64,7 +64,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -153,7 +152,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       estimatorDesiredJointDataHolder = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
 
-      DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER);
+      DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters();
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
                                                                                                                                     stateEstimatorParameters,
                                                                                                                                     estimatorDesiredJointDataHolder);

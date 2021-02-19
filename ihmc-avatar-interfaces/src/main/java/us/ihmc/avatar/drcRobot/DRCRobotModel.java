@@ -35,7 +35,6 @@ import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -195,11 +194,10 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    /**
     * Gets the parameters necessary to run an automated diagnostic on the robot.
     * 
-    * @param diagnosticEnvironment the context in which the diagnostic is to be performed.
     * @return the parameters required for running the diagnostic controller.
     * @see AutomatedDiagnosticAnalysisController
     */
-   default DiagnosticParameters getDiagnoticParameters(DiagnosticEnvironment diagnosticEnvironment)
+   default DiagnosticParameters getDiagnoticParameters()
    {
       return null;
    }

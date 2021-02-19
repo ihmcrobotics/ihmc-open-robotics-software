@@ -52,7 +52,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
@@ -113,7 +112,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER);
+      DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters();
 
       JointDesiredOutputList lowLevelOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
       DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
