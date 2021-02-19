@@ -27,13 +27,13 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
 {
    private final RobotTarget target;
    private final ValkyrieJointMap jointMap;
-   private final ValkyrieStandPrepParameters standPrepParameters;
+   private final ValkyrieStandPrepSetpoints standPrepParameters;
 
    public ValkyrieHighLevelControllerParameters(RobotTarget target, ValkyrieJointMap jointMap)
    {
       this.target = target;
       this.jointMap = jointMap;
-      standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
+      standPrepParameters = new ValkyrieStandPrepSetpoints(jointMap);
    }
 
    @Override

@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.atlas.AtlasJointMap;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -22,6 +23,8 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
    private final String pelvisIMUName;
    private final boolean runningOnRealRobot;
 
+   private final AtlasDiagnosticSetpoints setpoints;
+
    public AtlasDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment,
                                     AtlasJointMap jointMap,
                                     HumanoidRobotSensorInformation sensorInformation,
@@ -32,6 +35,7 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
       pelvisIMUName = sensorInformation.getPrimaryBodyImu();
+      setpoints = new AtlasDiagnosticSetpoints(jointMap);
    }
 
    @Override
@@ -72,5 +76,11 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
       }
 
       return behaviors;
+   }
+
+   @Override
+   public WholeBodySetpointParameters getDiagnosticSetpoints()
+   {
+      return setpoints;
    }
 }
