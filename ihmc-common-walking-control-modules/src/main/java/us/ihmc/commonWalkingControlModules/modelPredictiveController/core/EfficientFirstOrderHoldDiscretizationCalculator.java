@@ -2,13 +2,9 @@
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.NormOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
-import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.EfficientMatrixExponentialCalculator;
 
-public class EfficientFirstOrderHoldDiscretizationCalculator implements DiscretizationCalculator
+ public class EfficientFirstOrderHoldDiscretizationCalculator implements DiscretizationCalculator
 {
    private final EfficientMatrixExponentialCalculator matrixExponentialCalculator = new EfficientMatrixExponentialCalculator(6, 10, 10);
 
@@ -23,7 +19,6 @@ public class EfficientFirstOrderHoldDiscretizationCalculator implements Discreti
       int aCols = A.getNumCols();
       int bCols = B.getNumCols();
       int cCols = C.getNumCols();
-      int size = aCols + bCols + cCols;
       At.reshape(rows, rows);
       Bt.reshape(rows, bCols);
       Ct.reshape(rows, cCols);
@@ -35,7 +30,7 @@ public class EfficientFirstOrderHoldDiscretizationCalculator implements Discreti
       CommonOps_DDRM.scale(tickDuration, B, Bt);
       CommonOps_DDRM.scale(tickDuration, C, Ct);
 
-      matrixExponentialCalculator.reshape(size, bCols, cCols);
+      matrixExponentialCalculator.reshape(rows, bCols, cCols);
       matrixExponentialCalculator.compute(At, Bt, Ct, Ad, Bd, Cd);
    }
 }

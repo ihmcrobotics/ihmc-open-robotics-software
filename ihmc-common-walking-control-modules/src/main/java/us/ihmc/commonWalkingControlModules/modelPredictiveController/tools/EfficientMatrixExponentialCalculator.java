@@ -1,4 +1,4 @@
- package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
+ package us.ihmc.commonWalkingControlModules.modelPredictiveController.tools;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -51,6 +51,8 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
     private final DMatrixRMaj D_B = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj D_C = new DMatrixRMaj(0, 0);
 
+    private final DMatrixRMaj tempBd = new DMatrixRMaj(0, 0);
+    private final DMatrixRMaj tempCd = new DMatrixRMaj(0, 0);
 
     // constants for pade approximation
     private static final double c0 = 1.0;
@@ -118,11 +120,15 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        Adinternal.reshape(rows, rows);
        Bdinternal.reshape(rows, Bcols);
        Cdinternal.reshape(rows, Ccols);
+
+       tempBd.reshape(rows, Bcols);
+       tempCd.reshape(rows, Ccols);
     }
 
     private final DMatrixRMaj Ainternal = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj Binternal = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj Cinternal = new DMatrixRMaj(0, 0);
+
     private final DMatrixRMaj Adinternal = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj Bdinternal = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj Cdinternal = new DMatrixRMaj(0, 0);
@@ -139,6 +145,10 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        MatrixTools.setMatrixBlock(result, 0, 0, Adinternal, 0, 0, rows, rows, 1.0);
        MatrixTools.setMatrixBlock(result, 0, rows, Bdinternal, 0, 0, rows, Bcols, 1.0);
        MatrixTools.setMatrixBlock(result, 0, rows + Bcols, Cdinternal, 0, 0, rows, Ccols, 1.0);
+
+       int size = rows + Bcols + Ccols;
+       for (int row = rows; row < size; row++)
+          result.set(row, row, 1.0);
     }
 
     public void compute(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj Ad, DMatrixRMaj Bd, DMatrixRMaj Cd)
@@ -146,6 +156,9 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        MatrixTools.checkMatrixDimensions(A, rows, rows);
        MatrixTools.checkMatrixDimensions(B, rows, Bcols);
        MatrixTools.checkMatrixDimensions(C, rows, Ccols);
+       MatrixTools.checkMatrixDimensions(Ad, rows, rows);
+       MatrixTools.checkMatrixDimensions(Bd, rows, Bcols);
+       MatrixTools.checkMatrixDimensions(Cd, rows, Ccols);
 
        int j = Math.max(0, 1 + (int) Math.floor(Math.log(inducedPInf(A, B, C)) / Math.log(2)));
 
@@ -182,7 +195,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        CommonOps_DDRM.addEquals(U_C, c2, Cs_2);
        CommonOps_DDRM.addEquals(U_C, c4, Cs_4);
 
-       // FIXME NEED TO RESHAPE THIS GUY
+       temp.reshape(rows, rows);
        MatrixTools.setDiagonal(temp, c6);
        CommonOps_DDRM.addEquals(temp, c8, As_2);
        CommonOps_DDRM.addEquals(temp, c10, As_4);
@@ -206,7 +219,6 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        CommonOps_DDRM.addEquals(V_C, c3, Cs_2);
        CommonOps_DDRM.addEquals(V_C, c5, Cs_4);
 
-       // FIXME NEED TO RESHAPE THIS GUY
        temp.reshape(rows, rows);
 
        MatrixTools.setDiagonal(temp, c7);
@@ -216,7 +228,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 
        CommonOps_DDRM.multAdd(temp, As_6, V_A);
        CommonOps_DDRM.multAdd(temp, Bs_6, V_B);
-       CommonOps_DDRM.multAdd(temp, Bs_6, V_C);
+       CommonOps_DDRM.multAdd(temp, Cs_6, V_C);
 
        N_A.set(U_A);
        CommonOps_DDRM.multAdd(As, V_A, N_A);
@@ -254,17 +266,20 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        for (int k = 0; k < j; k++)
        {
           temp.set(Ad);
+          tempBd.set(Bd);
+          tempCd.set(Cd);
           MatrixTools.addDiagonal(temp, 1.0);
 
-          CommonOps_DDRM.mult(temp, Bd, Bd);
-          CommonOps_DDRM.mult(temp, Cd, Cd);
+          CommonOps_DDRM.mult(temp, tempBd, Bd);
+          CommonOps_DDRM.mult(temp, tempCd, Cd);
 
           MatrixTools.addDiagonal(temp, -1.0);
           CommonOps_DDRM.mult(temp, temp, Ad);
        }
     }
 
-    public static double inducedPInf( DMatrixRMaj A , DMatrixRMaj B, DMatrixRMaj C) {
+    public static double inducedPInf(DMatrixRMaj A , DMatrixRMaj B, DMatrixRMaj C)
+    {
        double max = 0;
 
        int m = A.numRows;
