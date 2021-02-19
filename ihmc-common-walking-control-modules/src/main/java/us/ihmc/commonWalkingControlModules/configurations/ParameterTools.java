@@ -11,7 +11,6 @@ import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPID3DGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
-import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.TunableJointDesiredBehavior;
