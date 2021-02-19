@@ -1,10 +1,10 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -30,8 +30,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final Graphics3DObject linkGraphics;
    private final AppearanceDefinition appearance;
 
-   private final ArrayList<ConvexPolytope3D> planarCollisionMesh = new ArrayList<>();
-   private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+   private final ArrayList<ConvexPolytope3D> planarCollisionShape = new ArrayList<>();
 
    private final Point3D tempPoint3dForCheckInside = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private final Vector3D terrainNormal = new Vector3D();
@@ -48,8 +47,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       this.appearance = appearance;
       this.linkGraphics = setupLinkGraphics();
 
-      transformToWorld.set(planarRegion.getTransformToWorld());
-      this.planarCollisionMesh.add(extrudePolygon(planarRegion, transformToWorld, 0.1));
+      createCollisionShapeForPlanarRegion(planarRegion, 0.005);
 
       this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
 
@@ -59,30 +57,29 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
          terrainNormal.negate();
    }
 
-   private ConvexPolytope3D extrudePolygon(PlanarRegion planarRegion, RigidBodyTransform transform, double thickness)
+   private void createCollisionShapeForPlanarRegion(PlanarRegion planarRegion, double thickness)
    {
       ConvexPolytope3D extrudedPolygon = new ConvexPolytope3D();
-      Point2D tmpVertex2D;
       Point3D tmpVertex = new Point3D();
+      Point2DReadOnly tmpVertex2D;
 
-      extrudedPolygon.applyTransform(transform);
-
-      int numberOfVertices = planarRegion.getConcaveHullSize();
-      for(int i = 0; i < numberOfVertices; i++)
+      List<ConvexPolygon2D> planarPolygons = planarRegion.getConvexPolygons();
+      int numberOfVertices;
+      for (ConvexPolygon2D planarPolygon : planarPolygons)
       {
-         tmpVertex2D = planarRegion.getConcaveHullVertex(i);
-         tmpVertex.set(tmpVertex2D.getX(), tmpVertex2D.getY(), thickness/2.0);
-         extrudedPolygon.addVertex(tmpVertex);
-         tmpVertex.setZ(-thickness/2.0);
-         extrudedPolygon.addVertex(tmpVertex);
+         extrudedPolygon.clear();
+         numberOfVertices = planarPolygon.getNumberOfVertices();
+         for (int vertex = 0; vertex < numberOfVertices; vertex++)
+         {
+            tmpVertex2D = planarPolygon.getVertex(vertex);
+            tmpVertex.set(tmpVertex2D.getX(), tmpVertex2D.getY(), 0.0);
+            extrudedPolygon.addVertex(tmpVertex);
+            tmpVertex.setZ(-thickness);
+            extrudedPolygon.addVertex(tmpVertex);
+         }
+         extrudedPolygon.applyTransform(planarRegion.getTransformToWorld());
+         planarCollisionShape.add(extrudedPolygon.copy());
       }
-
-      return extrudedPolygon;
-   }
-
-   public void updateCollisionMeshLocation(RigidBodyTransform transformToApply)
-   {
-      planarCollisionMesh.get(0).applyTransform(transformToApply);
    }
 
    @Override
@@ -180,7 +177,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    @Override
    public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
    {
-      return planarCollisionMesh;
+      return planarCollisionShape;
    }
 
    private Graphics3DObject setupLinkGraphics()
