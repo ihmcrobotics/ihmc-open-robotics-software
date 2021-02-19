@@ -3,12 +3,9 @@ package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnv
 import java.util.ArrayList;
 import java.util.List;
 
-import org.lwjgl.Sys;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-import us.ihmc.simulationConstructionSetTools.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -52,21 +49,8 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
    protected void addPlanarRegionsToTerrain(AppearanceDefinition appearance)
    {
       planarRegionsLists.add(generator.getPlanarRegionsList().copy());
-//      updateCollisionMesh();
       appearances.add(appearance);
       generator.reset();
-   }
-
-   private void updateCollisionMesh()
-   {
-      RigidBodyTransform transform;
-      int numberOfObjects = environment.getCombinedTerrainObject3D().getTerrainObjects().size();
-      for(int i = 0; i < numberOfObjects; i++)
-      {
-         transform = planarRegionsLists.get(0).getPlanarRegion(i).getTransformToWorldCopy();
-         PlanarRegionTerrainObject planarRegion = (PlanarRegionTerrainObject) environment.getCombinedTerrainObject3D().getTerrainObjects().get(i);
-         planarRegion.updateCollisionMeshLocation(transform);
-      }
    }
 
    public CombinedTerrainObject3D getCombinedTerrainObject3D()
