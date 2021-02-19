@@ -2,17 +2,14 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
 import java.util.logging.Logger;
 
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ParameterizedPDController;
@@ -76,39 +73,38 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       qddMaxIdle.set(diagnosticParameters.getIdleQddMax());
       tauMaxIdle.set(diagnosticParameters.getIdleTauMax());
 
-      Set<String> jointNamesToIgnore = new HashSet<>();
-      jointNamesToIgnore.addAll(Arrays.asList(toolbox.getWalkingControllerParameters().getJointsToIgnoreInController()));
-      if (fullRobotModel.getLidarSensorNames() != null)
-      {
-         fullRobotModel.getLidarSensorNames().stream().map(fullRobotModel::getLidarJoint).filter(Objects::nonNull)
-                       .forEach(joint -> jointNamesToIgnore.add(joint.getName()));
-      }
-
       trajectoryTimeProvider = () -> diagnosticParameters.getInitialJointSplineDuration();
       submitDiagnostic(new WaitDiagnosticTask(trajectoryTimeProvider.getValue()));
 
       Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMap = new HashMap<>();
       ParameterTools.extractJointBehaviorMap("NoLoad", toolbox.getDiagnosticParameters().getDesiredJointBehaviors(), jointBehaviorMap, registry);
 
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
-      {
-         String jointName = joint.getName();
-
-         if (jointNamesToIgnore.contains(jointName))
-            continue;
-
-         JointDesiredOutput jointDesiredOutput = lowLevelOutput.getJointDesiredOutput(joint);
-         JointDesiredBehaviorReadOnly jointDesiredBehavior = jointBehaviorMap.get(jointName);
-         Objects.requireNonNull(jointDesiredBehavior, "No desired behavior for the joint: " + jointName);
-         double setpoint = diagnosticParameters.getDiagnosticSetpoints().getSetpoint(jointName);
-         jointControllers.add(new JointController(joint, jointDesiredOutput, jointDesiredBehavior, setpoint));
-
-      }
-
       if (diagnosticParameters.enableLogging())
       {
          diagnosticTaskExecutor.setupForLogging();
          setupForLogging();
+      }
+
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      {
+         String jointName = joint.getName();
+
+         JointDesiredOutput jointDesiredOutput = lowLevelOutput.getJointDesiredOutput(joint);
+         JointDesiredBehaviorReadOnly jointDesiredBehavior = jointBehaviorMap.get(jointName);
+
+         if (jointDesiredBehavior == null)
+         {
+            String msg = "No desired behavior for the joint: " + jointName + ", joint will not be controlled.";
+
+            if (logger != null)
+               logger.info(msg);
+            else
+               LogTools.info(msg);
+         }
+
+         double setpoint = diagnosticParameters.getDiagnosticSetpoints().getSetpoint(jointName);
+         jointControllers.add(new JointController(joint, jointDesiredOutput, jointDesiredBehavior, setpoint));
+
       }
 
       parentRegistry.addChild(registry);

@@ -8,7 +8,6 @@ import java.util.Map;
 import us.ihmc.avatar.SimulatedLowLevelOutputWriter;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -106,7 +105,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       robotInitialSetup.initializeRobot(simulatedRobot, robotModel.getJointMap());
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       YoDouble yoTime = simulatedRobot.getYoTime();
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
@@ -123,7 +121,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                                                                 lowLevelOutput,
                                                                                                 sensorOutputMap,
                                                                                                 diagnosticParameters,
-                                                                                                walkingControllerParameters,
                                                                                                 yoTime,
                                                                                                 simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, simulationRegistry);

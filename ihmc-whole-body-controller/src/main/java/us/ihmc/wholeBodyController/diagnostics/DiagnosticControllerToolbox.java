@@ -3,7 +3,6 @@ package us.ihmc.wholeBodyController.diagnostics;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -40,14 +39,12 @@ public class DiagnosticControllerToolbox
    private final double dt;
    private final FullHumanoidRobotModel fullRobotModel;
    private final JointDesiredOutputList lowLevelOutput;
-   private final WalkingControllerParameters walkingControllerParameters;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
    public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel,
                                       JointDesiredOutputList lowLevelOutput,
                                       SensorOutputMapReadOnly sensorOutputMap,
                                       DiagnosticParameters diagnosticParameters,
-                                      WalkingControllerParameters walkingControllerParameters,
                                       YoDouble yoTime,
                                       YoRegistry parentRegistry)
    {
@@ -57,7 +54,6 @@ public class DiagnosticControllerToolbox
 
       this.sensorOutputMap = sensorOutputMap;
       this.diagnosticParameters = diagnosticParameters;
-      this.walkingControllerParameters = walkingControllerParameters;
 
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = diagnosticParameters.getOrCreateSensorProcessingConfiguration(null,
                                                                                                                                                       null);
@@ -88,11 +84,6 @@ public class DiagnosticControllerToolbox
    public DiagnosticParameters getDiagnosticParameters()
    {
       return diagnosticParameters;
-   }
-
-   public WalkingControllerParameters getWalkingControllerParameters()
-   {
-      return walkingControllerParameters;
    }
 
    public YoDouble getYoTime()
