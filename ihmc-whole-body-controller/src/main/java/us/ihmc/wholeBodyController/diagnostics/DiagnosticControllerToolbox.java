@@ -7,8 +7,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;

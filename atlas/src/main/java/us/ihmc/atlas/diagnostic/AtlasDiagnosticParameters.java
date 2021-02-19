@@ -12,9 +12,9 @@ import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class AtlasDiagnosticParameters extends DiagnosticParameters
 {

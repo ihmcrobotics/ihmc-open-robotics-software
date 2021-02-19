@@ -10,7 +10,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;

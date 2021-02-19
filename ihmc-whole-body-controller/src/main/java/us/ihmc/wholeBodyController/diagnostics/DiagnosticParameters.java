@@ -1,4 +1,4 @@
-package us.ihmc.sensorProcessing.diagnostic;
+package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayList;
 import java.util.List;
