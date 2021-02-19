@@ -8,19 +8,16 @@ import us.ihmc.avatar.diagnostics.AutomatedDiagnosticSimulationFactory;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 
 public class ValkyrieAutomatedDiagnosticSimulation
 {
    public ValkyrieAutomatedDiagnosticSimulation()
    {
       ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS);
-      ValkyrieDiagnosticParameters diagnosticParameters = new ValkyrieDiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, robotModel, false);
 
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
 
@@ -30,8 +27,7 @@ public class ValkyrieAutomatedDiagnosticSimulation
       simulationFactory.setGainStream(gainStream);
       simulationFactory.setSetpointStream(setpointStream);
       simulationFactory.setRobotInitialSetup(0.5, 0.0);
-      simulationFactory.setDiagnosticParameters(diagnosticParameters);
-      
+
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
       automatedDiagnosticConfiguration.addJointCheckUpDiagnostic();
       automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();

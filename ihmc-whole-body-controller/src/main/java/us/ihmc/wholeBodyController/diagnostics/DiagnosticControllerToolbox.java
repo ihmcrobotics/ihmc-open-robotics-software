@@ -45,9 +45,15 @@ public class DiagnosticControllerToolbox
    private final WalkingControllerParameters walkingControllerParameters;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
-   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, JointDesiredOutputList lowLevelOutput, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
-         WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double dt,
-         DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoRegistry parentRegistry)
+   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel,
+                                      JointDesiredOutputList lowLevelOutput,
+                                      SensorOutputMapReadOnly sensorOutputMap,
+                                      DiagnosticParameters diagnosticParameters,
+                                      WalkingControllerParameters walkingControllerParameters,
+                                      YoDouble yoTime,
+                                      double dt,
+                                      DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration,
+                                      YoRegistry parentRegistry)
    {
       this.fullRobotModel = fullRobotModel;
       this.lowLevelOutput = lowLevelOutput;

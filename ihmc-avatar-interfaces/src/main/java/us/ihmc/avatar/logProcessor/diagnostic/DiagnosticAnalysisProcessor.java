@@ -11,8 +11,14 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.sensorProcessing.diagnostic.*;
+import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticUpdatable;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
+import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.PositionVelocity3DConsistencyChecker;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -36,7 +42,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.OFFLINE_LOG, false);
+      diagnosticParameters = drcRobotModel.getDiagnoticParameters(DiagnosticEnvironment.OFFLINE_LOG);
       fullRobotModel = logDataProcessorHelper.getFullRobotModel();
       dt = drcRobotModel.getEstimatorDT();
       logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();

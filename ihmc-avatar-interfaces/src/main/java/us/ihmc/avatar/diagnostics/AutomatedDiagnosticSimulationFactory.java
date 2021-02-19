@@ -56,6 +56,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -69,7 +70,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private final YoDouble controllerTime = new YoDouble("controllerTime", simulationRegistry);
    private final AlphaFilteredYoVariable averageControllerTime = new AlphaFilteredYoVariable("averageControllerTime", simulationRegistry, 0.99, controllerTime);
    private SensorReader sensorReader;
-   private DiagnosticParameters diagnosticParameters;
    private AutomatedDiagnosticAnalysisController automatedDiagnosticAnalysisController;
    private JointDesiredOutputWriter lowLevelOutputWriter;
 
@@ -96,6 +96,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       scs.setDT(robotModel.getSimulateDT(), 10);
       scs.setCameraPosition(scsCameraPosition.getX(), scsCameraPosition.getY(), scsCameraPosition.getZ());
       scs.setCameraFix(scsCameraFix.getX(), scsCameraFix.getY(), scsCameraFix.getZ());
+      new DefaultParameterReader().readParametersInRegistry(scs.getRootRegistry());
       scs.startOnAThread();
    }
 
@@ -115,18 +116,28 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       StateEstimatorParameters stateEstimatorParameters = robotModel.getStateEstimatorParameters();
 
-      if (diagnosticParameters == null)
-         diagnosticParameters = new DiagnosticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER, false);
+      DiagnosticParameters diagnosticParameters = robotModel.getDiagnoticParameters(DiagnosticEnvironment.RUNTIME_CONTROLLER);
 
       JointDesiredOutputList lowLevelOutput = new JointDesiredOutputList(fullRobotModel.getOneDoFJoints());
-      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters, stateEstimatorParameters, lowLevelOutput);
+      DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = new DiagnosticSensorProcessingConfiguration(diagnosticParameters,
+                                                                                                                          stateEstimatorParameters,
+                                                                                                                          lowLevelOutput);
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
 
-      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel, lowLevelOutput, sensorOutputMap, diagnosticParameters, walkingControllerParameters, yoTime, dt,
-            sensorProcessingConfiguration, simulationRegistry);
-      automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, gainStream, setpointStream,
-            simulationRegistry);
+      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel,
+                                                                                                lowLevelOutput,
+                                                                                                sensorOutputMap,
+                                                                                                diagnosticParameters,
+                                                                                                walkingControllerParameters,
+                                                                                                yoTime,
+                                                                                                dt,
+                                                                                                sensorProcessingConfiguration,
+                                                                                                simulationRegistry);
+      automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox,
+                                                                                        gainStream,
+                                                                                        setpointStream,
+                                                                                        simulationRegistry);
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
@@ -140,7 +151,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    }
 
    private SensorOutputMapReadOnly createStateEstimator(FullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,
-         DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration)
+                                                        DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration)
    {
       FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
       IMUDefinition[] imuDefinitions = fullRobotModel.getIMUDefinitions();
@@ -151,7 +162,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       CenterOfMassDataHolder centerOfMassDataHolderToUpdate = new CenterOfMassDataHolder();
 
       SimulatedSensorHolderAndReaderFromRobotFactory sensorReaderFactory = new SimulatedSensorHolderAndReaderFromRobotFactory(simulatedRobot,
-            sensorProcessingConfiguration);
+                                                                                                                              sensorProcessingConfiguration);
       sensorReaderFactory.build(rootJoint, imuDefinitions, forceSensorDefinitions, estimatorDesiredJointDataHolder, simulationRegistry);
       sensorReader = sensorReaderFactory.getSensorReader();
 
@@ -166,7 +177,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       RobotContactPointParameters<RobotSide> contactPointParameters = robotModel.getContactPointParameters();
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
-      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
+      contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(),
+                                                       contactPointParameters.getControllerToeContactLines());
       contactableBodiesFactory.setFullRobotModel(fullRobotModel);
       contactableBodiesFactory.setReferenceFrames(humanoidReferenceFrames);
       SideDependentList<ContactableFoot> bipedFeet = new SideDependentList<>(contactableBodiesFactory.createFootContactableFeet());
@@ -187,17 +199,29 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
          ForceSensorDataReadOnly footForceSensorForEstimator = forceSensorDataHolderToUpdate.getByName(footForceSensorName);
          String namePrefix = bipedFeet.get(robotSide).getName() + "StateEstimator";
 
-         FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix, contactablePlaneBody,
+         FootSwitchInterface footSwitchInterface = footSwitchFactory.newFootSwitch(namePrefix,
+                                                                                   contactablePlaneBody,
                                                                                    Collections.singleton(bipedFeet.get(robotSide.getOppositeSide())),
-                                                                                   footForceSensorForEstimator, totalRobotWeight, null, simulationRegistry);
+                                                                                   footForceSensorForEstimator,
+                                                                                   totalRobotWeight,
+                                                                                   null,
+                                                                                   simulationRegistry);
          footSwitchMap.put(rigidBody, footSwitchInterface);
       }
 
       RobotMotionStatusHolder robotMotionStatusHolder = new RobotMotionStatusHolder();
       robotMotionStatusHolder.setCurrentRobotMotionStatus(RobotMotionStatus.UNKNOWN);
-      stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure, stateEstimatorParameters, processedSensorOutputMap,
-                                                            centerOfMassDataHolderToUpdate, imuSensorsToUseInStateEstimator, gravitationalAcceleration,
-                                                            footSwitchMap, null, robotMotionStatusHolder, bipedFeetMap, null);
+      stateEstimator = new DRCKinematicsBasedStateEstimator(inverseDynamicsStructure,
+                                                            stateEstimatorParameters,
+                                                            processedSensorOutputMap,
+                                                            centerOfMassDataHolderToUpdate,
+                                                            imuSensorsToUseInStateEstimator,
+                                                            gravitationalAcceleration,
+                                                            footSwitchMap,
+                                                            null,
+                                                            robotMotionStatusHolder,
+                                                            bipedFeetMap,
+                                                            null);
       simulationRegistry.addChild(stateEstimator.getYoRegistry());
 
       forceSensorStateUpdater = new ForceSensorStateUpdater(fullRobotModel.getRootJoint(),
@@ -210,11 +234,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                             simulationRegistry);
 
       return sensorReader.getProcessedSensorOutputMap();
-   }
-
-   public void setDiagnosticParameters(DiagnosticParameters diagnosticParameters)
-   {
-      this.diagnosticParameters = diagnosticParameters;
    }
 
    public void setRobotInitialSetup(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
@@ -239,6 +258,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
    /**
     * Sets the initial SCS camera position.
+    * 
     * @param positionX
     * @param positionY
     * @param positionZ
@@ -250,6 +270,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
    /**
     * Sets the initial fix point that the SCS camera looks at.
+    * 
     * @param fixX
     * @param fixY
     * @param fixZ

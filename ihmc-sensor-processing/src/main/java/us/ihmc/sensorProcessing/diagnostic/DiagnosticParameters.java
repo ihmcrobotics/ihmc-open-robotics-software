@@ -3,9 +3,16 @@ package us.ihmc.sensorProcessing.diagnostic;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiagnosticParameters
+import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+
+public abstract class DiagnosticParameters
 {
-   public enum DiagnosticEnvironment {RUNTIME_CONTROLLER, RUNTIME_EXTERNAL_MODULE, OFFLINE_LOG};
+   public enum DiagnosticEnvironment
+   {
+      RUNTIME_CONTROLLER, RUNTIME_EXTERNAL_MODULE, OFFLINE_LOG
+   };
+
    protected final DiagnosticEnvironment diagnosticEnvironment;
    private final boolean runningOnRealRobot;
 
@@ -14,6 +21,8 @@ public class DiagnosticParameters
       this.diagnosticEnvironment = diagnosticEnvironment;
       this.runningOnRealRobot = runningOnRealRobot;
    }
+
+   public abstract List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors();
 
    public boolean enableLogging()
    {
@@ -26,8 +35,9 @@ public class DiagnosticParameters
    }
 
    /**
-    * Override this method to limit the scope of the automated diagnostic.
-    * If not overridden, the diagnostic will be attempted on all the joints.
+    * Override this method to limit the scope of the automated diagnostic. If not overridden, the
+    * diagnostic will be attempted on all the joints.
+    * 
     * @return
     */
    public List<String> getJointsToIgnoreDuringDiagnostic()
@@ -44,12 +54,12 @@ public class DiagnosticParameters
    {
       switch (diagnosticEnvironment)
       {
-      case RUNTIME_CONTROLLER:
-         return 10.0;
-      case OFFLINE_LOG:
-      case RUNTIME_EXTERNAL_MODULE:
-      default:
-         return 0.16;
+         case RUNTIME_CONTROLLER:
+            return 10.0;
+         case OFFLINE_LOG:
+         case RUNTIME_EXTERNAL_MODULE:
+         default:
+            return 0.16;
       }
    }
 
@@ -87,12 +97,12 @@ public class DiagnosticParameters
    {
       switch (diagnosticEnvironment)
       {
-      case RUNTIME_CONTROLLER:
-         return 1.0;
-      case OFFLINE_LOG:
-      case RUNTIME_EXTERNAL_MODULE:
-      default:
-         return 1.0;
+         case RUNTIME_CONTROLLER:
+            return 1.0;
+         case OFFLINE_LOG:
+         case RUNTIME_EXTERNAL_MODULE:
+         default:
+            return 1.0;
       }
    }
 

@@ -1,34 +1,45 @@
 package us.ihmc.valkyrie.diagnostic;
 
+import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.POSITION;
+import static us.ihmc.valkyrie.ValkyrieHighLevelControllerParameters.configureBehavior;
+import static us.ihmc.valkyrie.ValkyrieHighLevelControllerParameters.configureSymmetricBehavior;
+
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
-import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 {
    private final HumanoidJointNameMap jointMap;
-   private final ValkyrieSensorInformation sensorInformation;
-   
+   private final HumanoidRobotSensorInformation sensorInformation;
+   private final boolean runningOnRealRobot;
+
    private final boolean ignoreAllNeckJoints = true;
    private final boolean ignoreAllArmJoints = false;
    private final boolean ignoreAllLegJoints = false;
    private final boolean ignoreAllSpineJoints = false;
 
-   public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, ValkyrieRobotModel robotModel, boolean runningOnRealRobot)
+   public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment,
+                                       ValkyrieJointMap jointMap,
+                                       HumanoidRobotSensorInformation sensorInformation,
+                                       boolean runningOnRealRobot)
    {
       super(diagnosticEnvironment, runningOnRealRobot);
-      this.jointMap = robotModel.getJointMap();
-      this.sensorInformation = robotModel.getSensorInformation();
+      this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
+      this.runningOnRealRobot = runningOnRealRobot;
    }
 
    @Override
@@ -81,11 +92,11 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
          }
          else
          {
-//            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
-//            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
-//            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
-//            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.KNEE));
-//            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
+            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
+            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
+            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH));
+            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
          }
       }
 
@@ -96,12 +107,73 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
       }
       else
       {
-         
+
       }
 
       jointToIgnoreList.add("hokuyo_joint");
-      
+
       return jointToIgnoreList;
+   }
+
+   @Override
+   public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors()
+   {
+      List<GroupParameter<JointDesiredBehaviorReadOnly>> behaviors = new ArrayList<>();
+
+      if (runningOnRealRobot)
+      {
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, POSITION, 50.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, POSITION, 100.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, POSITION, 100.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, POSITION, 100.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, POSITION, 30.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, POSITION, 30.0, 3.0);
+
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 100.0, 10.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 100.0, 10.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, POSITION, 100.0, 10.0);
+
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, POSITION, 50.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, POSITION, 50.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, POSITION, 30.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, POSITION, 50.0, 5.0);
+
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, POSITION, 50.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 10.0, 1.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, POSITION, 10.0, 1.0);
+
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, POSITION, 100.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 100.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, POSITION, 100.0, 10.0);
+      }
+      else
+      {
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_YAW, POSITION, 300.0, 30.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, POSITION, 500.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, POSITION, 550.0, 55.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, POSITION, 260.0, 26.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, POSITION, 100.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, POSITION, 100.0, 10.0);
+
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 500.0, 50.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 800.0, 80.0);
+         configureBehavior(behaviors, jointMap, SpineJointName.SPINE_ROLL, POSITION, 800.0, 80.0);
+
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_PITCH, POSITION, 200.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_ROLL, POSITION, 200.0, 50.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, POSITION, 100.0, 25.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, POSITION, 100.0, 25.0);
+
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, POSITION, 100.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 50.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, POSITION, 50.0, 5.0);
+
+         configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, POSITION, 100.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 100.0, 10.0);
+         configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_PITCH, POSITION, 100.0, 10.0);
+      }
+
+      return behaviors;
    }
 
    @Override
