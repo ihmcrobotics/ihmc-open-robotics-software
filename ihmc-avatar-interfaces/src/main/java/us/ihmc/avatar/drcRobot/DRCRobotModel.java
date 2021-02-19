@@ -25,6 +25,8 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
@@ -33,6 +35,7 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -185,6 +188,18 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return the robot collision model used to create the robot's {@link Collidable}s.
     */
    default RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      return null;
+   }
+
+   /**
+    * Gets the parameters necessary to run an automated diagnostic on the robot.
+    * 
+    * @param diagnosticEnvironment the context in which the diagnostic is to be performed.
+    * @return the parameters required for running the diagnostic controller.
+    * @see AutomatedDiagnosticAnalysisController
+    */
+   default DiagnosticParameters getDiagnoticParameters(DiagnosticEnvironment diagnosticEnvironment)
    {
       return null;
    }

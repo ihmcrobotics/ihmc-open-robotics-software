@@ -3,6 +3,7 @@ package us.ihmc.atlas;
 import java.io.InputStream;
 import java.util.List;
 
+import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
@@ -63,6 +64,8 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -129,7 +132,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          boolean createAdditionalContactPoints,
                           boolean useShapeCollision)
    {
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
@@ -140,14 +146,21 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPointsn)
    {
       this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
-                          boolean createAdditionalContactPoints, boolean useShapeCollision)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          FootContactPoints<RobotSide> simulationContactPoints,
+                          boolean createAdditionalContactPoints,
+                          boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
       {
@@ -288,9 +301,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    }
 
    @Override
-   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight,
-                                                                                           double initialYaw,
-                                                                                           double initialX,
+   public DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> getDefaultRobotInitialSetup(double groundHeight, double initialYaw, double initialX,
                                                                                            double initialY)
    {
       return new AtlasSimInitialSetup(groundHeight, initialYaw, initialX, initialY);
@@ -445,7 +456,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return sensorSuiteManager;
    }
 
-
    @Override
    public UIParameters getUIParameters()
    {
@@ -460,7 +470,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeROS2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                        ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
@@ -920,5 +931,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       AtlasSimulationCollisionModel collisionModel = new AtlasSimulationCollisionModel(jointMap, selectedVersion);
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
+   }
+
+   @Override
+   public DiagnosticParameters getDiagnoticParameters(DiagnosticEnvironment diagnosticEnvironment)
+   {
+      return new AtlasDiagnosticParameters(diagnosticEnvironment, getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
    }
 }

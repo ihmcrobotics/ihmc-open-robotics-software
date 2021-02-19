@@ -42,10 +42,13 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
+import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
 import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
@@ -570,7 +573,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return "/us/ihmc/valkyrie/parameters/controller_simulation.xml";
    }
-   
+
    public static String getHardwareParameterResourceName()
    {
       return "/us/ihmc/valkyrie/parameters/controller_hardware.xml";
@@ -691,6 +694,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (simulationLowLevelControllerFactory == null)
          simulationLowLevelControllerFactory = DRCRobotModel.super.getSimulationLowLevelControllerFactory();
       return simulationLowLevelControllerFactory;
+   }
+
+   @Override
+   public DiagnosticParameters getDiagnoticParameters(DiagnosticEnvironment diagnosticEnvironment)
+   {
+      return new ValkyrieDiagnosticParameters(diagnosticEnvironment, getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
    }
 
    @Override
