@@ -7,10 +7,10 @@ import static us.ihmc.robotics.partNames.SpineJointName.SPINE_YAW;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class AtlasMomentumOptimizationSettings extends MomentumOptimizationSettings

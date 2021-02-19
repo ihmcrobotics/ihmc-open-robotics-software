@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackCont
 
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
+import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 
 public interface FeedbackControllerSettings
 {
