@@ -1,6 +1,5 @@
 package us.ihmc.avatar.diagnostics;
 
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -53,8 +52,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -64,8 +63,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 {
    private final DRCRobotModel robotModel;
    private DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup;
-   private InputStream gainStream;
-   private InputStream setpointStream;
    private final YoRegistry simulationRegistry = new YoRegistry("AutomatedDiagnosticSimulation");
    private final YoDouble controllerTime = new YoDouble("controllerTime", simulationRegistry);
    private final AlphaFilteredYoVariable averageControllerTime = new AlphaFilteredYoVariable("averageControllerTime", simulationRegistry, 0.99, controllerTime);
@@ -134,10 +131,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                                                                 dt,
                                                                                                 sensorProcessingConfiguration,
                                                                                                 simulationRegistry);
-      automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox,
-                                                                                        gainStream,
-                                                                                        setpointStream,
-                                                                                        simulationRegistry);
+      automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, simulationRegistry);
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
@@ -244,16 +238,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    public void setRobotInitialSetup(double groundHeight, double initialYaw)
    {
       robotInitialSetup = robotModel.getDefaultRobotInitialSetup(groundHeight, initialYaw);
-   }
-
-   public void setGainStream(InputStream gainStream)
-   {
-      this.gainStream = gainStream;
-   }
-
-   public void setSetpointStream(InputStream setpointStream)
-   {
-      this.setpointStream = setpointStream;
    }
 
    /**

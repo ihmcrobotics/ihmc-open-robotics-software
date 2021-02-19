@@ -1,6 +1,5 @@
 package us.ihmc.atlas.diagnostic;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -22,11 +21,6 @@ public class AtlasAutomatedDiagnosticSimulation
 
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
 
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("diagnostic/simulationPDGains.yaml");
-      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream("diagnostic/diagnosticSetPoints.yaml");
-
-      simulationFactory.setGainStream(gainStream);
-      simulationFactory.setSetpointStream(setpointStream);
       simulationFactory.setRobotInitialSetup(0.2, 0.0);
       
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
