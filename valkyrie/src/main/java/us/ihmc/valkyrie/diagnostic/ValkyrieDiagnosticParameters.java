@@ -7,6 +7,7 @@ import static us.ihmc.valkyrie.ValkyrieHighLevelControllerParameters.configureSy
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -31,6 +32,8 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
    private final boolean ignoreAllLegJoints = false;
    private final boolean ignoreAllSpineJoints = false;
 
+   private final ValkyrieDiagnosticSetpoints setpoints;
+
    public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment,
                                        ValkyrieJointMap jointMap,
                                        HumanoidRobotSensorInformation sensorInformation,
@@ -40,6 +43,7 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
       this.jointMap = jointMap;
       this.sensorInformation = sensorInformation;
       this.runningOnRealRobot = runningOnRealRobot;
+      setpoints = new ValkyrieDiagnosticSetpoints(jointMap);
    }
 
    @Override
@@ -174,6 +178,12 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
       }
 
       return behaviors;
+   }
+
+   @Override
+   public WholeBodySetpointParameters getDiagnosticSetpoints()
+   {
+      return setpoints;
    }
 
    @Override
