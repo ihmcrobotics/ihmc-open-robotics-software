@@ -7,6 +7,7 @@ import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixMissingTools
@@ -127,6 +128,13 @@ public class MatrixMissingTools
    {
       DMatrixRMaj vector = new DMatrixRMaj(size, 1);
       CommonOps_DDRM.fill(vector, fillValue);
+      return vector;
+   }
+
+   public static DMatrixRMaj createVector(Tuple3DReadOnly tuple)
+   {
+      DMatrixRMaj vector = new DMatrixRMaj(3, 1);
+      tuple.get(vector);
       return vector;
    }
 
