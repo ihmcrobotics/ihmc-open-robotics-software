@@ -9,18 +9,8 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 
 public abstract class DiagnosticParameters
 {
-   public enum DiagnosticEnvironment
+   public DiagnosticParameters()
    {
-      RUNTIME_CONTROLLER, RUNTIME_EXTERNAL_MODULE, OFFLINE_LOG
-   };
-
-   protected final DiagnosticEnvironment diagnosticEnvironment;
-   private final boolean runningOnRealRobot;
-
-   public DiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment, boolean runningOnRealRobot)
-   {
-      this.diagnosticEnvironment = diagnosticEnvironment;
-      this.runningOnRealRobot = runningOnRealRobot;
    }
 
    public abstract List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors();
@@ -32,10 +22,7 @@ public abstract class DiagnosticParameters
       return true;
    }
 
-   public double getInitialJointSplineDuration()
-   {
-      return runningOnRealRobot ? 10.0 : 1.0;
-   }
+   public abstract double getInitialJointSplineDuration();
 
    /**
     * Override this method to limit the scope of the automated diagnostic. If not overridden, the
@@ -55,15 +42,7 @@ public abstract class DiagnosticParameters
 
    public double getDelayEstimatorFilterBreakFrequency()
    {
-      switch (diagnosticEnvironment)
-      {
-         case RUNTIME_CONTROLLER:
-            return 10.0;
-         case OFFLINE_LOG:
-         case RUNTIME_EXTERNAL_MODULE:
-         default:
-            return 0.16;
-      }
+      return 10.0;
    }
 
    public double getDelayEstimatorMaximumLag()
@@ -98,15 +77,7 @@ public abstract class DiagnosticParameters
 
    public double getFFTObservationWindow()
    {
-      switch (diagnosticEnvironment)
-      {
-         case RUNTIME_CONTROLLER:
-            return 1.0;
-         case OFFLINE_LOG:
-         case RUNTIME_EXTERNAL_MODULE:
-         default:
-            return 1.0;
-      }
+      return 1.0;
    }
 
    public double getCheckUpOscillationPositionAmplitude()

@@ -18,7 +18,6 @@ import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistency
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity3DConsistencyChecker;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -42,7 +41,7 @@ public class DiagnosticAnalysisProcessor implements LogDataProcessorFunction
    public DiagnosticAnalysisProcessor(LogDataProcessorHelper logDataProcessorHelper, DRCRobotModel drcRobotModel)
    {
       this.logDataProcessorHelper = logDataProcessorHelper;
-      diagnosticParameters = drcRobotModel.getDiagnoticParameters(DiagnosticEnvironment.OFFLINE_LOG);
+      diagnosticParameters = drcRobotModel.getDiagnoticParameters();
       fullRobotModel = logDataProcessorHelper.getFullRobotModel();
       dt = drcRobotModel.getEstimatorDT();
       logYoVariableHolder = logDataProcessorHelper.getLogYoVariableHolder();

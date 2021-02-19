@@ -64,7 +64,6 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -697,9 +696,9 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public DiagnosticParameters getDiagnoticParameters(DiagnosticEnvironment diagnosticEnvironment)
+   public DiagnosticParameters getDiagnoticParameters()
    {
-      return new ValkyrieDiagnosticParameters(diagnosticEnvironment, getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
+      return new ValkyrieDiagnosticParameters(getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
    }
 
    @Override

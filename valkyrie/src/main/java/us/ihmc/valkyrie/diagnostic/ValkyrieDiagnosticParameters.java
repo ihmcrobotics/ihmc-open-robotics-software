@@ -34,16 +34,18 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 
    private final ValkyrieDiagnosticSetpoints setpoints;
 
-   public ValkyrieDiagnosticParameters(DiagnosticEnvironment diagnosticEnvironment,
-                                       ValkyrieJointMap jointMap,
-                                       HumanoidRobotSensorInformation sensorInformation,
-                                       boolean runningOnRealRobot)
+   public ValkyrieDiagnosticParameters(ValkyrieJointMap jointMap, HumanoidRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
    {
-      super(diagnosticEnvironment, runningOnRealRobot);
       this.jointMap = jointMap;
       this.sensorInformation = sensorInformation;
       this.runningOnRealRobot = runningOnRealRobot;
       setpoints = new ValkyrieDiagnosticSetpoints(jointMap);
+   }
+
+   @Override
+   public double getInitialJointSplineDuration()
+   {
+      return runningOnRealRobot ? 10.0 : 1.0;
    }
 
    @Override
