@@ -9,7 +9,9 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
@@ -57,7 +59,7 @@ public class OrientationInputCalculator
    private final DMatrixRMaj B = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj C = new DMatrixRMaj(6, 1);
 
-   private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
+   private final DiscretizationCalculator discretizationCalculator = new DiscreteDiscretizationCalculator();
 
    private final DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj Bd = new DMatrixRMaj(6, 0);
@@ -73,7 +75,7 @@ public class OrientationInputCalculator
       this.indexHandler = indexHandler;
       this.mass = mass;
 
-      gravityVector.set(2, 0, gravity);
+      gravityVector.set(2, 0, -Math.abs(gravity));
       MatrixMissingTools.toSkewSymmetricMatrix(gravityVector, skewGravity);
    }
 
@@ -94,7 +96,7 @@ public class OrientationInputCalculator
       calculateStateJacobians(command);
 
       computeAffineTimeInvariantTerms(command.getTimeOfConstraint());
-      computeDiscreteAffineTimeInvariantTerms(command.getDurationOfHold());
+      discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, command.getDurationOfHold());
 
       if (command.getEndDiscreteTickId() == 0)
          setUpConstraintForFirstTick(inputToPack, command);
@@ -122,6 +124,15 @@ public class OrientationInputCalculator
       contactForceJacobian.zero();
       contactForceToOriginTorqueJacobian.zero();
 
+      a0.zero();
+      a1.zero();
+      a2.zero();
+      a3.zero();
+      a4.zero();
+
+      A.zero();
+      B.zero();
+      C.zero();
    }
 
    private void getAllTheTermsFromTheCommandInput(DiscreteOrientationCommand command)
@@ -137,8 +148,8 @@ public class OrientationInputCalculator
       command.getDesiredCoMVelocity().get(desiredCoMVelocity);
       command.getDesiredBodyAngularVelocity().get(desiredBodyAngularVelocity);
 
-      MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
-      MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, skewDesiredCoMVelocity);
+      MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMPosition(), skewDesiredCoMPosition);
+      MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMVelocity(), skewDesiredCoMVelocity);
 
       UnrolledInverseFromMinor_DDRM.inv3(inertiaMatrixInBody, inverseInertia, 1.0);
 
@@ -188,14 +199,15 @@ public class OrientationInputCalculator
    }
 
 
-   private final DMatrixRMaj contactPoint = new DMatrixRMaj(3, 1);
+   private final FramePoint3D contactPoint = new FramePoint3D();
    private final DMatrixRMaj skewContactPoint = new DMatrixRMaj(3, 3);
 
    private void computeTorqueAboutOriginJacobian(int colStart, MPCContactPlane contactPlane, DMatrixRMaj jacobianToPack)
    {
       for (int i = 0; i < contactPlane.getNumberOfContactPoints(); i++)
       {
-         contactPlane.getContactPointHelper(i).getBasisVectorOrigin().get(contactPoint);
+         contactPoint.setIncludingFrame(contactPlane.getContactPointHelper(i).getBasisVectorOrigin());
+         contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
          MatrixMissingTools.toSkewSymmetricMatrix(contactPoint, skewContactPoint);
 
          MatrixMissingTools.setMatrixBlock(jacobianToPack, 0, colStart, skewContactPoint, 0, 0, 3, 3, 1.0);
@@ -222,16 +234,6 @@ public class OrientationInputCalculator
       MatrixTools.multAddBlock(timeOfConstraint, a2, gravityVector, C, 0, 0);
 
       MatrixTools.setMatrixBlock(C, 0, 0, a0, 0, 0, 3, 1, 1.0);
-   }
-
-   private void computeDiscreteAffineTimeInvariantTerms(double duration)
-   {
-      matrixExponentialCalculator.reshape(6);
-      CommonOps_DDRM.scale(duration, A);
-      matrixExponentialCalculator.compute(Ad, A);
-
-      CommonOps_DDRM.scale(duration, B, Bd);
-      CommonOps_DDRM.scale(duration, C, Cd);
    }
 
    private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);

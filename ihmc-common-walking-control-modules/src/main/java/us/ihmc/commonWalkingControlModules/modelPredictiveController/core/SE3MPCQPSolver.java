@@ -41,7 +41,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
       orientationInputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
-      orientationVariableRegularization.set(1e-5);
+      orientationVariableRegularization.set(1e-8);
       orientationRateVariableRegularization.set(1e-6);
 
    }
