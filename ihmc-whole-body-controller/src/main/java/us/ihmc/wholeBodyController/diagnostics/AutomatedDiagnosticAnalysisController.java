@@ -17,6 +17,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ParameterizedPDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -56,6 +57,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    private final YoDouble startTime = new YoDouble("diagnosticControllerStartTime", registry);
 
    private final double controlDT;
+
+   private final ExecutionTimer timer = new ExecutionTimer(getClass().getSimpleName() + "Timer", registry);
 
    public AutomatedDiagnosticAnalysisController(DiagnosticControllerToolbox toolbox, YoRegistry parentRegistry)
    {
@@ -146,6 +149,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    @Override
    public void doControl()
    {
+      timer.startMeasurement();
+
       if (!hasBeenInitialized)
       {
          initialize();
@@ -185,6 +190,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          }
       }
       isDiagnosticComplete.set(isDone);
+
+      timer.stopMeasurement();
    }
 
    private void doIdleControl()
