@@ -94,14 +94,6 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
             for (LegJointName legJointName : jointMap.getLegJointNames())
                jointToIgnoreList.add(jointMap.getLegJointName(robotSide, legJointName));
          }
-         else
-         {
-            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
-            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
-            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
-            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH));
-            jointToIgnoreList.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
-         }
       }
 
       if (ignoreAllSpineJoints)
@@ -156,8 +148,8 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_ROLL, POSITION, 500.0, 50.0);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.HIP_PITCH, POSITION, 550.0, 55.0);
          configureSymmetricBehavior(behaviors, jointMap, LegJointName.KNEE_PITCH, POSITION, 260.0, 26.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, POSITION, 100.0, 10.0);
-         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, POSITION, 100.0, 10.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_PITCH, POSITION, 30.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, LegJointName.ANKLE_ROLL, POSITION, 30.0, 3.0);
 
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_YAW, POSITION, 500.0, 50.0);
          configureBehavior(behaviors, jointMap, SpineJointName.SPINE_PITCH, POSITION, 800.0, 80.0);
@@ -168,9 +160,9 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.SHOULDER_YAW, POSITION, 100.0, 25.0);
          configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_PITCH, POSITION, 100.0, 25.0);
 
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, POSITION, 100.0, 10.0);
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 50.0, 5.0);
-         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, POSITION, 50.0, 5.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.ELBOW_ROLL, POSITION, 30.0, 3.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.WRIST_ROLL, POSITION, 10.0, 1.0);
+         configureSymmetricBehavior(behaviors, jointMap, ArmJointName.FIRST_WRIST_PITCH, POSITION, 10.0, 1.0);
 
          configureBehavior(behaviors, jointMap, NeckJointName.PROXIMAL_NECK_PITCH, POSITION, 100.0, 10.0);
          configureBehavior(behaviors, jointMap, NeckJointName.DISTAL_NECK_YAW, POSITION, 100.0, 10.0);

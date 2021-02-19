@@ -198,6 +198,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
          List<OneDoFJointSensorValidityChecker> jointValidityCheckerList = new ArrayList<>();
          for (OneDoFJointBasics joint : jointsToWiggle.get(axis))
          {
+            Objects.requireNonNull(toolbox.getJointSensorValidityChecker(joint), "Did not find joint sensor validity checker for joint: " + joint.getName());
             jointValidityCheckerList.add(toolbox.getJointSensorValidityChecker(joint));
          }
          jointValidityCheckers.put(axis, jointValidityCheckerList);
