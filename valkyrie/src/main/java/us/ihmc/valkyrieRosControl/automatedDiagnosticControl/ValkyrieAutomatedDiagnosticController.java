@@ -4,7 +4,6 @@ import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.forceTorqu
 import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readForceTorqueSensors;
 import static us.ihmc.valkyrieRosControl.ValkyrieRosControlController.readIMUs;
 
-import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -65,8 +64,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.logging.DiagnosticLoggerConfiguration;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -92,9 +91,6 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
    private final ExecutionTimer diagnosticControllerTimer = new ExecutionTimer("diagnosticControllerTimer", 10.0, registry);
    private final YoLong startTime = new YoLong("startTime", registry);
    private final YoBoolean startController = new YoBoolean("startController", registry);
-
-   private final String diagnosticGainsFilePath = "diagnostic/realRobotPDGains.yaml";
-   private final String diagnosticSetPointsFilePath = "diagnostic/diagnosticSetPoints.yaml";
 
    private JointDesiredOutputList estimatorDesiredJointDataHolder;
    private ValkyrieRosControlSensorReader sensorReader;
@@ -202,9 +198,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                                             diagnosticSensorProcessingConfiguration,
                                                                             registry);
 
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream(diagnosticGainsFilePath);
-      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream(diagnosticSetPointsFilePath);
-      diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox, gainStream, setpointStream, registry);
+      diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox, registry);
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(toolbox, diagnosticController);
       automatedDiagnosticConfiguration.addWait(1.0);
       automatedDiagnosticConfiguration.addJointCheckUpDiagnostic();

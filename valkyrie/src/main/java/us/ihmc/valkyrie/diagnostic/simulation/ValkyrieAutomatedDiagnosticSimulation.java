@@ -1,6 +1,5 @@
 package us.ihmc.valkyrie.diagnostic.simulation;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 
 import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
@@ -20,12 +19,6 @@ public class ValkyrieAutomatedDiagnosticSimulation
       ValkyrieRobotModelWithHoist robotModel = new ValkyrieRobotModelWithHoist(RobotTarget.SCS);
 
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
-
-      InputStream gainStream = getClass().getClassLoader().getResourceAsStream("diagnostic/simulationPDGains.yaml");
-      InputStream setpointStream = getClass().getClassLoader().getResourceAsStream("diagnostic/diagnosticSetPoints.yaml");
-
-      simulationFactory.setGainStream(gainStream);
-      simulationFactory.setSetpointStream(setpointStream);
       simulationFactory.setRobotInitialSetup(0.5, 0.0);
 
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
