@@ -31,6 +31,10 @@ public class EfficientMatrixExponentialCalculatorTest
          DMatrixRMaj subB = new DMatrixRMaj(rows, Bcols);
          DMatrixRMaj subC = new DMatrixRMaj(rows, Ccols);
 
+         subA.setData(RandomNumbers.nextDoubleArray(random, rows * rows, 1.0));
+         subB.setData(RandomNumbers.nextDoubleArray(random, rows * Bcols, 1.0));
+         subC.setData(RandomNumbers.nextDoubleArray(random, rows * Ccols, 1.0));
+
          DMatrixRMaj A = new DMatrixRMaj(size, size);
          MatrixTools.setMatrixBlock(A, 0, 0, subA, 0, 0, rows, rows, 1.0);
          MatrixTools.setMatrixBlock(A, 0, rows, subB, 0, 0, rows, Bcols, 1.0);

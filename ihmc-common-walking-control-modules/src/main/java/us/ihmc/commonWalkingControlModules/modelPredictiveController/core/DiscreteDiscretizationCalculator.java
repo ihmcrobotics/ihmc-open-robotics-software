@@ -11,8 +11,8 @@ public class DiscreteDiscretizationCalculator implements DiscretizationCalculato
    @Override
    public void compute(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj Ad, DMatrixRMaj Bd, DMatrixRMaj Cd, double tickDuration)
    {
-      CommonOps_DDRM.scale(tickDuration, A);
-      MatrixTools.addDiagonal(A, 1.0);
+      CommonOps_DDRM.scale(tickDuration, A, Ad);
+      MatrixTools.addDiagonal(Ad, 1.0);
 
       CommonOps_DDRM.scale(tickDuration, B, Bd);
       CommonOps_DDRM.scale(tickDuration, C, Cd);
