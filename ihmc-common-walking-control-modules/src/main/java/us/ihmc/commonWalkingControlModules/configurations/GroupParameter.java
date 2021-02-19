@@ -1,4 +1,4 @@
-package us.ihmc.robotics.dataStructures.parameters;
+package us.ihmc.commonWalkingControlModules.configurations;
 
 import java.util.Arrays;
 import java.util.Collections;

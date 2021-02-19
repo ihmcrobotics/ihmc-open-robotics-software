@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.atlas.AtlasJointMap;
+import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.robotics.dataStructures.parameters.GroupParameter;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
