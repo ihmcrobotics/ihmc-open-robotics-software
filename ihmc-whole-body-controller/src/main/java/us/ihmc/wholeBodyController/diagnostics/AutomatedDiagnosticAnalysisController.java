@@ -1,24 +1,27 @@
 package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ParameterizedPDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTaskExecutor;
 import us.ihmc.wholeBodyController.diagnostics.utils.WaitDiagnosticTask;
@@ -37,15 +40,8 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
    private final DiagnosticTaskExecutor diagnosticTaskExecutor;
 
-   private final PairList<OneDoFJointBasics, JointDesiredOutputBasics> controlledJoints = new PairList<>();
-   private final JointDesiredBehaviorReadOnly[] jointDesiredBehaviors;
-   private final Map<OneDoFJointBasics, ParameterizedPDController> jointPDControllerMap = new LinkedHashMap<>();
-   private final Map<OneDoFJointBasics, YoDouble> jointDesiredPositionMap = new LinkedHashMap<>();
-   private final Map<OneDoFJointBasics, YoDouble> jointDesiredVelocityMap = new LinkedHashMap<>();
-   private final Map<OneDoFJointBasics, YoDouble> jointDesiredTauMap = new LinkedHashMap<>();
-
+   private final List<JointController> jointControllers = new ArrayList<>();
    private final DoubleProvider trajectoryTimeProvider;
-   private final Map<OneDoFJointBasics, OneDoFJointQuinticTrajectoryGenerator> jointTrajectories = new LinkedHashMap<>();
 
    private final ArrayDeque<DiagnosticDataReporter> dataReportersToExecute = new ArrayDeque<>();
    private DiagnosticDataReporter diagnosticDataReporterRunning = null;
@@ -77,67 +73,33 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       qddMaxIdle.set(diagnosticParameters.getIdleQddMax());
       tauMaxIdle.set(diagnosticParameters.getIdleTauMax());
 
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      Set<String> jointNamesToIgnore = new HashSet<>();
+      jointNamesToIgnore.addAll(Arrays.asList(toolbox.getWalkingControllerParameters().getJointsToIgnoreInController()));
+      if (fullRobotModel.getLidarSensorNames() != null)
       {
-         controlledJoints.add(joint, lowLevelOutput.getJointDesiredOutput(joint));
-      }
-
-      for (String jointToIgnore : toolbox.getWalkingControllerParameters().getJointsToIgnoreInController())
-      {
-         controlledJoints.removeIf(entry -> entry.getKey().getName().equals(jointToIgnore));
-      }
-
-      if (toolbox.getFullRobotModel().getLidarSensorNames() != null)
-      {
-         for (String lidarSensorName : fullRobotModel.getLidarSensorNames())
-         {
-            JointBasics lidarJoint = fullRobotModel.getLidarJoint(lidarSensorName);
-            if (lidarJoint != null)
-               controlledJoints.removeIf(entry -> entry.getKey().getName().equals(lidarJoint.getName()));
-         }
-      }
-
-      Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMap = new HashMap<>();
-      ParameterTools.extractJointBehaviorMap("NoLoad", toolbox.getDiagnosticParameters().getDesiredJointBehaviors(), jointBehaviorMap, registry);
-      jointDesiredBehaviors = new JointDesiredBehaviorReadOnly[controlledJoints.size()];
-
-      for (int i = 0; i < controlledJoints.size(); i++)
-      {
-         String jointName = controlledJoints.get(i).getKey().getName();
-         JointDesiredBehaviorReadOnly jointDesiredBehavior = jointBehaviorMap.get(jointName);
-         Objects.requireNonNull(jointDesiredBehavior, "No desired behavior for the joint: " + jointName);
-         jointDesiredBehaviors[i] = jointDesiredBehavior;
+         fullRobotModel.getLidarSensorNames().stream().map(fullRobotModel::getLidarJoint).filter(Objects::nonNull)
+                       .forEach(joint -> jointNamesToIgnore.add(joint.getName()));
       }
 
       trajectoryTimeProvider = () -> diagnosticParameters.getInitialJointSplineDuration();
       submitDiagnostic(new WaitDiagnosticTask(trajectoryTimeProvider.getValue()));
 
-      for (int i = 0; i < controlledJoints.size(); i++)
+      Map<String, JointDesiredBehaviorReadOnly> jointBehaviorMap = new HashMap<>();
+      ParameterTools.extractJointBehaviorMap("NoLoad", toolbox.getDiagnosticParameters().getDesiredJointBehaviors(), jointBehaviorMap, registry);
+
+      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
-         OneDoFJointBasics joint = controlledJoints.first(i);
          String jointName = joint.getName();
-         OneDoFJointQuinticTrajectoryGenerator jointTrajectory = new OneDoFJointQuinticTrajectoryGenerator(jointName, joint, trajectoryTimeProvider, registry);
-         jointTrajectories.put(joint, jointTrajectory);
-         jointTrajectories.get(joint).setFinalPosition(diagnosticParameters.getDiagnosticSetpoints().getSetpoint(jointName));
-      }
 
-      for (int i = 0; i < controlledJoints.size(); i++)
-      {
-         OneDoFJointBasics joint = controlledJoints.first(i);
-         String jointName = joint.getName();
-         JointDesiredBehaviorReadOnly jointDesiredBehavior = jointDesiredBehaviors[i];
+         if (jointNamesToIgnore.contains(jointName))
+            continue;
 
-         DoubleProvider kp = () -> jointDesiredBehavior.getStiffness();
-         DoubleProvider kd = () -> jointDesiredBehavior.getDamping();
-         ParameterizedPDController jointPDController = new ParameterizedPDController(kp, kd, jointName, registry);
-         YoDouble jointDesiredPosition = new YoDouble("q_d_" + jointName, registry);
-         YoDouble jointDesiredVelocity = new YoDouble("qd_d_" + jointName, registry);
-         YoDouble jointDesiredTau = new YoDouble("tau_d_" + jointName, registry);
+         JointDesiredOutput jointDesiredOutput = lowLevelOutput.getJointDesiredOutput(joint);
+         JointDesiredBehaviorReadOnly jointDesiredBehavior = jointBehaviorMap.get(jointName);
+         Objects.requireNonNull(jointDesiredBehavior, "No desired behavior for the joint: " + jointName);
+         double setpoint = diagnosticParameters.getDiagnosticSetpoints().getSetpoint(jointName);
+         jointControllers.add(new JointController(joint, jointDesiredOutput, jointDesiredBehavior, setpoint));
 
-         jointPDControllerMap.put(joint, jointPDController);
-         jointDesiredPositionMap.put(joint, jointDesiredPosition);
-         jointDesiredVelocityMap.put(joint, jointDesiredVelocity);
-         jointDesiredTauMap.put(joint, jointDesiredTau);
       }
 
       if (diagnosticParameters.enableLogging())
@@ -169,10 +131,9 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    @Override
    public void initialize()
    {
-      for (int i = 0; i < controlledJoints.size(); i++)
+      for (int i = 0; i < jointControllers.size(); i++)
       {
-         OneDoFJointBasics state = controlledJoints.first(i);
-         jointTrajectories.get(state).initialize(state.getQ(), 0.0);
+         jointControllers.get(i).initialize();
       }
 
       startTime.set(yoTime.getDoubleValue());
@@ -201,43 +162,11 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       diagnosticTaskExecutor.doControl();
       DiagnosticTask currentTask = diagnosticTaskExecutor.getCurrentTask();
+      double timeInTrajectory = yoTime.getDoubleValue() - startTime.getDoubleValue();
 
-      for (int i = 0; i < controlledJoints.size(); i++)
+      for (int i = 0; i < jointControllers.size(); i++)
       {
-         OneDoFJointBasics state = controlledJoints.first(i);
-         JointDesiredOutputBasics output = controlledJoints.second(i);
-         ParameterizedPDController jointPDController = jointPDControllerMap.get(state);
-
-         double desiredJointPositionOffset = 0.0;
-         double desiredJointVelocityOffset = 0.0;
-         double desiredJointTauOffset = 0.0;
-
-         if (currentTask != null)
-         {
-            desiredJointPositionOffset = currentTask.getDesiredJointPositionOffset(state);
-            desiredJointVelocityOffset = currentTask.getDesiredJointVelocityOffset(state);
-            desiredJointTauOffset = currentTask.getDesiredJointTauOffset(state);
-         }
-
-         OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(state);
-         jointTrajectory.compute(yoTime.getDoubleValue() - startTime.getDoubleValue());
-
-         YoDouble jointDesiredPosition = jointDesiredPositionMap.get(state);
-         YoDouble jointDesiredVelocity = jointDesiredVelocityMap.get(state);
-
-         jointDesiredPosition.set(jointTrajectory.getValue() + desiredJointPositionOffset);
-         jointDesiredVelocity.set(jointTrajectory.getVelocity() + desiredJointVelocityOffset);
-
-         double q = state.getQ();
-         double qDesired = jointDesiredPosition.getDoubleValue();
-         double qd = state.getQd();
-         double qdDesired = jointDesiredVelocity.getDoubleValue();
-         double tauDesired = jointPDController.compute(q, qDesired, qd, qdDesired) + desiredJointTauOffset;
-         output.setDesiredTorque(tauDesired);
-         output.setDesiredPosition(qDesired);
-         output.setDesiredVelocity(qdDesired);
-
-         jointDesiredTauMap.get(state).set(tauDesired);
+         jointControllers.get(i).doControl(currentTask, timeInTrajectory);
       }
 
       if (currentTask != null)
@@ -260,38 +189,9 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
    private void doIdleControl()
    {
-      for (int i = 0; i < controlledJoints.size(); i++)
+      for (int i = 0; i < jointControllers.size(); i++)
       {
-         OneDoFJointBasics state = controlledJoints.first(i);
-         JointDesiredOutputBasics output = controlledJoints.second(i);
-         ParameterizedPDController jointPDController = jointPDControllerMap.get(state);
-
-         OneDoFJointQuinticTrajectoryGenerator jointTrajectory = jointTrajectories.get(state);
-         jointTrajectory.compute(trajectoryTimeProvider.getValue());
-
-         YoDouble jointDesiredPosition = jointDesiredPositionMap.get(state);
-         YoDouble jointDesiredVelocity = jointDesiredVelocityMap.get(state);
-         jointDesiredPosition.set(jointTrajectory.getValue());
-         jointDesiredVelocity.set(0.0);
-
-         double q = state.getQ();
-         double qDesired = jointDesiredPosition.getDoubleValue();
-         double qd = state.getQd();
-         double qdDesired = jointDesiredVelocity.getDoubleValue();
-         double tauDesired = jointPDController.compute(q, qDesired, qd, qdDesired);
-
-         double qdMax = qdMaxIdle.getDoubleValue();
-         double qddMax = qddMaxIdle.getDoubleValue();
-         double tauMax = tauMaxIdle.getDoubleValue();
-
-         qDesired = q + MathTools.clamp(qDesired - q, qdMax * controlDT);
-         qdDesired = qd + MathTools.clamp(qdDesired - qd, qddMax * controlDT);
-         tauDesired = MathTools.clamp(tauDesired, tauMax);
-         output.setDesiredTorque(tauDesired);
-         output.setDesiredPosition(qDesired);
-         output.setDesiredVelocity(qdDesired);
-
-         jointDesiredTauMap.get(state).set(tauDesired);
+         jointControllers.get(i).doIdleControl();
       }
    }
 
@@ -335,5 +235,95 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
    public String getDescription()
    {
       return getName();
+   }
+
+   private class JointController
+   {
+      private final OneDoFJointBasics joint;
+      private final JointDesiredOutputBasics desiredOutput;
+
+      private final ParameterizedPDController pdController;
+      private final YoDouble desiredPosition;
+      private final YoDouble desiredVelocity;
+      private final YoDouble desiredTau;
+
+      private final OneDoFJointQuinticTrajectoryGenerator trajectory;
+
+      public JointController(OneDoFJointBasics joint, JointDesiredOutputBasics desiredOutput, JointDesiredBehaviorReadOnly desiredBehavior, double setpoint)
+      {
+         this.joint = joint;
+         this.desiredOutput = desiredOutput;
+         String jointName = joint.getName();
+
+         DoubleProvider kp = () -> desiredBehavior.getStiffness();
+         DoubleProvider kd = () -> desiredBehavior.getDamping();
+         pdController = new ParameterizedPDController(kp, kd, jointName, registry);
+         desiredPosition = new YoDouble("q_d_" + jointName, registry);
+         desiredVelocity = new YoDouble("qd_d_" + jointName, registry);
+         desiredTau = new YoDouble("tau_d_" + jointName, registry);
+
+         trajectory = new OneDoFJointQuinticTrajectoryGenerator(jointName, joint, trajectoryTimeProvider, registry);
+         trajectory.setFinalPosition(setpoint);
+      }
+
+      public void initialize()
+      {
+         trajectory.initialize(joint.getQ(), 0.0);
+      }
+
+      public void doControl(DiagnosticTask currentTask, double timeInTrajectory)
+      {
+         double desiredJointPositionOffset = 0.0;
+         double desiredJointVelocityOffset = 0.0;
+         double desiredJointTauOffset = 0.0;
+
+         if (currentTask != null)
+         {
+            desiredJointPositionOffset = currentTask.getDesiredJointPositionOffset(joint);
+            desiredJointVelocityOffset = currentTask.getDesiredJointVelocityOffset(joint);
+            desiredJointTauOffset = currentTask.getDesiredJointTauOffset(joint);
+         }
+
+         trajectory.compute(timeInTrajectory);
+
+         desiredPosition.set(trajectory.getValue() + desiredJointPositionOffset);
+         desiredVelocity.set(trajectory.getVelocity() + desiredJointVelocityOffset);
+
+         double q = joint.getQ();
+         double qDesired = desiredPosition.getDoubleValue();
+         double qd = joint.getQd();
+         double qdDesired = desiredVelocity.getDoubleValue();
+         double tauDesired = pdController.compute(q, qDesired, qd, qdDesired) + desiredJointTauOffset;
+         desiredOutput.setDesiredTorque(tauDesired);
+         desiredOutput.setDesiredPosition(qDesired);
+         desiredOutput.setDesiredVelocity(qdDesired);
+         desiredTau.set(tauDesired);
+      }
+
+      public void doIdleControl()
+      {
+         trajectory.compute(trajectoryTimeProvider.getValue());
+
+         desiredPosition.set(trajectory.getValue());
+         desiredVelocity.set(0.0);
+
+         double q = joint.getQ();
+         double qDesired = desiredPosition.getDoubleValue();
+         double qd = joint.getQd();
+         double qdDesired = desiredVelocity.getDoubleValue();
+         double tauDesired = pdController.compute(q, qDesired, qd, qdDesired);
+
+         double qdMax = qdMaxIdle.getDoubleValue();
+         double qddMax = qddMaxIdle.getDoubleValue();
+         double tauMax = tauMaxIdle.getDoubleValue();
+
+         qDesired = q + MathTools.clamp(qDesired - q, qdMax * controlDT);
+         qdDesired = qd + MathTools.clamp(qdDesired - qd, qddMax * controlDT);
+         tauDesired = MathTools.clamp(tauDesired, tauMax);
+         desiredOutput.setDesiredTorque(tauDesired);
+         desiredOutput.setDesiredPosition(qDesired);
+         desiredOutput.setDesiredVelocity(qdDesired);
+         desiredTau.set(tauDesired);
+      }
    }
 }
