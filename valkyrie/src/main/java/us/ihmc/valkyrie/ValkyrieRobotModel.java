@@ -42,8 +42,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.sensors.ContactSensorType;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
@@ -65,6 +63,8 @@ import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {

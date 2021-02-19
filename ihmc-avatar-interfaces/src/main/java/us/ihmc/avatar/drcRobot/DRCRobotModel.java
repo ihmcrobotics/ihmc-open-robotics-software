@@ -25,8 +25,6 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
@@ -36,6 +34,8 @@ import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {

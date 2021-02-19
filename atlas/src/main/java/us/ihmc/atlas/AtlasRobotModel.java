@@ -64,8 +64,6 @@ import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.simulatedHand.SimulatedRobotiqHandsController;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.RealtimeROS2Node;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters.DiagnosticEnvironment;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -74,6 +72,8 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters.DiagnosticEnvironment;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
