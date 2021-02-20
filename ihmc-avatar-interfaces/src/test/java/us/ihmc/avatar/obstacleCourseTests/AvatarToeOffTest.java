@@ -40,6 +40,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private boolean useExperimentalPhysicsEngine = false;
 
+   private double isAnkleLimitAtJointLimit;
    private double swingTime = 0.6;
    private double transferTime = 0.25;
    private double stepHeight = 0.0;
@@ -110,6 +111,11 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
    private void walkForward(double stepLength, int steps) throws SimulationExceededMaximumTimeException
    {
+      walkForward(stepLength, steps, 0.0, 0.0);
+   }
+
+   private void walkForward(double stepLength, int steps, double initialXPosition, double stepHeight) throws SimulationExceededMaximumTimeException
+   {
       double stepWidth = 0.14;
 
       ReferenceFrame pelvisFrame = drcSimulationTestHelper.getSDFFullRobotModel().getPelvis().getBodyFixedFrame();
@@ -121,10 +127,10 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       {
          robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
-         footstepX = stepLength * i;
+         footstepX = stepLength * i + initialXPosition;
          FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
          location.changeFrame(ReferenceFrame.getWorldFrame());
-         location.setZ(0.0);
+         location.setZ(stepHeight);
          Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
          footsteps.getFootstepDataList().add().set(footstepData);
@@ -132,21 +138,34 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       // closing step
       robotSide = robotSide.getOppositeSide();
       footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
-      footstepX = stepLength * steps;
+      footstepX = stepLength * steps + initialXPosition;
       FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
       location.changeFrame(ReferenceFrame.getWorldFrame());
-      location.setZ(0.0);
+      location.setZ(stepHeight);
       Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
       footsteps.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.publishToController(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.9 + transferTime + swingTime));
+      updateAnkleLimitStatus();
+      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+      updateAnkleLimitStatus();
+      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+      updateAnkleLimitStatus();
+      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+      updateAnkleLimitStatus();
+      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+      updateAnkleLimitStatus();
+      assertTrue(isAnkleLimitAtJointLimit == 0.0);
    }
 
    private void setYoVariablesToDoToeOffInSS(double icpProximity, double icpPercentLengthToLeadingFoot, double ecmpProximity)
    {
       YoDouble yoICPProximity, yoICPPercent, yoECMPProximity;
+
+      YoBoolean toeOffAtJointLimit = (YoBoolean) drcSimulationTestHelper.getYoVariable("forceToeOffAtJointLimit");
+      toeOffAtJointLimit.set(true);
 
       YoBoolean toeOffInSS = (YoBoolean) drcSimulationTestHelper.getYoVariable("doToeOffIfPossibleInSingleSupport");
       yoICPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("icpProximityForToeOff");
@@ -157,6 +176,11 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       yoICPProximity.set(icpProximity);
       yoICPPercent.set(icpPercentLengthToLeadingFoot);
       yoECMPProximity.set(ecmpProximity);
+   }
+
+   private void updateAnkleLimitStatus()
+   {
+      isAnkleLimitAtJointLimit = drcSimulationTestHelper.getYoVariable("limitl_leg_aky_Status").getValueAsDouble();
    }
 
    private void pitchTorso(double angle)
