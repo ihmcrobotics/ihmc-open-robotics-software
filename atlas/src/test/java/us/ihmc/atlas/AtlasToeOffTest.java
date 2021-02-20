@@ -18,6 +18,14 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     }
 
     @Test
+    public void testToeOffTakingShortStepDownCheckingAnkleLimitsWithExperimentalPhysicsEngine(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    {
+        setUseExperimentalPhysicsEngine(true);
+        setStepHeight(-0.1);
+        super.testToeOffTakingStepAndCheckingAnkleLimits(testInfo);
+    }
+
+    @Test
     public void testToeOffTakingMediumStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.2);
