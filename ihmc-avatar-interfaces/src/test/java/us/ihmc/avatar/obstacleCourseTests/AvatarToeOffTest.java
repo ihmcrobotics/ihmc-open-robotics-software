@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -22,6 +23,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
+import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -97,7 +100,22 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 
-   private void setupTest(CommonAvatarEnvironmentInterface environment) throws SimulationExceededMaximumTimeException
+   @Test
+   public void testToeOffTakingStepAndCheckingAnkleLimits(TestInfo testInfo) throws SimulationExceededMaximumTimeException
+   {
+      StepsEnvironment steps = new StepsEnvironment();
+      double startYPosition = 0.0;
+      double width = 0.5;
+      double depth = 0.5;
+
+      steps.addStep(getStepLength(), startYPosition, width, depth, stepHeight);
+      setupTest(testInfo, steps);
+      setYoVariablesToDoToeOffInSS(0.0, 0.3, 0.1);
+
+      walkForward(getStepLength(), 1, 0.0, stepHeight);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+   }
+
    private void setupTest(TestInfo testInfo, CommonAvatarEnvironmentInterface environment) throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
