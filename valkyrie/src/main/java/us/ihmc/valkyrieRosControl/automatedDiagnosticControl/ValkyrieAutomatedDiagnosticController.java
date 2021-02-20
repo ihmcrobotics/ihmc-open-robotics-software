@@ -54,6 +54,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSens
 import us.ihmc.tools.SettableTimestampProvider;
 import us.ihmc.tools.TimestampProvider;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlSensorReader;
@@ -194,7 +195,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox, registry);
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(toolbox, diagnosticController);
       automatedDiagnosticConfiguration.addWait(1.0);
-      automatedDiagnosticConfiguration.addJointCheckUpDiagnostic();
+      automatedDiagnosticConfiguration.addJointCheckUps(ValkyrieDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));
       automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();
 
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);

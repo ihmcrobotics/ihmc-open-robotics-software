@@ -5,12 +5,15 @@ import static us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters.config
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.EFFORT;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.atlas.AtlasJointMap;
+import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
@@ -32,6 +35,28 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
       this.runningOnRealRobot = runningOnRealRobot;
       pelvisIMUName = sensorInformation.getPrimaryBodyImu();
       setpoints = new AtlasDiagnosticSetpoints(jointMap);
+   }
+
+   public static List<List<String>> defaultJointCheckUpConfiguration(HumanoidJointNameMap jointMap)
+   {
+      List<List<String>> jointNames = new ArrayList<>();
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, LegJointName.ANKLE_ROLL));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, LegJointName.ANKLE_PITCH));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, LegJointName.KNEE_PITCH));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, LegJointName.HIP_PITCH));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, LegJointName.HIP_ROLL));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, LegJointName.HIP_YAW));
+      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)));
+      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)));
+      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.SHOULDER_YAW));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.SHOULDER_ROLL));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.ELBOW_PITCH));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.ELBOW_ROLL));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.FIRST_WRIST_PITCH));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.WRIST_ROLL));
+      jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.SECOND_WRIST_PITCH));
+      return jointNames;
    }
 
    @Override

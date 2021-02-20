@@ -100,6 +100,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
                logger.info(msg);
             else
                LogTools.info(msg);
+            continue;
          }
 
          double setpoint = diagnosticParameters.getDiagnosticSetpoints().getSetpoint(jointName);
