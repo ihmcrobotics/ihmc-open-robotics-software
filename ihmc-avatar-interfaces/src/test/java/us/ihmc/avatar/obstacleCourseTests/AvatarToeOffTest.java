@@ -2,7 +2,6 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -199,14 +197,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private void updateAnkleLimitStatus()
    {
       isAnkleLimitAtJointLimit = drcSimulationTestHelper.getYoVariable("limitl_leg_aky_Status").getValueAsDouble();
-   }
-
-   private void pitchTorso(double angle)
-   {
-      ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(0.5,
-              new YawPitchRoll(0.0, angle, 0.0),
-              ReferenceFrame.getWorldFrame());
-      drcSimulationTestHelper.publishToController(message);
    }
 
    private static class StepsEnvironment implements CommonAvatarEnvironmentInterface
