@@ -42,6 +42,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
    private double swingTime = 0.6;
    private double transferTime = 0.25;
+   private double stepHeight = 0.0;
 
    public abstract double getStepLength();
 
@@ -77,6 +78,11 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
    {
       this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+   }
+
+   public void setStepHeight(double height)
+   {
+      stepHeight = height;
    }
 
    @Test
