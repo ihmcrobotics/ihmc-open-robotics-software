@@ -1,15 +1,11 @@
 package us.ihmc.avatar.diagnostics;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.partNames.ArmJointName;
-import us.ihmc.robotics.partNames.LegJointName;
-import us.ihmc.robotics.partNames.RobotSpecificJointNames;
-import us.ihmc.robotics.partNames.SpineJointName;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
@@ -36,72 +32,72 @@ public class AutomatedDiagnosticConfiguration
       diagnosticController.submitDiagnostic(new WaitDiagnosticTask(timeToWait));
    }
 
-   public void addJointCheckUpDiagnostic()
+   /**
+    * Queues a check-up for running diagnostic on a single joint.
+    * 
+    * @param jointName the name of the joint to run diagnostics on.
+    */
+   public void addSingleJointCheckUp(String jointName)
    {
-      FullHumanoidRobotModel fullRobotModel = toolbox.getFullRobotModel();
-      RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
-      List<String> jointsToIgnore = toolbox.getDiagnosticParameters().getJointsToIgnoreDuringDiagnostic();
+      OneDoFJointBasics joint = toolbox.getFullRobotModel().getOneDoFJointByName(jointName);
+      OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(joint, toolbox);
 
-      for (LegJointName legJointName : robotSpecificJointNames.getLegJointNames())
+      if (enableLogging)
+         checkUp.setupForLogging();
+
+      diagnosticController.submitDiagnostic(checkUp);
+   }
+
+   /**
+    * Queues a check-up for running diagnostic on several joints in parallel.
+    * 
+    * @param jointNames the name of the joints to run diagnostics on.
+    */
+   public void addParallelJointCheckUp(String... jointNames)
+   {
+      addParallelJointCheckUp(Arrays.asList(jointNames));
+   }
+
+   /**
+    * Queues a check-up for running diagnostic on several joints in parallel.
+    * 
+    * @param jointNames the name of the joints to run diagnostics on.
+    */
+   public void addParallelJointCheckUp(Collection<String> jointNames)
+   {
+      List<OneDoFJointCheckUpDiagnosticTask> checkUps = new ArrayList<>();
+
+      for (String jointName : jointNames)
       {
-         List<OneDoFJointCheckUpDiagnosticTask> checkUps = new ArrayList<>();
+         OneDoFJointBasics joint = toolbox.getFullRobotModel().getOneDoFJointByName(jointName);
 
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            OneDoFJointBasics legJoint = fullRobotModel.getLegJoint(robotSide, legJointName);
-            if (!jointsToIgnore.contains(legJoint.getName()))
-            {
-               OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(legJoint, toolbox);
-               if (enableLogging)
-                  checkUp.setupForLogging();
-               checkUps.add(checkUp);
-            }
-         }
-
-         if (!checkUps.isEmpty())
-         {
-            if (checkUps.size() > 1)
-               diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
-            else
-               diagnosticController.submitDiagnostic(checkUps.get(0));
-         }
+         OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(joint, toolbox);
+         if (enableLogging)
+            checkUp.setupForLogging();
+         checkUps.add(checkUp);
       }
 
-      for (ArmJointName armJointName : robotSpecificJointNames.getArmJointNames())
+      if (!checkUps.isEmpty())
       {
-         List<OneDoFJointCheckUpDiagnosticTask> checkUps = new ArrayList<>();
-
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
-            if (!jointsToIgnore.contains(armJoint.getName()))
-            {
-               OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(armJoint, toolbox);
-               if (enableLogging)
-                  checkUp.setupForLogging();
-               checkUps.add(checkUp);
-            }
-         }
-
-         if (!checkUps.isEmpty())
-         {
-            if (checkUps.size() > 1)
-               diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
-            else
-               diagnosticController.submitDiagnostic(checkUps.get(0));
-         }
+         if (checkUps.size() > 1)
+            diagnosticController.submitDiagnostic(new DiagnosticParallelTask(checkUps));
+         else
+            diagnosticController.submitDiagnostic(checkUps.get(0));
       }
+   }
 
-      for (SpineJointName spineJointName : robotSpecificJointNames.getSpineJointNames())
+   /**
+    * Queues a list of check-ups, each check-up can be for either a single or multiple joint(s).
+    * 
+    * @param jointNames a 2D list: the first dimension represents the series of check-ups to run, the
+    *                   second dimension represents the name of the joints to run diagnostic for at
+    *                   each check-up.
+    */
+   public void addJointCheckUps(List<? extends List<String>> jointNames)
+   {
+      for (int i = 0; i < jointNames.size(); i++)
       {
-         OneDoFJointBasics spineJoint = fullRobotModel.getSpineJoint(spineJointName);
-         if (!jointsToIgnore.contains(spineJoint.getName()))
-         {
-            OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(spineJoint, toolbox);
-            if (enableLogging)
-               checkUp.setupForLogging();
-            diagnosticController.submitDiagnostic(checkUp);
-         }
+         addParallelJointCheckUp(jointNames.get(i));
       }
    }
 

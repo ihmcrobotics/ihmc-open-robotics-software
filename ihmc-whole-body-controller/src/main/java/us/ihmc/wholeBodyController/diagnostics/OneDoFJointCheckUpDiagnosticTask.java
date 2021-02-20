@@ -1,6 +1,7 @@
 package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayDeque;
+import java.util.Objects;
 import java.util.logging.Logger;
 
 import org.apache.commons.math3.stat.descriptive.moment.Mean;
@@ -102,10 +103,11 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
       rampDuration.set(0.2 * checkUpDuration.getDoubleValue());
       ramp = new YoDouble(jointName + nameSuffix + "SignalRamp", registry);
 
-      validityChecker = toolbox.getJointSensorValidityChecker(joint);
-      positionVelocityConsistency = toolbox.getJointPositionVelocityConsistencyChecker(joint);
-      forceTrackingDelay = toolbox.getJointForceTrackingDelayEstimator(joint);
-      fourierAnalysis = toolbox.getJointFourierAnalysis(joint);
+      String errorMessage = "Joint (" + jointToCheck.getName() + ") is missing a sensor processor.";
+      validityChecker = Objects.requireNonNull(toolbox.getJointSensorValidityChecker(joint), errorMessage);
+      positionVelocityConsistency = Objects.requireNonNull(toolbox.getJointPositionVelocityConsistencyChecker(joint), errorMessage);
+      forceTrackingDelay = Objects.requireNonNull(toolbox.getJointForceTrackingDelayEstimator(joint), errorMessage);
+      fourierAnalysis = Objects.requireNonNull(toolbox.getJointFourierAnalysis(joint), errorMessage);
 
       processedPositionQualityMean = new YoDouble(jointName + nameSuffix + "ProcessedPositionQualityMean", registry);
       processedPositionQualityStandardDeviation = new YoDouble(jointName + nameSuffix + "ProcessedPositionQualityStandardDeviation", registry);
@@ -229,7 +231,7 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          processedVelocityDelayStandardDeviationCalculator.increment(positionVelocityConsistency.getEstimatedDelayForProcessedVelocity());
          processedVelocityDelayStandardDeviation.set(processedVelocityDelayStandardDeviationCalculator.getResult());
       }
-      
+
       if (forceTrackingDelay.isEstimatingDelay())
       {
          forceTrackingQualityMeanCalculator.increment(forceTrackingDelay.getCorrelation());
@@ -278,12 +280,27 @@ public class OneDoFJointCheckUpDiagnosticTask extends DiagnosticTask
          return;
 
       String loggerName = logger.getName() + "DataReporter";
-      dataReporter = new OneDoFJointCheckUpDiagnosticDataReporter(loggerName, joint, diagnosticParameters,
-            processedPositionQualityMean, processedPositionQualityStandardDeviation, processedPositionDelayMean, processedPositionDelayStandardDeviation,
-            rawVelocityQualityMean, rawVelocityQualityStandardDeviation, rawVelocityDelayMean, rawVelocityDelayStandardDeviation,
-            processedVelocityQualityMean, processedVelocityQualityStandardDeviation, processedVelocityDelayMean, processedVelocityDelayStandardDeviation,
-            forceTrackingQualityMean, forceTrackingQualityStandardDeviation, forceTrackingDelayMean,
-            forceTrackingDelayStandardDeviation, fourierAnalysis, functionGenerator);
+      dataReporter = new OneDoFJointCheckUpDiagnosticDataReporter(loggerName,
+                                                                  joint,
+                                                                  diagnosticParameters,
+                                                                  processedPositionQualityMean,
+                                                                  processedPositionQualityStandardDeviation,
+                                                                  processedPositionDelayMean,
+                                                                  processedPositionDelayStandardDeviation,
+                                                                  rawVelocityQualityMean,
+                                                                  rawVelocityQualityStandardDeviation,
+                                                                  rawVelocityDelayMean,
+                                                                  rawVelocityDelayStandardDeviation,
+                                                                  processedVelocityQualityMean,
+                                                                  processedVelocityQualityStandardDeviation,
+                                                                  processedVelocityDelayMean,
+                                                                  processedVelocityDelayStandardDeviation,
+                                                                  forceTrackingQualityMean,
+                                                                  forceTrackingQualityStandardDeviation,
+                                                                  forceTrackingDelayMean,
+                                                                  forceTrackingDelayStandardDeviation,
+                                                                  fourierAnalysis,
+                                                                  functionGenerator);
       sendDataReporter = true;
    }
 

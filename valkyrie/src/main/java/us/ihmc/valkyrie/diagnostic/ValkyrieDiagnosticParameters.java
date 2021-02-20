@@ -3,8 +3,10 @@ package us.ihmc.valkyrie.diagnostic;
 import static us.ihmc.sensorProcessing.outputData.JointDesiredControlMode.POSITION;
 import static us.ihmc.valkyrie.ValkyrieHighLevelControllerParameters.configureBehavior;
 import static us.ihmc.valkyrie.ValkyrieHighLevelControllerParameters.configureSymmetricBehavior;
+import static us.ihmc.valkyrie.ValkyrieHighLevelControllerParameters.getLeftAndRightJointNames;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
@@ -40,6 +42,25 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
       this.sensorInformation = sensorInformation;
       this.runningOnRealRobot = runningOnRealRobot;
       setpoints = new ValkyrieDiagnosticSetpoints(jointMap);
+   }
+
+   public static List<List<String>> defaultJointCheckUpConfiguration(HumanoidJointNameMap jointMap)
+   {
+      List<List<String>> jointNames = new ArrayList<>();
+      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.ANKLE_ROLL));
+      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.ANKLE_PITCH));
+      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.KNEE_PITCH));
+      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.HIP_PITCH));
+      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.HIP_ROLL));
+      jointNames.add(getLeftAndRightJointNames(jointMap, LegJointName.HIP_YAW));
+      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_YAW)));
+      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH)));
+      jointNames.add(Collections.singletonList(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL)));
+      jointNames.add(getLeftAndRightJointNames(jointMap, ArmJointName.SHOULDER_PITCH));
+      jointNames.add(getLeftAndRightJointNames(jointMap, ArmJointName.SHOULDER_ROLL));
+      jointNames.add(getLeftAndRightJointNames(jointMap, ArmJointName.SHOULDER_YAW));
+      jointNames.add(getLeftAndRightJointNames(jointMap, ArmJointName.ELBOW_PITCH));
+      return jointNames;
    }
 
    @Override
@@ -86,7 +107,7 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
          }
          else
          {
-            jointToIgnoreList.add(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_YAW));
+            jointToIgnoreList.add(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL));
             jointToIgnoreList.add(jointMap.getArmJointName(robotSide, ArmJointName.WRIST_ROLL));
             jointToIgnoreList.add(jointMap.getArmJointName(robotSide, ArmJointName.FIRST_WRIST_PITCH));
          }
