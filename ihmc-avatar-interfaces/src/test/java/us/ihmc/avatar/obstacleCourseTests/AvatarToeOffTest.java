@@ -164,4 +164,30 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
               ReferenceFrame.getWorldFrame());
       drcSimulationTestHelper.publishToController(message);
    }
+
+   private static class StepsEnvironment implements CommonAvatarEnvironmentInterface
+   {
+      private final CombinedTerrainObject3D terrainObject = new CombinedTerrainObject3D("Steps");
+
+      public StepsEnvironment()
+      {
+         double length = 0.3;
+         terrainObject.addBox(-length/2.0, -length, length/2.0, length, -0.1);
+      }
+
+      public StepsEnvironment(double startXPosition, double startYPosition, double width, double depth, double height)
+      {
+         terrainObject.addBox(startXPosition, startYPosition, startXPosition + depth, startYPosition + width, height);
+      }
+
+      public void addStep(double startXPosition, double startYPosition, double width, double depth, double height)
+      {
+         terrainObject.addBox(startXPosition-depth, startYPosition-width, startXPosition + depth, startYPosition + width, height, height-0.1);
+      }
+
+      @Override
+      public TerrainObject3D getTerrainObject3D() {
+         return terrainObject;
+      }
+   }
 }
