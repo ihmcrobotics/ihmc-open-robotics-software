@@ -219,11 +219,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
          terrainObject.addBox(-length/2.0, -length, length/2.0, length, -0.1);
       }
 
-      public StepsEnvironment(double startXPosition, double startYPosition, double width, double depth, double height)
-      {
-         terrainObject.addBox(startXPosition, startYPosition, startXPosition + depth, startYPosition + width, height);
-      }
-
       public void addStep(double startXPosition, double startYPosition, double width, double depth, double height)
       {
          terrainObject.addBox(startXPosition-depth, startYPosition-width, startXPosition + depth, startYPosition + width, height, height-0.1);
