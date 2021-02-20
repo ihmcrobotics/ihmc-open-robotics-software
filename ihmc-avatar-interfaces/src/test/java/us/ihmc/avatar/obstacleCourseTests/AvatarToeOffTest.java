@@ -33,10 +33,12 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setRunMultiThreaded(false);
    }
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private boolean useExperimentalPhysicsEngine = false;
 
    private double swingTime = 0.6;
    private double transferTime = 0.25;
@@ -72,6 +74,11 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
+   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   {
+      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+   }
+
    @Test
    public void testShortSteps() throws SimulationExceededMaximumTimeException
    {
@@ -87,6 +94,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
