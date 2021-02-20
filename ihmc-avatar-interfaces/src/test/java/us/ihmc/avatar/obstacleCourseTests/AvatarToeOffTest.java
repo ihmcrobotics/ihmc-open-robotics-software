@@ -86,21 +86,23 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    }
 
    @Test
-   public void testShortSteps() throws SimulationExceededMaximumTimeException
+   public void testShortSteps(TestInfo testInfo) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      setupTest(flatGround);
+      setupTest(testInfo, flatGround);
+      setYoVariablesToDoToeOffInSS(0.0, 0.3, 0.1);
 
       walkForward(getStepLength(), getNumberOfSteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 
    private void setupTest(CommonAvatarEnvironmentInterface environment) throws SimulationExceededMaximumTimeException
+   private void setupTest(TestInfo testInfo, CommonAvatarEnvironmentInterface environment) throws SimulationExceededMaximumTimeException
    {
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName()+ " " + testInfo.getTestMethod().get().getName());
       drcSimulationTestHelper.setupCameraForUnitTest(new Point3D(0.6, 0.0, 0.6), new Point3D(10.0, 3.0, 3.0));
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
