@@ -1,4 +1,4 @@
-package us.ihmc.avatar.diagnostics;
+package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -6,10 +6,6 @@ import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
-import us.ihmc.wholeBodyController.diagnostics.OneDoFJointCheckUpDiagnosticTask;
-import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask.PelvisIMUCheckUpParameters;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticParallelTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.WaitDiagnosticTask;
