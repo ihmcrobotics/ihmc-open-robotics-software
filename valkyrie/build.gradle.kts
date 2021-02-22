@@ -66,6 +66,7 @@ tasks.getByPath("installDist").dependsOn("compositeJar")
 
 app.entrypoint("IHMCValkyrieJoystickApplication", "us.ihmc.valkyrie.joystick.ValkyrieJoystickBasedSteppingApplication")
 app.entrypoint("valkyrie-network-processor", "us.ihmc.valkyrie.ValkyrieNetworkProcessor")
+app.entrypoint("ValkyrieObstacleCourseNoUI", "us.ihmc.valkyrie.ValkyrieObstacleCourseNoUI")
 
 tasks.create("deployOCUApplications") {
    dependsOn("installDist")
@@ -95,6 +96,15 @@ tasks.create("deployLocal") {
       copy {
          from("build/install/valkyrie/lib")
          into(libFolder)
+      }
+
+      val binFolder = File(System.getProperty("user.home"), "valkyrie/bin")
+      binFolder.delete()
+      binFolder.mkdirs()
+      
+      copy {
+         from("build/install/valkyrie/bin")
+         into(binFolder)
       }
 
       copy {
