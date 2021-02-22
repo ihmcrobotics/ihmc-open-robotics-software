@@ -25,6 +25,8 @@ import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -44,7 +46,18 @@ public class RosTools
    public static final String L515_COLOR_CAMERA_INFO = "/camera/color/camera_info";
    public static final String L515_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = "/camera/depth/image_rect_raw";
+   public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
+
+   public static RosMainNode createRosNode(String uri, String name)
+   {
+      return createRosNode(ExceptionTools.handle(() -> new URI(uri), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), name);
+   }
+
+   public static RosMainNode createRosNode(URI uri, String name)
+   {
+      return new RosMainNode(uri, name);
+   }
 
    public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
    {
