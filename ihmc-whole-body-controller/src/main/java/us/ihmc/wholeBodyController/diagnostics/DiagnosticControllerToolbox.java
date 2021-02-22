@@ -2,10 +2,17 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
@@ -37,7 +44,12 @@ public class DiagnosticControllerToolbox
    private final Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
 
    private final double dt;
-   private final FullHumanoidRobotModel fullRobotModel;
+   private final RigidBodyBasics rootBody;
+   private final FloatingJointBasics rootJoint;
+   private final OneDoFJointBasics[] joints;
+   private final Map<String, OneDoFJointBasics> nameToJointMap;
+   private final IMUDefinition[] imuDefinitions;
+   private final ForceSensorDefinition[] forceSensorDefinitions;
    private final JointDesiredOutputList lowLevelOutput;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
@@ -48,12 +60,17 @@ public class DiagnosticControllerToolbox
                                       YoDouble yoTime,
                                       YoRegistry parentRegistry)
    {
-      this.fullRobotModel = fullRobotModel;
       this.lowLevelOutput = lowLevelOutput;
-      this.yoTime = yoTime;
-
       this.sensorOutputMap = sensorOutputMap;
       this.diagnosticParameters = diagnosticParameters;
+      this.yoTime = yoTime;
+
+      rootBody = fullRobotModel.getElevator();
+      rootJoint = fullRobotModel.getRootJoint();
+      joints = fullRobotModel.getOneDoFJoints();
+      nameToJointMap = Stream.of(joints).collect(Collectors.toMap(JointBasics::getName, Function.identity()));
+      imuDefinitions = fullRobotModel.getIMUDefinitions();
+      forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
       DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = diagnosticParameters.getOrCreateSensorProcessingConfiguration(null,
                                                                                                                                                       null);
@@ -71,9 +88,39 @@ public class DiagnosticControllerToolbox
       parentRegistry.addChild(registry);
    }
 
-   public FullHumanoidRobotModel getFullRobotModel()
+   public RigidBodyBasics getRootBody()
    {
-      return fullRobotModel;
+      return rootBody;
+   }
+
+   public FloatingJointBasics getRootJoint()
+   {
+      return rootJoint;
+   }
+
+   public OneDoFJointBasics[] getJoints()
+   {
+      return joints;
+   }
+
+   public OneDoFJointBasics getJoint(String jointName)
+   {
+      return nameToJointMap.get(jointName);
+   }
+
+   public List<OneDoFJointBasics> getJoints(String... jointNames)
+   {
+      return Stream.of(jointNames).map(this::getJoint).collect(Collectors.toList());
+   }
+
+   public IMUDefinition getIMUDefinition(String name)
+   {
+      return Stream.of(imuDefinitions).filter(d -> d.getName().equals(name)).findFirst().get();
+   }
+
+   public ForceSensorDefinition getForceSensorDefinition(String name)
+   {
+      return Stream.of(forceSensorDefinitions).filter(d -> d.getSensorName().equals(name)).findFirst().get();
    }
 
    public JointDesiredOutputList getLowLevelOutput()

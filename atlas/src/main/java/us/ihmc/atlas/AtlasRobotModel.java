@@ -949,6 +949,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public DiagnosticParameters getDiagnoticParameters()
    {
-      return new AtlasDiagnosticParameters(getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
+      return new AtlasDiagnosticParameters(getJointMap(), target == RobotTarget.REAL_ROBOT);
    }
 }

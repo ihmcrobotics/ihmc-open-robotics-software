@@ -18,7 +18,6 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
@@ -26,7 +25,6 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 {
    private final HumanoidJointNameMap jointMap;
-   private final HumanoidRobotSensorInformation sensorInformation;
    private final boolean runningOnRealRobot;
 
    private final boolean ignoreAllNeckJoints = true;
@@ -36,10 +34,9 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 
    private final ValkyrieDiagnosticSetpoints setpoints;
 
-   public ValkyrieDiagnosticParameters(ValkyrieJointMap jointMap, HumanoidRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
+   public ValkyrieDiagnosticParameters(ValkyrieJointMap jointMap, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
-      this.sensorInformation = sensorInformation;
       this.runningOnRealRobot = runningOnRealRobot;
       setpoints = new ValkyrieDiagnosticSetpoints(jointMap);
    }
@@ -205,11 +202,5 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
    public boolean doIdleControlUntilRobotIsAlive()
    {
       return true;
-   }
-
-   @Override
-   public String getPelvisIMUName()
-   {
-      return sensorInformation.getPrimaryBodyImu();
    }
 }

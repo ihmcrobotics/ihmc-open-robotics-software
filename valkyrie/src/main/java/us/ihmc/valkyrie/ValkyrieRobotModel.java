@@ -698,7 +698,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public DiagnosticParameters getDiagnoticParameters()
    {
-      return new ValkyrieDiagnosticParameters(getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
+      return new ValkyrieDiagnosticParameters(getJointMap(), target == RobotTarget.REAL_ROBOT);
    }
 
    @Override
