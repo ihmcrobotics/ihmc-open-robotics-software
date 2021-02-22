@@ -476,7 +476,7 @@ public class ContactPlaneJacobianCalculator
             columnStart += LinearMPCIndexHandler.coefficientsPerRho;
          }
 
-         rowStart += 3 * contactPointIdx;
+         rowStart += 3;
       }
    }
 }
