@@ -68,6 +68,11 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       return centerOfPressureDataHolder;
    }
 
+   public void setDesiredExternalWrenchData(DesiredExternalWrenchHolder desiredExternalWrenchHolder)
+   {
+      this.desiredExternalWrenchHolder.set(desiredExternalWrenchHolder);
+   }
+
    public DesiredExternalWrenchHolder getDesiredExternalWrenchData()
    {
       return desiredExternalWrenchHolder;
@@ -149,7 +154,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
          throw new RuntimeException("You used the deprecated constructor set is not supported in that case.");
 
       centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
-      desiredExternalWrenchHolder.set(desiredExternalWrenchHolder);
+      desiredExternalWrenchHolder.set(other.desiredExternalWrenchHolder);
       linearMomentumRate.setIncludingFrame(other.linearMomentumRate);
       rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
       lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
