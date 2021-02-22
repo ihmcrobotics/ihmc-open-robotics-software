@@ -4,7 +4,6 @@ import java.util.ArrayList;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.avatar.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.avatar.diagnostics.AutomatedDiagnosticSimulationFactory;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -12,6 +11,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 
 public class AtlasAutomatedDiagnosticSimulation
 {

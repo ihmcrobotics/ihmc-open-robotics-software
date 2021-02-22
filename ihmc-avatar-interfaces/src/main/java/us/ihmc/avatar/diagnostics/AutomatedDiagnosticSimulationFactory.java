@@ -49,6 +49,7 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSens
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
