@@ -67,6 +67,8 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
 
       header.setSeq(seq++);
 
+      message.setIsBigendian((byte) 0);
+      message.setStep(1280);
       message.setHeight(height);
       message.setWidth(width);
       message.setEncoding("16UC1");
