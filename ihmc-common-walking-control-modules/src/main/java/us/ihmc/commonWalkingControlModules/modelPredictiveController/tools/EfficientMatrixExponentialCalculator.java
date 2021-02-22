@@ -4,9 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
-import org.omg.PortableInterceptor.ACTIVE;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 
  public class EfficientMatrixExponentialCalculator
  {
@@ -45,7 +43,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
     private final DMatrixRMaj N_B = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj N_C = new DMatrixRMaj(0, 0);
 
-    private final DMatrixRMaj N_Ainverse = new DMatrixRMaj(0, 0);
+    private final DMatrixRMaj D_Ainverse = new DMatrixRMaj(0, 0);
 
     private final DMatrixRMaj D_A = new DMatrixRMaj(0, 0);
     private final DMatrixRMaj D_B = new DMatrixRMaj(0, 0);
@@ -111,7 +109,7 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        N_B.reshape(rows, Bcols);
        N_C.reshape(rows, Ccols);
 
-       N_Ainverse.reshape(rows, rows);
+       D_Ainverse.reshape(rows, rows);
 
        Ainternal.reshape(rows, rows);
        Binternal.reshape(rows, Bcols);
@@ -249,32 +247,31 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
        CommonOps_DDRM.multAdd(-1.0, As, V_C, D_C);
 
        // solve DF = N for F
-       solver.setA(N_A);
-       solver.invert(N_Ainverse);
+       solver.setA(D_A);
+       solver.invert(D_Ainverse);
 
-       CommonOps_DDRM.mult(N_Ainverse, D_A, Ad);
+       CommonOps_DDRM.mult(D_Ainverse, N_A, Ad);
 
        temp.reshape(rows, Bcols);
-       CommonOps_DDRM.subtract(D_B, N_B, temp);
-       CommonOps_DDRM.mult(N_Ainverse, temp, Bd);
+       CommonOps_DDRM.subtract(N_B, D_B, temp);
+       CommonOps_DDRM.mult(D_Ainverse, temp, Bd);
 
        temp.reshape(rows, Ccols);
-       CommonOps_DDRM.subtract(D_C, N_C, temp);
-       CommonOps_DDRM.mult(N_Ainverse, temp, Cd);
+       CommonOps_DDRM.subtract(N_C, D_C, temp);
+       CommonOps_DDRM.mult(D_Ainverse, temp, Cd);
 
        // now square j times
        for (int k = 0; k < j; k++)
        {
           temp.set(Ad);
+          CommonOps_DDRM.mult(temp, temp, Ad);
+
           tempBd.set(Bd);
           tempCd.set(Cd);
           MatrixTools.addDiagonal(temp, 1.0);
 
           CommonOps_DDRM.mult(temp, tempBd, Bd);
           CommonOps_DDRM.mult(temp, tempCd, Cd);
-
-          MatrixTools.addDiagonal(temp, -1.0);
-          CommonOps_DDRM.mult(temp, temp, Ad);
        }
     }
 
