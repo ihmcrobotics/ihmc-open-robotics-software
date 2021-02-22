@@ -117,7 +117,8 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
 
       SensorOutputMapReadOnly sensorOutputMap = createStateEstimator(fullRobotModel, stateEstimatorParameters, sensorProcessingConfiguration);
 
-      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel,
+      DiagnosticControllerToolbox diagnosticControllerToolbox = new DiagnosticControllerToolbox(fullRobotModel.getElevator(),
+                                                                                                fullRobotModel.getRootJoint(),
                                                                                                 lowLevelOutput,
                                                                                                 sensorOutputMap,
                                                                                                 diagnosticParameters,
