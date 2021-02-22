@@ -12,6 +12,7 @@ import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class ValkyrieAutomatedDiagnosticSimulation
 {
@@ -24,7 +25,8 @@ public class ValkyrieAutomatedDiagnosticSimulation
 
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
       automatedDiagnosticConfiguration.addJointCheckUps(ValkyrieDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));
-      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();
+      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic(DiagnosticParameters.defaultPelvisIMUCheckUp(robotModel.getSensorInformation(),
+                                                                                                                  robotModel.getJointMap()));
 
       simulationFactory.startSimulation();
    }

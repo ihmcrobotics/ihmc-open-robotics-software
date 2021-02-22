@@ -11,7 +11,6 @@ import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.controllers.ParameterizedPDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -64,7 +63,6 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       diagnosticTaskExecutor = new DiagnosticTaskExecutor("highLevelTaskExecutor", yoTime, registry);
 
-      FullHumanoidRobotModel fullRobotModel = toolbox.getFullRobotModel();
       JointDesiredOutputList lowLevelOutput = toolbox.getLowLevelOutput();
       DiagnosticParameters diagnosticParameters = toolbox.getDiagnosticParameters();
 
@@ -85,7 +83,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
          setupForLogging();
       }
 
-      for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
+      for (OneDoFJointBasics joint : toolbox.getJoints())
       {
          String jointName = joint.getName();
 

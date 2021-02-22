@@ -22,10 +22,11 @@ public class AtlasAutomatedDiagnosticSimulation
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
 
       simulationFactory.setRobotInitialSetup(0.2, 0.0);
-      
+
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
       automatedDiagnosticConfiguration.addJointCheckUps(AtlasDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));
-      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();
+      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic(AtlasDiagnosticParameters.defaultPelvisIMUCheckUp(robotModel.getSensorInformation(),
+                                                                                                                       robotModel.getJointMap()));
 
       simulationFactory.startSimulation();
    }

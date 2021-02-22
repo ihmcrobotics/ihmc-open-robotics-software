@@ -196,7 +196,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(toolbox, diagnosticController);
       automatedDiagnosticConfiguration.addWait(1.0);
       automatedDiagnosticConfiguration.addJointCheckUps(ValkyrieDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));
-      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic();
+      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic(DiagnosticParameters.defaultPelvisIMUCheckUp(robotModel.getSensorInformation(),
+                                                                                                                  robotModel.getJointMap()));
 
       yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
       yoVariableServer.start();

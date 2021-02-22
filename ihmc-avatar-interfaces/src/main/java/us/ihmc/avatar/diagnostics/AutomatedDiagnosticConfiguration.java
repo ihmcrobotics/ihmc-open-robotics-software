@@ -8,9 +8,9 @@ import java.util.List;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.wholeBodyController.diagnostics.OneDoFJointCheckUpDiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask;
+import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask.PelvisIMUCheckUpParameters;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticParallelTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.WaitDiagnosticTask;
 
@@ -39,7 +39,7 @@ public class AutomatedDiagnosticConfiguration
     */
    public void addSingleJointCheckUp(String jointName)
    {
-      OneDoFJointBasics joint = toolbox.getFullRobotModel().getOneDoFJointByName(jointName);
+      OneDoFJointBasics joint = toolbox.getJoint(jointName);
       OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(joint, toolbox);
 
       if (enableLogging)
@@ -69,7 +69,7 @@ public class AutomatedDiagnosticConfiguration
 
       for (String jointName : jointNames)
       {
-         OneDoFJointBasics joint = toolbox.getFullRobotModel().getOneDoFJointByName(jointName);
+         OneDoFJointBasics joint = toolbox.getJoint(jointName);
 
          OneDoFJointCheckUpDiagnosticTask checkUp = new OneDoFJointCheckUpDiagnosticTask(joint, toolbox);
          if (enableLogging)
@@ -101,17 +101,9 @@ public class AutomatedDiagnosticConfiguration
       }
    }
 
-   public void addPelvisIMUCheckUpDiagnostic()
+   public void addPelvisIMUCheckUpDiagnostic(PelvisIMUCheckUpParameters checkUpParameters)
    {
-      DiagnosticParameters diagnosticParameters = toolbox.getDiagnosticParameters();
-      String pelvisIMUName = diagnosticParameters.getPelvisIMUName();
-      if (pelvisIMUName == null || pelvisIMUName.isEmpty())
-      {
-         System.err.println(getClass().getSimpleName() + ": Cannot create the pelvis IMU check up diagnostic without a pelvisIMUName to look for.");
-         return;
-      }
-
-      PelvisIMUCheckUpDiagnosticTask checkUp = new PelvisIMUCheckUpDiagnosticTask(pelvisIMUName, toolbox);
+      PelvisIMUCheckUpDiagnosticTask checkUp = new PelvisIMUCheckUpDiagnosticTask(checkUpParameters, toolbox);
       if (enableLogging)
          checkUp.setupForLogging();
       diagnosticController.submitDiagnostic(checkUp);

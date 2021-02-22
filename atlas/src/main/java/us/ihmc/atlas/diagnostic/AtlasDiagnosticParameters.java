@@ -18,22 +18,19 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class AtlasDiagnosticParameters extends DiagnosticParameters
 {
    private final AtlasJointMap jointMap;
-   private final String pelvisIMUName;
    private final boolean runningOnRealRobot;
 
    private final AtlasDiagnosticSetpoints setpoints;
 
-   public AtlasDiagnosticParameters(AtlasJointMap jointMap, HumanoidRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
+   public AtlasDiagnosticParameters(AtlasJointMap jointMap, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
-      pelvisIMUName = sensorInformation.getPrimaryBodyImu();
       setpoints = new AtlasDiagnosticSetpoints(jointMap);
    }
 
@@ -57,12 +54,6 @@ public class AtlasDiagnosticParameters extends DiagnosticParameters
       jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.WRIST_ROLL));
       jointNames.add(AtlasHighLevelControllerParameters.getLeftAndRightJointNames(jointMap, ArmJointName.SECOND_WRIST_PITCH));
       return jointNames;
-   }
-
-   @Override
-   public String getPelvisIMUName()
-   {
-      return pelvisIMUName;
    }
 
    @Override

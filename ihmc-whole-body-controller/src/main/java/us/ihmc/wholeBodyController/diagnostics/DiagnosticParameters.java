@@ -5,12 +5,34 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.robotics.partNames.LegJointName;
+import us.ihmc.robotics.partNames.SpineJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.SensorProcessingConfiguration;
+import us.ihmc.wholeBodyController.diagnostics.PelvisIMUCheckUpDiagnosticTask.PelvisIMUCheckUpParameters;
 
 public abstract class DiagnosticParameters
 {
+   public static PelvisIMUCheckUpParameters defaultPelvisIMUCheckUp(HumanoidRobotSensorInformation sensorInformation, HumanoidJointNameMap jointMap)
+   {
+      PelvisIMUCheckUpParameters parameters = new PelvisIMUCheckUpParameters();
+      parameters.setPelvisIMUName(sensorInformation.getPrimaryBodyImu());
+      parameters.setSpineJointNames(jointMap.getSpineJointName(SpineJointName.SPINE_YAW),
+                                    jointMap.getSpineJointName(SpineJointName.SPINE_PITCH),
+                                    jointMap.getSpineJointName(SpineJointName.SPINE_ROLL));
+      parameters.setLeftHipJointNames(jointMap.getLegJointName(RobotSide.LEFT, LegJointName.HIP_YAW),
+                                      jointMap.getLegJointName(RobotSide.LEFT, LegJointName.HIP_PITCH),
+                                      jointMap.getLegJointName(RobotSide.LEFT, LegJointName.HIP_ROLL));
+      parameters.setRightHipJointNames(jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.HIP_YAW),
+                                       jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.HIP_PITCH),
+                                       jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.HIP_ROLL));
+      return parameters;
+   }
+
    private DiagnosticSensorProcessingConfiguration sensorProcessingConfiguration = null;
 
    public DiagnosticParameters()
@@ -129,11 +151,6 @@ public abstract class DiagnosticParameters
    public double getGoodDelay()
    {
       return 0.01;
-   }
-
-   public String getPelvisIMUName()
-   {
-      return null;
    }
 
    public boolean doIdleControlUntilRobotIsAlive()
