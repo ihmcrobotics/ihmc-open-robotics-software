@@ -174,7 +174,7 @@ public class SE3ModelPredictiveControllerTest
 
 //      assertCoefficientsEqual(expectedSolutionMatrix, mpc.trajectoryHandler);
 
-      visualize(mpc, contactProviders, duration);
+      visualize(mpc, contactProviders, duration, testRegistry);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredVRPPosition(), epsilon);
@@ -383,7 +383,7 @@ public class SE3ModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoMPosition, mpc.getDesiredVRPPosition(), epsilon);
 //      EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
 
-      visualize(mpc, contactProviders, duration);
+      visualize(mpc, contactProviders, duration, testRegistry);
    }
 
    @Test
@@ -569,7 +569,7 @@ public class SE3ModelPredictiveControllerTest
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
       }
 
-      visualize(mpc, contactProviders, duration);
+      visualize(mpc, contactProviders, duration, testRegistry);
 
 
       Random random = new Random(1738L);
@@ -765,6 +765,7 @@ public class SE3ModelPredictiveControllerTest
 //      assertEquals(omega, dcmPositionCommands.get(0).getOmega(), epsilon);
 //      EuclidCoreTestTools.assertTuple3DEquals(finalDCM, dcmPositionCommands.get(0).getObjective(), epsilon);
 
+      visualize(mpc, contactProviders, 2 * duration, testRegistry);
 
       assertEquals(previewWindowLength.getDoubleValue() - duration, vrpPositionCommands.get(0).getTimeOfObjective(), epsilon);
       assertEquals(omega, vrpPositionCommands.get(0).getOmega(), epsilon);
@@ -809,7 +810,6 @@ public class SE3ModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(comVelocityEndOfPreview, comVelocityEndOfPreviewAfter, 2e-3);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(vrpPositionEndOfPreview, vrpPositionEndOfPreviewAfter, 6e-3);
 
-      visualize(mpc, contactProviders, duration);
    }
 
    @Test
@@ -944,13 +944,14 @@ public class SE3ModelPredictiveControllerTest
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
    }
 
-   private static void visualize(SE3ModelPredictiveController mpc, List<ContactPlaneProvider> contacts, double duration)
+   private static void visualize(SE3ModelPredictiveController mpc, List<ContactPlaneProvider> contacts, double duration, YoRegistry controllerRegistry)
    {
       if (!visualize || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          return;
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
       YoRegistry registry = scs.getRootRegistry();
+      registry.addChild(controllerRegistry);
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       SE3MPCVisualizer mpcVisualizer = new SE3MPCVisualizer(mpc, scs, registry, graphicsListRegistry);

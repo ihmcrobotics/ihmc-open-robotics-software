@@ -6,6 +6,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -220,6 +221,31 @@ public class MatrixMissingTools
       skewSymmetricToPack.set(2, 0, -y);
       skewSymmetricToPack.set(2, 1, x);
       skewSymmetricToPack.set(2, 2, 0.0);
+   }
+
+   public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, Matrix3DBasics skewSymmetricToPack)
+   {
+      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack);
+   }
+
+   public static void toSkewSymmetricMatrix(DMatrix1Row vector, Matrix3DBasics skewSymmetricToPack)
+   {
+      toSkewSymmetricMatrix(vector.get(0), vector.get(1), vector.get(2), skewSymmetricToPack);
+   }
+
+   public static void toSkewSymmetricMatrix(double x, double y, double z, Matrix3DBasics skewSymmetricToPack)
+   {
+      skewSymmetricToPack.setM00(0.0);
+      skewSymmetricToPack.setM01(-z);
+      skewSymmetricToPack.setM02(y);
+
+      skewSymmetricToPack.setM10(z);
+      skewSymmetricToPack.setM11(0.0);
+      skewSymmetricToPack.setM12(-x);
+
+      skewSymmetricToPack.setM20(-y);
+      skewSymmetricToPack.setM21(x);
+      skewSymmetricToPack.setM22(0.0);
    }
 
    public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)

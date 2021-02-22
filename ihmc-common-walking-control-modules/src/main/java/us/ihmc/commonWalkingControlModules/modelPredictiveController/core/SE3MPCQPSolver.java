@@ -64,8 +64,13 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
             {
                solverInput_H.add(var + i, var + i, 1e-2);
             }
-
          }
+      }
+
+      int lastTickStart = indexHandler.getOrientationTickStartIndex(indexHandler.getTotalNumberOfOrientationTicks() - 1);
+      for (int i = 0; i < 3; i++)
+      {
+         solverInput_H.add(lastTickStart + i, lastTickStart + i, 1e1);
       }
    }
 

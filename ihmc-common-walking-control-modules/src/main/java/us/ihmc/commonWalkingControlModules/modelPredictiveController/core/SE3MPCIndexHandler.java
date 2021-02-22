@@ -13,12 +13,11 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 
    private static final double nominalOrientationDt = 0.01;
 
+   private int totalNumberOfOrientationTicks = 0;
    private final TIntArrayList orientationStartIndices = new TIntArrayList();
    private final TDoubleArrayList orientationTickDuration = new TDoubleArrayList();
    private final TIntArrayList orientationTicksInSegment = new TIntArrayList();
    private final TIntArrayList orientationTickStartIndex = new TIntArrayList();
-
-   protected final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
 
    public SE3MPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
@@ -37,12 +36,15 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       orientationTicksInSegment.clear();
       orientationTickStartIndex.clear();
 
+      totalNumberOfOrientationTicks = 0;
       double remainingOrientationWindowDuration = orientationWindowDuration;
       for (int i = 0; i < previewWindowContactSequence.size(); i++)
       {
          double segmentDuration = Math.min(previewWindowContactSequence.get(i).getTimeInterval().getDuration(), remainingOrientationWindowDuration);
          int ticksInSegment = (int) Math.floor(previewWindowContactSequence.get(i).getTimeInterval().getDuration() / nominalOrientationDt);
          double tickDuration = segmentDuration / ticksInSegment;
+
+         totalNumberOfOrientationTicks += ticksInSegment;
 
          int orientationIndex = rhoStartIndices.get(i) + rhoCoefficientsInSegment.get(i);
          orientationStartIndices.add(orientationIndex);
@@ -66,6 +68,11 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
          totalProblemSize += orientationCoefficientsInSegment;
          remainingOrientationWindowDuration -= segmentDuration;
       }
+   }
+
+   public int getTotalNumberOfOrientationTicks()
+   {
+      return totalNumberOfOrientationTicks;
    }
 
    public int getOrientationStartIndices(int segment)

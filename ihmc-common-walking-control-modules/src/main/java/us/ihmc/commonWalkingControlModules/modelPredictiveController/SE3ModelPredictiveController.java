@@ -89,6 +89,7 @@ public class SE3ModelPredictiveController
    private final FixedFramePoint3DBasics desiredECMPPosition = new FramePoint3D(worldFrame);
 
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
+   private final FrameOrientation3DBasics desiredBodyOrientationFeedForward = new FrameQuaternion(worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
@@ -798,11 +799,17 @@ public class SE3ModelPredictiveController
       vrpVelocityToPack.setMatchingFrame(positionTrajectoryHandler.getDesiredVRPVelocity());
 
       desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
+      desiredBodyOrientationFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview());
 
       ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
       double nominalHeight = gravityZ / MathTools.square(omega.getValue());
       ecmpPositionToPack.set(desiredVRPPosition);
       ecmpPositionToPack.subZ(nominalHeight);
+   }
+
+   public int getCurrentSegmentIndex()
+   {
+      return positionTrajectoryHandler.getComTrajectory().getCurrentSegmentIndex();
    }
 
    public void setInitialCenterOfMassState(FramePoint3DReadOnly centerOfMassPosition, FrameVector3DReadOnly centerOfMassVelocity)
@@ -889,9 +896,14 @@ public class SE3ModelPredictiveController
       return desiredECMPPosition;
    }
 
-   public FrameOrientation3DReadOnly getDesiredBodyOrientation()
+   public FrameOrientation3DReadOnly getDesiredBodyOrientationSolution()
    {
       return desiredBodyOrientation;
+   }
+
+   public FrameOrientation3DReadOnly getDesiredFeedForwardBodyOrientation()
+   {
+      return desiredBodyOrientationFeedForward;
    }
 
    public List<? extends Polynomial3DReadOnly> getVRPTrajectories()

@@ -217,6 +217,7 @@ public class OrientationMPCTrajectoryHandler
    public void compute(double timeInPhase)
    {
       orientationTrajectory.compute(timeInPhase);
+      orientationInitializationCalculator.compute(timeInPhase);
       internalAngularMomentumTrajectory.compute(timeInPhase);
    }
 

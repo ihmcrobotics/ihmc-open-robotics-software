@@ -357,6 +357,14 @@ public class MPCContactPlane
       }
    }
 
+   public void clearViz()
+   {
+      for (MPCContactPoint contactPoint : contactPoints)
+      {
+         contactPoint.clearViz();
+      }
+   }
+
    @Override
    public boolean equals(Object object)
    {
