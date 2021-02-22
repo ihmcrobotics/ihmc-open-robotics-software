@@ -232,6 +232,11 @@ public class GDXLowLevelDepthSensorSimulator
       return depthFloatBuffer;
    }
 
+   public float getMaxRange()
+   {
+      return maxRange;
+   }
+
    public RecyclingArrayList<Point3D32> getPoints()
    {
       return points;
