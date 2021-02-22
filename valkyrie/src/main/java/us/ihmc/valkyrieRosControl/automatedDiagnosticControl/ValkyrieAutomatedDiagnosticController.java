@@ -185,7 +185,8 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
       /*
        * Create diagnostic controller
        */
-      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel,
+      DiagnosticControllerToolbox toolbox = new DiagnosticControllerToolbox(fullRobotModel.getElevator(),
+                                                                            fullRobotModel.getRootJoint(),
                                                                             estimatorDesiredJointDataHolder,
                                                                             processedSensorOutputMap,
                                                                             diagnosticParameters,

@@ -22,7 +22,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGenerator;
 import us.ihmc.robotics.math.functionGenerator.YoFunctionGeneratorMode;
-import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.sensorProcessing.diagnostic.DelayEstimatorBetweenTwoSignals;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
@@ -40,7 +39,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    private final YoRegistry registry;
 
-   private final IMUDefinition imuDefinition;
+   private final String imuName;
    private final IMUSensorReadOnly imuSensor;
 
    private final EnumMap<Axis3D, List<OneDoFJointSensorValidityChecker>> jointValidityCheckers = new EnumMap<>(Axis3D.class);
@@ -177,16 +176,16 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
 
    public PelvisIMUCheckUpDiagnosticTask(PelvisIMUCheckUpParameters checkUpParameters, DiagnosticControllerToolbox toolbox)
    {
-      IMUDefinition imuToCheck = toolbox.getIMUDefinition(checkUpParameters.getPelvisIMUName());
       RigidBodyBasics pelvis = toolbox.getRootJoint().getSuccessor();
-      if (imuToCheck.getRigidBody() != pelvis)
-         throw new RuntimeException("The IMU: " + imuToCheck.getName() + " is not attached to the pelvis, cannot create check up diagnostic for it.");
 
-      this.imuDefinition = imuToCheck;
-      String imuName = imuDefinition.getName();
       String nameSuffix = "CheckUp";
-
+      imuName = checkUpParameters.getPelvisIMUName();
       imuSensor = toolbox.getIMUSensorReadOnly(imuName);
+
+      Objects.requireNonNull(imuSensor, "Could not find IMU sensor from name: " + imuName);
+
+      if (imuSensor.getMeasurementLink() != pelvis)
+         throw new RuntimeException("The IMU: " + imuName + " is not attached to the pelvis, cannot create check up diagnostic for it.");
 
       registry = new YoRegistry(imuName + nameSuffix);
       diagnosticParameters = toolbox.getDiagnosticParameters();
@@ -301,7 +300,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    public void doTransitionIntoAction()
    {
       if (logger != null)
-         logger.info("Starting check up for the IMU: " + imuDefinition.getName());
+         logger.info("Starting check up for the IMU: " + imuName);
 
       for (Axis3D axis : Axis3D.values)
          ramps.get(axis).set(0.0);
@@ -480,7 +479,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
    public void doTransitionOutOfAction()
    {
       if (logger != null)
-         logger.info("Done with check up for the IMU: " + imuDefinition.getName());
+         logger.info("Done with check up for the IMU: " + imuName);
 
       for (Axis3D axis : Axis3D.values)
          ramps.get(axis).set(0.0);
@@ -507,7 +506,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityToOrientationQualityMeanFormatted = doubleFormat.format(velocityToOrientationQualityMean.getDoubleValue());
       String velocityToOrientationQualityStandardDeviationFormatted = doubleFormat.format(velocityToOrientationQualityStandardDeviation.getDoubleValue());
       logger.log(logLevel,
-                 "Velocity (qd_w" + axis + ") signal quality against orientation for the IMU: " + imuDefinition.getName() + " equals "
+                 "Velocity (qd_w" + axis + ") signal quality against orientation for the IMU: " + imuName + " equals "
                        + velocityToOrientationQualityMeanFormatted + " second (+/-" + velocityToOrientationQualityStandardDeviationFormatted
                        + "). Note: 0 means orientation and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
@@ -521,8 +520,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityToOrientationDelayMeanFormatted = doubleFormat.format(velocityToOrientationDelayMean.getDoubleValue());
       String velocityToOrientationDelayStandardDeviationFormatted = doubleFormat.format(velocityToOrientationDelayStandardDeviation.getDoubleValue());
       logger.log(logLevel,
-                 "Estimated velocity (qd_w" + axis + ") delay w.r.t. orientation for the IMU: " + imuDefinition.getName() + " equals "
-                       + velocityToOrientationDelayMeanFormatted + " second (+/-" + velocityToOrientationDelayStandardDeviationFormatted + ").");
+                 "Estimated velocity (qd_w" + axis + ") delay w.r.t. orientation for the IMU: " + imuName + " equals " + velocityToOrientationDelayMeanFormatted
+                       + " second (+/-" + velocityToOrientationDelayStandardDeviationFormatted + ").");
 
       ///////////////////////////////////////////////////////////////////////
       //// Report results of comparing the IMU against the joint sensors ////
@@ -538,8 +537,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityIMUVsJointQualityMeanFormatted = doubleFormat.format(velocityIMUVsJointQualityMean.getDoubleValue());
       String velocityIMUVsJointQualityStandardDeviationFormatted = doubleFormat.format(velocityIMUVsJointQualityStandardDeviation.getDoubleValue());
       logger.log(logLevel,
-                 "IMU Velocity (qd_w" + axis + ") signal quality against joint velocity: " + imuDefinition.getName() + " equals "
-                       + velocityIMUVsJointQualityMeanFormatted + " second (+/-" + velocityIMUVsJointQualityStandardDeviationFormatted
+                 "IMU Velocity (qd_w" + axis + ") signal quality against joint velocity: " + imuName + " equals " + velocityIMUVsJointQualityMeanFormatted
+                       + " second (+/-" + velocityIMUVsJointQualityStandardDeviationFormatted
                        + "). Note: 0 means orientation and velocity are completely inconsistent, and 1 they're perfectly matching.");
 
       if (velocityIMUVsJointDelayMean.getDoubleValue() > diagnosticParameters.getBadDelay())
@@ -552,8 +551,8 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       String velocityIMUVsJointDelayMeanFormatted = doubleFormat.format(velocityIMUVsJointDelayMean.getDoubleValue());
       String velocityIMUVsJointDelayStandardDeviationFormatted = doubleFormat.format(velocityIMUVsJointDelayStandardDeviation.getDoubleValue());
       logger.log(logLevel,
-                 "Estimated IMU velocity (qd_w" + axis + ") delay w.r.t. joint velocity: " + imuDefinition.getName() + " equals "
-                       + velocityIMUVsJointDelayMeanFormatted + " second (+/-" + velocityIMUVsJointDelayStandardDeviationFormatted + ").");
+                 "Estimated IMU velocity (qd_w" + axis + ") delay w.r.t. joint velocity: " + imuName + " equals " + velocityIMUVsJointDelayMeanFormatted
+                       + " second (+/-" + velocityIMUVsJointDelayStandardDeviationFormatted + ").");
    }
 
    @Override
@@ -563,7 +562,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
       {
          disableEstimators(null);
          if (logger != null)
-            logger.severe(imuDefinition.getName() + " IMU sensor can't be trusted, skipping to the next diagnostic task.");
+            logger.severe(imuName + " IMU sensor can't be trusted, skipping to the next diagnostic task.");
          return true;
       }
 
@@ -576,7 +575,7 @@ public class PelvisIMUCheckUpDiagnosticTask extends DiagnosticTask
             {
                disableEstimators(null);
                if (logger != null)
-                  logger.severe(imuDefinition.getName() + " IMU sensor can't be trusted, skipping to the next diagnostic task.");
+                  logger.severe(jointsToWiggleLists.get(currentAxis).get(i).getName() + " sensors can't be trusted, skipping to the next diagnostic task.");
                return true;
             }
          }
