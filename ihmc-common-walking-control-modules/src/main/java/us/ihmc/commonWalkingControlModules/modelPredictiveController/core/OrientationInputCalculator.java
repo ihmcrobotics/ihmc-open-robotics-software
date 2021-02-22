@@ -14,13 +14,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 
 public class OrientationInputCalculator
 {
    private final FrameVector3D desiredBodyAngularMomentum = new FrameVector3D();
    private final DMatrixRMaj desiredBodyAngularMomentumVector = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj desireInternalAngularMomentumRate = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj desiredInternalAngularMomentumRate = new DMatrixRMaj(3, 1);
 
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewGravity = new DMatrixRMaj(3, 3);
@@ -116,8 +115,9 @@ public class OrientationInputCalculator
       comVelocityJacobian.reshape(3, indexHandler.getTotalProblemSize());
       originTorqueJacobian.reshape(3, indexHandler.getTotalProblemSize());
 
-      contactForceJacobian.reshape(3 * totalContactPoints, indexHandler.getTotalProblemSize());
-      contactForceToOriginTorqueJacobian.reshape(3, 3 * totalContactPoints);
+      int contactForceVectorSize = 3 * totalContactPoints;
+      contactForceJacobian.reshape(contactForceVectorSize, indexHandler.getTotalProblemSize());
+      contactForceToOriginTorqueJacobian.reshape(3, contactForceVectorSize);
 
       comPositionJacobian.zero();
       comVelocityJacobian.zero();
@@ -133,6 +133,10 @@ public class OrientationInputCalculator
       A.zero();
       B.zero();
       C.zero();
+
+      Ad.zero();
+      Bd.zero();
+      Cd.zero();
    }
 
    private void getAllTheTermsFromTheCommandInput(DiscreteOrientationCommand command)
@@ -153,7 +157,7 @@ public class OrientationInputCalculator
 
       UnrolledInverseFromMinor_DDRM.inv3(inertiaMatrixInBody, inverseInertia, 1.0);
 
-      command.getDesiredInternalAngularMomentumRate().get(desireInternalAngularMomentumRate);
+      command.getDesiredInternalAngularMomentumRate().get(desiredInternalAngularMomentumRate);
    }
 
    private void calculateStateJacobians(DiscreteOrientationCommand command)
@@ -229,7 +233,7 @@ public class OrientationInputCalculator
       MatrixTools.multAddBlock(-mass, skewGravity, comPositionJacobian, B, 3, 0);
       MatrixTools.multAddBlock(contactForceToOriginTorqueJacobian, contactForceJacobian, B, 3, 0);
 
-      MatrixTools.setMatrixBlock(C, 3, 0, desireInternalAngularMomentumRate, 0, 0, 3, 1, -1.0);
+      MatrixTools.setMatrixBlock(C, 3, 0, desiredInternalAngularMomentumRate, 0, 0, 3, 1, -1.0);
       MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, a1, gravityVector, C, 0, 0);
       MatrixTools.multAddBlock(timeOfConstraint, a2, gravityVector, C, 0, 0);
 
@@ -260,6 +264,5 @@ public class OrientationInputCalculator
       CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()), identity, 0, 0, 6, 6, 1.0);
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId() - 1), Ad, 0, 0, 6, 6, -1.0);
-
    }
 }
