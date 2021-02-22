@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
-import javafx.geometry.Side;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,6 +24,7 @@ public class SE3MPCVisualizer
    private final YoFramePoint3D desiredDCM;
    private final YoFramePoint3D desiredCoM;
    private final YoFrameYawPitchRoll desiredBodyOrientation;
+   private final YoFrameYawPitchRoll desiredBodyOrientationFeedForward;
    private final YoFramePoseUsingYawPitchRoll desiredBodyPose;
 
    private final YoFrameVector3D desiredCoMVelocity;
@@ -48,6 +47,7 @@ public class SE3MPCVisualizer
       desiredCoMVelocity = new YoFrameVector3D("DesiredCoMVelocityVis", ReferenceFrame.getWorldFrame(), registry);
 
       desiredBodyOrientation = new YoFrameYawPitchRoll("DesiredBodyOrientation", ReferenceFrame.getWorldFrame(), registry);
+      desiredBodyOrientationFeedForward = new YoFrameYawPitchRoll("DesiredBodyOrientationFeedForward", ReferenceFrame.getWorldFrame(), registry);
 
       desiredBodyPose = new YoFramePoseUsingYawPitchRoll(desiredCoM, desiredBodyOrientation);
 
@@ -84,10 +84,17 @@ public class SE3MPCVisualizer
       for (double time = 0.0; time <= duration; time += 0.005)
       {
          mpc.compute(time);
-         int currentSegment = 0;
-         for (int i = 0; i < mpc.contactPlaneHelperPool.get(currentSegment).size(); i++)
+         int currentSegment = mpc.getCurrentSegmentIndex();
+
+         for (int i = 0; i < currentSegment; i++)
          {
-            mpc.contactPlaneHelperPool.get(currentSegment).get(i).computeContactForce(3.0, time);
+            for (int j = 0; j < mpc.contactPlaneHelperPool.get(i).size(); j++)
+               mpc.contactPlaneHelperPool.get(i).get(j).clearViz();
+         }
+         if (currentSegment < mpc.contactPlaneHelperPool.size())
+         {
+            for (int i = 0; i < mpc.contactPlaneHelperPool.get(currentSegment).size(); i++)
+               mpc.contactPlaneHelperPool.get(currentSegment).get(i).computeContactForce(3.0, time);
          }
 
 
@@ -97,7 +104,8 @@ public class SE3MPCVisualizer
 
          desiredCoMVelocity.setMatchingFrame(mpc.getDesiredCoMVelocity());
 
-         desiredBodyOrientation.setMatchingFrame(mpc.getDesiredBodyOrientation());
+         desiredBodyOrientation.setMatchingFrame(mpc.getDesiredBodyOrientationSolution());
+         desiredBodyOrientationFeedForward.setMatchingFrame(mpc.getDesiredFeedForwardBodyOrientation());
 
          scs.setTime(time);
          scs.tickAndUpdate();
