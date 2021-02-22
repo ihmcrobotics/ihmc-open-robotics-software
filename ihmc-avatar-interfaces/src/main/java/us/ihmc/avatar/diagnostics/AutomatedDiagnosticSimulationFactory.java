@@ -49,7 +49,6 @@ import us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation.ForceSens
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
-import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticControllerToolbox;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticSensorProcessingConfiguration;
@@ -72,7 +71,6 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
    private final Point3D scsCameraPosition = new Point3D(0.0, -8.0, 1.8);
    private final Point3D scsCameraFix = new Point3D(0.0, 0.0, 1.35);
 
-   private AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration;
    private HumanoidFloatingRootJointRobot simulatedRobot;
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private StateEstimatorController stateEstimator;
@@ -96,7 +94,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
       scs.startOnAThread();
    }
 
-   public AutomatedDiagnosticConfiguration createDiagnosticController(boolean startWithRobotAlive)
+   public void createDiagnosticController(boolean startWithRobotAlive)
    {
       simulatedRobot = robotModel.createHumanoidFloatingRootJointRobot(false);
       DiagnosticLoggerConfiguration.setupLogging(simulatedRobot.getYoTime(), getClass(), robotModel.getSimpleRobotName());
@@ -127,15 +125,12 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                                                                 simulationRegistry);
       automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox);
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
-      automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 
       lowLevelOutputWriter = new SimulatedLowLevelOutputWriter(simulatedRobot, false);
       lowLevelOutputWriter.setJointDesiredOutputList(lowLevelOutput);
 
       int simulationTicksPerControlTick = (int) (robotModel.getEstimatorDT() / robotModel.getSimulateDT());
       simulatedRobot.setController(this, simulationTicksPerControlTick);
-
-      return automatedDiagnosticConfiguration;
    }
 
    private SensorOutputMapReadOnly createStateEstimator(FullHumanoidRobotModel fullRobotModel, StateEstimatorParameters stateEstimatorParameters,

@@ -106,6 +106,9 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       }
 
       toolbox.getRegistry().addChild(registry);
+
+      AutomatedDiagnosticConfiguration configuration = new AutomatedDiagnosticConfiguration(toolbox, this);
+      toolbox.getDiagnosticParameters().scheduleCheckUps(configuration);
    }
 
    public void setRobotIsAlive(boolean isAlive)

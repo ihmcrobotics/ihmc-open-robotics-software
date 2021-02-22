@@ -51,6 +51,8 @@ public abstract class DiagnosticParameters
       return this.sensorProcessingConfiguration;
    }
 
+   public abstract void scheduleCheckUps(AutomatedDiagnosticConfiguration configuration);
+
    public abstract List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviors();
 
    public abstract WholeBodySetpointParameters getDiagnosticSetpoints();

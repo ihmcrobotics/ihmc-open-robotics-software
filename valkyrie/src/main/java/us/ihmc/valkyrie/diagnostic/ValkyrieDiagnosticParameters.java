@@ -18,13 +18,16 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 {
    private final HumanoidJointNameMap jointMap;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final boolean runningOnRealRobot;
 
    private final boolean ignoreAllNeckJoints = true;
@@ -34,11 +37,20 @@ public class ValkyrieDiagnosticParameters extends DiagnosticParameters
 
    private final ValkyrieDiagnosticSetpoints setpoints;
 
-   public ValkyrieDiagnosticParameters(ValkyrieJointMap jointMap, boolean runningOnRealRobot)
+   public ValkyrieDiagnosticParameters(ValkyrieJointMap jointMap, HumanoidRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
       this.runningOnRealRobot = runningOnRealRobot;
       setpoints = new ValkyrieDiagnosticSetpoints(jointMap);
+   }
+
+   @Override
+   public void scheduleCheckUps(AutomatedDiagnosticConfiguration configuration)
+   {
+      configuration.addWait(1.0);
+      configuration.addJointCheckUps(defaultJointCheckUpConfiguration(jointMap));
+      configuration.addPelvisIMUCheckUpDiagnostic(DiagnosticParameters.defaultPelvisIMUCheckUp(sensorInformation, jointMap));
    }
 
    public static List<List<String>> defaultJointCheckUpConfiguration(HumanoidJointNameMap jointMap)

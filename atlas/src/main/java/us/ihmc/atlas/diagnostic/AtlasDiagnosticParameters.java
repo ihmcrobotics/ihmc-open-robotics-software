@@ -18,20 +18,32 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class AtlasDiagnosticParameters extends DiagnosticParameters
 {
    private final AtlasJointMap jointMap;
+   private final HumanoidRobotSensorInformation sensorInformation;
    private final boolean runningOnRealRobot;
 
    private final AtlasDiagnosticSetpoints setpoints;
 
-   public AtlasDiagnosticParameters(AtlasJointMap jointMap, boolean runningOnRealRobot)
+   public AtlasDiagnosticParameters(AtlasJointMap jointMap, HumanoidRobotSensorInformation sensorInformation, boolean runningOnRealRobot)
    {
       this.jointMap = jointMap;
+      this.sensorInformation = sensorInformation;
       this.runningOnRealRobot = runningOnRealRobot;
       setpoints = new AtlasDiagnosticSetpoints(jointMap);
+   }
+
+   @Override
+   public void scheduleCheckUps(AutomatedDiagnosticConfiguration configuration)
+   {
+      configuration.addWait(1.0);
+      configuration.addJointCheckUps(AtlasDiagnosticParameters.defaultJointCheckUpConfiguration(jointMap));
+      configuration.addPelvisIMUCheckUpDiagnostic(DiagnosticParameters.defaultPelvisIMUCheckUp(sensorInformation, jointMap));
    }
 
    public static List<List<String>> defaultJointCheckUpConfiguration(HumanoidJointNameMap jointMap)
