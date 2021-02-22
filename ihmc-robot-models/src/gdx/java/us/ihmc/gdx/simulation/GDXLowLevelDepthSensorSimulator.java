@@ -50,8 +50,9 @@ public class GDXLowLevelDepthSensorSimulator
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
 
-   private ByteBuffer depthByteBuffer;
-   private FloatBuffer depthFloatBuffer;
+   private ByteBuffer rawDepthByteBuffer;
+   private FloatBuffer rawDepthFloatBuffer;
+   private FloatBuffer eyeDepthMetersBuffer;
 
    private boolean depthWindowEnabledOptimization = true;
 
@@ -78,8 +79,10 @@ public class GDXLowLevelDepthSensorSimulator
       frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT32F, GL30.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
 
-      depthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
-      depthFloatBuffer = depthByteBuffer.asFloatBuffer();
+      rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
+
+      eyeDepthMetersBuffer = BufferUtils.newFloatBuffer(imageWidth * imageHeight);
 
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
@@ -105,35 +108,45 @@ public class GDXLowLevelDepthSensorSimulator
       modelBatch.end();
 
       Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
-      depthByteBuffer.rewind();
-      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, depthByteBuffer);
+      rawDepthByteBuffer.rewind();
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, rawDepthByteBuffer);
 
       frameBuffer.end();
 
       points.clear();
       colors.clear();
 
-      depthFloatBuffer.rewind();
+      float twoXCameraFarNear = 2.0f * camera.near * camera.far;
+      float farPlusNear = camera.far + camera.near;
+      float farMinusNear = camera.far - camera.near;
+      rawDepthFloatBuffer.rewind();
+      eyeDepthMetersBuffer.rewind();
       for (int y = 0; y < imageHeight; y++)
       {
          for (int x = 0; x < imageWidth; x++)
          {
-            float depthReading = depthFloatBuffer.get();
+            float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
+
+            // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
+            // https://stackoverflow.com/a/45710371/1070333
+            float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
+            float eyeDepth = twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear); // in meters
+            eyeDepthMetersBuffer.put(eyeDepth);
 
             if (depthWindowEnabledOptimization)
             {
                float colorRange = 1.0f;
-               float grayscale = depthReading * colorRange / camera.far;
+               float grayscale = eyeDepth * colorRange / camera.far;
                int flippedY = imageHeight - y;
 
                depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
             }
 
-            if (depthReading > camera.near && depthReading < maxRange)
+            if (eyeDepth > camera.near && eyeDepth < maxRange)
             {
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
                depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
-               depthPoint.z = 2.0f * depthReading - 1.0f;
+               depthPoint.z = 2.0f * rawDepthReading - 1.0f;
                depthPoint.prj(camera.invProjectionView);
 
                Point3D32 point = points.add();
@@ -227,9 +240,9 @@ public class GDXLowLevelDepthSensorSimulator
       return camera;
    }
 
-   public FloatBuffer getDepthFloatBuffer()
+   public FloatBuffer getEyeDepthMetersBuffer()
    {
-      return depthFloatBuffer;
+      return eyeDepthMetersBuffer;
    }
 
    public float getMaxRange()
