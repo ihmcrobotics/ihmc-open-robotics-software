@@ -124,7 +124,7 @@ public class AutomatedDiagnosticSimulationFactory implements RobotController
                                                                                                 diagnosticParameters,
                                                                                                 yoTime,
                                                                                                 simulationRegistry);
-      automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox, simulationRegistry);
+      automatedDiagnosticAnalysisController = new AutomatedDiagnosticAnalysisController(diagnosticControllerToolbox);
       automatedDiagnosticAnalysisController.setRobotIsAlive(startWithRobotAlive);
       automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(diagnosticControllerToolbox, automatedDiagnosticAnalysisController);
 

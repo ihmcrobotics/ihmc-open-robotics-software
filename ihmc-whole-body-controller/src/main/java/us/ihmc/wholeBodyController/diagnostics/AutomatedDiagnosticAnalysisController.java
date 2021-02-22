@@ -15,9 +15,8 @@ import us.ihmc.robotics.controllers.ParameterizedPDController;
 import us.ihmc.robotics.math.trajectories.OneDoFJointQuinticTrajectoryGenerator;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTask;
 import us.ihmc.wholeBodyController.diagnostics.utils.DiagnosticTaskExecutor;
@@ -56,14 +55,14 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
    private final ExecutionTimer timer = new ExecutionTimer(getClass().getSimpleName() + "Timer", registry);
 
-   public AutomatedDiagnosticAnalysisController(DiagnosticControllerToolbox toolbox, YoRegistry parentRegistry)
+   public AutomatedDiagnosticAnalysisController(DiagnosticControllerToolbox toolbox)
    {
       this.yoTime = toolbox.getYoTime();
       this.controlDT = toolbox.getDT();
 
       diagnosticTaskExecutor = new DiagnosticTaskExecutor("highLevelTaskExecutor", yoTime, registry);
 
-      JointDesiredOutputList lowLevelOutput = toolbox.getLowLevelOutput();
+      JointDesiredOutputListBasics lowLevelOutput = toolbox.getLowLevelOutput();
       DiagnosticParameters diagnosticParameters = toolbox.getDiagnosticParameters();
 
       doIdleControl.set(diagnosticParameters.doIdleControlUntilRobotIsAlive());
@@ -87,7 +86,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
       {
          String jointName = joint.getName();
 
-         JointDesiredOutput jointDesiredOutput = lowLevelOutput.getJointDesiredOutput(joint);
+         JointDesiredOutputBasics jointDesiredOutput = lowLevelOutput.getJointDesiredOutput(joint);
          JointDesiredBehaviorReadOnly jointDesiredBehavior = jointBehaviorMap.get(jointName);
 
          if (jointDesiredBehavior == null)
@@ -106,7 +105,7 @@ public class AutomatedDiagnosticAnalysisController implements RobotController
 
       }
 
-      parentRegistry.addChild(registry);
+      toolbox.getRegistry().addChild(registry);
    }
 
    public void setRobotIsAlive(boolean isAlive)
