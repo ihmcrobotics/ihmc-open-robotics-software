@@ -11,7 +11,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
 
 public class AtlasAutomatedDiagnosticSimulation
 {
@@ -23,11 +22,7 @@ public class AtlasAutomatedDiagnosticSimulation
 
       simulationFactory.setRobotInitialSetup(0.2, 0.0);
 
-      AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
-      automatedDiagnosticConfiguration.addJointCheckUps(AtlasDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));
-      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic(AtlasDiagnosticParameters.defaultPelvisIMUCheckUp(robotModel.getSensorInformation(),
-                                                                                                                       robotModel.getJointMap()));
-
+      simulationFactory.createDiagnosticController(true);
       simulationFactory.startSimulation();
    }
 

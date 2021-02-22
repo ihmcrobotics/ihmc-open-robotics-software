@@ -10,9 +10,6 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.virtualHoist.VirtualHoist;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
-import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticConfiguration;
-import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class ValkyrieAutomatedDiagnosticSimulation
 {
@@ -23,11 +20,7 @@ public class ValkyrieAutomatedDiagnosticSimulation
       AutomatedDiagnosticSimulationFactory simulationFactory = new AutomatedDiagnosticSimulationFactory(robotModel);
       simulationFactory.setRobotInitialSetup(0.5, 0.0);
 
-      AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = simulationFactory.createDiagnosticController(true);
-      automatedDiagnosticConfiguration.addJointCheckUps(ValkyrieDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));
-      automatedDiagnosticConfiguration.addPelvisIMUCheckUpDiagnostic(DiagnosticParameters.defaultPelvisIMUCheckUp(robotModel.getSensorInformation(),
-                                                                                                                  robotModel.getJointMap()));
-
+      simulationFactory.createDiagnosticController(true);
       simulationFactory.startSimulation();
    }
 
