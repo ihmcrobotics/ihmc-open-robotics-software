@@ -193,7 +193,7 @@ public class ValkyrieAutomatedDiagnosticController extends IHMCWholeRobotControl
                                                                             diagnosticControllerTime,
                                                                             registry);
 
-      diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox, registry);
+      diagnosticController = new AutomatedDiagnosticAnalysisController(toolbox);
       AutomatedDiagnosticConfiguration automatedDiagnosticConfiguration = new AutomatedDiagnosticConfiguration(toolbox, diagnosticController);
       automatedDiagnosticConfiguration.addWait(1.0);
       automatedDiagnosticConfiguration.addJointCheckUps(ValkyrieDiagnosticParameters.defaultJointCheckUpConfiguration(robotModel.getJointMap()));

@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
@@ -19,7 +20,7 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -47,12 +48,12 @@ public class DiagnosticControllerToolbox
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] joints;
    private final Map<String, OneDoFJointBasics> nameToJointMap;
-   private final JointDesiredOutputList lowLevelOutput;
+   private final JointDesiredOutputListBasics lowLevelOutput;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
    public DiagnosticControllerToolbox(RigidBodyBasics rootBody,
                                       FloatingJointBasics rootJoint,
-                                      JointDesiredOutputList lowLevelOutput,
+                                      JointDesiredOutputListBasics lowLevelOutput,
                                       SensorOutputMapReadOnly sensorOutputMap,
                                       DiagnosticParameters diagnosticParameters,
                                       YoDouble yoTime,
@@ -63,7 +64,7 @@ public class DiagnosticControllerToolbox
       this.diagnosticParameters = diagnosticParameters;
       this.yoTime = yoTime;
 
-      this.rootBody = rootBody;
+      this.rootBody = MultiBodySystemTools.getRootBody(rootBody); // Make sure it is the root body
       this.rootJoint = rootJoint;
       joints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).toArray(OneDoFJointBasics[]::new);
       nameToJointMap = Stream.of(joints).collect(Collectors.toMap(JointBasics::getName, Function.identity()));
@@ -109,7 +110,7 @@ public class DiagnosticControllerToolbox
       return Stream.of(jointNames).map(this::getJoint).collect(Collectors.toList());
    }
 
-   public JointDesiredOutputList getLowLevelOutput()
+   public JointDesiredOutputListBasics getLowLevelOutput()
    {
       return lowLevelOutput;
    }
@@ -173,5 +174,10 @@ public class DiagnosticControllerToolbox
             return imuProcessedOutputs.get(i);
       }
       return null;
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }
