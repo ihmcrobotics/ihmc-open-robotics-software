@@ -49,6 +49,8 @@ public class GDXLowLevelDepthSensorSimulator
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
+   private float lowestValueSeen = -1.0f;
+   private float highestValueSeen = -1.0f;
 
    private ByteBuffer rawDepthByteBuffer;
    private FloatBuffer rawDepthFloatBuffer;
@@ -135,8 +137,13 @@ public class GDXLowLevelDepthSensorSimulator
 
             if (depthWindowEnabledOptimization)
             {
-               float colorRange = 1.0f;
-               float grayscale = eyeDepth * colorRange / camera.far;
+               if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
+                  highestValueSeen = eyeDepth;
+               if (lowestValueSeen < 0 || eyeDepth < lowestValueSeen)
+                  lowestValueSeen = eyeDepth;
+
+               float colorRange = highestValueSeen - lowestValueSeen;
+               float grayscale = (eyeDepth - lowestValueSeen) / colorRange;
                int flippedY = imageHeight - y;
 
                depthWindowPixmap.drawPixel(x, flippedY, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
