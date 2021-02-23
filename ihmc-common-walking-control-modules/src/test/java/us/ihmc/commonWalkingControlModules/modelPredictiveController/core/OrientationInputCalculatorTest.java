@@ -17,6 +17,8 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -47,9 +49,7 @@ public class OrientationInputCalculatorTest
       momentOfInertia.setM11(Iyy);
       momentOfInertia.setM22(Izz);
 
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
-      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
@@ -84,26 +84,23 @@ public class OrientationInputCalculatorTest
          DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
          trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
 
+         contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0));
+
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FrameVector3DReadOnly comVelocity = MPCTestHelper.computeCoMVelocity(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
          DMatrixRMaj comVelocityVector = new DMatrixRMaj(3, 1);
 
-         CommonOps_DDRM.mult(MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlaneHelper), trajectoryCoefficients, comPositionVector);
-         CommonOps_DDRM.mult(MPCTestHelper.getCoMVelocityJacobian(time, omega, contactPlaneHelper), trajectoryCoefficients, comVelocityVector);
-
-         FramePoint3D comPosition = new FramePoint3D();
-         FrameVector3D comVelocity = new FrameVector3D();
-         comPosition.set(comPositionVector);
-         comVelocity.set(comVelocityVector);
-
-         comPosition.scaleAdd(0.5 * time * time, gravityVector, comPosition);
-         comVelocity.scaleAdd(time, gravityVector, comVelocity);
+         comPosition.get(comPositionVector);
+         comVelocity.get(comVelocityVector);
 
          FrameVector3D netTorqueFromContact = new FrameVector3D();
-         contactPlaneHelper.computeContactForce(omega, time);
+         contactPlane.computeContactForce(omega, time);
 
-         for (int i = 0; i < contactPlaneHelper.getNumberOfContactPoints(); i++)
+         for (int i = 0; i < contactPlane.getNumberOfContactPoints(); i++)
          {
-            MPCContactPoint contactPoint = contactPlaneHelper.getContactPointHelper(i);
+            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(i);
             FrameVector3D contactPointTorque = new FrameVector3D();
             FrameVector3D contactForce = new FrameVector3D();
             contactForce.set(contactPoint.getContactAcceleration());
@@ -118,16 +115,17 @@ public class OrientationInputCalculatorTest
          expectedTorqueAboutBodyInWorldAtCurrentInstant.scale(-mass);
          expectedTorqueAboutBodyInWorldAtCurrentInstant.add(netTorqueFromContact);
 
-         FrameVector3D angularMomentumAboutBodyInWorldAtCurrentInstant = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D axisAngleErrorAtCurrentInstant = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D expectedAngularMomentumAboutBodyInWorldAtNextTick = new FrameVector3D();
+         FrameVector3D angularMomentumOfBodyAboutOriginAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D axisAngleErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D angularMomentumOfBodyAboutOriginAtNextTick = new FrameVector3D();
          FrameVector3D axisAngleErrorAtNextTick = new FrameVector3D();
 
-         expectedAngularMomentumAboutBodyInWorldAtNextTick.scaleAdd(tickDuration, expectedTorqueAboutBodyInWorldAtCurrentInstant, angularMomentumAboutBodyInWorldAtCurrentInstant);
+         angularMomentumOfBodyAboutOriginAtNextTick.scaleAdd(tickDuration, expectedTorqueAboutBodyInWorldAtCurrentInstant, angularMomentumOfBodyAboutOriginAtCurrentTick);
 
          DMatrixRMaj fullSolutionVector = new DMatrixRMaj(numberOfTrajectoryCoefficients + 6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
 
          int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
+         int currentTickId = nextTickId - 1;
 
          MatrixTools.setMatrixBlock(fullSolutionVector, 0, 0, trajectoryCoefficients, 0, 0, trajectoryCoefficients.getNumRows(), 1, 1.0);
 
@@ -147,42 +145,43 @@ public class OrientationInputCalculatorTest
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, skewDesiredCoMVelocity);
 
-         FrameVector3D axisAngleRateAtCurrentInstant = new FrameVector3D();
-         axisAngleRateAtCurrentInstant.cross(desiredBodyAngularVelocity, axisAngleErrorAtCurrentInstant);
+         FrameVector3D axisAngleRateAtCurrentTick = new FrameVector3D();
+         axisAngleRateAtCurrentTick.cross(axisAngleErrorAtCurrentTick, desiredBodyAngularVelocity);
+
+         Matrix3D desiredRotationMatrix = new Matrix3D();
+         desiredBodyOrientation.get(desiredRotationMatrix);
 
          FrameVector3D tempVector = new FrameVector3D();
-         desiredBodyOrientation.inverseTransform(desiredBodyAngularMomentum);
-         tempVector.cross(desiredBodyAngularMomentum, axisAngleErrorAtCurrentInstant);
+         desiredRotationMatrix.inverseTransform(desiredBodyAngularMomentum);
+         tempVector.cross(desiredBodyAngularMomentum, axisAngleErrorAtCurrentTick);
          momentOfInertia.inverseTransform(tempVector);
-         axisAngleRateAtCurrentInstant.add(tempVector);
+         axisAngleRateAtCurrentTick.add(tempVector);
 
-         desiredBodyOrientation.inverseTransform(angularMomentumAboutBodyInWorldAtCurrentInstant, tempVector);
+         desiredRotationMatrix.inverseTransform(angularMomentumOfBodyAboutOriginAtCurrentTick, tempVector);
          momentOfInertia.inverseTransform(tempVector);
-         axisAngleRateAtCurrentInstant.add(tempVector);
+         axisAngleRateAtCurrentTick.add(tempVector);
 
          FrameVector3D tempVector2 = new FrameVector3D();
          FrameVector3D tempVector3 = new FrameVector3D();
          tempVector.cross(desiredCoMPosition, comVelocity);
-         tempVector2.cross(desiredCoMVelocity, comPosition);
-         tempVector3.cross(desiredCoMPosition, desiredCoMVelocity);
-         tempVector.sub(tempVector2);
-         tempVector3.sub(tempVector3);
-         tempVector.scale(-mass);
+         tempVector2.sub(comPosition, desiredCoMPosition);
+         tempVector3.cross(tempVector2, desiredCoMVelocity);
+         tempVector.add(tempVector3);
+         tempVector.scale(mass);
          desiredBodyOrientation.inverseTransform(tempVector);
          momentOfInertia.inverseTransform(tempVector);
-         axisAngleRateAtCurrentInstant.add(tempVector);
+         axisAngleRateAtCurrentTick.sub(tempVector);
 
-         momentOfInertia.inverseTransform(desiredBodyAngularMomentum, tempVector);
-         tempVector.scale(-1.0);
-         axisAngleRateAtCurrentInstant.add(tempVector);
+         desiredBodyOrientation.inverseTransform(desiredBodyAngularMomentum, tempVector);
+         momentOfInertia.inverseTransform(tempVector);
+         axisAngleRateAtCurrentTick.sub(tempVector);
 
+         axisAngleErrorAtNextTick.scaleAdd(tickDuration, axisAngleRateAtCurrentTick, axisAngleErrorAtCurrentTick);
 
-         axisAngleErrorAtNextTick.scaleAdd(tickDuration, axisAngleRateAtCurrentInstant, axisAngleErrorAtCurrentInstant);
-
-         axisAngleErrorAtCurrentInstant.get(indexHandler.getOrientationTickStartIndex(nextTickId - 1), fullSolutionVector );
-         angularMomentumAboutBodyInWorldAtCurrentInstant.get(indexHandler.getOrientationTickStartIndex(nextTickId - 1) + 3, fullSolutionVector );
+         axisAngleErrorAtCurrentTick.get(indexHandler.getOrientationTickStartIndex(currentTickId), fullSolutionVector );
          axisAngleErrorAtNextTick.get(indexHandler.getOrientationTickStartIndex(nextTickId), fullSolutionVector);
-         expectedAngularMomentumAboutBodyInWorldAtNextTick.get(indexHandler.getOrientationTickStartIndex(nextTickId) + 3, fullSolutionVector);
+         angularMomentumOfBodyAboutOriginAtCurrentTick.get(indexHandler.getOrientationTickStartIndex(currentTickId) + 3, fullSolutionVector );
+         angularMomentumOfBodyAboutOriginAtNextTick.get(indexHandler.getOrientationTickStartIndex(nextTickId) + 3, fullSolutionVector);
 
          DiscreteOrientationCommand command = new DiscreteOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
@@ -198,75 +197,8 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+
          inputCalculator.compute(qpInput, command);
-
-
-
-         FrameVector3D a0 = new FrameVector3D();
-         a0.cross(desiredCoMVelocity, desiredCoMPosition);
-         a0.scale(mass);
-         a0.sub(desiredBodyAngularMomentum);
-         desiredBodyOrientation.inverseTransform(a0);
-         momentOfInertia.inverseTransform(a0);
-
-         Matrix3D a3 = new Matrix3D();
-         desiredBodyOrientation.get(a3);
-         a3.invert();
-         momentOfInertia.inverseTransform(a3);
-
-         Matrix3DBasics a1 = new Matrix3D();
-         MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, a1);
-         a1.preMultiply(a3);
-         a1.scale(mass);
-
-         Matrix3DBasics a2 = new Matrix3D();
-         MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, a2);
-         a2.preMultiply(a3);
-         a2.scale(-mass);
-
-         Matrix3D tempMatrix = new Matrix3D();
-         MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocity, tempMatrix);
-         tempMatrix.scale(-1.0);
-         Vector3D a4Vector = new Vector3D(desiredBodyAngularMomentum);
-         desiredBodyOrientation.inverseTransform(a4Vector);
-         Matrix3D a4 = new Matrix3D();
-         MatrixMissingTools.toSkewSymmetricMatrix(a4Vector, a4);
-         momentOfInertia.inverseTransform(a4);
-         a4.add(tempMatrix);
-
-         DMatrixRMaj a0Vector = new DMatrixRMaj(3, 1);
-         a0.get(a0Vector);
-
-         DMatrixRMaj a1Matrix = new DMatrixRMaj(3, 3);
-         a1.get(a1Matrix);
-
-         DMatrixRMaj a2Matrix = new DMatrixRMaj(3, 3);
-         a2.get(a2Matrix);
-
-         DMatrixRMaj a3Matrix = new DMatrixRMaj(3, 3);
-         a3.get(a3Matrix);
-
-         DMatrixRMaj a4Matrix = new DMatrixRMaj(3, 3);
-         a4.get(a4Matrix);
-
-         DMatrixRMaj Amatrix = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
-         DMatrixRMaj Bmatrix = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
-         DMatrixRMaj Cmatrix = new DMatrixRMaj(6, 1);
-
-         MatrixTools.setMatrixBlock(Amatrix, 0, 0, a3Matrix, 0, 0, 3, 3, 1.0);
-         MatrixTools.setMatrixBlock(Amatrix, 0, 3, a4Matrix, 0, 0, 3, 3, 1.0);
-
-         // TODO a4 Matrix
-         DMatrixRMaj jacobian = new DMatrixRMaj(6, indexHandler.getTotalProblemSize());
-         MatrixTools.multAddBlock(a1Matrix, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlaneHelper), jacobian, 0, 0);
-         MatrixTools.multAddBlock(a2Matrix, MPCTestHelper.getCoMVelocityJacobian(time, omega, contactPlaneHelper), jacobian, 0, 0);
-         MatrixTools.addMatrixBlock(jacobian, 0, indexHandler.getOrientationTickStartIndex(nextTickId - 1) + 3, a3Matrix, 0, 0, 3, 3, 1.0);
-         MatrixTools.addMatrixBlock(jacobian, 0, indexHandler.getOrientationTickStartIndex(nextTickId - 1) , a4Matrix, 0, 0, 3, 3, 1.0);
-
-         CommonOps_DDRM.scale(-tickDuration, jacobian);
-         MatrixTools.addMatrixBlock(jacobian, 0, indexHandler.getOrientationTickStartIndex(nextTickId) , CommonOps_DDRM.identity(3), 0, 0, 3, 3, 1.0);
-
-         MatrixTestTools.assertMatrixEquals(jacobian, qpInput.getTaskJacobian(), 1e-6);
 
          DMatrixRMaj producedValue = new DMatrixRMaj(6, 1);
 
@@ -293,9 +225,7 @@ public class OrientationInputCalculatorTest
       momentOfInertia.setM11(Iyy);
       momentOfInertia.setM22(Izz);
 
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
-      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
@@ -420,13 +350,13 @@ public class OrientationInputCalculatorTest
          DMatrixRMaj skewGravityVector = new DMatrixRMaj(3, 3);
          MatrixMissingTools.toSkewSymmetricMatrix(gravity, skewGravityVector);
 
-         DMatrixRMaj contactTorqueJacobian = MPCTestHelper.getContactTorqueJacobian(mass, time, omega, new FramePoint3D(), contactPlaneHelper);
+         DMatrixRMaj contactTorqueJacobian = MPCTestHelper.getContactTorqueJacobian(mass, time, omega, new FramePoint3D(), contactPlane);
 
-         MatrixTools.multAddBlock(-mass, skewGravityVector, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlaneHelper), Bmatrix, 3, 0);
+         MatrixTools.multAddBlock(-mass, skewGravityVector, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), Bmatrix, 3, 0);
          MatrixTools.addMatrixBlock(Bmatrix, 0, indexHandler.getRhoCoefficientStartIndex(0), contactTorqueJacobian, 0, 0, 3, indexHandler.getRhoCoefficientsInSegment(0), 1.0);
 
-         MatrixTools.multAddBlock(a1Matrix, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlaneHelper), Bmatrix, 0, 0);
-         MatrixTools.multAddBlock(a2Matrix, MPCTestHelper.getCoMVelocityJacobian(time, omega, contactPlaneHelper), Bmatrix, 0, 0);
+         MatrixTools.multAddBlock(a1Matrix, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), Bmatrix, 0, 0);
+         MatrixTools.multAddBlock(a2Matrix, MPCTestHelper.getCoMVelocityJacobian(time, omega, contactPlane), Bmatrix, 0, 0);
 
          desiredInternalAngularMomentumRate.get(3, Cmatrix);
          CommonOps_DDRM.scale(-1.0, Cmatrix);
