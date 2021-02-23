@@ -37,6 +37,18 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
                      {
                         return new Vector3D(30.0, 30.0, 30.0);
                      }
+
+                     @Override
+                     public double getFinalCoMVelocityInjectionRatio()
+                     {
+                        return 1.0;
+                     }
+
+                     @Override
+                     public double getFinalCoMAccelerationInjectionRatio()
+                     {
+                        return 1.0;
+                     }
                   };
                }
             };
