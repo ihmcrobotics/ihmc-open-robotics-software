@@ -278,6 +278,8 @@ public class SCS2AvatarSimulationFactory
          controllerTask.addRunnableOnTaskThread(() -> yoVariableServer.update(controllerThread.getHumanoidRobotContextData().getTimestamp(),
                                                                               controllerThread.getYoVariableRegistry()));
       }
+      robotController.getYoRegistry().addChild(estimatorThread.getYoRegistry());
+      robotController.getYoRegistry().addChild(controllerThread.getYoVariableRegistry());
    }
 
    private void initializeStateEstimatorToActual()
