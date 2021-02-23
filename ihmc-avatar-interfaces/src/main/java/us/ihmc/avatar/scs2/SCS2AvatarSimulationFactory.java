@@ -61,7 +61,7 @@ import us.ihmc.tools.factories.RequiredFactoryField;
 
 public class SCS2AvatarSimulationFactory
 {
-   private static final ReferenceFrame inertialFrame = ReferenceFrame.getWorldFrame();
+   private static final ReferenceFrame inertialFrame = SimulationSession.DEFAULT_INERTIAL_FRAME;
 
    private final RequiredFactoryField<DRCRobotModel> robotModel = new RequiredFactoryField<>("robotModel");
    private final RequiredFactoryField<HighLevelHumanoidControllerFactory> highLevelHumanoidControllerFactory = new RequiredFactoryField<>("highLevelHumanoidControllerFactory");
@@ -123,15 +123,7 @@ public class SCS2AvatarSimulationFactory
       simulationSession = new SimulationSession();
       simulationSession.submitBufferSizeRequest(scsInitialSetup.get().getSimulationDataBufferSize());
       simulationSession.addTerrainObject(terrainObjectDefinition.get());
-      RobotDefinition robotDefinition = RobotDefinitionTools.toRobotDefinition(robotModel.get().getRobotDescription());
-      RobotCollisionModel collisionModel = robotModel.get().getSimulationRobotCollisionModel(new CollidableHelper(), "robot", "terrain");
-      if (collisionModel != null)
-         RobotDefinitionTools.addCollisionsToRobotDefinition(collisionModel.getRobotCollidables(robotModel.get().createFullRobotModel().getElevator()),
-                                                             robotDefinition);
-      HumanoidFloatingRootJointRobot tempRobotForInitialState = robotModel.get().createHumanoidFloatingRootJointRobot(false);
-      robotInitialSetup.get().initializeRobot(tempRobotForInitialState, robotModel.get().getJointMap());
-      RobotDefinitionTools.addInitialStateToRobotDefinition(tempRobotForInitialState, robotDefinition);
-      simulationSession.addRobot(robotDefinition);
+      simulationSession.addRobot(robot);
       simulationSession.setSessionTickToTimeIncrement(Conversions.secondsToNanoseconds(robotModel.get().getSimulateDT()));
    }
 
@@ -331,6 +323,7 @@ public class SCS2AvatarSimulationFactory
 
    private void setupThreadedRobotController()
    {
+      robot.getRegistry().addChild(robotController.getYoRegistry());
       robot.getControllerManager().addController(() -> robotController.doControl());
    }
 

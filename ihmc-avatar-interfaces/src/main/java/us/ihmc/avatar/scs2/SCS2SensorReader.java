@@ -68,19 +68,19 @@ public class SCS2SensorReader implements SensorReader
 
    private final boolean usePerfectSensor;
 
-   public static SCS2SensorReader newSensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint,
-                                                  SensorProcessingConfiguration sensorProcessingConfiguration)
+   public static SCS2SensorReader newSensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions,
+                                                  ForceSensorDataHolder forceSensorDataHolder, SensorProcessingConfiguration sensorProcessingConfiguration)
    {
-      return new SCS2SensorReader(controllerInput, rootJoint, sensorProcessingConfiguration, false);
+      return new SCS2SensorReader(controllerInput, rootJoint, imuDefinitions, forceSensorDataHolder, sensorProcessingConfiguration, false);
    }
 
    public static SCS2SensorReader newPerfectSensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint)
    {
-      return new SCS2SensorReader(controllerInput, rootJoint, null, true);
+      return new SCS2SensorReader(controllerInput, rootJoint, null, null, null, true);
    }
 
-   private SCS2SensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint, SensorProcessingConfiguration sensorProcessingConfiguration,
-                            boolean usePerfectSensor)
+   private SCS2SensorReader(SimControllerInput controllerInput, FloatingJointBasics rootJoint, IMUDefinition[] imuDefinitions,
+                            ForceSensorDataHolder forceSensorDataHolder, SensorProcessingConfiguration sensorProcessingConfiguration, boolean usePerfectSensor)
    {
       this.controllerInput = controllerInput;
       this.usePerfectSensor = usePerfectSensor;
@@ -88,6 +88,18 @@ public class SCS2SensorReader implements SensorReader
       rootBody = rootJoint.getPredecessor();
       simJointList = new ArrayList<>(controllerInput.getInput().getAllJoints());
       controllerJointList = new ArrayList<>(rootJoint.subtreeList());
+
+      for (JointBasics joint : rootJoint.subtreeIterable())
+      {
+         if (joint instanceof OneDoFJointBasics)
+         {
+            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
+            OneDoFJointStateReadOnly jointSensorOutput = OneDoFJointStateReadOnly.createFromOneDoFJoint(oneDoFJoint, true);
+            jointSensorOutputList.add(jointSensorOutput);
+            jointToSensorOutputMap.put(oneDoFJoint, jointSensorOutput);
+            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
+         }
+      }
 
       if (usePerfectSensor)
       {
@@ -145,6 +157,9 @@ public class SCS2SensorReader implements SensorReader
       }
       else
       {
+         for (IMUDefinition imuDefinition : imuDefinitions)
+            addIMUSensor(imuDefinition);
+         addWrenchSensors(forceSensorDataHolder);
          sensorProcessing = new SensorProcessing(stateEstimatorSensorDefinitions, sensorProcessingConfiguration, registry);
          simJointList.remove(0);
          controllerJointList.remove(0);
@@ -155,21 +170,9 @@ public class SCS2SensorReader implements SensorReader
          sensorHeadPPSTimetamp = null;
          perfectSensorOutputMap = null;
       }
-
-      for (JointBasics joint : rootJoint.subtreeIterable())
-      {
-         if (joint instanceof OneDoFJointBasics)
-         {
-            OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
-            OneDoFJointStateReadOnly jointSensorOutput = OneDoFJointStateReadOnly.createFromOneDoFJoint(oneDoFJoint, true);
-            jointSensorOutputList.add(jointSensorOutput);
-            jointToSensorOutputMap.put(oneDoFJoint, jointSensorOutput);
-            stateEstimatorSensorDefinitions.addJointSensorDefinition(oneDoFJoint);
-         }
-      }
    }
 
-   public void addIMUSensor(IMUDefinition definition)
+   private void addIMUSensor(IMUDefinition definition)
    {
       SimRigidBodyReadOnly rigidBody = controllerInput.getInput().findRigidBody(definition.getRigidBody().getName());
       List<SimIMUSensor> sensorList = rigidBody.getParentJoint().getAuxialiryData().getIMUSensors();
@@ -186,7 +189,7 @@ public class SCS2SensorReader implements SensorReader
       }
    }
 
-   public void addWrenchSensors(ForceSensorDataHolder forceSensorDataHolderToUpdate)
+   private void addWrenchSensors(ForceSensorDataHolder forceSensorDataHolderToUpdate)
    {
       for (ForceSensorDefinition definition : forceSensorDataHolderToUpdate.getForceSensorDefinitions())
       {
@@ -207,12 +210,22 @@ public class SCS2SensorReader implements SensorReader
    private final DMatrixRMaj wrenchMatrix = new DMatrixRMaj(6, 1);
 
    @Override
+   public void initialize()
+   {
+      sensorProcessing.initialize();
+   }
+
+   @Override
    public long read(SensorDataContext sensorDataContext)
    {
       long timestamp = Conversions.secondsToNanoseconds(controllerInput.getTime());
-      this.timestamp.set(timestamp);
-      controllerTimestamp.set(timestamp);
-      sensorHeadPPSTimetamp.set(timestamp);
+
+      if (usePerfectSensor)
+      {
+         this.timestamp.set(timestamp);
+         controllerTimestamp.set(timestamp);
+         sensorHeadPPSTimetamp.set(timestamp);
+      }
 
       MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.CONFIGURATION);
       MultiBodySystemTools.copyJointsState(simJointList, controllerJointList, JointStateType.VELOCITY);
@@ -285,5 +298,10 @@ public class SCS2SensorReader implements SensorReader
    public SensorOutputMapReadOnly getRawSensorOutputMap()
    {
       return usePerfectSensor ? perfectSensorOutputMap : sensorProcessing.getRawSensorOutputMap();
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }

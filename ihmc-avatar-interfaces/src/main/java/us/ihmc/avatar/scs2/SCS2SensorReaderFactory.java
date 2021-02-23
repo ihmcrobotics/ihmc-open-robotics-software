@@ -1,7 +1,5 @@
 package us.ihmc.avatar.scs2;
 
-import java.util.stream.Stream;
-
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -53,10 +51,12 @@ public class SCS2SensorReaderFactory implements SensorReaderFactory
       if (usePerfectSensors)
          sensorReader = SCS2SensorReader.newPerfectSensorReader(controllerInput, rootJoint);
       else
-         sensorReader = SCS2SensorReader.newSensorReader(controllerInput, rootJoint, sensorProcessingConfiguration);
-
-      Stream.of(imuDefinitions).forEach(sensorReader::addIMUSensor);
-      sensorReader.addWrenchSensors(forceSensorDataHolderToUpdate);
+         sensorReader = SCS2SensorReader.newSensorReader(controllerInput,
+                                                         rootJoint,
+                                                         imuDefinitions,
+                                                         forceSensorDataHolderToUpdate,
+                                                         sensorProcessingConfiguration);
+      parentRegistry.addChild(sensorReader.getRegistry());
    }
 
    @Override
