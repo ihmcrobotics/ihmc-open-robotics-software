@@ -105,6 +105,41 @@ public class OrientationInputCalculator
       return true;
    }
 
+   DiscretizationCalculator getDiscretizationCalculator()
+   {
+      return discretizationCalculator;
+   }
+
+   DMatrixRMaj getContinuousAMatrix()
+   {
+      return A;
+   }
+
+   DMatrixRMaj getContinuousBMatrix()
+   {
+      return B;
+   }
+
+   DMatrixRMaj getContinuousCMatrix()
+   {
+      return C;
+   }
+
+   DMatrixRMaj getDiscreteAMatrix()
+   {
+      return Ad;
+   }
+
+   DMatrixRMaj getDiscreteBMatrix()
+   {
+      return Bd;
+   }
+
+   DMatrixRMaj getDiscreteCMatrix()
+   {
+      return Cd;
+   }
+
    private void reset(DiscreteOrientationCommand command)
    {
       int totalContactPoints = 0;
@@ -194,13 +229,14 @@ public class OrientationInputCalculator
       CommonOps_DDRM.mult(-1.0, a3, desiredBodyAngularMomentumVector, a0);
       CommonOps_DDRM.multAdd(a3, comCoriolisForce, a0);
 
-      CommonOps_DDRM.mult(desiredRotationMatrix, desiredBodyAngularMomentumVector, rotatedBodyAngularMomentum);
+      CommonOps_DDRM.multTransA(desiredRotationMatrix, desiredBodyAngularMomentumVector, rotatedBodyAngularMomentum);
       MatrixMissingTools.toSkewSymmetricMatrix(rotatedBodyAngularMomentum, skewRotatedBodyAngularMomentum);
       MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocity, skewDesiredBodyAngularVelocity);
 
       CommonOps_DDRM.mult(inverseInertia, skewRotatedBodyAngularMomentum, a4);
       CommonOps_DDRM.subtractEquals(a4, skewDesiredBodyAngularVelocity);
    }
+
 
 
    private final FramePoint3D contactPoint = new FramePoint3D();
@@ -233,11 +269,11 @@ public class OrientationInputCalculator
       MatrixTools.multAddBlock(-mass, skewGravity, comPositionJacobian, B, 3, 0);
       MatrixTools.multAddBlock(contactForceToOriginTorqueJacobian, contactForceJacobian, B, 3, 0);
 
-      MatrixTools.setMatrixBlock(C, 3, 0, desiredInternalAngularMomentumRate, 0, 0, 3, 1, -1.0);
+      MatrixTools.setMatrixBlock(C, 0, 0, a0, 0, 0, 3, 1, 1.0);
       MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, a1, gravityVector, C, 0, 0);
       MatrixTools.multAddBlock(timeOfConstraint, a2, gravityVector, C, 0, 0);
 
-      MatrixTools.setMatrixBlock(C, 0, 0, a0, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(C, 3, 0, desiredInternalAngularMomentumRate, 0, 0, 3, 1, -1.0);
    }
 
    private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);
