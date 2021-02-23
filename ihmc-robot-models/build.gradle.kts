@@ -37,8 +37,10 @@ gdxDependencies {
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-graphics-description:0.19.3")
-   api("com.badlogicgames.gdx:gdx-backend-lwjgl3:1.9.12")
-   api("com.badlogicgames.gdx:gdx-platform:1.9.12:natives-desktop")
+
+   val gdxVersion = "1.9.14"
+   api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
+   api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
 
    api("org.lwjgl:lwjgl-openvr:3.2.3")
    api("org.lwjgl:lwjgl-openvr:3.2.3:natives-linux")
@@ -46,13 +48,14 @@ gdxDependencies {
    api("org.lwjgl:lwjgl-openvr:3.2.3:natives-windows-x86")
    api("org.lwjgl:lwjgl-openvr:3.2.3:natives-macos")
 
-   api("io.imgui.java:imgui-java-binding:1.79-1.4.0")
-   api("io.imgui.java:imgui-java-lwjgl3:1.79-1.4.0")
-   api("io.imgui.java:imgui-java-natives-linux:1.79-1.4.0")
-   api("io.imgui.java:imgui-java-natives-linux-x86:1.79-1.4.0")
-   api("io.imgui.java:imgui-java-natives-macos:1.79-1.4.0")
-   api("io.imgui.java:imgui-java-natives-windows:1.79-1.4.0")
-   api("io.imgui.java:imgui-java-natives-windows-x86:1.79-1.4.0")
+   val imguiVersion = "1.80-1.5.0"
+   api("io.imgui.java:imgui-java-binding:$imguiVersion")
+   api("io.imgui.java:imgui-java-lwjgl3:$imguiVersion")
+   api("io.imgui.java:imgui-java-natives-linux:$imguiVersion")
+   api("io.imgui.java:imgui-java-natives-linux-x86:$imguiVersion")
+   api("io.imgui.java:imgui-java-natives-macos:$imguiVersion")
+   api("io.imgui.java:imgui-java-natives-windows:$imguiVersion")
+   api("io.imgui.java:imgui-java-natives-windows-x86:$imguiVersion")
 }
 
 testDependencies {
