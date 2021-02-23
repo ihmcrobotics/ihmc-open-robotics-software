@@ -16,6 +16,7 @@ import org.lwjgl.opengl.GL32;
 public class GDX3DSceneTools
 {
    public static final float CLEAR_COLOR = 0.5019608f;
+   public static final String TUNING_WINDOW_NAME = "Lighting";
 
    private static ImBoolean ambientEnabled = new ImBoolean(true);
    private static ImFloat ambientColor = new ImFloat(1.0f);
@@ -85,7 +86,7 @@ public class GDX3DSceneTools
 
    public static void renderTuningSliders()
    {
-      ImGui.begin("Lighting");
+      ImGui.begin(TUNING_WINDOW_NAME);
       ImGui.checkbox("Ambient enabled", ambientEnabled);
       ImGui.sliderFloat("Ambient color", ambientColor.getData(), 0.0f, 1.0f);
       ImGui.checkbox("Point enabled", pointEnabled);
