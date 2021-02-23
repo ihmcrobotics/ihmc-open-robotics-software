@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.function.IntFunction;
 
@@ -502,5 +504,29 @@ public class MPCTestHelper
       }
 
       return jacobian;
+   }
+
+   public static DMatrixRMaj getContactTorqueJacobian(double mass, double time, double omega, FramePoint3DReadOnly point, MPCContactPlane contact)
+   {
+      int coefficients = contact.getCoefficientSize();
+      DMatrixRMaj contactTorqueJacobian = new DMatrixRMaj(3, coefficients);
+      DMatrixRMaj contactPointForceToTorqueJacobian = new DMatrixRMaj(3, 3 * contact.getNumberOfContactPoints());
+      DMatrixRMaj coefficientsToForceJacobian = new DMatrixRMaj(3 * contact.getNumberOfContactPoints(), coefficients);
+
+      ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, time, omega, 0, 0, contact, coefficientsToForceJacobian);
+
+      for (int contactIdx = 0; contactIdx < contact.getNumberOfContactPoints(); contactIdx++)
+      {
+         MPCContactPoint contactPoint = contact.getContactPointHelper(contactIdx);
+         FrameVector3D momentArm = new FrameVector3D();
+         momentArm.sub(contactPoint.getBasisVectorOrigin(), point);
+         DMatrixRMaj momentArmSkew = new DMatrixRMaj(3, 3);
+         MatrixMissingTools.toSkewSymmetricMatrix(momentArm, momentArmSkew);
+         MatrixTools.setMatrixBlock(contactPointForceToTorqueJacobian, 0, 3 * contactIdx, momentArmSkew, 0, 0, 3, 3, 1.0);
+      }
+
+      CommonOps_DDRM.mult(contactPointForceToTorqueJacobian, coefficientsToForceJacobian, contactTorqueJacobian);
+
+      return contactTorqueJacobian;
    }
 }
