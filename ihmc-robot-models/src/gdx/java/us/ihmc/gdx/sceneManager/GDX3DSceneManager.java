@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import imgui.ImGui;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -109,6 +110,8 @@ public class GDX3DSceneManager
 
    public void renderRegisteredObjectsWithEnvironment(ModelBatch modelBatch, GDXSceneLevel sceneLevel)
    {
+      environment = GDX3DSceneTools.createDefaultEnvironment();
+
       for (GDXRenderable renderable : renderables)
       {
          if (sceneLevel.ordinal() >= renderable.getSceneType().ordinal())
