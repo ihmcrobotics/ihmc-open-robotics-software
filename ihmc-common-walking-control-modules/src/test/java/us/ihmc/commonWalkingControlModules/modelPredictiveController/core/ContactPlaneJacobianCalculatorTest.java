@@ -16,15 +16,10 @@ public class ContactPlaneJacobianCalculatorTest
    @Test
    public void testComputePointMagnitudeJacobian()
    {
-      double gravityZ = -9.81;
       double omega = 3.0;
       double mu = 0.8;
-      double dt = 1e-3;
 
       MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
-
-      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
-      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
 
