@@ -110,17 +110,17 @@ public class OrientationInputCalculatorTest
             netTorqueFromContact.add(contactPointTorque);
          }
 
-         FrameVector3D expectedTorqueAboutBodyInWorldAtCurrentInstant = new FrameVector3D();
-         expectedTorqueAboutBodyInWorldAtCurrentInstant.cross(gravityVector, comPosition);
-         expectedTorqueAboutBodyInWorldAtCurrentInstant.scale(-mass);
-         expectedTorqueAboutBodyInWorldAtCurrentInstant.add(netTorqueFromContact);
+         FrameVector3D torqueAboutBodyInWorldAtCurrentInstant = new FrameVector3D();
+         torqueAboutBodyInWorldAtCurrentInstant.cross(gravityVector, comPosition);
+         torqueAboutBodyInWorldAtCurrentInstant.scale(-mass);
+         torqueAboutBodyInWorldAtCurrentInstant.add(netTorqueFromContact);
 
          FrameVector3D angularMomentumOfBodyAboutOriginAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D axisAngleErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D angularMomentumOfBodyAboutOriginAtNextTick = new FrameVector3D();
          FrameVector3D axisAngleErrorAtNextTick = new FrameVector3D();
 
-         angularMomentumOfBodyAboutOriginAtNextTick.scaleAdd(tickDuration, expectedTorqueAboutBodyInWorldAtCurrentInstant, angularMomentumOfBodyAboutOriginAtCurrentTick);
+         angularMomentumOfBodyAboutOriginAtNextTick.scaleAdd(tickDuration, torqueAboutBodyInWorldAtCurrentInstant, angularMomentumOfBodyAboutOriginAtCurrentTick);
 
          DMatrixRMaj fullSolutionVector = new DMatrixRMaj(numberOfTrajectoryCoefficients + 6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
 
@@ -200,8 +200,22 @@ public class OrientationInputCalculatorTest
 
          inputCalculator.compute(qpInput, command);
 
-         DMatrixRMaj producedValue = new DMatrixRMaj(6, 1);
+         DMatrixRMaj expectedRate = new DMatrixRMaj(6, 1);
+         axisAngleRateAtCurrentTick.get(expectedRate);
+         torqueAboutBodyInWorldAtCurrentInstant.get(3, expectedRate);
 
+         DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
+         axisAngleErrorAtCurrentTick.get(currentState);
+         angularMomentumOfBodyAboutOriginAtCurrentTick.get(3, currentState);
+
+         DMatrixRMaj solutionRate = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(inputCalculator.getContinuousAMatrix(), currentState, solutionRate);
+         CommonOps_DDRM.multAdd(inputCalculator.getContinuousBMatrix(), fullSolutionVector, solutionRate);
+         CommonOps_DDRM.addEquals(solutionRate, inputCalculator.getContinuousCMatrix());
+
+         MatrixTestTools.assertMatrixEquals(expectedRate, solutionRate, 1e-6);
+
+         DMatrixRMaj producedValue = new DMatrixRMaj(6, 1);
          CommonOps_DDRM.mult(qpInput.getTaskJacobian(), fullSolutionVector, producedValue);
 
          MatrixTestTools.assertMatrixEquals(qpInput.getTaskObjective(), producedValue, 1e-6);
