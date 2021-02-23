@@ -52,6 +52,11 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DIdentityIns
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DRotateInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DScaleInstruction;
 import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateInstruction;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCylinder3DReadOnly;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPRamp3DReadOnly;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.robotDescription.ExternalForcePointDescription;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -83,10 +88,15 @@ import us.ihmc.scs2.definition.geometry.ModelFileGeometryDefinition.SubMeshDefin
 import us.ihmc.scs2.definition.geometry.Point3DDefinition;
 import us.ihmc.scs2.definition.geometry.Polygon3DDefinition;
 import us.ihmc.scs2.definition.geometry.PyramidBox3DDefinition;
+import us.ihmc.scs2.definition.geometry.STPBox3DDefinition;
+import us.ihmc.scs2.definition.geometry.STPCapsule3DDefinition;
+import us.ihmc.scs2.definition.geometry.STPConvexPolytope3DDefinition;
+import us.ihmc.scs2.definition.geometry.STPCylinder3DDefinition;
+import us.ihmc.scs2.definition.geometry.STPRamp3DDefinition;
 import us.ihmc.scs2.definition.geometry.Sphere3DDefinition;
 import us.ihmc.scs2.definition.geometry.TriangleMesh3DDefinition;
 import us.ihmc.scs2.definition.geometry.TruncatedCone3DDefinition;
-import us.ihmc.scs2.definition.geometry.Wedge3DDefinition;
+import us.ihmc.scs2.definition.geometry.Ramp3DDefinition;
 import us.ihmc.scs2.definition.robot.ExternalWrenchPointDefinition;
 import us.ihmc.scs2.definition.robot.GroundContactPointDefinition;
 import us.ihmc.scs2.definition.robot.IMUSensorDefinition;
@@ -303,11 +313,25 @@ public class RobotDefinitionTools
 
       FrameShape3DReadOnly shape = source.getShape();
 
-      if (shape instanceof FrameBox3DReadOnly)
+      if (shape instanceof FrameSTPBox3DReadOnly)
+      {
+         FrameSTPBox3DReadOnly stpBox3D = (FrameSTPBox3DReadOnly) shape;
+         STPBox3DDefinition stpGeometry = new STPBox3DDefinition(stpBox3D.getSize());
+         stpGeometry.setMargins(stpBox3D.getMinimumMargin(), stpBox3D.getMaximumMargin());
+         geometry = stpGeometry;
+      }
+      else if (shape instanceof FrameBox3DReadOnly)
       {
          FrameBox3DReadOnly box3D = (FrameBox3DReadOnly) shape;
          geometry = new Box3DDefinition(box3D.getSize());
          pose.set(shape.getPose());
+      }
+      else if (shape instanceof FrameSTPCapsule3DReadOnly)
+      {
+         FrameSTPCapsule3DReadOnly stpCapsule3D = (FrameSTPCapsule3DReadOnly) shape;
+         STPCapsule3DDefinition stpGeometry = new STPCapsule3DDefinition(stpCapsule3D.getLength(), stpCapsule3D.getRadius());
+         stpGeometry.setMargins(stpCapsule3D.getMinimumMargin(), stpCapsule3D.getMaximumMargin());
+         geometry = stpGeometry;
       }
       else if (shape instanceof FrameCapsule3DReadOnly)
       {
@@ -316,10 +340,24 @@ public class RobotDefinitionTools
          pose.getTranslation().set(capsule3D.getPosition());
          EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule3D.getAxis(), pose.getRotation());
       }
+      else if (shape instanceof FrameSTPConvexPolytope3DReadOnly)
+      {
+         FrameSTPConvexPolytope3DReadOnly stpConvexPolytope3D = (FrameSTPConvexPolytope3DReadOnly) shape;
+         STPConvexPolytope3DDefinition stpGeometry = new STPConvexPolytope3DDefinition(stpConvexPolytope3D);
+         stpGeometry.setMargins(stpConvexPolytope3D.getMinimumMargin(), stpConvexPolytope3D.getMaximumMargin());
+         geometry = stpGeometry;
+      }
       else if (shape instanceof FrameConvexPolytope3DReadOnly)
       {
          FrameConvexPolytope3DReadOnly convexPolytope3D = (FrameConvexPolytope3DReadOnly) shape;
          geometry = new ConvexPolytope3DDefinition(convexPolytope3D);
+      }
+      else if (shape instanceof FrameSTPCylinder3DReadOnly)
+      {
+         FrameSTPCylinder3DReadOnly stpCylinder3D = (FrameSTPCylinder3DReadOnly) shape;
+         STPCylinder3DDefinition stpGeometry = new STPCylinder3DDefinition(stpCylinder3D.getLength(), stpCylinder3D.getRadius());
+         stpGeometry.setMargins(stpCylinder3D.getMinimumMargin(), stpCylinder3D.getMaximumMargin());
+         geometry = stpGeometry;
       }
       else if (shape instanceof FrameCylinder3DReadOnly)
       {
@@ -339,10 +377,17 @@ public class RobotDefinitionTools
          FramePointShape3DReadOnly pointShape3D = (FramePointShape3DReadOnly) shape;
          geometry = new Point3DDefinition(pointShape3D);
       }
+      else if (shape instanceof FrameSTPRamp3DReadOnly)
+      {
+         FrameSTPRamp3DReadOnly stpRamp3D = (FrameSTPRamp3DReadOnly) shape;
+         STPRamp3DDefinition stpGeometry = new STPRamp3DDefinition(stpRamp3D.getSize());
+         stpGeometry.setMargins(stpRamp3D.getMinimumMargin(), stpRamp3D.getMaximumMargin());
+         geometry = stpGeometry;
+      }
       else if (shape instanceof FrameRamp3DReadOnly)
       {
          FrameRamp3DReadOnly ramp3D = (FrameRamp3DReadOnly) shape;
-         geometry = new Wedge3DDefinition(ramp3D.getSize());
+         geometry = new Ramp3DDefinition(ramp3D.getSize());
          pose.set(ramp3D.getPose());
       }
       else if (shape instanceof FrameSphere3DReadOnly)
@@ -498,7 +543,7 @@ public class RobotDefinitionTools
                else if (instruction instanceof WedgeGraphics3DInstruction)
                {
                   WedgeGraphics3DInstruction wedge = (WedgeGraphics3DInstruction) instruction;
-                  visualDefinition.setGeometryDefinition(new Wedge3DDefinition(wedge.getLengthX(), wedge.getWidthY(), wedge.getHeightZ()));
+                  visualDefinition.setGeometryDefinition(new Ramp3DDefinition(wedge.getLengthX(), wedge.getWidthY(), wedge.getHeightZ()));
                }
             }
             else if (instruction instanceof Graphics3DAddExtrusionInstruction)
