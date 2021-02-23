@@ -44,21 +44,16 @@ public class GDX3DSceneManager
 
    public void create()
    {
-      create(GDX3DSceneTools.createDefaultEnvironment(), GDXInputMode.libGDX);
+      create(GDXInputMode.libGDX);
    }
 
    public void create(GDXInputMode inputMode)
-   {
-      create(GDX3DSceneTools.createDefaultEnvironment(), inputMode);
-   }
-
-   public void create(Environment environment, GDXInputMode inputMode)
    {
       this.inputMode = inputMode;
       new GLProfiler(Gdx.graphics).enable();
       GDXTools.syncLogLevelWithLogTools();
 
-      this.environment = environment;
+      this.environment = GDX3DSceneTools.createDefaultEnvironment();
 
       DefaultShader.Config defaultShaderConfig = new DefaultShader.Config();
       // we could set shader options or even swap out the shader here
