@@ -840,4 +840,22 @@ public abstract class WalkingControllerParameters
       return 0.25;
    }
 
+   /**
+    * When the swing state last longer than planned, i.e. touchdown is late, the height trajectory can
+    * transition to a pseudo free fall trajectory meant to minimize the rate at which the capture point
+    * diverges by reducing reducing the support foot ground reaction forces.
+    * <p>
+    * The transition to a free fall trajectory is initialized at
+    * {@code t = swingTime + swingTimeOverrunDuration}, where {@code t} is the current time in the
+    * swing state, {@code swingTime} is the planned swing duration, and {@code swingTimeOverrun} is the
+    * fixed value obtained by this parameter.
+    * </p>
+    * <p>
+    * Set this parameter to {@link Double#POSITIVE_INFINITY} to disable the transition to free fall.
+    * </p>
+    */
+   public double getSwingTimeOverrunToInitializeFreeFall()
+   {
+      return Double.POSITIVE_INFINITY;
+   }
 }
