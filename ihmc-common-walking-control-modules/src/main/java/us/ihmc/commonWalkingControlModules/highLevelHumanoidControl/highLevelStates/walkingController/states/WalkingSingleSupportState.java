@@ -105,7 +105,7 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                                      walkingControllerParameters.minimizeAngularMomentumRateZDuringSwing());
 
       timeOverrunToInitializeFreeFall = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
-                                                                               parentRegistry.getName(),
+                                                                               getClass().getSimpleName(),
                                                                                "swingTimeOverrunToInitializeFreeFall",
                                                                                registry,
                                                                                walkingControllerParameters.getSwingTimeOverrunToInitializeFreeFall());

@@ -69,12 +69,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                                                         registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
       icpErrorThresholdForSlowTransfer = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
-                                                                                parentRegistry.getName(),
+                                                                                getClass().getSimpleName(),
                                                                                 "icpErrorThresholdForSlowTransfer",
                                                                                 registry,
                                                                                 walkingControllerParameters.getInitialICPErrorToSlowDownTransfer());
       minimumSlowTransferDuration = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
-                                                                           parentRegistry.getName(),
+                                                                           getClass().getSimpleName(),
                                                                            "minimumSlowTransferDuration",
                                                                            registry,
                                                                            walkingControllerParameters.getMinimumSlowTransferDuration());
