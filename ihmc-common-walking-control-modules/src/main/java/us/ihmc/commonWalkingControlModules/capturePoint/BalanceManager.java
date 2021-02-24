@@ -597,14 +597,16 @@ public class BalanceManager
       }
 
       comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
-      comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
 
+      int lastSegment = comTrajectoryPlanner.getSegmentNumber(totalStateDuration.getDoubleValue());
+      comTrajectoryPlanner.compute(lastSegment, comTrajectoryPlanner.getTimeInSegment(lastSegment, totalStateDuration.getDoubleValue()));
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
       yoFinalDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
       yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
+      int currentSegment = Math.min(lastSegment, comTrajectoryPlanner.getSegmentNumber(timeInSupportSequence.getDoubleValue()));
+      comTrajectoryPlanner.compute(currentSegment, comTrajectoryPlanner.getTimeInSegment(currentSegment, timeInSupportSequence.getDoubleValue()));
 
-      comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
       {
@@ -617,6 +619,8 @@ public class BalanceManager
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
          timeInSupportSequence.add(controllerToolbox.getControlDT());
+      else
+         timeInSupportSequence.add(0.5 * controllerToolbox.getControlDT());
 
       icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
