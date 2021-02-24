@@ -55,6 +55,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -777,6 +778,8 @@ public class BalanceManager
 
       initializeOnStateChange = true;
       stepAdjustmentController.reset();
+      comTrajectoryPlanner.reset();
+      angularMomentumHandler.resetAngularMomentum();
    }
 
    public void prepareForDoubleSupportPushRecovery()
