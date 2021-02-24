@@ -193,7 +193,7 @@ public class FocusBasedGDXCamera extends Camera
          latitude -= latitudeSpeed * deltaY;
          longitude += longitudeSpeed * deltaX;
 
-         return true;
+         return false;
       }
 
       return false;
@@ -202,7 +202,7 @@ public class FocusBasedGDXCamera extends Camera
    public boolean scrolled(float amountX, float amountY)
    {
       zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
-      return true;
+      return false;
    }
 
    // Taken from GDX PerspectiveCamera
