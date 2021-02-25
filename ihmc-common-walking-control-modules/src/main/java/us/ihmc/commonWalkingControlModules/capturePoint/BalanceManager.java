@@ -61,7 +61,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -191,6 +190,13 @@ public class BalanceManager
    private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
    private final YoBoolean icpPlannerDone = new YoBoolean("ICPPlannerDone", registry);
+   /**
+    * When the current state last longer than planned, this scale factor is applied to the control DT
+    * when integrating to computing the planner time. With a value of 0, the planner time will be
+    * clamped to the planned state duration, when > 0, the planner time is allowed to overrun the
+    * planned duration and the ICP planner will extrapolate the desired ICP.
+    */
+   private final DoubleParameter icpPlanOverrunTimeScaleFactor;
    private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
 
    private boolean initializeOnStateChange = false;
@@ -253,6 +259,7 @@ public class BalanceManager
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
+      icpPlanOverrunTimeScaleFactor = new DoubleParameter("icpPlanOverrunTimeScaleFactor", registry, 0.0);
 
       WalkingMessageHandler walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       momentumTrajectoryHandler = walkingMessageHandler == null ? null : walkingMessageHandler.getMomentumTrajectoryHandler();
@@ -619,8 +626,8 @@ public class BalanceManager
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
       if (footsteps.isEmpty() || !icpPlannerDone.getValue())
          timeInSupportSequence.add(controllerToolbox.getControlDT());
-      else
-         timeInSupportSequence.add(0.5 * controllerToolbox.getControlDT());
+      else if (icpPlanOverrunTimeScaleFactor.getValue() > 0.0)
+         timeInSupportSequence.add(icpPlanOverrunTimeScaleFactor.getValue() * controllerToolbox.getControlDT());
 
       icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
