@@ -226,6 +226,7 @@ public class MainTabController
       swingPlannerType.setItems(FXCollections.observableArrayList(SwingPlannerType.values()));
       swingPlannerType.setValue(SwingPlannerType.NONE);
 
+      messager.bindBidirectional(BindStartToRobot, bindStartToRobot.selectedProperty(), true);
       messager.bindBidirectional(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty(), true);
       messager.bindBidirectional(OverrideStepTimings, overrideTiming.selectedProperty(), true);
       messager.bindBidirectional(ManualSwingTime, swingTimeSpinner.valueFactoryProperty().getValue().valueProperty(), true);
