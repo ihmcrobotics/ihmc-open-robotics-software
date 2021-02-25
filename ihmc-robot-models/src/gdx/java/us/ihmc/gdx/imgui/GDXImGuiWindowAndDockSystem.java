@@ -1,7 +1,5 @@
 package us.ihmc.gdx.imgui;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import imgui.ImFont;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
@@ -26,8 +24,10 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
-   public void create()
+   public void create(long windowHandle)
    {
+      this.windowHandle = windowHandle;
+
       GLFWErrorCallback.createPrint(System.err).set();
 
       if (!glfwInit())
@@ -70,8 +70,6 @@ public class GDXImGuiWindowAndDockSystem
          style.setWindowRounding(0.0f);
          style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
       }
-
-      windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
 
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);

@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import imgui.flag.ImGuiWindowFlags;
@@ -87,7 +88,7 @@ public class GDXImGuiBasedUI
       if (ENABLE_VR)
          sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
 
-      imGuiWindowAndDockSystem.create();
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
    }
 
    public ImGuiDockingSetup getImGuiDockingSetup()
