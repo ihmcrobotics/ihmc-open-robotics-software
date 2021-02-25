@@ -16,8 +16,19 @@ import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class GlfwWindowForImGui
 {
+   private final String windowTitle;
+   private final int windowWidth;
+   private final int windowHeight;
    private long windowHandle;
 
+   public GlfwWindowForImGui(String windowTitle, int windowWidth, int windowHeight)
+   {
+      this.windowTitle = windowTitle;
+      this.windowWidth = windowWidth;
+      this.windowHeight = windowHeight;
+   }
+
+   // TODO: Extract more settings options
    public void create()
    {
       GLFWErrorCallback.createPrint(System.err).set();
@@ -27,7 +38,9 @@ public class GlfwWindowForImGui
          throw new IllegalStateException("Unable to initialize GLFW");
       }
 
-      windowHandle = glfwCreateWindow(1280, 768, "Dear ImGui+LWJGL Example", NULL, NULL);
+      long monitor = NULL;
+      long share = NULL;
+      windowHandle = glfwCreateWindow(windowWidth, windowHeight, windowTitle, monitor, share);
 
       if (windowHandle == NULL) {
          throw new RuntimeException("Failed to create the GLFW window");
