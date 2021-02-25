@@ -1,19 +1,19 @@
 package us.ihmc.gdx.sceneManager;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputMultiplexer;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
 import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.profiling.GLProfiler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
-import imgui.ImGui;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.input.GDXInputMode;
-import us.ihmc.gdx.input.GDXInputMultiplexer;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.log.LogTools;
@@ -25,12 +25,11 @@ import java.util.HashSet;
  */
 public class GDX3DSceneManager
 {
-   private GDXInputMultiplexer inputMultiplexer;
+   private InputMultiplexer inputMultiplexer;
    private FocusBasedGDXCamera camera3D;
    private Environment environment;
    private ScreenViewport viewport;
    private ModelBatch modelBatch;
-   private GDXInputMode inputMode;
 
    private int x = 0;
    private int y = 0;
@@ -50,7 +49,6 @@ public class GDX3DSceneManager
 
    public void create(GDXInputMode inputMode)
    {
-      this.inputMode = inputMode;
       new GLProfiler(Gdx.graphics).enable();
       GDXTools.syncLogLevelWithLogTools();
 
@@ -60,12 +58,17 @@ public class GDX3DSceneManager
       // we could set shader options or even swap out the shader here
       modelBatch = new ModelBatch(new DefaultShaderProvider(defaultShaderConfig));
 
-      inputMultiplexer = new GDXInputMultiplexer();
-      Gdx.input.setInputProcessor(inputMultiplexer);
+      if (inputMode == GDXInputMode.libGDX)
+      {
+         inputMultiplexer = new InputMultiplexer();
+         Gdx.input.setInputProcessor(inputMultiplexer);
+      }
 
       camera3D = new FocusBasedGDXCamera();
       if (inputMode == GDXInputMode.libGDX)
-         camera3D.setInputForLibGDX();
+      {
+         inputMultiplexer.addProcessor(camera3D.setInputForLibGDX());
+      }
 
       if (addFocusSphere)
          addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);
@@ -218,9 +221,16 @@ public class GDX3DSceneManager
       return camera3D;
    }
 
-   public GDXInputMultiplexer getInputMultiplexer()
+   public void addLibGDXInputProcessor(InputProcessor inputProcessor)
    {
-      return inputMultiplexer;
+      if (inputMultiplexer != null)
+      {
+         inputMultiplexer.addProcessor(inputProcessor);
+      }
+      else
+      {
+         LogTools.error(1, "libGDX is not being used for input!");
+      }
    }
 
    public ModelBatch getModelBatch()

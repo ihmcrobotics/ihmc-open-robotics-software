@@ -2,6 +2,8 @@ package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
@@ -23,8 +25,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
-import us.ihmc.gdx.input.GDXInputAdapter;
-import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class FocusBasedGDXCamera extends Camera
@@ -62,7 +62,7 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
-   private GDXInputAdapter gdxInputAdapter;
+   private boolean libGDXInputMode = false;
    private boolean isWPressed = false;
    private boolean isAPressed = false;
    private boolean isSPressed = false;
@@ -111,10 +111,14 @@ public class FocusBasedGDXCamera extends Camera
       update(true);
    }
 
-   public void setInputForLibGDX()
+   public InputProcessor setInputForLibGDX()
    {
-      gdxInputAdapter = new GDXInputAdapter(GDXInputMode.libGDX)
+      libGDXInputMode = true;
+      return new InputAdapter()
       {
+         int lastDragX = 0;
+         int lastDragY = 0;
+
          @Override
          public boolean scrolled(float amountX, float amountY)
          {
@@ -123,9 +127,21 @@ public class FocusBasedGDXCamera extends Camera
          }
 
          @Override
-         public boolean touchDraggedDelta(int deltaX, int deltaY)
+         public boolean touchDown(int screenX, int screenY, int pointer, int button)
          {
-            if (isButtonPressed(Input.Buttons.LEFT))
+            lastDragX = screenX;
+            lastDragY = screenY;
+            return false;
+         }
+
+         @Override
+         public boolean touchDragged(int screenX, int screenY, int pointer)
+         {
+            int deltaX = screenX - lastDragX;
+            int deltaY = screenY - lastDragY;
+            lastDragX = screenX;
+            lastDragY = screenY;
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT))
             {
                FocusBasedGDXCamera.this.mouseDragged(deltaX, deltaY);
             }
@@ -240,14 +256,14 @@ public class FocusBasedGDXCamera extends Camera
    {
       float tpf = Gdx.app.getGraphics().getDeltaTime();
 
-      if (gdxInputAdapter != null)
+      if (libGDXInputMode)
       {
-         isWPressed = gdxInputAdapter.isKeyPressed(Input.Keys.W);
-         isSPressed = gdxInputAdapter.isKeyPressed(Input.Keys.S);
-         isAPressed = gdxInputAdapter.isKeyPressed(Input.Keys.A);
-         isDPressed = gdxInputAdapter.isKeyPressed(Input.Keys.D);
-         isQPressed = gdxInputAdapter.isKeyPressed(Input.Keys.Q);
-         isZPressed = gdxInputAdapter.isKeyPressed(Input.Keys.Z);
+         isWPressed = Gdx.input.isKeyPressed(Input.Keys.W);
+         isSPressed = Gdx.input.isKeyPressed(Input.Keys.S);
+         isAPressed = Gdx.input.isKeyPressed(Input.Keys.A);
+         isDPressed = Gdx.input.isKeyPressed(Input.Keys.D);
+         isQPressed = Gdx.input.isKeyPressed(Input.Keys.Q);
+         isZPressed = Gdx.input.isKeyPressed(Input.Keys.Z);
       }
 
       if (isWPressed)

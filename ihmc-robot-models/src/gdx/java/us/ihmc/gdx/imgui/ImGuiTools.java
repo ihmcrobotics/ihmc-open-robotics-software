@@ -1,6 +1,8 @@
 package us.ihmc.gdx.imgui;
 
+import com.badlogic.gdx.Input;
 import imgui.*;
+import org.lwjgl.glfw.GLFW;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 
 import java.io.ByteArrayOutputStream;
@@ -12,6 +14,7 @@ import java.util.Objects;
 public class ImGuiTools
 {
    public static float TAB_BAR_HEIGHT = 20.0f;
+   public static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
 
    public static ImFont setupFonts(ImGuiIO io)
    {
