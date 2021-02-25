@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.pushRecovery;
+package us.ihmc.atlas.pushRecovery;
 
 import java.util.function.Consumer;
 
@@ -7,6 +7,10 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasSwingTrajectoryParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.pushRecovery.HumanoidFootFallDisturbanceRecoveryTest;
@@ -14,23 +18,19 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-import us.ihmc.valkyrie.parameters.ValkyrieSwingTrajectoryParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDisturbanceRecoveryTest
+public class AtlasFootFallDisturbanceRecoveryTest extends HumanoidFootFallDisturbanceRecoveryTest
 {
    @Override
    public DRCRobotModel getRobotModel()
    {
-      ValkyrieRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS)
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS)
       {
          @Override
          public WalkingControllerParameters getWalkingControllerParameters()
          {
-            return new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), getTarget())
+            return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
             {
                @Override
                public double getInitialICPErrorToSlowDownTransfer()
@@ -47,7 +47,7 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
                @Override
                public SwingTrajectoryParameters getSwingTrajectoryParameters()
                {
-                  return new ValkyrieSwingTrajectoryParameters(getRobotPhysicalProperties(), getTarget())
+                  return new AtlasSwingTrajectoryParameters(getTarget(), getJointMap().getModelScale())
                   {
                      @Override
                      public Tuple3DReadOnly getTouchdownVelocityWeight()
@@ -93,7 +93,6 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
       testBlindWalkOverHole(testInfo, 0.6, 0.25, 0.15);
    }
 
-   @Disabled // TODO Falls on the way out of the hole because of a poor CMP positioning. 
    @Tag("humanoid-push-recovery-slow")
    @Test
    public void testBlindWalkOverHole_20cm(TestInfo testInfo) throws Exception
@@ -105,6 +104,7 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
       testBlindWalkOverHole(testInfo, 0.6, 0.25, 0.20, varMutator);
    }
 
+   @Disabled // TODO It seems that the joint limits are getting in the way for the step down tests
    @Tag("humanoid-push-recovery-slow")
    @Test
    public void testBlindWalkOver_10cm_StepDown(TestInfo testInfo) throws Exception
@@ -114,7 +114,7 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
       super.testBlindWalkOverStepDown(testInfo, 0.6, 0.25, 0.10);
    }
 
-   @Disabled 
+   @Disabled // TODO It seems that the joint limits are getting in the way for the step down tests
    @Tag("humanoid-push-recovery-slow")
    @Test
    public void testBlindWalkOver_15cm_StepDown(TestInfo testInfo) throws Exception
@@ -125,6 +125,7 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
       super.testBlindWalkOverStepDown(testInfo, 0.6, 0.25, 0.15);
    }
 
+   @Disabled // TODO It seems that the joint limits are getting in the way for the step down tests
    @Tag("humanoid-push-recovery-slow")
    @Test
    public void testBlindWalkOver_20cm_StepDown(TestInfo testInfo) throws Exception
