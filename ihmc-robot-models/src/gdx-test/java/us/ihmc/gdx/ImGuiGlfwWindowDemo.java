@@ -1,49 +1,27 @@
 package us.ihmc.gdx;
 
 import imgui.internal.ImGui;
-import us.ihmc.gdx.imgui.GDXImGuiWindowAndDockSystem;
-import us.ihmc.gdx.imgui.GlfwWindowForImGui;
-import us.ihmc.gdx.imgui.ImGuiDockingSetup;
-import us.ihmc.gdx.imgui.ImGuiTools;
-
-import static org.lwjgl.glfw.GLFW.*;
+import us.ihmc.gdx.imgui.*;
 
 public class ImGuiGlfwWindowDemo
 {
-   private final GlfwWindowForImGui glfwWindowForImGui = new GlfwWindowForImGui();
-   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem();
-
    public ImGuiGlfwWindowDemo()
    {
-      glfwWindowForImGui.create();
+      ImGuiGlfwWindow imGuiGlfwWindow = new ImGuiGlfwWindow(getClass().getSimpleName(), 800, 600);
+      imGuiGlfwWindow.getDockingSetup().addFirst("Window");
+      imGuiGlfwWindow.run(this::render, this::dispose);
+   }
 
-      long windowHandle = glfwWindowForImGui.getWindowHandle();
+   public void render()
+   {
+      ImGui.begin("Window");
+      ImGui.text("Text");
+      ImGui.end();
+   }
 
-      imGuiDockSystem.create(windowHandle);
+   public void dispose()
+   {
 
-      ImGuiDockingSetup dockingSetup = new ImGuiDockingSetup();
-      dockingSetup.addFirst("Meow");
-
-      while (!glfwWindowShouldClose(windowHandle))
-      {
-         ImGuiTools.glClearDarkGray();
-         imGuiDockSystem.beforeWindowManagement();
-
-         ImGui.begin("Meow");
-         ImGui.text("Hello");
-         ImGui.end();
-
-         if (imGuiDockSystem.isFirstRenderCall())
-         {
-            dockingSetup.build(imGuiDockSystem.getCentralDockspaceId());
-         }
-
-         imGuiDockSystem.afterWindowManagement();
-      }
-
-      imGuiDockSystem.dispose();
-
-      glfwWindowForImGui.dispose();
    }
 
    public static void main(String[] args)
