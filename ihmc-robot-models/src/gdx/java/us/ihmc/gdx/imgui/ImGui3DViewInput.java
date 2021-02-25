@@ -1,7 +1,12 @@
 package us.ihmc.gdx.imgui;
 
+import com.badlogic.gdx.math.Vector3;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 /**
@@ -22,8 +27,15 @@ public class ImGui3DViewInput
    private boolean isWindowHovered;
    private float mouseWheelDelta;
 
-   public void compute(GDXImGuiBasedUI baseUI)
+   private final Vector3 gdxOrigin = new Vector3();
+   private final Vector3 gdxDirection = new Vector3();
+   private final Line3D pickRayInWorld = new Line3D();
+   private boolean computedPickRay = false;
+
+   public void compute()
    {
+      computedPickRay = false;
+
       boolean leftMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Left);
       float mouseDragDeltaX = ImGui.getMouseDragDeltaX();
       float mouseDragDeltaY = ImGui.getMouseDragDeltaY();
@@ -50,6 +62,34 @@ public class ImGui3DViewInput
          dragBucketX += mouseDragDeltaX - dragBucketX;
          dragBucketY += mouseDragDeltaY - dragBucketY;
       }
+   }
+
+   public Line3DReadOnly getPickRayInWorld(GDXImGuiBasedUI baseUI)
+   {
+      if (!computedPickRay)
+      {
+         computedPickRay = true;
+
+         FocusBasedGDXCamera camera = baseUI.getSceneManager().getCamera3D();
+         float viewportWidth = baseUI.getViewportSizeX();
+         float viewportHeight = baseUI.getViewportSizeY();
+
+         float viewportX = (2.0f * getMousePosX()) / viewportWidth - 1.0f;
+         float viewportY = (2.0f * (viewportHeight - getMousePosY())) / viewportHeight - 1.0f;
+
+         gdxOrigin.set(viewportX, viewportY, -1.0f);
+         gdxOrigin.prj(camera.invProjectionView);
+
+         gdxDirection.set(viewportX, viewportY, 1.0f);
+         gdxDirection.prj(camera.invProjectionView);
+
+         gdxDirection.sub(gdxOrigin).nor();
+
+         GDXTools.toEuclid(gdxOrigin, pickRayInWorld.getPoint());
+         GDXTools.toEuclid(gdxDirection, pickRayInWorld.getDirection());
+      }
+
+      return pickRayInWorld;
    }
 
    public boolean isWindowHovered()

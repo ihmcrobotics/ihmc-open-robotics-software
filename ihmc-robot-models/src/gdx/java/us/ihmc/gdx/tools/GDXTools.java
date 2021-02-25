@@ -10,10 +10,9 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.euclid.tuple3D.Vector3D32;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
 
 public class GDXTools
@@ -135,12 +134,12 @@ public class GDXTools
       gdxVector3.set(euclidTuple.getX32(), euclidTuple.getY32(), euclidTuple.getZ32());
    }
 
-   public static void toEuclid(Vector3 gdxVector3, Vector3D32 euclidVector3D32)
+   public static void toEuclid(Vector3 gdxVector3, Vector3DBasics euclidVector3D32)
    {
       euclidVector3D32.set(gdxVector3.x, gdxVector3.y, gdxVector3.z);
    }
 
-   public static void toEuclid(Vector3 gdxVector3, Point3D32 euclidPoint3D32)
+   public static void toEuclid(Vector3 gdxVector3, Point3DBasics euclidPoint3D32)
    {
       euclidPoint3D32.set(gdxVector3.x, gdxVector3.y, gdxVector3.z);
    }

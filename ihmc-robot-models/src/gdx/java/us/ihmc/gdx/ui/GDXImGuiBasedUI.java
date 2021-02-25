@@ -151,7 +151,7 @@ public class GDXImGuiBasedUI
       float renderSizeX = sizeX * antiAliasing;
       float renderSizeY = sizeY * antiAliasing;
 
-      inputCalculator.compute(this);
+      inputCalculator.compute();
       for (Consumer<ImGui3DViewInput> imGuiInputProcessor : imGuiInputProcessors)
       {
          imGuiInputProcessor.accept(inputCalculator);
