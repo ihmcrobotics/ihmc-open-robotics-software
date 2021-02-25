@@ -3,6 +3,7 @@ package us.ihmc.gdx.imgui;
 import com.badlogic.gdx.Input;
 import imgui.*;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 
 import java.io.ByteArrayOutputStream;
@@ -11,10 +12,19 @@ import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.util.Objects;
 
+import static org.lwjgl.opengl.GL32.glClear;
+import static org.lwjgl.opengl.GL32.glClearColor;
+
 public class ImGuiTools
 {
    public static float TAB_BAR_HEIGHT = 20.0f;
    public static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
+
+   public static void glClearDarkGray()
+   {
+      glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
+      glClear(GL32.GL_COLOR_BUFFER_BIT);
+   }
 
    public static ImFont setupFonts(ImGuiIO io)
    {
