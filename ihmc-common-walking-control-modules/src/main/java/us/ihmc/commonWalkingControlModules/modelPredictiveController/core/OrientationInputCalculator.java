@@ -140,6 +140,31 @@ public class OrientationInputCalculator
       return Cd;
    }
 
+   DMatrixRMaj getA0()
+   {
+      return a0;
+   }
+
+   DMatrixRMaj getA1()
+   {
+      return a1;
+   }
+
+   DMatrixRMaj getA2()
+   {
+      return a2;
+   }
+
+   DMatrixRMaj getA3()
+   {
+      return a3;
+   }
+
+   DMatrixRMaj getA4()
+   {
+      return a4;
+   }
+
    private void reset(DiscreteOrientationCommand command)
    {
       int totalContactPoints = 0;
@@ -257,8 +282,8 @@ public class OrientationInputCalculator
 
    private void computeAffineTimeInvariantTerms(double timeOfConstraint)
    {
-      MatrixTools.setMatrixBlock(A, 0, 0, a3, 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(A, 0, 3, a4, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 0, a4, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 3, a3, 0, 0, 3, 3, 1.0);
 
       B.reshape(6, indexHandler.getTotalProblemSize());
       B.zero();

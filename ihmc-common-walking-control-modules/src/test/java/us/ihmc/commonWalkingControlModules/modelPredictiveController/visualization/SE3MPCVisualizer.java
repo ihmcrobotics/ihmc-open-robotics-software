@@ -56,9 +56,9 @@ public class SE3MPCVisualizer
          forceViewers.put(robotSide, new ContactPlaneForceViewer(robotSide.getCamelCaseName(), 4, registry, graphicsListRegistry));
       }
 
-      YoGraphicPosition vrpVis = new YoGraphicPosition("DesiredVRPVis", desiredVRP, 0.05, YoAppearance.Green());
-      YoGraphicPosition dcmVis = new YoGraphicPosition("DesiredDCMVis", desiredDCM, 0.05, YoAppearance.Blue());
-      YoGraphicPosition comVis = new YoGraphicPosition("DesiredCoMVis", desiredCoM, 0.05, YoAppearance.White());
+      YoGraphicPosition vrpVis = new YoGraphicPosition("DesiredVRPVis", desiredVRP, 0.025, YoAppearance.Green());
+      YoGraphicPosition dcmVis = new YoGraphicPosition("DesiredDCMVis", desiredDCM, 0.025, YoAppearance.Yellow());
+      YoGraphicPosition comVis = new YoGraphicPosition("DesiredCoMVis", desiredCoM, 0.025, YoAppearance.Black());
       AppearanceDefinition bodyVisAppearance = YoAppearance.Green();
       bodyVisAppearance.setTransparency(0.5);
       YoGraphicEllipsoid bodyVis = new YoGraphicEllipsoid("DesiredBodyVis", desiredBodyPose, bodyVisAppearance, new Vector3D(0.05, 0.05, 0.1));
