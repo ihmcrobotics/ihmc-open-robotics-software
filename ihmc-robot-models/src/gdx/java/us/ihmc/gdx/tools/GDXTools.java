@@ -143,4 +143,16 @@ public class GDXTools
    {
       euclidPoint3D32.set(gdxVector3.x, gdxVector3.y, gdxVector3.z);
    }
+
+   public static void toEuclid(Matrix4 gdxAffine, Point3DBasics euclidPoint)
+   {
+      euclidPoint.set(gdxAffine.val[Matrix4.M03],
+                      gdxAffine.val[Matrix4.M13],
+                      gdxAffine.val[Matrix4.M23]);
+   }
+
+   public static void toGDX(Point3DBasics euclidPoint, Matrix4 gdxAffine)
+   {
+      gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
+   }
 }
