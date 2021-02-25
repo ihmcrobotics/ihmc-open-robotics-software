@@ -63,8 +63,9 @@ public class GDX3DSceneManager
       inputMultiplexer = new GDXInputMultiplexer();
       Gdx.input.setInputProcessor(inputMultiplexer);
 
-      camera3D = new FocusBasedGDXCamera(inputMode);
-      inputMultiplexer.addProcessor(camera3D.getInputAdapter());
+      camera3D = new FocusBasedGDXCamera();
+      if (inputMode == GDXInputMode.libGDX)
+         camera3D.setInputForLibGDX();
 
       if (addFocusSphere)
          addModelInstance(camera3D.getFocusPointSphere(), GDXSceneLevel.VIRTUAL);

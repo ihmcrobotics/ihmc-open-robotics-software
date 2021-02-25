@@ -135,6 +135,22 @@ public class GDXInputMultiplexer implements InputProcessor
       return false;
    }
 
+//   public boolean mouseClicked(int screenX, int screenY, int button)
+//   {
+//      Object[] items = processors.begin();
+//      try
+//      {
+//         for (int i = 0, n = processors.size; i < n; i++)
+//            if (((GDXInputAdapter) items[i]).getFirstInputProcessor().mouseClicked(screenX, screenY, button))
+//               return true;
+//      }
+//      finally
+//      {
+//         processors.end();
+//      }
+//      return false;
+//   }
+
    public boolean touchUp(int screenX, int screenY, int pointer, int button)
    {
       Object[] items = processors.begin();

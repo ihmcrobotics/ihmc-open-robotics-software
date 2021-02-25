@@ -11,6 +11,8 @@ import java.util.Objects;
 
 public class ImGuiTools
 {
+   public static float TAB_BAR_HEIGHT = 20.0f;
+
    public static ImFont setupFonts(ImGuiIO io)
    {
       final ImFontAtlas fontAtlas = io.getFonts();

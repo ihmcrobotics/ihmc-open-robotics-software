@@ -12,6 +12,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import imgui.internal.ImGui;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -21,14 +22,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.input.GDXInputAdapter;
 import us.ihmc.gdx.input.GDXInputMode;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class FocusBasedGDXCamera extends Camera
 {
-   private final GDXInputAdapter gdxInputAdapter;
-
    private final FramePose3D cameraPose = new FramePose3D();
 
    private final Vector3D euclidDirection = new Vector3D();
@@ -62,7 +62,15 @@ public class FocusBasedGDXCamera extends Camera
    private final Vector3D cameraOffsetLeft;
    private final Vector3D cameraOffsetDown;
 
-   public FocusBasedGDXCamera(GDXInputMode inputMode)
+   private GDXInputAdapter gdxInputAdapter;
+   private boolean isWPressed = false;
+   private boolean isAPressed = false;
+   private boolean isSPressed = false;
+   private boolean isDPressed = false;
+   private boolean isQPressed = false;
+   private boolean isZPressed = false;
+
+   public FocusBasedGDXCamera()
    {
       fieldOfView = 45.0f;
       viewportWidth = Gdx.graphics.getWidth();
@@ -101,19 +109,27 @@ public class FocusBasedGDXCamera extends Camera
 
       updateCameraPose();
       update(true);
+   }
 
-      gdxInputAdapter = new GDXInputAdapter(inputMode)
+   public void setInputForLibGDX()
+   {
+      gdxInputAdapter = new GDXInputAdapter(GDXInputMode.libGDX)
       {
          @Override
          public boolean scrolled(float amountX, float amountY)
          {
-            return FocusBasedGDXCamera.this.scrolled(amountX, amountY);
+            FocusBasedGDXCamera.this.scrolled(amountY);
+            return false;
          }
 
          @Override
          public boolean touchDraggedDelta(int deltaX, int deltaY)
          {
-            return FocusBasedGDXCamera.this.touchDragged(deltaX, deltaY);
+            if (isButtonPressed(Input.Buttons.LEFT))
+            {
+               FocusBasedGDXCamera.this.mouseDragged(deltaX, deltaY);
+            }
+            return false;
          }
       };
    }
@@ -186,23 +202,35 @@ public class FocusBasedGDXCamera extends Camera
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
    }
 
-   public boolean touchDragged(int deltaX, int deltaY)
+   public void processImGuiInput(ImGui3DViewInput input)
    {
-      if (gdxInputAdapter.isButtonPressed(Input.Buttons.LEFT))
-      {
-         latitude -= latitudeSpeed * deltaY;
-         longitude += longitudeSpeed * deltaX;
+      isWPressed = input.isWindowHovered() && ImGui.isKeyDown('W');
+      isSPressed = input.isWindowHovered() && ImGui.isKeyDown('S');
+      isAPressed = input.isWindowHovered() && ImGui.isKeyDown('A');
+      isDPressed = input.isWindowHovered() && ImGui.isKeyDown('D');
+      isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
+      isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
 
-         return false;
+      if (input.isDragging())
+      {
+         mouseDragged(input.getMouseDraggedX(), input.getMouseDraggedY());
       }
 
-      return false;
+      if (input.isWindowHovered())
+      {
+         scrolled(input.getMouseWheelDelta());
+      }
    }
 
-   public boolean scrolled(float amountX, float amountY)
+   private void mouseDragged(float deltaX, float deltaY)
+   {
+      latitude -= latitudeSpeed * deltaY;
+      longitude += longitudeSpeed * deltaX;
+   }
+
+   private void scrolled(float amountY)
    {
       zoom = zoom + Math.signum(amountY) * zoom * zoomSpeedFactor;
-      return false;
    }
 
    // Taken from GDX PerspectiveCamera
@@ -212,27 +240,37 @@ public class FocusBasedGDXCamera extends Camera
    {
       float tpf = Gdx.app.getGraphics().getDeltaTime();
 
-      if (gdxInputAdapter.isKeyPressed(Input.Keys.W))
+      if (gdxInputAdapter != null)
+      {
+         isWPressed = gdxInputAdapter.isKeyPressed(Input.Keys.W);
+         isSPressed = gdxInputAdapter.isKeyPressed(Input.Keys.S);
+         isAPressed = gdxInputAdapter.isKeyPressed(Input.Keys.A);
+         isDPressed = gdxInputAdapter.isKeyPressed(Input.Keys.D);
+         isQPressed = gdxInputAdapter.isKeyPressed(Input.Keys.Q);
+         isZPressed = gdxInputAdapter.isKeyPressed(Input.Keys.Z);
+      }
+
+      if (isWPressed)
       {
          focusPointPose.appendTranslation(getTranslateSpeedFactor() * tpf, 0.0, 0.0);
       }
-      if (gdxInputAdapter.isKeyPressed(Input.Keys.S))
+      if (isSPressed)
       {
          focusPointPose.appendTranslation(-getTranslateSpeedFactor() * tpf, 0.0, 0.0);
       }
-      if (gdxInputAdapter.isKeyPressed(Input.Keys.A))
+      if (isAPressed)
       {
          focusPointPose.appendTranslation(0.0, getTranslateSpeedFactor() * tpf, 0.0);
       }
-      if (gdxInputAdapter.isKeyPressed(Input.Keys.D))
+      if (isDPressed)
       {
          focusPointPose.appendTranslation(0.0, -getTranslateSpeedFactor() * tpf, 0.0);
       }
-      if (gdxInputAdapter.isKeyPressed(Input.Keys.Q))
+      if (isQPressed)
       {
          focusPointPose.appendTranslation(0.0, 0.0, getTranslateSpeedFactor() * tpf);
       }
-      if (gdxInputAdapter.isKeyPressed(Input.Keys.Z))
+      if (isZPressed)
       {
          focusPointPose.appendTranslation(0.0, 0.0, -getTranslateSpeedFactor() * tpf);
       }
@@ -269,10 +307,5 @@ public class FocusBasedGDXCamera extends Camera
    private double getTranslateSpeedFactor()
    {
       return translateSpeedFactor * zoom;
-   }
-
-   public GDXInputAdapter getInputAdapter()
-   {
-      return gdxInputAdapter;
    }
 }
