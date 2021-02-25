@@ -105,6 +105,7 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
       testBlindWalkOverHole(testInfo, 0.6, 0.25, 0.20, varMutator);
    }
 
+   @Disabled // Disabled as pretty redundant with the 15cm test. 
    @Tag("humanoid-push-recovery-slow")
    @Test
    public void testBlindWalkOver_10cm_StepDown(TestInfo testInfo) throws Exception
@@ -114,7 +115,6 @@ public class ValkyrieFootFallDisturbanceRecoveryTest extends HumanoidFootFallDis
       super.testBlindWalkOverStepDown(testInfo, 0.6, 0.25, 0.10);
    }
 
-   @Disabled 
    @Tag("humanoid-push-recovery-slow")
    @Test
    public void testBlindWalkOver_15cm_StepDown(TestInfo testInfo) throws Exception
