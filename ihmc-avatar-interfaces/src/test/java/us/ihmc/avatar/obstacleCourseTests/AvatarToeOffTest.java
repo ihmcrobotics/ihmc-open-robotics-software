@@ -89,6 +89,11 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       stepHeight = height;
    }
 
+   public void setCheckAnkleLimits(boolean checkAnkleLimits)
+   {
+      this.checkAnkleLimits = checkAnkleLimits;
+   }
+
    @Test
    public void testShortSteps(TestInfo testInfo) throws SimulationExceededMaximumTimeException
    {
