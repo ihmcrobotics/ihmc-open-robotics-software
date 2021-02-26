@@ -41,6 +41,8 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private boolean useExperimentalPhysicsEngine = false;
 
    private boolean isAnkleAtJointLimit = false;
+   private double anklePitchLowerLimit;
+   private double anklePitchUpperLimit;
    private double swingTime = 0.6;
    private double transferTime = 0.25;
    private double stepHeight = 0.0;
@@ -107,7 +109,8 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
       steps.addStep(getStepLength(), startYPosition, width, depth, stepHeight);
       setupTest(testInfo, steps);
-      setYoVariablesToDoToeOffInSS(0.0, 0.3, 0.1);
+      anklePitchLowerLimit = drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getJointLimitLower();
+      anklePitchUpperLimit = drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getJointLimitUpper();
 
       walkForward(getStepLength(), 1, 0.0, stepHeight);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
