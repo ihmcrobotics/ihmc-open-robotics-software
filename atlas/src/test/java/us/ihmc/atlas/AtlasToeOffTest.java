@@ -18,6 +18,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     public void testToeOffTakingShortStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.1);
+        setCheckAnkleLimits(true);
         super.testToeOffTakingStep(testInfo);
     }
 
@@ -25,6 +26,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     public void testToeOffTakingShortStepDownCheckingAnkleLimitsWithExperimentalPhysicsEngine(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setUseExperimentalPhysicsEngine(true);
+        setCheckAnkleLimits(true);
         setStepHeight(-0.1);
         super.testToeOffTakingStep(testInfo);
     }
@@ -33,6 +35,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     public void testToeOffTakingMediumStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.2);
+        setCheckAnkleLimits(true);
         super.testToeOffTakingStep(testInfo);
     }
 
@@ -40,6 +43,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     public void testToeOffTakingHighStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.3);
+        setCheckAnkleLimits(true);
         super.testToeOffTakingStep(testInfo);
     }
 
