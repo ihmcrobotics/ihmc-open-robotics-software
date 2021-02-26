@@ -40,6 +40,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private boolean useExperimentalPhysicsEngine = false;
 
+   private boolean checkAnkleLimits = false;
    private boolean isAnkleAtJointLimit = false;
    private double anklePitchLowerLimit;
    private double anklePitchUpperLimit;
@@ -165,18 +166,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       footsteps.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.publishToController(footsteps);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.9 + transferTime + swingTime));
-      updateAnkleLimitStatus();
-      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
-      updateAnkleLimitStatus();
-      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
-      updateAnkleLimitStatus();
-      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
-      updateAnkleLimitStatus();
-      assertTrue((isAnkleLimitAtJointLimit == 0.0) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
-      updateAnkleLimitStatus();
-      assertTrue(isAnkleLimitAtJointLimit == 0.0);
-   }
 
    private void setYoVariablesToDoToeOffInSS(double icpProximity, double icpPercentLengthToLeadingFoot, double ecmpProximity)
    {
@@ -194,6 +183,25 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       yoICPProximity.set(icpProximity);
       yoICPPercent.set(icpPercentLengthToLeadingFoot);
       yoECMPProximity.set(ecmpProximity);
+      // check ankle limits after each step at the time of touchdown
+      if(checkAnkleLimits)
+      {
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.9));
+         for(int numberOfSteps=0; numberOfSteps < steps; numberOfSteps++)
+         {
+            assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(transferTime + swingTime));
+            for (int smallStepSimulate = 0; smallStepSimulate < 4; smallStepSimulate++)
+            {
+               updateAnkleLimitStatus();
+               assertTrue((!isAnkleAtJointLimit) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+            }
+            assertTrue(!isAnkleAtJointLimit);
+         }
+      }
+      else
+      {
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+      }
    }
 
    private void updateAnkleLimitStatus()
