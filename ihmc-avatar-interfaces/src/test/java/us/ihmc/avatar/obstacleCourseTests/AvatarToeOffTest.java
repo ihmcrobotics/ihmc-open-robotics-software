@@ -40,7 +40,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private boolean useExperimentalPhysicsEngine = false;
 
-   private double isAnkleLimitAtJointLimit;
+   private boolean isAnkleAtJointLimit = false;
    private double swingTime = 0.6;
    private double transferTime = 0.25;
    private double stepHeight = 0.0;
@@ -195,7 +195,12 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
    private void updateAnkleLimitStatus()
    {
-      isAnkleLimitAtJointLimit = drcSimulationTestHelper.getYoVariable("limitl_leg_aky_Status").getValueAsDouble();
+      double leftAnklePitch =  drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getQ();
+      double rightAnklePitch =  drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH).getQ();
+      isAnkleAtJointLimit |= MathTools.epsilonCompare(leftAnklePitch, anklePitchLowerLimit, Math.toRadians(1.0));
+      isAnkleAtJointLimit |= MathTools.epsilonCompare(leftAnklePitch, anklePitchUpperLimit, Math.toRadians(1.0));
+      isAnkleAtJointLimit |= MathTools.epsilonCompare(rightAnklePitch, anklePitchLowerLimit, Math.toRadians(1.0));
+      isAnkleAtJointLimit |= MathTools.epsilonCompare(rightAnklePitch, anklePitchUpperLimit, Math.toRadians(1.0));
    }
 
    private static class StepsEnvironment implements CommonAvatarEnvironmentInterface
