@@ -60,7 +60,46 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     @Override
     public DRCRobotModel getRobotModel()
     {
-        AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
+        AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+        {
+            @Override
+            public WalkingControllerParameters getWalkingControllerParameters()
+            {
+                return new AtlasWalkingControllerParameters(getTarget(), getJointMap(), getContactPointParameters())
+                {
+                    @Override
+                    public ToeOffParameters getToeOffParameters()
+                    {
+                        return new AtlasToeOffParameters(getJointMap())
+                        {
+                            @Override
+                            public boolean doToeOffIfPossibleInSingleSupport()
+                            {
+                                return true;
+                            }
+
+                            @Override
+                            public double getECMPProximityForToeOff()
+                            {
+                                return 0.1;
+                            }
+
+                            @Override
+                            public double getICPProximityForToeOff()
+                            {
+                                return 0.0;
+                            }
+
+                            @Override
+                            public double getICPPercentOfStanceForSSToeOff()
+                            {
+                                return 0.20;
+                            }
+                        };
+                    }
+                };
+            }
+        };
         return robotModel;
     }
 

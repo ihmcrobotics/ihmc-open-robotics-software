@@ -12,12 +12,14 @@ import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -26,8 +28,6 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 {
@@ -99,7 +99,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       setupTest(testInfo, flatGround);
-      setYoVariablesToDoToeOffInSS(0.0, 0.3, 0.1);
 
       walkForward(getStepLength(), getNumberOfSteps());
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
@@ -172,22 +171,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 
       drcSimulationTestHelper.publishToController(footsteps);
 
-   private void setYoVariablesToDoToeOffInSS(double icpProximity, double icpPercentLengthToLeadingFoot, double ecmpProximity)
-   {
-      YoDouble yoICPProximity, yoICPPercent, yoECMPProximity;
-
-      YoBoolean toeOffAtJointLimit = (YoBoolean) drcSimulationTestHelper.getYoVariable("forceToeOffAtJointLimit");
-      toeOffAtJointLimit.set(true);
-
-      YoBoolean toeOffInSS = (YoBoolean) drcSimulationTestHelper.getYoVariable("doToeOffIfPossibleInSingleSupport");
-      yoICPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("icpProximityForToeOff");
-      yoICPPercent = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPercentOfStanceForSSToeOff");
-      yoECMPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("ecmpProximityForToeOff");
-
-      toeOffInSS.set(true);
-      yoICPProximity.set(icpProximity);
-      yoICPPercent.set(icpPercentLengthToLeadingFoot);
-      yoECMPProximity.set(ecmpProximity);
       // check ankle limits after each step at the time of touchdown
       if(checkAnkleLimits)
       {
