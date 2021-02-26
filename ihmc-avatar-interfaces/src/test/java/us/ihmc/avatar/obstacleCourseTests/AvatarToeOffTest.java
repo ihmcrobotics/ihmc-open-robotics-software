@@ -105,7 +105,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    }
 
    @Test
-   public void testToeOffTakingStepAndCheckingAnkleLimits(TestInfo testInfo) throws SimulationExceededMaximumTimeException
+   public void testToeOffTakingStep(TestInfo testInfo) throws SimulationExceededMaximumTimeException
    {
       StepsEnvironment steps = new StepsEnvironment();
       double startYPosition = 0.0;

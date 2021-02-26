@@ -2,9 +2,13 @@ package us.ihmc.atlas;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+import us.ihmc.atlas.parameters.AtlasToeOffParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.obstacleCourseTests.AvatarToeOffTest;
+import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
@@ -14,7 +18,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     public void testToeOffTakingShortStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.1);
-        super.testToeOffTakingStepAndCheckingAnkleLimits(testInfo);
+        super.testToeOffTakingStep(testInfo);
     }
 
     @Test
@@ -22,21 +26,21 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     {
         setUseExperimentalPhysicsEngine(true);
         setStepHeight(-0.1);
-        super.testToeOffTakingStepAndCheckingAnkleLimits(testInfo);
+        super.testToeOffTakingStep(testInfo);
     }
 
     @Test
     public void testToeOffTakingMediumStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.2);
-        super.testToeOffTakingStepAndCheckingAnkleLimits(testInfo);
+        super.testToeOffTakingStep(testInfo);
     }
 
     @Test
     public void testToeOffTakingHighStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.3);
-        super.testToeOffTakingStepAndCheckingAnkleLimits(testInfo);
+        super.testToeOffTakingStep(testInfo);
     }
 
     @Override
