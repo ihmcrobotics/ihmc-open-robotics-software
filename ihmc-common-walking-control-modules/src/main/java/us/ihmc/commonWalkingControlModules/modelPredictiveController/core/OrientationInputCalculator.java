@@ -250,7 +250,7 @@ public class OrientationInputCalculator
       CommonOps_DDRM.mult(mass, a3, skewDesiredCoMVelocity, a1);
       CommonOps_DDRM.mult(-mass, a3, skewDesiredCoMPosition, a2);
 
-      CommonOps_DDRM.mult(mass, skewDesiredCoMVelocity, desiredCoMPosition, comCoriolisForce);
+      CommonOps_DDRM.mult(mass, skewDesiredCoMPosition, desiredCoMVelocity, comCoriolisForce);
       CommonOps_DDRM.mult(-1.0, a3, desiredBodyAngularMomentumVector, a0);
       CommonOps_DDRM.multAdd(a3, comCoriolisForce, a0);
 
