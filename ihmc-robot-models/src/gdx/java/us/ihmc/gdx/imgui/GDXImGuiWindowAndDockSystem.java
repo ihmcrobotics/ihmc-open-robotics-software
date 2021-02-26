@@ -126,4 +126,9 @@ public class GDXImGuiWindowAndDockSystem
    {
       return isFirstRenderCall;
    }
+
+   public ImGuiImplGl3 getImGuiGl3()
+   {
+      return imGuiGl3;
+   }
 }
