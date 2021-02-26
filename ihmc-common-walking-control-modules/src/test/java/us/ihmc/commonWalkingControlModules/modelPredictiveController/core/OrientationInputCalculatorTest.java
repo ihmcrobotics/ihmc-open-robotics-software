@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import org.omg.PortableInterceptor.AdapterManagerIdHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
@@ -12,16 +10,13 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.convexOptimization.qpOASES.Matrix;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -31,7 +26,6 @@ import us.ihmc.robotics.MatrixMissingTools;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
@@ -42,6 +36,7 @@ public class OrientationInputCalculatorTest
    {
       double gravityZ = -9.81;
       double omega = 3.0;
+      double mu = 0.8;
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
@@ -62,6 +57,8 @@ public class OrientationInputCalculatorTest
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
       FramePose3D contactPose = new FramePose3D();
+
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -123,6 +120,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -182,6 +180,7 @@ public class OrientationInputCalculatorTest
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
             MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+            contactPoint.computeContactForce(omega, time);
 
             FrameVector3D expectedTorqueFromContactPoint = new FrameVector3D();
             expectedTorqueFromContactPoint.cross(contactPoint.getBasisVectorOrigin(), contactPoint.getContactAcceleration());
@@ -234,6 +233,69 @@ public class OrientationInputCalculatorTest
                assertEquals(0.0, inputCalculator.getContinuousBMatrix().get(row, col), 1e-6);
          }
 
+         FrameVector3D expectedErrorRateFromBMatrix = new FrameVector3D();
+         FrameVector3D expectedTorqueFromBMatrix = new FrameVector3D();
+         FramePoint3D constructedPosition = new FramePoint3D(MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane));
+         FrameVector3D constructedVelocity = new FrameVector3D(MPCTestHelper.computeCoMVelocity(time, omega, gravityZ, trajectoryCoefficients, contactPlane));
+         constructedPosition.subZ(0.5 * time * time * gravityZ);
+         constructedVelocity.subZ(time * gravityZ);
+
+         expectedTorqueFromBMatrix.add(expectedTorqueFromContactPlane);
+         expectedTorqueFromBMatrix.add(expectedTorqueFromGravity);
+
+         expectedErrorRateFromBMatrix.cross(constructedVelocity, desiredCoMPosition);
+         tempVector.cross(desiredCoMVelocity, constructedPosition);
+         expectedErrorRateFromBMatrix.add(tempVector);
+         desiredBodyOrientation.inverseTransform(expectedErrorRateFromBMatrix);
+         momentOfInertia.inverseTransform(expectedErrorRateFromBMatrix);
+         expectedErrorRateFromBMatrix.scale(mass);
+
+         DMatrixRMaj expectedRateFromBMatrix = new DMatrixRMaj(6, 1);
+         expectedErrorRateFromBMatrix.get(expectedRateFromBMatrix);
+         expectedTorqueFromBMatrix.get(3, expectedRateFromBMatrix);
+
+         DMatrixRMaj rateFromBMatrix = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.mult(inputCalculator.getContinuousBMatrix(), fullCoefficientVector, rateFromBMatrix);
+         MatrixTestTools.assertMatrixEquals(expectedRateFromBMatrix, rateFromBMatrix, 1e-6);
+
+
+         FrameVector3D expectedErrorRateFromCMatrix = new FrameVector3D();
+         FrameVector3D expectedTorqueFromCMatrix = new FrameVector3D();
+
+         expectedErrorRateFromCMatrix.cross(desiredCoMPosition, desiredCoMVelocity);
+         expectedErrorRateFromCMatrix.scale(mass);
+         expectedErrorRateFromCMatrix.sub(desiredBodyAngularMomentum);
+         desiredBodyOrientation.inverseTransform(expectedErrorRateFromCMatrix);
+         momentOfInertia.inverseTransform(expectedErrorRateFromCMatrix);
+
+         DMatrixRMaj a0Expected = new DMatrixRMaj(3, 1);
+         expectedErrorRateFromCMatrix.get(a0Expected);
+         MatrixTestTools.assertMatrixEquals(a0Expected, inputCalculator.getA0(), 1e-6);
+
+         FrameVector3D residualErrorRate = new FrameVector3D();
+         FramePoint3D residualPosition = new FramePoint3D(gravityVector);
+         FrameVector3D residualVelocity = new FrameVector3D(gravityVector);
+         residualPosition.scale(0.5 * time * time);
+         residualVelocity.scale(time);
+
+         residualErrorRate.cross(residualVelocity, desiredCoMPosition);
+         tempVector.cross(desiredCoMVelocity, residualPosition);
+         residualErrorRate.add(tempVector);
+         desiredBodyOrientation.inverseTransform(residualErrorRate);
+         momentOfInertia.inverseTransform(residualErrorRate);
+         residualErrorRate.scale(mass);
+
+         expectedErrorRateFromCMatrix.add(residualErrorRate);
+
+         expectedTorqueFromCMatrix.set(desiredInternalAngularMomentumRate);
+         expectedTorqueFromCMatrix.scale(-1.0);
+
+         DMatrixRMaj expectedRateFromCMatrix = new DMatrixRMaj(6, 1);
+         expectedErrorRateFromCMatrix.get(expectedRateFromCMatrix);
+         expectedTorqueFromCMatrix.get(3, expectedRateFromCMatrix);
+
+         MatrixTestTools.assertMatrixEquals(expectedRateFromCMatrix, inputCalculator.getContinuousCMatrix(), 1e-6);
+
          FrameVector3D expectedErrorRateFromContact = new FrameVector3D();
          expectedErrorRateFromContact.add(expectedAngularErrorRateFromCoriolis);
          expectedErrorRateFromContact.add(expectedAngularErrorRateFromInternalMomentum);
@@ -245,9 +307,15 @@ public class OrientationInputCalculatorTest
          CommonOps_DDRM.mult(inputCalculator.getContinuousBMatrix(), fullCoefficientVector, rateFromContact);
          CommonOps_DDRM.addEquals(rateFromContact, inputCalculator.getContinuousCMatrix());
 
-         MatrixTestTools.assertMatrixEquals(expectedRateFromContact, rateFromContact, 1e-6);
-         MatrixTestTools.assertMatrixEquals(expectedRateVector, rateVector, 1e-6);
+         DMatrixRMaj constructedRateFromContact = new DMatrixRMaj(6, 1);
+         CommonOps_DDRM.add(expectedRateFromBMatrix, expectedRateFromCMatrix, constructedRateFromContact);
 
+
+         MatrixTestTools.assertMatrixEquals(constructedRateFromContact, rateFromContact, 1e-6);
+
+         CommonOps_DDRM.addEquals(constructedRateFromContact, expectedRateVectorFromAngularError);
+         CommonOps_DDRM.addEquals(constructedRateFromContact, expectedRateVectorFromAngularMomentum);
+         MatrixTestTools.assertMatrixEquals(constructedRateFromContact, rateVector, 5e-1);
       }
    }
 
@@ -259,6 +327,7 @@ public class OrientationInputCalculatorTest
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
+      double mu = 0.8;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -278,6 +347,8 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -333,6 +404,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -396,7 +468,7 @@ public class OrientationInputCalculatorTest
          DMatrixRMaj contactTorqueJacobian = MPCTestHelper.getContactTorqueJacobian(mass, time, omega, new FramePoint3D(), contactPlane);
 
          MatrixTools.multAddBlock(-mass, skewGravityVector, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), Bmatrix, 3, 0);
-         MatrixTools.addMatrixBlock(Bmatrix, 0, indexHandler.getRhoCoefficientStartIndex(0), contactTorqueJacobian, 0, 0, 3, indexHandler.getRhoCoefficientsInSegment(0), 1.0);
+         MatrixTools.addMatrixBlock(Bmatrix, 3, indexHandler.getRhoCoefficientStartIndex(0), contactTorqueJacobian, 0, 0, 3, indexHandler.getRhoCoefficientsInSegment(0), 1.0);
 
          MatrixTools.multAddBlock(a1Matrix, MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), Bmatrix, 0, 0);
          MatrixTools.multAddBlock(a2Matrix, MPCTestHelper.getCoMVelocityJacobian(time, omega, contactPlane), Bmatrix, 0, 0);
@@ -443,6 +515,7 @@ public class OrientationInputCalculatorTest
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
+      double mu = 0.8;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -462,6 +535,8 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -517,6 +592,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -585,6 +661,7 @@ public class OrientationInputCalculatorTest
       double omega = 3.0;
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
+      double mu = 0.8;
       double tickDuration = 0.1;
       double Ixx = 1.0;
       double Iyy = 1.0;
@@ -605,6 +682,8 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -660,6 +739,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -721,6 +801,7 @@ public class OrientationInputCalculatorTest
       double omega = 3.0;
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
+      double mu = 0.8;
       double tickDuration = 0.1;
       double Ixx = 1.0;
       double Iyy = 1.0;
@@ -741,6 +822,7 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -806,6 +888,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -874,6 +957,7 @@ public class OrientationInputCalculatorTest
       double omega = 3.0;
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
+      double mu = 0.8;
       double tickDuration = 0.1;
       double Ixx = 1.0;
       double Iyy = 1.0;
@@ -894,6 +978,8 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
+
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -962,6 +1048,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -1053,6 +1140,7 @@ public class OrientationInputCalculatorTest
       double omega = 3.0;
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
+      double mu = 0.8;
       double tickDuration = 0.1;
       double Ixx = 1.0;
       double Iyy = 1.0;
@@ -1073,6 +1161,7 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -1138,6 +1227,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -1197,6 +1287,7 @@ public class OrientationInputCalculatorTest
       double gravityZ = -9.81;
       double omega = 3.0;
       double mass = 10.0;
+      double mu = 0.8;
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
       double Ixx = 1.0;
@@ -1218,6 +1309,7 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -1283,6 +1375,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -1330,6 +1423,7 @@ public class OrientationInputCalculatorTest
       double mass = 10.0;
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
+      double mu = 0.8;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -1349,6 +1443,7 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -1417,6 +1512,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
@@ -1497,6 +1593,7 @@ public class OrientationInputCalculatorTest
       double gravityZ = -9.81;
       double omega = 3.0;
       double mass = 10.0;
+      double mu = 0.8;
       double orientationPreviewWindowLength = 0.75;
       double tickDuration = 0.1;
       double Ixx = 1.0;
@@ -1518,6 +1615,7 @@ public class OrientationInputCalculatorTest
       gravity.get(gravityVector);
 
       FramePose3D contactPose = new FramePose3D();
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
 
       ContactPlaneProvider contact = new ContactPlaneProvider();
       contact.getTimeInterval().setInterval(0.0, 1.0);
@@ -1590,6 +1688,7 @@ public class OrientationInputCalculatorTest
          command.setDesiredNetAngularMomentum(desiredNetAngularMomentum);
          command.setDesiredInternalAngularMomentum(desiredInternalAngularMomentum);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
 
          inputCalculator.compute(qpInput, command);
 
