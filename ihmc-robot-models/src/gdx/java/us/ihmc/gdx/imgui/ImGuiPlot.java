@@ -9,13 +9,22 @@ public class ImGuiPlot
    private final String name;
    private final int bufferSize;
    private final float[] values;
+   private final int width;
+   private final int height;
    private int index = 0;
 
    public ImGuiPlot(String name, int bufferSize)
    {
+      this(name, bufferSize, 230, 50);
+   }
+
+   public ImGuiPlot(String name, int bufferSize, int width, int height)
+   {
       this.name = name;
       this.bufferSize = bufferSize;
       values = new float[bufferSize];
+      this.width = width;
+      this.height = height;
       Arrays.fill(values, Float.NaN);
    }
 
@@ -32,9 +41,7 @@ public class ImGuiPlot
 
    public void render()
    {
-      int graphWidth = 230;
-      int graphHeight = 50;
-      ImGui.plotLines(name, values, bufferSize, 0, "" + values[index], Float.MAX_VALUE, Float.MAX_VALUE, graphWidth, graphHeight);
+      ImGui.plotLines(name, values, bufferSize, 0, "" + values[index], Float.MAX_VALUE, Float.MAX_VALUE, width, height);
 
       ++index;
       if (index >= bufferSize - 1)
