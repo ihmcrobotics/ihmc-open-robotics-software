@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPC
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MomentumOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
@@ -20,20 +20,16 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCa
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tools.Matrix3DTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -50,7 +46,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
 
-public class SE3ModelPredictiveController
+public class MomentumOrientationSE3ModelPredictiveController
 {
    private static final boolean debug = false;
 
@@ -122,7 +118,7 @@ public class SE3ModelPredictiveController
 
    private final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler positionTrajectoryHandler;
-   final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
+   final MomentumOrientationMPCTrajectoryHandler orientationTrajectoryHandler;
 
    protected final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
@@ -143,8 +139,8 @@ public class SE3ModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
 
-   public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
-                                       double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
+   public MomentumOrientationSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
+                                                          double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
@@ -159,7 +155,7 @@ public class SE3ModelPredictiveController
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       positionTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
-      orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler, momentOfInertia, mass, registry);
+      orientationTrajectoryHandler = new MomentumOrientationMPCTrajectoryHandler(indexHandler, momentOfInertia, mass, registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
@@ -410,7 +406,7 @@ public class SE3ModelPredictiveController
          mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
 
 
-      mpcCommands.addCommand(computeInitialDiscreteOrientationObjective(commandProvider.getNextDiscreteOrientationCommand()));
+      mpcCommands.addCommand(computeInitialDiscreteOrientationObjective(commandProvider.getNextDiscreteMomentumOrientationCommand()));
       mpcCommands.addCommandList(computeDiscreteOrientationObjectives());
    }
 
@@ -457,7 +453,7 @@ public class SE3ModelPredictiveController
    private final Vector3D tempVector = new Vector3D();
    private final Vector3D currentAngularMomentumAboutFixedPoint = new Vector3D();
 
-   private MPCCommand<?> computeInitialDiscreteOrientationObjective(DiscreteOrientationCommand objectiveToPack)
+   private MPCCommand<?> computeInitialDiscreteOrientationObjective(DiscreteMomentumOrientationCommand objectiveToPack)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
@@ -531,7 +527,7 @@ public class SE3ModelPredictiveController
          double localTime = 0.0;
          for (; tick < endTick; tick++)
          {
-            DiscreteOrientationCommand objective = commandProvider.getNextDiscreteOrientationCommand();
+            DiscreteMomentumOrientationCommand objective = commandProvider.getNextDiscreteMomentumOrientationCommand();
 
             localTime += indexHandler.getOrientationTickDuration(segment);
             globalTime += indexHandler.getOrientationTickDuration(segment);

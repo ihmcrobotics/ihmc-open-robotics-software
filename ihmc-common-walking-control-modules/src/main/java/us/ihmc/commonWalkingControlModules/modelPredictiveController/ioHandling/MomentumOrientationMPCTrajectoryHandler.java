@@ -31,7 +31,7 @@ import java.util.List;
  * <p>
  * It assembles all this solution into a continuous multi-segment trajectory for the center of mass, and a list of polynomials for the VRP.
  */
-public class OrientationMPCTrajectoryHandler
+public class MomentumOrientationMPCTrajectoryHandler
 {
    private final OrientationTrajectoryCalculator orientationInitializationCalculator;
 
@@ -55,7 +55,7 @@ public class OrientationMPCTrajectoryHandler
 
    private final double mass;
 
-   public OrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, Matrix3DReadOnly momentOfInertiaMatrix, double mass, YoRegistry registry)
+   public MomentumOrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, Matrix3DReadOnly momentOfInertiaMatrix, double mass, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
       this.momentOfInertiaMatrix = momentOfInertiaMatrix;

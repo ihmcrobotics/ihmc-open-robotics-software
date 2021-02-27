@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.CoMMPCVisualizer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -34,7 +33,7 @@ import java.util.Random;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertNotEquals;
 
-public class SE3ModelPredictiveControllerTest
+public class MomentumOrientationSE3ModelPredictiveControllerTest
 {
    private static final double epsilon = 1e-3;
    private static final boolean visualize = true;
@@ -58,7 +57,7 @@ public class SE3ModelPredictiveControllerTest
       momentOfInertia.setM11(Iyy);
       momentOfInertia.setM22(Izz);
 
-      SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
+      MomentumOrientationSE3ModelPredictiveController mpc = new MomentumOrientationSE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -211,7 +210,7 @@ public class SE3ModelPredictiveControllerTest
       momentOfInertia.setM11(Iyy);
       momentOfInertia.setM22(Izz);
 
-      SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
+      MomentumOrientationSE3ModelPredictiveController mpc = new MomentumOrientationSE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -406,7 +405,7 @@ public class SE3ModelPredictiveControllerTest
       momentOfInertia.setM11(Iyy);
       momentOfInertia.setM22(Izz);
 
-      SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
+      MomentumOrientationSE3ModelPredictiveController mpc = new MomentumOrientationSE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
 
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
@@ -637,7 +636,7 @@ public class SE3ModelPredictiveControllerTest
       momentOfInertia.setM22(Izz);
 
 
-      SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
+      MomentumOrientationSE3ModelPredictiveController mpc = new MomentumOrientationSE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
@@ -832,7 +831,7 @@ public class SE3ModelPredictiveControllerTest
       momentOfInertia.setM11(Iyy);
       momentOfInertia.setM22(Izz);
 
-      SE3ModelPredictiveController mpc = new SE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
+      MomentumOrientationSE3ModelPredictiveController mpc = new MomentumOrientationSE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
@@ -944,7 +943,7 @@ public class SE3ModelPredictiveControllerTest
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
    }
 
-   private static void visualize(SE3ModelPredictiveController mpc, List<ContactPlaneProvider> contacts, double duration, YoRegistry controllerRegistry)
+   private static void visualize(MomentumOrientationSE3ModelPredictiveController mpc, List<ContactPlaneProvider> contacts, double duration, YoRegistry controllerRegistry)
    {
       if (!visualize || ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
          return;

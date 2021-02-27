@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.MomentumOrientationSE3ModelPredictiveController;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -17,7 +17,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class SE3MPCVisualizer
 {
-   private final SE3ModelPredictiveController mpc;
+   private final MomentumOrientationSE3ModelPredictiveController mpc;
    private final SimulationConstructionSet scs;
 
    private final YoFramePoint3D desiredVRP;
@@ -31,7 +31,7 @@ public class SE3MPCVisualizer
 
    private final SideDependentList<ContactPlaneForceViewer> forceViewers = new SideDependentList<>();
 
-   public SE3MPCVisualizer(SE3ModelPredictiveController mpc, SimulationConstructionSet scs,
+   public SE3MPCVisualizer(MomentumOrientationSE3ModelPredictiveController mpc, SimulationConstructionSet scs,
                            YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.mpc = mpc;

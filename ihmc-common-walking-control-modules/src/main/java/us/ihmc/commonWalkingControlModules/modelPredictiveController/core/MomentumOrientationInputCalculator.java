@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteMomentumOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -15,7 +15,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
-public class OrientationInputCalculator
+public class MomentumOrientationInputCalculator
 {
    private final FrameVector3D desiredBodyAngularMomentum = new FrameVector3D();
    private final DMatrixRMaj desiredBodyAngularMomentumVector = new DMatrixRMaj(3, 1);
@@ -69,7 +69,7 @@ public class OrientationInputCalculator
 
    private static final DMatrixRMaj identity = CommonOps_DDRM.identity(6);
 
-   public OrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public MomentumOrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
       this.indexHandler = indexHandler;
       this.mass = mass;
@@ -78,7 +78,7 @@ public class OrientationInputCalculator
       MatrixMissingTools.toSkewSymmetricMatrix(gravityVector, skewGravity);
    }
 
-   public boolean compute(QPInputTypeA inputToPack, DiscreteOrientationCommand command)
+   public boolean compute(QPInputTypeA inputToPack, DiscreteMomentumOrientationCommand command)
    {
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape(6);
@@ -165,7 +165,7 @@ public class OrientationInputCalculator
       return a4;
    }
 
-   private void reset(DiscreteOrientationCommand command)
+   private void reset(DiscreteMomentumOrientationCommand command)
    {
       int totalContactPoints = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
@@ -199,7 +199,7 @@ public class OrientationInputCalculator
       Cd.zero();
    }
 
-   private void getAllTheTermsFromTheCommandInput(DiscreteOrientationCommand command)
+   private void getAllTheTermsFromTheCommandInput(DiscreteMomentumOrientationCommand command)
    {
       desiredBodyAngularMomentum.sub(command.getDesiredNetAngularMomentum(), command.getDesiredInternalAngularMomentum());
       desiredBodyAngularMomentum.get(desiredBodyAngularMomentumVector);
@@ -220,7 +220,7 @@ public class OrientationInputCalculator
       command.getDesiredInternalAngularMomentumRate().get(desiredInternalAngularMomentumRate);
    }
 
-   private void calculateStateJacobians(DiscreteOrientationCommand command)
+   private void calculateStateJacobians(DiscreteMomentumOrientationCommand command)
    {
       double timeOfConstraint = command.getTimeOfConstraint();
       double omega = command.getOmega();
@@ -305,7 +305,7 @@ public class OrientationInputCalculator
    private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);
 
    private void setUpConstraintForFirstTick(QPInputTypeA inputToPack,
-                                            DiscreteOrientationCommand command)
+                                            DiscreteMomentumOrientationCommand command)
    {
       command.getCurrentBodyAngularMomentumAboutFixedPoint().get(initialStateVector);
       command.getCurrentAxisAngleError().get(3, initialStateVector);
@@ -319,7 +319,7 @@ public class OrientationInputCalculator
    }
 
    private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,
-                                              DiscreteOrientationCommand command)
+                                              DiscreteMomentumOrientationCommand command)
    {
       inputToPack.getTaskObjective().set(Cd);
 

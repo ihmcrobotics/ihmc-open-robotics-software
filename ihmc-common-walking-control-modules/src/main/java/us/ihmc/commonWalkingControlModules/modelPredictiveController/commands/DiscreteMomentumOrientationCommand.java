@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientationCommand>
+public class DiscreteMomentumOrientationCommand implements MPCCommand<DiscreteMomentumOrientationCommand>
 {
    private int commandId;
 
@@ -153,7 +153,7 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
    }
 
    @Override
-   public void set(DiscreteOrientationCommand other)
+   public void set(DiscreteMomentumOrientationCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
@@ -284,9 +284,9 @@ public class DiscreteOrientationCommand implements MPCCommand<DiscreteOrientatio
       {
          return true;
       }
-      else if (object instanceof DiscreteOrientationCommand)
+      else if (object instanceof DiscreteMomentumOrientationCommand)
       {
-         DiscreteOrientationCommand other = (DiscreteOrientationCommand) object;
+         DiscreteMomentumOrientationCommand other = (DiscreteMomentumOrientationCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)
