@@ -11,6 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
@@ -24,6 +25,8 @@ import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.util.*;
 
@@ -48,11 +51,13 @@ public class BehaviorModule
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry, 
-                         DRCRobotModel robotModel, 
-                         CommunicationMode ros2CommunicationMode, 
+                         DRCRobotModel robotModel,
+                         CommunicationMode ros2CommunicationMode,
                          CommunicationMode messagerCommunicationMode)
    {
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
+
+      RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "behavior_backpack");
 
       MessagerAPI messagerAPI = behaviorRegistry.getMessagerAPI();
 
@@ -79,28 +84,29 @@ public class BehaviorModule
       ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
-      init(behaviorRegistry, robotModel, ros2Node, messager);
+      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
 
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry,
                          DRCRobotModel robotModel,
+                         RosMainNode ros1Node,
                          ROS2Node ros2Node,
                          Messager messager)
    {
       this.ros2Node = ros2Node;
       this.messager = messager;
 
-      init(behaviorRegistry, robotModel, ros2Node, messager);
+      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
    }
 
-   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, ROS2Node ros2Node, Messager messager)
+   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, Messager messager)
    {
       statusLogger = new StatusLogger(messager::submitMessage);
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros2Node);
+         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
       }
