@@ -18,7 +18,8 @@ public class CommandProvider
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoAccelerationObjectiveCommand> rhoAccelerationObjectiveCommandPool = new RecyclingArrayList<>(RhoAccelerationObjectiveCommand::new);
-   private final RecyclingArrayList<DiscreteOrientationCommand> discreteOrientationCommandPool = new RecyclingArrayList<>(DiscreteOrientationCommand::new);
+   private final RecyclingArrayList<DiscreteMomentumOrientationCommand> discreteMomentumOrientationCommandPool = new RecyclingArrayList<>(
+         DiscreteMomentumOrientationCommand::new);
 
    /**
     * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
@@ -36,7 +37,7 @@ public class CommandProvider
       comVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
       rhoAccelerationObjectiveCommandPool.clear();
-      discreteOrientationCommandPool.clear();
+      discreteMomentumOrientationCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -94,8 +95,8 @@ public class CommandProvider
       return rhoAccelerationObjectiveCommandPool.add();
    }
 
-   public DiscreteOrientationCommand getNextDiscreteOrientationCommand()
+   public DiscreteMomentumOrientationCommand getNextDiscreteMomentumOrientationCommand()
    {
-      return discreteOrientationCommandPool.add();
+      return discreteMomentumOrientationCommandPool.add();
    }
 }

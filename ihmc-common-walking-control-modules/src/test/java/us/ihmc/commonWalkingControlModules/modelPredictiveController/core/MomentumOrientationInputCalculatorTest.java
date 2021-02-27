@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteOrientationCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteMomentumOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
@@ -29,7 +29,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class OrientationInputCalculatorTest
+public class MomentumOrientationInputCalculatorTest
 {
    @Test
    public void testCoMObjectiveOneSegment()
@@ -69,7 +69,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -106,7 +106,7 @@ public class OrientationInputCalculatorTest
          FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -359,7 +359,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -390,7 +390,7 @@ public class OrientationInputCalculatorTest
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, skewDesiredCoMVelocity);
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -547,7 +547,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -578,7 +578,7 @@ public class OrientationInputCalculatorTest
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, skewDesiredCoMVelocity);
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -694,7 +694,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -725,7 +725,7 @@ public class OrientationInputCalculatorTest
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, skewDesiredCoMVelocity);
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -833,7 +833,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -874,7 +874,7 @@ public class OrientationInputCalculatorTest
          FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -990,7 +990,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1034,7 +1034,7 @@ public class OrientationInputCalculatorTest
          FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -1172,7 +1172,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1213,7 +1213,7 @@ public class OrientationInputCalculatorTest
          FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -1320,7 +1320,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1361,7 +1361,7 @@ public class OrientationInputCalculatorTest
          FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -1454,7 +1454,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1498,7 +1498,7 @@ public class OrientationInputCalculatorTest
          FrameVector3D desiredCoMVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
@@ -1626,7 +1626,7 @@ public class OrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      MomentumOrientationInputCalculator inputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1674,7 +1674,7 @@ public class OrientationInputCalculatorTest
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
          MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMVelocity, skewDesiredCoMVelocity);
 
-         DiscreteOrientationCommand command = new DiscreteOrientationCommand();
+         DiscreteMomentumOrientationCommand command = new DiscreteMomentumOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
          command.setDesiredCoMVelocity(desiredCoMVelocity);
          command.setDesiredCoMPosition(desiredCoMPosition);
