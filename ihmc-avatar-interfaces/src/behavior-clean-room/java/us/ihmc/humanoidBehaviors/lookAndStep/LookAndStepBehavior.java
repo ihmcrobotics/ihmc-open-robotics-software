@@ -130,7 +130,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
       supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publishROS2);
-      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, supportRegionsPublisher::acceptPlanarRegions);
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
       helper.createUICallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
 
@@ -143,7 +142,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createUICallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
-      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
+      helper.createROS1PlanarRegionsCallback(REGIONS_FOR_FOOTSTEP_PLANNING, message ->
+      {
+         supportRegionsPublisher.acceptPlanarRegions(message);
+         footstepPlanning.acceptPlanarRegions(message);
+      });
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
       helper.createROS2ControllerCallback(FootstepStatusMessage.class, status ->
       {

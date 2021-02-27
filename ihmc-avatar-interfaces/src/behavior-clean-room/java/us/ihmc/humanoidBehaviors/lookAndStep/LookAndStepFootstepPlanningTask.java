@@ -139,7 +139,12 @@ public class LookAndStepFootstepPlanningTask
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
-         planarRegionsInput.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      }
+
+      public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)
+      {
+         planarRegionsInput.set(planarRegionsList);
          planarRegionsExpirationTimer.reset();
       }
 

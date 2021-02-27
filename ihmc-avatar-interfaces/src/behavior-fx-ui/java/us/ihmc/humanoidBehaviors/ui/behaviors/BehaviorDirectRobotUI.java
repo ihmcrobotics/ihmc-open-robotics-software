@@ -6,7 +6,6 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.StackPane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.DirectRobotUI;
 import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoView;
@@ -47,9 +46,9 @@ public class BehaviorDirectRobotUI extends Group
       lidarRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
       lidarRegionsGraphic.setEnabled(false);
       getChildren().add(lidarRegionsGraphic);
-      realsenseRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, LookAndStepBehaviorAPI.REGIONS_FOR_FOOTSTEP_PLANNING, false);
-      realsenseRegionsGraphic.setEnabled(false);
-      getChildren().add(realsenseRegionsGraphic);
+//      realsenseRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, LookAndStepBehaviorAPI.REGIONS_FOR_FOOTSTEP_PLANNING, false);
+//      realsenseRegionsGraphic.setEnabled(false);
+//      getChildren().add(realsenseRegionsGraphic);
       mapRegionsGraphic = new JavaFXLivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
       mapRegionsGraphic.setEnabled(false);
       getChildren().add(mapRegionsGraphic);
@@ -82,8 +81,8 @@ public class BehaviorDirectRobotUI extends Group
 
    private void showRealsenseRegions(boolean showRealsenseRegions)
    {
-      realsenseRegionsGraphic.setEnabled(showRealsenseRegions);
-      realsenseRegionsGraphic.clear();
+//      realsenseRegionsGraphic.setEnabled(showRealsenseRegions);
+//      realsenseRegionsGraphic.clear();
    }
 
    private void showMapRegions(boolean showMapRegions)
