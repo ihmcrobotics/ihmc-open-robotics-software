@@ -25,7 +25,6 @@ import org.ros.node.topic.Subscriber;
 
 import sensor_msgs.CameraInfo;
 import sensor_msgs.CompressedImage;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
