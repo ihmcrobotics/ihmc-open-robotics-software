@@ -167,6 +167,8 @@ public class MomentumOrientationSE3ModelPredictiveController
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
+      qpSolver.setFirstOrientationVariableRegularization(1e-1);
+      qpSolver.setSecondOrientationVariableRegularization(1e-10);
 
       parentRegistry.addChild(registry);
    }
