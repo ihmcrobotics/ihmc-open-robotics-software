@@ -33,6 +33,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.log.LogTools;
 
 public class RosTools
 {
@@ -56,6 +57,7 @@ public class RosTools
 
    public static RosMainNode createRosNode(URI uri, String name)
    {
+      LogTools.info("Creating ROS 1 node. name: {} URI: {}", name, uri);
       return new RosMainNode(uri, name);
    }
 
