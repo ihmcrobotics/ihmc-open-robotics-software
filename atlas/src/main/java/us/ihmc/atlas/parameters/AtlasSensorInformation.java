@@ -440,4 +440,9 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       return staticTranformsForRos;
    }
 
+   @Override
+   public RigidBodyTransform getSteppingCameraTransform()
+   {
+      return transformPelvisToL515DepthCamera;
+   }
 }
