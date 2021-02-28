@@ -11,8 +11,10 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
+import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -82,10 +84,14 @@ public class LinearMPCQPSolver
 
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
-      this(indexHandler, dt, gravityZ, true, parentRegistry);
+      this(indexHandler,
+           dt,
+           gravityZ,
+           new BlockInverseCalculator(indexHandler, i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
+           parentRegistry);
    }
 
-   public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, boolean useBlockInverse, YoRegistry parentRegistry)
+   public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, InverseMatrixCalculator<NativeMatrix> inverseMatrixCalculator, YoRegistry parentRegistry)
    {
       this.indexHandler = indexHandler;
       this.dt = dt;
@@ -97,8 +103,9 @@ public class LinearMPCQPSolver
       comRateCoefficientRegularization.set(1e-6);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
-      if (useBlockInverse)
-         qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
+      if (inverseMatrixCalculator != null)
+         qpSolver.setInverseHessianCalculator(inverseMatrixCalculator);
+
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
