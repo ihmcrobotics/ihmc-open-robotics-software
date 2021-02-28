@@ -11,7 +11,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 {
    public static final int variablesPerOrientationTick = 6;
 
-   private static final double nominalOrientationDt = 0.01;
+   private static final double nominalOrientationDt = 0.025;
 
    private int totalNumberOfOrientationTicks = 0;
    private final TIntArrayList orientationStartIndices = new TIntArrayList();
@@ -41,7 +41,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       for (int i = 0; i < previewWindowContactSequence.size(); i++)
       {
          double segmentDuration = Math.min(previewWindowContactSequence.get(i).getTimeInterval().getDuration(), remainingOrientationWindowDuration);
-         int ticksInSegment = (int) Math.floor(previewWindowContactSequence.get(i).getTimeInterval().getDuration() / nominalOrientationDt);
+         int ticksInSegment = (int) Math.floor(segmentDuration / nominalOrientationDt);
          double tickDuration = segmentDuration / ticksInSegment;
 
          totalNumberOfOrientationTicks += ticksInSegment;
