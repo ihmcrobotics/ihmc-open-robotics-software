@@ -43,11 +43,24 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
    protected static final boolean debug = false;
 
    final LinearMPCQPSolver qpSolver;
+
+   private final LinearMPCIndexHandler indexHandler;
    private final LinearMPCSolutionInspection solutionInspection;
 
-   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight,double dt, YoRegistry parentRegistry)
+   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
-      super(gravityZ, nominalCoMHeight, dt, parentRegistry);
+      this(new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint), gravityZ, nominalCoMHeight, dt, parentRegistry);
+   }
+
+   public CoMTrajectoryModelPredictiveController(LinearMPCIndexHandler indexHandler,
+                                                 double gravityZ,
+                                                 double nominalCoMHeight,
+                                                 double dt,
+                                                 YoRegistry parentRegistry)
+   {
+      super(indexHandler, gravityZ, nominalCoMHeight, parentRegistry);
+
+      this.indexHandler = indexHandler;
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
 
@@ -59,12 +72,21 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       parentRegistry.addChild(registry);
    }
 
+   @Override
+   protected void initializeIndexHandler()
+   {
+      List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
+      indexHandler.initialize(planningWindow);
+   }
+
+   @Override
    protected void resetActiveSet()
    {
       qpSolver.notifyResetActiveSet();
       qpSolver.resetRateRegularization();
    }
 
+   @Override
    protected DMatrixRMaj solveQP()
    {
       qpSolver.initialize();
