@@ -55,74 +55,14 @@ public class AtlasPartialFootholdWalkingTest extends HumanoidPartialFootholdWalk
    }
 
    @Test
-   public void testSteppingOntoWithInsideOfFoot() throws SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(false);
-      super.testSteppingOntoWithInsideOfFoot();
-   }
-
-   @Test
-   public void testSteppingOntoWithInsideOfFootWithExperimentalPhysicsEngine() throws SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(true);
-      super.testSteppingOntoWithInsideOfFoot();
-   }
-
-   @Test
-   public void testSteppingOntoWithOutsideOfFoot() throws SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(false);
-      super.testSteppingOntoWithOutsideOfFoot();
-   }
-
-   @Test
-   public void testSteppingOntoWithOutsideOfFootWithExperimentalPhysicsEngine() throws SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(true);
-      super.testSteppingOntoWithOutsideOfFoot();
-   }
-
-   @Test
    public void testSteppingOntoBlock() throws SimulationExceededMaximumTimeException
    {
-      setUseExperimentalPhysicsEngine(false);
       super.testSteppingOntoBlock();
    }
-
-   @Test
-   public void testSteppingOntoBlockWithExperimentalPhysicsEngine() throws SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(true);
-      super.testSteppingOntoBlock();
-   }
-
-   @Test
-   public void testSteppingOntoNarrowBlock() throws  SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(false);
-      super.testSteppingOntoNarrowBlock();
-   }
-
-   @Test
-   public void testSteppingOntoNarrowBlockWithExperimentalPhysicsEngine() throws  SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(true);
-      super.testSteppingOntoNarrowBlock();
-   }
-
 
    @Test
    public void testWalkingOverBlock() throws SimulationExceededMaximumTimeException
    {
-      setUseExperimentalPhysicsEngine(false);
       super.testWalkingOverBlock();
    }
-
-   @Test
-   public void testWalkingOverBlockWithExperimentalPhysicsEngine() throws SimulationExceededMaximumTimeException
-   {
-      setUseExperimentalPhysicsEngine(true);
-      super.testWalkingOverBlock();
-   }
-
 }
