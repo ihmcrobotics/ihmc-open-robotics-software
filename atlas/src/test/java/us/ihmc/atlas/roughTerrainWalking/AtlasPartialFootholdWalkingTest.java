@@ -22,28 +22,15 @@ public class AtlasPartialFootholdWalkingTest extends HumanoidPartialFootholdWalk
    @Override
    public DRCRobotModel getRobotModel()
    {
-      AtlasRobotModel robotModel;
-      if(getUseExperimentalPhysicsEngine())
+      FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 5, true, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints)
       {
-         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false)
+         @Override
+         public double getSimulateDT()
          {
-            @Override
-            public double getSimulateDT() {
-               return 0.00025;
-            }
-         };
-      }
-      else
-      {
-         FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 10, 5, true, false);
-         robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints)
-         {
-            @Override
-            public double getSimulateDT() {
-               return 0.00025;
-            }
-         };
-      }
+            return 0.00025;
+         }
+      };
 
       return robotModel;
    }
