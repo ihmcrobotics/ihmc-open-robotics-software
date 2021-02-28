@@ -37,16 +37,6 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       simulationTestingParameters.setRunMultiThreaded(false);
    }
 
-   public void setUseExperimentalPhysicsEngine(boolean flag)
-   {
-      useExperimentalPhysicsEngine = flag;
-   }
-
-   public boolean getUseExperimentalPhysicsEngine()
-   {
-      return useExperimentalPhysicsEngine;
-   }
-
    @Test
    public void testPartialFootholdField() throws SimulationExceededMaximumTimeException
    {
