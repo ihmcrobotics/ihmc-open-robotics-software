@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MomentumSE3MPCVisualizer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCVisualizer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -38,16 +38,17 @@ public class MomentumOrientationSE3ModelPredictiveControllerTest
    private static final double epsilon = 1e-3;
    private static final boolean visualize = true;
 
+   private static final double gravityZ = -9.81;
+   private static final double mass = 10.0;
+
    @Test
    public void testSimpleStanding()
    {
-      double gravityZ = -9.81;
       double dt = 0.001;
       double nominalHeight = 1.0;
       double duration = 1.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
-      double mass = 10.0;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -193,14 +194,12 @@ public class MomentumOrientationSE3ModelPredictiveControllerTest
    @Test
    public void testStandingTwoSegments()
    {
-      double gravityZ = -9.81;
       double dt = 0.001;
       double nominalHeight = 1.0;
       double duration = 0.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      double mass = 10.0;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -388,14 +387,12 @@ public class MomentumOrientationSE3ModelPredictiveControllerTest
    @Test
    public void testStandingTwoSegmentsTwoFeet()
    {
-      double gravityZ = -9.81;
       double dt = 0.001;
       double nominalHeight = 1.0;
       double duration = 0.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-      double mass = 10.0;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -618,12 +615,10 @@ public class MomentumOrientationSE3ModelPredictiveControllerTest
    @Test
    public void testSimpleStep()
    {
-      double gravityZ = -9.81;
       double dt = 0.001;
       double nominalHeight = 1.0;
       double duration = 0.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
-      double mass = 10.0;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -814,13 +809,12 @@ public class MomentumOrientationSE3ModelPredictiveControllerTest
    @Test
    public void testSimpleStandingFewRhos()
    {
-      double gravityZ = -9.81;
+
       double dt = 0.001;
       double nominalHeight = 1.0;
       double duration = 1.5;
       double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
 
-      double mass = 10.0;
       double Ixx = 1.0;
       double Iyy = 1.0;
       double Izz = 1.0;
@@ -953,7 +947,7 @@ public class MomentumOrientationSE3ModelPredictiveControllerTest
       registry.addChild(controllerRegistry);
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-      MomentumSE3MPCVisualizer mpcVisualizer = new MomentumSE3MPCVisualizer(mpc, scs, registry, graphicsListRegistry);
+      SE3MPCVisualizer mpcVisualizer = new SE3MPCVisualizer(mpc, scs, mass, gravityZ, registry, graphicsListRegistry);
 
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.startOnAThread();
