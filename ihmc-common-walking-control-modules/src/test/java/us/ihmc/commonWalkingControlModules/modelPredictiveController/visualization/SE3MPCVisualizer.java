@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.AngularVelocityOrientationSE3ModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.MomentumOrientationSE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
