@@ -12,16 +12,16 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class AngularVelocityOrientationSE3ModelPredictiveController extends SE3ModelPredictiveController
+public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredictiveController
 {
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 
-   public AngularVelocityOrientationSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
-                                                                 double gravityZ,
-                                                                 double nominalCoMHeight,
-                                                                 double mass,
-                                                                 double dt,
-                                                                 YoRegistry parentRegistry)
+   public AngularVelocitySE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
+                                                      double gravityZ,
+                                                      double nominalCoMHeight,
+                                                      double mass,
+                                                      double dt,
+                                                      YoRegistry parentRegistry)
    {
       this(new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint),
            momentOfInertia,
@@ -35,10 +35,10 @@ public class AngularVelocityOrientationSE3ModelPredictiveController extends SE3M
       qpSolver.setSecondOrientationVariableRegularization(1e-2);
    }
 
-   private AngularVelocityOrientationSE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
-                                                                  Matrix3DReadOnly momentOfInertia,
-                                                                  double gravityZ, double nominalCoMHeight, double mass, double dt,
-                                                                  YoRegistry parentRegistry)
+   private AngularVelocitySE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
+                                                       Matrix3DReadOnly momentOfInertia,
+                                                       double gravityZ, double nominalCoMHeight, double mass, double dt,
+                                                       YoRegistry parentRegistry)
    {
       super(indexHandler,
             new AngularVelocityOrientationMPCTrajectoryHandler(indexHandler),

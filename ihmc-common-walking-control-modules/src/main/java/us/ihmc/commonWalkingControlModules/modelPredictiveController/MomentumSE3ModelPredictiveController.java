@@ -12,12 +12,12 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class MomentumOrientationSE3ModelPredictiveController extends SE3ModelPredictiveController
+public class MomentumSE3ModelPredictiveController extends SE3ModelPredictiveController
 {
    protected final YoVector3D currentBodyAngularMomentum = new YoVector3D("currentBodyAngularMomentum", registry);
 
-   public MomentumOrientationSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
-                                                          double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
+   public MomentumSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
+                                               double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
       this(new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint),
             momentOfInertia,
@@ -31,9 +31,9 @@ public class MomentumOrientationSE3ModelPredictiveController extends SE3ModelPre
       qpSolver.setSecondOrientationVariableRegularization(1e-10);
    }
 
-   private MomentumOrientationSE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
-                                                           Matrix3DReadOnly momentOfInertia,
-                                                           double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
+   private MomentumSE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
+                                                Matrix3DReadOnly momentOfInertia,
+                                                double gravityZ, double nominalCoMHeight, double mass, double dt, YoRegistry parentRegistry)
    {
       super(indexHandler,
             new MomentumOrientationMPCTrajectoryHandler(indexHandler, momentOfInertia, mass),
