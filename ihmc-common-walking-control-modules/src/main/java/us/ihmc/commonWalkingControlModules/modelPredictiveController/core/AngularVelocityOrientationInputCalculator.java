@@ -5,55 +5,47 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteMomentumOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
 public class AngularVelocityOrientationInputCalculator
 {
-   private final FrameVector3D desiredBodyAngularMomentum = new FrameVector3D();
-   private final DMatrixRMaj desiredBodyAngularMomentumVector = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj desiredInternalAngularMomentumRate = new DMatrixRMaj(3, 1);
 
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewGravity = new DMatrixRMaj(3, 3);
 
-   private final DMatrixRMaj rotatedBodyAngularMomentum = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj skewRotatedBodyAngularMomentum = new DMatrixRMaj(3, 3);
+   private final FrameVector3D desiredBodyAngularMomentumRate = new FrameVector3D();
 
-   private final CommonMatrix3DBasics tempRotationMatrix = new RotationMatrix();
-   private final DMatrixRMaj desiredRotationMatrix = new DMatrixRMaj(3, 3);
+   private final FrameVector3D rotatedBodyAngularMomentumRate = new FrameVector3D();
+   private final DMatrixRMaj skewRotatedBodyAngularMomentumRate = new DMatrixRMaj(3, 3);
+
+   private final CommonMatrix3DBasics desiredRotationMatrix = new RotationMatrix();
+   private final DMatrixRMaj rotationMatrix = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj inertiaMatrixInBody = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj inverseInertia = new DMatrixRMaj(3, 3);
 
-   private final DMatrixRMaj comCoriolisForce = new DMatrixRMaj(3, 1);
-
    private final DMatrixRMaj desiredBodyAngularVelocity = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewDesiredBodyAngularVelocity = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj desiredCoMPosition = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj desiredCoMVelocity = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj desiredCoMAcceleration = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewDesiredCoMPosition = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj skewDesiredCoMVelocity = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj skewDesiredCoMAcceleration = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj comVelocityJacobian = new DMatrixRMaj(3, 0);
    private final DMatrixRMaj contactForceJacobian = new DMatrixRMaj(3, 0);
    private final DMatrixRMaj contactForceToOriginTorqueJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj originTorqueJacobian = new DMatrixRMaj(3, 0);
 
-   private final DMatrixRMaj a0 = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj a1 = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj a2 = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj a3 = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj a4 = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj b0 = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj b1 = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj b2 = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj b3 = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj b4 = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj A = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj B = new DMatrixRMaj(6, 0);
@@ -68,7 +60,8 @@ public class AngularVelocityOrientationInputCalculator
    private final SE3MPCIndexHandler indexHandler;
    private final double mass;
 
-   private static final DMatrixRMaj identity = CommonOps_DDRM.identity(6);
+   private static final DMatrixRMaj identity3 = CommonOps_DDRM.identity(3);
+   private static final DMatrixRMaj identity6 = CommonOps_DDRM.identity(6);
 
    public AngularVelocityOrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
@@ -89,19 +82,19 @@ public class AngularVelocityOrientationInputCalculator
       inputToPack.setConstraintType(ConstraintType.EQUALITY);
 
       reset(command);
-//      getAllTheTermsFromTheCommandInput(command);
-//
-//      calculateAffineAxisAngleErrorTerms();
-//
-//      calculateStateJacobians(command);
-//
-//      computeAffineTimeInvariantTerms(command.getTimeOfConstraint());
-//      discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, command.getDurationOfHold());
-//
-//      if (command.getEndDiscreteTickId() == 0)
-//         setUpConstraintForFirstTick(inputToPack, command);
-//      else
-//         setUpConstraintForRegularTick(inputToPack, command);
+      getAllTheTermsFromTheCommandInput(command);
+
+      calculateStateJacobians(command);
+
+      calculateAffineAxisAngleErrorTerms(command);
+
+      computeAffineTimeInvariantTerms(command.getSegmentNumber(), command.getTimeOfConstraint());
+      discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, command.getDurationOfHold());
+
+      if (command.getEndDiscreteTickId() == 0)
+         setUpConstraintForFirstTick(inputToPack, command);
+      else
+         setUpConstraintForRegularTick(inputToPack, command);
 
       return true;
    }
@@ -141,29 +134,29 @@ public class AngularVelocityOrientationInputCalculator
       return Cd;
    }
 
-   DMatrixRMaj getA0()
+   DMatrixRMaj getB0()
    {
-      return a0;
+      return b0;
    }
 
-   DMatrixRMaj getA1()
+   DMatrixRMaj getB1()
    {
-      return a1;
+      return b1;
    }
 
-   DMatrixRMaj getA2()
+   DMatrixRMaj getB2()
    {
-      return a2;
+      return b2;
    }
 
-   DMatrixRMaj getA3()
+   DMatrixRMaj getB3()
    {
-      return a3;
+      return b3;
    }
 
-   DMatrixRMaj getA4()
+   DMatrixRMaj getB4()
    {
-      return a4;
+      return b4;
    }
 
    private void reset(DiscreteAngularVelocityOrientationCommand command)
@@ -172,27 +165,24 @@ public class AngularVelocityOrientationInputCalculator
       for (int i = 0; i < command.getNumberOfContacts(); i++)
          totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
 
+      int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(command.getSegmentNumber());
       comPositionJacobian.reshape(3, indexHandler.getTotalProblemSize());
-      comVelocityJacobian.reshape(3, indexHandler.getTotalProblemSize());
-      originTorqueJacobian.reshape(3, indexHandler.getTotalProblemSize());
 
       int contactForceVectorSize = 3 * totalContactPoints;
       contactForceJacobian.reshape(contactForceVectorSize, indexHandler.getTotalProblemSize());
       contactForceToOriginTorqueJacobian.reshape(3, contactForceVectorSize);
 
-
       B.reshape(6, indexHandler.getTotalProblemSize());
 
       comPositionJacobian.zero();
-      comVelocityJacobian.zero();
       contactForceJacobian.zero();
       contactForceToOriginTorqueJacobian.zero();
 
-      a0.zero();
-      a1.zero();
-      a2.zero();
-      a3.zero();
-      a4.zero();
+      b0.zero();
+      b1.zero();
+      b2.zero();
+      b3.zero();
+      b4.zero();
 
       A.zero();
       B.zero();
@@ -203,110 +193,125 @@ public class AngularVelocityOrientationInputCalculator
       Cd.zero();
    }
 
-   private void getAllTheTermsFromTheCommandInput(DiscreteMomentumOrientationCommand command)
+   private void getAllTheTermsFromTheCommandInput(DiscreteAngularVelocityOrientationCommand command)
    {
-      desiredBodyAngularMomentum.sub(command.getDesiredNetAngularMomentum(), command.getDesiredInternalAngularMomentum());
-      desiredBodyAngularMomentum.get(desiredBodyAngularMomentumVector);
+      desiredBodyAngularMomentumRate.sub(command.getDesiredNetAngularMomentumRate(), command.getDesiredInternalAngularMomentumRate());
 
-      command.getDesiredBodyOrientation().get(tempRotationMatrix);
-      tempRotationMatrix.get(desiredRotationMatrix);
+      command.getDesiredBodyOrientation().get(desiredRotationMatrix);
+      desiredRotationMatrix.get(rotationMatrix);
 
       command.getMomentOfInertiaInBodyFrame().get(inertiaMatrixInBody);
-      command.getDesiredCoMPosition().get(desiredCoMPosition);
-      command.getDesiredCoMVelocity().get(desiredCoMVelocity);
+      command.getDesiredCoMAcceleration().get(desiredCoMAcceleration);
       command.getDesiredBodyAngularVelocity().get(desiredBodyAngularVelocity);
 
       MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMPosition(), skewDesiredCoMPosition);
-      MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMVelocity(), skewDesiredCoMVelocity);
+      MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredBodyAngularVelocity(), skewDesiredBodyAngularVelocity);
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMAcceleration, skewDesiredCoMAcceleration);
 
       UnrolledInverseFromMinor_DDRM.inv3(inertiaMatrixInBody, inverseInertia, 1.0);
-
-      command.getDesiredInternalAngularMomentumRate().get(desiredInternalAngularMomentumRate);
    }
 
-   private void calculateStateJacobians(DiscreteMomentumOrientationCommand command)
+   private void calculateStateJacobians(DiscreteAngularVelocityOrientationCommand command)
    {
       double timeOfConstraint = command.getTimeOfConstraint();
       double omega = command.getOmega();
       int comStartIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
       int rhoStartIndex = indexHandler.getRhoCoefficientStartIndex(command.getSegmentNumber());
 
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartIndex, timeOfConstraint, comPositionJacobian, 0, 1.0);
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartIndex, timeOfConstraint, comVelocityJacobian, 1, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, timeOfConstraint, comPositionJacobian, comStartIndex, 1.0);
 
       int contactRow = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
          MPCContactPlane contactPlane = command.getContactPlaneHelper(i);
          ContactPlaneJacobianCalculator.computeLinearJacobian(0, timeOfConstraint, omega, rhoStartIndex, contactPlane, comPositionJacobian);
-         ContactPlaneJacobianCalculator.computeLinearJacobian(1, timeOfConstraint, omega, rhoStartIndex, contactPlane, comVelocityJacobian);
          ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, contactRow, rhoStartIndex, contactPlane, contactForceJacobian);
-         computeTorqueAboutOriginJacobian(contactRow, contactPlane, contactForceToOriginTorqueJacobian);
+         computeTorqueAboutBodyJacobian(contactRow, command.getDesiredCoMPosition(), contactPlane, contactForceToOriginTorqueJacobian);
 
          contactRow += contactPlane.getNumberOfContactPoints();
          rhoStartIndex += contactPlane.getCoefficientSize();
       }
    }
 
-   private void calculateAffineAxisAngleErrorTerms()
+   private final DMatrixRMaj IR = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj angularMomentum = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj skewAngularMomentum = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj torqueAboutPoint = new DMatrixRMaj(3, 1);
+
+   private static void crossAdd(double scale, DMatrixRMaj a, FramePoint3DReadOnly b, DMatrixRMaj c)
    {
-      CommonOps_DDRM.multTransB(inverseInertia, desiredRotationMatrix, a3);
-      CommonOps_DDRM.mult(mass, a3, skewDesiredCoMVelocity, a1);
-      CommonOps_DDRM.mult(-mass, a3, skewDesiredCoMPosition, a2);
-
-      CommonOps_DDRM.mult(mass, skewDesiredCoMPosition, desiredCoMVelocity, comCoriolisForce);
-      CommonOps_DDRM.addEquals(comCoriolisForce, -1.0, desiredBodyAngularMomentumVector);
-//      CommonOps_DDRM.mult(-1.0, a3, desiredBodyAngularMomentumVector, a0);
-      CommonOps_DDRM.multAdd(a3, comCoriolisForce, a0);
-
-      CommonOps_DDRM.multTransA(desiredRotationMatrix, desiredBodyAngularMomentumVector, rotatedBodyAngularMomentum);
-      MatrixMissingTools.toSkewSymmetricMatrix(rotatedBodyAngularMomentum, skewRotatedBodyAngularMomentum);
-      MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocity, skewDesiredBodyAngularVelocity);
-
-      CommonOps_DDRM.mult(inverseInertia, skewRotatedBodyAngularMomentum, a4);
-      CommonOps_DDRM.subtractEquals(a4, skewDesiredBodyAngularVelocity);
+      c.add(0, 0, scale * (a.get(1) * b.getZ() - a.get(2) * b.getY()));
+      c.add(1, 0, scale * (a.get(2) * b.getX() - a.get(0) * b.getZ()));
+      c.add(2, 0, scale * (a.get(0) * b.getY() - a.get(1) * b.getX()));
    }
 
+   private void calculateAffineAxisAngleErrorTerms(DiscreteAngularVelocityOrientationCommand command)
+   {
+      CommonOps_DDRM.multTransB(inverseInertia, rotationMatrix, IR);
 
+      CommonOps_DDRM.mult(-mass, IR, skewDesiredCoMAcceleration, b1);
+      CommonOps_DDRM.mult(IR, contactForceToOriginTorqueJacobian, b2);
 
-   private final FramePoint3D contactPoint = new FramePoint3D();
-   private final DMatrixRMaj skewContactPoint = new DMatrixRMaj(3, 3);
+      desiredRotationMatrix.inverseTransform(desiredBodyAngularMomentumRate, rotatedBodyAngularMomentumRate);
+      MatrixMissingTools.toSkewSymmetricMatrix(rotatedBodyAngularMomentumRate, skewRotatedBodyAngularMomentumRate);
 
-   private void computeTorqueAboutOriginJacobian(int colStart, MPCContactPlane contactPlane, DMatrixRMaj jacobianToPack)
+      CommonOps_DDRM.mult(inverseInertia, skewRotatedBodyAngularMomentumRate, b3);
+
+      CommonOps_DDRM.mult(inertiaMatrixInBody, desiredBodyAngularVelocity, angularMomentum);
+      MatrixMissingTools.toSkewSymmetricMatrix(angularMomentum, skewAngularMomentum);
+      CommonOps_DDRM.multAdd(-1.0, skewDesiredBodyAngularVelocity, inertiaMatrixInBody, skewAngularMomentum);
+      CommonOps_DDRM.mult(inverseInertia, skewAngularMomentum, b4);
+
+      int totalContactPoints = 0;
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+         totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
+
+      torqueAboutPoint.zero();
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         for (int contact = 0; contact < command.getContactPlaneHelper(i).getNumberOfContactPoints(); contact++)
+         {
+            FramePoint3DReadOnly contactOrigin = command.getContactPlaneHelper(i).getContactPointHelper(contact).getBasisVectorOrigin();
+            crossAdd(mass / totalContactPoints, desiredCoMAcceleration, contactOrigin, torqueAboutPoint);
+         }
+      }
+
+      CommonOps_DDRM.mult(IR, torqueAboutPoint, b0);
+   }
+
+   private final FrameVector3D momentArm = new FrameVector3D();
+   private final DMatrixRMaj skewMomentArm = new DMatrixRMaj(3, 3);
+
+   private void computeTorqueAboutBodyJacobian(int colStart, FramePoint3DReadOnly desiredCoMPosition, MPCContactPlane contactPlane, DMatrixRMaj jacobianToPack)
    {
       for (int i = 0; i < contactPlane.getNumberOfContactPoints(); i++)
       {
-         contactPoint.setIncludingFrame(contactPlane.getContactPointHelper(i).getBasisVectorOrigin());
-         contactPoint.changeFrame(ReferenceFrame.getWorldFrame());
-         MatrixMissingTools.toSkewSymmetricMatrix(contactPoint, skewContactPoint);
+         momentArm.sub(contactPlane.getContactPointHelper(i).getBasisVectorOrigin(), desiredCoMPosition);
+         MatrixMissingTools.toSkewSymmetricMatrix(momentArm, skewMomentArm);
 
-         MatrixMissingTools.setMatrixBlock(jacobianToPack, 0, colStart, skewContactPoint, 0, 0, 3, 3, 1.0);
+         MatrixMissingTools.setMatrixBlock(jacobianToPack, 0, colStart, skewMomentArm, 0, 0, 3, 3, 1.0);
          colStart += 3;
       }
    }
 
-   private void computeAffineTimeInvariantTerms(double timeOfConstraint)
+   private void computeAffineTimeInvariantTerms(int segmentNumber, double timeOfConstraint)
    {
-      MatrixTools.setMatrixBlock(A, 0, 0, a4, 0, 0, 3, 3, 1.0);
-      MatrixTools.setMatrixBlock(A, 0, 3, a3, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 0, 0, skewDesiredBodyAngularVelocity, 0, 0, 3, 3, -1.0);
+      MatrixTools.setMatrixBlock(A, 0, 3, identity3, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 3, 0, b3, 0, 0, 3, 3, 1.0);
+      MatrixTools.setMatrixBlock(A, 3, 3, b4, 0, 0, 3, 3, 1.0);
 
-      MatrixTools.multAddBlock(a1, comPositionJacobian, B, 0, 0);
-      MatrixTools.multAddBlock(a2, comVelocityJacobian, B, 0, 0);
+      MatrixTools.multAddBlock(b1, comPositionJacobian, B, 3, 0);
+      MatrixTools.multAddBlock(b2, contactForceJacobian, B, 3, 0);
 
-      MatrixTools.multAddBlock(-mass, skewGravity, comPositionJacobian, B, 3, 0);
-      MatrixTools.multAddBlock(contactForceToOriginTorqueJacobian, contactForceJacobian, B, 3, 0);
-
-      MatrixTools.setMatrixBlock(C, 0, 0, a0, 0, 0, 3, 1, 1.0);
-      MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, a1, gravityVector, C, 0, 0);
-      MatrixTools.multAddBlock(timeOfConstraint, a2, gravityVector, C, 0, 0);
-
-      MatrixTools.setMatrixBlock(C, 3, 0, desiredInternalAngularMomentumRate, 0, 0, 3, 1, -1.0);
+      MatrixTools.setMatrixBlock(C, 0, 0, b0, 0, 0, 3, 1, 1.0);
+      MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 0, 0);
    }
 
    private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);
 
    private void setUpConstraintForFirstTick(QPInputTypeA inputToPack,
-                                            DiscreteMomentumOrientationCommand command)
+                                            DiscreteAngularVelocityOrientationCommand command)
    {
       command.getCurrentBodyAngularMomentumAboutFixedPoint().get(initialStateVector);
       command.getCurrentAxisAngleError().get(3, initialStateVector);
@@ -316,16 +321,18 @@ public class AngularVelocityOrientationInputCalculator
 
       CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
 
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()), identity, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
+                                 identity3, 0, 0, 6, 6, 1.0);
    }
 
    private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,
-                                              DiscreteMomentumOrientationCommand command)
+                                              DiscreteAngularVelocityOrientationCommand command)
    {
       inputToPack.getTaskObjective().set(Cd);
 
       CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()), identity, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
+                                 identity6, 0, 0, 6, 6, 1.0);
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId() - 1), Ad, 0, 0, 6, 6, -1.0);
    }
 }
