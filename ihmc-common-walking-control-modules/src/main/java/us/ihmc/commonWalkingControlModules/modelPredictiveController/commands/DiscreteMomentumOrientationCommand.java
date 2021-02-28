@@ -44,7 +44,7 @@ public class DiscreteMomentumOrientationCommand implements MPCCommand<DiscreteMo
 
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.ORIENTATION_DYNAMICS;
+      return MPCCommandType.ORIENTATION_MOMENTUM_DYNAMICS;
    }
 
    public void clear()
