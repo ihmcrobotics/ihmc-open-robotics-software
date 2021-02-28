@@ -307,8 +307,8 @@ public class MomentumOrientationInputCalculator
    private void setUpConstraintForFirstTick(QPInputTypeA inputToPack,
                                             DiscreteMomentumOrientationCommand command)
    {
-      command.getCurrentBodyAngularMomentumAboutFixedPoint().get(initialStateVector);
-      command.getCurrentAxisAngleError().get(3, initialStateVector);
+      command.getCurrentAxisAngleError().get(initialStateVector);
+      command.getCurrentBodyAngularMomentumAboutFixedPoint().get(3, initialStateVector);
 
       CommonOps_DDRM.mult(Ad, initialStateVector, inputToPack.getTaskObjective());
       CommonOps_DDRM.addEquals(inputToPack.getTaskObjective(), Cd);

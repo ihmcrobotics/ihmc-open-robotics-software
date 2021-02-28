@@ -36,7 +36,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
    private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    private final Vector3D currentAxisAngleError = new Vector3D();
-   private final Vector3D currentBodyAngularMomentumAboutFixedPoint = new Vector3D();
+   private final Vector3D currentBodyAngularVelocityError = new Vector3D();
 
    private int segmentNumber;
    private int endDiscreteTickId;
@@ -70,7 +70,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
       contactPlaneHelpers.clear();
 
       currentAxisAngleError.setToNaN();
-      currentBodyAngularMomentumAboutFixedPoint.setToNaN();
+      currentBodyAngularVelocityError.setToNaN();
    }
 
    public void setSegmentNumber(int segmentNumber)
@@ -143,9 +143,9 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
       this.currentAxisAngleError.set(currentAxisAngleError);
    }
 
-   public void setCurrentBodyAngularMomentumAboutFixedPoint(Vector3DReadOnly currentBodyAngularMomentumAboutFixedPoint)
+   public void setCurrentBodyAngularVelocityErrorInBodyFrame(Vector3DReadOnly currentBodyAngularVelocityError)
    {
-      this.currentBodyAngularMomentumAboutFixedPoint.set(currentBodyAngularMomentumAboutFixedPoint);
+      this.currentBodyAngularVelocityError.set(currentBodyAngularVelocityError);
    }
 
    @Override
@@ -169,7 +169,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
       setDesiredCoMAcceleration(other.getDesiredCoMAcceleration());
 
       setCurrentAxisAngleError(other.getCurrentAxisAngleError());
-      setCurrentBodyAngularMomentumAboutFixedPoint(other.getCurrentBodyAngularMomentumAboutFixedPoint());
+      setCurrentBodyAngularVelocityErrorInBodyFrame(other.getCurrentBodyAngularVelocityError());
 
       for (int i = 0; i < other.getNumberOfContacts(); i++)
          addContactPlaneHelper(other.getContactPlaneHelper(i));
@@ -215,9 +215,9 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
       return currentAxisAngleError;
    }
 
-   public Vector3DReadOnly getCurrentBodyAngularMomentumAboutFixedPoint()
+   public Vector3DReadOnly getCurrentBodyAngularVelocityError()
    {
-      return currentBodyAngularMomentumAboutFixedPoint;
+      return currentBodyAngularVelocityError;
    }
 
    public int getSegmentNumber()
@@ -307,7 +307,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
          {
             if (!currentAxisAngleError.equals(other.currentAxisAngleError))
                return false;
-            if (!currentBodyAngularMomentumAboutFixedPoint.equals(other.currentBodyAngularMomentumAboutFixedPoint))
+            if (!currentBodyAngularVelocityError.equals(other.currentBodyAngularVelocityError))
                return false;
          }
          if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
