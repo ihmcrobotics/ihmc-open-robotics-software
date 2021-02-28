@@ -218,7 +218,7 @@ public class AngularVelocityOrientationInputCalculator
       int comStartIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
       int rhoStartIndex = indexHandler.getRhoCoefficientStartIndex(command.getSegmentNumber());
 
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, timeOfConstraint, comPositionJacobian, comStartIndex, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartIndex, timeOfConstraint, comPositionJacobian, 0, 1.0);
 
       int contactRow = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
@@ -322,7 +322,7 @@ public class AngularVelocityOrientationInputCalculator
       CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
 
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
-                                 identity3, 0, 0, 6, 6, 1.0);
+                                 identity6, 0, 0, 6, 6, 1.0);
    }
 
    private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,

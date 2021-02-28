@@ -15,7 +15,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class SE3MPCVisualizer
+public class MomentumSE3MPCVisualizer
 {
    private final MomentumOrientationSE3ModelPredictiveController mpc;
    private final SimulationConstructionSet scs;
@@ -31,8 +31,8 @@ public class SE3MPCVisualizer
 
    private final SideDependentList<ContactPlaneForceViewer> forceViewers = new SideDependentList<>();
 
-   public SE3MPCVisualizer(MomentumOrientationSE3ModelPredictiveController mpc, SimulationConstructionSet scs,
-                           YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+   public MomentumSE3MPCVisualizer(MomentumOrientationSE3ModelPredictiveController mpc, SimulationConstructionSet scs,
+                                   YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.mpc = mpc;
       this.scs = scs;

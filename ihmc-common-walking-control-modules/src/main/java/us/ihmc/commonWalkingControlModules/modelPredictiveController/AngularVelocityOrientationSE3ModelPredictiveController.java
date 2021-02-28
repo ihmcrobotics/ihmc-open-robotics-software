@@ -84,6 +84,9 @@ public class AngularVelocityOrientationSE3ModelPredictiveController
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
    private final FrameOrientation3DBasics desiredBodyOrientationFeedForward = new FrameQuaternion(worldFrame);
 
+   private final FixedFrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
+   private final FixedFrameVector3DBasics desiredBodyAngularVelocityFeedForward = new FrameVector3D(worldFrame);
+
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
 
@@ -165,7 +168,7 @@ public class AngularVelocityOrientationSE3ModelPredictiveController
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
       qpSolver.setFirstOrientationVariableRegularization(1e-1);
-      qpSolver.setSecondOrientationVariableRegularization(1e-10);
+      qpSolver.setSecondOrientationVariableRegularization(1e-2);
 
       parentRegistry.addChild(registry);
    }
@@ -793,6 +796,9 @@ public class AngularVelocityOrientationSE3ModelPredictiveController
       desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
       desiredBodyOrientationFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview());
 
+      desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
+      desiredBodyAngularVelocityFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
+
       ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
       double nominalHeight = gravityZ / MathTools.square(omega.getValue());
       ecmpPositionToPack.set(desiredVRPPosition);
@@ -896,6 +902,16 @@ public class AngularVelocityOrientationSE3ModelPredictiveController
    public FrameOrientation3DReadOnly getDesiredFeedForwardBodyOrientation()
    {
       return desiredBodyOrientationFeedForward;
+   }
+
+   public FrameVector3DReadOnly getDesiredBodyAngularVelocitySolution()
+   {
+      return desiredBodyAngularVelocity;
+   }
+
+   public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
+   {
+      return desiredBodyAngularVelocityFeedForward;
    }
 
    public List<? extends Polynomial3DReadOnly> getVRPTrajectories()
