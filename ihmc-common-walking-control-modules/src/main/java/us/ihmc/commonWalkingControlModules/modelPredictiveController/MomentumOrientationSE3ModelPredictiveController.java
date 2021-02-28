@@ -1,50 +1,16 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteMomentumOrientationCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MomentumOrientationMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
-import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
-import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.YoVector3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.List;
-import java.util.function.DoubleConsumer;
-import java.util.function.Supplier;
-
-import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
 
 public class MomentumOrientationSE3ModelPredictiveController extends SE3ModelPredictiveController
 {
@@ -181,9 +147,8 @@ public class MomentumOrientationSE3ModelPredictiveController extends SE3ModelPre
             objective.setTimeOfConstraint(localTime);
             objective.setEndingDiscreteTickId(tick);
 
-            positionTrajectoryHandler.compute(globalTime);
+            linearTrajectoryHandler.compute(globalTime);
             orientationTrajectoryHandler.computeOutsidePreview(globalTime);
-
 
             FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview();
             objective.setDesiredBodyOrientation(desiredOrientation);
@@ -200,8 +165,8 @@ public class MomentumOrientationSE3ModelPredictiveController extends SE3ModelPre
 
             objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
-            objective.setDesiredCoMPosition(positionTrajectoryHandler.getDesiredCoMPosition());
-            objective.setDesiredCoMVelocity(positionTrajectoryHandler.getDesiredCoMVelocity());
+            objective.setDesiredCoMPosition(linearTrajectoryHandler.getDesiredCoMPosition());
+            objective.setDesiredCoMVelocity(linearTrajectoryHandler.getDesiredCoMVelocity());
 
             for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
             {

@@ -9,7 +9,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -141,7 +140,7 @@ public class AngularVelocityOrientationSE3ModelPredictiveController extends SE3M
             objective.setTimeOfConstraint(localTime);
             objective.setEndingDiscreteTickId(tick);
 
-            positionTrajectoryHandler.compute(globalTime);
+            linearTrajectoryHandler.compute(globalTime);
             orientationTrajectoryHandler.computeOutsidePreview(globalTime);
 
 
@@ -158,8 +157,8 @@ public class AngularVelocityOrientationSE3ModelPredictiveController extends SE3M
 
             objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
-            objective.setDesiredCoMPosition(positionTrajectoryHandler.getDesiredCoMPosition());
-            objective.setDesiredCoMAcceleration(positionTrajectoryHandler.getDesiredCoMAcceleration());
+            objective.setDesiredCoMPosition(linearTrajectoryHandler.getDesiredCoMPosition());
+            objective.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
 
             for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
             {
