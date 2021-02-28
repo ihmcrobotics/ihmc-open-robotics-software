@@ -80,12 +80,16 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
          int ticks = indexHandler.getOrientationTicksInSegment(segmentId);
          for (int tick = 0; tick < ticks; tick++)
          {
+            double tickDuration = indexHandler.getOrientationTickDuration(tick);
+            double firstOrientationCoefficientFactor = tickDuration * firstOrientationVariableRegularization.getDoubleValue();
+            double secondOrientationCoefficientFactor = tickDuration * secondOrientationVariableRegularization.getDoubleValue();
+
             int end = var + 3;
             for (; var < end; var++)
-               solverInput_H.add(var, var, firstOrientationVariableRegularization.getDoubleValue());
+               solverInput_H.add(var, var, firstOrientationCoefficientFactor);
             end += 3;
             for (; var < end; var++)
-               solverInput_H.add(var, var, secondOrientationVariableRegularization.getDoubleValue());
+               solverInput_H.add(var, var, secondOrientationCoefficientFactor);
          }
       }
    }
