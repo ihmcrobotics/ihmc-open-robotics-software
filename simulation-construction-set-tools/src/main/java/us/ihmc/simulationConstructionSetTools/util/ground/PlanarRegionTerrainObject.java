@@ -22,6 +22,11 @@ import java.util.List;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
+ *
+ * Note: The bahvior of contacts occuring at the intersection of multiple planar regions (e.g.,
+ *       when stepping with partial footholds) might not be as accurate. In these cases, the
+ *       @p thickness by which the convex polytopes are extruded ends up affecting the response
+ *       of the physics engine at the time of collision.
  */
 public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
