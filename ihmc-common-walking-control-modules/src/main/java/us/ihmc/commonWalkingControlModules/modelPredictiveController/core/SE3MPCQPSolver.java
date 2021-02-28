@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,12 +25,20 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
    public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, YoRegistry parentRegistry)
    {
-      this(indexHandler, dt, gravityZ, mass, false, parentRegistry);
+      this(indexHandler,
+           dt,
+           gravityZ,
+           mass,
+           new BlockInverseCalculator(indexHandler,
+                                      i -> indexHandler.getOrientationTicksInSegment(i) * SE3MPCIndexHandler.variablesPerOrientationTick
+                                           + indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
+           parentRegistry);
    }
 
-   public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, boolean useBlockInverse, YoRegistry parentRegistry)
+   public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
    {
-      super(indexHandler, dt, gravityZ, useBlockInverse, parentRegistry);
+      super(indexHandler, dt, gravityZ, inverseCalculator, parentRegistry);
+
       this.indexHandler = indexHandler;
 
       momentumOrientationInputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
