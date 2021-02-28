@@ -81,20 +81,20 @@ public class AngularVelocityOrientationInputCalculator
       inputToPack.getTaskObjective().zero();
       inputToPack.setConstraintType(ConstraintType.EQUALITY);
 
-      reset(command);
+      int coefficientsInSegment = reset(command);
       getAllTheTermsFromTheCommandInput(command);
 
       calculateStateJacobians(command);
 
       calculateAffineAxisAngleErrorTerms(command);
 
-      computeAffineTimeInvariantTerms(command.getSegmentNumber(), command.getTimeOfConstraint());
+      computeAffineTimeInvariantTerms(command.getTimeOfConstraint());
       discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, command.getDurationOfHold());
 
       if (command.getEndDiscreteTickId() == 0)
-         setUpConstraintForFirstTick(inputToPack, command);
+         setUpConstraintForFirstTick(inputToPack, command, coefficientsInSegment);
       else
-         setUpConstraintForRegularTick(inputToPack, command);
+         setUpConstraintForRegularTick(inputToPack, command, coefficientsInSegment);
 
       return true;
    }
@@ -159,20 +159,22 @@ public class AngularVelocityOrientationInputCalculator
       return b4;
    }
 
-   private void reset(DiscreteAngularVelocityOrientationCommand command)
+   private int reset(DiscreteAngularVelocityOrientationCommand command)
    {
       int totalContactPoints = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
          totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
 
-      int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(command.getSegmentNumber());
-      comPositionJacobian.reshape(3, indexHandler.getTotalProblemSize());
+      int rhoCoefficientsInSegment = indexHandler.getRhoCoefficientsInSegment(command.getSegmentNumber());
+      int coefficientsInSegment = LinearMPCIndexHandler.comCoefficientsPerSegment + rhoCoefficientsInSegment;
 
+      comPositionJacobian.reshape(3, coefficientsInSegment);
       int contactForceVectorSize = 3 * totalContactPoints;
-      contactForceJacobian.reshape(contactForceVectorSize, indexHandler.getTotalProblemSize());
+      contactForceJacobian.reshape(contactForceVectorSize, rhoCoefficientsInSegment);
       contactForceToOriginTorqueJacobian.reshape(3, contactForceVectorSize);
 
-      B.reshape(6, indexHandler.getTotalProblemSize());
+      B.reshape(6, coefficientsInSegment);
+      Bd.reshape(6, coefficientsInSegment);
 
       comPositionJacobian.zero();
       contactForceJacobian.zero();
@@ -191,6 +193,8 @@ public class AngularVelocityOrientationInputCalculator
       Ad.zero();
       Bd.zero();
       Cd.zero();
+
+      return coefficientsInSegment;
    }
 
    private void getAllTheTermsFromTheCommandInput(DiscreteAngularVelocityOrientationCommand command)
@@ -215,16 +219,15 @@ public class AngularVelocityOrientationInputCalculator
    {
       double timeOfConstraint = command.getTimeOfConstraint();
       double omega = command.getOmega();
-      int comStartIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
-      int rhoStartIndex = indexHandler.getRhoCoefficientStartIndex(command.getSegmentNumber());
+      int rhoStartIndex = 0;
 
-      CoMCoefficientJacobianCalculator.calculateCoMJacobian(comStartIndex, timeOfConstraint, comPositionJacobian, 0, 1.0);
+      CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, timeOfConstraint, comPositionJacobian, 0, 1.0);
 
       int contactRow = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
          MPCContactPlane contactPlane = command.getContactPlaneHelper(i);
-         ContactPlaneJacobianCalculator.computeLinearJacobian(0, timeOfConstraint, omega, rhoStartIndex, contactPlane, comPositionJacobian);
+         ContactPlaneJacobianCalculator.computeLinearJacobian(0, timeOfConstraint, omega, LinearMPCIndexHandler.comCoefficientsPerSegment + rhoStartIndex, contactPlane, comPositionJacobian);
          ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, contactRow, rhoStartIndex, contactPlane, contactForceJacobian);
          computeTorqueAboutBodyJacobian(contactRow, command.getDesiredCoMPosition(), contactPlane, contactForceToOriginTorqueJacobian);
 
@@ -294,7 +297,7 @@ public class AngularVelocityOrientationInputCalculator
       }
    }
 
-   private void computeAffineTimeInvariantTerms(int segmentNumber, double timeOfConstraint)
+   private void computeAffineTimeInvariantTerms(double timeOfConstraint)
    {
       MatrixTools.setMatrixBlock(A, 0, 0, skewDesiredBodyAngularVelocity, 0, 0, 3, 3, -1.0);
       MatrixTools.setMatrixBlock(A, 0, 3, identity3, 0, 0, 3, 3, 1.0);
@@ -302,7 +305,7 @@ public class AngularVelocityOrientationInputCalculator
       MatrixTools.setMatrixBlock(A, 3, 3, b4, 0, 0, 3, 3, 1.0);
 
       MatrixTools.multAddBlock(b1, comPositionJacobian, B, 3, 0);
-      MatrixTools.multAddBlock(b2, contactForceJacobian, B, 3, 0);
+      MatrixTools.multAddBlock(b2, contactForceJacobian, B, 3, LinearMPCIndexHandler.comCoefficientsPerSegment);
 
       MatrixTools.setMatrixBlock(C, 0, 0, b0, 0, 0, 3, 1, 1.0);
       MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 0, 0);
@@ -311,7 +314,8 @@ public class AngularVelocityOrientationInputCalculator
    private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);
 
    private void setUpConstraintForFirstTick(QPInputTypeA inputToPack,
-                                            DiscreteAngularVelocityOrientationCommand command)
+                                            DiscreteAngularVelocityOrientationCommand command,
+                                            int coefficientsInSegment)
    {
       command.getCurrentAxisAngleError().get(initialStateVector);
       command.getCurrentBodyAngularVelocityError().get(3, initialStateVector);
@@ -319,18 +323,22 @@ public class AngularVelocityOrientationInputCalculator
       CommonOps_DDRM.mult(Ad, initialStateVector, inputToPack.getTaskObjective());
       CommonOps_DDRM.addEquals(inputToPack.getTaskObjective(), Cd);
 
-      CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
+      int startCoMIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, startCoMIndex, Bd, 0, 0, 6, coefficientsInSegment, -1.0);
 
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
                                  identity6, 0, 0, 6, 6, 1.0);
    }
 
    private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,
-                                              DiscreteAngularVelocityOrientationCommand command)
+                                              DiscreteAngularVelocityOrientationCommand command,
+                                              int coefficientsInSegment)
    {
       inputToPack.getTaskObjective().set(Cd);
 
-      CommonOps_DDRM.scale(-1.0, Bd, inputToPack.getTaskJacobian());
+      int startCoMIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, startCoMIndex, Bd, 0, 0, 6, coefficientsInSegment, -1.0);
+
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
                                  identity6, 0, 0, 6, 6, 1.0);
       MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId() - 1), Ad, 0, 0, 6, 6, -1.0);
