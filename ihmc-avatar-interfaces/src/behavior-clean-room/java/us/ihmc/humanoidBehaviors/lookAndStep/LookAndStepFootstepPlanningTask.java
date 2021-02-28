@@ -55,7 +55,7 @@ public class LookAndStepFootstepPlanningTask
    protected RemoteSyncedRobotModel syncedRobot;
    protected LookAndStepReview<FootstepPlanEtcetera> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlanEtcetera> autonomousOutput;
-   protected Runnable planningFailedNotifier;
+   protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<RobotSide> lastStanceSideReference;
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
 
@@ -72,7 +72,6 @@ public class LookAndStepFootstepPlanningTask
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
-      private final Timer planningFailedTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
       public void initialize(LookAndStepBehavior lookAndStep)
@@ -100,8 +99,6 @@ public class LookAndStepFootstepPlanningTask
 
          review.initialize(statusLogger, "footstep plan", lookAndStep.approvalNotification, autonomousOutput);
 
-         planningFailedNotifier = planningFailedTimer::reset;
-
          executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
          localizationResultInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
@@ -121,6 +118,7 @@ public class LookAndStepFootstepPlanningTask
                                  () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No capturability based status. ", () -> capturabilityBasedStatus == null);
          suppressor.addCondition(() -> "No localization result. ", () -> localizationResult == null);
+         suppressor.addCondition("Planner failed and operator is reviewing.", () -> plannerFailedLastTime.get() && operatorReviewEnabledSupplier.get());
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
@@ -308,7 +306,7 @@ public class LookAndStepFootstepPlanningTask
 
          statusLogger.info("Footstep planning failure. Aborting task...");
          plannerFailedLastTime.set(true);
-         planningFailedNotifier.run();
+         planningFailedTimer.reset();
       }
       else
       {

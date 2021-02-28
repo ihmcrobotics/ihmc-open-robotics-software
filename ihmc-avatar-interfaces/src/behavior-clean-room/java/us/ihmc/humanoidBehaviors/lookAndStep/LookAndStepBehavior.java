@@ -135,7 +135,11 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       bodyPathPlanning.initialize(this);
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
-      helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
+      helper.createROS2Callback(GOAL_INPUT, goal ->
+      {
+         behaviorStateReference.broadcast();
+         bodyPathPlanning.acceptGoal(goal);
+      });
 
       bodyPathLocalization.initialize(this);
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);

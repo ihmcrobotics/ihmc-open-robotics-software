@@ -85,7 +85,6 @@ public class BehaviorModule
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
       init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
-
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry,
@@ -119,6 +118,8 @@ public class BehaviorModule
 
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
+
+      ros1Node.execute();
    }
 
    private void stringBasedSelection(String selection)
