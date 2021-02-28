@@ -29,7 +29,6 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
    private final static boolean visualize = true;
    private final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
-   private boolean useExperimentalPhysicsEngine = false;
 
    @BeforeEach
    public void setup()
@@ -235,7 +234,6 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       String className = getClass().getSimpleName();
       DRCRobotModel robotModel = getRobotModel();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(className);
 
       // increase ankle damping to match the real robot better
