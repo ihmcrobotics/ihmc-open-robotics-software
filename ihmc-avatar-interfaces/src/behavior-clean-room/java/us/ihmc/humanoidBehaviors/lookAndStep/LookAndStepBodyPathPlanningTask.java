@@ -92,29 +92,29 @@ public class LookAndStepBodyPathPlanningTask
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
-         if (robotTarget == RobotTarget.SCS)
-         {
-            statusLogger.info("Robot target is {}. Adding neck suppressor conditions.", robotTarget);
-            suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
-                                    () -> neckTrajectoryTimerSnapshot.isRunning());
-            suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
-                                                                                  lookAndStepParameters::getNeckPitchForBodyPath,
-                                                                                  lookAndStepParameters::getNeckPitchTolerance,
-                                                                                  () ->
-                                              {
-                                                 commandPitchHeadWithRespectToChest.accept(lookAndStepParameters.getNeckPitchForBodyPath());
-                                                 neckTrajectoryTimer.reset();
-                                              }));
-         }
+//         if (robotTarget == RobotTarget.SCS)
+//         {
+//            statusLogger.info("Robot target is {}. Adding neck suppressor conditions.", robotTarget);
+//            suppressor.addCondition(() -> "Looking... Neck pitch: " + neckPitch,
+//                                    () -> neckTrajectoryTimerSnapshot.isRunning());
+//            suppressor.addCondition(SuppressionConditions.neckPitchWithCorrection(() -> neckPitch,
+//                                                                                  lookAndStepParameters::getNeckPitchForBodyPath,
+//                                                                                  lookAndStepParameters::getNeckPitchTolerance,
+//                                                                                  () ->
+//                                              {
+//                                                 commandPitchHeadWithRespectToChest.accept(lookAndStepParameters.getNeckPitchForBodyPath());
+//                                                 neckTrajectoryTimer.reset();
+//                                              }));
+//         }
          suppressor.addCondition("No goal specified",
                                  () -> !(goal != null && !goal.containsNaN()),
                                  () -> uiPublisher.publishToUI(PlanarRegionsForUI, mapRegions));
-         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
-                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
-                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
-         suppressor.addCondition(() -> "No regions. "
-                                       + (mapRegions == null ? null : (" isEmpty: " + mapRegions.isEmpty())),
-                                 () -> !(mapRegions != null && !mapRegions.isEmpty()));
+//         suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + mapRegionsReceptionTimerSnapshot.hasBeenSet()
+//                                       + " timeSinceLastUpdate: " + mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
+//                                 () -> mapRegionsReceptionTimerSnapshot.isExpired());
+//         suppressor.addCondition(() -> "No regions. "
+//                                       + (mapRegions == null ? null : (" isEmpty: " + mapRegions.isEmpty())),
+//                                 () -> !(mapRegions != null && !mapRegions.isEmpty()));
          // TODO: This could be "run recently" instead of failed recently
          suppressor.addCondition("Failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Is being reviewed", review::isBeingReviewed);
