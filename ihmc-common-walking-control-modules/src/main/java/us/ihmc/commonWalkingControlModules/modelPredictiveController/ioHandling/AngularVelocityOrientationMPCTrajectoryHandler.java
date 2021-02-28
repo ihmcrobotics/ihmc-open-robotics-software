@@ -32,9 +32,9 @@ public class AngularVelocityOrientationMPCTrajectoryHandler extends OrientationM
    private final RecyclingArrayList<AxisAngleBasics> axisAngleErrorSolution = new RecyclingArrayList<>(AxisAngle::new);
    private final RecyclingArrayList<FrameVector3DBasics> angularVelocityErrorSolution = new RecyclingArrayList<>(FrameVector3D::new);
 
-   public AngularVelocityOrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, YoRegistry registry)
+   public AngularVelocityOrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler)
    {
-      super(indexHandler, registry);
+      super(indexHandler);
    }
 
    @Override

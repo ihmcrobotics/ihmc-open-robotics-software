@@ -42,7 +42,9 @@ public abstract class OrientationMPCTrajectoryHandler
    protected final FramePolynomial3D internalAngularMomentumTrajectory = new FramePolynomial3D(3, ReferenceFrame.getWorldFrame());
    protected final YoDouble previewWindowEndTime;
 
-   public OrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, YoRegistry registry)
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   public OrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
 
@@ -51,6 +53,11 @@ public abstract class OrientationMPCTrajectoryHandler
 
       orientationInitializationCalculator = new OrientationTrajectoryCalculator(registry);
       orientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("desiredCoMTrajectory", 100, ReferenceFrame.getWorldFrame(), registry);
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 
    /**

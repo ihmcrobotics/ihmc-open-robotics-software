@@ -39,9 +39,9 @@ public class MomentumOrientationMPCTrajectoryHandler extends OrientationMPCTraje
    private final Matrix3DReadOnly momentOfInertiaMatrix;
    private final double mass;
 
-   public MomentumOrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, Matrix3DReadOnly momentOfInertiaMatrix, double mass, YoRegistry registry)
+   public MomentumOrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, Matrix3DReadOnly momentOfInertiaMatrix, double mass)
    {
-      super(indexHandler, registry);
+      super(indexHandler);
 
       this.momentOfInertiaMatrix = momentOfInertiaMatrix;
       this.mass = mass;
