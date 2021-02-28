@@ -68,7 +68,7 @@ public abstract class SE3ModelPredictiveController
    public static final double initialComWeight = 5e3;
    public static final double vrpTrackingWeight = 1e2;
 
-   protected final SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+   protected final SE3MPCIndexHandler indexHandler;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -83,6 +83,9 @@ public abstract class SE3ModelPredictiveController
 
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
    private final FrameOrientation3DBasics desiredBodyOrientationFeedForward = new FrameQuaternion(worldFrame);
+
+   private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
+   private final FrameVector3DBasics desiredBodyAngularVelocityFeedForward = new FrameVector3D(worldFrame);
 
    private final RecyclingArrayList<FramePoint3D> startVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
    private final RecyclingArrayList<FramePoint3D> endVRPPositions = new RecyclingArrayList<>(FramePoint3D::new);
@@ -109,7 +112,6 @@ public abstract class SE3ModelPredictiveController
    private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
 
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
-   protected final YoVector3D currentBodyAngularMomentum = new YoVector3D("currentBodyAngularMomentum", registry);
 
    public final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
 
@@ -142,6 +144,7 @@ public abstract class SE3ModelPredictiveController
                                        double gravityZ, double nominalCoMHeight, double mass, double dt,
                                        YoRegistry parentRegistry)
    {
+      this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.omega = omega;
@@ -673,6 +676,9 @@ public abstract class SE3ModelPredictiveController
       desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
       desiredBodyOrientationFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview());
 
+      desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
+      desiredBodyAngularVelocityFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
+
       ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
       double nominalHeight = gravityZ / MathTools.square(omega.getValue());
       ecmpPositionToPack.set(desiredVRPPosition);
@@ -776,6 +782,16 @@ public abstract class SE3ModelPredictiveController
    public FrameOrientation3DReadOnly getDesiredFeedForwardBodyOrientation()
    {
       return desiredBodyOrientationFeedForward;
+   }
+
+   public FrameVector3DReadOnly getDesiredBodyAngularVelocitySolution()
+   {
+      return desiredBodyAngularVelocity;
+   }
+
+   public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
+   {
+      return desiredBodyAngularVelocityFeedForward;
    }
 
    public List<? extends Polynomial3DReadOnly> getVRPTrajectories()
