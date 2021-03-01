@@ -21,7 +21,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -53,7 +52,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
 import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
@@ -625,12 +623,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (calibrationParameters == null)
          calibrationParameters = new ValkyrieCalibrationParameters(getJointMap());
       return calibrationParameters;
-   }
-
-   @Override
-   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return new ValkyrieFootstepPlanningParameters();
    }
 
    @Override
