@@ -50,7 +50,18 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.*;
+import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
+import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -111,6 +122,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
       estimatorDT = 0.002;
       simulateDT = estimatorDT / 3.0;
+   }
+
+   public void setVal2Scale()
+   {
+      setModelSizeScale(0.925170);
+      setModelMassScale(0.925170);
    }
 
    public ValkyrieRobotVersion getRobotVersion()

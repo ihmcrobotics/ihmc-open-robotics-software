@@ -105,7 +105,7 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
          translate(footsteps, new Vector3D(0.6 - 0.045 - actualFootLength / 2.0, 0.0, 0.0));
       else
          translate(footsteps, new Vector3D(1.8 - 0.045 - actualFootLength / 2.0 + (numberOfSteps + 1) * stepLength, 0.0, startZ));
-      setStepDurations(footsteps, swingDuration, transferDuration);
+      EndToEndTestTools.setStepDurations(footsteps, swingDuration, transferDuration);
       if (corruptor != null)
          corruptor.accept(footsteps);
       publishHeightOffset(heightOffset);
@@ -130,27 +130,6 @@ public abstract class HumanoidEndToEndStairsTest implements MultiRobotTestInterf
       double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, robotModel.getWalkingControllerParameters());
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.1 * walkingDuration));
-   }
-
-   private static FootstepDataListMessage setStepDurations(FootstepDataListMessage message, double swingDuration, double transferDuration)
-   {
-      if (Double.isFinite(swingDuration) && swingDuration > 0.0)
-      {
-         for (int i = 0; i < message.getFootstepDataList().size(); i++)
-         {
-            message.getFootstepDataList().get(i).setSwingDuration(swingDuration);
-         }
-      }
-
-      if (Double.isFinite(transferDuration) && transferDuration > 0.0)
-      {
-         for (int i = 0; i < message.getFootstepDataList().size(); i++)
-         {
-            message.getFootstepDataList().get(i).setTransferDuration(transferDuration);
-         }
-      }
-
-      return message;
    }
 
    private static FootstepDataListMessage translate(FootstepDataListMessage message, Tuple3DReadOnly translation)
