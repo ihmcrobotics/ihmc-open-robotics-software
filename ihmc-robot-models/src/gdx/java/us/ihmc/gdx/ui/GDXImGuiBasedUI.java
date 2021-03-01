@@ -89,7 +89,7 @@ public class GDXImGuiBasedUI
       if (ENABLE_VR)
          sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
 
-      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
+      imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), windowTitle);
    }
 
    public ImGuiDockingSetup getImGuiDockingSetup()
@@ -197,7 +197,7 @@ public class GDXImGuiBasedUI
 
       ImGui.end();
 
-      if (imGuiWindowAndDockSystem.isFirstRenderCall() && !Files.exists(GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI))
+      if (imGuiWindowAndDockSystem.isFirstRenderCall() && !Files.exists(imGuiWindowAndDockSystem.getImGuiSettingsPath()))
       {
          imGuiDockingSetup.build(imGuiWindowAndDockSystem.getCentralDockspaceId());
          saveImGuiSettings();
@@ -211,7 +211,7 @@ public class GDXImGuiBasedUI
 
    private void saveImGuiSettings()
    {
-      String settingsPath = GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI.toString();
+      String settingsPath = imGuiWindowAndDockSystem.getImGuiSettingsPath().toString();
       LogTools.info("Saving ImGui settings to {}", settingsPath);
       ImGui.saveIniSettingsToDisk(settingsPath);
    }
