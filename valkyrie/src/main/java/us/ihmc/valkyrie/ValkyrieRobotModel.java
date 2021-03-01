@@ -14,7 +14,6 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.communication.ROS2Tools;
@@ -58,7 +57,6 @@ import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlanningParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
-import us.ihmc.valkyrie.parameters.ValkyrieSliderBoardParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
@@ -578,12 +576,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public static String getHardwareParameterResourceName()
    {
       return "/us/ihmc/valkyrie/parameters/controller_hardware.xml";
-   }
-
-   @Override
-   public SliderBoardParameters getSliderBoardParameters()
-   {
-      return new ValkyrieSliderBoardParameters();
    }
 
    @Override
