@@ -10,11 +10,17 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import us.ihmc.log.LogTools;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiWindowAndDockSystem
 {
+   public static final Path IMGUI_SETTINGS_INI = Paths.get(System.getProperty("user.home"), ".ihmc/ImGuiSettings.ini").toAbsolutePath().normalize();
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
@@ -77,6 +83,13 @@ public class GDXImGuiWindowAndDockSystem
 
    public void beforeWindowManagement()
    {
+      if (isFirstRenderCall && Files.exists(IMGUI_SETTINGS_INI))
+      {
+         String settingsPath = IMGUI_SETTINGS_INI.toString();
+         LogTools.info("Loading ImGui settings from {}", settingsPath);
+         ImGui.loadIniSettingsFromDisk(settingsPath);
+      }
+
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 

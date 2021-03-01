@@ -16,6 +16,7 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -131,6 +132,10 @@ public class GDXImGuiBasedUI
                ImGui.menuItem(window.getWindowName(), "", window.getEnabled());
             }
          }
+         if (ImGui.button("Save Layout"))
+         {
+            saveImGuiSettings();
+         }
          ImGui.endMenu();
       }
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
@@ -192,15 +197,23 @@ public class GDXImGuiBasedUI
 
       ImGui.end();
 
-      if (imGuiWindowAndDockSystem.isFirstRenderCall())
+      if (imGuiWindowAndDockSystem.isFirstRenderCall() && !Files.exists(GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI))
       {
          imGuiDockingSetup.build(imGuiWindowAndDockSystem.getCentralDockspaceId());
+         saveImGuiSettings();
       }
 
       imGuiWindowAndDockSystem.afterWindowManagement();
 
       if (ENABLE_VR)
          vrManager.render(sceneManager);
+   }
+
+   private void saveImGuiSettings()
+   {
+      String settingsPath = GDXImGuiWindowAndDockSystem.IMGUI_SETTINGS_INI.toString();
+      LogTools.info("Saving ImGui settings to {}", settingsPath);
+      ImGui.saveIniSettingsToDisk(settingsPath);
    }
 
    public void dispose()
