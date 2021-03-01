@@ -101,6 +101,15 @@ public class GDXVRManager implements RenderableProvider
             LogTools.info("{} button released: {}", device, button);
          }
       });
+
+      context.addListener(new VRDeviceAdapter()
+      {
+         @Override
+         public void buttonPressed(GDXVRContext.VRDevice device, int button)
+         {
+//            if (controllers.get(Robot))
+         }
+      });
    }
 
    public void pollEvents()
