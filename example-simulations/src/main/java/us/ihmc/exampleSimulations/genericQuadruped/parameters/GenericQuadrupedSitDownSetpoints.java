@@ -31,12 +31,6 @@ public class GenericQuadrupedSitDownSetpoints implements WholeBodySetpointParame
    }
 
    @Override
-   public double getSetpoint(int jointIndex)
-   {
-      return getSetpoint(GenericQuadrupedOrderedJointMap.values[jointIndex].getName());
-   }
-
-   @Override
    public double getSetpoint(String jointName)
    {
       if(setPoints.containsKey(jointName))
