@@ -20,7 +20,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiWindowAndDockSystem
 {
-   public static final Path IMGUI_SETTINGS_INI = Paths.get(System.getProperty("user.home"), ".ihmc/ImGuiSettings.ini").toAbsolutePath().normalize();
+   private Path imGuiSettingsPath;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
@@ -30,9 +30,10 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
-   public void create(long windowHandle)
+   public void create(long windowHandle, String windowTitle)
    {
       this.windowHandle = windowHandle;
+      imGuiSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + windowTitle.replaceAll(" ", "") + "ImGuiSettings.ini").toAbsolutePath().normalize();
 
       GLFWErrorCallback.createPrint(System.err).set();
 
@@ -83,9 +84,9 @@ public class GDXImGuiWindowAndDockSystem
 
    public void beforeWindowManagement()
    {
-      if (isFirstRenderCall && Files.exists(IMGUI_SETTINGS_INI))
+      if (isFirstRenderCall && Files.exists(imGuiSettingsPath))
       {
-         String settingsPath = IMGUI_SETTINGS_INI.toString();
+         String settingsPath = imGuiSettingsPath.toString();
          LogTools.info("Loading ImGui settings from {}", settingsPath);
          ImGui.loadIniSettingsFromDisk(settingsPath);
       }
@@ -143,5 +144,10 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiImplGl3 getImGuiGl3()
    {
       return imGuiGl3;
+   }
+
+   public Path getImGuiSettingsPath()
+   {
+      return imGuiSettingsPath;
    }
 }

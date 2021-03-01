@@ -4,12 +4,14 @@ import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public class ImGuiGlfwWindow
 {
+   private final String windowTitle;
    private final GlfwWindowForImGui glfwWindowForImGui;
    private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem();
    private final ImGuiDockingSetup dockingSetup = new ImGuiDockingSetup();
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
    {
+      this.windowTitle = windowTitle;
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle, windowWidth, windowHeight);
    }
 
@@ -24,7 +26,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiDockSystem.create(windowHandle);
+      imGuiDockSystem.create(windowHandle, windowTitle);
 
       while (!glfwWindowShouldClose(windowHandle))
       {
