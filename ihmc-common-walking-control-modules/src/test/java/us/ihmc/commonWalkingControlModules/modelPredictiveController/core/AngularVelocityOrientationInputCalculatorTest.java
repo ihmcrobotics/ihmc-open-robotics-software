@@ -14,7 +14,9 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
@@ -377,5 +379,100 @@ public class AngularVelocityOrientationInputCalculatorTest
       }
    }
 
+   private static FrameVector3DReadOnly computeAngularVelocityErrorRate(Matrix3DReadOnly momentOfInertia,
+                                                                        FrameOrientation3DReadOnly desiredBodyOrientation,
+                                                                        FrameVector3DReadOnly desiredBodyAngularVelocity,
+                                                                        FrameVector3DReadOnly desiredBodyAngularMomentumRate,
+                                                                        FrameVector3DReadOnly angularErrorAtCurrentTick,
+                                                                        FrameVector3DReadOnly angularVelocityErrorAtCurrentTick
+   )
+   {
+      FrameVector3D angularVelocityErrorRate = new FrameVector3D();
+      FrameVector3D angularVelocityErrorRateFromAngularError = new FrameVector3D();
+      FrameVector3D angularVelocityErrorRateFromAngularVelocityError = new FrameVector3D();
+      FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
+
+      FrameVector3D tempVector = new FrameVector3D(desiredBodyAngularMomentumRate);
+      FrameVector3D tempVector2 = new FrameVector3D(desiredBodyAngularMomentumRate);
+      desiredBodyOrientation.inverseTransform(tempVector);
+      angularVelocityErrorRateFromAngularError.cross(tempVector, angularErrorAtCurrentTick);
+      momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularError);
+
+      Matrix3D tempMatrix = new Matrix3D();
+      tempVector.set(desiredBodyAngularVelocity);
+      momentOfInertia.inverseTransform(tempVector);
+      MatrixMissingTools.toSkewSymmetricMatrix(tempVector, tempMatrix);
+
+      tempMatrix.transform(angularVelocityErrorAtCurrentTick, angularVelocityErrorRateFromAngularVelocityError);
+      momentOfInertia.transform(angularVelocityErrorAtCurrentTick, tempVector);
+      tempVector2.cross(desiredBodyAngularVelocity, tempVector);
+      angularVelocityErrorRateFromAngularVelocityError.sub(tempVector2);
+      momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularVelocityError);
+
+      FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
+      desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
+
+      angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
+      angularVelocityErrorRateFromContact.scale(-mass);
+
+      for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
+      {
+         MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
+         FrameVector3D relativeContactPointLocation = new FrameVector3D();
+         relativeContactPointLocation.sub(contactPoint.getBasisVectorOrigin(), desiredCoMPosition);
+
+         FrameVector3D torqueFromContact = new FrameVector3D();
+         torqueFromContact.cross(relativeContactPointLocation, contactPoint.getContactAcceleration());
+         torqueFromContact.scale(mass);
+
+         FrameVector3D coriolisForce = new FrameVector3D();
+         coriolisForce.cross(desiredContactPointForce, contactPoint.getBasisVectorOrigin());
+         torqueFromContact.add(coriolisForce);
+
+         angularVelocityErrorRateFromContact.add(torqueFromContact);
+      }
+
+      desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
+      momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
+
+      angularVelocityErrorRate.set(angularVelocityErrorRateFromAngularError);
+      angularVelocityErrorRate.add(angularVelocityErrorRateFromAngularVelocityError);
+      angularVelocityErrorRate.add(angularVelocityErrorRateFromContact);
+
+      FrameVector3D angularErrorRate = new FrameVector3D();
+      FrameVector3D angularErrorRateFromAngularError = new FrameVector3D();
+      FrameVector3D angularErrorRateFromAngularVelocityError = new FrameVector3D();
+
+      angularErrorRateFromAngularError.cross(desiredBodyAngularVelocity, angularErrorAtCurrentTick);
+      angularErrorRateFromAngularError.scale(-1.0);
+
+      angularErrorRateFromAngularVelocityError.set(angularVelocityErrorAtCurrentTick);
+
+      angularErrorRate.add(angularErrorRateFromAngularError, angularErrorRateFromAngularVelocityError);
+
+      DMatrixRMaj expectedRateVector = new DMatrixRMaj(6, 1);
+      angularErrorRate.get(expectedRateVector);
+      angularVelocityErrorRate.get(3, expectedRateVector);
+
+      return angularVelocityErrorRate;
+   }
+
+   private static FrameVector3DReadOnly computeAngularErrorRate(FrameVector3DReadOnly desiredBodyAngularVelocity,
+                                                                FrameVector3DReadOnly angularErrorAtCurrentTick,
+                                                                FrameVector3DReadOnly angularVelocityErrorAtCurrentTick)
+   {
+      FrameVector3D angularErrorRate = new FrameVector3D();
+      FrameVector3D angularErrorRateFromAngularError = new FrameVector3D();
+      FrameVector3D angularErrorRateFromAngularVelocityError = new FrameVector3D();
+
+      angularErrorRateFromAngularError.cross(desiredBodyAngularVelocity, angularErrorAtCurrentTick);
+      angularErrorRateFromAngularError.scale(-1.0);
+
+      angularErrorRateFromAngularVelocityError.set(angularVelocityErrorAtCurrentTick);
+
+      angularErrorRate.add(angularErrorRateFromAngularError, angularErrorRateFromAngularVelocityError);
+
+      return angularErrorRate;
+   }
 
 }
