@@ -19,7 +19,7 @@ public class ImGuiDockingSetup
 
    public void addFirst(ImGuiWindow window)
    {
-      instructions.add(new ImGuiDockingSetupInstruction(window.getWindowName()));
+      addInstruction(new ImGuiDockingSetupInstruction(window.getWindowName()), window);
    }
 
    public void splitAdd(String windowToAddName, int imGuiDir, double percent)
@@ -39,8 +39,13 @@ public class ImGuiDockingSetup
 
    public void splitAdd(String windowToSplitName, ImGuiWindow windowToAdd, int imGuiDir, double percent)
    {
-      instructions.add(new ImGuiDockingSetupInstruction(windowToSplitName, windowToAdd.getWindowName(), imGuiDir, percent));
-      windows.add(windowToAdd);
+      addInstruction(new ImGuiDockingSetupInstruction(windowToSplitName, windowToAdd.getWindowName(), imGuiDir, percent), windowToAdd);
+   }
+
+   private void addInstruction(ImGuiDockingSetupInstruction instruction, ImGuiWindow window)
+   {
+      instructions.add(instruction);
+      windows.add(window);
    }
 
    public void build(int centralDockspaceId)
