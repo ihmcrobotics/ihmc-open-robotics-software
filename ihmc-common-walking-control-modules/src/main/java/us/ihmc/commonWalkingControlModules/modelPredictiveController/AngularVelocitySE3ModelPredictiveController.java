@@ -31,8 +31,8 @@ public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredict
            dt,
            parentRegistry);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e-2);
-      qpSolver.setSecondOrientationVariableRegularization(1e-3);
+      qpSolver.setFirstOrientationVariableRegularization(1e1);
+      qpSolver.setSecondOrientationVariableRegularization(1e0);
    }
 
    private AngularVelocitySE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
