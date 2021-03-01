@@ -4,6 +4,7 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.UIFootstepGeneratorParameters;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieCollisionBasedSelectionModel;
@@ -100,5 +101,11 @@ public class ValkyrieUIParameters implements UIParameters
    public RobotCollisionModel getSelectionModel()
    {
       return new ValkyrieCollisionBasedSelectionModel(jointMap);
+   }
+
+   @Override
+   public UIFootstepGeneratorParameters getUIFootstepGeneratorParameters()
+   {
+      return new ValkyrieUIFootstepGeneratorParameters();
    }
 }
