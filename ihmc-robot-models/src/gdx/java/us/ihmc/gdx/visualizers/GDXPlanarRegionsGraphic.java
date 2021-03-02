@@ -21,6 +21,8 @@ import us.ihmc.gdx.mesh.GDXIDMappedColorFunction;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.function.Function;
 
@@ -39,6 +41,8 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
    private ModelInstance modelInstance;
    private Model lastModel;
 
+   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+
    public void generateFlatGround()
    {
       generateMeshes(PlanarRegionsList.flatGround(20.0));
@@ -51,6 +55,12 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
          toRender.run();
          toRender = null;
       }
+   }
+
+   public void generateMeshesAsync(PlanarRegionsList planarRegionsList)
+   {
+      executorService.clearTaskQueue();
+      executorService.execute(() -> generateMeshes(planarRegionsList));
    }
 
    public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
