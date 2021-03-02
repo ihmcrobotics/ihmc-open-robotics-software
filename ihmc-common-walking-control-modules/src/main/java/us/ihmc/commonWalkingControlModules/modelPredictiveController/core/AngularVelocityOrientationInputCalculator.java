@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
@@ -275,6 +276,7 @@ public class AngularVelocityOrientationInputCalculator
          for (int contact = 0; contact < command.getContactPlaneHelper(i).getNumberOfContactPoints(); contact++)
          {
             FramePoint3DReadOnly contactOrigin = command.getContactPlaneHelper(i).getContactPointHelper(contact).getBasisVectorOrigin();
+            contactOrigin.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             crossAdd(mass / totalContactPoints, desiredCoMAcceleration, contactOrigin, torqueAboutPoint);
          }
       }
@@ -308,7 +310,7 @@ public class AngularVelocityOrientationInputCalculator
       MatrixTools.multAddBlock(b2, contactForceJacobian, B, 3, LinearMPCIndexHandler.comCoefficientsPerSegment);
 
       MatrixTools.setMatrixBlock(C, 0, 0, b0, 0, 0, 3, 1, 1.0);
-      MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 0, 0);
+      MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 3, 0);
    }
 
    private final DMatrixRMaj initialStateVector = new DMatrixRMaj(6, 1);

@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
@@ -248,9 +249,143 @@ public class AngularVelocityOrientationInputCalculatorTest
          MatrixTestTools.assertMatrixEquals(expectedAngleErrorRateFromVelocityError, angleErrorRateFromVelocityError, 1e-6);
          MatrixTestTools.assertMatrixEquals(expectedVelocityErrorRateFromVelocityError, velocityErrorRateFromVelocityError, 1e-6);
 
-         MatrixTestTools.assertMatrixEquals(expectedVelocityErrorRateFromContact, velocityErrorRateFromContact, 1e-1);
+         MatrixTestTools.assertMatrixEquals(expectedVelocityErrorRateFromContact, velocityErrorRateFromContact, 1e-5);
 
-         MatrixTestTools.assertMatrixEquals(expectedRateVector, rateVector, 1e-1);
+         MatrixTestTools.assertMatrixEquals(expectedRateVector, rateVector, 1e-5);
+      }
+   }
+
+   @Test
+   public void testB1()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      double mass = 10.0;
+      double orientationPreviewWindowLength = 0.75;
+      double tickDuration = 0.1;
+      double Ixx = 1.0;
+      double Iyy = 1.0;
+      double Izz = 1.0;
+
+      Matrix3D momentOfInertia = new Matrix3D();
+      momentOfInertia.setM00(Ixx);
+      momentOfInertia.setM11(Iyy);
+      momentOfInertia.setM22(Izz);
+
+      MPCContactPlane contactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+
+      Random random = new Random(1738L);
+      FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
+      desiredCoMPosition.setZ(0.0);
+      FrameVector3D desiredCoMAcceleration = new FrameVector3D(desiredCoMPosition);
+
+      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      ConvexPolygon2D contactPolygon = new ConvexPolygon2D();
+      contactPolygon.addVertex(desiredCoMPosition);
+      contactPolygon.addVertex(desiredCoMPosition);
+      contactPolygon.addVertex(desiredCoMPosition);
+      contactPolygon.addVertex(desiredCoMPosition);
+      contactPolygon.update();
+
+      FramePose3D contactPose = new FramePose3D();
+
+      contactPlane.computeBasisVectors(contactPolygon, contactPose, mu);
+
+      ContactPlaneProvider contact = new ContactPlaneProvider();
+      contact.getTimeInterval().setInterval(0.0, 1.0);
+      contact.addContact(contactPose, contactPolygon);
+      contact.setStartECMPPosition(new FramePoint3D());
+      contact.setEndECMPPosition(new FramePoint3D());
+
+      contactProviders.add(contact);
+
+      SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
+      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+
+      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+
+      int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(0);
+      int comCoefficients = LinearMPCIndexHandler.comCoefficientsPerSegment;
+      QPInputTypeA qpInput = new QPInputTypeA(rhoCoefficients + comCoefficients + indexHandler.getTotalNumberOfOrientationTicks() * 6);
+
+
+      for (double time = 0.0; time < orientationPreviewWindowLength; time += 0.01)
+      {
+         int numberOfTrajectoryCoefficients = rhoCoefficients + comCoefficients;
+         DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
+         trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
+
+         contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0));
+         contactPlane.computeContactForce(omega, time);
+
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+
+         int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
+
+         FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredInternalAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
+         desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
+         FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
+         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
+         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
+         command.setDesiredCoMPosition(desiredCoMPosition);
+         command.setDesiredBodyOrientation(desiredBodyOrientation);
+         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
+         command.setTimeOfConstraint(time);
+         command.setSegmentNumber(0);
+         command.setEndingDiscreteTickId(nextTickId);
+         command.setDurationOfHold(tickDuration);
+         command.setOmega(omega);
+         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
+         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(contactPlane);
+         //
+         inputCalculator.compute(qpInput, command);
+
+         FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
+         angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
+         desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
+         momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
+         angularVelocityErrorRateFromContact.scale(-mass);
+
+
+         DMatrixRMaj rateVector = new DMatrixRMaj(6, 1);
+         DMatrixRMaj rateFromContact = new DMatrixRMaj(6, 1);
+
+         DMatrixRMaj velocityErrorRateFromContact = new DMatrixRMaj(3, 1);
+
+
+         CommonOps_DDRM.multAdd(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateVector);
+         CommonOps_DDRM.addEquals(rateVector, inputCalculator.getContinuousCMatrix());
+
+         CommonOps_DDRM.mult(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateFromContact);
+         CommonOps_DDRM.addEquals(rateFromContact, inputCalculator.getContinuousCMatrix());
+
+         DMatrixRMaj scaledGravity = new DMatrixRMaj(3, 1);
+         scaledGravity.set(2, 0, 0.5 * time * time * gravityZ);
+
+         DMatrixRMaj expectedBMatrix = new DMatrixRMaj(6, numberOfTrajectoryCoefficients);
+         DMatrixRMaj expectedCMatrix = new DMatrixRMaj(6, 1);
+         MatrixTools.multAddBlock(inputCalculator.getB1(), MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), expectedBMatrix, 3, 0);
+         MatrixTools.multAddBlock(inputCalculator.getB1(), scaledGravity, expectedCMatrix, 3, 0);
+
+         MatrixTools.setMatrixBlock(velocityErrorRateFromContact, 0, 0, rateFromContact, 3, 0, 3, 1, 1.0);
+
+         DMatrixRMaj expectedVelocityErrorRateFromContact = new DMatrixRMaj(3, 1);
+
+         angularVelocityErrorRateFromContact.get(expectedVelocityErrorRateFromContact);
+
+         MatrixTestTools.assertMatrixEquals(new DMatrixRMaj(3, 1), inputCalculator.getB0(), 1e-5);
+         MatrixTestTools.assertMatrixEquals(new DMatrixRMaj(3, 3 * contactPolygon.getNumberOfVertices()), inputCalculator.getB2(), 1e-5);
+
+         MatrixTestTools.assertMatrixEquals(expectedBMatrix, inputCalculator.getContinuousBMatrix(), 1e-5);
+         MatrixTestTools.assertMatrixEquals(expectedCMatrix, inputCalculator.getContinuousCMatrix(), 1e-5);
+         MatrixTestTools.assertMatrixEquals(expectedVelocityErrorRateFromContact, velocityErrorRateFromContact, 1e-5);
       }
    }
 
@@ -476,19 +611,38 @@ public class AngularVelocityOrientationInputCalculatorTest
                                                                         angularVelocityErrorAtCurrentTick,
                                                                         contactPlane);
 
-
          inputCalculator.compute(qpInput, command);
 
          MatrixTools.setMatrixBlock(Aeq, 6 * tick, 0, qpInput.getTaskJacobian(), 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
          MatrixTools.setMatrixBlock(beq, 6 * tick, 0, qpInput.getTaskObjective(), 0, 0, 6, 1, 1.0);
 
-
-         FrameVector3DReadOnly angularErrorRate = computeAngularErrorRate(angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, command);
-         FrameVector3DReadOnly angularVelocityErrorRate = computeAngularVelocityErrorRate(mass,
+         FrameVector3DReadOnly expectedAngularErrorRate = computeAngularErrorRate(angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, command);
+         FrameVector3DReadOnly expectedAngularVelocityErrorRate = computeAngularVelocityErrorRate(mass,
                                                                                           comPosition,
                                                                                           angularErrorAtCurrentTick,
                                                                                           angularVelocityErrorAtCurrentTick,
                                                                                           command);
+
+         DMatrixRMaj stateVector = new DMatrixRMaj(6, 1);
+         angularErrorAtCurrentTick.get(stateVector);
+         angularVelocityErrorAtCurrentTick.get(3, stateVector);
+
+         DMatrixRMaj expectedRateVector = new DMatrixRMaj(6, 1);
+         expectedAngularErrorRate.get(expectedRateVector);
+         expectedAngularVelocityErrorRate.get(3, expectedRateVector);
+
+         DMatrixRMaj rateVector = new DMatrixRMaj(6, 1);
+
+         CommonOps_DDRM.mult(inputCalculator.getContinuousAMatrix(), stateVector, rateVector);
+         CommonOps_DDRM.multAdd(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateVector);
+         CommonOps_DDRM.addEquals(rateVector, inputCalculator.getContinuousCMatrix());
+
+         MatrixTestTools.assertMatrixEquals("Failed on tick " + tick, expectedRateVector, rateVector, 1e-5);
+
+         FrameVector3D angularErrorRate = new FrameVector3D();
+         FrameVector3D angularVelocityErrorRate = new FrameVector3D();
+         angularErrorRate.set(rateVector);
+         angularVelocityErrorRate.set(3, rateVector);
 
          angularErrorAtCurrentTick.scaleAdd(tickDuration, angularErrorRate, angularErrorAtCurrentTick);
          angularVelocityErrorAtCurrentTick.scaleAdd(tickDuration, angularVelocityErrorRate, angularVelocityErrorAtCurrentTick);
