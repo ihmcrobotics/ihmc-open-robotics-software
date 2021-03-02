@@ -35,6 +35,7 @@ public class AngularVelocityOrientationInputCalculator
    private final DMatrixRMaj desiredBodyAngularVelocity = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewDesiredBodyAngularVelocity = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj desiredCoMAcceleration = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj desiredContactForce = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewDesiredCoMPosition = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj skewDesiredCoMAcceleration = new DMatrixRMaj(3, 3);
 
@@ -242,11 +243,11 @@ public class AngularVelocityOrientationInputCalculator
    private final DMatrixRMaj skewAngularMomentum = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj torqueAboutPoint = new DMatrixRMaj(3, 1);
 
-   private static void crossAdd(double scale, DMatrixRMaj a, FramePoint3DReadOnly b, DMatrixRMaj c)
+   private static void crossAdd(DMatrixRMaj a, FramePoint3DReadOnly b, DMatrixRMaj c)
    {
-      c.add(0, 0, scale * (a.get(1) * b.getZ() - a.get(2) * b.getY()));
-      c.add(1, 0, scale * (a.get(2) * b.getX() - a.get(0) * b.getZ()));
-      c.add(2, 0, scale * (a.get(0) * b.getY() - a.get(1) * b.getX()));
+      c.add(0, 0, (a.get(1) * b.getZ() - a.get(2) * b.getY()));
+      c.add(1, 0, (a.get(2) * b.getX() - a.get(0) * b.getZ()));
+      c.add(2, 0, (a.get(0) * b.getY() - a.get(1) * b.getX()));
    }
 
    private void calculateAffineAxisAngleErrorTerms(DiscreteAngularVelocityOrientationCommand command)
@@ -270,6 +271,10 @@ public class AngularVelocityOrientationInputCalculator
       for (int i = 0; i < command.getNumberOfContacts(); i++)
          totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
 
+      desiredContactForce.set(desiredCoMAcceleration);
+      desiredContactForce.add(2, 0, Math.abs(gravityVector.get(2, 0)));
+      CommonOps_DDRM.scale(mass / totalContactPoints, desiredContactForce);
+
       torqueAboutPoint.zero();
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
@@ -277,7 +282,7 @@ public class AngularVelocityOrientationInputCalculator
          {
             FramePoint3DReadOnly contactOrigin = command.getContactPlaneHelper(i).getContactPointHelper(contact).getBasisVectorOrigin();
             contactOrigin.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            crossAdd(mass / totalContactPoints, desiredCoMAcceleration, contactOrigin, torqueAboutPoint);
+            crossAdd(desiredContactForce, contactOrigin, torqueAboutPoint);
          }
       }
 

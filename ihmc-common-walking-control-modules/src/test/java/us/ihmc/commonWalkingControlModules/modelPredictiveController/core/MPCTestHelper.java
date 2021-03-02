@@ -307,6 +307,9 @@ public class MPCTestHelper
 
    public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
+      if (contactPlane == null)
+         return getCoMPositionJacobian(time, omega, 0, null);
+
       return getCoMPositionJacobian(time, omega, contactPlane.getRhoSize(), contactPlane::getBasisVector);
    }
 
