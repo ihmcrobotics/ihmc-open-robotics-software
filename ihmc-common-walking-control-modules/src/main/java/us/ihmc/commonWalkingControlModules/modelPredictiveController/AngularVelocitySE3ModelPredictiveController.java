@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.AngularVelocityOrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.AngleTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -14,6 +15,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredictiveController
 {
+   private final AngleTools angleTools = new AngleTools();
+
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 
    public AngularVelocitySE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
@@ -31,8 +34,8 @@ public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredict
            dt,
            parentRegistry);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e1);
-      qpSolver.setSecondOrientationVariableRegularization(1e0);
+      qpSolver.setFirstOrientationVariableRegularization(1e-4);
+      qpSolver.setSecondOrientationVariableRegularization(1e-8);
    }
 
    private AngularVelocitySE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
@@ -55,9 +58,7 @@ public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredict
    }
 
    private final Matrix3D desiredRotation = new Matrix3D();
-   private final Matrix3D transformedDesiredRotation = new Matrix3D();
    private final Matrix3D currentRotation = new Matrix3D();
-   private final Matrix3D transformedCurrentRotation = new Matrix3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
    private MPCCommand<?> computeInitialDiscreteOrientationObjective(DiscreteAngularVelocityOrientationCommand objectiveToPack)
@@ -88,21 +89,12 @@ public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredict
       objectiveToPack.setDesiredCoMPosition(currentCoMPosition);
       objectiveToPack.setDesiredCoMAcceleration(tempVector); // FIXME
 
-      desiredOrientation.get(desiredRotation);
-      currentBodyOrientation.get(currentRotation);
-
-      desiredRotation.inverseTransform(currentRotation, transformedCurrentRotation);
-      currentRotation.inverseTransform(desiredRotation, transformedDesiredRotation);
-      transformedCurrentRotation.sub(transformedDesiredRotation);
-      transformedCurrentRotation.scale(0.5);
-      currentBodyAxisAngleError.setX(transformedCurrentRotation.getM21());
-      currentBodyAxisAngleError.setY(transformedCurrentRotation.getM02());
-      currentBodyAxisAngleError.setZ(transformedCurrentRotation.getM10());
+      angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
 
       objectiveToPack.setCurrentAxisAngleError(currentBodyAxisAngleError);
 
       currentBodyAngularVelocityError.sub(currentBodyAngularVelocity, orientationTrajectoryHandler.getDesiredAngularVelocity());
-      desiredOrientation.transform(currentBodyAngularVelocityError);
+      desiredOrientation.inverseTransform(currentBodyAngularVelocityError);
       objectiveToPack.setCurrentBodyAngularVelocityErrorInBodyFrame(currentBodyAngularVelocityError);
 
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
@@ -130,19 +122,19 @@ public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredict
          {
             DiscreteAngularVelocityOrientationCommand objective = commandProvider.getNextDiscreteAngularVelocityOrientationCommand();
 
-            localTime += indexHandler.getOrientationTickDuration(segment);
-            globalTime += indexHandler.getOrientationTickDuration(segment);
+            double tickDuration = indexHandler.getOrientationTickDuration(segment);
+            localTime += tickDuration;
+            globalTime += tickDuration;
 
             objective.clear();
             objective.setOmega(omega.getValue());
             objective.setSegmentNumber(segment);
-            objective.setDurationOfHold(indexHandler.getOrientationTickDuration(segment));
+            objective.setDurationOfHold(tickDuration);
             objective.setTimeOfConstraint(localTime);
             objective.setEndingDiscreteTickId(tick);
 
             linearTrajectoryHandler.compute(globalTime);
             orientationTrajectoryHandler.computeOutsidePreview(globalTime);
-
 
             FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview();
             objective.setDesiredBodyOrientation(desiredOrientation);
@@ -160,9 +152,9 @@ public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredict
             objective.setDesiredCoMPosition(linearTrajectoryHandler.getDesiredCoMPosition());
             objective.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
 
-            for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
+            for (int i = 0; i < contactPlaneHelperPool.get(segment).size(); i++)
             {
-               objective.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
+               objective.addContactPlaneHelper(contactPlaneHelperPool.get(segment).get(i));
             }
 
             commandList.addCommand(objective);
