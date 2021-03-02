@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commons.MathTools;
+import us.ihmc.log.LogTools;
 
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -41,8 +43,18 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
       for (int i = 0; i < previewWindowContactSequence.size(); i++)
       {
          double segmentDuration = Math.min(previewWindowContactSequence.get(i).getTimeInterval().getDuration(), remainingOrientationWindowDuration);
-         int ticksInSegment = (int) Math.floor(segmentDuration / nominalOrientationDt);
-         double tickDuration = segmentDuration / ticksInSegment;
+         int ticksInSegment;
+         double tickDuration;
+         if (segmentDuration > 0.0 && segmentDuration < nominalOrientationDt)
+         {
+            ticksInSegment = 1;
+            tickDuration = segmentDuration;
+         }
+         else
+         {
+            ticksInSegment = (int) Math.floor(segmentDuration / nominalOrientationDt);
+            tickDuration = segmentDuration / ticksInSegment;
+         }
 
          totalNumberOfOrientationTicks += ticksInSegment;
 
