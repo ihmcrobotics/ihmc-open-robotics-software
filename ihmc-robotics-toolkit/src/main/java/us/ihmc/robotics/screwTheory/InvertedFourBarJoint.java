@@ -7,6 +7,7 @@ import java.util.function.DoubleSupplier;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -16,6 +17,8 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -28,6 +31,9 @@ import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemFactories.JointBuilder;
+import us.ihmc.mecano.tools.MultiBodySystemFactories.RigidBodyBuilder;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 import us.ihmc.yoVariables.exceptions.IllegalOperationException;
@@ -693,5 +699,76 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    public int hashCode()
    {
       return nameId.hashCode();
+   }
+
+   public static InvertedFourBarJoint cloneInvertedFourBarJoint(InvertedFourBarJoint original, ReferenceFrame stationaryFrame, String cloneSuffix)
+   {
+      RigidBodyBasics originalPredecessor = original.getPredecessor();
+      RigidBodyBasics clonePredecessor = new RigidBody(originalPredecessor.getName() + cloneSuffix, stationaryFrame);
+      return cloneInvertedFourBarJoint(original, clonePredecessor, cloneSuffix);
+   }
+
+   public static InvertedFourBarJoint cloneInvertedFourBarJoint(InvertedFourBarJoint original, RigidBodyBasics clonePredecessor, String cloneSuffix)
+   {
+      RevoluteJoint cloneJointA, cloneJointB, cloneJointC, cloneJointD;
+      RigidBodyBasics cloneBodyAD, cloneBodyBC, cloneSuccessor;
+   
+      JointBuilder jointBuilder = MultiBodySystemFactories.DEFAULT_JOINT_BUILDER;
+      RigidBodyBuilder bodyBuilder = MultiBodySystemFactories.DEFAULT_RIGID_BODY_BUILDER;
+   
+      if (original.getJointA().isLoopClosure())
+      {
+         cloneJointB = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointB(), cloneSuffix, clonePredecessor);
+         cloneBodyBC = bodyBuilder.cloneRigidBody(original.getJointB().getSuccessor(), null, cloneSuffix, cloneJointB);
+         cloneJointC = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointC(), cloneSuffix, cloneBodyBC);
+         cloneSuccessor = bodyBuilder.cloneRigidBody(original.getSuccessor(), null, cloneSuffix, cloneJointC);
+         cloneJointD = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointD(), cloneSuffix, cloneSuccessor);
+         cloneBodyAD = bodyBuilder.cloneRigidBody(original.getJointD().getSuccessor(), null, cloneSuffix, cloneJointD);
+         cloneJointA = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointA(), cloneSuffix, cloneBodyAD);
+         RigidBodyTransform transform = new RigidBodyTransform(original.getJointA().getLoopClosureFrame().getTransformToParent());
+         transform.invert();
+         cloneJointA.setupLoopClosure(clonePredecessor, transform);
+      }
+      else if (original.getJointB().isLoopClosure())
+      {
+         cloneJointA = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointA(), cloneSuffix, clonePredecessor);
+         cloneBodyAD = bodyBuilder.cloneRigidBody(original.getJointA().getSuccessor(), null, cloneSuffix, cloneJointA);
+         cloneJointD = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointD(), cloneSuffix, cloneBodyAD);
+         cloneSuccessor = bodyBuilder.cloneRigidBody(original.getSuccessor(), null, cloneSuffix, cloneJointD);
+         cloneJointC = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointC(), cloneSuffix, cloneSuccessor);
+         cloneBodyBC = bodyBuilder.cloneRigidBody(original.getJointC().getSuccessor(), null, cloneSuffix, cloneJointC);
+         cloneJointB = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointB(), cloneSuffix, cloneBodyBC);
+         RigidBodyTransform transform = new RigidBodyTransform(original.getJointB().getLoopClosureFrame().getTransformToParent());
+         transform.invert();
+         cloneJointB.setupLoopClosure(clonePredecessor, transform);
+      }
+      else
+      {
+         cloneJointA = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointA(), cloneSuffix, clonePredecessor);
+         cloneBodyAD = bodyBuilder.cloneRigidBody(original.getJointA().getSuccessor(), null, cloneSuffix, cloneJointA);
+         cloneJointD = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointD(), cloneSuffix, cloneBodyAD);
+         cloneJointB = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointB(), cloneSuffix, clonePredecessor);
+         cloneBodyBC = bodyBuilder.cloneRigidBody(original.getJointB().getSuccessor(), null, cloneSuffix, cloneJointB);
+         cloneJointC = (RevoluteJoint) jointBuilder.cloneOneDoFJoint(original.getJointC(), cloneSuffix, cloneBodyBC);
+   
+         if (original.getJointC().isLoopClosure())
+         {
+            cloneSuccessor = bodyBuilder.cloneRigidBody(original.getSuccessor(), null, cloneSuffix, cloneJointD);
+            RigidBodyTransform transform = new RigidBodyTransform(original.getJointC().getLoopClosureFrame().getTransformToParent());
+            transform.invert();
+            cloneJointC.setupLoopClosure(cloneSuccessor, transform);
+         }
+         else
+         {
+            cloneSuccessor = bodyBuilder.cloneRigidBody(original.getSuccessor(), null, cloneSuffix, cloneJointC);
+            RigidBodyTransform transform = new RigidBodyTransform(original.getJointD().getLoopClosureFrame().getTransformToParent());
+            transform.invert();
+            cloneJointD.setupLoopClosure(cloneSuccessor, transform);
+         }
+      }
+   
+      return new InvertedFourBarJoint(original.getName() + cloneSuffix,
+                                      new RevoluteJointBasics[] {cloneJointA, cloneJointB, cloneJointC, cloneJointD},
+                                      original.getFourBarFunction().getMasterJointIndex());
    }
 }
