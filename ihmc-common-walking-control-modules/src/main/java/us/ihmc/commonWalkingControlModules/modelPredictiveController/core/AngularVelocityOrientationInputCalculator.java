@@ -91,6 +91,9 @@ public class AngularVelocityOrientationInputCalculator
       calculateAffineAxisAngleErrorTerms(command);
 
       computeAffineTimeInvariantTerms(command.getTimeOfConstraint());
+      if (!Double.isFinite(command.getDurationOfHold()))
+         throw new IllegalArgumentException("The duration of the hold is not finite.");
+
       discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, command.getDurationOfHold());
 
       if (command.getEndDiscreteTickId() == 0)
