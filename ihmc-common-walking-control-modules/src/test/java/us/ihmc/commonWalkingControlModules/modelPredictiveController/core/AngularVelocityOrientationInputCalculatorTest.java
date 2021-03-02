@@ -157,11 +157,12 @@ public class AngularVelocityOrientationInputCalculatorTest
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularVelocityError);
 
          FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
-         desiredContactPointForce.addZ(Math.abs(gravityZ));
-         desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
+         desiredContactPointForce.sub(gravityVector);
 
-         angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
+         angularVelocityErrorRateFromContact.cross(desiredContactPointForce, comPosition);
          angularVelocityErrorRateFromContact.scale(-mass);
+
+         desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
 
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
@@ -349,8 +350,9 @@ public class AngularVelocityOrientationInputCalculatorTest
          angularVelocityErrorRateFromAngularVelocityError.sub(tempVector2);
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularVelocityError);
 
-
-         angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
+         FrameVector3D desiredContactForce = new FrameVector3D(desiredCoMAcceleration);
+         desiredContactForce.subZ(gravityZ);
+         angularVelocityErrorRateFromContact.cross(desiredContactForce, comPosition);
          angularVelocityErrorRateFromContact.scale(-mass);
 
          desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
@@ -649,7 +651,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
       desiredCoMPosition.setZ(0.0);
       FrameVector3D desiredCoMAcceleration = new FrameVector3D(desiredCoMPosition);
-      desiredCoMAcceleration.subZ(gravityZ);
+      desiredCoMAcceleration.setZ(gravityZ);
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2D contactPolygon = new ConvexPolygon2D();
@@ -718,8 +720,11 @@ public class AngularVelocityOrientationInputCalculatorTest
          //
          inputCalculator.compute(qpInput, command);
 
+         FrameVector3D desiredContactForce = new FrameVector3D(desiredCoMAcceleration);
+         desiredContactForce.subZ(gravityZ);
+
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
-         angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
+         angularVelocityErrorRateFromContact.cross(desiredContactForce, comPosition);
          desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
          angularVelocityErrorRateFromContact.scale(-mass);

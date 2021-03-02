@@ -211,7 +211,7 @@ public class AngularVelocityOrientationInputCalculator
       command.getDesiredBodyAngularVelocity().get(desiredBodyAngularVelocity);
 
       desiredContactForce.set(desiredCoMAcceleration);
-      desiredContactForce.add(2, 0, Math.abs(gravityVector.get(2, 0)));
+      desiredContactForce.add(2, 0, -gravityVector.get(2, 0));
 
       MatrixMissingTools.toSkewSymmetricMatrix(desiredContactForce, skewDesiredContactForce);
       MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMPosition(), skewDesiredCoMPosition);
