@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualizati
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -36,28 +37,31 @@ import static us.ihmc.robotics.Assert.assertNotEquals;
 public class AngularVelocitySE3ModelPredictiveControllerTest
 {
    private static final double epsilon = 1e-3;
-   private static final boolean visualize = true;
+   private static final boolean visualize = false;
 
    private static final double gravityZ = -9.81;
    private static final double mass = 10.0;
+   private static final double dt = 0.001;
+   private static final double nominalHeight = 1.0;
+   private static final double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
+
+   private static final double Ixx = 1.0;
+   private static final double Iyy = 1.0;
+   private static final double Izz = 1.0;
+   private static final Matrix3D momentOfInertia = new Matrix3D();
+   static
+   {
+      momentOfInertia.setM00(Ixx);
+      momentOfInertia.setM11(Iyy);
+      momentOfInertia.setM22(Izz);
+   }
 
 
    @Test
    public void testSimpleStanding()
    {
-      double dt = 0.001;
-      double nominalHeight = 1.0;
       double duration = 1.5;
-      double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
-      double Ixx = 1.0;
-      double Iyy = 1.0;
-      double Izz = 1.0;
-
-      Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(Ixx);
-      momentOfInertia.setM11(Iyy);
-      momentOfInertia.setM22(Izz);
 
       AngularVelocitySE3ModelPredictiveController mpc = new AngularVelocitySE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
 
@@ -66,7 +70,6 @@ public class AngularVelocitySE3ModelPredictiveControllerTest
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
-
 
       FramePose3D contactPose = new FramePose3D();
       contactPose.getPosition().set(0.5, 0.3, 0.0);
@@ -195,20 +198,8 @@ public class AngularVelocitySE3ModelPredictiveControllerTest
    @Test
    public void testStandingTwoSegments()
    {
-      double dt = 0.001;
-      double nominalHeight = 1.0;
       double duration = 0.5;
-      double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
-
-      double Ixx = 1.0;
-      double Iyy = 1.0;
-      double Izz = 1.0;
-
-      Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(Ixx);
-      momentOfInertia.setM11(Iyy);
-      momentOfInertia.setM22(Izz);
 
       AngularVelocitySE3ModelPredictiveController mpc = new AngularVelocitySE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
 
@@ -388,20 +379,8 @@ public class AngularVelocitySE3ModelPredictiveControllerTest
    @Test
    public void testStandingTwoSegmentsTwoFeet()
    {
-      double dt = 0.001;
-      double nominalHeight = 1.0;
       double duration = 0.5;
-      double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
       YoRegistry testRegistry = new YoRegistry("testRegistry");
-
-      double Ixx = 1.0;
-      double Iyy = 1.0;
-      double Izz = 1.0;
-
-      Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(Ixx);
-      momentOfInertia.setM11(Iyy);
-      momentOfInertia.setM22(Izz);
 
       AngularVelocitySE3ModelPredictiveController mpc = new AngularVelocitySE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
 
@@ -579,8 +558,11 @@ public class AngularVelocitySE3ModelPredictiveControllerTest
          modifiedCoM.set(initialCoMPosition);
          modifiedCoM.add(EuclidCoreRandomTools.nextVector3D(random, -0.05, 0.05));
 
+         Vector3D axisAngleErrorVector = EuclidCoreRandomTools.nextVector3D(random, -0.05, 0.05);
+         AxisAngle axisAngleError = new AxisAngle();
+         axisAngleError.setRotationVector(axisAngleErrorVector);
          modifiedOrientation.set(initialOrientation);
-         modifiedOrientation.append(EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame()));
+         modifiedOrientation.append(axisAngleError);
 
          mpc.setCurrentState(modifiedCoM, initialCoMVelocity, modifiedOrientation, initialAngularVelocity, time);
          mpc.solveForTrajectory(contactProviders);
@@ -616,20 +598,9 @@ public class AngularVelocitySE3ModelPredictiveControllerTest
    @Test
    public void testSimpleStep()
    {
-      double dt = 0.001;
-      double nominalHeight = 1.0;
       double contactDuration = 0.5;
-      double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
-      double Ixx = 1.0;
-      double Iyy = 1.0;
-      double Izz = 1.0;
       YoRegistry testRegistry = new YoRegistry("testRegistry");
 
-
-      Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(Ixx);
-      momentOfInertia.setM11(Iyy);
-      momentOfInertia.setM22(Izz);
 
 
       AngularVelocitySE3ModelPredictiveController mpc = new AngularVelocitySE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
@@ -810,20 +781,8 @@ public class AngularVelocitySE3ModelPredictiveControllerTest
    @Test
    public void testSimpleStandingFewRhos()
    {
-      double dt = 0.001;
-      double nominalHeight = 1.0;
       double duration = 1.5;
-      double omega = Math.sqrt(Math.abs(gravityZ) / nominalHeight);
-
-      double Ixx = 1.0;
-      double Iyy = 1.0;
-      double Izz = 1.0;
       YoRegistry testRegistry = new YoRegistry("testRegistry");
-
-      Matrix3D momentOfInertia = new Matrix3D();
-      momentOfInertia.setM00(Ixx);
-      momentOfInertia.setM11(Iyy);
-      momentOfInertia.setM22(Izz);
 
       AngularVelocitySE3ModelPredictiveController mpc = new AngularVelocitySE3ModelPredictiveController(momentOfInertia, gravityZ, nominalHeight, mass, dt, testRegistry);
       YoDouble previewWindowLength = ((YoDouble) testRegistry.findVariable("previewWindowDuration"));

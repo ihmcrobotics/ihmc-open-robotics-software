@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MomentumOrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.AngleTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
@@ -14,6 +15,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MomentumSE3ModelPredictiveController extends SE3ModelPredictiveController
 {
+   private final AngleTools angleTools = new AngleTools();
    protected final YoVector3D currentBodyAngularMomentum = new YoVector3D("currentBodyAngularMomentum", registry);
 
    public MomentumSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
@@ -93,14 +95,7 @@ public class MomentumSE3ModelPredictiveController extends SE3ModelPredictiveCont
       desiredOrientation.get(desiredRotation);
       currentBodyOrientation.get(currentRotation);
 
-      desiredOrientation.inverseTransform(currentRotation, transformedCurrentRotation);
-      currentRotation.inverseTransform(desiredRotation, transformedDesiredRotation);
-      transformedCurrentRotation.sub(transformedDesiredRotation);
-      transformedCurrentRotation.scale(0.5);
-      currentBodyAxisAngleError.setX(transformedCurrentRotation.getM21());
-      currentBodyAxisAngleError.setY(transformedCurrentRotation.getM02());
-      currentBodyAxisAngleError.setZ(transformedCurrentRotation.getM10());
-
+      angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
       objectiveToPack.setCurrentAxisAngleError(currentBodyAxisAngleError);
 
       currentBodyOrientation.inverseTransform(currentBodyAngularVelocity, tempVector);

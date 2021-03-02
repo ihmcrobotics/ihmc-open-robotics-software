@@ -66,7 +66,7 @@ public class AngularVelocityOrientationMPCTrajectoryHandler extends OrientationM
             FrameVector3DBasics angularVelocity = angularVelocitySolution.add();
             angularVelocity.set(angularVelocityErrorSolution.get(globalTick));
 
-            orientation.inverseTransform(angularVelocity);
+            orientation.transform(angularVelocity);
             angularVelocity.add(desiredAngularVelocity.get(globalTick));
 
             orientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
