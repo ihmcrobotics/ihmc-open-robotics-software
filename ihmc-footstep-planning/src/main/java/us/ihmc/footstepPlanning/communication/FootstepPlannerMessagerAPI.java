@@ -6,6 +6,7 @@ import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -188,6 +189,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
+   public static final Topic<Box3D> LoggedCollisionBox = topic("LoggedCollisionBox");
 
    public static final Topic<Boolean> ShowLoggedStartOfSwingStep = topic("ShowLoggedStartOfSwingStep");
    public static final Topic<Boolean> ShowLoggedStanceStep = topic("ShowLoggedStanceStep");
@@ -195,6 +197,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> ShowLoggedSnappedCandidateStep = topic("ShowLoggedSnappedCandidateStep");
    public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
    public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
+   public static final Topic<Boolean> ShowBodyBox = topic("ShowBodyBox");
 
    // Test dashboard, only displayed if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");

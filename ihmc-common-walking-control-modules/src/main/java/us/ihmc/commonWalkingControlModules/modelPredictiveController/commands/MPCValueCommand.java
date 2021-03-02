@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 
@@ -25,7 +25,7 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    /**
     * Defines the contact planes to be used to achieve the objective.
     */
-   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    /**
     * What segment number this objective corresponds to.
@@ -110,7 +110,7 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
    /**
     * Adds a contact that the MPC can use to try and achieve the desired objective
     */
-   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -177,7 +177,7 @@ public abstract class MPCValueCommand implements MPCCommand<MPCValueCommand>
       return contactPlaneHelpers.size();
    }
 
-   public ContactPlaneHelper getContactPlaneHelper(int i)
+   public MPCContactPlane getContactPlaneHelper(int i)
    {
       return contactPlaneHelpers.get(i);
    }

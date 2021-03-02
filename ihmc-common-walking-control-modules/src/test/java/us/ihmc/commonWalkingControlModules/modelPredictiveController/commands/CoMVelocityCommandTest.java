@@ -4,8 +4,8 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -32,9 +32,7 @@ public class CoMVelocityCommandTest
 
       FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-      ContactStateMagnitudeToForceMatrixHelper rhoHelper = new ContactStateMagnitudeToForceMatrixHelper(4, 4, new ZeroConeRotationCalculator());
-      CoefficientJacobianMatrixHelper helper = new CoefficientJacobianMatrixHelper(4, 4);
-      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
@@ -43,7 +41,6 @@ public class CoMVelocityCommandTest
 
       ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
-      rhoHelper.computeMatrices(contactPolygon, contactPose, 1e-8, 1e-10, mu);
       contactPlaneHelper.computeBasisVectors(contactPolygon, contactPose, mu);
 
       indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
@@ -68,19 +65,16 @@ public class CoMVelocityCommandTest
 
       FramePoint3D solvedVelocityAtConstraint = new FramePoint3D();
       FramePoint3D solvedObjectiveVelocityTuple = new FramePoint3D();
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
       DMatrixRMaj solvedObjectiveVelocity = new DMatrixRMaj(3, 1);
 
       DMatrixRMaj solution = solver.getSolution();
-      DMatrixRMaj rhoSolution = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
+      DMatrixRMaj rhoSolution = new DMatrixRMaj(contactPlaneHelper.getRhoSize() * 4, 1);
       solvedVelocityAtConstraint.addX(solution.get(0, 0));
       solvedVelocityAtConstraint.addY(solution.get(2, 0));
       solvedVelocityAtConstraint.addZ(solution.get(4, 0));
 
-      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, rhoHelper.getRhoSize() * 4, 1, 1.0);
+      MatrixTools.setMatrixBlock(rhoSolution, 0, 0, solution, 6, 0, contactPlaneHelper.getRhoSize() * 4, 1, 1.0);
 
-      helper.computeMatrices(timeOfConstraint, omega);
-      CommonOps_DDRM.mult(helper.getVelocityJacobianMatrix(), rhoSolution, rhoValueVector);
 
       CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectiveVelocity);
       solvedObjectiveVelocityTuple.set(solvedObjectiveVelocity);
@@ -91,9 +85,9 @@ public class CoMVelocityCommandTest
       objectiveVelocity.get(taskObjectiveExpected);
       taskObjectiveExpected.add(2, 0, -timeOfConstraint * -Math.abs(gravityZ));
 
-      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getCoMVelocityJacobian(timeOfConstraint, omega, rhoHelper);
+      DMatrixRMaj taskJacobianExpected = MPCTestHelper.getCoMVelocityJacobian(timeOfConstraint, omega, contactPlaneHelper);
 
-      for (int rhoIdx  = 0; rhoIdx < rhoHelper.getRhoSize(); rhoIdx++)
+      for (int rhoIdx  = 0; rhoIdx < contactPlaneHelper.getRhoSize(); rhoIdx++)
       {
          int startIdx = 6 + 4 * rhoIdx;
          double rhoValue = omega * Math.exp(omega * timeOfConstraint) * solution.get(startIdx, 0);
@@ -101,8 +95,7 @@ public class CoMVelocityCommandTest
          rhoValue += 3.0 * timeOfConstraint * timeOfConstraint * solution.get(startIdx + 2, 0);
          rhoValue += 2.0 * timeOfConstraint * solution.get(startIdx + 3, 0);
 
-         assertEquals(rhoValue, rhoValueVector.get(rhoIdx), 1e-5);
-         solvedVelocityAtConstraint.scaleAdd(rhoValue, rhoHelper.getBasisVector(rhoIdx), solvedVelocityAtConstraint);
+         solvedVelocityAtConstraint.scaleAdd(rhoValue, contactPlaneHelper.getBasisVector(rhoIdx), solvedVelocityAtConstraint);
       }
       solvedVelocityAtConstraint.scaleAdd(timeOfConstraint, gravityVector, solvedVelocityAtConstraint);
 

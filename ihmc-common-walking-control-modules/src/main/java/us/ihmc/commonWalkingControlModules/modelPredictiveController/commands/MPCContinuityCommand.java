@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,11 +22,11 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
    /**
     * Contact planes used to generate the motion in the first segment.
     */
-   private final List<ContactPlaneHelper> firstSegmentContactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> firstSegmentContactPlaneHelpers = new ArrayList<>();
    /**
     * Contact planes used to generate the motion in the first segment.
     */
-   private final List<ContactPlaneHelper> secondSegmentContactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> secondSegmentContactPlaneHelpers = new ArrayList<>();
 
    /**
     * Segment number of the first segment. The segment number of the second will always be {@link #firstSegmentNumber} + 1
@@ -99,7 +99,7 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
    /**
     * Adds a contact that the MPC is to use for the first motion segment
     */
-   public void addFirstSegmentContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addFirstSegmentContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       firstSegmentContactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -107,7 +107,7 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
    /**
     * Adds a contact that the MPC is to use for the second motion segment
     */
-   public void addSecondSegmentContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addSecondSegmentContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       secondSegmentContactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -169,7 +169,7 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
       return firstSegmentContactPlaneHelpers.size();
    }
 
-   public ContactPlaneHelper getFirstSegmentContactPlaneHelper(int i)
+   public MPCContactPlane getFirstSegmentContactPlaneHelper(int i)
    {
       return firstSegmentContactPlaneHelpers.get(i);
    }
@@ -179,7 +179,7 @@ public abstract class MPCContinuityCommand implements MPCCommand<MPCContinuityCo
       return secondSegmentContactPlaneHelpers.size();
    }
 
-   public ContactPlaneHelper getSecondSegmentContactPlaneHelper(int i )
+   public MPCContactPlane getSecondSegmentContactPlaneHelper(int i )
    {
       return secondSegmentContactPlaneHelpers.get(i);
    }

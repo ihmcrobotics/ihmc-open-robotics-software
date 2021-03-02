@@ -1,6 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -159,6 +160,11 @@ public class CombinedTerrainObject3D implements TerrainObject3D, HeightMapWithNo
       {
          boundingBox = BoundingBox3D.union(boundingBox, object.getBoundingBox());
       }
+   }
+
+   public void addTerrainObjects(Collection<? extends TerrainObject3D> objects)
+   {
+      objects.forEach(this::addTerrainObject);
    }
 
    public void addStaticLinkGraphics(Graphics3DObject linkGraphics)
