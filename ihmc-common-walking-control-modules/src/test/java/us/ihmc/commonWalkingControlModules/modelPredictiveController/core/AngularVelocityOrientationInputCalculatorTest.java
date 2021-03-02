@@ -649,6 +649,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
       desiredCoMPosition.setZ(0.0);
       FrameVector3D desiredCoMAcceleration = new FrameVector3D(desiredCoMPosition);
+      desiredCoMAcceleration.subZ(gravityZ);
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
       ConvexPolygon2D contactPolygon = new ConvexPolygon2D();
@@ -814,7 +815,7 @@ public class AngularVelocityOrientationInputCalculatorTest
          desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
          FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D desiredCoMAcceleration = new FrameVector3D();
+         FrameVector3D desiredCoMAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
          DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
          command.setMomentOfInertiaInBodyFrame(momentOfInertia);
@@ -1088,10 +1089,12 @@ public class AngularVelocityOrientationInputCalculatorTest
       momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularVelocityError);
 
       FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
-      desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
+      desiredContactPointForce.addZ(Math.abs(gravityZ));
 
-      angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
+      angularVelocityErrorRateFromContact.cross(desiredContactPointForce, comPosition);
       angularVelocityErrorRateFromContact.scale(-mass);
+
+      desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
 
       for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
       {
