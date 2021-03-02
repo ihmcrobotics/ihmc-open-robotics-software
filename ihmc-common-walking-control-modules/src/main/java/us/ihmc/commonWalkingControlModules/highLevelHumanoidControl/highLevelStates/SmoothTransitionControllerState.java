@@ -9,12 +9,15 @@ import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.tools.lists.PairList;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SmoothTransitionControllerState extends HighLevelControllerState
 {
+   private final BooleanProvider enableTimeBasedTransition;
    private final DoubleProvider standTransitionDuration;
    private final YoDouble standTransitionRatioCurrentValue;
    private final YoPolynomial transitionRatioTrajectory;
@@ -34,6 +37,10 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       this.initialControllerState = initialControllerState;
       this.finalControllerState = finalControllerState;
 
+      enableTimeBasedTransition = new BooleanParameter(namePrefix + "EnableTimeBasedTransition",
+                                                       "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
+                                                       registry,
+                                                       false);
       standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration", registry, highLevelControllerParameters.getTimeInStandTransition());
       standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);
@@ -51,8 +58,8 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    public void onEntry()
    {
       finalControllerState.onEntry();
-
       transitionRatioTrajectory.setLinear(0.0, standTransitionDuration.getValue(), 0.0, 1.0);
+      standTransitionRatioCurrentValue.set(0.0);
    }
 
    @Override
@@ -61,10 +68,24 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       initialControllerState.doAction(timeInState);
       finalControllerState.doAction(timeInState);
 
-      double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getValue());
-      transitionRatioTrajectory.compute(timeInBlending);
-      double gainRatio = transitionRatioTrajectory.getValue();
-      standTransitionRatioCurrentValue.set(gainRatio);
+      double gainRatio;
+
+      if (enableTimeBasedTransition.getValue())
+      {
+         double timeInBlending = MathTools.clamp(timeInState, 0.0, standTransitionDuration.getValue());
+         transitionRatioTrajectory.compute(timeInBlending);
+         gainRatio = transitionRatioTrajectory.getValue();
+         standTransitionRatioCurrentValue.set(gainRatio);
+      }
+      else
+      {
+         gainRatio = standTransitionRatioCurrentValue.getValue();
+      }
+
+      if (Double.isNaN(gainRatio))
+         gainRatio = 0.0;
+      else
+         gainRatio = MathTools.clamp(gainRatio, 0.0, 1.0);
 
       JointDesiredOutputListReadOnly standReadyJointCommand = initialControllerState.getOutputForLowLevelController();
       JointDesiredOutputListReadOnly walkingJointCommand = finalControllerState.getOutputForLowLevelController();
@@ -76,8 +97,10 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
 
-         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData, standReadyJointCommand.getJointDesiredOutput(joint),
-                                                          walkingJointCommand.getJointDesiredOutput(joint), gainRatio);
+         jointControlBlender.computeAndUpdateJointControl(lowLevelJointData,
+                                                          standReadyJointCommand.getJointDesiredOutput(joint),
+                                                          walkingJointCommand.getJointDesiredOutput(joint),
+                                                          gainRatio);
       }
 
       lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
@@ -92,7 +115,10 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
    @Override
    public boolean isDone(double timeInState)
    {
-      return timeInState > standTransitionDuration.getValue();
+      if (enableTimeBasedTransition.getValue())
+         return timeInState > standTransitionDuration.getValue();
+      else
+         return standTransitionRatioCurrentValue.getValue() >= 1.0;
    }
 
    @Override
