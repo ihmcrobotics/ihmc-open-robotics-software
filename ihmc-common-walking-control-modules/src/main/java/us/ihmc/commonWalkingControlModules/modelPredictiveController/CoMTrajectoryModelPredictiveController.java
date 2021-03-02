@@ -8,11 +8,11 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCSolutionInspection;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SegmentPointViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
@@ -40,13 +40,14 @@ import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core
 
 public class CoMTrajectoryModelPredictiveController
 {
+   private static final boolean debug = false;
+
    private static final boolean includeVelocityObjective = true;
    private static final boolean includeRhoMinInequality = true;
    private static final boolean includeRhoMaxInequality = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final int numberOfBasisVectorsPerContactPoint = 4;
-   private static final int maxCapacity = 10;
    private static final double minRhoValue = 0.0;//05;
    private final double maxContactForce;
 
@@ -93,7 +94,7 @@ public class CoMTrajectoryModelPredictiveController
    private final YoDouble vrpTrackingCostToGo1 = new YoDouble("vrpTrackingCostToGo1", registry);
    private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
 
-   final RecyclingArrayList<RecyclingArrayList<ContactPlaneHelper>> contactPlaneHelperPool;
+   final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
 
    private final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler trajectoryHandler;
@@ -106,7 +107,7 @@ public class CoMTrajectoryModelPredictiveController
    private final ExecutionTimer mpcQPTime = new ExecutionTimer("mpcQPTime", registry);
    private final ExecutionTimer mpcExtractionTime = new ExecutionTimer("mpcExtractionTime", registry);
    final LinearMPCQPSolver qpSolver;
-   private final MPCCornerPointCalculator cornerPointCalculator = new MPCCornerPointCalculator();
+   private MPCCornerPointViewer cornerPointViewer = null;
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
 
    private final DoubleConsumer initialComPositionConsumer = initialCoMPositionCostToGo::set;
@@ -132,18 +133,22 @@ public class CoMTrajectoryModelPredictiveController
       comHeight.set(nominalCoMHeight);
 
       FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
-      Supplier<ContactPlaneHelper> contactPlaneHelperProvider = () -> new ContactPlaneHelper(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
+      Supplier<MPCContactPlane> contactPlaneHelperProvider = () -> new MPCContactPlane(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
       contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
-      solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
+
+      if (debug)
+         solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
+      else
+         solutionInspection = null;
 
       parentRegistry.addChild(registry);
    }
 
-   public void setCornerPointViewer(SegmentPointViewer viewer)
+   public void setCornerPointViewer(MPCCornerPointViewer viewer)
    {
-      cornerPointCalculator.setViewer(viewer);
+      cornerPointViewer = viewer;
    }
 
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
@@ -156,7 +161,7 @@ public class CoMTrajectoryModelPredictiveController
       contactPlaneHelperPool.clear();
       for (int i = 0; i < 2; i++)
       {
-         RecyclingArrayList<ContactPlaneHelper> helpers = contactPlaneHelperPool.add();
+         RecyclingArrayList<MPCContactPlane> helpers = contactPlaneHelperPool.add();
          helpers.clear();
          for (int j = 0; j < 6; j++)
          {
@@ -198,12 +203,12 @@ public class CoMTrajectoryModelPredictiveController
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
 
       trajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
-      trajectoryHandler.compute(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime());
+      trajectoryHandler.computeOutsidePreview(planningWindow.get(planningWindow.size() - 1).getTimeInterval().getEndTime());
 
-      comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPosition());
-      comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocity());
-      dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPosition());
-      vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPosition());
+      comPositionAtEndOfWindow.set(trajectoryHandler.getDesiredCoMPositionOutsidePreview());
+      comVelocityAtEndOfWindow.set(trajectoryHandler.getDesiredCoMVelocityOutsidePreview());
+      dcmAtEndOfWindow.set(trajectoryHandler.getDesiredDCMPositionOutsidePreview());
+      vrpAtEndOfWindow.set(trajectoryHandler.getDesiredVRPPositionOutsidePreview());
 
       if (previewWindowCalculator.activeSegmentChanged())
       {
@@ -236,12 +241,11 @@ public class CoMTrajectoryModelPredictiveController
       mpcExtractionTime.startMeasurement();
       if (solutionCoefficients != null)
       {
-         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, omega.getValue());
-         if (trajectoryHandler.getVrpTrajectories().size() != previewWindowCalculator.getFullPlanningSequence().size())
-            throw new RuntimeException("Somehow these didn't match up.");
+         trajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, previewWindowCalculator.getFullPlanningSequence(), omega.getValue());
       }
 
-      cornerPointCalculator.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence(), maxCapacity);
+      if (cornerPointViewer != null)
+         cornerPointViewer.updateCornerPoints(trajectoryHandler, previewWindowCalculator.getFullPlanningSequence());
 
       if (trajectoryViewer != null)
       {
@@ -260,13 +264,13 @@ public class CoMTrajectoryModelPredictiveController
          ContactPlaneProvider contact = contactSequence.get(sequenceId);
          double duration = contact.getTimeInterval().getDuration();
 
-         RecyclingArrayList<ContactPlaneHelper> contactPlaneHelpers = contactPlaneHelperPool.add();
+         RecyclingArrayList<MPCContactPlane> contactPlaneHelpers = contactPlaneHelperPool.add();
          contactPlaneHelpers.clear();
 
          double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
-            ContactPlaneHelper contactPlaneHelper = contactPlaneHelpers.add();
+            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.add();
             contactPlaneHelper.setMaxNormalForce(maxContactForce);
             contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
             contactPlaneHelper.computeAccelerationIntegrationMatrix(duration, omega.getValue(), objectiveForce);
@@ -299,9 +303,9 @@ public class CoMTrajectoryModelPredictiveController
                                                             initialDuration,
                                                             vrpTrackingConsumer0));
          if (includeRhoMinInequality)
-            mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
          if (includeRhoMaxInequality)
-            mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
       }
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
@@ -319,9 +323,9 @@ public class CoMTrajectoryModelPredictiveController
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
             if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
+               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
             if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), transition, firstSegmentDuration));
+               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
 
@@ -339,9 +343,9 @@ public class CoMTrajectoryModelPredictiveController
                                                                nextDuration,
                                                                costToGoConsumer));
             if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
             if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
          }
       }
 
@@ -360,9 +364,9 @@ public class CoMTrajectoryModelPredictiveController
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
       if (includeRhoMinInequality)
-         mpcCommands.addCommand(computeMinRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
+         mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
       if (includeRhoMaxInequality)
-         mpcCommands.addCommand(computeMaxRhoObjective(commandProvider.getNextRhoValueObjectiveCommand(), numberOfPhases - 1, finalDuration));
+         mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -375,7 +379,6 @@ public class CoMTrajectoryModelPredictiveController
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
       objectiveToPack.setCostToGoConsumer(initialComPositionConsumer);
-      //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -423,7 +426,7 @@ public class CoMTrajectoryModelPredictiveController
       return continuityObjectiveToPack;
    }
 
-   private MPCCommand<?> computeMinRhoObjective(RhoValueObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMinForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
    {
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
@@ -440,7 +443,7 @@ public class CoMTrajectoryModelPredictiveController
       return valueObjective;
    }
 
-   private MPCCommand<?> computeMaxRhoObjective(RhoValueObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMaxForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
    {
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
@@ -452,7 +455,7 @@ public class CoMTrajectoryModelPredictiveController
       int objectiveSize = 0;
       for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
-         ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
+         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
          objectiveSize += contactPlaneHelper.getRhoSize();
          valueObjective.addContactPlaneHelper(contactPlaneHelper);
       }
@@ -462,7 +465,7 @@ public class CoMTrajectoryModelPredictiveController
       objectiveVector.reshape(objectiveSize, 1);
       for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
-         ContactPlaneHelper contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
+         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
          MatrixTools.setMatrixBlock(objectiveVector, rowStart, 0, contactPlaneHelper.getRhoMaxMatrix(), 0, 0, contactPlaneHelper.getRhoSize(), 1, 1.0);
 
          rowStart += contactPlaneHelper.getRhoSize();
@@ -583,7 +586,8 @@ public class CoMTrajectoryModelPredictiveController
 
       DMatrixRMaj solutionCoefficients = qpSolver.getSolution();
 
-      solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
+      if (solutionInspection != null)
+         solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
       return solutionCoefficients;
    }
@@ -714,6 +718,6 @@ public class CoMTrajectoryModelPredictiveController
 
    public List<ContactPlaneProvider> getContactStateProviders()
    {
-      return previewWindowCalculator.getFullPlanningSequence();
+      return trajectoryHandler.getFullPlanningSequence();
    }
 }

@@ -46,10 +46,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
          }
       };
       if (useVal2Scale)
-      {
-         robotModel.setModelSizeScale(0.925170);
-         robotModel.setModelMassScale(0.925170);
-      }
+         robotModel.setVal2Scale();
       return robotModel;
    }
 

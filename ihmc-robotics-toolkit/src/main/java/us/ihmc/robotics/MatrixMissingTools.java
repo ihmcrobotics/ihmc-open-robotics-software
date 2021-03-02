@@ -7,9 +7,46 @@ import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixMissingTools
 {
+   /**
+    * Sets a block of a matrix
+    *
+    * @param dest            Set a block of this matrix
+    * @param destStartRow    Row index of the top left corner of the block to set
+    * @param destStartColumn Column index of the top left corner of the block to set
+    * @param src             Get a block of this matrix
+    * @param srcStartRow     Row index of the top left corner of the block to use from otherMatrix
+    * @param srcStartColumn  Column index of the top left corner of the block to use from otherMatrix
+    * @param numberOfRows    Row size of the block
+    * @param numberOfColumns Column size of the block
+    * @param scale           Scale the block from otherMatrix by this value
+    */
+   public static void setMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix src, int srcStartRow, int srcStartColumn,
+                                     int numberOfRows, int numberOfColumns, double scale)
+   {
+      if (numberOfRows == 0 || numberOfColumns == 0)
+         return;
+
+      if (dest.getNumRows() < numberOfRows || dest.getNumCols() < numberOfColumns)
+         throw new IllegalArgumentException("dest is too small, min size: [rows: " + numberOfRows + ", cols: " + numberOfColumns + "], was: [rows: "
+                                            + dest.getNumRows() + ", cols: " + dest.getNumCols() + "]");
+      if (src.getNumRows() < numberOfRows + srcStartRow || src.getNumCols() < numberOfColumns + srcStartColumn)
+         throw new IllegalArgumentException("src is too small, min size: [rows: " + (numberOfRows + srcStartRow) + ", cols: "
+                                            + (numberOfColumns + srcStartColumn) + "], was: [rows: " + src.getNumRows() + ", cols: " + src.getNumCols() + "]");
+
+      for (int i = 0; i < numberOfRows; i++)
+      {
+         for (int j = 0; j < numberOfColumns; j++)
+         {
+            dest.unsafe_set(destStartRow + i, destStartColumn + j, scale * src.unsafe_get(srcStartRow + i, srcStartColumn + j));
+         }
+      }
+   }
+
    public static void setDiagonalValues(DMatrix1Row mat, double diagonalValue, int rowStart, int colStart)
    {
       if (rowStart >= mat.getNumRows())
@@ -94,6 +131,13 @@ public class MatrixMissingTools
       return vector;
    }
 
+   public static DMatrixRMaj createVector(Tuple3DReadOnly tuple)
+   {
+      DMatrixRMaj vector = new DMatrixRMaj(3, 1);
+      tuple.get(vector);
+      return vector;
+   }
+
    public static DMatrixRMaj createRowVector(double... values)
    {
       DMatrixRMaj vector = new DMatrixRMaj(1, values.length);
@@ -134,5 +178,20 @@ public class MatrixMissingTools
       skewSymmetric.set(2, 1, vector.get(0));
       skewSymmetric.set(2, 2, 0.0);
       return skewSymmetric;
+   }
+
+   public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
+   {
+      matrix.data[ row * matrix.numCols + col ] += value;
+   }
+
+   public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src)
+   {
+      addMatrixBlock(dest, destStartRow, destStartColumn, src, 1.0);
+   }
+
+   public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src, double scale)
+   {
+      MatrixTools.addMatrixBlock(dest, destStartRow, destStartColumn, src, 0, 0, src.getNumRows(), src.getNumCols(), scale);
    }
 }

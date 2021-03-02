@@ -236,6 +236,7 @@
                         <parameter name="numberOfStepsToConsider" type="IntegerParameter" min="-10" max="10" value="3" />
                         <parameter name="exitCoPForwardSafetyMarginOnToes" type="DoubleParameter" min="0.0" max="1.0" value="0.016" />
                      </registry>
+                     <parameter name="useAngularMomentumOffset" type="BooleanParameter" value="true" />
                      <parameter name="maintainInitialCoMVelocityContinuitySingleSupport" type="BooleanParameter" value="true" />
                      <parameter name="maintainInitialCoMVelocityContinuityTransfer" type="BooleanParameter" value="true" />
                      <parameter name="ellipticICPErrorForMomentumRecovery" type="DoubleParameter" min="0.0" max="1.0" value="3.0" />

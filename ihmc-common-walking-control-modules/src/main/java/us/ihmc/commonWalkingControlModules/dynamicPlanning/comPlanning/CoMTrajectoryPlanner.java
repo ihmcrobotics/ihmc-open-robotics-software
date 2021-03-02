@@ -208,6 +208,11 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       return comHeight.getDoubleValue();
    }
 
+   public double getOmega()
+   {
+      return omega.getValue();
+   }
+
    /**
     * {@inheritDoc}
     */

@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,13 +13,13 @@ import java.util.List;
  *
  * Can be used to both specify a direct value, as well as upper and lower bounds for those forces.
  */
-public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCommand>
+public abstract class RhoObjectiveCommand implements MPCCommand<RhoObjectiveCommand>
 {
    private int commandId;
    /**
     * Contact planes containing the generalized contact force vectors.
     */
-   private final List<ContactPlaneHelper> contactPlaneHelpers = new ArrayList<>();
+   private final List<MPCContactPlane> contactPlaneHelpers = new ArrayList<>();
 
    /**
     * Segment numbers for those forces.
@@ -64,10 +64,12 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       timeOfObjective = Double.NaN;
    }
 
+   public abstract int getDerivativeOrder();
+
    /**
     * Adds a contact that contain the contact points that define the direction of the generalized contact forces.
     */
-   public void addContactPlaneHelper(ContactPlaneHelper contactPlaneHelper)
+   public void addContactPlaneHelper(MPCContactPlane contactPlaneHelper)
    {
       this.contactPlaneHelpers.add(contactPlaneHelper);
    }
@@ -163,7 +165,7 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       return objectiveVector;
    }
 
-   public ContactPlaneHelper getContactPlaneHelper(int i)
+   public MPCContactPlane getContactPlaneHelper(int i)
    {
       return contactPlaneHelpers.get(i);
    }
@@ -180,7 +182,7 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
    }
 
    @Override
-   public void set(RhoValueObjectiveCommand other)
+   public void set(RhoObjectiveCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
@@ -214,9 +216,9 @@ public class RhoValueObjectiveCommand implements MPCCommand<RhoValueObjectiveCom
       {
          return true;
       }
-      else if (object instanceof RhoValueObjectiveCommand)
+      else if (object instanceof RhoObjectiveCommand)
       {
-         RhoValueObjectiveCommand other = (RhoValueObjectiveCommand) object;
+         RhoObjectiveCommand other = (RhoObjectiveCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)
