@@ -37,7 +37,7 @@ public class AngularVelocityOrientationInputCalculator
    private final DMatrixRMaj desiredCoMAcceleration = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj desiredContactForce = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewDesiredCoMPosition = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj skewDesiredCoMAcceleration = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj skewDesiredContactForce = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, 0);
    private final DMatrixRMaj contactForceJacobian = new DMatrixRMaj(3, 0);
@@ -210,9 +210,12 @@ public class AngularVelocityOrientationInputCalculator
       command.getDesiredCoMAcceleration().get(desiredCoMAcceleration);
       command.getDesiredBodyAngularVelocity().get(desiredBodyAngularVelocity);
 
+      desiredContactForce.set(desiredCoMAcceleration);
+      desiredContactForce.add(2, 0, Math.abs(gravityVector.get(2, 0)));
+
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredContactForce, skewDesiredContactForce);
       MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMPosition(), skewDesiredCoMPosition);
       MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredBodyAngularVelocity(), skewDesiredBodyAngularVelocity);
-      MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMAcceleration, skewDesiredCoMAcceleration);
 
       UnrolledInverseFromMinor_DDRM.inv3(inertiaMatrixInBody, inverseInertia, 1.0);
    }
@@ -254,7 +257,7 @@ public class AngularVelocityOrientationInputCalculator
    {
       CommonOps_DDRM.multTransB(inverseInertia, rotationMatrix, IR);
 
-      CommonOps_DDRM.mult(-mass, IR, skewDesiredCoMAcceleration, b1);
+      CommonOps_DDRM.mult(-mass, IR, skewDesiredContactForce, b1);
       CommonOps_DDRM.mult(IR, contactForceToOriginTorqueJacobian, b2);
 
       desiredRotationMatrix.inverseTransform(desiredBodyAngularMomentumRate, rotatedBodyAngularMomentumRate);
@@ -271,8 +274,7 @@ public class AngularVelocityOrientationInputCalculator
       for (int i = 0; i < command.getNumberOfContacts(); i++)
          totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
 
-      desiredContactForce.set(desiredCoMAcceleration);
-      desiredContactForce.add(2, 0, Math.abs(gravityVector.get(2, 0)));
+
       CommonOps_DDRM.scale(mass / totalContactPoints, desiredContactForce);
 
       torqueAboutPoint.zero();
