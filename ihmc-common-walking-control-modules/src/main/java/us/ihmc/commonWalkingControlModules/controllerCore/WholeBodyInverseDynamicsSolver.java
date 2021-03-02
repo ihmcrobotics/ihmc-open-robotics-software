@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
@@ -84,6 +85,10 @@ public class WholeBodyInverseDynamicsSolver
     * intensive, needs benchmark.
     */
    private final YoBoolean minimizeJointTorques;
+   /**
+    * Whether the desired joint torques should be clamped to each joint min and max torque.
+    */
+   private final YoBoolean areJointTorqueLimitsConsidered;
 
    private final double controlDT;
 
@@ -124,6 +129,8 @@ public class WholeBodyInverseDynamicsSolver
 
       minimizeJointTorques = new YoBoolean("minimizeJointTorques", registry);
       minimizeJointTorques.set(false);
+      areJointTorqueLimitsConsidered = new YoBoolean("areJointTorqueLimitsConsidered", registry);
+      areJointTorqueLimitsConsidered.set(toolbox.getOptimizationSettings().areJointTorqueLimitsConsidered());
 
       parentRegistry.addChild(registry);
    }
@@ -216,7 +223,10 @@ public class WholeBodyInverseDynamicsSolver
             int jointAccelerationIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointAccelerationIndex, 0));
-            jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
+            if (areJointTorqueLimitsConsidered.getValue())
+               jointDesiredOutput.setDesiredTorque(MathTools.clamp(tauSolution.get(jointIndex, 0), joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
+            else
+               jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
          }
 
          if (!kinematicLoopFunctions.isEmpty())
@@ -237,7 +247,11 @@ public class WholeBodyInverseDynamicsSolver
             int jointIndex = inverseDynamicsCalculator.getInput().getJointMatrixIndexProvider().getJointDoFIndices(joint)[0];
             JointDesiredOutputBasics jointDesiredOutput = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             jointDesiredOutput.setDesiredAcceleration(jointAccelerations.get(jointIndex, 0));
-            jointDesiredOutput.setDesiredTorque(inverseDynamicsCalculator.getComputedJointTau(joint).get(0));
+            double tau = inverseDynamicsCalculator.getComputedJointTau(joint).get(0);
+            if (areJointTorqueLimitsConsidered.getValue())
+               jointDesiredOutput.setDesiredTorque(MathTools.clamp(tau, joint.getEffortLimitLower(), joint.getEffortLimitUpper()));
+            else
+               jointDesiredOutput.setDesiredTorque(tau);
          }
 
          updateKinematicLoopJointEfforts();

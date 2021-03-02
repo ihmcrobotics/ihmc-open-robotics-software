@@ -14,6 +14,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StandPrepControllerState extends HighLevelControllerState
@@ -25,6 +26,9 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    private final PairList<OneDoFJointBasics, TrajectoryData> jointsData = new PairList<>();
 
+   private final YoBoolean reinitialize = new YoBoolean("standPrepReinitialize", registry);
+   private final YoBoolean continuousUpdate = new YoBoolean("standPrepContinuousUpdate", registry);
+   private final YoDouble splineStartTime = new YoDouble("standPrepSplineStartTime", registry);
    private final YoDouble timeToPrepareForStanding = new YoDouble("timeToPrepareForStanding", registry);
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
@@ -53,7 +57,9 @@ public class StandPrepControllerState extends HighLevelControllerState
          String namePrefix = CaseFormat.UPPER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, jointName);
 
          YoPolynomial trajectory = new YoPolynomial(namePrefix + "StandPrepTrajectory", 4, registry);
-         DoubleProvider standPrepFinalConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition", registry, standPrepParameters.getSetpoint(jointName));
+         DoubleProvider standPrepFinalConfiguration = new DoubleParameter(namePrefix + "StandPrepPosition",
+                                                                          registry,
+                                                                          standPrepParameters.getSetpoint(jointName));
          YoDouble standPrepDesiredConfiguration = new YoDouble(namePrefix + "StandPrepCurrentDesired", registry);
 
          TrajectoryData jointData = new TrajectoryData(standPrepFinalConfiguration, standPrepDesiredConfiguration, trajectory);
@@ -65,6 +71,15 @@ public class StandPrepControllerState extends HighLevelControllerState
    @Override
    public void onEntry()
    {
+      continuousUpdate.set(false);
+      reinitialize.set(false);
+      initializeSplines(0.0);
+   }
+
+   public void initializeSplines(double startTime)
+   {
+      splineStartTime.set(startTime);
+
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
          OneDoFJointBasics joint = jointsData.get(jointIndex).getLeft();
@@ -90,7 +105,18 @@ public class StandPrepControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      double timeInTrajectory = MathTools.clamp(timeInState, 0.0, timeToPrepareForStanding.getDoubleValue());
+      if (continuousUpdate.getValue())
+      {
+         reinitialize.set(false);
+         initializeSplines(splineStartTime.getValue());
+      }
+      else if (reinitialize.getValue())
+      {
+         reinitialize.set(false);
+         initializeSplines(timeInState);
+      }
+
+      double timeInTrajectory = MathTools.clamp(timeInState - splineStartTime.getValue(), 0.0, timeToPrepareForStanding.getDoubleValue());
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
