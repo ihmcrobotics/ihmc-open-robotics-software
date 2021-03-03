@@ -18,9 +18,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -48,6 +46,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    private static final double Izz = 1.0;
 
    private static final Matrix3D momentOfInertia = new Matrix3D();
+
    static
    {
       momentOfInertia.setM00(Ixx);
@@ -128,7 +127,7 @@ public class AngularVelocityOrientationInputCalculatorTest
          command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
          command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
          command.addContactPlaneHelper(contactPlane);
-//
+         //
          inputCalculator.compute(qpInput, command);
 
          FrameVector3D angularErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -475,168 +474,166 @@ public class AngularVelocityOrientationInputCalculatorTest
 
       Random random = new Random(1738L);
 
-      for (double time = 0.0; time < orientationPreviewWindowLength; time += 0.01)
-      {
-         int numberOfTrajectoryCoefficients = rhoCoefficients + comCoefficients;
-         DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
-         trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
+      int numberOfTrajectoryCoefficients = rhoCoefficients + comCoefficients;
+      DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
+      trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
 
-         contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0));
-         contactPlane.computeContactForce(omega, time);
+      FrameVector3D initialAngularError = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+      FrameVector3D initialAngularVelocityError = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+      FrameVector3D angularErrorAtCurrentTick = new FrameVector3D(initialAngularError);
+      FrameVector3D angularVelocityErrorAtCurrentTick = new FrameVector3D(initialAngularVelocityError);
+
+      DMatrixRMaj orientationVariables = new DMatrixRMaj(6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
+
+      FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
+      FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+      FrameVector3D desiredInternalAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+      FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
+      desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
+      FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+      double time = 0.0;
+      for (int tick = 0; tick < indexHandler.getTotalNumberOfOrientationTicks(); tick++)
+      {
 
          FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
+         FrameVector3DReadOnly comAcceleration = MPCTestHelper.computeCoMAcceleration(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
 
-         int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
+         DiscreteAngularVelocityOrientationCommand command = getCommand(time,
+                                                                        tick,
+                                                                        tickDuration,
+                                                                        omega,
+                                                                        momentOfInertia,
+                                                                        comPosition,
+                                                                        comAcceleration,
+                                                                        desiredBodyOrientation,
+                                                                        desiredBodyAngularVelocity,
+                                                                        desiredNetAngularMomentumRate,
+                                                                        desiredInternalAngularMomentumRate,
+                                                                        angularErrorAtCurrentTick,
+                                                                        angularVelocityErrorAtCurrentTick,
+                                                                        contactPlane);
 
-         FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D desiredInternalAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
-         desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
-         FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
-         //
          inputCalculator.compute(qpInput, command);
 
-         FrameVector3D angularErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D angularVelocityErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameQuaternion expectedOrientationAtEndOfTick = new FrameQuaternion();
+         FrameVector3D expectedAngularVelocityAtEndOfTick = new FrameVector3D();
 
-         AxisAngle axisAngle = new AxisAngle();
-         axisAngle.setRotationVector(angularErrorAtCurrentTick);
-
-         FrameQuaternion currentOrientation = new FrameQuaternion(desiredBodyOrientation);
-         currentOrientation.append(axisAngle);
-
-         FrameVector3D currentBodyAngularVelocity = new FrameVector3D();
-         currentBodyAngularVelocity.add(desiredBodyAngularVelocity, angularVelocityErrorAtCurrentTick);
-
-         FrameVector3D angularVelocityErrorRate = new FrameVector3D();
-         FrameVector3D angularVelocityErrorRateFromAngularError = new FrameVector3D();
-         FrameVector3D angularVelocityErrorRateFromAngularVelocityError = new FrameVector3D();
-         FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
-
-         FrameVector3D tempVector = new FrameVector3D(desiredBodyAngularMomentumRate);
-         FrameVector3D tempVector2 = new FrameVector3D(desiredBodyAngularMomentumRate);
-         desiredBodyOrientation.inverseTransform(tempVector);
-         angularVelocityErrorRateFromAngularError.cross(tempVector, angularErrorAtCurrentTick);
-         momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularError);
-
-         Matrix3D tempMatrix = new Matrix3D();
-         tempVector.set(desiredBodyAngularVelocity);
-         momentOfInertia.inverseTransform(tempVector);
-         MatrixMissingTools.toSkewSymmetricMatrix(tempVector, tempMatrix);
-
-         tempMatrix.transform(angularVelocityErrorAtCurrentTick, angularVelocityErrorRateFromAngularVelocityError);
-         momentOfInertia.transform(angularVelocityErrorAtCurrentTick, tempVector);
-         tempVector2.cross(desiredBodyAngularVelocity, tempVector);
-         angularVelocityErrorRateFromAngularVelocityError.sub(tempVector2);
-         momentOfInertia.inverseTransform(angularVelocityErrorRateFromAngularVelocityError);
-
-         FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
-         desiredContactPointForce.addZ(Math.abs(gravityZ));
-         desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
-
-         angularVelocityErrorRateFromContact.cross(desiredCoMAcceleration, comPosition);
-         angularVelocityErrorRateFromContact.scale(-mass);
-
-         for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
-         {
-            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
-            FrameVector3D relativeContactPointLocation = new FrameVector3D();
-            relativeContactPointLocation.sub(contactPoint.getBasisVectorOrigin(), desiredCoMPosition);
-
-            FrameVector3D torqueFromContact = new FrameVector3D();
-            torqueFromContact.cross(relativeContactPointLocation, contactPoint.getContactAcceleration());
-            torqueFromContact.scale(mass);
-
-            FrameVector3D coriolisForce = new FrameVector3D();
-            coriolisForce.cross(desiredContactPointForce, contactPoint.getBasisVectorOrigin());
-            torqueFromContact.add(coriolisForce);
-
-            angularVelocityErrorRateFromContact.add(torqueFromContact);
-         }
-
-         desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
-         momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
-
-         angularVelocityErrorRate.set(angularVelocityErrorRateFromAngularError);
-         angularVelocityErrorRate.add(angularVelocityErrorRateFromAngularVelocityError);
-         angularVelocityErrorRate.add(angularVelocityErrorRateFromContact);
-
-         FrameVector3D angularErrorRate = new FrameVector3D();
-         FrameVector3D angularErrorRateFromAngularError = new FrameVector3D();
-         FrameVector3D angularErrorRateFromAngularVelocityError = new FrameVector3D();
-
-         angularErrorRateFromAngularError.cross(desiredBodyAngularVelocity, angularErrorAtCurrentTick);
-         angularErrorRateFromAngularError.scale(-1.0);
-
-         angularErrorRateFromAngularVelocityError.set(angularVelocityErrorAtCurrentTick);
-
-         angularErrorRate.add(angularErrorRateFromAngularError, angularErrorRateFromAngularVelocityError);
-
-         DMatrixRMaj expectedRateVector = new DMatrixRMaj(6, 1);
-         angularErrorRate.get(expectedRateVector);
-         angularVelocityErrorRate.get(3, expectedRateVector);
+         FrameVector3DReadOnly expectedAngularErrorRate = computeAngularErrorRate(angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, command);
+         FrameVector3DReadOnly expectedAngularVelocityErrorRate = computeAngularVelocityErrorRate(mass,
+                                                                                                  comPosition,
+                                                                                                  angularErrorAtCurrentTick,
+                                                                                                  angularVelocityErrorAtCurrentTick,
+                                                                                                  command);
 
          DMatrixRMaj stateVector = new DMatrixRMaj(6, 1);
-         DMatrixRMaj rateErrorVector = new DMatrixRMaj(6, 1);
-
          angularErrorAtCurrentTick.get(stateVector);
          angularVelocityErrorAtCurrentTick.get(3, stateVector);
 
-         CommonOps_DDRM.mult(inputCalculator.getContinuousAMatrix(), stateVector, rateErrorVector);
-         CommonOps_DDRM.multAdd(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateErrorVector);
-         CommonOps_DDRM.addEquals(rateErrorVector, inputCalculator.getContinuousCMatrix());
+         DMatrixRMaj expectedRateVector = new DMatrixRMaj(6, 1);
+         expectedAngularErrorRate.get(expectedRateVector);
+         expectedAngularVelocityErrorRate.get(3, expectedRateVector);
 
-         MatrixTestTools.assertMatrixEquals(expectedRateVector, rateErrorVector, 1e-5);
+         DMatrixRMaj rateVector = new DMatrixRMaj(6, 1);
 
-         Matrix3D currentRotation = new Matrix3D();
-         Matrix3D desiredRotation = new Matrix3D();
+         CommonOps_DDRM.mult(inputCalculator.getContinuousAMatrix(), stateVector, rateVector);
+         CommonOps_DDRM.multAdd(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateVector);
+         CommonOps_DDRM.addEquals(rateVector, inputCalculator.getContinuousCMatrix());
 
-         currentOrientation.get(currentRotation);
-         desiredBodyOrientation.get(desiredRotation);
+         MatrixTestTools.assertMatrixEquals("Failed on tick " + tick, expectedRateVector, rateVector, 1e-5);
 
-         Matrix3D skewCurrentAngularVelocity = new Matrix3D();
-         Matrix3D skewDesiredAngularVelocity = new Matrix3D();
+         FrameVector3D angularErrorRate = new FrameVector3D();
+         FrameVector3D angularVelocityErrorRate = new FrameVector3D();
+         angularErrorRate.set(rateVector);
+         angularVelocityErrorRate.set(3, rateVector);
 
-         MatrixMissingTools.toSkewSymmetricMatrix(currentBodyAngularVelocity, skewCurrentAngularVelocity);
-         MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocity, skewDesiredAngularVelocity);
+         angularErrorAtCurrentTick.scaleAdd(tickDuration, angularErrorRate, angularErrorAtCurrentTick);
+         angularVelocityErrorAtCurrentTick.scaleAdd(tickDuration, angularVelocityErrorRate, angularVelocityErrorAtCurrentTick);
 
-         Matrix3D currentRotationRate = new Matrix3D();
-         Matrix3D desiredRotationRate = new Matrix3D();
+         angularErrorAtCurrentTick.get(6 * tick, orientationVariables);
+         angularVelocityErrorAtCurrentTick.get(6 * tick + 3, orientationVariables);
 
-         currentRotationRate.set(currentRotation);
-         currentRotationRate.multiply(skewCurrentAngularVelocity);
-
-         desiredRotationRate.set(desiredRotation);
-         desiredRotationRate.multiply(skewDesiredAngularVelocity);
-
-         Vector3D currentRotationRateVector = new Vector3D();
-         Vector3D desiredRotationRateVector = new Vector3D();
-         MatrixMissingTools.fromSkewSymmetricMatrix(currentRotationRate, currentRotationRateVector);
-         MatrixMissingTools.fromSkewSymmetricMatrix(desiredRotationRate, desiredRotationRateVector);
-
-         Vector3D rotationRateVectorError = new Vector3D();
-         rotationRateVectorError.sub(currentRotationRateVector, desiredRotationRateVector);
-
-         EuclidCoreTestTools.assertVector3DGeometricallyEquals(rotationRateVectorError, angularErrorRate, 1e-5);
+         time += tickDuration;
       }
+
+      DMatrixRMaj fullVariableMatrix = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
+      MatrixTools.setMatrixBlock(fullVariableMatrix, 0, 0, trajectoryCoefficients, 0, 0, numberOfTrajectoryCoefficients, 1, 1.0);
+      MatrixTools.setMatrixBlock(fullVariableMatrix,
+                                 numberOfTrajectoryCoefficients,
+                                 0,
+                                 orientationVariables,
+                                 0,
+                                 0,
+                                 6 * indexHandler.getTotalNumberOfOrientationTicks(),
+                                 1,
+                                 1.0);
+   }
+
+   private static void simulateForward(FrameQuaternionReadOnly currentOrientation,
+                                       FrameVector3DReadOnly currentAngularVelocity,
+                                       FrameQuaternionBasics integratedOrientationToPack,
+                                       FrameVector3DBasics integratedAngularVelocityToPack,
+                                       DMatrixRMaj trajectoryCoefficients,
+                                       MPCContactPlane contactPlane,
+                                       double omega,
+                                       double time,
+                                       double gravity,
+                                       double durationToSimulate,
+                                       Matrix3DReadOnly inertiaInBodyFrame,
+                                       double mass)
+   {
+      FrameQuaternion integratedOrientation = new FrameQuaternion(currentOrientation);
+      FrameVector3D integratedVelocity = new FrameVector3D(currentAngularVelocity);
+
+      double endTime = time + durationToSimulate;
+      double simulateDt = 1e-4;
+      for (; time < endTime; time += simulateDt)
+      {
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravity, trajectoryCoefficients, contactPlane);
+
+         DMatrixRMaj rhoAccelerationVector = MPCTestHelper.computeRhoAccelerationVector(time, omega, trajectoryCoefficients, contactPlane);
+         FrameVector3D torqueAboutCoM = new FrameVector3D();
+         int rhoStart = 0;
+         for (int contactIdx = 0; contactIdx < contactPlane.getNumberOfContactPoints(); contactIdx++)
+         {
+            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactIdx);
+            for (int rhoIdx = 0; rhoIdx < contactPoint.getRhoSize(); rhoIdx++)
+            {
+               FrameVector3D force = new FrameVector3D(contactPoint.getBasisVector(rhoIdx));
+               force.scale(mass * rhoAccelerationVector.get(rhoStart + rhoIdx));
+
+               FrameVector3D momentArm = new FrameVector3D();
+               momentArm.sub(contactPoint.getBasisVectorOrigin(), comPosition);
+
+               FrameVector3D torque = new FrameVector3D();
+               torque.cross(momentArm, force);
+
+               torqueAboutCoM.add(torque);
+            }
+            rhoStart += contactPoint.getRhoSize();
+         }
+
+         Matrix3D inertiaInWorld = new Matrix3D(inertiaInBodyFrame);
+         integratedOrientation.transform(inertiaInWorld);
+
+         Vector3D acceleration = new Vector3D(torqueAboutCoM);
+         inertiaInWorld.transform(acceleration);
+
+         Vector3D rotationDuringTick = new Vector3D();
+         rotationDuringTick.scaleAdd(simulateDt, integratedVelocity, rotationDuringTick);
+         rotationDuringTick.scaleAdd(0.5 * simulateDt * simulateDt, acceleration, rotationDuringTick);
+
+         integratedVelocity.scaleAdd(simulateDt, acceleration, integratedVelocity);
+
+         AxisAngle rotation = new AxisAngle();
+         rotation.setRotationVector(rotationDuringTick);
+
+         integratedOrientation.append(rotation);
+      }
+
+      integratedOrientationToPack.set(integratedOrientation);
+      integratedAngularVelocityToPack.set(integratedVelocity);
    }
 
    @Test
@@ -681,7 +678,6 @@ public class AngularVelocityOrientationInputCalculatorTest
       int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(0);
       int comCoefficients = LinearMPCIndexHandler.comCoefficientsPerSegment;
       QPInputTypeA qpInput = new QPInputTypeA(rhoCoefficients + comCoefficients + indexHandler.getTotalNumberOfOrientationTicks() * 6);
-
 
       for (double time = 0.0; time < orientationPreviewWindowLength; time += 0.01)
       {
@@ -729,12 +725,10 @@ public class AngularVelocityOrientationInputCalculatorTest
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
          angularVelocityErrorRateFromContact.scale(-mass);
 
-
          DMatrixRMaj rateVector = new DMatrixRMaj(6, 1);
          DMatrixRMaj rateFromContact = new DMatrixRMaj(6, 1);
 
          DMatrixRMaj velocityErrorRateFromContact = new DMatrixRMaj(3, 1);
-
 
          CommonOps_DDRM.multAdd(inputCalculator.getContinuousBMatrix(), trajectoryCoefficients, rateVector);
          CommonOps_DDRM.addEquals(rateVector, inputCalculator.getContinuousCMatrix());
@@ -870,7 +864,6 @@ public class AngularVelocityOrientationInputCalculatorTest
          DMatrixRMaj angularRateErrorRateFromContact = new DMatrixRMaj(3, 1);
          MatrixTools.setMatrixBlock(angularRateErrorRateFromContact, 0, 0, rate, 3, 0, 3, 1, 1.0);
 
-
          DMatrixRMaj easyExpectedAngularAcceleration = new DMatrixRMaj(3, 1);
          CommonOps_DDRM.mult(inputCalculator.getB2(), contactForces, easyExpectedAngularAcceleration);
          MatrixTestTools.assertMatrixEquals(easyExpectedAngularAcceleration, angularRateErrorRateFromContact, 1e-6);
@@ -970,10 +963,10 @@ public class AngularVelocityOrientationInputCalculatorTest
 
          FrameVector3DReadOnly expectedAngularErrorRate = computeAngularErrorRate(angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, command);
          FrameVector3DReadOnly expectedAngularVelocityErrorRate = computeAngularVelocityErrorRate(mass,
-                                                                                          comPosition,
-                                                                                          angularErrorAtCurrentTick,
-                                                                                          angularVelocityErrorAtCurrentTick,
-                                                                                          command);
+                                                                                                  comPosition,
+                                                                                                  angularErrorAtCurrentTick,
+                                                                                                  angularVelocityErrorAtCurrentTick,
+                                                                                                  command);
 
          DMatrixRMaj stateVector = new DMatrixRMaj(6, 1);
          angularErrorAtCurrentTick.get(stateVector);
@@ -1007,7 +1000,15 @@ public class AngularVelocityOrientationInputCalculatorTest
 
       DMatrixRMaj fullVariableMatrix = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
       MatrixTools.setMatrixBlock(fullVariableMatrix, 0, 0, trajectoryCoefficients, 0, 0, numberOfTrajectoryCoefficients, 1, 1.0);
-      MatrixTools.setMatrixBlock(fullVariableMatrix, numberOfTrajectoryCoefficients, 0, orientationVariables, 0, 0, 6 * indexHandler.getTotalNumberOfOrientationTicks(), 1, 1.0);
+      MatrixTools.setMatrixBlock(fullVariableMatrix,
+                                 numberOfTrajectoryCoefficients,
+                                 0,
+                                 orientationVariables,
+                                 0,
+                                 0,
+                                 6 * indexHandler.getTotalNumberOfOrientationTicks(),
+                                 1,
+                                 1.0);
 
       DMatrixRMaj value = new DMatrixRMaj(6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
       CommonOps_DDRM.mult(Aeq, fullVariableMatrix, value);
@@ -1161,5 +1162,4 @@ public class AngularVelocityOrientationInputCalculatorTest
 
       return angularErrorRate;
    }
-
 }
