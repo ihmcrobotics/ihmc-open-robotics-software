@@ -159,7 +159,7 @@ public class KinematicsBasedFootSwitch implements FootSwitchInterface
    @Override
    public void computeAndPackFootWrench(Wrench footWrenchToPack)
    {
-      footWrenchToPack.setToZero();
+      footWrenchToPack.setToZero(foot.getRigidBody().getBodyFixedFrame(), foot.getSoleFrame());
       if (hasFootHitGround())
          footWrenchToPack.setLinearPartZ(totalRobotWeight);
    }
