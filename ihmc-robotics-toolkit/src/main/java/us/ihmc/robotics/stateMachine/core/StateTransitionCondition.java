@@ -27,4 +27,14 @@ public interface StateTransitionCondition
     * @return {@code true} to request a transition, {@code false} otherwise.
     */
    boolean testCondition(double timeInCurrentState);
+
+   default boolean performOnExit()
+   {
+      return true;
+   }
+
+   default boolean performOnEntry()
+   {
+      return true;
+   }
 }
