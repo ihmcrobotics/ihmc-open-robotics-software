@@ -147,6 +147,11 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
       }
    }
 
+   public void destroy()
+   {
+      executorService.destroy(1500);
+   }
+
    public void setDrawAreaText(boolean drawAreaText)
    {
       this.drawAreaText = drawAreaText;
