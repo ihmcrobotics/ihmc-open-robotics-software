@@ -220,12 +220,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return target == RobotTarget.REAL_ROBOT;
-   }
-
-   @Override
    public double getKinematicsPelvisPositionFilterFreqInHertz()
    {
       return kinematicsPelvisPositionFilterFreqInHertz;
