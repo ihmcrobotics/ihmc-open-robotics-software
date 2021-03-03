@@ -11,7 +11,7 @@ public class AtlasRealsenseROS1Bridge
    {
       new RealsenseROS1Bridge(new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS),
                               AtlasSensorInformation.transformPelvisToD435DepthCamera,
-                              AtlasSensorInformation.transformPelvisToL515DepthCamera);
+                              AtlasSensorInformation.transformChestToL515DepthCamera);
    }
 
    public static void main(String[] args)
