@@ -953,7 +953,7 @@ public class MomentumSE3ModelPredictiveControllerTest
       scs.startOnAThread();
 
       mpc.solveForTrajectory(contacts);
-      mpcVisualizer.visualize(duration);
+      mpcVisualizer.visualize(0.0, duration);
 
       ThreadTools.sleepForever();
    }

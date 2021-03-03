@@ -97,9 +97,9 @@ public class SE3MPCVisualizer
       return new ContactPlaneForceViewer("plane" + contactPlaneViewer++, 4, registry, graphicsListRegistry);
    }
 
-   public void visualize(double duration)
+   public void visualize(double startTime, double durationToVisualize)
    {
-      for (double time = 0.0; time <= duration; time += 0.005)
+      for (double time = startTime; time <= startTime + durationToVisualize; time += 0.005)
       {
          mpc.compute(time);
          int currentSegment = mpc.getCurrentSegmentIndex();
