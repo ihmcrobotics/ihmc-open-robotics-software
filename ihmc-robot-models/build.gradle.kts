@@ -42,11 +42,12 @@ gdxDependencies {
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
 
-   api("org.lwjgl:lwjgl-openvr:3.2.3")
-   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-linux")
-   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-windows")
-   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-windows-x86")
-   api("org.lwjgl:lwjgl-openvr:3.2.3:natives-macos")
+   val lwjglVersion = "3.2.3"
+   api("org.lwjgl:lwjgl-openvr:$lwjglVersion")
+   api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-linux")
+   api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows")
+   api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows-x86")
+   api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-macos")
 
    val imguiVersion = "1.80-1.5.0"
    api("io.imgui.java:imgui-java-binding:$imguiVersion")
