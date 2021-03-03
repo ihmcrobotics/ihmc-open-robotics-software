@@ -6,13 +6,9 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.parameters.*;
@@ -185,23 +181,14 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformTrackingCameraToDepthCamera.invert();
    }
 
-   public static final RigidBodyTransform transformPelvisToL515DepthCamera = new RigidBodyTransform();
+   public static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
    static
    {
-      Point3D pelvisBoltOffset = new Point3D(0.175, 0.015, 0.035);
-      Point3D boltToPitchJoint = new Point3D(0.022, 0.0, 0.01425);
-      Point3D pelvisToPitchJoint = new Point3D(pelvisBoltOffset);
-      pelvisToPitchJoint.add(boltToPitchJoint);
+      Point3D chestToSensor = new Point3D(0.25, 0.0, 0.11);
 
-      transformPelvisToL515DepthCamera.appendTranslation(pelvisBoltOffset);
-      transformPelvisToL515DepthCamera.appendTranslation(boltToPitchJoint);
-      double pitch = Math.toRadians(61.5);
-      transformPelvisToL515DepthCamera.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
-      double c = 0.04975 + 0.03015;
-      transformPelvisToL515DepthCamera.appendTranslation(c * Math.cos(pitch), 0.0, c * Math.sin(pitch));
-
-      transformPelvisToL515DepthCamera.appendYawRotation(-Math.PI / 2);
-      transformPelvisToL515DepthCamera.appendRollRotation(-Math.PI / 2);
+      transformChestToL515DepthCamera.appendTranslation(chestToSensor);
+      double pitch = Math.toRadians(22.5);
+      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
@@ -443,6 +430,6 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    @Override
    public RigidBodyTransform getSteppingCameraTransform()
    {
-      return transformPelvisToL515DepthCamera;
+      return transformChestToL515DepthCamera;
    }
 }
