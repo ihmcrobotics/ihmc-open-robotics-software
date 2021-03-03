@@ -7,8 +7,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
-   public abstract boolean isRunningOnRealRobot();
-
    @Override
    public abstract double getEstimatorDT();
 
