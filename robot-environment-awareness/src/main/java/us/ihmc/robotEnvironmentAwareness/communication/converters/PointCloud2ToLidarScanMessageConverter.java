@@ -97,7 +97,7 @@ public class PointCloud2ToLidarScanMessageConverter
                           LogTools.info("Received PointCloud2 message");
                        }
 
-                       ThreadTools.sleep(1);
+                       ThreadTools.sleep(20);
                     }
                  }).start();
    }
