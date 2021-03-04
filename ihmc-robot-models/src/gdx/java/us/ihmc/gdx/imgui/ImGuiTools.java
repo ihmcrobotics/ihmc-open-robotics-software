@@ -28,6 +28,21 @@ public class ImGuiTools
       glClear(GL32.GL_COLOR_BUFFER_BIT);
    }
 
+   public static String uniqueLabel(String id, String label)
+   {
+      return label + "###" + id + ":" + label;
+   }
+
+   public static String uniqueLabel(Object thisObject, String label)
+   {
+      return label + "###" + thisObject.getClass().getName() + ":" + label;
+   }
+
+   public static String uniqueIDOnly(Object thisObject, String label)
+   {
+      return "###" + thisObject.getClass().getName() + ":" + label;
+   }
+
    /**
     * See https://github.com/ocornut/imgui/blob/master/docs/FONTS.md
     * and ImGuiGlfwFreeTypeDemo in this project

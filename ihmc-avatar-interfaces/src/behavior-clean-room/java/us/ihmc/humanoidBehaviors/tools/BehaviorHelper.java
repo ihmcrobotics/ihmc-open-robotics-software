@@ -203,8 +203,7 @@ public class BehaviorHelper
          @Override
          public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
          {
-            executorService.clearTaskQueue();
-            executorService.execute(() ->
+            executorService.clearQueueAndExecute(() ->
             {
                PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
                syncedRobot.update();

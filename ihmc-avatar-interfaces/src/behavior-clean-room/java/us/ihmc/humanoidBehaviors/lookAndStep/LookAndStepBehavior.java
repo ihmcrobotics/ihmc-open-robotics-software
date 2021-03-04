@@ -179,4 +179,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       behaviorStateReference.broadcast();
       reset.queueReset();
    }
+
+   public void destroy()
+   {
+      bodyPathPlanning.destroy();
+      footstepPlanning.destroy();
+      reset.destroy();
+   }
 }

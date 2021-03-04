@@ -3,9 +3,10 @@ package us.ihmc.humanoidBehaviors.tools;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
@@ -15,7 +16,7 @@ public class ThrottledRobotStateCallback
    private final double updatePeriod;
    private final RemoteSyncedRobotModel syncableRobot;
    private final Timer throttleTimer = new Timer();
-   private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ArrayList<Consumer<RemoteSyncedRobotModel>> consumers = new ArrayList<>();
    private final Runnable waitThenAct = this::waitThenAct;
 
@@ -29,7 +30,7 @@ public class ThrottledRobotStateCallback
    {
       updatePeriod = UnitConversions.hertzToSeconds(rateHz);
       syncableRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.submitTask(waitThenAct));
+      syncableRobot.addRobotConfigurationDataReceivedCallback(() -> executor.clearQueueAndExecute(waitThenAct));
    }
 
    private void waitThenAct()
@@ -46,5 +47,10 @@ public class ThrottledRobotStateCallback
    public void addConsumer(Consumer<RemoteSyncedRobotModel> syncedRobotConsumer)
    {
       consumers.add(syncedRobotConsumer);
+   }
+
+   public void destroy()
+   {
+      executor.destroy();
    }
 }

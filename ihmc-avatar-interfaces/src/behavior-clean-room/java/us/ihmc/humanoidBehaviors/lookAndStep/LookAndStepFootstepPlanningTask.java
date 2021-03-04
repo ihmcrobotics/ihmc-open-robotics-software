@@ -7,7 +7,6 @@ import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -33,6 +32,8 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,7 @@ public class LookAndStepFootstepPlanningTask
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
       // instance variables
-      private SingleThreadSizeOneQueueExecutor executor;
+      private ResettableExceptionHandlingExecutorService executor;
       private ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
 
@@ -99,11 +100,11 @@ public class LookAndStepFootstepPlanningTask
 
          review.initialize(statusLogger, "footstep plan", lookAndStep.approvalNotification, autonomousOutput);
 
-         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+         executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-         localizationResultInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
-         planarRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.submitTask(this::evaluateAndRun));
+         localizationResultInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         planarRegionsInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         footstepCompletedInput.addCallback(() -> executor.clearQueueAndExecute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
@@ -186,6 +187,11 @@ public class LookAndStepFootstepPlanningTask
          {
             performTask();
          }
+      }
+
+      public void destroy()
+      {
+         executor.destroy();
       }
    }
 

@@ -10,15 +10,15 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -36,7 +36,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    private final RigidBodyTransform sensorTransform;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private final Timer throttleTimer = new Timer();
-   private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    public RealsensePointCloudROS1Bridge(DRCRobotModel robotModel,
                                         RosMainNode ros1Node,
@@ -61,7 +61,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    @Override
    public void onNewMessage(sensor_msgs.PointCloud2 ros1PointCloud)
    {
-      executor.submitTask(() -> waitThenAct(ros1PointCloud));
+      executor.clearQueueAndExecute(() -> waitThenAct(ros1PointCloud));
    }
 
    private void waitThenAct(sensor_msgs.PointCloud2 ros1PointCloud)
