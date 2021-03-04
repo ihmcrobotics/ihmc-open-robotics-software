@@ -1,10 +1,17 @@
-package us.ihmc.sensorProcessing.diagnostic;
+package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.List;
 import java.util.Map;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
+import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
+import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
+import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
