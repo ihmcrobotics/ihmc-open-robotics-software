@@ -2,6 +2,7 @@ package us.ihmc.wholeBodyController;
 
 import com.jme3.math.Transform;
 
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.UIFootstepGeneratorParameters;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -33,5 +34,13 @@ public interface UIParameters
    public default RobotCollisionModel getSelectionModel()
    {
       return null;
+   }
+
+   /**
+    * Returns the parameters used to create Footstep Plans.
+    */
+   default public UIFootstepGeneratorParameters getUIFootstepGeneratorParameters()
+   {
+      return new UIFootstepGeneratorParameters();
    }
 }

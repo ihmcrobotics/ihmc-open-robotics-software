@@ -167,13 +167,6 @@ public class ValkyrieStandPrepParameters implements WholeBodySetpointParameters,
    }
 
    @Override
-   public double getSetpoint(int jointIndex)
-   {
-      String jointName = ValkyrieOrderedJointMap.jointNames[jointIndex];
-      return getSetpoint(jointName);
-   }
-
-   @Override
    public double getSetpoint(String jointName)
    {
       if (setPoints.containsKey(jointName))
