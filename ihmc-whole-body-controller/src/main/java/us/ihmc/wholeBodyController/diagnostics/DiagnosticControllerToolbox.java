@@ -2,13 +2,17 @@ package us.ihmc.wholeBodyController.diagnostics;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticParameters;
-import us.ihmc.sensorProcessing.diagnostic.DiagnosticSensorProcessingConfiguration;
 import us.ihmc.sensorProcessing.diagnostic.IMUSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointForceTrackingDelayEstimator;
 import us.ihmc.sensorProcessing.diagnostic.OneDoFJointFourierAnalysis;
@@ -16,7 +20,7 @@ import us.ihmc.sensorProcessing.diagnostic.OneDoFJointSensorValidityChecker;
 import us.ihmc.sensorProcessing.diagnostic.OrientationAngularVelocityConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.PositionVelocity1DConsistencyChecker;
 import us.ihmc.sensorProcessing.diagnostic.WrenchSensorValidityChecker;
-import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -40,24 +44,34 @@ public class DiagnosticControllerToolbox
    private final Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> jointFourierAnalysisMap;
 
    private final double dt;
-   private final FullHumanoidRobotModel fullRobotModel;
-   private final JointDesiredOutputList lowLevelOutput;
-   private final WalkingControllerParameters walkingControllerParameters;
+   private final RigidBodyBasics rootBody;
+   private final FloatingJointBasics rootJoint;
+   private final OneDoFJointBasics[] joints;
+   private final Map<String, OneDoFJointBasics> nameToJointMap;
+   private final JointDesiredOutputListBasics lowLevelOutput;
    private final SensorOutputMapReadOnly sensorOutputMap;
 
-   public DiagnosticControllerToolbox(FullHumanoidRobotModel fullRobotModel, JointDesiredOutputList lowLevelOutput, SensorOutputMapReadOnly sensorOutputMap, DiagnosticParameters diagnosticParameters,
-         WalkingControllerParameters walkingControllerParameters, YoDouble yoTime, double dt,
-         DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration, YoRegistry parentRegistry)
+   public DiagnosticControllerToolbox(RigidBodyBasics rootBody,
+                                      FloatingJointBasics rootJoint,
+                                      JointDesiredOutputListBasics lowLevelOutput,
+                                      SensorOutputMapReadOnly sensorOutputMap,
+                                      DiagnosticParameters diagnosticParameters,
+                                      YoDouble yoTime,
+                                      YoRegistry parentRegistry)
    {
-      this.fullRobotModel = fullRobotModel;
       this.lowLevelOutput = lowLevelOutput;
-      this.yoTime = yoTime;
-      this.dt = dt;
-
       this.sensorOutputMap = sensorOutputMap;
       this.diagnosticParameters = diagnosticParameters;
-      this.walkingControllerParameters = walkingControllerParameters;
+      this.yoTime = yoTime;
 
+      this.rootBody = MultiBodySystemTools.getRootBody(rootBody); // Make sure it is the root body
+      this.rootJoint = rootJoint;
+      joints = SubtreeStreams.fromChildren(OneDoFJointBasics.class, rootBody).toArray(OneDoFJointBasics[]::new);
+      nameToJointMap = Stream.of(joints).collect(Collectors.toMap(JointBasics::getName, Function.identity()));
+
+      DiagnosticSensorProcessingConfiguration diagnosticSensorProcessingConfiguration = diagnosticParameters.getOrCreateSensorProcessingConfiguration(null,
+                                                                                                                                                      null);
+      dt = diagnosticSensorProcessingConfiguration.getEstimatorDT();
       jointSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getJointSensorValidityCheckers();
       imuSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getIMUSensorValidityCheckers();
       wrenchSensorValidityCheckers = diagnosticSensorProcessingConfiguration.getWrenchSensorValidityCheckers();
@@ -71,12 +85,32 @@ public class DiagnosticControllerToolbox
       parentRegistry.addChild(registry);
    }
 
-   public FullHumanoidRobotModel getFullRobotModel()
+   public RigidBodyBasics getRootBody()
    {
-      return fullRobotModel;
+      return rootBody;
    }
 
-   public JointDesiredOutputList getLowLevelOutput()
+   public FloatingJointBasics getRootJoint()
+   {
+      return rootJoint;
+   }
+
+   public OneDoFJointBasics[] getJoints()
+   {
+      return joints;
+   }
+
+   public OneDoFJointBasics getJoint(String jointName)
+   {
+      return nameToJointMap.get(jointName);
+   }
+
+   public List<OneDoFJointBasics> getJoints(String... jointNames)
+   {
+      return Stream.of(jointNames).map(this::getJoint).collect(Collectors.toList());
+   }
+
+   public JointDesiredOutputListBasics getLowLevelOutput()
    {
       return lowLevelOutput;
    }
@@ -84,11 +118,6 @@ public class DiagnosticControllerToolbox
    public DiagnosticParameters getDiagnosticParameters()
    {
       return diagnosticParameters;
-   }
-
-   public WalkingControllerParameters getWalkingControllerParameters()
-   {
-      return walkingControllerParameters;
    }
 
    public YoDouble getYoTime()
@@ -145,5 +174,10 @@ public class DiagnosticControllerToolbox
             return imuProcessedOutputs.get(i);
       }
       return null;
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 }
