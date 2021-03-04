@@ -143,8 +143,8 @@ public class AtlasSimulationBasics
          LogTools.info("Shutting down");
          if (USE_DYNAMICS_SIMULATION)
             dynamicSimulation.destroy();
-         else
-            kinematicsSimulation.destroy();
+//         else
+//            kinematicsSimulation.destroy();
 
          if (lidarAndCameraSimulator != null)
             lidarAndCameraSimulator.destroy();
