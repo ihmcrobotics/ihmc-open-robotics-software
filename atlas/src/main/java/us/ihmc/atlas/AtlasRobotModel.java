@@ -30,7 +30,7 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.UIFootstepGeneratorParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -466,12 +466,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          default:
             return null;
       }
-   }
-
-   @Override
-   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return new AtlasQuadTreeFootstepPlanningParameters();
    }
 
    @Override
