@@ -20,8 +20,7 @@ public class RealsenseROS1Bridge
    private final RealsensePointCloudROS1Bridge l515PointCloudBridge;
    private final MapsensePlanarRegionROS1Bridge l515PlanarRegionBridge;
 
-   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform d435PelvisToSensorTransform,
-                              RigidBodyTransform l515PelvisToSensorTransform)
+   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform d435PelvisToSensorTransform, RigidBodyTransform l515PelvisToSensorTransform)
    {
       URI masterURI = NetworkParameters.getROSURI();
       LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
