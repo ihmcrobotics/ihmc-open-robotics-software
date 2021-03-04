@@ -12,6 +12,8 @@ import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
@@ -239,7 +241,7 @@ public class AngularVelocityOrientationInputCalculator
          ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, contactRow, rhoStartIndex, contactPlane, contactForceJacobian);
          computeTorqueAboutBodyJacobian(contactRow, command.getDesiredCoMPosition(), contactPlane, contactForceToOriginTorqueJacobian);
 
-         contactRow += contactPlane.getNumberOfContactPoints();
+         contactRow += 3 * contactPlane.getNumberOfContactPoints();
          rhoStartIndex += contactPlane.getCoefficientSize();
       }
    }
@@ -248,8 +250,9 @@ public class AngularVelocityOrientationInputCalculator
    private final DMatrixRMaj angularMomentum = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj skewAngularMomentum = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj torqueAboutPoint = new DMatrixRMaj(3, 1);
+   private final FrameVector3D tempVector = new FrameVector3D();
 
-   private static void crossAdd(DMatrixRMaj a, FramePoint3DReadOnly b, DMatrixRMaj c)
+   private static void crossAdd(DMatrixRMaj a, Tuple3DReadOnly b, DMatrixRMaj c)
    {
       c.add(0, 0, (a.get(1) * b.getZ() - a.get(2) * b.getY()));
       c.add(1, 0, (a.get(2) * b.getX() - a.get(0) * b.getZ()));
@@ -260,7 +263,7 @@ public class AngularVelocityOrientationInputCalculator
    {
       CommonOps_DDRM.multTransB(inverseInertia, rotationMatrix, IR);
 
-      CommonOps_DDRM.mult(-mass, IR, skewDesiredContactForce, b1);
+      CommonOps_DDRM.mult(mass, IR, skewDesiredContactForce, b1);
       CommonOps_DDRM.mult(IR, contactForceToOriginTorqueJacobian, b2);
 
       desiredRotationMatrix.inverseTransform(desiredBodyAngularMomentumRate, rotatedBodyAngularMomentumRate);
@@ -287,7 +290,8 @@ public class AngularVelocityOrientationInputCalculator
          {
             FramePoint3DReadOnly contactOrigin = command.getContactPlaneHelper(i).getContactPointHelper(contact).getBasisVectorOrigin();
             contactOrigin.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            crossAdd(desiredContactForce, contactOrigin, torqueAboutPoint);
+            tempVector.scaleAdd(-2.0, command.getDesiredCoMPosition(), contactOrigin);
+            crossAdd(desiredContactForce, tempVector, torqueAboutPoint);
          }
       }
 
@@ -319,7 +323,7 @@ public class AngularVelocityOrientationInputCalculator
       MatrixTools.multAddBlock(b1, comPositionJacobian, B, 3, 0);
       MatrixTools.multAddBlock(b2, contactForceJacobian, B, 3, LinearMPCIndexHandler.comCoefficientsPerSegment);
 
-      MatrixTools.setMatrixBlock(C, 0, 0, b0, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(C, 3, 0, b0, 0, 0, 3, 1, 1.0);
       MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 3, 0);
    }
 
