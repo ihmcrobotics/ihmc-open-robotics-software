@@ -196,8 +196,8 @@ public class BehaviorHelper
       GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
       RemoteSyncedRobotModel syncedRobot = newSyncedRobot();
       RigidBodyTransform transform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      MovingReferenceFrame pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
-      ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", pelvisFrame, transform);
+      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
+      ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
       ros1Node.attachSubscriber(topic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
       {
          @Override
