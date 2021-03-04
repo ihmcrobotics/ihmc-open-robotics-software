@@ -23,14 +23,13 @@ import java.util.function.Consumer;
 public class GDXImGuiBasedUI
 {
    private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
-   private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
    private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-   private final GDXVRManager vrManager = ENABLE_VR ? new GDXVRManager() : null;
+   private final GDXVRManager vrManager = new GDXVRManager();
 
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
    private final ImGuiDockingSetup imGuiDockingSetup = new ImGuiDockingSetup();
@@ -75,7 +74,7 @@ public class GDXImGuiBasedUI
       LogTools.info("create()");
 
       sceneManager.create(GDXInputMode.ImGui);
-      if (ENABLE_VR)
+      if (vrManager.isVREnabled())
          vrManager.create();
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
@@ -86,7 +85,7 @@ public class GDXImGuiBasedUI
 
       sceneManager.addCoordinateFrame(0.3);
 
-      if (ENABLE_VR)
+      if (vrManager.isVREnabled())
          sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), windowTitle);
@@ -99,7 +98,7 @@ public class GDXImGuiBasedUI
 
    public void pollVREvents()
    {
-      if (ENABLE_VR)
+      if (vrManager.isVREnabled())
       {
          vrManager.pollEvents();
       }
@@ -205,7 +204,7 @@ public class GDXImGuiBasedUI
 
       imGuiWindowAndDockSystem.afterWindowManagement();
 
-      if (ENABLE_VR)
+      if (vrManager.isVREnabled())
          vrManager.render(sceneManager);
    }
 
@@ -219,7 +218,7 @@ public class GDXImGuiBasedUI
    public void dispose()
    {
       imGuiWindowAndDockSystem.dispose();
-      if (ENABLE_VR)
+      if (vrManager.isVREnabled())
          vrManager.dispose();
       sceneManager.dispose();
    }

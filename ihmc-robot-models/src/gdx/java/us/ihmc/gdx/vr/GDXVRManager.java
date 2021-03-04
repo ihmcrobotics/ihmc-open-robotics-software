@@ -17,11 +17,12 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.HashMap;
 import java.util.HashSet;
 
 public class GDXVRManager implements RenderableProvider
 {
+   private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
+
    private GDXVRContext context;
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
@@ -175,5 +176,10 @@ public class GDXVRManager implements RenderableProvider
    public GDXVRContext getContext()
    {
       return context;
+   }
+
+   public static boolean isVREnabled()
+   {
+      return ENABLE_VR;
    }
 }
