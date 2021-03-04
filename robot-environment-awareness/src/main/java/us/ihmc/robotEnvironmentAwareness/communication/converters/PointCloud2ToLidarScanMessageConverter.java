@@ -7,11 +7,13 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -28,13 +30,14 @@ public class PointCloud2ToLidarScanMessageConverter
 
    private static final double SENSOR_POSE_X = 0.0;
    private static final double SENSOR_POSE_Y = 0.0;
-   private static final double SENSOR_POSE_Z = 0.0;
+   private static final double SENSOR_POSE_Z = 1.0;
    private static final double SENSOR_POSE_YAW = 0.0;
    private static final double SENSOR_POSE_PITCH = 0.0;
    private static final double SENSOR_POSE_ROLL = 0.0;
 
    private final AtomicReference<PointCloud2> pointCloud2Message = new AtomicReference<>();
    private final AtomicInteger counter = new AtomicInteger();
+   private final AtomicBoolean hasPrintedReceivedMessage = new AtomicBoolean();
 
    public PointCloud2ToLidarScanMessageConverter(String topicName, double poseX, double poseY, double poseZ, double poseYaw, double posePitch, double poseRoll)
    {
@@ -87,6 +90,11 @@ public class PointCloud2ToLidarScanMessageConverter
                           lidarScanMessage.getScan().clear();
                           lidarScanMessage.getScan().add(points);
                           lidarScanMessagePublisher.publish(lidarScanMessage);
+                       }
+
+                       if (!hasPrintedReceivedMessage.getAndSet(true))
+                       {
+                          LogTools.info("Received PointCloud2 message");
                        }
 
                        ThreadTools.sleep(1);
