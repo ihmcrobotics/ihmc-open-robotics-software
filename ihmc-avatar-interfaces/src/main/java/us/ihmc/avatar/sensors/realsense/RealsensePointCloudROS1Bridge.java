@@ -12,7 +12,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -32,9 +31,9 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
-   private final MovingReferenceFrame chestFrame;
+   private final ReferenceFrame sensorBaseFrame;
    private final FramePose3D tempSensorFramePose = new FramePose3D();
-   private final RigidBodyTransform chestToSensorTransform;
+   private final RigidBodyTransform sensorTransform;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private final Timer throttleTimer = new Timer();
    private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
@@ -42,15 +41,15 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    public RealsensePointCloudROS1Bridge(DRCRobotModel robotModel,
                                         RosMainNode ros1Node,
                                         ROS2Node ros2Node,
-                                        RigidBodyTransform chestToSensorTransform,
+                                        RigidBodyTransform sensorTransform,
                                         String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
    {
       super(sensor_msgs.PointCloud2._TYPE);
 
-      this.chestToSensorTransform = chestToSensorTransform;
+      this.sensorTransform = sensorTransform;
 
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      chestFrame = syncedRobot.getReferenceFrames().getChestFrame();
+      sensorBaseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
 
       LogTools.info("Subscribing ROS 1: {}", ros1InputTopic);
       ros1Node.attachSubscriber(ros1InputTopic, this);
@@ -80,20 +79,9 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
          boolean hasColors = true;
          PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
 
-         Point3D pelvisToSensor = new Point3D(0.25, 0.0, 0.11);
-
-         chestToSensorTransform.appendTranslation(pelvisToSensor);
-         double pitch = Math.toRadians(22.5);
-         chestToSensorTransform.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
-//         double c = 0.04975 + 0.03015;
-//         chestToSensorTransform.appendTranslation(c * Math.cos(pitch), 0.0, c * Math.sin(pitch));
-
-         chestToSensorTransform.appendYawRotation(-Math.PI / 2);
-         chestToSensorTransform.appendRollRotation(-Math.PI / 2);
-
          syncedRobot.update();
-         chestFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-         transformToWorld.multiply(chestToSensorTransform);
+         sensorBaseFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
+         transformToWorld.multiply(sensorTransform);
          tempSensorFramePose.set(transformToWorld);
          pointCloudData.applyTransform(transformToWorld);
 

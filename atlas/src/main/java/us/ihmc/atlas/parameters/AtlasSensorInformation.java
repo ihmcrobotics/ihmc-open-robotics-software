@@ -6,11 +6,13 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.*;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
@@ -187,7 +189,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       Point3D chestToSensor = new Point3D(0.25, 0.0, 0.11);
 
       transformChestToL515DepthCamera.appendTranslation(chestToSensor);
-      double pitch = Math.toRadians(22.5);
+      double pitch = Math.toRadians(180.0 - 22.5);
       transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
    }
 
@@ -431,5 +433,12 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public RigidBodyTransform getSteppingCameraTransform()
    {
       return transformChestToL515DepthCamera;
+   }
+
+
+   @Override
+   public ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
    }
 }
