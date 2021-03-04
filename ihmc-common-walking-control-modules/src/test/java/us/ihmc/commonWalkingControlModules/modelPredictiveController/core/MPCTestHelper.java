@@ -217,6 +217,44 @@ public class MPCTestHelper
       return jacobian;
    }
 
+   public static DMatrixRMaj getContactPointAccelerationJacobian(double time, double omega, MPCContactPlane contactPlane)
+   {
+      int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + contactPlane.getCoefficientSize();
+      DMatrixRMaj jacobian = new DMatrixRMaj(3 * contactPlane.getNumberOfContactPoints(), coefficients);
+
+      double c2 = omega * omega * Math.exp(omega * time);
+      double c3 = omega * omega * Math.exp(-omega * time);
+      double c4 = 6 * time;
+      double c5 = 2;
+
+      int rhoIdx = 0;
+      for (int contactPointIdx  = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
+      {
+         for (int i = 0; i < contactPlane.getContactPointHelper(contactPointIdx).getRhoSize(); i++)
+         {
+            int startIdx = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * (rhoIdx + i);
+            FrameVector3DReadOnly basisVector = contactPlane.getContactPointHelper(contactPointIdx).getBasisVector(i);
+
+            jacobian.set(contactPointIdx, startIdx, basisVector.getX() * (c2));
+            jacobian.set(contactPointIdx + 1, startIdx, basisVector.getY() * (c2));
+            jacobian.set(contactPointIdx + 2, startIdx, basisVector.getZ() * (c2));
+            jacobian.set(contactPointIdx, startIdx + 1, basisVector.getX() * (c3));
+            jacobian.set(contactPointIdx + 1, startIdx + 1, basisVector.getY() * (c3));
+            jacobian.set(contactPointIdx + 2, startIdx + 1, basisVector.getZ() * (c3));
+            jacobian.set(contactPointIdx, startIdx + 2, basisVector.getX() * (c4));
+            jacobian.set(contactPointIdx + 1, startIdx + 2, basisVector.getY() * (c4));
+            jacobian.set(contactPointIdx + 2, startIdx + 2, basisVector.getZ() * (c4));
+            jacobian.set(contactPointIdx, startIdx + 3, basisVector.getX() * (c5));
+            jacobian.set(contactPointIdx + 1, startIdx + 3, basisVector.getY() * (c5));
+            jacobian.set(contactPointIdx + 2, startIdx + 3, basisVector.getZ() * (c5));
+         }
+
+         rhoIdx += contactPlane.getContactPointHelper(contactPointIdx).getRhoSize();
+      }
+
+      return jacobian;
+   }
+
    public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getCoMPositionJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
