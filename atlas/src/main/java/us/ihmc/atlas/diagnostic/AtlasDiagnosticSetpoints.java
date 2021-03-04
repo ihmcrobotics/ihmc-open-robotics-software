@@ -3,7 +3,6 @@ package us.ihmc.atlas.diagnostic;
 import java.util.HashMap;
 
 import us.ihmc.atlas.AtlasJointMap;
-import us.ihmc.atlas.ros.AtlasOrderedJointMap;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
@@ -51,13 +50,6 @@ public class AtlasDiagnosticSetpoints implements WholeBodySetpointParameters
    private void setSetpoint(String jointName, double value)
    {
       setPoints.put(jointName, value);
-   }
-
-   @Override
-   public double getSetpoint(int jointIndex)
-   {
-      String jointName = AtlasOrderedJointMap.jointNames[jointIndex];
-      return getSetpoint(jointName);
    }
 
    @Override

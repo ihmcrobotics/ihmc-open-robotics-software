@@ -9,7 +9,6 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
-import us.ihmc.valkyrie.parameters.ValkyrieOrderedJointMap;
 
 public class ValkyrieDiagnosticSetpoints implements WholeBodySetpointParameters
 {
@@ -54,13 +53,6 @@ public class ValkyrieDiagnosticSetpoints implements WholeBodySetpointParameters
    private void setSetpoint(String jointName, double value)
    {
       setPoints.put(jointName, value);
-   }
-
-   @Override
-   public double getSetpoint(int jointIndex)
-   {
-      String jointName = ValkyrieOrderedJointMap.jointNames[jointIndex];
-      return getSetpoint(jointName);
    }
 
    @Override
