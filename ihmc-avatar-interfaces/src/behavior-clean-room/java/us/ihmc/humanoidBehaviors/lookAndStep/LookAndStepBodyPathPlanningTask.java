@@ -15,7 +15,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -36,6 +35,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 public class LookAndStepBodyPathPlanningTask
 {
@@ -53,7 +54,7 @@ public class LookAndStepBodyPathPlanningTask
 
    public static class LookAndStepBodyPathPlanning extends LookAndStepBodyPathPlanningTask
    {
-      private SingleThreadSizeOneQueueExecutor executor;
+      private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
       private final TypedInput<Pose3D> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
@@ -85,10 +86,10 @@ public class LookAndStepBodyPathPlanningTask
          review.initialize(statusLogger, "body path", lookAndStep.approvalNotification, output);
 
          // don't run two body path plans at the same time
-         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+         executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-         mapRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
-         goalInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         mapRegionsInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         goalInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Body path planning");
          suppressor.addCondition("Not in body path planning state", () -> !behaviorState.equals(BODY_PATH_PLANNING));
@@ -166,6 +167,11 @@ public class LookAndStepBodyPathPlanningTask
          {
             performTask();
          }
+      }
+
+      public void destroy()
+      {
+         executor.destroy();
       }
    }
 

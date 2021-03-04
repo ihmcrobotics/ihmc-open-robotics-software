@@ -11,9 +11,10 @@ import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -29,7 +30,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
 
    private final IHMCROS2Publisher<VideoPacket> publisher;
    private final Timer throttleTimer = new Timer();
-   private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    private final YUVPictureConverter converter = new YUVPictureConverter();
    private final JPEGEncoder encoder = new JPEGEncoder();
@@ -52,7 +53,7 @@ public class RealsenseVideoROS1Bridge extends AbstractRosTopicSubscriber<sensor_
    {
       if (THROTTLE)
       {
-         executor.submitTask(() -> waitThenAct(ros1Image));
+         executor.clearQueueAndExecute(() -> waitThenAct(ros1Image));
       }
       else
       {

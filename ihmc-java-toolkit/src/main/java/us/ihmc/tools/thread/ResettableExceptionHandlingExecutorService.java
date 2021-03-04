@@ -62,6 +62,12 @@ public class ResettableExceptionHandlingExecutorService
       return executorService.submit(callable, callableAfterExecuteHandler);
    }
 
+   public void clearQueueAndExecute(Runnable runnable)
+   {
+      clearTaskQueue();
+      execute(runnable);
+   }
+
    public boolean isExecuting()
    {
       return executorService.getActiveCount() > 0 || executorService.getQueue().size() > 0;
@@ -73,10 +79,15 @@ public class ResettableExceptionHandlingExecutorService
       executorService = executorServiceSupplier.get();
    }
 
+   public void destroy()
+   {
+      destroy(1500);
+   }
+
    public void destroy(int maxMillisToWait)
    {
       executorService.shutdownNow();
       if (maxMillisToWait > 0)
-         ExceptionTools.handle(() -> executorService.awaitTermination(200, TimeUnit.MILLISECONDS), DefaultExceptionHandler.PRINT_STACKTRACE);
+         ExceptionTools.handle(() -> executorService.awaitTermination(maxMillisToWait, TimeUnit.MILLISECONDS), DefaultExceptionHandler.PRINT_STACKTRACE);
    }
 }

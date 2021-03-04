@@ -3,8 +3,9 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.OperatorReviewEnabledToUI;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.ResetForUI;
@@ -12,20 +13,20 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.Reset
 public class LookAndStepReset
 {
    private LookAndStepBehavior lookAndStep;
-   private SingleThreadSizeOneQueueExecutor executor;
+   private ResettableExceptionHandlingExecutorService executor;
    private final Timer resetTimer = new Timer();
 
    public void initialize(LookAndStepBehavior lookAndStep)
    {
       this.lookAndStep = lookAndStep;
 
-      executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+      executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    }
 
    public void queueReset()
    {
       resetTimer.reset();
-      executor.submitTask(this::performReset);
+      executor.clearQueueAndExecute(this::performReset);
    }
 
    private void performReset()
@@ -91,5 +92,10 @@ public class LookAndStepReset
 
       lookAndStep.isBeingReset.set(false);
       lookAndStep.behaviorStateReference.set(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+   }
+
+   public void destroy()
+   {
+      executor.destroy();
    }
 }

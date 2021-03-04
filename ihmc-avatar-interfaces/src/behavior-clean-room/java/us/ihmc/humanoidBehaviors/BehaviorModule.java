@@ -171,7 +171,7 @@ public class BehaviorModule
       statusLogger.info("Shutting down...");
       for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
       {
-         behavior.getRight().setEnabled(false);
+         behavior.getRight().destroy();
       }
 
       ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);

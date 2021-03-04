@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.Axis3D;
@@ -24,13 +23,15 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class LookAndStepSupportRegionsPublisher
 {
-   private SingleThreadSizeOneQueueExecutor executor;
+   private ResettableExceptionHandlingExecutorService executor;
    private BehaviorTaskSuppressor suppressor;
    private StatusLogger statusLogger;
    private LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
@@ -52,7 +53,7 @@ public class LookAndStepSupportRegionsPublisher
       this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
       this.ros2Publisher = ros2Publisher;
 
-      executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+      executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
       suppressor = new BehaviorTaskSuppressor(statusLogger, "Support regions publisher");
       suppressor.addCondition(() -> "Regions expired. haveReceivedAny: " + planarRegionReceptionTimerSnapshot.hasBeenSet()
@@ -69,7 +70,7 @@ public class LookAndStepSupportRegionsPublisher
 
    public void queuePublish()
    {
-      executor.submitTask(this::evaluateAndRun);
+      executor.clearQueueAndExecute(this::evaluateAndRun);
    }
 
    public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)

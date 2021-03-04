@@ -59,8 +59,7 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
 
    public void generateMeshesAsync(PlanarRegionsList planarRegionsList)
    {
-      executorService.clearTaskQueue();
-      executorService.execute(() -> generateMeshes(planarRegionsList));
+      executorService.clearQueueAndExecute(() -> generateMeshes(planarRegionsList));
    }
 
    public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
@@ -149,7 +148,7 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
 
    public void destroy()
    {
-      executorService.destroy(1500);
+      executorService.destroy();
    }
 
    public void setDrawAreaText(boolean drawAreaText)
