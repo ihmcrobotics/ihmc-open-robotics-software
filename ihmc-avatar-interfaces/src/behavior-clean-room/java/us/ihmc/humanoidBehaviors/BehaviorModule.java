@@ -34,11 +34,15 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
+   private final RosMainNode ros1Node;
+   private final boolean manageROS1Node;
+   private final ROS2Node ros2Node;
+   private final boolean manageROS2Node;
    private final Messager messager;
+   private final boolean manageMessager;
    private StatusLogger statusLogger;
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
-   private final ROS2Node ros2Node;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -55,9 +59,13 @@ public class BehaviorModule
                          CommunicationMode ros2CommunicationMode,
                          CommunicationMode messagerCommunicationMode)
    {
+      this.manageROS1Node = true;
+      this.manageROS2Node = true;
+      this.manageMessager = true;
+
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
 
-      RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "behavior_backpack");
+      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "behavior_backpack");
 
       MessagerAPI messagerAPI = behaviorRegistry.getMessagerAPI();
 
@@ -93,8 +101,12 @@ public class BehaviorModule
                          ROS2Node ros2Node,
                          Messager messager)
    {
+      this.ros1Node = ros1Node;
+      this.manageROS1Node = false;
       this.ros2Node = ros2Node;
+      this.manageROS2Node = false;
       this.messager = messager;
+      this.manageMessager = false;
 
       init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
    }
@@ -169,13 +181,24 @@ public class BehaviorModule
    public void destroy()
    {
       statusLogger.info("Shutting down...");
+
+      if (manageROS2Node)
+      {
+         ros2Node.destroy();
+      }
+      if (manageROS1Node)
+      {
+         ros1Node.shutdown();
+      }
+      if (manageMessager)
+      {
+         ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
+      }
+
       for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
       {
          behavior.getRight().destroy();
       }
-
-      ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
-      ros2Node.destroy();
    }
 
    // API created here from build
