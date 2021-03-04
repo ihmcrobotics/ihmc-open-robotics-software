@@ -33,6 +33,8 @@ import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.SimulatedFullHumanoidRobotModelFactory;
 import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
+import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -185,6 +187,17 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
     * @return the robot collision model used to create the robot's {@link Collidable}s.
     */
    default RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
+   {
+      return null;
+   }
+
+   /**
+    * Gets the parameters necessary to run an automated diagnostic on the robot.
+    * 
+    * @return the parameters required for running the diagnostic controller.
+    * @see AutomatedDiagnosticAnalysisController
+    */
+   default DiagnosticParameters getDiagnoticParameters()
    {
       return null;
    }
