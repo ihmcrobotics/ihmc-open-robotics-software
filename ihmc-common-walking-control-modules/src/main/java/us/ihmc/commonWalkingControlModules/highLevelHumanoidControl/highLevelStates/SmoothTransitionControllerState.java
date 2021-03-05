@@ -40,7 +40,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
       enableTimeBasedTransition = new BooleanParameter(namePrefix + "EnableTimeBasedTransition",
                                                        "When true, the ramp up follows a linear time-based trajectory, when false, the user has to ramp up manually TransitionRatioCurrentValue through SCS.",
                                                        registry,
-                                                       false);
+                                                       true);
       standTransitionDuration = new DoubleParameter(namePrefix + "TransitionDuration", registry, highLevelControllerParameters.getTimeInStandTransition());
       standTransitionRatioCurrentValue = new YoDouble(namePrefix + "TransitionRatioCurrentValue", registry);
       transitionRatioTrajectory = new YoPolynomial(namePrefix + "TransitionRatioTrajectory", 2, registry);

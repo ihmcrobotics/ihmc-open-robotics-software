@@ -27,13 +27,13 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
 {
    private final RobotTarget target;
    private final ValkyrieJointMap jointMap;
-   private final ValkyrieStandPrepParameters standPrepParameters;
+   private final ValkyrieStandPrepSetpoints standPrepParameters;
 
    public ValkyrieHighLevelControllerParameters(RobotTarget target, ValkyrieJointMap jointMap)
    {
       this.target = target;
       this.jointMap = jointMap;
-      standPrepParameters = new ValkyrieStandPrepParameters(jointMap);
+      standPrepParameters = new ValkyrieStandPrepSetpoints(jointMap);
    }
 
    @Override
@@ -274,7 +274,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointBehavior;
    }
 
-   private static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, LegJointName legJointName)
+   public static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, LegJointName legJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
@@ -284,7 +284,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       return jointNames;
    }
 
-   private static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, ArmJointName armJointName)
+   public static List<String> getLeftAndRightJointNames(HumanoidJointNameMap jointMap, ArmJointName armJointName)
    {
       List<String> jointNames = new ArrayList<>();
       for (RobotSide side : RobotSide.values)
