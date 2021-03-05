@@ -198,6 +198,9 @@ public class BehaviorHelper
       RigidBodyTransform transform = robotModel.getSensorInformation().getSteppingCameraTransform();
       ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
       ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
+      RigidBodyTransform zForwardXRightToZUpXForward = new RigidBodyTransform();
+      zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
+      zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
       ros1Node.attachSubscriber(topic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
       {
          @Override
@@ -209,6 +212,7 @@ public class BehaviorHelper
                syncedRobot.update();
                try
                {
+                  planarRegionsList.applyTransform(zForwardXRightToZUpXForward);
                   planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
                }
                catch (NotARotationMatrixException e)
