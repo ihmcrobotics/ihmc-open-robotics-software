@@ -14,7 +14,6 @@ public enum AtlasRobotVersion
    ATLAS_UNPLUGGED_V5_NO_FOREARMS,
    ATLAS_UNPLUGGED_V5_NO_HANDS,
    ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
-   ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ_PELVIS_L515,
    ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI,
    ATLAS_UNPLUGGED_V5_TROOPER;
 
@@ -26,7 +25,6 @@ public enum AtlasRobotVersion
       switch (this)
       {
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ_PELVIS_L515:
       case ATLAS_UNPLUGGED_V5_TROOPER:
          return DRCHandType.ROBOTIQ;
       case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
@@ -52,8 +50,6 @@ public enum AtlasRobotVersion
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
       case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
          return "models/GFE/atlas_unplugged_v5_dual_robotiq.sdf";
-      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ_PELVIS_L515:
-         return "models/GFE/atlas_unplugged_v5_dual_robotiq_pelvis_l515.sdf";
       case ATLAS_UNPLUGGED_V5_NO_FOREARMS:
          return "models/GFE/atlas_unplugged_v5_no_forearms.sdf";
       case ATLAS_UNPLUGGED_V5_TROOPER:
@@ -93,7 +89,6 @@ public enum AtlasRobotVersion
       switch (this)
       {
       case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ:
-      case ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ_PELVIS_L515:
       case ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI:
          distanceAttachmentPlateHand = 0.12; // On the palm.
          break;

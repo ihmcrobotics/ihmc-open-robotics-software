@@ -34,6 +34,8 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
+   private static SharedMemoryMessager sharedMemoryMessager;
+
    private final RosMainNode ros1Node;
    private final boolean manageROS1Node;
    private final ROS2Node ros2Node;
@@ -88,8 +90,8 @@ public class BehaviorModule
       {
          messager = new SharedMemoryMessager(messagerAPI);
       }
+      ThreadTools.startAThread(() -> ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
 
-      ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
       init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
@@ -113,6 +115,9 @@ public class BehaviorModule
 
    private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, Messager messager)
    {
+      if (messager instanceof SharedMemoryMessager)
+         sharedMemoryMessager = (SharedMemoryMessager) messager;
+
       statusLogger = new StatusLogger(messager::submitMessage);
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
@@ -168,11 +173,6 @@ public class BehaviorModule
       }
    }
 
-   private void kryoStarter()
-   {
-      ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
-   }
-
    public Messager getMessager()
    {
       return messager;
@@ -199,6 +199,11 @@ public class BehaviorModule
       {
          behavior.getRight().destroy();
       }
+   }
+
+   public static SharedMemoryMessager getSharedMemoryMessager()
+   {
+      return sharedMemoryMessager;
    }
 
    // API created here from build
