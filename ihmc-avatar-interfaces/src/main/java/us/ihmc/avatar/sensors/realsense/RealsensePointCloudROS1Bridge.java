@@ -79,6 +79,8 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
          boolean hasColors = true;
          PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
 
+         pointCloudData.flipToZUp();
+
          syncedRobot.update();
          sensorBaseFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
          transformToWorld.multiply(sensorTransform);

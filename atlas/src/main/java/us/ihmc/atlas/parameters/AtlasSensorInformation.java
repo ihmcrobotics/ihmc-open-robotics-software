@@ -186,11 +186,12 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
    static
    {
-      Point3D chestToSensor = new Point3D(0.25, 0.0, 0.11);
+      // TODO: Move this stuff to a file so it can be tuned and saved
+      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.14);
 
       transformChestToL515DepthCamera.appendTranslation(chestToSensor);
-      double pitch = Math.toRadians(180.0 - 22.5);
-      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.0, pitch, 0.0));
+      double pitch = Math.toRadians(90.0 - 24.0);
+      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
