@@ -3,8 +3,22 @@ package us.ihmc.atlas;
 import java.io.InputStream;
 import java.util.List;
 
+import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.*;
+import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
+import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
+import us.ihmc.atlas.parameters.AtlasContactPointParameters;
+import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
+import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
+import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
+import us.ihmc.atlas.parameters.AtlasSensorInformation;
+import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
+import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
+import us.ihmc.atlas.parameters.AtlasSwingPlannerParameters;
+import us.ihmc.atlas.parameters.AtlasUIParameters;
+import us.ihmc.atlas.parameters.AtlasVisibilityGraphParameters;
+import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -30,7 +44,6 @@ import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -71,6 +84,7 @@ import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.wholeBodyController.DRCOutputProcessor;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
 {
@@ -129,7 +143,10 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, boolean createAdditionalContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          boolean createAdditionalContactPoints,
                           boolean useShapeCollision)
    {
       this(atlasVersion, target, headless, null, createAdditionalContactPoints, useShapeCollision);
@@ -140,14 +157,21 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       this(atlasVersion, target, headless, simulationContactPoints, false, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          FootContactPoints<RobotSide> simulationContactPoints,
                           boolean createAdditionalContactPointsn)
    {
       this(atlasVersion, target, headless, simulationContactPoints, createAdditionalContactPointsn, false);
    }
 
-   public AtlasRobotModel(AtlasRobotVersion atlasVersion, RobotTarget target, boolean headless, FootContactPoints<RobotSide> simulationContactPoints,
-                          boolean createAdditionalContactPoints, boolean useShapeCollision)
+   public AtlasRobotModel(AtlasRobotVersion atlasVersion,
+                          RobotTarget target,
+                          boolean headless,
+                          FootContactPoints<RobotSide> simulationContactPoints,
+                          boolean createAdditionalContactPoints,
+                          boolean useShapeCollision)
    {
       if (SCALE_ATLAS)
       {
@@ -445,7 +469,6 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       return sensorSuiteManager;
    }
 
-
    @Override
    public UIParameters getUIParameters()
    {
@@ -460,18 +483,13 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeROS2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       realtimeROS2Node,
+                                                       ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
                                                        ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
             return null;
       }
-   }
-
-   @Override
-   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return new AtlasQuadTreeFootstepPlanningParameters();
    }
 
    @Override
@@ -926,5 +944,11 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
       AtlasSimulationCollisionModel collisionModel = new AtlasSimulationCollisionModel(jointMap, selectedVersion);
       collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
       return collisionModel;
+   }
+
+   @Override
+   public DiagnosticParameters getDiagnoticParameters()
+   {
+      return new AtlasDiagnosticParameters(getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
    }
 }

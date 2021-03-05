@@ -4,7 +4,6 @@ import java.io.InputStream;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -12,14 +11,6 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<E>>
 {
    public double getControllerDT();
-
-   /**
-    * Returns the parameters used to create Footstep Plans.
-    */
-   default public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return null;
-   }
 
    public StateEstimatorParameters getStateEstimatorParameters();
 

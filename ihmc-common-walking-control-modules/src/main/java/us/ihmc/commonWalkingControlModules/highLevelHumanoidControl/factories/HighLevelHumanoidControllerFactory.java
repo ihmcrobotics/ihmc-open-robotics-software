@@ -19,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.Hea
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.ROS2Tools;
@@ -111,10 +112,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    private HumanoidHighLevelControllerManager humanoidHighLevelControllerManager;
 
-   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory, SideDependentList<String> footForceSensorNames,
-                                             SideDependentList<String> footContactSensorNames, SideDependentList<String> wristSensorNames,
+   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
+                                             SideDependentList<String> footForceSensorNames,
+                                             SideDependentList<String> footContactSensorNames,
+                                             SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
-                                             WalkingControllerParameters walkingControllerParameters, CoPTrajectoryParameters copTrajectoryParameters)
+                                             WalkingControllerParameters walkingControllerParameters,
+                                             CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
@@ -344,9 +348,35 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerFactoriesMap.put(customControllerStateFactory.getStateEnum(), customControllerStateFactory);
    }
 
+   /**
+    * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
+    * trigger as soon as {@code currentControlStateEnum}'s
+    * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
+    * 
+    * @param currentStateEnum The state that is to be checked to see if it is finished.
+    * @param nextStateEnum    The state to transition to.
+    */
    public void addFinishedTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
    {
       stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum));
+   }
+
+   /**
+    * Adds a transition from {@code currentControlStateEnum} to {@code nextControlStateEnum} that will
+    * trigger as soon as {@code currentControlStateEnum}'s
+    * {@link HighLevelControllerState#isDone(double)} returns {@code true}.
+    * 
+    * @param currentControlStateEnum The state that is to be checked to see if it is finished.
+    * @param nextControlStateEnum    The state to transition to.
+    * @param performNextStateOnEntry indicates whether {@link HighLevelControllerState#onEntry()} of
+    *                                the next state be invoked (if {@code true}), or skipped
+    *                                ({@code false}).
+    */
+   public void addFinishedTransition(HighLevelControllerName currentControlStateEnum,
+                                     HighLevelControllerName nextControlStateEnum,
+                                     boolean performNextStateOnEntry)
+   {
+      stateTransitionFactories.add(new FinishedControllerStateTransitionFactory<>(currentControlStateEnum, nextControlStateEnum, performNextStateOnEntry));
    }
 
    public void addRequestableTransition(HighLevelControllerName currentControlStateEnum, HighLevelControllerName nextControlStateEnum)
@@ -376,10 +406,16 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       return requestedHighLevelControllerState;
    }
 
-   public RobotController getController(FullHumanoidRobotModel fullRobotModel, double controlDT, double gravity, YoDouble yoTime,
-                                        YoGraphicsListRegistry yoGraphicsListRegistry, HumanoidRobotSensorInformation sensorInformation,
-                                        ForceSensorDataHolderReadOnly forceSensorDataHolder, CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
-                                        JointDesiredOutputListBasics lowLevelControllerOutput, JointBasics... jointsToIgnore)
+   public RobotController getController(FullHumanoidRobotModel fullRobotModel,
+                                        double controlDT,
+                                        double gravity,
+                                        YoDouble yoTime,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry,
+                                        HumanoidRobotSensorInformation sensorInformation,
+                                        ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                        CenterOfPressureDataHolder centerOfPressureDataHolderForEstimator,
+                                        JointDesiredOutputListBasics lowLevelControllerOutput,
+                                        JointBasics... jointsToIgnore)
    {
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
@@ -468,8 +504,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    }
 
    private SideDependentList<FootSwitchInterface> createFootSwitches(SideDependentList<? extends ContactablePlaneBody> bipedFeet,
-                                                                     ForceSensorDataHolderReadOnly forceSensorDataHolder, double totalRobotWeight,
-                                                                     YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
+                                                                     ForceSensorDataHolderReadOnly forceSensorDataHolder,
+                                                                     double totalRobotWeight,
+                                                                     YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                                     YoRegistry registry)
    {
       SideDependentList<FootSwitchInterface> footSwitches = new SideDependentList<FootSwitchInterface>();
 
