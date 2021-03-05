@@ -90,4 +90,9 @@ public class ResettableExceptionHandlingExecutorService
       if (maxMillisToWait > 0)
          ExceptionTools.handle(() -> executorService.awaitTermination(maxMillisToWait, TimeUnit.MILLISECONDS), DefaultExceptionHandler.PRINT_STACKTRACE);
    }
+
+   public boolean isShutdown()
+   {
+      return executorService.isShutdown();
+   }
 }

@@ -87,6 +87,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    private final LookAndStepBehavior lookAndStepBehavior;
    private final BehaviorHelper helper;
    private ScheduledFuture<?> stateMachineTask = null;
+   private PausablePeriodicThread toolboxWakerThread;
 
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
    private Runnable doorDetectedCallback = () -> {};
@@ -170,13 +171,14 @@ public class BuildingExplorationBehavior implements BehaviorInterface
                                                                                                           ToolboxStateMessage.class,
                                                                                                           ObjectDetectorToolboxModule.getInputTopic(robotName));
 
-      new PausablePeriodicThread("ToolboxWaker", 1.0, true, () ->
+      toolboxWakerThread = new PausablePeriodicThread("ToolboxWaker", 1.0, true, () ->
       {
          ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage();
          wakeUpMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
          fiducialDetectorPublisher.publish(wakeUpMessage);
          objectDetectorPublisher.publish(wakeUpMessage);
-      }).start();
+      });
+      toolboxWakerThread.start();
    }
 
    @Override
@@ -252,6 +254,13 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          LogTools.info("Stop requested. Shutting down on next update");
          stopRequested.set(true);
       }
+   }
+
+   @Override
+   public void destroy()
+   {
+      toolboxWakerThread.destroy();
+      executorService.shutdown();
    }
 
    private StateMachine<BuildingExplorationStateName, State> buildStateMachine()
