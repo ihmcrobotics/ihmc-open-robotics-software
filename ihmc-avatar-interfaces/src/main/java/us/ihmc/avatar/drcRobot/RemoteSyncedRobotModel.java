@@ -3,6 +3,8 @@ package us.ihmc.avatar.drcRobot;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -71,7 +73,14 @@ public class RemoteSyncedRobotModel
 
       fullRobotModel.getElevator().updateFramesRecursively();
 
-      referenceFrames.updateFrames();
+      try
+      {
+         referenceFrames.updateFrames();
+      }
+      catch (NotARotationMatrixException e)
+      {
+         LogTools.error(e.getMessage());
+      }
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
