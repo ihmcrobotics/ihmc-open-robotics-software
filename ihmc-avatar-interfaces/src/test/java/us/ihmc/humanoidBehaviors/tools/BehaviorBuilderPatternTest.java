@@ -1,8 +1,9 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -155,14 +156,14 @@ public class BehaviorBuilderPatternTest
    @Test
    public void testBuildWithThread()
    {
-      SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+      ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
       AllRequiredClass allRequired = new AllRequiredClass();
 
       LogTools.info("Exceptions are supposed to print out here.");
-      executor.submitTask(() -> allRequired.run());
-      executor.submitTask(() -> allRequired.run());
-      executor.submitTask(() -> allRequired.run());
+      executor.clearQueueAndExecute(() -> allRequired.run());
+      executor.clearQueueAndExecute(() -> allRequired.run());
+      executor.clearQueueAndExecute(() -> allRequired.run());
    }
 
    class ExtendingClass extends AllRequiredClass

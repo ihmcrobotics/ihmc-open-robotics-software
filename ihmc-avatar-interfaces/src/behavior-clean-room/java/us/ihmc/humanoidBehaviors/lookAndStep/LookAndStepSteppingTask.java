@@ -8,7 +8,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.ExecutionMode;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -22,6 +21,8 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LastCommandedFootsteps;
 
@@ -45,7 +46,7 @@ public class LookAndStepSteppingTask
 
    public static class LookAndStepStepping extends LookAndStepSteppingTask
    {
-      private SingleThreadSizeOneQueueExecutor executor;
+      private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<FootstepPlanEtcetera> footstepPlanEtcInput = new TypedInput<>();
       private BehaviorTaskSuppressor suppressor;
 
@@ -69,8 +70,8 @@ public class LookAndStepSteppingTask
             }
          };
 
-         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
-         footstepPlanEtcInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
+         executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+         footstepPlanEtcInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Robot motion");
          suppressor.addCondition("Not in robot motion state", () -> !lookAndStep.behaviorStateReference.get().equals(LookAndStepBehavior.State.STEPPING));

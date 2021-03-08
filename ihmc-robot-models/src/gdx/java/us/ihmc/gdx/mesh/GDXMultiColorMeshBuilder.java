@@ -598,6 +598,11 @@ public class GDXMultiColorMeshBuilder
       return meshBuilder.generateMesh();
    }
 
+   public void clear()
+   {
+      meshBuilder.clear();
+   }
+
 //   public Material generateMaterial(AssetManager assetManager)
 //   {
 //      Material material = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");

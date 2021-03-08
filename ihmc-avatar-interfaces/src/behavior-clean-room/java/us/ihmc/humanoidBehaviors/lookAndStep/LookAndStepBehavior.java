@@ -130,20 +130,27 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
       supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publishROS2);
-      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, supportRegionsPublisher::acceptPlanarRegions);
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
       helper.createUICallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
 
       bodyPathPlanning.initialize(this);
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
-      helper.createROS2Callback(GOAL_INPUT, bodyPathPlanning::acceptGoal);
+      helper.createROS2Callback(GOAL_INPUT, goal ->
+      {
+         behaviorStateReference.broadcast();
+         bodyPathPlanning.acceptGoal(goal);
+      });
 
       bodyPathLocalization.initialize(this);
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
       helper.createUICallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
-      helper.createROS2Callback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
+      helper.createROS1PlanarRegionsCallback(REGIONS_FOR_FOOTSTEP_PLANNING, message ->
+      {
+         supportRegionsPublisher.acceptPlanarRegions(message);
+         footstepPlanning.acceptPlanarRegions(message);
+      });
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
       helper.createROS2ControllerCallback(FootstepStatusMessage.class, status ->
       {
@@ -171,5 +178,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.setCommunicationCallbacksEnabled(enabled);
       behaviorStateReference.broadcast();
       reset.queueReset();
+   }
+
+   public void destroy()
+   {
+      bodyPathPlanning.destroy();
+      footstepPlanning.destroy();
+      reset.destroy();
    }
 }

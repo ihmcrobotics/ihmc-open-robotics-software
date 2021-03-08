@@ -4,9 +4,10 @@ import javafx.application.Platform;
 import javafx.beans.Observable;
 import javafx.scene.control.Slider;
 import us.ihmc.commons.MathTools;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.function.Consumer;
 
@@ -17,7 +18,7 @@ public class JavaFXReactiveSlider
    private final Slider slider;
    private final Consumer<Number> action;
    private final Timer throttleTimer = new Timer();
-   private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    private boolean skipNextChange = false; // prevent feedback loo
 
@@ -36,7 +37,7 @@ public class JavaFXReactiveSlider
          skipNextChange = false;
          return;
       }
-      executor.submitTask(() -> waitThenAct(newValue));
+      executor.clearQueueAndExecute(() -> waitThenAct(newValue));
    }
 
    private void waitThenAct(Number newValue)

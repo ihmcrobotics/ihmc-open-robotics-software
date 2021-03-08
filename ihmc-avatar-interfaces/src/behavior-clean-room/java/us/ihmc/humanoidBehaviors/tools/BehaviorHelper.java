@@ -2,8 +2,10 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import map_sense.RawGPUPlanarRegionList;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
@@ -11,9 +13,13 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -25,17 +31,24 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
+import us.ihmc.log.LogTools;
+import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
+import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
 import us.ihmc.tools.thread.ActivationReference;
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -76,6 +89,7 @@ public class BehaviorHelper
 {
    private final DRCRobotModel robotModel;
    private final ManagedMessager managedMessager;
+   private final RosMainNode ros1Node;
    private final ManagedROS2Node managedROS2Node;
    private final ROS2PublisherMap ros2PublisherMap;
    private RemoteHumanoidRobotInterface robot;
@@ -86,10 +100,11 @@ public class BehaviorHelper
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, RosMainNode ros1Node, ROS2NodeInterface ros2Node)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);
+      this.ros1Node = ros1Node;
       managedROS2Node = new ManagedROS2Node(ros2Node);
 
       ros2PublisherMap = new ROS2PublisherMap(managedROS2Node);
@@ -137,6 +152,11 @@ public class BehaviorHelper
       return bodyPathPlanner;
    }
 
+   public RemoteSyncedRobotModel newSyncedRobot()
+   {
+      return getOrCreateRobotInterface().newSyncedRobot();
+   }
+
    public VisibilityGraphPathPlanner newBodyPathPlanner()
    {
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
@@ -165,6 +185,44 @@ public class BehaviorHelper
       return new SwingPlanningModule(footstepPlannerParameters,
                                      swingPlannerParameters,
                                      walkingControllerParameters);
+   }
+
+   public void createROS1PlanarRegionsCallback(String topic, Consumer<PlanarRegionsList> callback)
+   {
+      boolean daemon = true;
+      int queueSize = 1;
+      ResettableExceptionHandlingExecutorService executorService
+            = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
+      GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
+      RemoteSyncedRobotModel syncedRobot = newSyncedRobot();
+      RigidBodyTransform transform = robotModel.getSensorInformation().getSteppingCameraTransform();
+      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
+      ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
+      RigidBodyTransform zForwardXRightToZUpXForward = new RigidBodyTransform();
+      zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
+      zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
+      ros1Node.attachSubscriber(topic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
+      {
+         @Override
+         public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
+         {
+            executorService.clearQueueAndExecute(() ->
+            {
+               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+               syncedRobot.update();
+               try
+               {
+                  planarRegionsList.applyTransform(zForwardXRightToZUpXForward);
+                  planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+               }
+               catch (NotARotationMatrixException e)
+               {
+                  LogTools.error(e.getMessage());
+               }
+               callback.accept(planarRegionsList);
+            });
+         }
+      });
    }
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
@@ -322,6 +380,11 @@ public class BehaviorHelper
    public Messager getManagedMessager()
    {
       return managedMessager;
+   }
+
+   public RosMainNode getROS1Node()
+   {
+      return ros1Node;
    }
 
    public ManagedROS2Node getManagedROS2Node()

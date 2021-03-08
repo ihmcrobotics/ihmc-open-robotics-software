@@ -1,7 +1,5 @@
 package us.ihmc.gdx.imgui;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import imgui.ImFont;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
@@ -12,11 +10,17 @@ import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import us.ihmc.log.LogTools;
+
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiWindowAndDockSystem
 {
+   private Path imGuiSettingsPath;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
@@ -26,8 +30,11 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
-   public void create()
+   public void create(long windowHandle, String windowTitle)
    {
+      this.windowHandle = windowHandle;
+      imGuiSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + windowTitle.replaceAll(" ", "") + "ImGuiSettings.ini").toAbsolutePath().normalize();
+
       GLFWErrorCallback.createPrint(System.err).set();
 
       if (!glfwInit())
@@ -71,14 +78,19 @@ public class GDXImGuiWindowAndDockSystem
          style.setColor(ImGuiCol.WindowBg, imgui.ImGui.getColorU32(ImGuiCol.WindowBg, 1));
       }
 
-      windowHandle = ((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle();
-
       imGuiGlfw.init(windowHandle, true);
       imGuiGl3.init(glslVersion);
    }
 
    public void beforeWindowManagement()
    {
+      if (isFirstRenderCall && Files.exists(imGuiSettingsPath))
+      {
+         String settingsPath = imGuiSettingsPath.toString();
+         LogTools.info("Loading ImGui settings from {}", settingsPath);
+         ImGui.loadIniSettingsFromDisk(settingsPath);
+      }
+
       imGuiGlfw.newFrame();
       ImGui.newFrame();
 
@@ -127,5 +139,15 @@ public class GDXImGuiWindowAndDockSystem
    public boolean isFirstRenderCall()
    {
       return isFirstRenderCall;
+   }
+
+   public ImGuiImplGl3 getImGuiGl3()
+   {
+      return imGuiGl3;
+   }
+
+   public Path getImGuiSettingsPath()
+   {
+      return imGuiSettingsPath;
    }
 }

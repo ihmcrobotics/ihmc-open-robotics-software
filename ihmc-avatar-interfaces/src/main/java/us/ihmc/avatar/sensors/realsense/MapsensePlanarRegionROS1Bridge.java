@@ -61,8 +61,7 @@ public class MapsensePlanarRegionROS1Bridge
 
    private void acceptMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
    {
-      executorService.clearTaskQueue();
-      executorService.execute(() ->
+      executorService.clearQueueAndExecute(() ->
       {
          TimerSnapshot dataReceptionTimerSnapshot = syncedRobot.getDataReceptionTimerSnapshot();
          if (!dataReceptionTimerSnapshot.isRunning(2.0))

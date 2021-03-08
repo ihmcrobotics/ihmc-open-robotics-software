@@ -1,0 +1,34 @@
+<code_scheme name="Default" version="173">
+  <option name="LINE_SEPARATOR" value="&#xA;" />
+  <option name="RIGHT_MARGIN" value="160" />
+  <Objective-C>
+    <option name="INDENT_NAMESPACE_MEMBERS" value="3" />
+    <option name="INDENT_C_STRUCT_MEMBERS" value="3" />
+    <option name="INDENT_CLASS_MEMBERS" value="3" />
+    <option name="INDENT_INSIDE_CODE_BLOCK" value="3" />
+    <option name="KEEP_DIRECTIVE_AT_FIRST_COLUMN" value="false" />
+    <option name="NAMESPACE_BRACE_PLACEMENT" value="2" />
+    <option name="FUNCTION_BRACE_PLACEMENT" value="2" />
+    <option name="BLOCK_BRACE_PLACEMENT" value="2" />
+    <option name="SUPERCLASS_LIST_ALIGN_MULTILINE" value="false" />
+  </Objective-C>
+  <codeStyleSettings language="ObjectiveC">
+    <option name="RIGHT_MARGIN" value="160" />
+    <option name="KEEP_LINE_BREAKS" value="false" />
+    <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
+    <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
+    <option name="KEEP_BLANK_LINES_IN_DECLARATIONS" value="1" />
+    <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
+    <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="0" />
+    <option name="BLANK_LINES_BEFORE_IMPORTS" value="0" />
+    <option name="BRACE_STYLE" value="2" />
+    <option name="CLASS_BRACE_STYLE" value="2" />
+    <option name="KEEP_SIMPLE_BLOCKS_IN_ONE_LINE" value="false" />
+    <option name="KEEP_SIMPLE_METHODS_IN_ONE_LINE" value="false" />
+    <indentOptions>
+      <option name="INDENT_SIZE" value="3" />
+      <option name="CONTINUATION_INDENT_SIZE" value="6" />
+      <option name="TAB_SIZE" value="3" />
+    </indentOptions>
+  </codeStyleSettings>
+</code_scheme>
