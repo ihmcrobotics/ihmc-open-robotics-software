@@ -1,6 +1,7 @@
-package us.ihmc.humanoidBehaviors.tools.ros2;
+package us.ihmc.avatar.ros2;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2NodeInterface;
 

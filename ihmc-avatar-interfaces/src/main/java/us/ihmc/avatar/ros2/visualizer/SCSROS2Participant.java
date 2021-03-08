@@ -1,4 +1,4 @@
-package us.ihmc.avatar.ros.visualizer;
+package us.ihmc.avatar.ros2.visualizer;
 
 import us.ihmc.pubsub.common.Guid;
 
