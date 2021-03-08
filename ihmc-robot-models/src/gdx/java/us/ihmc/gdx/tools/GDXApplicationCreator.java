@@ -2,14 +2,18 @@ package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.vr.GDXVRManager;
+
+import java.util.concurrent.atomic.AtomicReference;
 
 public class GDXApplicationCreator
 {
-   public static void launchGDXApplication(Lwjgl3ApplicationAdapter application, Class<?> clazz)
+   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, Class<?> clazz)
    {
-      launchGDXApplication(application, clazz.getSimpleName(), 1100, 800);
+      return launchGDXApplication(applicationAdapter, clazz.getSimpleName(), 1100, 800);
    }
 
    public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(Class<?> clazz)
@@ -23,7 +27,7 @@ public class GDXApplicationCreator
       applicationConfiguration.setTitle(title);
       applicationConfiguration.setWindowedMode((int) width, (int) height);
       // TODO: These options are work in progress. Not sure what is the best setting for everyone.
-      if (Boolean.parseBoolean(System.getProperty("enable.vr")))
+      if (GDXVRManager.isVREnabled())
       {
          applicationConfiguration.useVsync(false); // important to disable vsync for VR
          applicationConfiguration.setIdleFPS(240);
@@ -45,15 +49,24 @@ public class GDXApplicationCreator
       return applicationConfiguration;
    }
 
-   public static void launchGDXApplication(Lwjgl3ApplicationAdapter application, String title, double width, double height)
+   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, String title, double width, double height)
    {
-      launchGDXApplication(getDefaultConfiguration(title, width, height), application, title);
+      return launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter, title);
    }
 
-   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
-                                           Lwjgl3ApplicationAdapter application,
+   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
+                                           Lwjgl3ApplicationAdapter applicationAdapter,
                                            String title)
    {
-      ThreadTools.startAThread(() -> new Lwjgl3Application(application, applicationConfiguration), title);
+      AtomicReference<Lwjgl3Application> application = new AtomicReference<>();
+      Notification beforeStart = new Notification();
+      ThreadTools.startAThread(() ->
+      {
+         application.set(new Lwjgl3Application(applicationAdapter, applicationConfiguration));
+         beforeStart.set();
+         application.get().start();
+      }, title);
+      beforeStart.blockingPoll();
+      return application.get();
    }
 }
