@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.ros2;
+package us.ihmc.communication.ros2;
 
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.IHMCROS2Publisher;

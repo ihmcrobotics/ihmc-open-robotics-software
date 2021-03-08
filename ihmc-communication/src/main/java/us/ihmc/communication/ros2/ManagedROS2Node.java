@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.ros2;
+package us.ihmc.communication.ros2;
 
 import us.ihmc.pubsub.TopicDataType;
 import us.ihmc.ros2.*;

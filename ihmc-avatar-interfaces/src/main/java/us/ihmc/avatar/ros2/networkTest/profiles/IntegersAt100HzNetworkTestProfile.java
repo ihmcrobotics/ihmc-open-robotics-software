@@ -1,9 +1,9 @@
-package us.ihmc.avatar.ros.networkTest.profiles;
+package us.ihmc.avatar.ros2.networkTest.profiles;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import std_msgs.msg.dds.Int64;
-import us.ihmc.avatar.ros.networkTest.ROS2NetworkTestMachine;
-import us.ihmc.avatar.ros.networkTest.ROS2NetworkTestProfile;
+import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
+import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -21,7 +21,7 @@ import us.ihmc.yoVariables.variable.YoLong;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.avatar.ros.networkTest.ROS2NetworkTestMachine.*;
+import static us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine.*;
 
 /**
  * This profile can show "overshooting" resending messages in reliable mode.

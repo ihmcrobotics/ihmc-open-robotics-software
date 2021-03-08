@@ -1,6 +1,5 @@
-package us.ihmc.avatar.ros.visualizer;
+package us.ihmc.avatar.ros2.visualizer;
 
-import javafx.application.Platform;
 import us.ihmc.pubsub.common.Guid;
 
 import java.util.HashMap;

@@ -28,11 +28,10 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
-import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
-import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
+import us.ihmc.communication.ros2.ManagedROS2Node;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.communication.ros2.ROS2TypelessInput;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;

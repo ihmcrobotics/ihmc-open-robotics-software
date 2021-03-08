@@ -1,4 +1,4 @@
-package us.ihmc.avatar.ros.networkTest;
+package us.ihmc.avatar.ros2.networkTest;
 
 import us.ihmc.yoVariables.registry.YoRegistry;
 

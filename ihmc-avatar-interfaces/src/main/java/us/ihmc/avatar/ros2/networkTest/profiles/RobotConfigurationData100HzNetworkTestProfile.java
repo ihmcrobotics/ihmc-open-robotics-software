@@ -1,8 +1,8 @@
-package us.ihmc.avatar.ros.networkTest.profiles;
+package us.ihmc.avatar.ros2.networkTest.profiles;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.avatar.ros.networkTest.ROS2NetworkTestMachine;
-import us.ihmc.avatar.ros.networkTest.ROS2NetworkTestProfile;
+import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestMachine;
+import us.ihmc.avatar.ros2.networkTest.ROS2NetworkTestProfile;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
