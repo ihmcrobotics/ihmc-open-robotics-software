@@ -22,11 +22,10 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
 /**
- * Buffer for RobotConfigurationData. Allows updating a fullrobotmodel based on timestamps. Make
- * sure not to share fullrobotmodels between thread
+ * Buffer for RobotConfigurationData. Allows updating a FullRobotModel based on timestamps. Make
+ * sure not to share FullRobotModels between threads.
  *
  * @author jesper
- *
  */
 public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigurationData>
 {
