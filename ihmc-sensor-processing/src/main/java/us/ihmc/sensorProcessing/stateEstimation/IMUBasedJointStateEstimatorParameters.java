@@ -16,7 +16,6 @@ public class IMUBasedJointStateEstimatorParameters
                                                 double breakFrequencyForVelocityEstimation,
                                                 double breakFrequencyForPositionEstimation)
    {
-      super();
       this.estimatorName = estimatorName;
       this.startEnabled = startEnabled;
       this.parentIMUName = parentIMUName;
