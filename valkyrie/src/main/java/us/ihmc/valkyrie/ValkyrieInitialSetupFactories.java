@@ -860,4 +860,16 @@ public class ValkyrieInitialSetupFactories
 
       return initialSetup;
    }
+
+   public static ValkyrieMutableInitialSetup newAllFoursBellyDown(HumanoidJointNameMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(RobotSide.LEFT, 0.0, -0.03, -1.54, 2.057, -0.8, 0.0);
+      initialSetup.setLegJointQs(RobotSide.RIGHT, 0.0, -0.03, -1.54, 2.057, -0.8, 0.0);
+      initialSetup.setArmJointQs(RobotSide.LEFT, -1.55, -1.2, 1.35, -1.1);
+      initialSetup.setArmJointQs(RobotSide.RIGHT, -1.55, 1.2, 1.35, 1.1);
+      initialSetup.setSpineJointQs(0.0, 0.025, 0.0);
+      initialSetup.setRootJointPose(-0.13, -0.006, 0.57, 0.0, 0.6181, 0.0, 0.7861);
+      return initialSetup;
+   }
 }

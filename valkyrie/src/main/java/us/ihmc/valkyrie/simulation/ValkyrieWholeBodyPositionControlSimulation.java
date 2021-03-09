@@ -55,7 +55,7 @@ public class ValkyrieWholeBodyPositionControlSimulation
    {
       groundPlaneMessage.getRegionNormal().set(Axis3D.Z);
 
-      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.FINGERLESS);
+      robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
       ValkyrieJointMap jointMap = robotModel.getJointMap();
       robotModel.setHighLevelControllerParameters(new ValkyrieSimulationPositionControlParameters(robotModel.getHighLevelControllerParameters(),
                                                                                                   jointMap,
@@ -69,9 +69,9 @@ public class ValkyrieWholeBodyPositionControlSimulation
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, new DefaultCommonAvatarEnvironment());
       simulationStarter.setUsePerfectSensors(true);
-      ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newCrawl1(jointMap);
-      initialSetup.rootJointOrientation.prependYawRotation(1.35);
-      initialSetup.rootJointPosition.add(0.2, 0.1, 0);
+      ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
+//      initialSetup.rootJointOrientation.prependYawRotation(1.35);
+//      initialSetup.rootJointPosition.add(0.2, 0.1, 0);
       simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       simulationStarter.getSCSInitialSetup().setRecordFrequency(10);
