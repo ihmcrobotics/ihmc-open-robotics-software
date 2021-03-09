@@ -30,7 +30,7 @@ public class WrenchVisualizer
    private static final double FORCE_VECTOR_SCALE = 0.0015;
    private static final double TORQUE_VECTOR_SCALE = 0.0015;
 
-   private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry registry;
    private final Map<RigidBodyBasics, YoFrameVector3D> forces = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
    private final Map<RigidBodyBasics, YoFrameVector3D> torques = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
    private final Map<RigidBodyBasics, YoFramePoint3D> pointsOfApplication = new LinkedHashMap<RigidBodyBasics, YoFramePoint3D>();
@@ -59,6 +59,7 @@ public class WrenchVisualizer
    {
       YoGraphicsList yoGraphicsList = new YoGraphicsList(name);
 
+      registry = new YoRegistry(name + getClass().getSimpleName());
       this.rigidBodies.addAll(rigidBodies);
       for (RigidBodyBasics rigidBody : rigidBodies)
       {

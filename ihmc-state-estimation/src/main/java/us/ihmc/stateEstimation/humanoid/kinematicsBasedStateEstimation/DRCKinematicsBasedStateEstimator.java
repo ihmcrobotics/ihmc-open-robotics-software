@@ -17,7 +17,9 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -29,6 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -78,12 +81,18 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final FloatingJointBasics rootJoint;
    private final YoFixedFrameTwist yoRootTwist;
 
-   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-                                           SensorOutputMapReadOnly sensorOutputMap, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
-                                           String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
+   private final List<JointTorqueBasedWrenchCalculator> wrenchCalculators = new ArrayList<>();
+
+   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                           StateEstimatorParameters stateEstimatorParameters,
+                                           SensorOutputMapReadOnly sensorOutputMap,
+                                           CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
+                                           String[] imuSensorsToUseInStateEstimator,
+                                           double gravitationalAcceleration,
                                            Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                            CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-                                           RobotMotionStatusHolder robotMotionStatusFromController, Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
+                                           RobotMotionStatusHolder robotMotionStatusFromController,
+                                           Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -138,6 +147,14 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          fusedIMUSensor = null;
          imusToUse.addAll(imuProcessedOutputs);
+      }
+
+      for (RigidBodyBasics foot : footSwitches.keySet())
+      {
+         ContactablePlaneBody contactableFoot = feet.get(foot);
+         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(inverseDynamicsStructure.getEstimationLink(), foot);
+         wrenchCalculators.add(new JointTorqueBasedWrenchCalculator(foot.getName()
+               + "Test", joints, foot, contactableFoot.getSoleFrame(), registry, yoGraphicsListRegistry));
       }
 
       BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement",
@@ -324,6 +341,9 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
       }
+
+      for (int i = 0; i < wrenchCalculators.size(); i++)
+         wrenchCalculators.get(i).update();
 
       updateVisualizers();
    }
