@@ -12,7 +12,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
+import us.ihmc.javafx.IdMappedColorFunction;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.SideDependentList;

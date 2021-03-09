@@ -14,7 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;

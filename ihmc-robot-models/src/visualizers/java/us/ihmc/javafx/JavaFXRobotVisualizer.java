@@ -1,4 +1,4 @@
-package us.ihmc.javaFXVisualizers;
+package us.ihmc.javafx;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.ToDoubleFunction;

@@ -1,12 +1,10 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
 import javafx.scene.Group;
-import javafx.scene.shape.MeshView;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.pathPlanning.visibilityGraphs.VisibilityGraph;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public class VisibilityGraphsGraphic extends Group

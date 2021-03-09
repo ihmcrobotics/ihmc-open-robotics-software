@@ -11,7 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.quadrupedUI.QuadrupedUserInterface;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;

@@ -24,7 +24,7 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
+import us.ihmc.javafx.JavaFXQuadrupedVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;

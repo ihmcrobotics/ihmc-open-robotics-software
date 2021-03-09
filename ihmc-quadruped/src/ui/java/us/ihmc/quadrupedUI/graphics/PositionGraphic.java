@@ -7,7 +7,7 @@ import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
+import us.ihmc.javafx.JavaFXGraphicTools;
 
 public class PositionGraphic
 {

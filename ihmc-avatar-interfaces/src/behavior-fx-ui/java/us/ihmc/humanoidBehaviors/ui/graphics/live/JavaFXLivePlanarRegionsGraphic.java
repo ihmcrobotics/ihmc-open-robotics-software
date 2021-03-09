@@ -8,7 +8,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
