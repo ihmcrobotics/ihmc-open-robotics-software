@@ -30,7 +30,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerBasics;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
@@ -49,7 +49,7 @@ public class UpDownFlatAreaFinder
    public static final int NUMBER_OF_VERTICES = 6;
    public static final double MINIMUM_NO_HEIGHT_CHANGE_DISTANCE = 0.5;
 
-   private final Messager messager;
+   private final MessagerBasics messager;
    private final ExceptionHandlingThreadScheduler scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName());
    private final FramePose3D midFeetZUpPose = new FramePose3D();
    private final UpDownResult upDownResultForVisualization = new UpDownResult(NUMBER_OF_VERTICES);
@@ -78,7 +78,7 @@ public class UpDownFlatAreaFinder
       ABORTED
    }
 
-   public UpDownFlatAreaFinder(Messager messager)
+   public UpDownFlatAreaFinder(MessagerBasics messager)
    {
       this.messager = messager;
    }

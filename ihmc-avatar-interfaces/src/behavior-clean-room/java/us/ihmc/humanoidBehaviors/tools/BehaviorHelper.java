@@ -32,8 +32,8 @@ import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.ros2.ROS2TypelessInput;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.MessagerBasics;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -46,7 +46,7 @@ import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -88,7 +88,7 @@ public class BehaviorHelper
 {
    private final DRCRobotModel robotModel;
    private final ManagedMessager managedMessager;
-   private final RosMainNode ros1Node;
+   private final RosNodeInterface ros1Node;
    private final ManagedROS2Node managedROS2Node;
    private final ROS2PublisherMap ros2PublisherMap;
    private RemoteHumanoidRobotInterface robot;
@@ -99,7 +99,16 @@ public class BehaviorHelper
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, RosMainNode ros1Node, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, MessagerBasics messager, RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
+   {
+      this(robotModel, messager, ros1Node, ros2Node, true);
+   }
+
+   public BehaviorHelper(DRCRobotModel robotModel,
+                         MessagerBasics messager,
+                         RosNodeInterface ros1Node,
+                         ROS2NodeInterface ros2Node,
+                         boolean commsEnabledToStart)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);
@@ -108,7 +117,7 @@ public class BehaviorHelper
 
       ros2PublisherMap = new ROS2PublisherMap(managedROS2Node);
 
-      setCommunicationCallbacksEnabled(false);
+      setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
 
    // Construction-only methods:
@@ -374,17 +383,17 @@ public class BehaviorHelper
       managedMessager.setEnabled(enabled);
    }
 
-   public Messager getManagedMessager()
+   public MessagerBasics getManagedMessager()
    {
       return managedMessager;
    }
 
-   public RosMainNode getROS1Node()
+   public RosNodeInterface getROS1Node()
    {
       return ros1Node;
    }
 
-   public ManagedROS2Node getManagedROS2Node()
+   public ROS2NodeInterface getManagedROS2Node()
    {
       return managedROS2Node;
    }

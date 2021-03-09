@@ -11,7 +11,7 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.messager.Messager;
+import us.ihmc.messager.MessagerBasics;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.string.StringTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -39,7 +39,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    }
 
    private final BehaviorHelper helper;
-   private final Messager messager;
+   private final MessagerBasics messager;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
 

@@ -9,15 +9,15 @@ import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 // TODO: This class should only implement a smaller subset of what a messager can do
-public class ManagedMessager implements Messager
+public class ManagedMessager implements MessagerBasics
 {
-   private final Messager messager;
+   private final MessagerBasics messager;
    private volatile boolean enabled = true;
 
    private final HashSet<Pair<Topic, TopicListener>> topicListeners = new HashSet<>();
    private final HashSet<Pair<Topic, AtomicReference>> topicInputs = new HashSet<>();
 
-   public ManagedMessager(Messager messager)
+   public ManagedMessager(MessagerBasics messager)
    {
       this.messager = messager;
    }
@@ -121,27 +121,9 @@ public class ManagedMessager implements Messager
    }
 
    @Override
-   public void startMessager() throws Exception
-   {
-      messager.startMessager();
-   }
-
-   @Override
-   public void closeMessager() throws Exception
-   {
-      messager.closeMessager();
-   }
-
-   @Override
    public boolean isMessagerOpen()
    {
       return messager.isMessagerOpen();
-   }
-
-   @Override
-   public void notifyMessagerStateListeners()
-   {
-      messager.notifyMessagerStateListeners();
    }
 
    @Override
