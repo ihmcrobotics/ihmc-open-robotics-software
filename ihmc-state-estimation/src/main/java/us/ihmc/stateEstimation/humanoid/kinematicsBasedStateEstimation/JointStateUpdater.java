@@ -45,7 +45,7 @@ public class JointStateUpdater
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
       this.oneDoFJoints = MultiBodySystemTools.filterJoints(joints, OneDoFJointBasics.class);
 
-      imuBasedJointStateEstimators = createIMUBasedJointVelocityEstimator(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
+      imuBasedJointStateEstimators = createIMUBasedJointVelocityEstimators(sensorOutputMapReadOnly, stateEstimatorParameters, registry);
 
       parentRegistry.addChild(registry);
    }
@@ -55,9 +55,9 @@ public class JointStateUpdater
       this.oneDoFJoints = oneDoFJoints;
    }
 
-   public List<IMUBasedJointStateEstimator> createIMUBasedJointVelocityEstimator(SensorOutputMapReadOnly sensorOutputMapReadOnly,
-                                                                                 StateEstimatorParameters stateEstimatorParameters,
-                                                                                 YoRegistry parentRegistry)
+   public List<IMUBasedJointStateEstimator> createIMUBasedJointVelocityEstimators(SensorOutputMapReadOnly sensorOutputMapReadOnly,
+                                                                                  StateEstimatorParameters stateEstimatorParameters,
+                                                                                  YoRegistry parentRegistry)
    {
       if (stateEstimatorParameters == null)
          return Collections.emptyList();
