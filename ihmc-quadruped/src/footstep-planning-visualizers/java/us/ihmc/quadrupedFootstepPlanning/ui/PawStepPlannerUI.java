@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.javaFXVisualizers.JavaFXQuadrupedVisualizer;
+import us.ihmc.javafx.JavaFXQuadrupedVisualizer;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.StartGoalPositionEditor;

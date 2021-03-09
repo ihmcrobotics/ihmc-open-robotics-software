@@ -1,4 +1,4 @@
-package us.ihmc.javaFXVisualizers;
+package us.ihmc.javafx;
 
 import javafx.scene.paint.Color;
 

@@ -1,4 +1,4 @@
-package us.ihmc.javaFXVisualizers;
+package us.ihmc.javafx;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.scene.Group;
