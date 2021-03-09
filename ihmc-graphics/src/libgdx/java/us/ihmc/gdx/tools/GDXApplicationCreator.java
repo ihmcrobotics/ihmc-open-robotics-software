@@ -1,13 +1,11 @@
 package us.ihmc.gdx.tools;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
-import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.vr.GDXVRManager;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class GDXApplicationCreator
 {
@@ -55,18 +53,13 @@ public class GDXApplicationCreator
    }
 
    public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
-                                           Lwjgl3ApplicationAdapter applicationAdapter,
-                                           String title)
+                                                        Lwjgl3ApplicationAdapter applicationAdapter,
+                                                        String title)
    {
-      AtomicReference<Lwjgl3Application> application = new AtomicReference<>();
-      Notification beforeStart = new Notification();
       ThreadTools.startAThread(() ->
       {
-         application.set(new Lwjgl3Application(applicationAdapter, applicationConfiguration));
-         beforeStart.set();
-         application.get().start();
+         new Lwjgl3Application(applicationAdapter, applicationConfiguration);
       }, title);
-      beforeStart.blockingPoll();
-      return application.get();
+      return (Lwjgl3Application) Gdx.app;
    }
 }
