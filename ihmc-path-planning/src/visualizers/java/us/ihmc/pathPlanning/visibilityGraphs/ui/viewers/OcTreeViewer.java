@@ -12,10 +12,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.jOctoMap.key.OcTreeKey;
 import us.ihmc.jOctoMap.tools.OcTreeKeyConversionTools;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.OcTreeKeyMessage;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
