@@ -28,6 +28,7 @@ javafxDependencies {
    api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
+   api("us.ihmc:simulation-construction-set-tools:source")
 }
 
 javafxTestDependencies {
@@ -37,7 +38,6 @@ javafxTestDependencies {
 jmonkeyengineDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   api("us.ihmc:simulation-construction-set:0.21.7")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
