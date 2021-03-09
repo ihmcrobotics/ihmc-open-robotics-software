@@ -6,12 +6,14 @@ import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -91,6 +93,7 @@ public class BehaviorHelper
    private final RosNodeInterface ros1Node;
    private final ManagedROS2Node managedROS2Node;
    private final ROS2PublisherMap ros2PublisherMap;
+   private final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
    private RemoteHumanoidRobotInterface robot;
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
@@ -116,6 +119,7 @@ public class BehaviorHelper
       managedROS2Node = new ManagedROS2Node(ros2Node);
 
       ros2PublisherMap = new ROS2PublisherMap(managedROS2Node);
+      ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName(), ros2PublisherMap);
 
       setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
@@ -169,6 +173,11 @@ public class BehaviorHelper
    {
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
+   }
+
+   public RobotLowLevelMessenger newRobotLowLevelMessenger()
+   {
+      return robotModel.newRobotLowLevelMessenger(managedROS2Node);
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
@@ -291,6 +300,11 @@ public class BehaviorHelper
    public void publishROS2(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
+   }
+
+   public void publishToController(Object message)
+   {
+      ros2ControllerPublisherMap.publish(message);
    }
 
    // UI Communication Methods:
