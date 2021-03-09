@@ -45,7 +45,6 @@ visualizersDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-graphics-javafx:source")
    api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-whole-body-controller:source")
