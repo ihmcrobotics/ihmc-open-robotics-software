@@ -16,6 +16,8 @@ import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
@@ -37,6 +39,8 @@ public class GDXLowLevelDepthSensorSimulator
    private final int imageHeight;
    private final float minRange;
    private final float maxRange;
+   private final double updatePeriod;
+   private final Timer throttleTimer = new Timer();
    private final Vector3 depthPoint = new Vector3();
    private final Vector3D32 noiseVector = new Vector3D32();
 
@@ -46,6 +50,7 @@ public class GDXLowLevelDepthSensorSimulator
    private SensorFrameBuffer frameBuffer;
    private RecyclingArrayList<Point3D32> points;
    private ArrayList<Integer> colors;
+   private boolean colorsAreBeingUsed = true;
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
@@ -65,10 +70,13 @@ public class GDXLowLevelDepthSensorSimulator
       this.imageHeight = imageHeight;
       this.minRange = (float) minRange;
       this.maxRange = (float) maxRange;
+      this.updatePeriod = UnitConversions.hertzToSeconds(30.0);
    }
 
    public void create()
    {
+      throttleTimer.reset();
+
       camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
       camera.near = minRange;
       camera.far = maxRange * 2.0f; // should render camera farther
@@ -95,6 +103,12 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
+      if (updateThisTick)
+         throttleTimer.reset();
+      else
+         return;
+
       frameBuffer.begin();
 
       float clear = 0.0f;
@@ -165,7 +179,8 @@ public class GDXLowLevelDepthSensorSimulator
                noiseVector.scale((random.nextDouble() - 0.5) * 0.007);
                point.add(noiseVector);
 
-               colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
+               if (colorsAreBeingUsed)
+                  colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
             }
          }
       }
@@ -174,6 +189,7 @@ public class GDXLowLevelDepthSensorSimulator
          depthWindowTexture.draw(depthWindowPixmap, 0, 0);
 
       depthWindowEnabledOptimization = false;
+      colorsAreBeingUsed = false;
    }
 
    public void renderImGuiDepthWindow()
@@ -264,6 +280,7 @@ public class GDXLowLevelDepthSensorSimulator
 
    public ArrayList<Integer> getColors()
    {
+      colorsAreBeingUsed = true;
       return colors;
    }
 
