@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
-import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.ExternalWrenchJointTorqueBasedEstimatorVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -17,9 +17,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCo
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.CenterOfMassDataHolder;
@@ -31,7 +29,6 @@ import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -58,7 +55,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final EstimatedFromTorquesWrenchVisualizer estimatedWrenchVisualizer;
+   private final ExternalWrenchJointTorqueBasedEstimatorVisualizer estimatedWrenchVisualizer;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -80,8 +77,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
 
    private final FloatingJointBasics rootJoint;
    private final YoFixedFrameTwist yoRootTwist;
-
-   private final List<JointTorqueBasedWrenchCalculator> wrenchCalculators = new ArrayList<>();
 
    public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
                                            StateEstimatorParameters stateEstimatorParameters,
@@ -147,14 +142,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          fusedIMUSensor = null;
          imusToUse.addAll(imuProcessedOutputs);
-      }
-
-      for (RigidBodyBasics foot : footSwitches.keySet())
-      {
-         ContactablePlaneBody contactableFoot = feet.get(foot);
-         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(inverseDynamicsStructure.getEstimationLink(), foot);
-         wrenchCalculators.add(new JointTorqueBasedWrenchCalculator(foot.getName()
-               + "Test", joints, foot, contactableFoot.getSoleFrame(), registry, yoGraphicsListRegistry));
       }
 
       BooleanProvider cancelGravityFromAccelerationMeasurement = new BooleanParameter("cancelGravityFromAccelerationMeasurement",
@@ -241,13 +228,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             ContactablePlaneBody contactableBody = feet.get(rigidBody);
             contactablePlaneBodies.add(contactableBody);
          }
-         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
-                                                                                                                      inverseDynamicsStructure.getRootJoint()
-                                                                                                                                              .getSuccessor(),
-                                                                                                                      contactablePlaneBodies,
-                                                                                                                      1.0,
-                                                                                                                      yoGraphicsListRegistry,
-                                                                                                                      registry);
+         estimatedWrenchVisualizer = ExternalWrenchJointTorqueBasedEstimatorVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
+                                                                                                                                   inverseDynamicsStructure.getRootJoint()
+                                                                                                                                                           .getSuccessor(),
+                                                                                                                                   contactablePlaneBodies,
+                                                                                                                                   1.0,
+                                                                                                                                   yoGraphicsListRegistry,
+                                                                                                                                   registry);
       }
       else
       {
@@ -341,9 +328,6 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
       {
          pelvisPoseHistoryCorrection.doControl(sensorOutput.getWallTime());
       }
-
-      for (int i = 0; i < wrenchCalculators.size(); i++)
-         wrenchCalculators.get(i).update();
 
       updateVisualizers();
    }
