@@ -123,7 +123,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       lastCommandedFootsteps = new SideDependentList<>();
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
       controllerStatusTracker = new ControllerStatusTracker(statusLogger,
-                                                            helper.getManagedROS2Node(),
+                                                            helper.getROS2Node(),
                                                             helper.getRobotModel().getSimpleRobotName());
       reset.initialize(this);
       helper.createROS2Callback(RESET, reset::queueReset);

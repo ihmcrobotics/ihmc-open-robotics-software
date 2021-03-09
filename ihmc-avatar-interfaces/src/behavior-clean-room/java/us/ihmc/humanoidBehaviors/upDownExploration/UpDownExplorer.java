@@ -64,7 +64,7 @@ public class UpDownExplorer
    public UpDownExplorer(BehaviorHelper behaviorHelper, RemoteREAInterface rea)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getManagedMessager());
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
       this.rea = rea;
 
       behaviorHelper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });

@@ -383,7 +383,7 @@ public class BehaviorHelper
       managedMessager.setEnabled(enabled);
    }
 
-   public MessagerBasics getManagedMessager()
+   public MessagerBasics getMessager()
    {
       return managedMessager;
    }
@@ -393,7 +393,7 @@ public class BehaviorHelper
       return ros1Node;
    }
 
-   public ROS2NodeInterface getManagedROS2Node()
+   public ROS2NodeInterface getROS2Node()
    {
       return managedROS2Node;
    }
