@@ -122,7 +122,7 @@ public class BehaviorModule
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node);
+         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node, false);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
       }
