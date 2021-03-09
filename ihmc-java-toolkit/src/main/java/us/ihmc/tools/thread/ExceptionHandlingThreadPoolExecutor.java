@@ -1,6 +1,7 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.exception.ExceptionHandler;
+import us.ihmc.log.LogTools;
 
 import java.util.HashMap;
 import java.util.List;
@@ -98,6 +99,13 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
    {
       super.afterExecute(runnableFuture, throwable); // fluff pretty much, super has no implementation
 
-      afterExecuteHandlers.remove(runnableFuture).handleException(throwable);
+      try
+      {
+         afterExecuteHandlers.remove(runnableFuture).handleException(throwable);
+      }
+      catch (NullPointerException nullPointerException)
+      {
+         LogTools.error(nullPointerException.getMessage());
+      }
    }
 }

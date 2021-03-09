@@ -83,6 +83,7 @@ public class HumanoidKinematicsSimulation
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
    private final PausablePeriodicThread controlThread;
    private final ROS2Node ros2Node;
+   private final RealtimeROS2Node realtimeROS2Node;
    private final IHMCROS2Publisher<RobotConfigurationData> robotConfigurationDataPublisher;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -225,15 +226,14 @@ public class HumanoidKinematicsSimulation
       walkingParentRegistry.addChild(walkingController.getYoVariableRegistry());
 
       // create controller network subscriber here!!
-      RealtimeROS2Node realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(kinematicsSimulationParameters.getPubSubImplementation(),
                                                                            ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopic,
                                                                                                 walkingInputManager,
                                                                                                 outputTopic,
-                                                                                                walkingOutputManager,
-                                                                                                realtimeROS2Node);
+                                                                                                walkingOutputManager, realtimeROS2Node);
       controllerNetworkSubscriber.addMessageFilter(message ->
       {
          if (message instanceof FootstepDataListMessage)
@@ -457,8 +457,9 @@ public class HumanoidKinematicsSimulation
    public void destroy()
    {
       LogTools.info("Shutting down...");
-      controlThread.stop();
+      controlThread.destroy();
       ros2Node.destroy();
+      realtimeROS2Node.destroy();
       if (yoVariableServer != null)
          yoVariableServer.close();
    }

@@ -19,7 +19,6 @@ import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class MapsensePlanarRegionROS1Bridge
 {
@@ -43,14 +42,7 @@ public class MapsensePlanarRegionROS1Bridge
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
-      ros1Node.attachSubscriber(ros1InputTopic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
-      {
-         @Override
-         public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
-         {
-            acceptMessage(rawGPUPlanarRegionList);
-         }
-      });
+      MapsenseTools.createROS1Callback(ros1Node, this::acceptMessage);
 
       publisher = ROS2Tools.createPublisher(ros2Node, ros2OutputTopic);
 
@@ -61,8 +53,7 @@ public class MapsensePlanarRegionROS1Bridge
 
    private void acceptMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
    {
-      executorService.clearTaskQueue();
-      executorService.execute(() ->
+      executorService.clearQueueAndExecute(() ->
       {
          TimerSnapshot dataReceptionTimerSnapshot = syncedRobot.getDataReceptionTimerSnapshot();
          if (!dataReceptionTimerSnapshot.isRunning(2.0))

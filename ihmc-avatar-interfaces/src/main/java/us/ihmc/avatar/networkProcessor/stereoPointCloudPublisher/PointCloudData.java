@@ -148,6 +148,17 @@ public class PointCloudData
       return message;
    }
 
+   public void flipToZUp()
+   {
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         double x = pointCloud[i].getX();
+         double y = pointCloud[i].getY();
+         double z = pointCloud[i].getZ();
+         pointCloud[i].set(z, -x, -y);
+      }
+   }
+
    public void applyTransform(RigidBodyTransform transform)
    {
       for (int i = 0; i < numberOfPoints; i++)
