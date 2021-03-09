@@ -87,7 +87,7 @@ public class NavigationBehavior implements BehaviorInterface
       this.helper = helper;
 
       // create map subscriber
-      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.withOutput());
+      mapRegionsInput = new ROS2Input<>(helper.getROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.withOutput());
 
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
@@ -177,7 +177,7 @@ public class NavigationBehavior implements BehaviorInterface
          pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
       }
 
-      helper.getManagedMessager().submitMessage(BodyPathPlanForUI, pathPoses);
+      helper.getMessager().submitMessage(BodyPathPlanForUI, pathPoses);
    }
 
    private void planBodyOrientationTrajectoryAndFootsteps()

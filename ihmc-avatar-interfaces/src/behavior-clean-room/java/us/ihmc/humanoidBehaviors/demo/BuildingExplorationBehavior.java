@@ -101,8 +101,8 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    {
       this.helper = helper;
       DRCRobotModel robotModel = helper.getRobotModel();
-      ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
-      MessagerBasics behaviorMessager = helper.getManagedMessager();
+      ROS2NodeInterface ros2Node = helper.getROS2Node();
+      MessagerBasics behaviorMessager = helper.getMessager();
 
       String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();

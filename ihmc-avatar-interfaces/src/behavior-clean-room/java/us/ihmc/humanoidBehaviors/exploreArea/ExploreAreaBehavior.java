@@ -55,7 +55,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      messager = helper.getManagedMessager();
+      messager = helper.getMessager();
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
 
