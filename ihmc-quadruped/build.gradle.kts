@@ -58,7 +58,8 @@ footstepPlanningDependencies {
 footstepPlanningVisualizersDependencies {
    api(ihmc.sourceSetProject("footstep-planning"))
 
-   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-graphics-javafx:source")
+   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
 }
 

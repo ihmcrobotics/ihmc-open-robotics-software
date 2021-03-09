@@ -1,4 +1,4 @@
-package us.ihmc.javaFXVisualizers;
+package us.ihmc.javafx;
 
 import javafx.scene.Node;
 import javafx.scene.transform.Affine;

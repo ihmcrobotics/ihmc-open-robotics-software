@@ -7,7 +7,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.concurrent.ConcurrentRingBuffer;
 import us.ihmc.idl.IDLSequence;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 
 import java.awt.image.BufferedImage;
