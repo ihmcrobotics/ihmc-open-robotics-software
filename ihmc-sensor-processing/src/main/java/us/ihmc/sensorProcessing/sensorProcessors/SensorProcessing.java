@@ -1012,6 +1012,19 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
+   public void addJointPositionElasticyCompensatorOnlyForSpecifiedJoints(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                                         DoubleProvider maximumDeflection,
+                                                                         Map<String, Integer> torqueProcessorIDs,
+                                                                         boolean forVizOnly,
+                                                                         String... jointsToBeProcessed)
+   {
+      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses,
+                                                            maximumDeflection,
+                                                            torqueProcessorIDs,
+                                                            forVizOnly,
+                                                            invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+   }
+
    public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
                                                                      DoubleProvider maximumDeflection,
                                                                      Map<String, Integer> torqueProcessorIDs,
