@@ -33,7 +33,7 @@ import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 public class SDFGraphics3DObject extends LinkGraphicsDescription
 {
    private static final boolean SHOW_COORDINATE_SYSTEMS = false;
-   private static final AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Orange();
+   public static AppearanceDefinition DEFAULT_APPEARANCE = YoAppearance.Orange();
    static
    {
       YoAppearance.makeTransparent(DEFAULT_APPEARANCE, 0.4);
@@ -124,7 +124,7 @@ public class SDFGraphics3DObject extends LinkGraphicsDescription
                // An appearance must exist in order to set a transparency value, whether a material was defined above or not.
                if (appearance == null)
                {
-                  appearance = new YoAppearanceRGBColor(DEFAULT_APPEARANCE.getColor(), 0.0);
+                  appearance = new YoAppearanceRGBColor(DEFAULT_APPEARANCE.getColor(), Double.parseDouble(sdfVisual.getTransparency()));
                }
                appearance.setTransparency(Double.parseDouble(sdfVisual.getTransparency()));
             }

@@ -11,7 +11,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
+import us.ihmc.javafx.JavaFXGraphicTools;
 
 public class DoorGraphic implements PositionEditable
 {

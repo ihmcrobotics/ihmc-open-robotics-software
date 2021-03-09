@@ -6,7 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
+import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.pubsub.TopicDataType;

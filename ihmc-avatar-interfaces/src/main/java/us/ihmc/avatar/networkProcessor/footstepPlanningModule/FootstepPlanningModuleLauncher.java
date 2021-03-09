@@ -72,7 +72,7 @@ public class FootstepPlanningModuleLauncher
    {
       LogTools.info("Starting footstep planning module in ROS 2 {} mode", pubSubImplementation.name());
       ROS2Node ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "footstep_planner");
-      return createModule(ros2Node, robotModel);
+      return createModule(ros2Node, robotModel, true);
    }
 
    /**
@@ -80,8 +80,16 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(ROS2Node ros2Node, DRCRobotModel robotModel)
    {
+      return createModule(ros2Node, robotModel, false);
+   }
+
+   /**
+    * If we don't create the ROS 2 node, then someone else is responsible for disposing it.
+    */
+   private static FootstepPlanningModule createModule(ROS2Node ros2Node, DRCRobotModel robotModel, boolean manageROS2Node)
+   {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
-      footstepPlanningModule.registerRosNode(ros2Node);
+      footstepPlanningModule.registerRosNode(ros2Node, manageROS2Node);
       String name = footstepPlanningModule.getName();
       ROS2Topic inputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(name).withInput();
       ROS2Topic outputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(name).withOutput();
