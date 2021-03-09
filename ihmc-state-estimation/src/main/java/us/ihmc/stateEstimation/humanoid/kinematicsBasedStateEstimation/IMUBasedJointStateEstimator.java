@@ -58,7 +58,7 @@ public class IMUBasedJointStateEstimator
       String name = parameters.getEstimatorName() + getClass().getSimpleName();
       registry = new YoRegistry(name);
 
-      enableOutput = new BooleanParameter(name + "EnableOutput", registry, parameters.isStartEnabled());
+      enableOutput = new BooleanParameter(name + "EnableOutput", registry, parameters.isOuputEnabled());
 
       jacobian = new GeometricJacobian(parentIMU.getMeasurementLink(), childIMU.getMeasurementLink(), childIMU.getMeasurementLink().getBodyFixedFrame());
       joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);

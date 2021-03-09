@@ -3,21 +3,21 @@ package us.ihmc.sensorProcessing.stateEstimation;
 public class IMUBasedJointStateEstimatorParameters
 {
    private final String estimatorName;
-   private final boolean startEnabled;
+   private final boolean enableOutput;
    private final String parentIMUName, childIMUName;
    private final double breakFrequencyForVelocityEstimation;
    private final double breakFrequencyForPositionEstimation;
    private double velocityEstimationBacklashSlopTime = 0.0;
 
    public IMUBasedJointStateEstimatorParameters(String estimatorName,
-                                                boolean startEnabled,
+                                                boolean enableOutput,
                                                 String parentIMUName,
                                                 String childIMUName,
                                                 double breakFrequencyForVelocityEstimation,
                                                 double breakFrequencyForPositionEstimation)
    {
       this.estimatorName = estimatorName;
-      this.startEnabled = startEnabled;
+      this.enableOutput = enableOutput;
       this.parentIMUName = parentIMUName;
       this.childIMUName = childIMUName;
       this.breakFrequencyForVelocityEstimation = breakFrequencyForVelocityEstimation;
@@ -34,9 +34,9 @@ public class IMUBasedJointStateEstimatorParameters
       return estimatorName;
    }
 
-   public boolean isStartEnabled()
+   public boolean isOuputEnabled()
    {
-      return startEnabled;
+      return enableOutput;
    }
 
    public String getParentIMUName()
