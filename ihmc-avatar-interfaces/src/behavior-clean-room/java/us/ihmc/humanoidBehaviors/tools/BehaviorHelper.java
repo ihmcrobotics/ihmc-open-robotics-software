@@ -2,11 +2,11 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import map_sense.RawGPUPlanarRegionList;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
@@ -47,7 +47,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
+import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -186,6 +186,11 @@ public class BehaviorHelper
                                      walkingControllerParameters);
    }
 
+   public void createROS1PlanarRegionsCallback(Consumer<PlanarRegionsList> callback)
+   {
+      createROS1PlanarRegionsCallback(RosTools.MAPSENSE_REGIONS, callback);
+   }
+
    public void createROS1PlanarRegionsCallback(String topic, Consumer<PlanarRegionsList> callback)
    {
       boolean daemon = true;
@@ -197,30 +202,23 @@ public class BehaviorHelper
       RigidBodyTransform transform = robotModel.getSensorInformation().getSteppingCameraTransform();
       ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
       ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
-      RigidBodyTransform zForwardXRightToZUpXForward = new RigidBodyTransform();
-      zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
-      zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
-      ros1Node.attachSubscriber(topic, new AbstractRosTopicSubscriber<RawGPUPlanarRegionList>(RawGPUPlanarRegionList._TYPE)
+      MapsenseTools.createROS1Callback(topic, ros1Node, rawGPUPlanarRegionList ->
       {
-         @Override
-         public void onNewMessage(RawGPUPlanarRegionList rawGPUPlanarRegionList)
+         executorService.clearQueueAndExecute(() ->
          {
-            executorService.clearQueueAndExecute(() ->
+            PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+            syncedRobot.update();
+            try
             {
-               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-               syncedRobot.update();
-               try
-               {
-                  planarRegionsList.applyTransform(zForwardXRightToZUpXForward);
-                  planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
-               }
-               catch (NotARotationMatrixException e)
-               {
-                  LogTools.error(e.getMessage());
-               }
-               callback.accept(planarRegionsList);
-            });
-         }
+               planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
+               planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+            }
+            catch (NotARotationMatrixException e)
+            {
+               LogTools.error(e.getMessage());
+            }
+            callback.accept(planarRegionsList);
+         });
       });
    }
 
