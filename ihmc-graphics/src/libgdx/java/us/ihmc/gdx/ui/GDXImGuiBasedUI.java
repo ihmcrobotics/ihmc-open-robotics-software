@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import us.ihmc.commons.FormattingTools;
@@ -140,13 +141,15 @@ public class GDXImGuiBasedUI
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
       ImGui.endMainMenuBar();
 
+      ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
       int flags = ImGuiWindowFlags.None;
-       flags |= ImGuiWindowFlags.NoDecoration;
-//       flags += ImGuiWindowFlags.MenuBar;
-//      flags += ImGuiWindowFlags.NoTitleBar;
-//      flags += ImGuiWindowFlags.NoMouseInputs;
-//      ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
-      ImGui.begin(VIEW_3D_WINDOW_NAME);
+//      flags |= ImGuiWindowFlags.NoDecoration;
+//      flags |= ImGuiWindowFlags.NoBackground;
+//      flags |= ImGuiWindowFlags.NoDocking;
+//      flags |= ImGuiWindowFlags.MenuBar;
+//      flags |= ImGuiWindowFlags.NoTitleBar;
+//      flags |= ImGuiWindowFlags.NoMouseInputs;
+      ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
 
       int antiAliasing = 2;
       float posX = ImGui.getWindowPosX();
@@ -195,6 +198,7 @@ public class GDXImGuiBasedUI
       ImGui.getWindowDrawList().addImage(textureId, pMinX, pMinY, pMaxX, pMaxY, uvMinX, uvMinY, uvMaxX, uvMaxY);
 
       ImGui.end();
+      ImGui.popStyleVar();
 
       if (imGuiWindowAndDockSystem.isFirstRenderCall() && !Files.exists(imGuiWindowAndDockSystem.getImGuiSettingsPath()))
       {
