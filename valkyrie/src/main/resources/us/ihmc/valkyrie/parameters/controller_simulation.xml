@@ -841,10 +841,12 @@
                <parameter name="yawDriftRateBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.0015" />
             </registry>
             <registry name="JointStateUpdater">
-               <parameter name="enableIMUBasedJointVelocityEstimator" type="BooleanParameter" value="false" />
-               <parameter name="imuBasedJointVelocityEstimatorAlphaFuseVelocity" type="DoubleParameter" min="0.0" max="1.0" value="4.080895976715269" />
-               <parameter name="imuBasedJointVelocityEstimatorAlphaFusePosition" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
-               <parameter name="imuBasedJointVelocityEstimatorSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+               <registry name="SpineIMUBasedJointStateEstimator">
+                  <parameter name="SpineIMUBasedJointStateEstimatorEnableOutput" type="BooleanParameter" value="false" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorAlphaFuseVelocity" type="DoubleParameter" min="0.0" max="1.0" value="4.080895976715269" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorAlphaFusePosition" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+               </registry>
             </registry>
             <registry name="PelvisLinearStateUpdater">
                <registry name="PelvisIMUBasedLinearStateCalculator">
