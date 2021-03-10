@@ -37,7 +37,18 @@ public class CenterOfMassMotionControlAnchorDescription
    public static CenterOfMassMotionControlAnchorDescription fromJSON(JsonNode node)
    {
       if (node == null)
-         return null;
+      {
+         CenterOfMassMotionControlAnchorDescription anchorDescription = new CenterOfMassMotionControlAnchorDescription();
+         KinematicsToolboxCenterOfMassMessage comMessage = new KinematicsToolboxCenterOfMassMessage();
+         comMessage.getSelectionMatrix().setXSelected(false);
+         comMessage.getSelectionMatrix().setYSelected(false);
+         comMessage.getSelectionMatrix().setZSelected(false);
+         comMessage.getWeights().setXWeight(-1.0);
+         comMessage.getWeights().setYWeight(-1.0);
+         comMessage.getWeights().setZWeight(-1.0);
+         anchorDescription.setInputMessage(comMessage);
+         return anchorDescription;
+      }
 
       JsonNode anchorNode = node.get(ANCHOR_JSON);
 
