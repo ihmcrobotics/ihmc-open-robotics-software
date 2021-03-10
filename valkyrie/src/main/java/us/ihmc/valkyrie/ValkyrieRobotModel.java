@@ -684,9 +684,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
    {
-      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
-      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
-      return collisionModel;
+      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
+      {
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap());
+         collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+         return collisionModel;
+      }
+      else
+      {
+         ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
+         collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+         return collisionModel;
+      }
    }
 
    @Override
