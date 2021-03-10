@@ -145,6 +145,46 @@ public class JointControlBlender
          outputDataToPack.setDamping(damping);
       }
 
+      if (hasVelocityScaling(outputData0) || hasVelocityScaling(outputData1))
+      {
+         double velocityScaling0 = hasVelocityScaling(outputData0) ? outputData0.getVelocityScaling() : 0.0;
+         double velocityScaling1 = hasVelocityScaling(outputData1) ? outputData1.getVelocityScaling() : 0.0;
+         double velocityScaling = EuclidCoreTools.interpolate(velocityScaling0, velocityScaling1, blendingFactor);
+         outputDataToPack.setVelocityScaling(velocityScaling);
+      }
+
+      if (hasVelocityIntegrationMaxError(outputData0) || hasVelocityIntegrationMaxError(outputData1))
+      {
+         double maxError0 = hasVelocityIntegrationMaxError(outputData0) ? outputData0.getVelocityIntegrationMaxError() : 0.0;
+         double maxError1 = hasVelocityIntegrationMaxError(outputData1) ? outputData1.getVelocityIntegrationMaxError() : 0.0;
+         double maxError = EuclidCoreTools.interpolate(maxError0, maxError1, blendingFactor);
+         outputDataToPack.setVelocityIntegrationMaxError(maxError);
+      }
+
+      if (hasVelocityIntegrationBreakFrequency(outputData0) || hasVelocityIntegrationBreakFrequency(outputData1))
+      {
+         double frequency0 = hasVelocityIntegrationBreakFrequency(outputData0) ? outputData0.getVelocityIntegrationBreakFrequency() : 0.0;
+         double frequency1 = hasVelocityIntegrationBreakFrequency(outputData1) ? outputData1.getVelocityIntegrationBreakFrequency() : 0.0;
+         double frequency = EuclidCoreTools.interpolate(frequency0, frequency1, blendingFactor);
+         outputDataToPack.setVelocityIntegrationBreakFrequency(frequency);
+      }
+
+      if (hasPositionIntegrationMaxError(outputData0) || hasPositionIntegrationMaxError(outputData1))
+      {
+         double maxError0 = hasPositionIntegrationMaxError(outputData0) ? outputData0.getPositionIntegrationMaxError() : 0.0;
+         double maxError1 = hasPositionIntegrationMaxError(outputData1) ? outputData1.getPositionIntegrationMaxError() : 0.0;
+         double maxError = EuclidCoreTools.interpolate(maxError0, maxError1, blendingFactor);
+         outputDataToPack.setPositionIntegrationMaxError(maxError);
+      }
+
+      if (hasPositionIntegrationBreakFrequency(outputData0) || hasPositionIntegrationBreakFrequency(outputData1))
+      {
+         double frequency0 = hasPositionIntegrationBreakFrequency(outputData0) ? outputData0.getPositionIntegrationBreakFrequency() : 0.0;
+         double frequency1 = hasPositionIntegrationBreakFrequency(outputData1) ? outputData1.getPositionIntegrationBreakFrequency() : 0.0;
+         double frequency = EuclidCoreTools.interpolate(frequency0, frequency1, blendingFactor);
+         outputDataToPack.setPositionIntegrationBreakFrequency(frequency);
+      }
+
       outputDataToPack.setResetIntegrators(pollResetIntegratorsRequest(outputData0) || pollResetIntegratorsRequest(outputData1));
    }
 
@@ -186,6 +226,31 @@ public class JointControlBlender
    private boolean hasDamping(JointDesiredOutputReadOnly outputData)
    {
       return outputData != null && outputData.hasDamping();
+   }
+
+   private boolean hasVelocityScaling(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasVelocityScaling();
+   }
+
+   private boolean hasVelocityIntegrationBreakFrequency(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasVelocityIntegrationBreakFrequency();
+   }
+
+   private boolean hasVelocityIntegrationMaxError(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasVelocityIntegrationMaxError();
+   }
+
+   private boolean hasPositionIntegrationBreakFrequency(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasPositionIntegrationBreakFrequency();
+   }
+
+   private boolean hasPositionIntegrationMaxError(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasPositionIntegrationMaxError();
    }
 
    private boolean pollResetIntegratorsRequest(JointDesiredOutputReadOnly outputData)
