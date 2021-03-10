@@ -21,9 +21,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FootControlHelper
 {
-   private static final double EPSILON_POINT_ON_EDGE = 5e-3;
-   private static final double EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS = 8e-3;
-
    private final RobotSide robotSide;
    private final ContactableFoot contactableFoot;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -129,7 +126,9 @@ public class FootControlHelper
          isDesiredCoPOnEdge.set(false);
       else
       {
-         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ? EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS : EPSILON_POINT_ON_EDGE;
+         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ?
+               supportStateParameters.getCopOnEdgeEpsilonWithHysteresis() :
+               supportStateParameters.getCopOnEdgeEpsilon();
          FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
          isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
       }

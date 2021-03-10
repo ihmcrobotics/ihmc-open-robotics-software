@@ -2,13 +2,18 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SupportStateParameters
 {
    private static final double defaultFootLoadThreshold = 0.2;
+
+   private static final double EPSILON_POINT_ON_EDGE = 5e-3;
+   private static final double EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS = 8e-3;
 
    // For testing:
    private final BooleanProvider assumeCopOnEdge;
@@ -25,12 +30,17 @@ public class SupportStateParameters
    private final YoDouble fullyLoadedMagnitude;
 
    private final YoDouble footLoadThreshold;
+   private final DoubleProvider copOnEdgeEpsilon;
+   private final DoubleProvider copOnEdgeEpsilonWithHysteresis;
+
 
    public SupportStateParameters(WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
       String prefix = "Foot";
       YoRegistry registry = new YoRegistry(prefix + getClass().getSimpleName());
 
+      copOnEdgeEpsilon = new DoubleParameter(prefix + "CopOnEdgeEpsilon", registry, EPSILON_POINT_ON_EDGE);
+      copOnEdgeEpsilonWithHysteresis = new DoubleParameter(prefix + "CopOnEdgeEpsilonWithHysteresis", registry, EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS);
 
       assumeCopOnEdge = new BooleanParameter(prefix + "AssumeCopOnEdge", registry, false);
       assumeFootBarelyLoaded = new BooleanParameter(prefix + "AssumeFootBarelyLoaded", registry, false);
@@ -93,5 +103,15 @@ public class SupportStateParameters
    public double getFootLoadThreshold()
    {
       return footLoadThreshold.getDoubleValue();
+   }
+
+   public double getCopOnEdgeEpsilon()
+   {
+      return copOnEdgeEpsilon.getValue();
+   }
+
+   public double getCopOnEdgeEpsilonWithHysteresis()
+   {
+      return copOnEdgeEpsilonWithHysteresis.getValue();
    }
 }
