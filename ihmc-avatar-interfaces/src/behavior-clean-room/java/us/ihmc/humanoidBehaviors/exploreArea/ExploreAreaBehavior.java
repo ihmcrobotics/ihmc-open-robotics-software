@@ -59,9 +59,9 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
 
-      explore = helper.createUIInput(ExploreArea, false);
-      helper.createUICallback(Parameters, parameters::setAllFromStrings);
-      lookAndStepReachedGoal = helper.createROS2Notification(LookAndStepBehaviorAPI.REACHED_GOAL);
+      explore = helper.subscribeViaReference(ExploreArea, false);
+      helper.subscribeViaCallback(Parameters, parameters::setAllFromStrings);
+      lookAndStepReachedGoal = helper.subscribeViaNotification(LookAndStepBehaviorAPI.REACHED_GOAL);
 
       statusLogger.info("Initializing explore area behavior");
 

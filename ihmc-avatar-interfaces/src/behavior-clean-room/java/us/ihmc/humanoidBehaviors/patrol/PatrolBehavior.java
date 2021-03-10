@@ -143,23 +143,23 @@ public class PatrolBehavior implements BehaviorInterface
                                                         goNotification);
 
       // TODO: Use helper
-      helper.createUICallback(Stop, object -> stopNotification.set());
-      helper.createUICallback(PlanReviewResult, message ->
+      helper.subscribeViaCallback(Stop, object -> stopNotification.set());
+      helper.subscribeViaCallback(PlanReviewResult, message ->
       {
          planReviewResult.set(message);
       });
-      helper.createUICallback(SkipPerceive, object -> skipPerceive.set());
+      helper.subscribeViaCallback(SkipPerceive, object -> skipPerceive.set());
 
       // TODO: Use helper
-      loop = helper.createUIInput(Loop, false);
-      swingOvers = helper.createUIInput(SwingOvers, false);
-      planReviewEnabled = helper.createUIInput(PlanReviewEnabled, false);
-      upDownExplorationEnabled = helper.createUIInput(UpDownExplorationEnabled, false);
-      perceiveDuration = helper.createUIInput(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
-      helper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
+      loop = helper.subscribeViaReference(Loop, false);
+      swingOvers = helper.subscribeViaReference(SwingOvers, false);
+      planReviewEnabled = helper.subscribeViaReference(PlanReviewEnabled, false);
+      upDownExplorationEnabled = helper.subscribeViaReference(UpDownExplorationEnabled, false);
+      perceiveDuration = helper.subscribeViaReference(PerceiveDuration, RemoteFootstepPlannerInterface.DEFAULT_PERCEIVE_TIME_REQUIRED);
+      helper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) goNotification.set(); });
 
       upDownExplorer = new UpDownExplorer(helper, rea);
-      helper.createUICallback(CancelPlanning, object ->
+      helper.subscribeViaCallback(CancelPlanning, object ->
       {
          cancelPlanning.set();
          upDownExplorer.abortPlanning();

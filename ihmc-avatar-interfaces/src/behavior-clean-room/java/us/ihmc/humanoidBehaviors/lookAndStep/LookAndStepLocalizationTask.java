@@ -66,7 +66,7 @@ public class LookAndStepLocalizationTask
       {
          lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
-         finishedWalkingNotification = lookAndStep.helper.createWalkingCompletedNotification();
+         finishedWalkingNotification = lookAndStep.helper.subscribeToWalkingCompletedViaNotification();
          ros2EmptyPublisher = lookAndStep.helper::publish;
          bodyPathPlanning = lookAndStep.bodyPathPlanning;
          behaviorStateReference = lookAndStep.behaviorStateReference;

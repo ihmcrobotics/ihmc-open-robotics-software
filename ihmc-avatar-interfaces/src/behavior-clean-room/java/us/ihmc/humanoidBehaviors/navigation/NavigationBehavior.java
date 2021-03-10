@@ -94,7 +94,7 @@ public class NavigationBehavior implements BehaviorInterface
 
       footPolygons = helper.createFootPolygons();
 
-      stepThroughAlgorithm = helper.createUINotification(StepThroughAlgorithm);
+      stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
 
       sequence = new LoopSequenceNode();
       sequence.addChild(new AlwaysSuccessfulAction(() -> stepThroughAlgorithm("aquire map")));

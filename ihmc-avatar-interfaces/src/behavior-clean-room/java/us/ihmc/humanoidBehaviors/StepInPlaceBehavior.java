@@ -50,8 +50,8 @@ public class StepInPlaceBehavior implements BehaviorInterface
       syncedRobot = robotInterface.newSyncedRobot();
 
       robotInterface.createFootstepStatusCallback(this::consumeFootstepStatus);
-      stepping = helper.createBooleanActivationReference(API.Stepping);
-      helper.createUICallback(API.Abort, this::doOnAbort);
+      stepping = helper.subscribeViaActivationReference(API.Stepping);
+      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::stepInPlace);
    }
