@@ -145,7 +145,6 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          desiredPosition.set(InterpolationTools.linearInterpolate(initialPosition, finalPosition, blendingAlpha));
 
-         // TODO check these values
          double desiredVelocity = positionDelta * blendingRate;
          double desiredAcceleration = positionDelta * blendingAcceleration;
 
