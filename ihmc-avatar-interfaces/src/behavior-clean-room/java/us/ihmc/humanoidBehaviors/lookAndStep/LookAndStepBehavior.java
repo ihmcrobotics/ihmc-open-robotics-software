@@ -121,7 +121,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       lastStanceSide = new AtomicReference<>();
       lastCommandedFootsteps = new SideDependentList<>();
-      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
+      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
       controllerStatusTracker = new ControllerStatusTracker(statusLogger,
                                                             helper.getROS2Node(),
                                                             helper.getRobotModel().getSimpleRobotName());
@@ -129,7 +129,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2Callback(RESET, reset::queueReset);
       helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
-      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publishROS2);
+      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publish);
       helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
       helper.createUICallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
 

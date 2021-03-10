@@ -190,7 +190,7 @@ public class BehaviorHelper
    public StatusLogger getOrCreateStatusLogger()
    {
       if (statusLogger == null)
-         statusLogger = new StatusLogger(this::publishToUI);
+         statusLogger = new StatusLogger(this::publish);
       return statusLogger;
    }
 
@@ -287,17 +287,17 @@ public class BehaviorHelper
       return notification;
    }
 
-   public <T> void publishROS2(ROS2Topic<T> topic, T message)
+   public <T> void publish(ROS2Topic<T> topic, T message)
    {
       ros2PublisherMap.publish(topic, message);
    }
 
-   public void publishROS2(ROS2Topic<Pose3D> topic, Pose3D message)
+   public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2PublisherMap.publish(topic, message);
    }
 
-   public void publishROS2(ROS2Topic<Empty> topic)
+   public void publish(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
    }
@@ -310,12 +310,12 @@ public class BehaviorHelper
    // UI Communication Methods:
    // Extract into class?
 
-   public <T> void publishToUI(Topic<T> topic, T message)
+   public <T> void publish(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
    }
 
-   public void publishToUI(Topic<Object> topic)
+   public void publish(Topic<Object> topic)
    {
       managedMessager.submitMessage(topic, new Object());
    }

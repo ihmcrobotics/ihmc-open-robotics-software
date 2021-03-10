@@ -58,7 +58,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    @Override
    public void doAction()
    {
-      helper.publishToUI(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
+      helper.publish(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
       Point2D pointToLookAt2D = new Point2D();
       if (userRequestedPointToLookAt.get() != null)

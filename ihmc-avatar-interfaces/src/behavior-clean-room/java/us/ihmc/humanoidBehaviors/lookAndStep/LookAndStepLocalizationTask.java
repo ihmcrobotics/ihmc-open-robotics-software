@@ -67,12 +67,12 @@ public class LookAndStepLocalizationTask
          lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
          finishedWalkingNotification = lookAndStep.helper.createWalkingCompletedNotification();
-         ros2EmptyPublisher = lookAndStep.helper::publishROS2;
+         ros2EmptyPublisher = lookAndStep.helper::publish;
          bodyPathPlanning = lookAndStep.bodyPathPlanning;
          behaviorStateReference = lookAndStep.behaviorStateReference;
          bodyPathLocalizationOutput = lookAndStep.footstepPlanning::acceptLocalizationResult;
          statusLogger = lookAndStep.statusLogger;
-         uiPublisher = lookAndStep.helper::publishToUI;
+         uiPublisher = lookAndStep.helper::publish;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          isBeingReset = lookAndStep.isBeingReset;
          stepping = lookAndStep.stepping;
