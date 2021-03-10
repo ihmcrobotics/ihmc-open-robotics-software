@@ -66,6 +66,8 @@ public class StandPrepControllerState extends HighLevelControllerState
          YoDouble standPrepDesiredConfiguration = new YoDouble(namePrefix + "StandPrepCurrentDesired", registry);
          YoDouble standPrepInitialConfiguration = new YoDouble(namePrefix + "StandPrepInitialPosition", registry);
 
+         standPrepFinalConfiguration.addListener(v -> reinitialize.set(true));
+
          TrajectoryData jointData = new TrajectoryData(standPrepInitialConfiguration, standPrepFinalConfiguration, standPrepDesiredConfiguration);
          jointsData.add(controlledJoint, jointData);
       }
@@ -139,13 +141,13 @@ public class StandPrepControllerState extends HighLevelControllerState
 
          double initialPosition = trajectoryData.getInitialJointConfiguration().getDoubleValue();
          double finalPosition = trajectoryData.getFinalJointConfiguration().getValue();
-         double delta = finalPosition - initialPosition;
+         double positionDelta = finalPosition - initialPosition;
 
          desiredPosition.set(InterpolationTools.linearInterpolate(initialPosition, finalPosition, blendingAlpha));
 
          // TODO check these values
-         double desiredVelocity = delta * blendingRate;
-         double desiredAcceleration = delta * blendingAcceleration;
+         double desiredVelocity = positionDelta * blendingRate;
+         double desiredAcceleration = positionDelta * blendingAcceleration;
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
          lowLevelJointData.clear();
