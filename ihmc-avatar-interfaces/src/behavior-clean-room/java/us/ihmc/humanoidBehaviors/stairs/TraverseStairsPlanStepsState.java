@@ -49,12 +49,12 @@ public class TraverseStairsPlanStepsState implements State
    {
       this.helper = helper;
       this.parameters = parameters;
-      helper.createROS2Callback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
+      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
       {
          LogTools.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
-      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
 
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());

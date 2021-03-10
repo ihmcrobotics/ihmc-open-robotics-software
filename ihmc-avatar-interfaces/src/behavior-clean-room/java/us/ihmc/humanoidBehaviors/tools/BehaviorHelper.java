@@ -49,7 +49,6 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
-import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -204,12 +203,7 @@ public class BehaviorHelper
                                      walkingControllerParameters);
    }
 
-   public void createROS1PlanarRegionsCallback(Consumer<PlanarRegionsList> callback)
-   {
-      createROS1PlanarRegionsCallback(RosTools.MAPSENSE_REGIONS, callback);
-   }
-
-   public void createROS1PlanarRegionsCallback(String topic, Consumer<PlanarRegionsList> callback)
+   public void subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
    {
       boolean daemon = true;
       int queueSize = 1;
@@ -240,47 +234,47 @@ public class BehaviorHelper
       });
    }
 
-   public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       new IHMCROS2Callback<>(managedROS2Node, topic, callback);
    }
 
-   public void createROS2Callback(ROS2Topic<Empty> topic, Runnable callback)
+   public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
       new IHMCROS2Callback<>(managedROS2Node, topic, message -> callback.run());
    }
 
    // TODO: Move to remote robot interface?
-   public <T> void createROS2ControllerCallback(Class<T> messageClass, Consumer<T> callback)
+   public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
       new IHMCROS2Callback<>(managedROS2Node, ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
-   public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
+   public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
    {
-      createROS2Callback(topic, planarRegionsListMessage ->
+      subscribeViaCallback(topic, planarRegionsListMessage ->
       {
          callback.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       });
    }
 
-   public Supplier<PlanarRegionsList> createROS2PlanarRegionsListInput(ROS2Topic<PlanarRegionsListMessage> topic)
+   public Supplier<PlanarRegionsList> subscribeToPlanarRegionsViaReference(ROS2Topic<PlanarRegionsListMessage> topic)
    {
       ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(managedROS2Node, topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
    }
 
-   public <T> ROS2Input<T> createROS2Input(ROS2Topic<T> topic)
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
    }
 
-   public ROS2TypelessInput createROS2TypelessInput(ROS2Topic<Empty> topic)
+   public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
    {
       return new ROS2TypelessInput(managedROS2Node, topic);
    }
 
-   public Notification createROS2Notification(ROS2Topic<Empty> topic)
+   public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
       new ROS2Callback<>(managedROS2Node, Empty.class, topic, message -> notification.set());
@@ -320,47 +314,41 @@ public class BehaviorHelper
       managedMessager.submitMessage(topic, new Object());
    }
 
-   public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
+   public ActivationReference<Boolean> subscribeViaActivationReference(Topic<Boolean> topic)
    {
       return managedMessager.createBooleanActivationReference(topic);
    }
 
-   public <T> void createUICallback(Topic<T> topic, TopicListener<T> listener)
+   public <T> void subscribeViaCallback(Topic<T> topic, TopicListener<T> listener)
    {
       managedMessager.registerTopicListener(topic, listener);
    }
 
-   public <T> AtomicReference<T> createUIInput(Topic<T> topic, T initialValue)
+   public <T> AtomicReference<T> subscribeViaReference(Topic<T> topic, T initialValue)
    {
       return managedMessager.createInput(topic, initialValue);
    }
 
-   public Notification createUINotification(Topic<Object> topic)
+   public Notification subscribeTypelessViaNotification(Topic<Object> topic)
    {
       Notification notification = new Notification();
-      createUICallback(topic, object -> notification.set());
+      subscribeViaCallback(topic, object -> notification.set());
       return notification;
    }
 
-   public <T extends K, K> TypedNotification<K> createUITypedNotification(Topic<T> topic)
+   public <T extends K, K> TypedNotification<K> subscribeViaNotification(Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();
-      createUICallback(topic, message -> typedNotification.set(message));
+      subscribeViaCallback(topic, message -> typedNotification.set(message));
       return typedNotification;
    }
 
    // ROS 2 Methods:
 
-   public ROS2PlanarRegionsInput createPlanarRegionsInput(String specifier)
-   {
-      ROS2Topic topic = ROS2Tools.REA.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix(specifier);
-      return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, topic.getName());
-   }
-
-   public Notification createWalkingCompletedNotification()
+   public Notification subscribeToWalkingCompletedViaNotification()
    {
       Notification notification = new Notification();
-      createROS2ControllerCallback(WalkingStatusMessage.class, walkingStatusMessage -> {
+      subscribeToControllerViaCallback(WalkingStatusMessage.class, walkingStatusMessage -> {
          if (walkingStatusMessage.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
          {
             notification.set();

@@ -63,9 +63,9 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       statusLogger = helper.getOrCreateStatusLogger();
 
-      helper.createUICallback(DoSlam, this::doSlam);
-      helper.createUICallback(ClearMap, this::clearMap);
-      helper.createUICallback(RandomPoseUpdate, this::randomPoseUpdate);
+      helper.subscribeViaCallback(DoSlam, this::doSlam);
+      helper.subscribeViaCallback(ClearMap, this::clearMap);
+      helper.subscribeViaCallback(RandomPoseUpdate, this::randomPoseUpdate);
 
       lookRight = new LookInADirection(-40.0, -20.0);
       lookCenter = new LookInADirection(0.0, 0.0);
