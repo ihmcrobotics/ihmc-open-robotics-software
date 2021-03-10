@@ -139,6 +139,24 @@ public class ManagedMessager implements Messager
    }
 
    @Override
+   public void startMessager() throws Exception
+   {
+      messager.startMessager();
+   }
+
+   @Override
+   public void closeMessager() throws Exception
+   {
+      messager.closeMessager();
+   }
+
+   @Override
+   public void notifyMessagerStateListeners()
+   {
+      messager.notifyMessagerStateListeners();
+   }
+
+   @Override
    public MessagerAPIFactory.MessagerAPI getMessagerAPI()
    {
       return messager.getMessagerAPI();
