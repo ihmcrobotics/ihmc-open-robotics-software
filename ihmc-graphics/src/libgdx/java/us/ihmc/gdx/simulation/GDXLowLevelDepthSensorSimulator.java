@@ -9,10 +9,12 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
@@ -62,6 +64,7 @@ public class GDXLowLevelDepthSensorSimulator
    private FloatBuffer eyeDepthMetersBuffer;
 
    private boolean depthWindowEnabledOptimization = true;
+   private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
 
    public GDXLowLevelDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -142,11 +145,13 @@ public class GDXLowLevelDepthSensorSimulator
          for (int x = 0; x < imageWidth; x++)
          {
             float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
+            float imageY = (2.0f * y) / imageHeight - 1.0f;
 
             // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
             // https://stackoverflow.com/a/45710371/1070333
             float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
-            float eyeDepth = twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear); // in meters
+            float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
+            eyeDepth += imageY * depthPitchTuner.get();
             eyeDepthMetersBuffer.put(eyeDepth);
 
             if (depthWindowEnabledOptimization)
@@ -166,7 +171,7 @@ public class GDXLowLevelDepthSensorSimulator
             if (eyeDepth > camera.near && eyeDepth < maxRange)
             {
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
-               depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
+               depthPoint.y = imageY;
                depthPoint.z = 2.0f * rawDepthReading - 1.0f;
                depthPoint.prj(camera.invProjectionView);
 
@@ -190,6 +195,11 @@ public class GDXLowLevelDepthSensorSimulator
 
       depthWindowEnabledOptimization = false;
       colorsAreBeingUsed = false;
+   }
+
+   public void renderTuningSliders()
+   {
+      ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
    }
 
    public void renderImGuiDepthWindow()
