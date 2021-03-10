@@ -113,6 +113,22 @@ public class JointControlBlender
          outputDataToPack.setDesiredTorque(desiredTorque);
       }
 
+      if (hasPositionFeedbackMaxError(outputData0) || hasPositionFeedbackMaxError(outputData1))
+      {
+         double maxError0 = hasPositionFeedbackMaxError(outputData0) ? outputData0.getPositionFeedbackMaxError() : 0.0;
+         double maxError1 = hasPositionFeedbackMaxError(outputData1) ? outputData1.getPositionFeedbackMaxError() : 0.0;
+         double maxError = EuclidCoreTools.interpolate(maxError0, maxError1, blendingFactor);
+         outputDataToPack.setPositionFeedbackMaxError(maxError);
+      }
+
+      if (hasVelocityFeedbackMaxError(outputData0) || hasVelocityFeedbackMaxError(outputData1))
+      {
+         double maxError0 = hasVelocityFeedbackMaxError(outputData0) ? outputData0.getVelocityFeedbackMaxError() : 0.0;
+         double maxError1 = hasVelocityFeedbackMaxError(outputData1) ? outputData1.getVelocityFeedbackMaxError() : 0.0;
+         double maxError = EuclidCoreTools.interpolate(maxError0, maxError1, blendingFactor);
+         outputDataToPack.setVelocityFeedbackMaxError(maxError);
+      }
+
       if (hasStiffness(outputData0) || hasStiffness(outputData1))
       {
          double stiffness0 = hasStiffness(outputData0) ? outputData0.getStiffness() : 0.0;
@@ -150,6 +166,16 @@ public class JointControlBlender
    private boolean hasDesiredTorque(JointDesiredOutputReadOnly outputData)
    {
       return outputData != null && outputData.hasDesiredTorque();
+   }
+
+   private boolean hasPositionFeedbackMaxError(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasPositionFeedbackMaxError();
+   }
+
+   private boolean hasVelocityFeedbackMaxError(JointDesiredOutputReadOnly outputData)
+   {
+      return outputData != null && outputData.hasVelocityFeedbackMaxError();
    }
 
    private boolean hasStiffness(JointDesiredOutputReadOnly outputData)
