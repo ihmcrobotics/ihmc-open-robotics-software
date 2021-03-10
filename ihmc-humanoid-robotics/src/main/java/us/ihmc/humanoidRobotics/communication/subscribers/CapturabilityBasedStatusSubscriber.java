@@ -66,7 +66,7 @@ public class CapturabilityBasedStatusSubscriber implements PacketConsumer<Captur
 
       for (CapturabilityBasedStatusListener listener : listOfListener)
       {
-         listener.updateStatusPacket(object);
+         //listener.updateStatusPacket(object);
       }
    }
 }

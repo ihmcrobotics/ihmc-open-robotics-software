@@ -1,6 +1,14 @@
 package us.ihmc.pathPlanning;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -14,12 +22,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.random.RandomGeometry;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
 
 public class PlannerTestEnvironments
 {
@@ -408,6 +410,24 @@ public class PlannerTestEnvironments
       generator.addCubeReferencedAtBottomMiddle(corridorLength, blockWidth, corridorHeight);
       generator.translate(0.0, -blockWidth - corridorWidth, 0.0);
       generator.addCubeReferencedAtBottomMiddle(corridorLength, blockWidth, corridorHeight);
+      return generator.getPlanarRegionsList();
+   }
+   
+   public static PlanarRegionsList getDoor()
+   {
+      double doorStartDistance = 1.5;
+      double doorWidth = 0.9144;
+      double doorHeight = 2.032;
+      double doorLength = 0.1016;
+      double blockWidth = 0.1016;
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.translate(5.0, 0.0, 0.0);
+      generator.addRectangle(20.0, 2.0 * blockWidth + doorWidth);
+      generator.identity();
+      generator.translate(doorStartDistance + doorLength / 2.0, (blockWidth + doorWidth) / 2.0, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(doorLength, blockWidth, doorHeight);
+      generator.translate(0.0, -blockWidth - doorWidth, 0.0);
+      generator.addCubeReferencedAtBottomMiddle(doorLength, blockWidth, doorHeight);
       return generator.getPlanarRegionsList();
    }
 
@@ -887,6 +907,7 @@ public class PlannerTestEnvironments
    {
       return flatGround(20.0);
    }
+   
 
    public static PlanarRegionsList flatGround(double size)
    {

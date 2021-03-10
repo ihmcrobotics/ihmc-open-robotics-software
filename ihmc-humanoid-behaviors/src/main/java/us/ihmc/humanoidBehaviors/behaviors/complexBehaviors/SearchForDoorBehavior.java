@@ -234,7 +234,7 @@ public class SearchForDoorBehavior extends StateMachineBehavior<SearchForDoorBeh
       
       factory.addStateChangedListener((from, to) ->
       {
-         publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
+        // publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
       });
 
       

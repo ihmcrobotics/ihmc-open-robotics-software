@@ -52,6 +52,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final FramePose3D startRightFootPose = new FramePose3D();
    private RobotSide initialStanceSide;
    private double desiredHeading;
+   private boolean checkForBodyPathCollisions;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
    private boolean squareUpEndSteps = true;
@@ -91,7 +92,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          Pose3DReadOnly rightFootPose,
                          boolean planBodyPath,
                          boolean assumeFlatGround,
-                         double desiredHeading, boolean squareUpEndSteps)
+                         double desiredHeading, boolean squareUpEndSteps, boolean checkForBodyPathCollisions)
    {
       this.squareUpEndSteps = squareUpEndSteps;
       this.goalPose = goalPose;
@@ -199,6 +200,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 
             FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
+            plannerParametersPacket.setCheckForBodyBoxCollisions(checkForBodyPathCollisions);
             plannerParametersPacket.setMaximumStepYaw(0.8);
             footstepPlannerParametersPublisher.publish(plannerParametersPacket);
 

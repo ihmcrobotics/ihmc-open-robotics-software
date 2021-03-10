@@ -47,6 +47,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private boolean goalLocationChanged = false;
 
    private boolean planBodyPath = false;
+   private boolean checkForBodyPathCollisions = false;
+
    private boolean performAStarSearch = false;
    private boolean assumeFlatGround = true;
 
@@ -109,7 +111,11 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    {
       this.planBodyPath = planBodyPath;
    }
-
+   
+   public void setCheckForBodyPathCollisions(boolean checkForCollisions)
+   {
+      checkForBodyPathCollisions = checkForCollisions;
+   }
    public void setPerformAStarSearch(boolean performAStarSearch)
    {
       this.performAStarSearch = performAStarSearch;
@@ -171,7 +177,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             }
 
            
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get(), squareUpEndSteps);
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround, desiredHeading.get(), squareUpEndSteps,checkForBodyPathCollisions);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
 

@@ -336,7 +336,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR,
                              new WalkThroughDoorBehavior(robotName,
-                                                         "Human",
+                                                         "WalkThroughDoor",
                                                          ros2Node,
                                                          yoTime,
                                                          yoDoubleSupport,
@@ -345,6 +345,19 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                          wholeBodyControllerParameters,
                                                          atlasPrimitiveActions,
                                                          yoGraphicsListRegistry));
+      
+      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_OPEN_DOOR_COLLISION_TEST,
+                             new WalkThroughOpenDoorCollisionTestBehavior(robotName,
+                                                         "CollisionTest",
+                                                         ros2Node,
+                                                         yoTime,
+                                                         yoDoubleSupport,
+                                                         fullRobotModel,
+                                                         referenceFrames,
+                                                         wholeBodyControllerParameters,
+                                                         atlasPrimitiveActions,
+                                                         yoGraphicsListRegistry));
+      
       
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_AUTOMATED_TIMING_BEHAVIOR,
