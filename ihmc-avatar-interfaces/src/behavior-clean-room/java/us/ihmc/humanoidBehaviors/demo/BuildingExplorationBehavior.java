@@ -35,7 +35,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.MessagerBasics;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -73,7 +73,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    private final ROS2NodeInterface ros2Node;
    private final YoEnum<BuildingExplorationStateName> requestedState = new YoEnum<>("requestedState", "", registry, BuildingExplorationStateName.class, true);
    private final StateMachine<BuildingExplorationStateName, State> stateMachine;
-   private final MessagerBasics behaviorMessager;
+   private final Messager behaviorMessager;
 
    private final AtomicBoolean isRunning = new AtomicBoolean();
    private final AtomicBoolean stopRequested = new AtomicBoolean();
@@ -102,7 +102,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       this.helper = helper;
       DRCRobotModel robotModel = helper.getRobotModel();
       ROS2NodeInterface ros2Node = helper.getROS2Node();
-      MessagerBasics behaviorMessager = helper.getMessager();
+      Messager behaviorMessager = helper.getMessager();
 
       String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();
@@ -407,7 +407,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       private static final double debrisCheckBodyBoxBaseZ = 0.5;
       private static final int numberOfStepsToIgnoreDebrisAfterClearing = 4;
 
-      private final MessagerBasics messager;
+      private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
 
       private final Pose3DReadOnly bombPose;
@@ -435,7 +435,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       public LookAndStepState(DRCRobotModel robotModel,
                               ROS2NodeInterface ros2Node,
-                              MessagerBasics messager,
+                              Messager messager,
                               Pose3DReadOnly bombPose,
                               Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
@@ -744,7 +744,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
    private static class TraverseStairsState implements State
    {
-      private final MessagerBasics messager;
+      private final Messager messager;
       private final IHMCROS2Publisher<Pose3D> goalPublisher;
 
       private final IHMCROS2Publisher<Empty> startPublisher;
@@ -755,7 +755,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       private final Supplier<RobotConfigurationData> robotConfigurationDataSupplier;
 
       public TraverseStairsState(ROS2NodeInterface ros2Node,
-                                 MessagerBasics messager,
+                                 Messager messager,
                                  Pose3DReadOnly bombPose,
                                  Supplier<RobotConfigurationData> robotConfigurationDataSupplier)
       {
@@ -808,7 +808,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
       }
    }
 
-   public MessagerBasics getBehaviorMessager()
+   public Messager getBehaviorMessager()
    {
       return behaviorMessager;
    }

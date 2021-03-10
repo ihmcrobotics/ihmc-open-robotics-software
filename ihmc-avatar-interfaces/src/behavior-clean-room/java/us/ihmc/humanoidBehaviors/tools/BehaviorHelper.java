@@ -35,7 +35,7 @@ import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.ros2.ROS2TypelessInput;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.messager.MessagerBasics;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -102,13 +102,13 @@ public class BehaviorHelper
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
-   public BehaviorHelper(DRCRobotModel robotModel, MessagerBasics messager, RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
    {
       this(robotModel, messager, ros1Node, ros2Node, true);
    }
 
    public BehaviorHelper(DRCRobotModel robotModel,
-                         MessagerBasics messager,
+                         Messager messager,
                          RosNodeInterface ros1Node,
                          ROS2NodeInterface ros2Node,
                          boolean commsEnabledToStart)
@@ -397,7 +397,7 @@ public class BehaviorHelper
       managedMessager.setEnabled(enabled);
    }
 
-   public MessagerBasics getMessager()
+   public Messager getMessager()
    {
       return managedMessager;
    }

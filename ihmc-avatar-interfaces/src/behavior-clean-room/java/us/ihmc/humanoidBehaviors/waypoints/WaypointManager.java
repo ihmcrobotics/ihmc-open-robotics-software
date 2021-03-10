@@ -5,11 +5,11 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.messager.MessagerBasics;
+import us.ihmc.messager.Messager;
 
 public class WaypointManager // should handle comms of waypointsequence, unique id management (creating waypoints)
 {
-   private final MessagerBasics messager;
+   private final Messager messager;
    private final Topic<WaypointSequence> sendTopic;
 
    private volatile WaypointSequence activeSequence = new WaypointSequence();
@@ -20,7 +20,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
    private final boolean delayUpdate; // for module to
    private volatile WaypointSequence delayedUpdateSequence = new WaypointSequence(); // prevent NPE
 
-   public static WaypointManager createForModule(MessagerBasics messager,
+   public static WaypointManager createForModule(Messager messager,
                                                  Topic<WaypointSequence> receiveTopic,
                                                  Topic<WaypointSequence> sendTopic,
                                                  Topic<Integer> goToWaypointTopic,
@@ -43,7 +43,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
       return waypointManager;
    }
 
-   public static WaypointManager createForUI(MessagerBasics messager,
+   public static WaypointManager createForUI(Messager messager,
                                              Topic<WaypointSequence> receiveTopic,
                                              Topic<WaypointSequence> sendTopic,
                                              Runnable receivedListener) // accept listenerForUI
@@ -57,7 +57,7 @@ public class WaypointManager // should handle comms of waypointsequence, unique 
       return waypointManager;
    }
 
-   public WaypointManager(MessagerBasics messager,
+   public WaypointManager(Messager messager,
                           Topic<WaypointSequence> receiveTopic,
                           Topic<WaypointSequence> sendTopic,
                           Topic<Integer> waypointIndexUIUpdateTopic,
