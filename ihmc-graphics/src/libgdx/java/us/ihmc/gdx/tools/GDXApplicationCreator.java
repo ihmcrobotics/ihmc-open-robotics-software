@@ -1,6 +1,5 @@
 package us.ihmc.gdx.tools;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import us.ihmc.commons.thread.ThreadTools;
@@ -9,9 +8,9 @@ import us.ihmc.gdx.vr.GDXVRManager;
 
 public class GDXApplicationCreator
 {
-   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, Class<?> clazz)
+   public static void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, Class<?> clazz)
    {
-      return launchGDXApplication(applicationAdapter, clazz.getSimpleName(), 1100, 800);
+      launchGDXApplication(applicationAdapter, clazz.getSimpleName(), 1100, 800);
    }
 
    public static Lwjgl3ApplicationConfiguration getDefaultConfiguration(Class<?> clazz)
@@ -47,12 +46,12 @@ public class GDXApplicationCreator
       return applicationConfiguration;
    }
 
-   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, String title, double width, double height)
+   public static void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter, String title, double width, double height)
    {
-      return launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter, title);
+      launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter, title);
    }
 
-   public static Lwjgl3Application launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
+   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
                                                         Lwjgl3ApplicationAdapter applicationAdapter,
                                                         String title)
    {
@@ -60,6 +59,5 @@ public class GDXApplicationCreator
       {
          new Lwjgl3Application(applicationAdapter, applicationConfiguration);
       }, title);
-      return (Lwjgl3Application) Gdx.app;
    }
 }
