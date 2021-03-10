@@ -678,7 +678,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel(getJointMap());
+      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
+      {
+         return new ValkyrieArmMassSimCollisionModel(getJointMap());
+      }
+      else
+      {
+         return new ValkyrieKinematicsCollisionModel(getJointMap());
+      }
    }
 
    @Override
@@ -686,7 +693,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
       {
-         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap());
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), true);
          collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
          return collisionModel;
       }
@@ -715,7 +722,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public UIParameters getUIParameters()
    {
-      return new ValkyrieUIParameters(getRobotPhysicalProperties(), getJointMap());
+      return new ValkyrieUIParameters(robotVersion, getRobotPhysicalProperties(), getJointMap());
    }
 
    @Override
