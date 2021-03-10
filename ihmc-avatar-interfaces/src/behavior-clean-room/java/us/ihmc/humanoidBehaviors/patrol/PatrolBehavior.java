@@ -129,7 +129,7 @@ public class PatrolBehavior implements BehaviorInterface
 
       factory.getFactory().addStateChangedListener((from, to) ->
       {
-         helper.publishToUI(CurrentState, to);
+         helper.publish(CurrentState, to);
          LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
       });
       factory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
@@ -311,8 +311,8 @@ public class PatrolBehavior implements BehaviorInterface
 
    private void onReviewStateEntry()
    {
-      helper.publishToUI(CurrentFootstepPlan,
-                         FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlanResultNotification.read().getFootstepPlan()));
+      helper.publish(CurrentFootstepPlan,
+                     FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlanResultNotification.read().getFootstepPlan()));
    }
 
    private void onReviewStateAction(double timeInState)
@@ -357,7 +357,7 @@ public class PatrolBehavior implements BehaviorInterface
 
       walkingCompleted = robotInterface.requestWalk(footstepDataListMessage);
 
-      helper.publishToUI(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
+      helper.publish(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
 
    private PlanTravelDistance decidePlanDistance(FootstepDataListMessage footstepPlan, HumanoidReferenceFrames humanoidReferenceFrames)

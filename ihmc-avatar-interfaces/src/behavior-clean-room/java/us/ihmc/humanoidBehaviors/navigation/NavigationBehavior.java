@@ -135,7 +135,7 @@ public class NavigationBehavior implements BehaviorInterface
       latestMapSequenceId = mapRegionsInput.getLatest().getSequenceId();
       //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
-      helper.publishToUI(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
+      helper.publish(MapRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(mapRegionsInput.getLatest()));
    }
 
    private void planBodyPath()
@@ -282,7 +282,7 @@ public class NavigationBehavior implements BehaviorInterface
 //      LogTools.info("Got {} footsteps", latestFootstepPlan.getNumberOfSteps());
 //
 //      // make robot walk a little of the path
-//      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(latestFootstepPlan));
+//      helper.publish(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(latestFootstepPlan));
    }
 
    private void shortenFootstepPlanAndWalkIt()
