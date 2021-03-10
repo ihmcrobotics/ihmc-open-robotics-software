@@ -41,6 +41,7 @@ public class FootControlHelper
 
    private final ExplorationParameters explorationParameters;
    private final FootholdRotationParameters footholdRotationParameters;
+   private final SupportStateParameters supportStateParameters;
 
    private final SwingTrajectoryCalculator swingTrajectoryCalculator;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
@@ -52,6 +53,7 @@ public class FootControlHelper
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             FootholdRotationParameters footholdRotationParameters,
+                            SupportStateParameters supportStateParameters,
                             YoRegistry registry)
    {
       this.robotSide = robotSide;
@@ -59,6 +61,7 @@ public class FootControlHelper
       this.walkingControllerParameters = walkingControllerParameters;
       this.explorationParameters = explorationParameters;
       this.footholdRotationParameters = footholdRotationParameters;
+      this.supportStateParameters = supportStateParameters;
 
       this.swingTrajectoryParameters = swingTrajectoryParameters;
       this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(), robotSide, controllerToolbox,
@@ -198,6 +201,11 @@ public class FootControlHelper
    public FootholdRotationParameters getFootholdRotationParameters()
    {
       return footholdRotationParameters;
+   }
+
+   public SupportStateParameters getSupportStateParameters()
+   {
+      return supportStateParameters;
    }
 
    public YoSwingTrajectoryParameters getSwingTrajectoryParameters()

@@ -113,6 +113,7 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
       FootholdRotationParameters footholdRotationParameters = new FootholdRotationParameters(registry);
+      SupportStateParameters supportStateParameters = new SupportStateParameters(walkingControllerParameters, registry);
 
       boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
       DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
@@ -135,6 +136,7 @@ public class FeetManager
                                                                      controllerToolbox,
                                                                      explorationParameters,
                                                                      footholdRotationParameters,
+                                                                     supportStateParameters,
                                                                      minWeightFractionPerFoot,
                                                                      maxWeightFractionPerFoot,
                                                                      registry);

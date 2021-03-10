@@ -112,6 +112,7 @@ public class FootControlModule
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             FootholdRotationParameters footholdRotationParameters,
+                            SupportStateParameters supportStateParameters,
                             DoubleProvider minWeightFractionPerFoot,
                             DoubleProvider maxWeightFractionPerFoot,
                             YoRegistry parentRegistry)
@@ -130,6 +131,7 @@ public class FootControlModule
                                                 controllerToolbox,
                                                 explorationParameters,
                                                 footholdRotationParameters,
+                                                supportStateParameters,
                                                 registry);
 
       this.controllerToolbox = controllerToolbox;
