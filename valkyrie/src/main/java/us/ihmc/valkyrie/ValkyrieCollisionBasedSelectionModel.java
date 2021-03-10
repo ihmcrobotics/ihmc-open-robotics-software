@@ -83,12 +83,24 @@ public class ValkyrieCollisionBasedSelectionModel implements RobotCollisionModel
          }
 
          { // Elbow
-            JointBasics elbowPitch = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
-            MovingReferenceFrame elbowPitchFrame = elbowPitch.getFrameAfterJoint();
-            FrameCapsule3D elbowShape = new FrameCapsule3D(elbowPitchFrame, 0.08, 0.05);
-            elbowShape.getPosition().set(0.0, 0.0, 0.0);
-            elbowShape.getAxis().set(Axis3D.Z);
-            collidables.add(new Collidable(elbowPitch.getSuccessor(), collisionMask, collisionGroup, elbowShape));
+            if (robotVersion.hasHands())
+            {
+               JointBasics elbowPitch = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
+               MovingReferenceFrame elbowPitchFrame = elbowPitch.getFrameAfterJoint();
+               FrameCapsule3D elbowShape = new FrameCapsule3D(elbowPitchFrame, 0.08, 0.05);
+               elbowShape.getPosition().set(0.0, 0.0, 0.0);
+               elbowShape.getAxis().set(Axis3D.Z);
+               collidables.add(new Collidable(elbowPitch.getSuccessor(), collisionMask, collisionGroup, elbowShape));
+            }
+            else
+            {
+               JointBasics elbow = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
+               MovingReferenceFrame elbowFrame = elbow.getFrameAfterJoint();
+               FrameCapsule3D forearmShape = new FrameCapsule3D(elbowFrame, 0.26, 0.055);
+               forearmShape.getPosition().set(-0.03, robotSide.negateIfRightSide(0.21), 0.0);
+               forearmShape.getAxis().set(Axis3D.Y);
+               collidables.add(new Collidable(elbow.getSuccessor(), collisionMask, collisionGroup, forearmShape));
+            }
          }
 
          { // Forearm
@@ -150,8 +162,8 @@ public class ValkyrieCollisionBasedSelectionModel implements RobotCollisionModel
             RigidBodyBasics thigh = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem)
                                                        .getPredecessor();
             MovingReferenceFrame thighFrame = thigh.getParentJoint().getFrameAfterJoint();
-            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.22, 0.12);
-            thighShape.getPosition().set(0.02, robotSide.negateIfRightSide(0.09), -0.22);
+            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.27, 0.13);
+            thighShape.getPosition().set(0.02, robotSide.negateIfRightSide(0.09), -0.23);
             thighShape.getAxis().set(new Vector3D(0.0, 0.0, 1.0));
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShape));
          }
