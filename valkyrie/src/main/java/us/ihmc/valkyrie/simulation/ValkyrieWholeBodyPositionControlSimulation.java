@@ -23,6 +23,9 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionJointLimitRemover;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutator;
+import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransition;
@@ -43,6 +46,8 @@ public class ValkyrieWholeBodyPositionControlSimulation
       new ValkyrieWholeBodyPositionControlSimulation();
    }
 
+   private static final boolean REMOVE_JOINT_LIMITS = true;
+
    private final double dt = 8.0e-4;
    private final ValkyrieRobotModel robotModel;
 
@@ -56,6 +61,14 @@ public class ValkyrieWholeBodyPositionControlSimulation
       groundPlaneMessage.getRegionNormal().set(Axis3D.Z);
 
       robotModel = new ValkyrieRobotModel(RobotTarget.SCS, ValkyrieRobotVersion.ARM_MASS_SIM);
+      if (REMOVE_JOINT_LIMITS)
+      {
+         SDFDescriptionMutatorList sdfDescriptionMutatorList = new SDFDescriptionMutatorList();
+         sdfDescriptionMutatorList.addMutator(robotModel.getSDFDescriptionMutator());
+         sdfDescriptionMutatorList.addMutator(new SDFDescriptionJointLimitRemover());
+         robotModel.setSDFDescriptionMutator(sdfDescriptionMutatorList);
+      }
+
       ValkyrieJointMap jointMap = robotModel.getJointMap();
       robotModel.setHighLevelControllerParameters(new ValkyrieSimulationPositionControlParameters(robotModel.getHighLevelControllerParameters(),
                                                                                                   jointMap,
