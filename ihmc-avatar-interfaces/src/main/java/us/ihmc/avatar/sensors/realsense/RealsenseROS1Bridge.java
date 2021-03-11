@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
@@ -20,7 +21,7 @@ public class RealsenseROS1Bridge
    private final RealsensePointCloudROS1Bridge l515PointCloudBridge;
    private final MapsensePlanarRegionROS1Bridge l515PlanarRegionBridge;
 
-   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransform d435PelvisToSensorTransform, RigidBodyTransform l515PelvisToSensorTransform)
+   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransformReadOnly d435PelvisToSensorTransform, RigidBodyTransformReadOnly l515PelvisToSensorTransform)
    {
       URI masterURI = NetworkParameters.getROSURI();
       LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
