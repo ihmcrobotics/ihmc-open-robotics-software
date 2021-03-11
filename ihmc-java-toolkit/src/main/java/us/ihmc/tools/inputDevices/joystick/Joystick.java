@@ -251,7 +251,10 @@ public class Joystick
    
    private static Controller getJoystickOfModelOnSystem(JoystickModel model, int nthToPick) throws JoystickNotFoundException
    {
-      Controller[] controllers = ControllerEnvironment.getDefaultEnvironment().getControllers();
+      ControllerEnvironment defaultEnvironment = ControllerEnvironment.getDefaultEnvironment();
+      // FIXME Hack to get the right librarypath needs to be properly fixed in JInputLibraryLoader
+      System.setProperty("net.java.games.input.librarypath", "C:\\Users\\nadiaocu\\.ihmc\\lib\\E0537B2CD0255F7BEBE3A771A961FEC256F17C8D");
+      Controller[] controllers = defaultEnvironment.getControllers();
    
       int i = 0;
       for (Controller controller : controllers)
