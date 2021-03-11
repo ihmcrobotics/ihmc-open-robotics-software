@@ -22,6 +22,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -217,7 +218,7 @@ public class BehaviorHelper
       RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
       HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RigidBodyTransform transform = robotModel.getSensorInformation().getSteppingCameraTransform();
+      RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
       ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
       ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
       MapsenseTools.createROS1Callback(topic, ros1Node, rawGPUPlanarRegionList ->

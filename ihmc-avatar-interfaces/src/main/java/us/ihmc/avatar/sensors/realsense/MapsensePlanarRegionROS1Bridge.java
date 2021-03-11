@@ -9,6 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -28,14 +29,14 @@ public class MapsensePlanarRegionROS1Bridge
    private final RemoteSyncedRobotModel syncedRobot;
    private final MovingReferenceFrame pelvisFrame;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-   private final RigidBodyTransform pelvisToSensorTransform;
+   private final RigidBodyTransformReadOnly pelvisToSensorTransform;
 
    public MapsensePlanarRegionROS1Bridge(DRCRobotModel robotModel,
                                          RosMainNode ros1Node,
                                          ROS2NodeInterface ros2Node,
                                          String ros1InputTopic,
                                          ROS2Topic<PlanarRegionsListMessage> ros2OutputTopic,
-                                         RigidBodyTransform pelvisToSensorTransform)
+                                         RigidBodyTransformReadOnly pelvisToSensorTransform)
    {
       this.pelvisToSensorTransform = pelvisToSensorTransform;
 
