@@ -202,7 +202,7 @@ public class FootstepChecker implements FootstepCheckerInterface
                                                                                   stanceStep,
                                                                                   candidateStepHeight,
                                                                                   stanceStepHeight,
-                                                                                  parameters.getNumberOfBoundingBoxChecks());
+                                                                                  parameters.getIntermediateBodyBoxChecks());
       for (int i = 0; i < collisionData.size(); i++)
       {
          if (collisionData.get(i).isCollisionDetected())
