@@ -33,6 +33,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.ros2.ROS2TypelessInput;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.Messager;
@@ -40,10 +41,12 @@ import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -210,16 +213,27 @@ public class BehaviorHelper
       ResettableExceptionHandlingExecutorService executorService
             = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
       GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
-      RemoteSyncedRobotModel syncedRobot = newSyncedRobot();
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
+      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       RigidBodyTransform transform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
+      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
       ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
       MapsenseTools.createROS1Callback(topic, ros1Node, rawGPUPlanarRegionList ->
       {
          executorService.clearQueueAndExecute(() ->
          {
+            robotConfigurationDataBuffer.updateFullRobotModel(false, rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs(), fullRobotModel, null);
+            try
+            {
+               referenceFrames.updateFrames();
+            }
+            catch (NotARotationMatrixException e)
+            {
+               LogTools.error(e.getMessage());
+            }
             PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-            syncedRobot.update();
             try
             {
                planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
