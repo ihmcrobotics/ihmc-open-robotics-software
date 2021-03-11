@@ -11,11 +11,14 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.IntFunction;
 
 public class MPCTestHelper
@@ -232,24 +235,21 @@ public class MPCTestHelper
       {
          for (int i = 0; i < contactPlane.getContactPointHelper(contactPointIdx).getRhoSize(); i++)
          {
-            int startIdx = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * (rhoIdx + i);
+            int startIdx = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoIdx;
             FrameVector3DReadOnly basisVector = contactPlane.getContactPointHelper(contactPointIdx).getBasisVector(i);
+            basisVector.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
 
-            jacobian.set(contactPointIdx, startIdx, basisVector.getX() * (c2));
-            jacobian.set(contactPointIdx + 1, startIdx, basisVector.getY() * (c2));
-            jacobian.set(contactPointIdx + 2, startIdx, basisVector.getZ() * (c2));
-            jacobian.set(contactPointIdx, startIdx + 1, basisVector.getX() * (c3));
-            jacobian.set(contactPointIdx + 1, startIdx + 1, basisVector.getY() * (c3));
-            jacobian.set(contactPointIdx + 2, startIdx + 1, basisVector.getZ() * (c3));
-            jacobian.set(contactPointIdx, startIdx + 2, basisVector.getX() * (c4));
-            jacobian.set(contactPointIdx + 1, startIdx + 2, basisVector.getY() * (c4));
-            jacobian.set(contactPointIdx + 2, startIdx + 2, basisVector.getZ() * (c4));
-            jacobian.set(contactPointIdx, startIdx + 3, basisVector.getX() * (c5));
-            jacobian.set(contactPointIdx + 1, startIdx + 3, basisVector.getY() * (c5));
-            jacobian.set(contactPointIdx + 2, startIdx + 3, basisVector.getZ() * (c5));
+            int row = 3 * contactPointIdx;
+            for (int ordinal = 0; ordinal < 3; ordinal++)
+            {
+               jacobian.set(row + ordinal, startIdx, basisVector.getElement(ordinal) * (c2));
+               jacobian.set(row + ordinal, startIdx + 1, basisVector.getElement(ordinal) * (c3));
+               jacobian.set(row + ordinal, startIdx + 2, basisVector.getElement(ordinal) * (c4));
+               jacobian.set(row + ordinal, startIdx + 3, basisVector.getElement(ordinal) * (c5));
+            }
+
+            rhoIdx++;
          }
-
-         rhoIdx += contactPlane.getContactPointHelper(contactPointIdx).getRhoSize();
       }
 
       return jacobian;
@@ -264,6 +264,18 @@ public class MPCTestHelper
    {
       DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
       CommonOps_DDRM.mult(getCoMPositionJacobian(time, omega, contactPlane), coefficientVector, solutionPosition);
+      solutionPosition.add(2, 0, 0.5 * time * time * gravity);
+
+      FramePoint3D position = new FramePoint3D();
+      position.set(solutionPosition);
+
+      return position;
+   }
+
+   public static FramePoint3DReadOnly computeCoMPosition(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane... contactPlanes)
+   {
+      DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(getCoMPositionJacobian(time, omega, contactPlanes), coefficientVector, solutionPosition);
       solutionPosition.add(2, 0, 0.5 * time * time * gravity);
 
       FramePoint3D position = new FramePoint3D();
@@ -343,12 +355,21 @@ public class MPCTestHelper
       return rhoValueVector;
    }
 
-   public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, MPCContactPlane... contactPlanes)
    {
-      if (contactPlane == null)
+      if (contactPlanes == null)
          return getCoMPositionJacobian(time, omega, 0, null);
 
-      return getCoMPositionJacobian(time, omega, contactPlane.getRhoSize(), contactPlane::getBasisVector);
+      int rhoSize = 0;
+      List<FrameVector3DReadOnly> basisVectors = new ArrayList<>();
+      for (MPCContactPlane contactPlane : contactPlanes)
+      {
+         rhoSize += contactPlane.getRhoSize();
+         for (int i = 0; i < contactPlane.getRhoSize(); i++)
+            basisVectors.add(contactPlane.getBasisVector(i));
+      }
+
+      return getCoMPositionJacobian(time, omega, rhoSize, basisVectors::get);
    }
 
    public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)

@@ -42,7 +42,7 @@ public class AngularVelocityOrientationInputCalculator
    private final DMatrixRMaj skewDesiredContactForce = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, 0);
-   private final DMatrixRMaj contactForceJacobian = new DMatrixRMaj(3, 0);
+   final DMatrixRMaj contactForceJacobian = new DMatrixRMaj(3, 0);
    private final DMatrixRMaj contactForceToOriginTorqueJacobian = new DMatrixRMaj(3, 0);
 
    private final DMatrixRMaj b0 = new DMatrixRMaj(3, 1);
