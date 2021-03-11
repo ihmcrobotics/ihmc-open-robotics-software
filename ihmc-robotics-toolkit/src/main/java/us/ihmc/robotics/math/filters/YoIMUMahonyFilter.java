@@ -362,6 +362,11 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
     */
    private static boolean computeRotationMatrixFromXZAxes(Vector3DReadOnly xAxis, Vector3DReadOnly zAxis, Orientation3DBasics orientationToPack)
    {
+      if (xAxis == null)
+         xAxis = Axis3D.X;
+      if (zAxis == null)
+         zAxis = Axis3D.Z;
+
       double zAxisX = zAxis.getX();
       double zAxisY = zAxis.getY();
       double zAxisZ = zAxis.getZ();
