@@ -195,7 +195,7 @@ public class PlannerTools
       bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
 
       BoundingBoxCollisionDetector collisionDetector = new BoundingBoxCollisionDetector();
-      collisionDetector.setBoxDimensions(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight(), 0.0);
+      collisionDetector.setBoxDimensions(parameters.getBodyBoxDepth(), parameters.getBodyBoxWidth(), parameters.getBodyBoxHeight());
       collisionDetector.setPlanarRegionsList(planarRegionsList);
 
       double distanceAlongPathPerCheck = 0.15;
