@@ -342,7 +342,9 @@ public class AngularVelocityOrientationInputCalculator
       int startCoMIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, startCoMIndex, Bd, 0, 0, 6, coefficientsInSegment, -1.0);
 
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
+      // FIXME could likely do a "set" instead of "add"
+      int orientationIndex = indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId());
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex,
                                  identity6, 0, 0, 6, 6, 1.0);
    }
 
