@@ -33,9 +33,9 @@ public class ConcaveHullFactoryParameters
 
    public void setDefaultParameters()
    {
-      edgeLengthThreshold = 0.224;
-      removeAllTrianglesWithTwoBorderEdges = false;
-      allowSplittingConcaveHull = false;
+      edgeLengthThreshold = 0.10;
+      removeAllTrianglesWithTwoBorderEdges = true;
+      allowSplittingConcaveHull = true;
       maxNumberOfIterations = 5000;
       triangulationTolerance = 0.0;
    }

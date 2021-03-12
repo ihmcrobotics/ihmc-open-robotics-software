@@ -15,13 +15,11 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class GPUPlanarRegionUpdater
 {
-
    private static final boolean EXPORT_SEGMENTATION_ON_EXCEPTION = true;
 
    private ConcaveHullFactoryParameters concaveHullFactoryParameters;
@@ -44,6 +42,11 @@ public class GPUPlanarRegionUpdater
    public GPUPlanarRegionUpdater()
    {
       concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
+      concaveHullFactoryParameters.setEdgeLengthThreshold(0.224);
+      concaveHullFactoryParameters.setRemoveAllTrianglesWithTwoBorderEdges(false);
+      concaveHullFactoryParameters.setAllowSplittingConcaveHull(false);
+      concaveHullFactoryParameters.setMaxNumberOfIterations(5000);
+      concaveHullFactoryParameters.setTriangulationTolerance(0.0);
       polygonizerParameters = new PolygonizerParameters();
    }
 
