@@ -57,25 +57,39 @@ public class FootstepPlannerBodyCollisionDetector
       collisionDataHolder.clear();
    }
 
-   public List<BodyCollisionData> checkForCollision(DiscreteFootstep footstep, DiscreteFootstep stanceStep, double snapHeight, double previousSnapHeight, int numberOfIntermediateChecks)
+   public boolean checkForCollision(DiscreteFootstep footstep, DiscreteFootstep stanceStep, double snapHeight, double previousSnapHeight, int numberOfIntermediateChecks)
    {
       collisionDetector.setBoxDimensions(bodyBoxDepth.getAsDouble(), bodyBoxWidth.getAsDouble(), bodyBoxHeight.getAsDouble());
-      ArrayList<BodyCollisionData> collisionDataList = new ArrayList<>();
 
-      LatticePoint previousLatticePoint = createLatticePointForCollisionCheck(stanceStep);
+      // Start by checking next step
       LatticePoint latticePoint = createLatticePointForCollisionCheck(footstep);
+      BodyCollisionData collisionData = checkForCollision(footstep, snapHeight);
+      if (collisionData.isCollisionDetected())
+      {
+         return true;
+      }
+      else if (numberOfIntermediateChecks <= 0)
+      {
+         return false;
+      }
+
+      // If requested, interpolate between previous step
+      LatticePoint previousLatticePoint = createLatticePointForCollisionCheck(stanceStep);
 
       for (int i = 0; i < numberOfIntermediateChecks; i++)
       {
-         double alpha = i / ((double) numberOfIntermediateChecks);
+         double alpha = (i + 1) / (numberOfIntermediateChecks + 1.0);
          LatticePoint interpolatedPoint = DiscreteFootstepTools.interpolate(latticePoint, previousLatticePoint, alpha);
          double interpolatedHeight = EuclidCoreTools.interpolate(snapHeight, previousSnapHeight, alpha);
 
-         BodyCollisionData collisionData = checkForCollision(interpolatedPoint, interpolatedHeight);
-         collisionDataList.add(collisionData);
+         collisionData = checkForCollision(interpolatedPoint, interpolatedHeight);
+         if (collisionData.isCollisionDetected())
+         {
+            return true;
+         }
       }
 
-      return collisionDataList;
+      return false;
    }
 
    public BodyCollisionData checkForCollision(DiscreteFootstep footstep, double snappedHeight)
