@@ -49,6 +49,7 @@ public class RosTools
    public static final String MAPSENSE_DEPTH_IMAGE = "/camera/depth/image_rect_raw";
    public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
+   public static final String MAPSENSE_CONFIGURATION = "/map/config";
 
    public static RosMainNode createRosNode(String uri, String name)
    {
