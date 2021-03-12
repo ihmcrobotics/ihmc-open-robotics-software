@@ -1,6 +1,7 @@
 package us.ihmc.gdx.imgui;
 
 import com.badlogic.gdx.graphics.Texture;
+import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
 
 public class ImGuiVideoWindow
@@ -18,6 +19,7 @@ public class ImGuiVideoWindow
 
    public void render()
    {
+      ImGui.setNextWindowSize(texture.getWidth(), texture.getHeight(), ImGuiCond.FirstUseEver);
       ImGui.begin(name);
 
       //      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
