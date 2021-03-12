@@ -189,7 +189,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> StanceStepToVisualize = topic("StanceStepToVisualize");
    public static final Topic<Pair<DiscreteFootstep, FootstepSnapData>> TouchdownStepToVisualize = topic("TouchdownStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
-   public static final Topic<Box3D> LoggedCollisionBox = topic("LoggedCollisionBox");
+   public static final Topic<List<Box3D>> LoggedCollisionBoxes = topic("LoggedCollisionBoxes");
 
    public static final Topic<Boolean> ShowLoggedStartOfSwingStep = topic("ShowLoggedStartOfSwingStep");
    public static final Topic<Boolean> ShowLoggedStanceStep = topic("ShowLoggedStanceStep");

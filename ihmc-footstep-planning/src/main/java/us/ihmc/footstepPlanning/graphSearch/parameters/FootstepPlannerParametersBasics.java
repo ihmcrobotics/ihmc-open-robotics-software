@@ -287,14 +287,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.costPerStep, costPerStep);
    }
 
-   default void setNumberOfBoundingBoxChecks(int numberOfBoundingBoxChecks)
+   default void setIntermediateBodyBoxChecks(int intermediateBodyBoxChecks)
    {
-      set(FootstepPlannerParameterKeys.numberOfBoundingBoxChecks, numberOfBoundingBoxChecks);
-   }
-
-   default void setMaximum2dDistanceFromBoundingBoxToPenalize(double maximum2dDistanceFromBoundingBoxToPenalize)
-   {
-      set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
+      set(FootstepPlannerParameterKeys.intermediateBodyBoxChecks, intermediateBodyBoxChecks);
    }
 
    default void setFinalTurnProximity(double finalTurnProximity)
@@ -357,7 +352,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
       setCheckForBodyBoxCollisions(parametersPacket.getCheckForBodyBoxCollisions());
       setCheckForPathCollisions(parametersPacket.getCheckForPathCollisions());
-      setNumberOfBoundingBoxChecks((int) parametersPacket.getNumberOfBoundingBoxChecks());
+      setIntermediateBodyBoxChecks((int) parametersPacket.getIntermediateBodyBoxChecks());
       if (parametersPacket.getIdealFootstepWidth() != noValue)
          setIdealFootstepWidth(parametersPacket.getIdealFootstepWidth());
       if (parametersPacket.getIdealFootstepLength() != noValue)
@@ -468,8 +463,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setStepDownWeight(parametersPacket.getStepDownWeight());
       if (parametersPacket.getCostPerStep() != noValue)
          setCostPerStep(parametersPacket.getCostPerStep());
-      if (parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize() != noValue)
-         setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
 
       if (parametersPacket.getFootholdAreaWeight() != noValue)
          setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());

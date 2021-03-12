@@ -55,7 +55,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> stanceStepToVisualize;
    private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> touchdownStepToVisualize;
    private final AtomicReference<RigidBodyTransform> idealStep;
-   private final AtomicReference<Box3D> collisionBox;
+   private final AtomicReference<List<Box3D>> collisionBoxes;
 
    public FootstepPlannerLogRenderer(SideDependentList<List<Point2D>> defaultContactPoints, Messager messager)
    {
@@ -79,7 +79,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       stanceStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.StanceStepToVisualize);
       touchdownStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.TouchdownStepToVisualize);
       idealStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedIdealStep);
-      collisionBox = messager.createInput(FootstepPlannerMessagerAPI.LoggedCollisionBox);
+      collisionBoxes = messager.createInput(FootstepPlannerMessagerAPI.LoggedCollisionBoxes);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, startOfSwingStepGraphic.getMeshView()::setVisible);
@@ -198,22 +198,27 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       }
 
       // Render collision box
-      Box3D collisionBox = this.collisionBox.getAndSet(null);
-      if (collisionBox != null)
+      List<Box3D> collisionBoxes = this.collisionBoxes.getAndSet(null);
+      if (collisionBoxes != null)
       {
-         if (collisionBox.containsNaN())
+         if (collisionBoxes.isEmpty())
          {
             loggedBodyBoxGraphic.remove();
          }
          else
          {
             meshBuilder.clear();
-            meshBuilder.addMesh(MeshDataGenerator.Cube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true),
-                                collisionBox.getPosition(),
-                                collisionBox.getOrientation(),
-                                bodyBoxColor);
-            loggedBodyBoxGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
-            loggedBodyBoxGraphic.update();
+
+            for (int i = 0; i < collisionBoxes.size(); i++)
+            {
+               Box3D collisionBox = collisionBoxes.get(i);
+               meshBuilder.addMesh(MeshDataGenerator.Cube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true),
+                                   collisionBox.getPosition(),
+                                   collisionBox.getOrientation(),
+                                   bodyBoxColor);
+               loggedBodyBoxGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+               loggedBodyBoxGraphic.update();
+            }
          }
       }
    }
