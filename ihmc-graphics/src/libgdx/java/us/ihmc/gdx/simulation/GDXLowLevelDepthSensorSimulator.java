@@ -15,6 +15,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiVideoWindow;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
@@ -31,8 +32,8 @@ import java.util.Random;
  */
 public class GDXLowLevelDepthSensorSimulator
 {
-   private final String depthWindowName = "Depth";
-   private final String colorWindowName = "Color";
+   private final String depthWindowName = ImGuiTools.uniqueLabel(this, "Depth");
+   private final String colorWindowName = ImGuiTools.uniqueLabel(this, "Color");
 
    private final Random random = new Random();
 
@@ -56,6 +57,8 @@ public class GDXLowLevelDepthSensorSimulator
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
+   private ImGuiVideoWindow depthWindow;
+   private ImGuiVideoWindow colorWindow;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
@@ -99,6 +102,9 @@ public class GDXLowLevelDepthSensorSimulator
 
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
+
+      depthWindow = new ImGuiVideoWindow(depthWindowName, depthWindowTexture, false);
+      colorWindow = new ImGuiVideoWindow(colorWindowName, frameBuffer.getColorTexture(), true);
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
       colors = new ArrayList<>(imageWidth * imageHeight);
@@ -204,53 +210,13 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void renderImGuiDepthWindow()
    {
-      renderImGuiWindow(depthWindowName, depthWindowTexture.getTextureObjectHandle(), false);
+      depthWindow.render();
       depthWindowEnabledOptimization = true;
    }
 
    public void renderImGuiColorWindow()
    {
-      renderImGuiWindow(colorWindowName, frameBuffer.getColorTexture().getTextureObjectHandle(), true);
-   }
-
-   private void renderImGuiWindow(String name, int textureId, boolean flipY)
-   {
-      ImGui.begin(name);
-
-//      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
-//      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
-//      float sizeX = ImGui.getWindowContentRegionMaxX();
-//      float sizeY = ImGui.getWindowContentRegionMaxY();
-      float tableHeader = 22.0f;
-      float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY() + tableHeader;
-      float sizeX = ImGui.getWindowSizeX();
-      float sizeY = ImGui.getWindowSizeY() - tableHeader;
-
-      float windowAspect = sizeX / sizeY;
-      float cameraAspect = (float) imageWidth / (float) imageHeight;
-      float drawSizeX = sizeX;
-      float drawSizeY = sizeY;
-      float centeringX = 0.0f;
-      float centeringY = 0.0f;
-      if (windowAspect > cameraAspect)
-      {
-         drawSizeX = drawSizeY * cameraAspect;
-         centeringX = (sizeX - drawSizeX) / 2.0f;
-      }
-      else
-      {
-         drawSizeY = drawSizeX / cameraAspect;
-         centeringY = (sizeY - drawSizeY) / 2.0f;
-      }
-      float startX = posX + centeringX;
-      float startY = flipY ? posY + centeringY + drawSizeY : posY + centeringY;
-      float endX = posX + centeringX + drawSizeX;
-      float endY = flipY ? posY + centeringY : posY + centeringY + drawSizeY;
-
-      ImGui.getWindowDrawList().addImage(textureId, startX, startY, endX, endY);
-
-      ImGui.end();
+      colorWindow.render();
    }
 
    public void dispose()
