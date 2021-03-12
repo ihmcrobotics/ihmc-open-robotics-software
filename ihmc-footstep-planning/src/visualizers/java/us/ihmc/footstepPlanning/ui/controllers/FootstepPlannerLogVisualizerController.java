@@ -734,7 +734,7 @@ public class FootstepPlannerLogVisualizerController
             snapAndWiggledEndStepTransform.set(snapData.getSnappedStepTransform(graphNode.getSecondStep()));
          }
 
-         if (footstepPlannerLog.getFootstepParametersPacket().getCheckForBodyBoxCollisions())
+         if (footstepPlannerLog != null && footstepPlannerLog.getFootstepParametersPacket().getCheckForBodyBoxCollisions())
          {
             double boxSizeX = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxDepth();
             double boxSizeY = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxWidth();
