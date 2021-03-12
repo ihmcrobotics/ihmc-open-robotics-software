@@ -3,6 +3,8 @@ package us.ihmc.robotEnvironmentAwareness.updaters;
 import geometry_msgs.Point;
 import map_sense.RawGPUPlanarRegion;
 import map_sense.RawGPUPlanarRegionList;
+import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
@@ -13,6 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.io.File;
 import java.util.List;
@@ -47,7 +50,18 @@ public class GPUPlanarRegionUpdater
       concaveHullFactoryParameters.setAllowSplittingConcaveHull(false);
       concaveHullFactoryParameters.setMaxNumberOfIterations(5000);
       concaveHullFactoryParameters.setTriangulationTolerance(0.0);
+
       polygonizerParameters = new PolygonizerParameters();
+   }
+
+   public void attachROS2Tuner(ROS2NodeInterface ros2Node)
+   {
+      new IHMCROS2Callback<>(ros2Node,
+                             ROS2Tools.CONCAVE_HULL_FACTORY_PARAMETERS,
+                             parameters -> concaveHullFactoryParameters.setFromString(parameters.getParameters().toString()));
+      new IHMCROS2Callback<>(ros2Node,
+                             ROS2Tools.POLYGONIZER_PARAMETERS,
+                             parameters -> polygonizerParameters.setFromString(parameters.getParameters().toString()));
    }
 
    public void logRawGPURegions(RawGPUPlanarRegionList rawGPUPlanarRegionList)

@@ -21,7 +21,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
@@ -214,6 +213,7 @@ public class BehaviorHelper
       ResettableExceptionHandlingExecutorService executorService
             = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
       GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
+      gpuPlanarRegionUpdater.attachROS2Tuner(managedROS2Node);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
       subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
@@ -354,7 +354,7 @@ public class BehaviorHelper
    public <T extends K, K> TypedNotification<K> subscribeViaNotification(Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();
-      subscribeViaCallback(topic, message -> typedNotification.set(message));
+      subscribeViaCallback(topic, typedNotification::set);
       return typedNotification;
    }
 
