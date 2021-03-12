@@ -4,8 +4,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.Random;
 
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.ContinuousIntegrationTools;
@@ -37,7 +40,7 @@ public class PredefinedContactExternalForceSolverTest
 {
    private static double controlDT = 1e-4;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean visualize = false;
+   private static final boolean keepSCSUp = true;
 
    private YoRegistry registry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -50,9 +53,9 @@ public class PredefinedContactExternalForceSolverTest
    private Vector3D minForce, maxForce;
 
    private final Random random = new Random(34298023);
-   private final double estimationTime = 4.0;
    private double epsilon;
    private final int iterations = 5;
+   private final double simTimePerIteration = 6.0;
 
    private ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
@@ -65,7 +68,7 @@ public class PredefinedContactExternalForceSolverTest
       externalForcePoint = new ExternalForcePoint("efp", registry);
    }
 
-   public void setupEstimator()
+   private void setupGeneralDynamixMatrixUpdater()
    {
       double gravity = 9.81;
       RigidBodyBasics rootBody = joints[0].getPredecessor();
@@ -80,7 +83,28 @@ public class PredefinedContactExternalForceSolverTest
          cqg.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
+   }
 
+   private void setupDoublePendulumDynamicMatrixUpdater(DoublePendulumRobot doublePendulumRobot)
+   {
+      this.dynamicMatrixUpdater = (m, cqg, tau) ->
+      {
+         doublePendulumRobot.updateManipulatorMatrices();
+         m.set(doublePendulumRobot.getH());
+
+         DMatrixRMaj C = doublePendulumRobot.getC();
+         DMatrixRMaj Qd = doublePendulumRobot.getQd();
+         DMatrixRMaj G = doublePendulumRobot.getG();
+         CommonOps_DDRM.mult(C, Qd, cqg);
+         CommonOps_DDRM.addEquals(cqg, G);
+
+         tau.set(0, 0, doublePendulumRobot.getJoint1().getTau());
+         tau.set(1, 0, doublePendulumRobot.getJoint2().getTau());
+      };
+   }
+
+   private void setupSimulation()
+   {
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
@@ -120,32 +144,65 @@ public class PredefinedContactExternalForceSolverTest
    }
 
    @Test
-   public void testDoublePendulumRobot()
+   public void testDoublePendulumRobotHoldingPosition()
    {
-      robot = setupDoublePendulum();
-      setupEstimator();
-      runTest();
+      DoublePendulumRobot doublePendulumRobot = setupDoublePendulum(true);
+      robot = doublePendulumRobot;
+      setupDoublePendulumDynamicMatrixUpdater(doublePendulumRobot);
+      setupSimulation();
+      simulateAndAddRandomExternalForces(iterations, simTimePerIteration, true);
       cleanup();
    }
 
    @Test
-   public void testMultiPendulumRobot()
+   public void testMultiPendulumRobotHoldingPosition()
    {
       robot = setupMultiPendulum(5);
-      setupEstimator();
-      runTest();
+      setupGeneralDynamixMatrixUpdater();
+      setupSimulation();
+      simulateAndAddRandomExternalForces(iterations, simTimePerIteration, true);
       cleanup();
    }
 
-   private Robot setupDoublePendulum()
+   @Test
+   public void testDoublePendulumRandomMotionNoExternalForce()
+   {
+      DoublePendulumRobot doublePendulumRobot = setupDoublePendulum(false);
+      robot = doublePendulumRobot;
+      setupDoublePendulumDynamicMatrixUpdater(doublePendulumRobot);
+      setupSimulation();
+      simulateWithoutExternalForce();
+      cleanup();
+   }
+
+   public void testDoublePendulumRandomMotionWithExternalForce()
+   {
+      DoublePendulumRobot doublePendulumRobot = setupDoublePendulum(false);
+      robot = doublePendulumRobot;
+      setupDoublePendulumDynamicMatrixUpdater(doublePendulumRobot);
+      setupSimulation();
+      simulateAndAddRandomExternalForces(2, 15.0, false);
+      cleanup();
+   }
+
+   private DoublePendulumRobot setupDoublePendulum(boolean staticSetpointController)
    {
       externalForcePointOffset.set(0.0, 0.1, -0.5);
 
       DoublePendulumRobot robot = new DoublePendulumRobot("doublePendulum", controlDT);
-      DoublePendulumController controller = new DoublePendulumController(robot);
-      robot.setController(controller);
 
-      controller.setSetpoints(0.3, 0.7);
+      if (staticSetpointController)
+      {
+         DoublePendulumPIDController controller = new DoublePendulumPIDController(robot);
+         robot.setController(controller);
+         controller.setSetpoints(0.3, 0.7);
+      }
+      else
+      {
+         DoublePendulumSinusoidalController controller = new DoublePendulumSinusoidalController(robot);
+         robot.setController(controller);
+      }
+
       robot.setInitialState(-0.2, 0.1, 0.6, -0.3);
       robot.getScsJoint2().addExternalForcePoint(externalForcePoint);
 
@@ -182,7 +239,7 @@ public class PredefinedContactExternalForceSolverTest
       return robot;
    }
 
-   public void runTest()
+   public void simulateAndAddRandomExternalForces(int iterations, double simTimePerIteration, boolean validateEstimator)
    {
       try
       {
@@ -191,19 +248,46 @@ public class PredefinedContactExternalForceSolverTest
             // Check zero force on first iteration and non-zero for rest
             externalForcePoint.setForce(i == 0 ? new Vector3D(0.0, 0.0, 0.0) : EuclidCoreRandomTools.nextVector3D(random, minForce, maxForce));
 
-            blockingSimulationRunner.simulateAndBlock(1.5);
-            blockingSimulationRunner.simulateAndBlock(estimationTime);
+            blockingSimulationRunner.simulateAndBlock(simTimePerIteration);
             YoFrameVector3D estimatedExternalForce = externalForceSolver.getEstimatedExternalWrenches()[0].getLinearPart();
             YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
             boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
 
-            if(!estimationSucceeded)
-               cleanup();
+            if (validateEstimator)
+            {
+               if(!estimationSucceeded)
+                  cleanup();
 
-            Assertions.assertTrue(estimationSucceeded,
-                                  "External force estimator failed to estimate force. Estimated value: " + estimatedExternalForce + ", Actual value: "
-                                  + simulatedExternalForce);
+               Assertions.assertTrue(estimationSucceeded,
+                                     "External force estimator failed to estimate force. Estimated value: " + estimatedExternalForce + ", Actual value: "
+                                     + simulatedExternalForce);
+            }
          }
+      }
+      catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
+      {
+         cleanup();
+         fail(e.getMessage());
+      }
+   }
+
+   public void simulateWithoutExternalForce()
+   {
+      try
+      {
+         externalForcePoint.getYoForce().setToZero();
+
+         blockingSimulationRunner.simulateAndBlock(30.0);
+         YoFrameVector3D estimatedExternalForce = externalForceSolver.getEstimatedExternalWrenches()[0].getLinearPart();
+         YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
+         boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
+
+         if (!estimationSucceeded)
+            cleanup();
+
+         Assertions.assertTrue(estimationSucceeded,
+                               "External force estimator failed to estimate force. Estimated value: " + estimatedExternalForce + ", Actual value: "
+                               + simulatedExternalForce);
       }
       catch (SimulationExceededMaximumTimeException | ControllerFailureException e)
       {
@@ -214,7 +298,7 @@ public class PredefinedContactExternalForceSolverTest
 
    public void cleanup()
    {
-      if(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      if(keepSCSUp && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
       {
          ThreadTools.sleepForever();
       }
@@ -231,5 +315,13 @@ public class PredefinedContactExternalForceSolverTest
       externalForceSolver = null;
       minForce = null;
       maxForce = null;
+   }
+
+   public static void main(String[] args)
+   {
+      PredefinedContactExternalForceSolverTest predefinedContactExternalForceSolverTest = new PredefinedContactExternalForceSolverTest();
+      predefinedContactExternalForceSolverTest.setup();
+      predefinedContactExternalForceSolverTest.testDoublePendulumRandomMotionWithExternalForce();
+      predefinedContactExternalForceSolverTest.cleanup();
    }
 }

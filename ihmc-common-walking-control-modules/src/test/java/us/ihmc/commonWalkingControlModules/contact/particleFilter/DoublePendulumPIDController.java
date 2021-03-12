@@ -6,7 +6,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class DoublePendulumController implements RobotController
+/* package-private */ class DoublePendulumPIDController implements RobotController
 {
    private static final double maxTau = 1000;
 
@@ -20,7 +20,7 @@ public class DoublePendulumController implements RobotController
    private final YoDouble joint1Setpoint = new YoDouble("joint1Setpoint", registry);
    private final YoDouble joint2Setpoint = new YoDouble("joint2Setpoint", registry);
 
-   public DoublePendulumController(DoublePendulumRobot robot)
+   public DoublePendulumPIDController(DoublePendulumRobot robot)
    {
       this.robot = robot;
       jointStiffness.set(350.0);
