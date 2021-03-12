@@ -214,10 +214,6 @@ public class FootstepPlannerParametersTest
       parameters.setPitchWeight(pitchWeight);
       assertEquals(pitchWeight, parameters.getPitchWeight(), epsilon);
 
-      double maximumDistanceFromBoundingBox = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximum2dDistanceFromBoundingBoxToPenalize(maximumDistanceFromBoundingBox);
-      assertEquals(maximumDistanceFromBoundingBox, parameters.getMaximum2dDistanceFromBoundingBoxToPenalize(), epsilon);
-
       double footholdAreaWeight = RandomNumbers.nextDouble(random, 10.00);
       parameters.setFootholdAreaWeight(footholdAreaWeight);
       assertEquals(footholdAreaWeight, parameters.getFootholdAreaWeight(), epsilon);

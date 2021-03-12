@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -39,14 +38,12 @@ public class BoundingBoxCollisionDetectorTest
 
       BodyCollisionData collisionData = collisionChecker.checkForCollision();
       assertFalse(collisionData.isCollisionDetected());
-      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       planarRegionsList = getSquarePlanarRegionsList(0.5, 1.0 + distanceFromBox, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
       assertFalse(collisionData.isCollisionDetected());
-      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       // test slightly outside along x
       planarRegionsList = getSquarePlanarRegionsList(1.0 + distanceFromBox, 0.5, 0.5, 0.0, 0.5);
@@ -54,14 +51,12 @@ public class BoundingBoxCollisionDetectorTest
 
       collisionData = collisionChecker.checkForCollision();
       assertFalse(collisionData.isCollisionDetected());
-      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       planarRegionsList = getSquarePlanarRegionsList(-0.5 - distanceFromBox, 0.5, 0.5, 0.0, 0.5);
       collisionChecker.setPlanarRegionsList(planarRegionsList);
 
       collisionData = collisionChecker.checkForCollision();
       assertFalse(collisionData.isCollisionDetected());
-      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromBox, 1e-8);
 
       // test slightly inside along y
       planarRegionsList = getSquarePlanarRegionsList(0.0, distanceFromBox, 0.5, 0.0, 0.5);
@@ -112,7 +107,6 @@ public class BoundingBoxCollisionDetectorTest
       collisionChecker.setBoxPose(0.25, 0.25, 0.0, Math.toRadians(0.0));
       BodyCollisionData collisionData = collisionChecker.checkForCollision();
       assertFalse(collisionData.isCollisionDetected());
-      assertEquals(collisionData.getDistanceFromBoundingBox(), distanceFromRegionAtZeroYaw, 1e-8);
 
       // assert no collision at small positive rotation
       collisionChecker.setBoxPose(0.25, 0.25, 0.0, Math.toRadians(15.0));
@@ -204,51 +198,7 @@ public class BoundingBoxCollisionDetectorTest
       collisionChecker.setBoxPose(-0.75 + 0.01, -0.45, 0.0, Math.toRadians(90.0));
       assertTrue(collisionChecker.checkForCollision().isCollisionDetected());
    }
-
-   @Test
-   public void testClosestPointsInFrontAndBack()
-   {
-      FootstepPlannerParametersReadOnly plannerParameters = new DefaultFootstepPlannerParameters();
-      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxDepth(0.5);
-      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxWidth(1.0);
-      ((DefaultFootstepPlannerParameters) plannerParameters).setBodyBoxHeight(1.0);
-
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-
-      double cubeX = 0.25;
-      double cubeY = -0.5;
-      double cubeZ = 0.25;
-      generator.translate(cubeX, cubeY, cubeZ);
-      generator.rotate(0.25 * Math.PI, Axis3D.Z);
-
-      double epsilon = 1e-7;
-      double distanceOutsideRegion = 0.001;
-
-      double squareWidth = 0.25 * Math.sqrt(2.0);
-      generator.addRectangle(squareWidth, squareWidth);
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
-
-      double boxDepth = plannerParameters.getBodyBoxDepth();
-      double boxWidth = plannerParameters.getBodyBoxWidth();
-      double boxHeight = plannerParameters.getBodyBoxHeight();
-      BoundingBoxCollisionDetector collisionChecker = new BoundingBoxCollisionDetector();
-      collisionChecker.setBoxDimensions(boxDepth, boxWidth, boxHeight);
-
-      collisionChecker.setPlanarRegionsList(planarRegionsList);
-
-      // test just outside along world y
-      collisionChecker.setBoxPose(0.25, distanceOutsideRegion, 0.0, Math.toRadians(90.0));
-      BodyCollisionData collisionData = collisionChecker.checkForCollision();
-      Assertions.assertEquals(collisionData.getDistanceOfClosestPointInBack(), distanceOutsideRegion, epsilon);
-      Assertions.assertTrue(Double.isNaN(collisionData.getDistanceOfClosestPointInFront()));
-
-      // test just ouside along world x
-      collisionChecker.setBoxPose(-0.25 - distanceOutsideRegion, -0.25, 0.0, 0.0);
-      collisionData = collisionChecker.checkForCollision();
-      Assertions.assertEquals(collisionData.getDistanceOfClosestPointInFront(), distanceOutsideRegion, epsilon);
-      Assertions.assertTrue(Double.isNaN(collisionData.getDistanceOfClosestPointInBack()));
-   }
-
+   
    private static PlanarRegionsList getSquarePlanarRegionsList(double x, double y, double z, double yaw, double sideLength)
    {
       ConvexPolygon2D unitSquare = new ConvexPolygon2D();
