@@ -3,7 +3,6 @@ package us.ihmc.avatar.sensors.realsense;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -19,7 +18,7 @@ public class RealsenseROS1Bridge
    private final RealsenseVideoROS1Bridge l515VideoBridge;
    private final RealsensePointCloudROS1Bridge d435PointCloudBridge;
    private final RealsensePointCloudROS1Bridge l515PointCloudBridge;
-   private final MapsensePlanarRegionROS1Bridge l515PlanarRegionBridge;
+   private final MapSensePlanarRegionROS1Bridge l515PlanarRegionBridge;
 
    public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransformReadOnly d435PelvisToSensorTransform, RigidBodyTransformReadOnly l515PelvisToSensorTransform)
    {
@@ -43,12 +42,9 @@ public class RealsenseROS1Bridge
                                                                l515PelvisToSensorTransform,
                                                                RosTools.L515_POINT_CLOUD,
                                                                ROS2Tools.L515_POINT_CLOUD);
-      l515PlanarRegionBridge = new MapsensePlanarRegionROS1Bridge(robotModel,
+      l515PlanarRegionBridge = new MapSensePlanarRegionROS1Bridge(robotModel,
                                                                   ros1Node,
-                                                                  ros2Node,
-                                                                  RosTools.MAPSENSE_REGIONS,
-                                                                  ROS2Tools.MAPSENSE_REGIONS,
-                                                                  l515PelvisToSensorTransform);
+                                                                  ros2Node);
 
       ros1Node.execute();
    }
