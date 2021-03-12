@@ -39,6 +39,7 @@ public class GDXImGuiBasedUI
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
    private final Stopwatch runTime = new Stopwatch().start();
+   private String statusText = "";
 
    private final ImGui3DViewInput inputCalculator = new ImGui3DViewInput();
    private final ArrayList<Consumer<ImGui3DViewInput>> imGuiInputProcessors = new ArrayList<>();
@@ -140,6 +141,7 @@ public class GDXImGuiBasedUI
          }
          ImGui.endMenu();
       }
+      ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
       ImGui.endMainMenuBar();
 
@@ -237,6 +239,11 @@ public class GDXImGuiBasedUI
    public void addImGui3DViewInputProcessor(Consumer<ImGui3DViewInput> processImGuiInput)
    {
       imGuiInputProcessors.add(processImGuiInput);
+   }
+
+   public void setStatus(String statusText)
+   {
+      this.statusText = statusText;
    }
 
    public GDX3DSceneManager getSceneManager()
