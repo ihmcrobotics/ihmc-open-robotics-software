@@ -360,16 +360,14 @@ public class MPCTestHelper
       if (contactPlanes == null)
          return getCoMPositionJacobian(time, omega, 0, null);
 
-      int rhoSize = 0;
       List<FrameVector3DReadOnly> basisVectors = new ArrayList<>();
       for (MPCContactPlane contactPlane : contactPlanes)
       {
-         rhoSize += contactPlane.getRhoSize();
          for (int i = 0; i < contactPlane.getRhoSize(); i++)
             basisVectors.add(contactPlane.getBasisVector(i));
       }
 
-      return getCoMPositionJacobian(time, omega, rhoSize, basisVectors::get);
+      return getCoMPositionJacobian(time, omega, basisVectors.size(), basisVectors::get);
    }
 
    public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
@@ -396,21 +394,13 @@ public class MPCTestHelper
          int startIdx = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoIdx;
 
          FrameVector3DReadOnly basisVector = basisVectors.apply(rhoIdx);
-         jacobian.set(0, startIdx, basisVector.getX() * (c2));
-         jacobian.set(1, startIdx, basisVector.getY() * (c2));
-         jacobian.set(2, startIdx, basisVector.getZ() * (c2));
-
-         jacobian.set(0, startIdx + 1, basisVector.getX() * (c3));
-         jacobian.set(1, startIdx + 1, basisVector.getY() * (c3));
-         jacobian.set(2, startIdx + 1, basisVector.getZ() * (c3));
-
-         jacobian.set(0, startIdx + 2, basisVector.getX() * (c4));
-         jacobian.set(1, startIdx + 2, basisVector.getY() * (c4));
-         jacobian.set(2, startIdx + 2, basisVector.getZ() * (c4));
-
-         jacobian.set(0, startIdx + 3, basisVector.getX() * (c5));
-         jacobian.set(1, startIdx + 3, basisVector.getY() * (c5));
-         jacobian.set(2, startIdx + 3, basisVector.getZ() * (c5));
+         for (int ordinal = 0; ordinal < 3; ordinal++)
+         {
+            jacobian.set(ordinal, startIdx, basisVector.getElement(ordinal) * (c2));
+            jacobian.set(ordinal, startIdx + 1, basisVector.getElement(ordinal) * (c3));
+            jacobian.set(ordinal, startIdx + 2, basisVector.getElement(ordinal) * (c4));
+            jacobian.set(ordinal, startIdx + 3, basisVector.getElement(ordinal) * (c5));
+         }
       }
 
       return jacobian;

@@ -280,15 +280,15 @@ public class AngularVelocityOrientationInputCalculator
       for (int i = 0; i < command.getNumberOfContacts(); i++)
          totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
 
-
       CommonOps_DDRM.scale(mass / totalContactPoints, desiredContactForce);
 
       torqueAboutPoint.zero();
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      for (int contactPlaneIdx = 0; contactPlaneIdx < command.getNumberOfContacts(); contactPlaneIdx++)
       {
-         for (int contact = 0; contact < command.getContactPlaneHelper(i).getNumberOfContactPoints(); contact++)
+         MPCContactPlane contactPlane = command.getContactPlaneHelper(contactPlaneIdx);
+         for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
-            FramePoint3DReadOnly contactOrigin = command.getContactPlaneHelper(i).getContactPointHelper(contact).getBasisVectorOrigin();
+            FramePoint3DReadOnly contactOrigin = contactPlane.getContactPointHelper(contactPointIdx).getBasisVectorOrigin();
             contactOrigin.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
             tempVector.scaleAdd(-2.0, command.getDesiredCoMPosition(), contactOrigin);
             crossAdd(desiredContactForce, tempVector, torqueAboutPoint);
