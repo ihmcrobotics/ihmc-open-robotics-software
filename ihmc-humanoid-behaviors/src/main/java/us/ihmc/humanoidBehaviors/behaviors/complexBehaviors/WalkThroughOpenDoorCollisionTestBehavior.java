@@ -83,10 +83,16 @@ public class WalkThroughOpenDoorCollisionTestBehavior extends StateMachineBehavi
       DONE
    }
 
+//   //this is the predefined walk to points relative to the door reference frame, these should eventualy be replaced by a behavior that finds the best location to walk up to given an arm task space 
+//   private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.45f, -1.9f, 0f);
+//   private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.45f, -1.6f, 0f);
+//   private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(0.45f, 1.2f, 0f);
+
+   
    //this is the predefined walk to points relative to the door reference frame, these should eventualy be replaced by a behavior that finds the best location to walk up to given an arm task space 
-   private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.45f, -1.9f, 0f);
-   private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.45f, -1.6f, 0f);
-   private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(0.45f, 1.2f, 0f);
+   private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.1f, -1.9f, 0f);
+   private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.1f, -1.6f, 0f);
+   private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(0.1f, 1.2f, 0f);
 
 
    //define some of the sub-behaviors that will be used that are specific to this behavior
@@ -339,7 +345,7 @@ public class WalkThroughOpenDoorCollisionTestBehavior extends StateMachineBehavi
 
             Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading(point1,true);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
-           atlasPrimitiveActions.walkToLocationPlannedBehavior.setCheckForBodyPathCollisions(false);
+           atlasPrimitiveActions.walkToLocationPlannedBehavior.setCheckForBodyPathCollisions(true);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setAssumeFlatGround(false);
 

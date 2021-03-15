@@ -94,6 +94,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          boolean assumeFlatGround,
                          double desiredHeading, boolean squareUpEndSteps, boolean checkForBodyPathCollisions)
    {
+	   this.checkForBodyPathCollisions= checkForBodyPathCollisions; 
       this.squareUpEndSteps = squareUpEndSteps;
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
@@ -200,6 +201,15 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             FootstepPlannerParametersPacket plannerParametersPacket = new FootstepPlannerParametersPacket();
 
             FootstepPlannerMessageTools.copyParametersToPacket(plannerParametersPacket, footstepPlannerParameters);
+            //************************
+            
+            plannerParametersPacket.setBodyBoxBaseY(0.1);
+            plannerParametersPacket.setBodyBoxDepth(.3);
+            plannerParametersPacket.setBodyBoxWidth(.76);
+            plannerParametersPacket.setMaximumStepReach(0.65);
+            plannerParametersPacket.setMinimumStepWidth(.1);
+            plannerParametersPacket.setMaximumSwingReach(.82);
+            //************************
             plannerParametersPacket.setCheckForBodyBoxCollisions(checkForBodyPathCollisions);
             plannerParametersPacket.setMaximumStepYaw(0.8);
             footstepPlannerParametersPublisher.publish(plannerParametersPacket);
