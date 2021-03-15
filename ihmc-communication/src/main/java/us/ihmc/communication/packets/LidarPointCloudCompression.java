@@ -6,7 +6,9 @@ import net.jpountz.lz4.LZ4Exception;
 import us.ihmc.tools.compression.LZ4CompressionImplementation;
 
 import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 
 /**
  * This class should be used to create and unpack a {@link LidarScanMessage}.
@@ -14,6 +16,8 @@ import java.nio.FloatBuffer;
 public class LidarPointCloudCompression
 {
    private static final ThreadLocal<LZ4CompressionImplementation> compressorThreadLocal = ThreadLocal.withInitial(LZ4CompressionImplementation::new);
+   public static final double POINT_RESOLUTION = 0.003;
+   private static final boolean debug = true;
 
    public static void compressPointCloud(int pointCloudSize, LidarScanMessage messageToPack, LidarPointCoordinateFunction coordinateFunction)
    {
@@ -21,13 +25,15 @@ public class LidarPointCloudCompression
       int pointCloudSizeInBytes = 4 * 3 * pointCloudSize;
 
       ByteBuffer byteBuffer = ByteBuffer.allocate(pointCloudSizeInBytes);
-      FloatBuffer pointCloudBuffer = byteBuffer.asFloatBuffer();
+      IntBuffer pointCloudBuffer = byteBuffer.asIntBuffer();
 
       for (int i = 0; i < pointCloudSize; i++)
       {
          for (int j = 0; j < 3; j++)
          {
-            pointCloudBuffer.put(coordinateFunction.getCoordinate(i, j));
+            double coordinate = coordinateFunction.getCoordinate(i, j);
+            int discritizedCoordinate = (int) (Math.round(coordinate / POINT_RESOLUTION));
+            pointCloudBuffer.put(3 * i + j, discritizedCoordinate);
          }
       }
 
@@ -43,6 +49,12 @@ public class LidarPointCloudCompression
          // TODO See why the compression would fail and how to fix it.
          e.printStackTrace();
          return;
+      }
+
+      if (debug)
+      {
+         double compressionRatio = compressedPointCloudSize / ((double) pointCloudSizeInBytes);
+         System.out.println(compressionRatio);
       }
 
       compressedPointCloudBuffer.flip();
@@ -63,13 +75,13 @@ public class LidarPointCloudCompression
       ByteBuffer decompressedPointCloudByteBuffer = ByteBuffer.allocate(numberOfDecompressedBytes);
       compressorThreadLocal.get().decompress(compressedPointCloudByteBuffer, decompressedPointCloudByteBuffer, numberOfDecompressedBytes);
       decompressedPointCloudByteBuffer.flip();
-      FloatBuffer decompressedPointCloudFloatBuffer = decompressedPointCloudByteBuffer.asFloatBuffer();
+      IntBuffer decompressedPointCloudIntBuffer = decompressedPointCloudByteBuffer.asIntBuffer();
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         double x = decompressedPointCloudFloatBuffer.get();
-         double y = decompressedPointCloudFloatBuffer.get();
-         double z = decompressedPointCloudFloatBuffer.get();
+         double x = POINT_RESOLUTION * decompressedPointCloudIntBuffer.get();
+         double y = POINT_RESOLUTION * decompressedPointCloudIntBuffer.get();
+         double z = POINT_RESOLUTION * decompressedPointCloudIntBuffer.get();
          pointCoordinateConsumer.accept(i, x, y, z);
       }
    }
@@ -81,7 +93,7 @@ public class LidarPointCloudCompression
        * @param coordinateIndex x=0, y=1, z=2
        * @return
        */
-      float getCoordinate(int pointIndex, int coordinateIndex);
+      double getCoordinate(int pointIndex, int coordinateIndex);
    }
 
    public interface LidarPointConsumer

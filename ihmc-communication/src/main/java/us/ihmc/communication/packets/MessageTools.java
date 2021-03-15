@@ -1043,7 +1043,7 @@ public class MessageTools
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
       lidarScanMessage.getScan().reset();
-      LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> (float) scan[i].getElement(j));
+      LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> scan[i].getElement(j));
    }
 
    public static Point3D[] unpackScanPoint3ds(LidarScanMessage lidarScanMessage)
