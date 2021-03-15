@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.tools.thread.ExecutorServiceTools.ExceptionHandling;
 
@@ -77,12 +77,12 @@ public class StereoVisionPointCloudDataExporter
 
       if(message == null)
          return;
-      Point3D[] pointCloud = PointCloudCompression.decompressPointCloudToArray(message);
+      Point3D[] pointCloud = StereoPointCloudCompression.decompressPointCloudToArray(message);
 
       Path path = Paths.get(dataDirectoryPath.get());
 
       saveSensorPose(path, message.timestamp_, message.getSensorPosition(), message.getSensorOrientation());
-      savePointCloud(path, message.timestamp_, pointCloud, PointCloudCompression.decompressColorsToIntArray(message));
+      savePointCloud(path, message.timestamp_, pointCloud, StereoPointCloudCompression.decompressColorsToIntArray(message));
    }
 
    public void shutdown()
