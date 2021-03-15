@@ -17,7 +17,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -271,7 +271,7 @@ public class REAOcTreeBuffer
    private static Scan toScan(StereoVisionPointCloudMessage stereoMessage)
    {
       PointCloud pointCloud = new PointCloud();
-      PointCloudCompression.decompressPointCloud(stereoMessage, pointCloud::add);
+      StereoPointCloudCompression.decompressPointCloud(stereoMessage, pointCloud::add);
       return new Scan(stereoMessage.getSensorPosition(), pointCloud);
    }
 

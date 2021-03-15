@@ -22,7 +22,7 @@ public class PointCloudMessageTools
       }
 
       // TODO: make parameters to method
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null);
+      StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
       return message;

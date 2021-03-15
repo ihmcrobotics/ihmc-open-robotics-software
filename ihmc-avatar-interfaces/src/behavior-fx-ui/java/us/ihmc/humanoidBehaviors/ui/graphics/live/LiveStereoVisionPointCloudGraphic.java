@@ -11,7 +11,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javafx.PrivateAnimationTimer;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -49,8 +49,8 @@ public class LiveStereoVisionPointCloudGraphic extends Group
    {
       threadQueue.clearQueueAndExecute(() ->
       {
-         Point3D32[] points = PointCloudCompression.decompressPointCloudToArray32(message);
-         int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
+         Point3D32[] points = StereoPointCloudCompression.decompressPointCloudToArray32(message);
+         int[] colors = StereoPointCloudCompression.decompressColorsToIntArray(message);
          buildMesh(points, colors);
       });
    }

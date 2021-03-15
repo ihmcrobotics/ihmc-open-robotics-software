@@ -9,9 +9,8 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
 
 public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVisionPointCloudMessage>
@@ -45,8 +44,8 @@ public class StereoVisionPointCloudViewer extends AbstractSourceViewer<StereoVis
    @Override
    public void unpackPointCloud(StereoVisionPointCloudMessage message)
    {
-      Point3D32[] pointcloud = PointCloudCompression.decompressPointCloudToArray32(message);
-      int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
+      Point3D32[] pointcloud = StereoPointCloudCompression.decompressPointCloudToArray32(message);
+      int[] colors = StereoPointCloudCompression.decompressColorsToIntArray(message);
 
       meshBuilder.clear();
       int numberOfScanPoints = pointcloud.length;

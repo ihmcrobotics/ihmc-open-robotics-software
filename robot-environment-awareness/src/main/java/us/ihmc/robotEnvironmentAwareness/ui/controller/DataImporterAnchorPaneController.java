@@ -18,7 +18,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.LidarImageFusionDataLoader;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataImporter;
 
@@ -121,7 +121,7 @@ public class DataImporterAnchorPaneController
       }
 
       double minimumResolution = 0.001;
-      StereoVisionPointCloudMessage dummyMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorsInteger, numberOfPoints, minimumResolution, null);
+      StereoVisionPointCloudMessage dummyMessage = StereoPointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorsInteger, numberOfPoints, minimumResolution, null);
       reaMessager.submitMessageToModule(REAModuleAPI.StereoVisionPointCloudState, dummyMessage);
 
       if (messager != null)
