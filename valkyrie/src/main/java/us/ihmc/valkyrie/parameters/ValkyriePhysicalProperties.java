@@ -9,11 +9,12 @@ public class ValkyriePhysicalProperties
 {
    private static final double defaultFootsizeReduction = 0.01;
 
-   private static final double defaultAnkleHeight = 0.09; // Should be 0.075 + 0.015 (sole thickness)
-   private static final double defaultFootLength = 0.25 - defaultFootsizeReduction;
-   private static final double defaultFootBack = 0.073 - defaultFootsizeReduction / 2.0;
+   // Modified ankle and foot size values below to be known Val 2 values.
+   private static final double defaultAnkleHeight = 0.1;//0.09; // Should be 0.075 + 0.015 (sole thickness)
+   private static final double defaultFootLength = 0.225 - defaultFootsizeReduction;//  0.25 - defaultFootsizeReduction; //
+   private static final double defaultFootBack = 0.072 - defaultFootsizeReduction / 2.0; //0.073 - defaultFootsizeReduction / 2.0;
    private static final double defaultFootForward = defaultFootLength - defaultFootBack;
-   private static final double defaultFootWidth = 0.15 - defaultFootsizeReduction;
+   private static final double defaultFootWidth = 0.13 - defaultFootsizeReduction; //0.15 - defaultFootsizeReduction;
 
    private static final double defaultThighLength = 0.431;
    private static final double defaultShinLength = 0.406;
