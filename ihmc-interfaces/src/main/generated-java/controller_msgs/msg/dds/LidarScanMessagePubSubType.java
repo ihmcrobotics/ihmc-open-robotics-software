@@ -52,8 +52,6 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (200000 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (2000000 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -88,14 +86,10 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getScan().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getScan0().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+      current_alignment += (data.getScan().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
 
@@ -114,15 +108,11 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       cdr.write_type_6(data.getPointCloudConfidence());
 
-      if(data.getScan().size() <= 200000)
-      cdr.write_type_e(data.getScan());else
-          throw new RuntimeException("scan field exceeds the maximum length");
-
       cdr.write_type_2(data.getNumberOfPoints());
 
-      if(data.getScan0().size() <= 2000000)
-      cdr.write_type_e(data.getScan0());else
-          throw new RuntimeException("scan0 field exceeds the maximum length");
+      if(data.getScan().size() <= 2000000)
+      cdr.write_type_e(data.getScan());else
+          throw new RuntimeException("scan field exceeds the maximum length");
 
    }
 
@@ -138,10 +128,9 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
       	
       data.setPointCloudConfidence(cdr.read_type_6());
       	
-      cdr.read_type_e(data.getScan());	
       data.setNumberOfPoints(cdr.read_type_2());
       	
-      cdr.read_type_e(data.getScan0());	
+      cdr.read_type_e(data.getScan());	
 
    }
 
@@ -156,9 +145,8 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       ser.write_type_6("sensor_pose_confidence", data.getSensorPoseConfidence());
       ser.write_type_6("point_cloud_confidence", data.getPointCloudConfidence());
-      ser.write_type_e("scan", data.getScan());
       ser.write_type_2("number_of_points", data.getNumberOfPoints());
-      ser.write_type_e("scan0", data.getScan0());
+      ser.write_type_e("scan", data.getScan());
    }
 
    @Override
@@ -172,9 +160,8 @@ public class LidarScanMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
       data.setSensorPoseConfidence(ser.read_type_6("sensor_pose_confidence"));
       data.setPointCloudConfidence(ser.read_type_6("point_cloud_confidence"));
-      ser.read_type_e("scan", data.getScan());
       data.setNumberOfPoints(ser.read_type_2("number_of_points"));
-      ser.read_type_e("scan0", data.getScan0());
+      ser.read_type_e("scan", data.getScan());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.LidarScanMessage src, controller_msgs.msg.dds.LidarScanMessage dest)
