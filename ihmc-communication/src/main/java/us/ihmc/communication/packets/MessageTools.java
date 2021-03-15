@@ -40,13 +40,10 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.idl.IDLSequence.Float;
@@ -100,23 +97,6 @@ public class MessageTools
       InvalidPacketNotificationPacket message = new InvalidPacketNotificationPacket();
       message.setPacketClassSimpleName(packetClass.getSimpleName());
       message.setErrorMessage(errorMessage);
-      return message;
-   }
-
-   public static LidarScanMessage createLidarScanMessage(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scan)
-   {
-      return createLidarScanMessage(timestamp, lidarPosition, lidarOrientation, scan, 1.0);
-   }
-
-   public static LidarScanMessage createLidarScanMessage(long timestamp, Point3D32 lidarPosition, Quaternion32 lidarOrientation, float[] scan,
-                                                         double sensorPoseConfidence)
-   {
-      LidarScanMessage message = new LidarScanMessage();
-      message.setRobotTimestamp(timestamp);
-      message.getLidarPosition().set(lidarPosition);
-      message.getLidarOrientation().set(lidarOrientation);
-      message.getScan().add(scan);
-      message.setSensorPoseConfidence(sensorPoseConfidence);
       return message;
    }
 
@@ -1063,34 +1043,14 @@ public class MessageTools
    public static void packScan(LidarScanMessage lidarScanMessage, Point3DReadOnly[] scan)
    {
       lidarScanMessage.getScan().reset();
-
-      for (Point3DReadOnly scanPoint : scan)
-      {
-         lidarScanMessage.getScan().add((float) scanPoint.getX());
-         lidarScanMessage.getScan().add((float) scanPoint.getY());
-         lidarScanMessage.getScan().add((float) scanPoint.getZ());
-      }
-   }
-
-   public static void unpackScanPoint(LidarScanMessage lidarScanMessage, int index, Point3DBasics scanPointToPack)
-   {
-      index *= 3;
-      scanPointToPack.setX(lidarScanMessage.getScan().get(index++));
-      scanPointToPack.setY(lidarScanMessage.getScan().get(index++));
-      scanPointToPack.setZ(lidarScanMessage.getScan().get(index++));
+      LidarPointCloudCompression.compressPointCloud(scan.length, lidarScanMessage, (i, j) -> (float) scan[i].getElement(j));
    }
 
    public static Point3D[] unpackScanPoint3ds(LidarScanMessage lidarScanMessage)
    {
-      int numberOfScanPoints = lidarScanMessage.getScan().size() / 3;
+      int numberOfScanPoints = lidarScanMessage.getNumberOfPoints();
       Point3D[] scanPoints = new Point3D[numberOfScanPoints];
-      for (int index = 0; index < numberOfScanPoints; index++)
-      {
-         Point3D scanPoint1 = new Point3D();
-         MessageTools.unpackScanPoint(lidarScanMessage, index, scanPoint1);
-         Point3D scanPoint = scanPoint1;
-         scanPoints[index] = scanPoint;
-      }
+      LidarPointCloudCompression.decompressPointCloud(lidarScanMessage.getScan(), lidarScanMessage.getNumberOfPoints(), (i, x, y, z) -> scanPoints[i] = new Point3D(x, y, z));
       return scanPoints;
    }
 
