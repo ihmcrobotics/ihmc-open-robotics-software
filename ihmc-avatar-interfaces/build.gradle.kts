@@ -25,7 +25,7 @@ mainDependencies {
    api("org.reflections:reflections:0.9.10")
    api("com.hierynomus:sshj:0.27.0")
 
-   api("net.java.jinput:jinput:2.0.6-ihmc")
+   api("net.java.jinput:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:euclid-geometry:0.16.2")
    api("us.ihmc:ihmc-yovariables:0.9.8")
