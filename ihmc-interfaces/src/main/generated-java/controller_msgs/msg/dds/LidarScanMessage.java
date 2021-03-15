@@ -31,12 +31,19 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
             */
    public double point_cloud_confidence_ = 1.0;
    public us.ihmc.idl.IDLSequence.Float  scan_;
+   /**
+            * Number of points in the pointcloud
+            */
+   public int number_of_points_;
+   public us.ihmc.idl.IDLSequence.Byte  scan0_;
 
    public LidarScanMessage()
    {
       lidar_position_ = new us.ihmc.euclid.tuple3D.Point3D();
       lidar_orientation_ = new us.ihmc.euclid.tuple4D.Quaternion();
       scan_ = new us.ihmc.idl.IDLSequence.Float (200000, "type_5");
+
+      scan0_ = new us.ihmc.idl.IDLSequence.Byte (2000000, "type_9");
 
    }
 
@@ -59,6 +66,9 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       point_cloud_confidence_ = other.point_cloud_confidence_;
 
       scan_.set(other.scan_);
+      number_of_points_ = other.number_of_points_;
+
+      scan0_.set(other.scan0_);
    }
 
    /**
@@ -141,6 +151,27 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       return scan_;
    }
 
+   /**
+            * Number of points in the pointcloud
+            */
+   public void setNumberOfPoints(int number_of_points)
+   {
+      number_of_points_ = number_of_points;
+   }
+   /**
+            * Number of points in the pointcloud
+            */
+   public int getNumberOfPoints()
+   {
+      return number_of_points_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.Byte  getScan0()
+   {
+      return scan0_;
+   }
+
 
    public static Supplier<LidarScanMessagePubSubType> getPubSubType()
    {
@@ -171,6 +202,10 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsFloatSequence(this.scan_, other.scan_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_points_, other.number_of_points_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsByteSequence(this.scan0_, other.scan0_, epsilon)) return false;
+
 
       return true;
    }
@@ -195,6 +230,9 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       if(this.point_cloud_confidence_ != otherMyClass.point_cloud_confidence_) return false;
 
       if (!this.scan_.equals(otherMyClass.scan_)) return false;
+      if(this.number_of_points_ != otherMyClass.number_of_points_) return false;
+
+      if (!this.scan0_.equals(otherMyClass.scan0_)) return false;
 
       return true;
    }
@@ -218,7 +256,11 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
       builder.append("point_cloud_confidence=");
       builder.append(this.point_cloud_confidence_);      builder.append(", ");
       builder.append("scan=");
-      builder.append(this.scan_);
+      builder.append(this.scan_);      builder.append(", ");
+      builder.append("number_of_points=");
+      builder.append(this.number_of_points_);      builder.append(", ");
+      builder.append("scan0=");
+      builder.append(this.scan0_);
       builder.append("}");
       return builder.toString();
    }

@@ -23,4 +23,9 @@ float64 point_cloud_confidence
 
 float32[] scan
 
+# Number of points in the pointcloud
+int32 number_of_points
+
+int8[] scan0
+
 
