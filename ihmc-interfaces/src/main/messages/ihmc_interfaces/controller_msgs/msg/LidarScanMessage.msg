@@ -16,3 +16,6 @@ float64 sensor_pose_confidence 1.0
 # The confidence of the point cloud represents the quality of the collected point cloud data.
 float64 point_cloud_confidence 1.0
 float32[<=200000] scan
+# Number of points in the pointcloud
+int32 number_of_points
+byte[<=2000000] scan0
