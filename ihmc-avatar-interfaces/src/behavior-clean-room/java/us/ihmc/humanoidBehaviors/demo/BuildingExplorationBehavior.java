@@ -101,8 +101,8 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    {
       this.helper = helper;
       DRCRobotModel robotModel = helper.getRobotModel();
-      ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
-      Messager behaviorMessager = helper.getManagedMessager();
+      ROS2NodeInterface ros2Node = helper.getROS2Node();
+      Messager behaviorMessager = helper.getMessager();
 
       String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();
@@ -112,7 +112,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
 
-      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, helper.getROS1Node(), ros2Node));
+      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, helper.getROS1Node(), ros2Node, false));
 
       teleopState = new TeleopState(robotModel,ros2Node);
       lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
@@ -493,7 +493,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          stepCounter.set(0);
          lookAndStepStarted = false;
 
-         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
+         helper.publish(LookAndStepBehaviorAPI.RESET);
 
          LogTools.info("Enabling look and step behavior");
          lookAndStepBehavior.setEnabled(true);
@@ -625,7 +625,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
          lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
-         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
+         helper.publish(LookAndStepBehaviorAPI.RESET);
       }
    }
 

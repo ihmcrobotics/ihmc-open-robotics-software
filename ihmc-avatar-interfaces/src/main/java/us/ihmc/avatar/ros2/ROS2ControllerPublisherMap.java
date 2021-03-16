@@ -15,13 +15,23 @@ public class ROS2ControllerPublisherMap
 
    public ROS2ControllerPublisherMap(ROS2NodeInterface ros2Node, String robotName)
    {
+      this(ros2Node, robotName, new ROS2PublisherMap(ros2Node));
+   }
+
+   public ROS2ControllerPublisherMap(ROS2NodeInterface ros2Node, String robotName, ROS2PublisherMap ros2PublisherMap)
+   {
       this.robotName = robotName;
-      publisherMap = new ROS2PublisherMap(ros2Node);
+      this.publisherMap = ros2PublisherMap;
    }
 
    public void publish(Object message)
    {
-      ROS2Topic topic = topicMap.computeIfAbsent(message.getClass(), messageType -> ControllerAPIDefinition.getTopic(messageType, robotName));
+      ROS2Topic topic = topicMap.get(message.getClass());
+      if (topic == null)
+      {
+         topic = ControllerAPIDefinition.getTopic(message.getClass(), robotName);
+         topicMap.put(message.getClass(), topic);
+      }
       publisherMap.publish(topic, message);
    }
 }

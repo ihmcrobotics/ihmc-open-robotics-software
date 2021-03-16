@@ -4,8 +4,8 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.Messager;
 
 public class WaypointManager // should handle comms of waypointsequence, unique id management (creating waypoints)
 {

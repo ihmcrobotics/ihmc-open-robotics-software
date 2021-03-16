@@ -81,7 +81,7 @@ public class LookAndStepFootstepPlanningTask
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
          footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
-         uiPublisher = lookAndStep.helper::publishToUI;
+         uiPublisher = lookAndStep.helper::publish;
          footstepPlanningModule = lookAndStep.helper.getOrCreateFootstepPlanner();
          defaultFootPolygons = FootstepPlanningModuleLauncher.createFootPolygons(lookAndStep.helper.getRobotModel());
          lastStanceSideReference = lookAndStep.lastStanceSide;

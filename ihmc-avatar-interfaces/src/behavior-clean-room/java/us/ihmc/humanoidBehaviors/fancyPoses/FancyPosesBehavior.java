@@ -67,18 +67,18 @@ public class FancyPosesBehavior implements BehaviorInterface
       syncedRobot = robotInterface.newSyncedRobot();
 
       robotInterface.createFootstepStatusCallback(this::acceptFootstepStatus);
-      stepping = helper.createBooleanActivationReference(API.Stepping);
+      stepping = helper.subscribeViaActivationReference(API.Stepping);
 
-      helper.createUICallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
-      helper.createUICallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
-      helper.createUICallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
-      helper.createUICallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
-      helper.createUICallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
-      helper.createUICallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
-      helper.createUICallback(API.GoToPresent, object -> goToPresentNotification.set());
-      helper.createUICallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
+      helper.subscribeViaCallback(API.GoToSingleSupport, object -> goToSingleSupportNotification.set());
+      helper.subscribeViaCallback(API.GoToDoubleSupport, object -> goToDoubleSupportNotification.set());
+      helper.subscribeViaCallback(API.GoToRunningMan, object -> goToRunningManNotification.set());
+      helper.subscribeViaCallback(API.GoToKarateKid1, object -> goToKarateKid1Notification.set());
+      helper.subscribeViaCallback(API.GoToKarateKid2, object -> goToKarateKid2Notification.set());
+      helper.subscribeViaCallback(API.GoToKarateKid3, object -> goToKarateKid3Notification.set());
+      helper.subscribeViaCallback(API.GoToPresent, object -> goToPresentNotification.set());
+      helper.subscribeViaCallback(API.GoToShutdownPose, object -> goToShutdownPoseNotification.set());
 
-      helper.createUICallback(API.Abort, this::doOnAbort);
+      helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::doBehavior);
    }

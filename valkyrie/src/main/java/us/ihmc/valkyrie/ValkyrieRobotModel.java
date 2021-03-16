@@ -17,10 +17,12 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -733,5 +735,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public String toString()
    {
       return getSimpleRobotName();
+   }
+
+   @Override
+   public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return new ValkyrieDirectRobotInterface(ros2Node, this);
    }
 }

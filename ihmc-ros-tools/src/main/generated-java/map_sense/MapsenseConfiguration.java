@@ -1,17 +1,17 @@
 package map_sense;
 
-import geometry_msgs.Point;
-import geometry_msgs.Vector3;
 import org.ros.internal.message.Message;
 import std_msgs.Header;
-
-import java.util.List;
 
 public interface MapsenseConfiguration extends Message
 {
    static final String _TYPE = "map_sense/MapsenseConfiguration";
    static final String _DEFINITION =
-         "std_msgs/Header header\n" + "float32 mergeAngularThreshold\n" + "float32 mergeDistanceThreshold\n" + "uint16 filterSize\n" + "uint16 kernelLevel";
+           "std_msgs/Header header\n"
+         + "float32 mergeAngularThreshold\n"
+         + "float32 mergeDistanceThreshold\n"
+         + "uint8 filterSize\n"
+         + "uint8 kernelLevel";
 
    Header getHeader();
 
@@ -25,11 +25,11 @@ public interface MapsenseConfiguration extends Message
 
    void setMergeDistanceThreshold(Float thres);
 
-   Short getFilterSize();
+   byte getFilterSize();
 
-   void setFilterSize(Short numOfRegions);
+   void setFilterSize(byte numOfRegions);
 
-   Short getKernelLevel();
+   byte getKernelLevel();
 
-   void setKernelLevel(Short numOfRegions);
+   void setKernelLevel(byte numOfRegions);
 }

@@ -94,7 +94,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("ForLookAndStep");
 
-      helper.createROS2Callback(LOOK_AND_STEP_PARAMETERS, parameters ->
+      helper.subscribeViaCallback(LOOK_AND_STEP_PARAMETERS, parameters ->
       {
          List<String> values = Arrays.asList(parameters.getStrings().toStringArray());
 
@@ -104,55 +104,55 @@ public class LookAndStepBehavior implements BehaviorInterface
             lookAndStepParameters.setAllFromStrings(values);
          }
       });
-      helper.createUICallback(FootstepPlannerParameters, parameters ->
+      helper.subscribeViaCallback(FootstepPlannerParameters, parameters ->
       {
          statusLogger.info("Accepting new footstep planner parameters");
          footstepPlannerParameters.setAllFromStrings(parameters);
       });
-      helper.createUICallback(SwingPlannerParameters, parameters ->
+      helper.subscribeViaCallback(SwingPlannerParameters, parameters ->
       {
          statusLogger.info("Accepting new swing planner parameters");
          swingPlannerParameters.setAllFromStrings(parameters);
       });
 
-      operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
-      approvalNotification = helper.createUITypedNotification(ReviewApproval);
+      operatorReviewEnabledInput = helper.subscribeViaReference(OperatorReviewEnabled, true);
+      approvalNotification = helper.subscribeViaNotification(ReviewApproval);
 
       // Trying to hold a lot of the state here? TODO: In general, where to put what state?
       lastStanceSide = new AtomicReference<>();
       lastCommandedFootsteps = new SideDependentList<>();
-      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publishToUI);
+      behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
       controllerStatusTracker = new ControllerStatusTracker(statusLogger,
-                                                            helper.getManagedROS2Node(),
+                                                            helper.getROS2Node(),
                                                             helper.getRobotModel().getSimpleRobotName());
       reset.initialize(this);
-      helper.createROS2Callback(RESET, reset::queueReset);
-      helper.createROS2ControllerCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
+      helper.subscribeViaCallback(RESET, reset::queueReset);
+      helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
-      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publishROS2);
-      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
-      helper.createUICallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
+      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publish);
+      helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
+      helper.subscribeViaCallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
 
       bodyPathPlanning.initialize(this);
-      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
-      helper.createROS2Callback(GOAL_INPUT, goal ->
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
+      helper.subscribeViaCallback(GOAL_INPUT, goal ->
       {
          behaviorStateReference.broadcast();
          bodyPathPlanning.acceptGoal(goal);
       });
 
       bodyPathLocalization.initialize(this);
-      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
-      helper.createUICallback(BodyPathInput, this::bodyPathPlanInput);
+      helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
+      helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
-      helper.createROS1PlanarRegionsCallback(REGIONS_FOR_FOOTSTEP_PLANNING, message ->
+      helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, message ->
       {
          supportRegionsPublisher.acceptPlanarRegions(message);
          footstepPlanning.acceptPlanarRegions(message);
       });
-      helper.createROS2ControllerCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
-      helper.createROS2ControllerCallback(FootstepStatusMessage.class, status ->
+      helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
+      helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, status ->
       {
          if (status.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
          {
