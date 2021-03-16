@@ -344,8 +344,7 @@ public class AngularVelocityOrientationInputCalculator
 
       // FIXME could likely do a "set" instead of "add"
       int orientationIndex = indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId());
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex,
-                                 identity6, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, identity6, 0, 0, 6, 6, 1.0);
    }
 
    private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,
