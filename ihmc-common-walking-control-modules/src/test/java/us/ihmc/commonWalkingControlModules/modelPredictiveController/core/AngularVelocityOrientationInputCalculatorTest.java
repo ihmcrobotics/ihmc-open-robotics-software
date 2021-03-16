@@ -297,11 +297,14 @@ public class AngularVelocityOrientationInputCalculatorTest
       FrameVector3D angularErrorAtCurrentTick = new FrameVector3D(initialAngularError);
       FrameVector3D angularVelocityErrorAtCurrentTick = new FrameVector3D(initialAngularVelocityError);
 
-      DMatrixRMaj firstSegmentOrientationVariables = new DMatrixRMaj(6 * indexHandler.getOrientationTicksInSegment(0), 1);
-      DMatrixRMaj secondSegmentOrientationVariables = new DMatrixRMaj(6 * indexHandler.getOrientationTicksInSegment(1), 1);
+      DMatrixRMaj fullVariableMatrix = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
+      MatrixTools.setMatrixBlock(fullVariableMatrix, indexHandler.getComCoefficientStartIndex(0), 0, firstSegmentTrajectoryCoefficients, 0, 0, numberOfFirstSegmentTrajectoryCoefficients, 1, 1.0);
+      MatrixTools.setMatrixBlock(fullVariableMatrix, indexHandler.getComCoefficientStartIndex(1), 0, secondSegmentTrajectoryCoefficients, 0, 0, numberOfSecondSegmentTrajectoryCoefficients, 1, 1.0);
+
 
       DMatrixRMaj Aeq = new DMatrixRMaj(6 * indexHandler.getTotalNumberOfOrientationTicks(), indexHandler.getTotalProblemSize());
       DMatrixRMaj beq = new DMatrixRMaj(6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
+      DMatrixRMaj value = new DMatrixRMaj(6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
 
       double time = 0.0;
       int tick = 0;
@@ -311,17 +314,10 @@ public class AngularVelocityOrientationInputCalculatorTest
          int endTick = tick + indexHandler.getOrientationTicksInSegment(segmentNumber);
 
          DMatrixRMaj trajectoryCoefficients;
-         DMatrixRMaj orientationVariables;
          if (segmentNumber == 0)
-         {
             trajectoryCoefficients = firstSegmentTrajectoryCoefficients;
-            orientationVariables = firstSegmentOrientationVariables;
-         }
          else
-         {
             trajectoryCoefficients = secondSegmentTrajectoryCoefficients;
-            orientationVariables = secondSegmentOrientationVariables;
-         }
 
          leftContactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, LinearMPCIndexHandler.comCoefficientsPerSegment);
          rightContactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, LinearMPCIndexHandler.comCoefficientsPerSegment + leftContactPlane.getCoefficientSize());
@@ -382,22 +378,18 @@ public class AngularVelocityOrientationInputCalculatorTest
             angularErrorAtCurrentTick.scaleAdd(tickDuration, expectedAngularErrorRate, angularErrorAtCurrentTick);
             angularVelocityErrorAtCurrentTick.scaleAdd(tickDuration, expectedAngularVelocityErrorRate, angularVelocityErrorAtCurrentTick);
 
-            angularErrorAtCurrentTick.get(6 * tick, orientationVariables);
-            angularVelocityErrorAtCurrentTick.get(6 * tick + 3, orientationVariables);
+            int orientationIndex = indexHandler.getOrientationTickStartIndex(tick);
+            angularErrorAtCurrentTick.get(orientationIndex, fullVariableMatrix);
+            angularVelocityErrorAtCurrentTick.get(orientationIndex + 3, fullVariableMatrix);
+
+            CommonOps_DDRM.mult(Aeq, fullVariableMatrix, value);
+            MatrixTestTools.assertMatrixEquals(value, beq, 1e-5);
 
             time += tickDuration;
          }
       }
 
-      DMatrixRMaj fullVariableMatrix = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
-      MatrixTools.setMatrixBlock(fullVariableMatrix, indexHandler.getComCoefficientStartIndex(0), 0, firstSegmentTrajectoryCoefficients, 0, 0, numberOfFirstSegmentTrajectoryCoefficients, 1, 1.0);
-      MatrixTools.setMatrixBlock(fullVariableMatrix, indexHandler.getOrientationStartIndices(0), 0, firstSegmentOrientationVariables, 0, 0, 6 * indexHandler.getOrientationTicksInSegment(0), 1, 1.0);
-      MatrixTools.setMatrixBlock(fullVariableMatrix, indexHandler.getComCoefficientStartIndex(1), 0, secondSegmentTrajectoryCoefficients, 0, 0, numberOfSecondSegmentTrajectoryCoefficients, 1, 1.0);
-      MatrixTools.setMatrixBlock(fullVariableMatrix, indexHandler.getOrientationStartIndices(1), 0, secondSegmentOrientationVariables, 0, 0, 6 * indexHandler.getOrientationTicksInSegment(1), 1, 1.0);
-
-      DMatrixRMaj value = new DMatrixRMaj(6 * indexHandler.getTotalNumberOfOrientationTicks(), 1);
       CommonOps_DDRM.mult(Aeq, fullVariableMatrix, value);
-
       MatrixTestTools.assertMatrixEquals(value, beq, 1e-5);
    }
 
