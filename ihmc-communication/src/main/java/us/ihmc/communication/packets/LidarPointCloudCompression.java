@@ -3,11 +3,9 @@ package us.ihmc.communication.packets;
 import controller_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
 import net.jpountz.lz4.LZ4Exception;
-import us.ihmc.tools.compression.LZ4CompressionImplementation;
+import us.ihmc.communication.compression.LZ4CompressionImplementation;
 
 import java.nio.ByteBuffer;
-import java.nio.DoubleBuffer;
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 /**
