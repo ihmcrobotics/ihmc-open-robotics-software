@@ -71,7 +71,7 @@ public class LookAndStepBodyPathPlanningTask
       public void initialize(LookAndStepBehavior lookAndStep)
       {
          statusLogger = lookAndStep.statusLogger;
-         uiPublisher = lookAndStep.helper::publishToUI;
+         uiPublisher = lookAndStep.helper::publish;
          visibilityGraphParameters = lookAndStep.visibilityGraphParameters;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
          operatorReviewEnabled = lookAndStep.operatorReviewEnabledInput::get;

@@ -22,7 +22,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI.Enabled;
 import static us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI.create;
 
 public class TraverseStairsBehavior implements BehaviorInterface
@@ -72,8 +71,8 @@ public class TraverseStairsBehavior implements BehaviorInterface
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
 
-      completedPublisher = ROS2Tools.createPublisher(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
-      supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getManagedROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
+      completedPublisher = ROS2Tools.createPublisher(helper.getROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
+      supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
                                                                             ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER
                                                                                   .withRobot(helper.getRobotModel().getSimpleRobotName()).withInput());
 

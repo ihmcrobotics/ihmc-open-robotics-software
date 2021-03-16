@@ -43,12 +43,14 @@ public class RosTools
    public static final String D435_CAMERA_INFO = "/depthcam/color/camera_info";
    public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
    public static final String L515_VIDEO = "/camera/color/image_raw/compressed";
+   public static final String L515_DEPTH = "/camera/depth/image_rect_raw";
    public static final String L515_POINT_CLOUD = "/camera/depth/color/points";
    public static final String L515_COLOR_CAMERA_INFO = "/camera/color/camera_info";
    public static final String L515_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = "/camera/depth/image_rect_raw";
    public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
+   public static final String MAPSENSE_CONFIGURATION = "/map/config";
 
    public static RosMainNode createRosNode(String uri, String name)
    {

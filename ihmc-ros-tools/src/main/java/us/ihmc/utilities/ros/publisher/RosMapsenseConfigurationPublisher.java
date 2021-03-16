@@ -4,13 +4,12 @@ import map_sense.MapsenseConfiguration;
 
 public class RosMapsenseConfigurationPublisher extends RosTopicPublisher<MapsenseConfiguration>
 {
-
    public RosMapsenseConfigurationPublisher()
    {
       super(MapsenseConfiguration._TYPE, false);
    }
 
-   public void publish(short kernelLevel, short filterSize, float mergeAngular, float mergeDistance)
+   public void publish(byte kernelLevel, byte filterSize, float mergeAngular, float mergeDistance)
    {
       MapsenseConfiguration message = getMessage();
       message.setKernelLevel(kernelLevel);
@@ -19,5 +18,4 @@ public class RosMapsenseConfigurationPublisher extends RosTopicPublisher<Mapsens
       message.setMergeDistanceThreshold(mergeDistance);
       publish(message);
    }
-
 }

@@ -49,21 +49,21 @@ public class TraverseStairsPlanStepsState implements State
    {
       this.helper = helper;
       this.parameters = parameters;
-      helper.createROS2Callback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
+      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
       {
          LogTools.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
-      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
 
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       planningModule.getFootstepPlannerParameters().load(footstepPlannerParameterFileName);
       planningModule.getSwingPlannerParameters().load(swingParameterFileName);
 
-      footstepListPublisher = new IHMCROS2Publisher<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
-      new IHMCROS2Callback<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
-      new IHMCROS2Callback<>(helper.getManagedROS2Node(), TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
+      footstepListPublisher = new IHMCROS2Publisher<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
+      new IHMCROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
+      new IHMCROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.REPLAN, r -> planSteps.set(true));
    }
 
    @Override

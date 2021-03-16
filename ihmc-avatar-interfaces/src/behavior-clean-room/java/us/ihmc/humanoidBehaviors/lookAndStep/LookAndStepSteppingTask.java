@@ -58,7 +58,7 @@ public class LookAndStepSteppingTask
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
          footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
-         uiPublisher = lookAndStep.helper::publishToUI;
+         uiPublisher = lookAndStep.helper::publish;
          footstepPlanPostProcessor = lookAndStep.helper.createFootstepPlanPostProcessor();
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
          replanFootstepsOutput = () ->
