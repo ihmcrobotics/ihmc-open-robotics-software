@@ -2,7 +2,6 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
-import sensor_msgs.msg.dds.PointCloud2;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -10,7 +9,13 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
+import sensor_msgs.PointCloud2;
+import org.jboss.netty.buffer.ChannelBuffer;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -26,28 +31,38 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PointCloud2ToLidarScanMessageConverter
 {
-   private static final String POINT_CLOUD_2_TOPIC_NAME = "/os1_cloud_node/points";
+   private static final String POINT_CLOUD_2_TOPIC_NAME = "/os_cloud_node/points";
 
    private static final double SENSOR_POSE_X = 0.0;
    private static final double SENSOR_POSE_Y = 0.0;
    private static final double SENSOR_POSE_Z = 1.0;
    private static final double SENSOR_POSE_YAW = 0.0;
-   private static final double SENSOR_POSE_PITCH = 0.0;
+   private static final double SENSOR_POSE_PITCH = 0.78;
    private static final double SENSOR_POSE_ROLL = 0.0;
 
    private final AtomicReference<PointCloud2> pointCloud2Message = new AtomicReference<>();
    private final AtomicInteger counter = new AtomicInteger();
-   private final AtomicBoolean hasPrintedReceivedMessage = new AtomicBoolean();
+   private final AtomicBoolean firstMessage = new AtomicBoolean(true);
 
    public PointCloud2ToLidarScanMessageConverter(String topicName, double poseX, double poseY, double poseZ, double poseYaw, double posePitch, double poseRoll)
+         throws URISyntaxException
    {
-      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
+      URI rosMasterURI = new URI("http://localhost:11311");
+      RosMainNode rosMainNode = new RosMainNode(rosMasterURI, getClass().getSimpleName());
       Pose3D sensorPose = new Pose3D(poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
 
+      ROS2Node ros2Node = ROS2Tools.createROS2Node(DomainFactory.PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
       IHMCROS2Publisher<LidarScanMessage> lidarScanMessagePublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
 
       // save and handle on another thread
-      ROS2Tools.createCallbackSubscription(ros2Node, PointCloud2.class, topicName, s -> pointCloud2Message.set(s.takeNextData()));
+      RosPointCloudSubscriber pointCloudSubscriber = new RosPointCloudSubscriber()
+      {
+         @Override
+         public void onNewMessage(sensor_msgs.PointCloud2 pointCloud)
+         {
+            pointCloud2Message.set(pointCloud);
+         }
+      };
 
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
       lidarScanMessage.getLidarPosition().set(sensorPose.getPosition());
@@ -61,10 +76,13 @@ public class PointCloud2ToLidarScanMessageConverter
 
                        if (pointCloud != null)
                        {
+                          if (firstMessage.getAndSet(false))
+                             LogTools.info("Receiving point cloud message...");
+
                           ByteOrder byteOrder = pointCloud.getIsBigendian() ? ByteOrder.BIG_ENDIAN : ByteOrder.LITTLE_ENDIAN;
                           long pointStep = pointCloud.getPointStep();
-                          int width = (int) pointCloud.getWidth();
-                          int height = (int) pointCloud.getHeight();
+                          int width = pointCloud.getWidth();
+                          int height = pointCloud.getHeight();
                           int numberOfPoints = width * height;
 
                           float[] points = new float[3 * numberOfPoints];
@@ -92,48 +110,54 @@ public class PointCloud2ToLidarScanMessageConverter
                           lidarScanMessagePublisher.publish(lidarScanMessage);
                        }
 
-                       if (!hasPrintedReceivedMessage.getAndSet(true))
-                       {
-                          LogTools.info("Received PointCloud2 message");
-                       }
-
                        ThreadTools.sleep(20);
                     }
                  }).start();
+
+      rosMainNode.attachSubscriber(topicName, pointCloudSubscriber);
+      rosMainNode.execute();
+      pointCloudSubscriber.wailTillRegistered();
    }
 
-   private static void packBytes(byte[] bytes, int startIndex, TByteArrayList data)
+   private static void packBytes(byte[] bytes, int startIndex, ChannelBuffer data)
    {
       for (int i = 0; i < 4; i++)
       {
-         bytes[i] = data.get(startIndex + i);
+         bytes[i] = data.getByte(startIndex + i);
       }
    }
 
    public static void main(String[] args)
    {
-      if (args.length != 7)
+      try
       {
-         System.out.println("Using the default parameters");
-         new PointCloud2ToLidarScanMessageConverter(POINT_CLOUD_2_TOPIC_NAME,
-                                                    SENSOR_POSE_X,
-                                                    SENSOR_POSE_Y,
-                                                    SENSOR_POSE_Z,
-                                                    SENSOR_POSE_YAW,
-                                                    SENSOR_POSE_PITCH,
-                                                    SENSOR_POSE_ROLL);
+         if (args.length != 7)
+         {
+            System.out.println("Using the default parameters");
+            new PointCloud2ToLidarScanMessageConverter(POINT_CLOUD_2_TOPIC_NAME,
+                                                       SENSOR_POSE_X,
+                                                       SENSOR_POSE_Y,
+                                                       SENSOR_POSE_Z,
+                                                       SENSOR_POSE_YAW,
+                                                       SENSOR_POSE_PITCH,
+                                                       SENSOR_POSE_ROLL);
+         }
+         else
+         {
+            System.out.println("Loading parameters from program arguments");
+            String topicName = args[0];
+            double poseX = Double.parseDouble(args[1]);
+            double poseY = Double.parseDouble(args[2]);
+            double poseZ = Double.parseDouble(args[3]);
+            double poseYaw = Double.parseDouble(args[4]);
+            double posePitch = Double.parseDouble(args[5]);
+            double poseRoll = Double.parseDouble(args[6]);
+            new PointCloud2ToLidarScanMessageConverter(topicName, poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
+         }
       }
-      else
+      catch (Exception e)
       {
-         System.out.println("Loading parameters from program arguments");
-         String topicName = args[0];
-         double poseX = Double.parseDouble(args[1]);
-         double poseY = Double.parseDouble(args[2]);
-         double poseZ = Double.parseDouble(args[3]);
-         double poseYaw = Double.parseDouble(args[4]);
-         double posePitch = Double.parseDouble(args[5]);
-         double poseRoll = Double.parseDouble(args[6]);
-         new PointCloud2ToLidarScanMessageConverter(topicName, poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
+         e.printStackTrace();
       }
    }
 }
