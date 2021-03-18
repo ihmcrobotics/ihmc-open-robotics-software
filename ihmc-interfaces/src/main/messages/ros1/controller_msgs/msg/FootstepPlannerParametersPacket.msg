@@ -409,15 +409,9 @@ float64 cost_per_step
 # Field default value -11.1
 float64 a_star_heuristics_weight
 
-# This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
-# Additional checks are done by interpolating between the start and end steps
+# Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
 # Field default value 1
-uint32 number_of_bounding_box_checks
-
-# If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-# @see FootstepPlannerCostParameters#getBoundingBoxCost
-# Field default value -11.1
-float64 maximum_2d_distance_from_bounding_box_to_penalize
+uint32 intermediate_body_box_checks
 
 # If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
 # Otherwise, it will turn towards the body path

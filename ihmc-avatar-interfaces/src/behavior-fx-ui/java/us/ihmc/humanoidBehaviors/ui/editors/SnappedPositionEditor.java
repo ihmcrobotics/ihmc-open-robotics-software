@@ -18,7 +18,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.commons.thread.TypedNotification;
 

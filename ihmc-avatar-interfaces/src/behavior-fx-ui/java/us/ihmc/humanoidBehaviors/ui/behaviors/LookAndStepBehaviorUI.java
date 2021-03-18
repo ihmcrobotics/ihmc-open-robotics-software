@@ -20,7 +20,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.WalkingGoalPlacementEditor;

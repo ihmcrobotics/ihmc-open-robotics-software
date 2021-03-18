@@ -25,12 +25,15 @@ import geometry_msgs.Pose;
 import geometry_msgs.Quaternion;
 import geometry_msgs.Vector3;
 import sensor_msgs.CameraInfo;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.log.LogTools;
 
 public class RosTools
 {
@@ -40,11 +43,25 @@ public class RosTools
    public static final String D435_CAMERA_INFO = "/depthcam/color/camera_info";
    public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
    public static final String L515_VIDEO = "/camera/color/image_raw/compressed";
+   public static final String L515_DEPTH = "/camera/depth/image_rect_raw";
    public static final String L515_POINT_CLOUD = "/camera/depth/color/points";
    public static final String L515_COLOR_CAMERA_INFO = "/camera/color/camera_info";
    public static final String L515_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_DEPTH_IMAGE = "/camera/depth/image_rect_raw";
+   public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
+   public static final String MAPSENSE_CONFIGURATION = "/map/config";
+
+   public static RosMainNode createRosNode(String uri, String name)
+   {
+      return createRosNode(ExceptionTools.handle(() -> new URI(uri), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE), name);
+   }
+
+   public static RosMainNode createRosNode(URI uri, String name)
+   {
+      LogTools.info("Creating ROS 1 node. name: {} URI: {}", name, uri);
+      return new RosMainNode(uri, name);
+   }
 
    public static BufferedImage bufferedImageFromByteArrayJpeg(ColorModel colorModel, byte[] payload, int width, int height)
    {

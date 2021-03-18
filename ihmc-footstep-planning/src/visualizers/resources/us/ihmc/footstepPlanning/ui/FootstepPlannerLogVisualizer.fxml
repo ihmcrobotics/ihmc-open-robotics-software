@@ -62,6 +62,8 @@
                         <CheckBox fx:id="showSnapAndWiggledStep" selected="true" text="Show snap and wiggled step"/>
                         <Region prefHeight="5"/>
                         <CheckBox fx:id="showIdealStep" selected="true" text="Show ideal step"/>
+                        <Region prefHeight="5"/>
+                        <CheckBox fx:id="showBodyBox" selected="true" text="Show collision box"/>
                         <padding><Insets left="20"/></padding>
                     </VBox>
 

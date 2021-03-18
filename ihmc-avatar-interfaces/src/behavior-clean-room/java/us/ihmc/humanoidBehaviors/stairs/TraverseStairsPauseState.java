@@ -19,7 +19,7 @@ public class TraverseStairsPauseState implements State
       this.helper = helper;
       this.parameters = parameters;
 
-      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
    }
 
    @Override

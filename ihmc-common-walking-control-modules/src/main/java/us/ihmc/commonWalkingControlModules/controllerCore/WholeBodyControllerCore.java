@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -108,14 +109,21 @@ public class WholeBodyControllerCore
       }
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
+      DesiredExternalWrenchHolder desiredExternalWrenchHolder;
 
       // When running only the inverse kinematics solver, there is no notion of contact.
       if (inverseDynamicsSolver != null || virtualModelControlSolver != null)
+      {
          desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
+         desiredExternalWrenchHolder = toolbox.getDesiredExternalWrenchHolder();
+      }
       else
+      {
          desiredCenterOfPressureDataHolder = null;
+         desiredExternalWrenchHolder = null;
+      }
 
-      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints, lowLevelControllerOutput);
+      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, desiredExternalWrenchHolder, controlledOneDoFJoints, lowLevelControllerOutput);
 
       parentRegistry.addChild(registry);
    }

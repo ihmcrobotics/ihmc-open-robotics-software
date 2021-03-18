@@ -3,13 +3,17 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -17,6 +21,7 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
 {
    private final CenterOfPressureDataHolder centerOfPressureDataHolder;
+   private final DesiredExternalWrenchHolder desiredExternalWrenchHolder;
    private final FrameVector3D linearMomentumRate = new FrameVector3D();
    private final RootJointDesiredConfigurationData rootJointDesiredConfigurationData = new RootJointDesiredConfigurationData();
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder;
@@ -25,17 +30,18 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    private final transient JointDesiredOutputListBasics jointDesiredOutputList;
 
    /**
-    * Do not use this constructor. It will break the barrier scheduler and the {@link #set(ControllerCoreOutput)} and
-    * {@link #equals(Object)} methods will not work.
+    * Do not use this constructor. It will break the barrier scheduler and the
+    * {@link #set(ControllerCoreOutput)} and {@link #equals(Object)} methods will not work.
     * <p>
-    * This is a simple command that is only holding on to data. Use the getters of this class to get its data. This
-    * constructor should be removed after the thread refactor summer 2019.
+    * This is a simple command that is only holding on to data. Use the getters of this class to get
+    * its data. This constructor should be removed after the thread refactor summer 2019.
     */
    @Deprecated
-   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, OneDoFJointBasics[] controlledOneDoFJoints,
-                               JointDesiredOutputList lowLevelControllerOutput)
+   public ControllerCoreOutput(CenterOfPressureDataHolder centerOfPressureDataHolder, DesiredExternalWrenchHolder desiredExternalWrenchHolder,
+                               OneDoFJointBasics[] controlledOneDoFJoints, JointDesiredOutputList lowLevelControllerOutput)
    {
       this.centerOfPressureDataHolder = centerOfPressureDataHolder;
+      this.desiredExternalWrenchHolder = desiredExternalWrenchHolder;
       linearMomentumRate.setToNaN(ReferenceFrame.getWorldFrame());
       if (lowLevelControllerOutput != null)
          jointDesiredOutputList = lowLevelControllerOutput;
@@ -47,6 +53,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    public ControllerCoreOutput()
    {
       centerOfPressureDataHolder = new CenterOfPressureDataHolder();
+      desiredExternalWrenchHolder = new DesiredExternalWrenchHolder();
       lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
       jointDesiredOutputList = lowLevelOneDoFJointDesiredDataHolder;
    }
@@ -61,15 +68,36 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       return centerOfPressureDataHolder;
    }
 
-   public void setDesiredCenterOfPressure(FramePoint2D cop, RigidBodyBasics rigidBody)
+   public void setDesiredExternalWrenchData(DesiredExternalWrenchHolder desiredExternalWrenchHolder)
+   {
+      this.desiredExternalWrenchHolder.set(desiredExternalWrenchHolder);
+   }
+
+   public DesiredExternalWrenchHolder getDesiredExternalWrenchData()
+   {
+      return desiredExternalWrenchHolder;
+   }
+
+   public void setDesiredCenterOfPressure(FramePoint2DReadOnly cop, RigidBodyBasics rigidBody)
    {
       centerOfPressureDataHolder.setCenterOfPressure(cop, rigidBody);
    }
 
    @Override
-   public void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBodyBasics rigidBody)
+   public void getDesiredCenterOfPressure(FramePoint2DBasics copToPack, RigidBodyBasics rigidBody)
    {
       centerOfPressureDataHolder.getCenterOfPressure(copToPack, rigidBody);
+   }
+
+   public void setDesiredExternalWrench(WrenchReadOnly desiredExternalWrench, RigidBodyBasics rigidBody)
+   {
+      desiredExternalWrenchHolder.setDesiredExternalWrench(desiredExternalWrench, rigidBody);
+   }
+
+   @Override
+   public void getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody)
+   {
+      desiredExternalWrenchHolder.getDesiredExternalWrench(desiredExternalWrenchToPack, rigidBody);
    }
 
    public void setLinearMomentumRate(FrameVector3DReadOnly linearMomentumRate)
@@ -78,7 +106,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
    }
 
    @Override
-   public void getLinearMomentumRate(FrameVector3D linearMomentumRateToPack)
+   public void getLinearMomentumRate(FrameVector3DBasics linearMomentumRateToPack)
    {
       linearMomentumRateToPack.setIncludingFrame(linearMomentumRate);
    }
@@ -126,6 +154,7 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
          throw new RuntimeException("You used the deprecated constructor set is not supported in that case.");
 
       centerOfPressureDataHolder.set(other.centerOfPressureDataHolder);
+      desiredExternalWrenchHolder.set(other.desiredExternalWrenchHolder);
       linearMomentumRate.setIncludingFrame(other.linearMomentumRate);
       rootJointDesiredConfigurationData.set(other.rootJointDesiredConfigurationData);
       lowLevelOneDoFJointDesiredDataHolder.set(other.lowLevelOneDoFJointDesiredDataHolder);
@@ -145,6 +174,8 @@ public class ControllerCoreOutput implements ControllerCoreOutputReadOnly
       {
          ControllerCoreOutput other = (ControllerCoreOutput) obj;
          if (!centerOfPressureDataHolder.equals(other.centerOfPressureDataHolder))
+            return false;
+         if (!desiredExternalWrenchHolder.equals(other.desiredExternalWrenchHolder))
             return false;
          if (!linearMomentumRate.equals(other.linearMomentumRate))
             return false;

@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;

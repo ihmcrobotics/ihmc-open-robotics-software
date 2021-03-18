@@ -8,13 +8,14 @@ import javafx.scene.shape.MeshView;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -27,12 +28,12 @@ public class LiveStereoVisionPointCloudGraphic extends Group
    private final PrivateAnimationTimer animationTimer = new PrivateAnimationTimer(this::updateScene);
 
    protected final AtomicReference<MeshView> scanMeshToRender = new AtomicReference<>(null);
-   private final SingleThreadSizeOneQueueExecutor threadQueue;
+   private final ResettableExceptionHandlingExecutorService threadQueue;
 
    public LiveStereoVisionPointCloudGraphic(ROS2Node ros2Node, ROS2Topic<?> topic)
    {
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(PALLETE_SIZE_FOR_MESH_BUILDER));
-      threadQueue = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+      threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       if (topic.getType().equals(LidarScanMessage.class))
       {
          new IHMCROS2Callback<>(ros2Node, topic.withType(LidarScanMessage.class), this::queueRenderLidarScan);
@@ -46,7 +47,7 @@ public class LiveStereoVisionPointCloudGraphic extends Group
 
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
-      threadQueue.submitTask(() ->
+      threadQueue.clearQueueAndExecute(() ->
       {
          Point3D32[] points = PointCloudCompression.decompressPointCloudToArray32(message);
          int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
@@ -56,7 +57,7 @@ public class LiveStereoVisionPointCloudGraphic extends Group
 
    private void queueRenderLidarScan(LidarScanMessage message)
    {
-      threadQueue.submitTask(() ->
+      threadQueue.clearQueueAndExecute(() ->
       {
          int numberOfPoints = message.getScan().size() / 3;
          Point3D32[] points = new Point3D32[numberOfPoints];

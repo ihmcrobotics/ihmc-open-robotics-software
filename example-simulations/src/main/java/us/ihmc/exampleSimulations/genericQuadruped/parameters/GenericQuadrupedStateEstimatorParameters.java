@@ -55,12 +55,6 @@ public class GenericQuadrupedStateEstimatorParameters extends StateEstimatorPara
    }
 
    @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
-   }
-
-   @Override
    public double getKinematicsPelvisPositionFilterFreqInHertz()
    {
       return Double.POSITIVE_INFINITY;

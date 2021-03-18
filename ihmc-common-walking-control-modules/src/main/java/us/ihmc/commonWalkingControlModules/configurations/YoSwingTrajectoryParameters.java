@@ -39,6 +39,8 @@ public class YoSwingTrajectoryParameters
    private final ParameterVector3D touchdownVelocityWeight;
    private final FrameParameterVector3D touchdownVelocity;
    private final FrameParameterVector3D touchdownAcceleration;
+   private final DoubleProvider finalCoMVelocityInjectionRatio;
+   private final DoubleProvider finalCoMAccelerationInjectionRatio;
 
    private final BooleanProvider ignoreInitialAngularVelocityZ;
    private final DoubleProvider maxInitialLinearVelocityMagnitude;
@@ -51,7 +53,8 @@ public class YoSwingTrajectoryParameters
       this(namePrefix, walkingControllerParameters, walkingControllerParameters.getSwingTrajectoryParameters(), registry);
    }
 
-   public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, SwingTrajectoryParameters parameters, YoRegistry registry)
+   public YoSwingTrajectoryParameters(String namePrefix, WalkingControllerParameters walkingControllerParameters, SwingTrajectoryParameters parameters,
+                                      YoRegistry registry)
    {
       doHeelTouchdownIfPossible = new BooleanParameter(namePrefix + "DoHeelTouchdownIfPossible", registry, parameters.doHeelTouchdownIfPossible());
       heelTouchdownAngle = new DoubleParameter(namePrefix + "HeelTouchdownAngle", registry, parameters.getHeelTouchdownAngle());
@@ -98,19 +101,30 @@ public class YoSwingTrajectoryParameters
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, parameters.getDesiredTouchdownVelocity());
       touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(), defaultTouchdownVelocity, registry);
+      finalCoMVelocityInjectionRatio = new DoubleParameter(namePrefix + "FinalCoMVelocityInjectionRatio",
+                                                           registry,
+                                                           parameters.getFinalCoMVelocityInjectionRatio());
+      finalCoMAccelerationInjectionRatio = new DoubleParameter(namePrefix + "finalCoMAccelerationInjectionRatio",
+                                                               registry,
+                                                               parameters.getFinalCoMAccelerationInjectionRatio());
 
       Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, parameters.getDesiredTouchdownAcceleration());
       touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration",
-                                                                                ReferenceFrame.getWorldFrame(),
-                                                                                defaultTouchdownAcceleration,
-                                                                                registry);
+                                                         ReferenceFrame.getWorldFrame(),
+                                                         defaultTouchdownAcceleration,
+                                                         registry);
 
-      ignoreInitialAngularVelocityZ = new BooleanParameter(namePrefix + "IgnoreInitialAngularVelocityZ", registry, walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
-      maxInitialLinearVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialLinearVelocityMagnitude", registry, walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
-      maxInitialAngularVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialAngularVelocityMagnitude", registry, walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
+      ignoreInitialAngularVelocityZ = new BooleanParameter(namePrefix + "IgnoreInitialAngularVelocityZ",
+                                                           registry,
+                                                           walkingControllerParameters.ignoreSwingInitialAngularVelocityZ());
+      maxInitialLinearVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialLinearVelocityMagnitude",
+                                                              registry,
+                                                              walkingControllerParameters.getMaxSwingInitialLinearVelocityMagnitude());
+      maxInitialAngularVelocityMagnitude = new DoubleParameter(namePrefix + "MaxInitialAngularVelocityMagnitude",
+                                                               registry,
+                                                               walkingControllerParameters.getMaxSwingInitialAngularVelocityMagnitude());
 
-      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry,
-                                                      parameters.getSwingFootVelocityAdjustmentDamping());
+      velocityAdjustmentDamping = new DoubleParameter(namePrefix + "VelocityAdjustmentDamping", registry, parameters.getSwingFootVelocityAdjustmentDamping());
    }
 
    public boolean doToeTouchdownIfPossible()
@@ -196,6 +210,16 @@ public class YoSwingTrajectoryParameters
    public FrameVector3DReadOnly getDesiredTouchdownAcceleration()
    {
       return touchdownAcceleration;
+   }
+
+   public double getFinalCoMVelocityInjectionRatio()
+   {
+      return finalCoMVelocityInjectionRatio.getValue();
+   }
+
+   public double getFinalCoMAccelerationInjectionRatio()
+   {
+      return finalCoMAccelerationInjectionRatio.getValue();
    }
 
    public boolean ignoreSwingInitialAngularVelocityZ()

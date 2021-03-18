@@ -16,7 +16,7 @@ public class RemoteBehaviorInterface
                                                               behaviorModuleAddress,
                                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
                                                               new BehaviorMessagerUpdateThread(RemoteBehaviorInterface.class.getSimpleName(), 5));
-      ThreadTools.startAThread(() -> ExceptionTools.handle(() -> moduleMessager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION),
+      ThreadTools.startAThread(() -> ExceptionTools.handle(moduleMessager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION),
                                "KryoMessagerAsyncConnectionThread");
       return moduleMessager;
    }

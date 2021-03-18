@@ -11,6 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
@@ -24,6 +25,8 @@ import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosTools;
 
 import java.util.*;
 
@@ -31,11 +34,17 @@ import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
+   private static SharedMemoryMessager sharedMemoryMessager;
+
+   private final RosMainNode ros1Node;
+   private final boolean manageROS1Node;
+   private final ROS2Node ros2Node;
+   private final boolean manageROS2Node;
    private final Messager messager;
+   private final boolean manageMessager;
    private StatusLogger statusLogger;
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
-   private final ROS2Node ros2Node;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -48,11 +57,17 @@ public class BehaviorModule
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry, 
-                         DRCRobotModel robotModel, 
-                         CommunicationMode ros2CommunicationMode, 
+                         DRCRobotModel robotModel,
+                         CommunicationMode ros2CommunicationMode,
                          CommunicationMode messagerCommunicationMode)
    {
+      this.manageROS1Node = true;
+      this.manageROS2Node = true;
+      this.manageMessager = true;
+
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
+
+      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "behavior_backpack");
 
       MessagerAPI messagerAPI = behaviorRegistry.getMessagerAPI();
 
@@ -75,32 +90,39 @@ public class BehaviorModule
       {
          messager = new SharedMemoryMessager(messagerAPI);
       }
+      ThreadTools.startAThread(() -> ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION), "KryoStarter");
 
-      ThreadTools.startAThread(this::kryoStarter, "KryoStarter");
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
-      init(behaviorRegistry, robotModel, ros2Node, messager);
-
+      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry,
                          DRCRobotModel robotModel,
+                         RosMainNode ros1Node,
                          ROS2Node ros2Node,
                          Messager messager)
    {
+      this.ros1Node = ros1Node;
+      this.manageROS1Node = false;
       this.ros2Node = ros2Node;
+      this.manageROS2Node = false;
       this.messager = messager;
+      this.manageMessager = false;
 
-      init(behaviorRegistry, robotModel, ros2Node, messager);
+      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
    }
 
-   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, ROS2Node ros2Node, Messager messager)
+   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, Messager messager)
    {
+      if (messager instanceof SharedMemoryMessager)
+         sharedMemoryMessager = (SharedMemoryMessager) messager;
+
       statusLogger = new StatusLogger(messager::submitMessage);
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros2Node);
+         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node, false);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
       }
@@ -113,6 +135,8 @@ public class BehaviorModule
 
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
+
+      ros1Node.execute();
    }
 
    private void stringBasedSelection(String selection)
@@ -149,11 +173,6 @@ public class BehaviorModule
       }
    }
 
-   private void kryoStarter()
-   {
-      ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
-   }
-
    public Messager getMessager()
    {
       return messager;
@@ -162,13 +181,29 @@ public class BehaviorModule
    public void destroy()
    {
       statusLogger.info("Shutting down...");
-      for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
+
+      if (manageROS2Node)
       {
-         behavior.getRight().setEnabled(false);
+         ros2Node.destroy();
+      }
+      if (manageROS1Node)
+      {
+         ros1Node.shutdown();
+      }
+      if (manageMessager)
+      {
+         ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
       }
 
-      ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
-      ros2Node.destroy();
+      for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
+      {
+         behavior.getRight().destroy();
+      }
+   }
+
+   public static SharedMemoryMessager getSharedMemoryMessager()
+   {
+      return sharedMemoryMessager;
    }
 
    // API created here from build

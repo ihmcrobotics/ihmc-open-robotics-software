@@ -9,17 +9,17 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
-import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
@@ -32,25 +32,25 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
    private final RemoteSyncedRobotModel syncedRobot;
-   private final MovingReferenceFrame pelvisFrame;
+   private final ReferenceFrame sensorBaseFrame;
    private final FramePose3D tempSensorFramePose = new FramePose3D();
-   private final RigidBodyTransform pelvisToSensorTransform;
+   private final RigidBodyTransformReadOnly sensorTransform;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private final Timer throttleTimer = new Timer();
-   private final SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
    public RealsensePointCloudROS1Bridge(DRCRobotModel robotModel,
                                         RosMainNode ros1Node,
                                         ROS2Node ros2Node,
-                                        RigidBodyTransform pelvisToSensorTransform,
+                                        RigidBodyTransformReadOnly sensorTransform,
                                         String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
    {
       super(sensor_msgs.PointCloud2._TYPE);
 
-      this.pelvisToSensorTransform = pelvisToSensorTransform;
+      this.sensorTransform = sensorTransform;
 
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
-      pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
+      sensorBaseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
 
       LogTools.info("Subscribing ROS 1: {}", ros1InputTopic);
       ros1Node.attachSubscriber(ros1InputTopic, this);
@@ -62,7 +62,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    @Override
    public void onNewMessage(sensor_msgs.PointCloud2 ros1PointCloud)
    {
-      executor.submitTask(() -> waitThenAct(ros1PointCloud));
+      executor.clearQueueAndExecute(() -> waitThenAct(ros1PointCloud));
    }
 
    private void waitThenAct(sensor_msgs.PointCloud2 ros1PointCloud)
@@ -80,9 +80,11 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
          boolean hasColors = true;
          PointCloudData pointCloudData = new PointCloudData(ros1PointCloud, MAX_POINTS, hasColors);
 
+         pointCloudData.flipToZUp();
+
          syncedRobot.update();
-         pelvisFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
-         transformToWorld.multiply(pelvisToSensorTransform);
+         sensorBaseFrame.getTransformToDesiredFrame(transformToWorld, ReferenceFrame.getWorldFrame());
+         transformToWorld.multiply(sensorTransform);
          tempSensorFramePose.set(transformToWorld);
          pointCloudData.applyTransform(transformToWorld);
 

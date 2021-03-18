@@ -167,13 +167,6 @@
                            <parameter name="leftFootUseSingularityAvoidanceInSwing" type="BooleanParameter" value="true" />
                            <parameter name="leftFootUseSingularityAvoidanceInSupport" type="BooleanParameter" value="true" />
                         </registry>
-                        <registry name="leftFootSupportState">
-                           <parameter name="leftFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootNeverHoldRotation" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootNeverHoldPosition" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootHoldFlatOrientation" type="BooleanParameter" value="false" />
-                        </registry>
                         <registry name="leftFootTaskspaceControlModule">
                            <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
                         </registry>
@@ -192,13 +185,6 @@
                            <parameter name="rightFootMinLegLength" type="DoubleParameter" min="0.0" max="1.0" value="0.1" />
                            <parameter name="rightFootUseSingularityAvoidanceInSwing" type="BooleanParameter" value="true" />
                            <parameter name="rightFootUseSingularityAvoidanceInSupport" type="BooleanParameter" value="true" />
-                        </registry>
-                        <registry name="rightFootSupportState">
-                           <parameter name="rightFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootNeverHoldRotation" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootNeverHoldPosition" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootHoldFlatOrientation" type="BooleanParameter" value="false" />
                         </registry>
                         <registry name="rightFootTaskspaceControlModule">
                            <parameter name="rightFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
@@ -1501,10 +1487,12 @@
                <parameter name="yawDriftRateBreakFrequency" type="DoubleParameter" min="0.0" max="1.0" value="0.0015" />
             </registry>
             <registry name="JointStateUpdater">
-               <parameter name="enableIMUBasedJointVelocityEstimator" type="BooleanParameter" value="true" />
-               <parameter name="imuBasedJointVelocityEstimatorAlphaFuseVelocity" type="DoubleParameter" min="0.0" max="1.0" value="4.080895976715269" />
-               <parameter name="imuBasedJointVelocityEstimatorAlphaFusePosition" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
-               <parameter name="imuBasedJointVelocityEstimatorSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+               <registry name="SpineIMUBasedJointStateEstimator">
+                  <parameter name="SpineIMUBasedJointStateEstimatorEnableOutput" type="BooleanParameter" value="false" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorAlphaFuseVelocity" type="DoubleParameter" min="0.0" max="1.0" value="4.080895976715269" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorAlphaFusePosition" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
+               </registry>
             </registry>
             <registry name="PelvisLinearStateUpdater">
                <registry name="PelvisIMUBasedLinearStateCalculator">

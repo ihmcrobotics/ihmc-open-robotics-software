@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.outputData;
 
 import controller_msgs.msg.dds.JointDesiredOutputMessage;
+import us.ihmc.commons.MathTools;
 
 /**
  * An interface for a data holder that is used to communicate desired joint behavior (setpoints and
@@ -236,6 +237,32 @@ public interface JointDesiredOutputReadOnly
    double getPositionFeedbackMaxError();
 
    /**
+    * Convenience for clamping the desired position with {@link #getPositionFeedbackMaxError()} if it
+    * is available.
+    * 
+    * @param currentPosition the current joint position that is to be used in the feedback controller.
+    * @return the desired position clamped such that
+    *         {@code |error| = Math.abs(getDesiredPosition() - currentPosition) <= getPositionFeedbackMaxError()}.
+    */
+   default double getClampedDesiredPosition(double currentPosition)
+   {
+      if (!hasDesiredPosition() || !hasPositionFeedbackMaxError())
+         return getDesiredPosition();
+
+      double error = getDesiredPosition() - currentPosition;
+
+      if (Math.abs(error) > getPositionFeedbackMaxError())
+      {
+         double errorClamped = MathTools.clamp(error, getPositionFeedbackMaxError());
+         return currentPosition + errorClamped;
+      }
+      else
+      {
+         return getDesiredPosition();
+      }
+   }
+
+   /**
     * Returns true if a maximum velocity error for feedback was set for this joint.
     *
     * @see #getVelocityFeedbackMaxError()
@@ -252,6 +279,32 @@ public interface JointDesiredOutputReadOnly
     * @return the maximum velocity error for the joint feedback control.
     */
    double getVelocityFeedbackMaxError();
+
+   /**
+    * Convenience for clamping the desired velocity with {@link #getVelocityFeedbackMaxError()} if it
+    * is available.
+    * 
+    * @param currentVelocity the current joint velocity that is to be used in the feedback controller.
+    * @return the desired velocity clamped such that
+    *         {@code |error| = Math.abs(getDesiredVelocity() - currentVelocity) <= getVelocityFeedbackMaxError()}.
+    */
+   default double getClampedDesiredVelocity(double currentVelocity)
+   {
+      if (!hasDesiredVelocity() || !hasVelocityFeedbackMaxError())
+         return getDesiredVelocity();
+
+      double error = getDesiredVelocity() - currentVelocity;
+
+      if (Math.abs(error) > getVelocityFeedbackMaxError())
+      {
+         double errorClamped = MathTools.clamp(error, getVelocityFeedbackMaxError());
+         return currentVelocity + errorClamped;
+      }
+      else
+      {
+         return getDesiredVelocity();
+      }
+   }
 
    /**
     * Copies the contents of this object to {@link JointDesiredOutputMessage}

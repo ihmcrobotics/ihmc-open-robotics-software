@@ -24,10 +24,11 @@ public class ManagedMessagerTest
    public void test()
    {
       MessagerAPIFactory messagerAPIFactory = new MessagerAPIFactory();
-      ManagedMessager managedMessager = new ManagedMessager(new SharedMemoryMessager(create()));
+      SharedMemoryMessager sharedMemoryMessager = new SharedMemoryMessager(create());
+      ManagedMessager managedMessager = new ManagedMessager(sharedMemoryMessager);
       try
       {
-         managedMessager.startMessager();
+         sharedMemoryMessager.startMessager();
       }
       catch (Exception e)
       {

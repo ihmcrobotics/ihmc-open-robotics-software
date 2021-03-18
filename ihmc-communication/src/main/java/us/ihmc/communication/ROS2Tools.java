@@ -5,12 +5,9 @@ import java.net.InetAddress;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
-import sensor_msgs.msg.dds.CompressedImage;
-import sensor_msgs.msg.dds.Image;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.*;
 import us.ihmc.util.PeriodicNonRealtimeThreadSchedulerFactory;
 import us.ihmc.util.PeriodicRealtimeThreadSchedulerFactory;
@@ -97,6 +94,10 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> REA_SUPPORT_REGIONS_INPUT
          = REA.withRobot(null).withInput().withType(PlanarRegionsListMessage.class).withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME);
    public static final ROS2Topic<REAStateRequestMessage> REA_STATE_REQUEST = REA.withInput().withTypeName(REAStateRequestMessage.class);
+   public static final ROS2Topic<ConcaveHullFactoryParametersStringMessage> CONCAVE_HULL_FACTORY_PARAMETERS
+         = REA.withInput().withType(ConcaveHullFactoryParametersStringMessage.class).withSuffix("concave_hull_factory_parameters");
+   public static final ROS2Topic<PolygonizerParametersStringMessage> POLYGONIZER_PARAMETERS
+         = REA.withInput().withType(PolygonizerParametersStringMessage.class).withSuffix("polygonizer_parameters");
 
    public static final ROS2Topic<VideoPacket> VIDEO = IHMC_ROOT.withTypeName(VideoPacket.class);
    public static final ROS2Topic<VideoPacket> D435_VIDEO = IHMC_ROOT.withModule(D435_NAME).withType(VideoPacket.class).withSuffix("video");

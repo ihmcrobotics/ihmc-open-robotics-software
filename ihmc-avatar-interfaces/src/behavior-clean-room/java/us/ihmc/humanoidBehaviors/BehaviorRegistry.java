@@ -78,4 +78,9 @@ public class BehaviorRegistry
       HashSet<BehaviorDefinition> thoseBehaviors = new HashSet<>(otherBehaviorRegistry.definitionEntries);
       return theseBehaviors.equals(thoseBehaviors);
    }
+
+   public static BehaviorRegistry getActiveRegistry()
+   {
+      return ACTIVE_REGISTRY;
+   }
 }

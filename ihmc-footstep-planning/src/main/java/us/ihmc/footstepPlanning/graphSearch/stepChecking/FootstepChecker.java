@@ -198,20 +198,12 @@ public class FootstepChecker implements FootstepCheckerInterface
 
       double candidateStepHeight = DiscreteFootstepTools.getSnappedStepHeight(candidateStep, candidateStepSnapData.getSnapTransform());
       double stanceStepHeight = DiscreteFootstepTools.getSnappedStepHeight(stanceStep, stanceStepSnapData.getSnapTransform());
-      List<BodyCollisionData> collisionData = collisionDetector.checkForCollision(candidateStep,
-                                                                                  stanceStep,
-                                                                                  candidateStepHeight,
-                                                                                  stanceStepHeight,
-                                                                                  parameters.getNumberOfBoundingBoxChecks());
-      for (int i = 0; i < collisionData.size(); i++)
-      {
-         if (collisionData.get(i).isCollisionDetected())
-         {
-            return true;
-         }
-      }
-
-      return false;
+      boolean collisionDetected = collisionDetector.checkForCollision(candidateStep,
+                                                                      stanceStep,
+                                                                      candidateStepHeight,
+                                                                      stanceStepHeight,
+                                                                      parameters.getIntermediateBodyBoxChecks());
+      return collisionDetected;
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)

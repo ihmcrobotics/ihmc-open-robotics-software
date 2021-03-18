@@ -8,7 +8,6 @@ import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
-import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
@@ -24,15 +23,13 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.dataStructures.parameters.FrameParameterVector3D;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -115,6 +112,7 @@ public class FootControlModule
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             FootholdRotationParameters footholdRotationParameters,
+                            SupportStateParameters supportStateParameters,
                             DoubleProvider minWeightFractionPerFoot,
                             DoubleProvider maxWeightFractionPerFoot,
                             YoRegistry parentRegistry)
@@ -133,6 +131,7 @@ public class FootControlModule
                                                 controllerToolbox,
                                                 explorationParameters,
                                                 footholdRotationParameters,
+                                                supportStateParameters,
                                                 registry);
 
       this.controllerToolbox = controllerToolbox;
@@ -411,7 +410,12 @@ public class FootControlModule
 
    public void setFootstep(Footstep footstep, double swingTime)
    {
-      swingState.setFootstep(footstep, swingTime);
+      setFootstep(footstep, swingTime, null, null);
+   }
+
+   public void setFootstep(Footstep footstep, double swingTime, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration)
+   {
+      swingState.setFootstep(footstep, swingTime, finalCoMVelocity, finalCoMAcceleration);
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
