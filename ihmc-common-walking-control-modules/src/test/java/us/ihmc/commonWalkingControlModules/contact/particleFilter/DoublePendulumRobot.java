@@ -131,8 +131,20 @@ import us.ihmc.simulationconstructionset.Robot;
       double H10 = H01;
       double H11 = Ixx2;
 
-      double C00 = -2.0 * mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * qd2 + damping1;
-      double C01 = - mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * qd2;
+      boolean factorCForSkewSymmetry = false;
+      double C00, C01;
+      if (factorCForSkewSymmetry)
+      {
+         // refactoring from pdf to make Mdot = C + C^T by moving some of the cross-term from C00 to C01
+         C00 = - mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * qd2 + damping1;
+         C01 = - mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * (qd1 + qd2);
+      }
+      else
+      {
+         C00 = -2.0 * mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * qd2 + damping1;
+         C01 = - mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * qd2;
+      }
+
       double C10 = mass2 * linkLength1 * lengthCoM2 * Math.sin(q2) * qd1;
       double C11 = damping2;
 
