@@ -86,11 +86,10 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    public void testToeOffWithDifferentStepLengths() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = 3;
-      double torsoAngle = 0.0;
 
       double icpProximity = 0.0;
-      double icpPercentLengthToLeadingFoot = 0.26;
-      double ecmpProximity = 0.045;
+      double icpPercentLengthToLeadingFoot = 0.25;
+      double ecmpProximity = 0.04; //0.045
 
       setupTest();
 
@@ -98,11 +97,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       for(double stepLength = getStepLength(); stepLength <= getMaxStepLength(); stepLength += 0.25)
       {
          // adjust toe off parameters
-         swingTime += 0.1;
-         icpPercentLengthToLeadingFoot += 0.04;
-         ecmpProximity += 0.005;
-         torsoAngle += Math.toRadians(4.0);
-         pitchTorso(torsoAngle);
          setYoVariablesToDoToeOffInSS(icpProximity, icpPercentLengthToLeadingFoot, ecmpProximity);
 
          // take steps
