@@ -51,7 +51,8 @@ int32 max_iterations -1
 float64 horizon_length
 # Planar regions to use, if you don't want to assume flat ground
 PlanarRegionsListMessage planar_regions_list_message
-# Explicitly tell the planner to use flat ground
+# If true, steps are snapped assuming flat ground.
+# Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
 bool assume_flat_ground
 # Set this id to keep track of your request
 int32 planner_request_id -1
