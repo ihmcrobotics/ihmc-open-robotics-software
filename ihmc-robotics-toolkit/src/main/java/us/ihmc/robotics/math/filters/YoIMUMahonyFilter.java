@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
@@ -51,6 +52,12 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    private final YoDouble proportionalGain;
    private final YoDouble integralGain;
 
+   private final YoBoolean enableYawRateBiasCorrection;
+   private final YoDouble zeroAngularVelocityThreshold;
+   private final YoDouble yawRateBiasGain;
+   private final YoDouble yawRateBiasEstimate;
+   private final YoFrameVector3D yawRateBiasError;
+
    private final double updateDT;
 
    private final YoBoolean hasBeenInitialized;
@@ -65,13 +72,25 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                             YoFrameVector3D estimatedAngularVelocity,
                             YoRegistry parentRegistry)
    {
+      this(imuName, nameSuffix, updateDT, false, sensorFrame, estimatedOrientation, estimatedAngularVelocity, parentRegistry);
+   }
+
+   public YoIMUMahonyFilter(String imuName,
+                            String nameSuffix,
+                            double updateDT,
+                            boolean createYawRateBiasEstimator,
+                            ReferenceFrame sensorFrame,
+                            YoFrameQuaternion estimatedOrientation,
+                            YoFrameVector3D estimatedAngularVelocity,
+                            YoRegistry parentRegistry)
+   {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
 
       YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
-      estimatedOrientation.checkReferenceFrameMatch(sensorFrame);
+      estimatedOrientation.checkReferenceFrameMatch(sensorFrame.getRootFrame());
       if (estimatedAngularVelocity != null)
          estimatedAngularVelocity.checkReferenceFrameMatch(sensorFrame);
 
@@ -84,10 +103,38 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       proportionalGain = new YoDouble("ProportionalGain" + nameSuffix, registry);
       integralGain = new YoDouble("IntegralGain" + nameSuffix, registry);
 
+      if (createYawRateBiasEstimator)
+      {
+         enableYawRateBiasCorrection = new YoBoolean("EnableYawRateBiasCorrection" + nameSuffix, registry);
+         zeroAngularVelocityThreshold = new YoDouble("ZeroAngularVelocityThreshold" + nameSuffix, registry);
+         yawRateBiasGain = new YoDouble("YawRateBiasFilterGain" + nameSuffix, registry);
+         yawRateBiasEstimate = new YoDouble("YawRateBiasEstimate" + nameSuffix, registry);
+         yawRateBiasError = new YoFrameVector3D("YawRateBiasError", nameSuffix, sensorFrame, registry);
+      }
+      else
+      {
+         enableYawRateBiasCorrection = null;
+         zeroAngularVelocityThreshold = null;
+         yawRateBiasGain = null;
+         yawRateBiasEstimate = null;
+         yawRateBiasError = null;
+      }
+
       hasBeenInitialized = new YoBoolean("HasBeenInitialized" + nameSuffix, registry);
    }
 
    public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame, YoRegistry parentRegistry)
+   {
+      this(imuName, namePrefix, nameSuffix, updateDT, false, sensorFrame, parentRegistry);
+   }
+
+   public YoIMUMahonyFilter(String imuName,
+                            String namePrefix,
+                            String nameSuffix,
+                            double updateDT,
+                            boolean createYawRateBiasEstimator,
+                            ReferenceFrame sensorFrame,
+                            YoRegistry parentRegistry)
    {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
@@ -95,7 +142,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
-      estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame, registry);
+      estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame.getRootFrame(), registry);
       estimatedAngularVelocity = new YoFrameVector3D(namePrefix, nameSuffix, sensorFrame, registry);
 
       yoErrorTerm = new YoFrameVector3D("ErrorTerm", nameSuffix, sensorFrame, registry);
@@ -103,6 +150,23 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
       proportionalGain = new YoDouble("ProportionalGain" + nameSuffix, registry);
       integralGain = new YoDouble("IntegralGain" + nameSuffix, registry);
+
+      if (createYawRateBiasEstimator)
+      {
+         enableYawRateBiasCorrection = new YoBoolean("EnableYawRateBiasCorrection" + nameSuffix, registry);
+         zeroAngularVelocityThreshold = new YoDouble("ZeroAngularVelocityThreshold" + nameSuffix, registry);
+         yawRateBiasGain = new YoDouble("YawRateBiasGain" + nameSuffix, registry);
+         yawRateBiasEstimate = new YoDouble("YawRateBiasEstimate" + nameSuffix, registry);
+         yawRateBiasError = new YoFrameVector3D("YawRateBiasError", nameSuffix, sensorFrame, registry);
+      }
+      else
+      {
+         enableYawRateBiasCorrection = null;
+         zeroAngularVelocityThreshold = null;
+         yawRateBiasGain = null;
+         yawRateBiasEstimate = null;
+         yawRateBiasError = null;
+      }
 
       hasBeenInitialized = new YoBoolean("HasBeenInitialized" + nameSuffix, registry);
    }
@@ -156,6 +220,13 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       this.integralGain.set(integralGain);
    }
 
+   public void setYawDriftParameters(boolean enableCorrection, double zeroAngularVelocityThreshold, double gain)
+   {
+      enableYawRateBiasCorrection.set(enableCorrection);
+      this.zeroAngularVelocityThreshold.set(zeroAngularVelocityThreshold);
+      yawRateBiasGain.set(gain);
+   }
+
    /**
     * Mostly useful for test purpose, but can be used to reinitilize this filter by giving
     * {@code false}.
@@ -169,6 +240,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    private final Vector3D rotationUpdate = new Vector3D();
    private final Quaternion quaternionUpdate = new Quaternion();
+   private final Vector3D angularVelocityUnbiased = new Vector3D();
    private final Vector3D angularVelocityTerm = new Vector3D();
 
    @Override
@@ -226,11 +298,24 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          {
             yoIntegralTerm.setToZero();
          }
+
+         angularVelocityUnbiased.add(inputAngularVelocity, yoIntegralTerm);
       }
       else
       {
          yoErrorTerm.setToZero();
          angularVelocityTerm.set(inputAngularVelocity);
+         angularVelocityUnbiased.set(inputAngularVelocity);
+      }
+
+      if (yawRateBiasError != null)
+      {
+         updateYawRateBiasEstimator(estimatedOrientation, angularVelocityUnbiased, yawRateBiasError);
+         if (enableYawRateBiasCorrection.getValue())
+         {
+            angularVelocityTerm.add(yawRateBiasError);
+            angularVelocityUnbiased.add(yawRateBiasError);
+         }
       }
 
       rotationUpdate.setAndScale(updateDT, angularVelocityTerm);
@@ -238,7 +323,19 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       estimatedOrientation.multiply(quaternionUpdate);
 
       if (estimatedAngularVelocity != null)
-         estimatedAngularVelocity.add(inputAngularVelocity, yoIntegralTerm);
+         estimatedAngularVelocity.set(angularVelocityUnbiased);
+   }
+
+   private void updateYawRateBiasEstimator(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity, Vector3DBasics yawRateVector)
+   {
+      if (angularVelocity.lengthSquared() > MathTools.square(zeroAngularVelocityThreshold.getValue()))
+         return;
+
+      orientation.transform(angularVelocity, yawRateVector);
+
+      yawRateBiasEstimate.set(EuclidCoreTools.interpolate(yawRateBiasEstimate.getValue(), yawRateVector.getZ(), yawRateBiasGain.getValue()));
+      yawRateVector.set(0, 0, -yawRateBiasEstimate.getValue());
+      orientation.inverseTransform(yawRateVector);
    }
 
    @Override
@@ -257,6 +354,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          estimatedOrientation.invert();
 
       yoIntegralTerm.setToZero();
+      yawRateBiasEstimate.set(0.0);
       hasBeenInitialized.set(true);
    }
 
