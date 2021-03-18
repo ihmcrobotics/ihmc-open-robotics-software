@@ -1,12 +1,16 @@
 package us.ihmc.atlas.parameters;
 
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.*;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.FORCE_SENSOR;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.TORQUE_SENSOR;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -14,6 +18,7 @@ import us.ihmc.robotics.dataStructures.PolynomialReadOnly;
 import us.ihmc.robotics.dataStructures.parameters.ParameterPolynomial;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,8 +26,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
-import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -54,7 +59,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
    private final HumanoidJointNameMap jointMap;
 
-   private final ImmutablePair<String, String> imusForSpineJointEstimation;
+   private final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
 
    private final boolean applyJointPositionPolynomialApproximation;
 
@@ -63,8 +68,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       this.jointMap = jointMap;
       this.runningOnRealRobot = runningOnRealRobot;
       this.estimatorDT = estimatorDT;
-
-      imusForSpineJointEstimation = new ImmutablePair<String, String>(sensorInformation.getPrimaryBodyImu(), sensorInformation.getChestImu());
 
       wristForceSensorNames = sensorInformation.getWristForceSensorNames();
       footForceSensorNames = sensorInformation.getFeetForceSensorNames();
@@ -81,12 +84,22 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       for (RobotSide robotSide : RobotSide.values)
       {
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 12000.0); //8000.0);
-//         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);
+         //         jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW), 7000.0);
       }
-//      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 8000.0);
-//      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 8000.0);
-//      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 8000.0);
+      //      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_YAW), 8000.0);
+      //      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_PITCH), 8000.0);
+      //      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 8000.0);
 
+      String pelvisIMU = sensorInformation.getPrimaryBodyImu();
+      String chestIMU = sensorInformation.getChestImu();
+      double breakFrequencyForVelocityEstimation = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.001);
+      double breakFrequencyForPositionEstimation = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(runningOnRealRobot ? 0.995 : 0.0, 0.001);
+      imuBasedJointStateEstimatorParameters.add(new IMUBasedJointStateEstimatorParameters("Spine",
+                                                                                          true,
+                                                                                          pelvisIMU,
+                                                                                          chestIMU,
+                                                                                          breakFrequencyForVelocityEstimation,
+                                                                                          breakFrequencyForPositionEstimation));
    }
 
    @Override
@@ -97,9 +110,11 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       if (applyJointPositionPolynomialApproximation)
       {
          // This was obtained using LIDAR by observing the variation in the back z position error. It does not correct for a possible absolute position error.
-         double[] coefficients = new double[]{0.00305, 1.04087};
+         double[] coefficients = new double[] {0.00305, 1.04087};
          PolynomialReadOnly backZPolynomial = new ParameterPolynomial("q_poly_back_bkz", coefficients, registry);
-         sensorProcessing.addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(backZPolynomial, false, jointMap.getSpineJointName(SpineJointName.SPINE_YAW));
+         sensorProcessing.addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(backZPolynomial,
+                                                                                    false,
+                                                                                    jointMap.getSpineJointName(SpineJointName.SPINE_YAW));
       }
 
       String[] armJointNames = createArmJointNames();
@@ -116,7 +131,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       DoubleProvider jointVelocitySlopTime = new DoubleParameter("jointBacklashSlopTime", registry, jointVelocitySlopTimeForBacklashCompensation);
 
       DoubleProvider armJointVelocityAlphaFilter1 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter1", defaultFilterBreakFrequencyArm);
-//      DoubleProvider armJointVelocityAlphaFilter2 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter2", defaultFilterBreakFrequencyArm);
+      //      DoubleProvider armJointVelocityAlphaFilter2 = sensorProcessing.createAlphaFilter("armJointVelocityAlphaFilter2", defaultFilterBreakFrequencyArm);
       DoubleProvider armJointVelocitySlopTime = new DoubleParameter("armJointBacklashSlopTime", registry, jointVelocitySlopTimeForBacklashCompensation);
 
       DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationAlphaFilter", defaultFilterBreakFrequency);
@@ -133,11 +148,25 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       {
          DoubleProvider elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotAlphaFilter", jointElasticityFilterFrequencyHz);
          DoubleProvider maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", 0.1);
-         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffnessWithJointsToIgnore("stiffness", defaultJointStiffness, jointSpecificStiffness, armJointNames);
+         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffnessWithJointsToIgnore("stiffness",
+                                                                                                                            defaultJointStiffness,
+                                                                                                                            jointSpecificStiffness,
+                                                                                                                            armJointNames);
 
-         Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(elasticityAlphaFilter, true, JOINT_TAU, armJointNames);
-         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
-         sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false, armJointNames);
+         Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(elasticityAlphaFilter,
+                                                                                                                  true,
+                                                                                                                  JOINT_TAU,
+                                                                                                                  armJointNames);
+         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness,
+                                                                                maxDeflection,
+                                                                                filteredTauForElasticity,
+                                                                                false,
+                                                                                armJointNames);
+         sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness,
+                                                                                maxDeflection,
+                                                                                filteredTauForElasticity,
+                                                                                false,
+                                                                                armJointNames);
       }
 
       // 3- Add backlash compensator
@@ -188,12 +217,6 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public double getEstimatorDT()
    {
       return estimatorDT;
-   }
-
-   @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return runningOnRealRobot;
    }
 
    @Override
@@ -351,29 +374,8 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
+   public List<IMUBasedJointStateEstimatorParameters> getIMUBasedJointStateEstimatorParameters()
    {
-      return true;
-   }
-
-   @Override
-   public double getBreakFrequencyForSpineJointVelocityEstimation()
-   {
-      // 04/24/2017 get rid of pelvis shaking
-      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.001);
-   }
-
-   @Override
-   public double getBreakFrequencyForSpineJointPositionEstimation()
-   {
-      // 04/24/2017 get rid of pelvis shaking
-      double alpha = runningOnRealRobot ? 0.995 : 0.0;
-      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(alpha, 0.001);
-   }
-
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      return imusForSpineJointEstimation;
+      return imuBasedJointStateEstimatorParameters;
    }
 }

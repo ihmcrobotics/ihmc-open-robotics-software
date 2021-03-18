@@ -57,7 +57,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  stepDownWeight                               = keys.addDoubleKey ("Step down weight", 0.2);
    public static final DoubleStoredPropertyKey  rollWeight                                   = keys.addDoubleKey ("Roll weight", 0.2);
    public static final DoubleStoredPropertyKey  pitchWeight                                  = keys.addDoubleKey ("Pitch weight", 0.2);
-   public static final DoubleStoredPropertyKey  maximum2dDistanceFromBoundingBoxToPenalize   = keys.addDoubleKey ("Maximum 2D distance from bounding box to penalize", 0.0);
    public static final DoubleStoredPropertyKey  footholdAreaWeight                           = keys.addDoubleKey ("Foothold area weight", 0.0);
 
    // Footstep snapping and wiggling
@@ -83,7 +82,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  bodyBoxBaseX                                 = keys.addDoubleKey ("Body box base X", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxBaseY                                 = keys.addDoubleKey ("Body box base Y", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxBaseZ                                 = keys.addDoubleKey ("Body box base Z", 0.25);
-   public static final IntegerStoredPropertyKey numberOfBoundingBoxChecks                    = keys.addIntegerKey("Number of bounding box checks", 1);
+   public static final IntegerStoredPropertyKey intermediateBodyBoxChecks                    = keys.addIntegerKey("Intermediate body box checks", 1);
 
    // Shin collision check
    public static final BooleanStoredPropertyKey enableShinCollisionCheck                     = keys.addBooleanKey("Enable shin collision check", false);

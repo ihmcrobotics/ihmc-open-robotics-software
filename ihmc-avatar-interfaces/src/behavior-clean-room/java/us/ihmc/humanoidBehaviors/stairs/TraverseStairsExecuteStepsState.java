@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.stairs;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
@@ -9,12 +8,10 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.robotics.stateMachine.core.State;
 
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 
 public class TraverseStairsExecuteStepsState implements State
@@ -33,7 +30,7 @@ public class TraverseStairsExecuteStepsState implements State
       this.footstepPlannerOutput = footstepPlannerOutput;
       this.robotInterface = helper.getOrCreateRobotInterface();
 
-      helper.createROS2ControllerCallback(WalkingStatusMessage.class, message ->
+      helper.subscribeToControllerViaCallback(WalkingStatusMessage.class, message ->
       {
          if (message.getWalkingStatus() == WalkingStatus.COMPLETED.toByte())
          {

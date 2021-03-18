@@ -4,18 +4,22 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Transform;
 import com.jme3.math.Vector3f;
 
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.UIFootstepGeneratorParameters;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.valkyrie.ValkyrieCollisionBasedSelectionModel;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.wholeBodyController.UIParameters;
 
 public class ValkyrieUIParameters implements UIParameters
 {
+   private final ValkyrieRobotVersion robotVersion;
    private final ValkyriePhysicalProperties physicalProperties;
    private final ValkyrieJointMap jointMap;
 
-   public ValkyrieUIParameters(ValkyriePhysicalProperties physicalProperties, ValkyrieJointMap jointMap)
+   public ValkyrieUIParameters(ValkyrieRobotVersion robotVersion, ValkyriePhysicalProperties physicalProperties, ValkyrieJointMap jointMap)
    {
+      this.robotVersion = robotVersion;
       this.physicalProperties = physicalProperties;
       this.jointMap = jointMap;
    }
@@ -99,6 +103,12 @@ public class ValkyrieUIParameters implements UIParameters
    @Override
    public RobotCollisionModel getSelectionModel()
    {
-      return new ValkyrieCollisionBasedSelectionModel(jointMap);
+      return new ValkyrieCollisionBasedSelectionModel(robotVersion, jointMap);
+   }
+
+   @Override
+   public UIFootstepGeneratorParameters getUIFootstepGeneratorParameters()
+   {
+      return new ValkyrieUIFootstepGeneratorParameters();
    }
 }

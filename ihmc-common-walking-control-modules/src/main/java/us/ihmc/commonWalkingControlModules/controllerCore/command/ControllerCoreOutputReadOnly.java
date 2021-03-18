@@ -1,9 +1,10 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 
 /**
@@ -24,7 +25,12 @@ public interface ControllerCoreOutputReadOnly
    /**
     * Typically used to obtain the desired center of pressures for the feet.
     */
-   public abstract void getDesiredCenterOfPressure(FramePoint2D copToPack, RigidBodyBasics rigidBody);
+   public abstract void getDesiredCenterOfPressure(FramePoint2DBasics copToPack, RigidBodyBasics rigidBody);
+
+   /**
+    * Typically used to obtain the desired external wrench for the feet.
+    */
+   public abstract void getDesiredExternalWrench(WrenchBasics desiredExternalWrenchToPack, RigidBodyBasics rigidBody);
 
    /**
     * Retrieves the linear momentum rate obtained after the optimization problem has been solved.
@@ -33,13 +39,13 @@ public interface ControllerCoreOutputReadOnly
     * compute the linear momentum rate.
     * </p>
     * <p>
-    * It is useful to compare against the desired momentum rate that provided to the controller core
-    * as input.
+    * It is useful to compare against the desired momentum rate that provided to the controller core as
+    * input.
     * </p>
     * 
     * @param linearMomentumRateToPack the linear momentum rate after optimization.
     */
-   public abstract void getLinearMomentumRate(FrameVector3D linearMomentumRateToPack);
+   public abstract void getLinearMomentumRate(FrameVector3DBasics linearMomentumRateToPack);
 
    /**
     * Retrieves the desired state for the root joint.

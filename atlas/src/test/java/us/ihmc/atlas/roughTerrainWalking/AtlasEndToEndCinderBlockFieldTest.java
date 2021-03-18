@@ -1,5 +1,6 @@
 package us.ihmc.atlas.roughTerrainWalking;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.AtlasRobotModel;
@@ -44,4 +45,18 @@ public class AtlasEndToEndCinderBlockFieldTest extends EndToEndCinderBlockFieldT
       super.testWalkingOverCinderBlockField();
    }
 
+   @Override
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
+   public void testSteppingStonesA() throws Exception
+   {
+      super.testSteppingStonesA();
+   }
+
+   @Tag("humanoid-rough-terrain-slow")
+   @Test
+   public void testSlantedCinderBlockFieldA() throws Exception
+   {
+      super.testSlantedCinderBlockField(false);
+   }
 }

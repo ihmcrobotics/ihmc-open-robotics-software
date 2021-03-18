@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;

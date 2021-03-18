@@ -11,7 +11,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
-import org.apache.commons.collections.Bag;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
@@ -23,8 +22,17 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.AngularMomentumHandler;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPPointViewer;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryGeneratorState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.FlamingoCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
@@ -55,6 +63,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -102,6 +111,8 @@ public class BalanceManager
    private final YoFrameVector3D yoDesiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
    private final YoFramePoint2D yoFinalDesiredICP = new YoFramePoint2D("finalDesiredICP", worldFrame, registry);
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
+   private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
+   private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
 
    private final SwingSpeedUpCalculator swingSpeedUpCalculator = new SwingSpeedUpCalculator();
 
@@ -127,11 +138,8 @@ public class BalanceManager
    private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
    private final FramePoint2D desiredCoM2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
-   private final FramePoint3D perfectCMP3d = new FramePoint3D();
    private final FramePoint2D perfectCMP2d = new FramePoint2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    private final YoBoolean blendICPTrajectories = new YoBoolean("blendICPTrajectories", registry);
 
@@ -422,11 +430,6 @@ public class BalanceManager
       this.supportSide = supportSide;
    }
 
-   private void updatePolygons()
-   {
-      bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
-   }
-
    public void compute(RobotSide supportLeg, FeedbackControlCommand<?> heightControlCommand, boolean keepCoPInsideSupportPolygon,
                        boolean controlHeightWithMomentum)
    {
@@ -588,6 +591,8 @@ public class BalanceManager
       comTrajectoryPlanner.compute(totalStateDuration.getDoubleValue());
 
       yoFinalDesiredCoM.set(comTrajectoryPlanner.getDesiredCoMPosition());
+      yoFinalDesiredCoMVelocity.set(comTrajectoryPlanner.getDesiredCoMVelocity());
+      yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
@@ -596,6 +601,8 @@ public class BalanceManager
       {
          yoFinalDesiredICP.setToNaN();
          yoFinalDesiredCoM.setToNaN();
+         yoFinalDesiredCoMVelocity.setToNaN();
+         yoFinalDesiredCoMAcceleration.setToNaN();
       }
 
       // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
@@ -720,6 +727,16 @@ public class BalanceManager
       return yoFinalDesiredCoM;
    }
 
+   public FrameVector3DReadOnly getFinalDesiredCoMVelocity()
+   {
+      return yoFinalDesiredCoMVelocity;
+   }
+   
+   public FrameVector3DReadOnly getFinalDesiredCoMAcceleration()
+   {
+      return yoFinalDesiredCoMAcceleration;
+   }
+
    public FrameVector3DReadOnly getDesiredCoMVelocity()
    {
       return yoDesiredCoMVelocity;
@@ -760,6 +777,8 @@ public class BalanceManager
    {
       yoFinalDesiredICP.setToNaN();
       yoFinalDesiredCoM.setToNaN();
+      yoFinalDesiredCoMVelocity.setToNaN();
+      yoFinalDesiredCoMAcceleration.setToNaN();
       yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
       yoDesiredCoMVelocity.setToZero();
@@ -777,6 +796,8 @@ public class BalanceManager
 
       initializeOnStateChange = true;
       stepAdjustmentController.reset();
+      comTrajectoryPlanner.reset();
+      angularMomentumHandler.resetAngularMomentum();
    }
 
    public void prepareForDoubleSupportPushRecovery()

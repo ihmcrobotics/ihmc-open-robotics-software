@@ -18,6 +18,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 
 /**
  * Implementation of a collision model that can be used to select rigid bodies via a GUI.
@@ -28,10 +29,12 @@ import us.ihmc.robotics.partNames.HumanoidJointNameMap;
  */
 public class ValkyrieCollisionBasedSelectionModel implements RobotCollisionModel
 {
+   private final ValkyrieRobotVersion robotVersion;
    private final HumanoidJointNameMap jointMap;
 
-   public ValkyrieCollisionBasedSelectionModel(HumanoidJointNameMap jointMap)
+   public ValkyrieCollisionBasedSelectionModel(ValkyrieRobotVersion robotVersion, HumanoidJointNameMap jointMap)
    {
+      this.robotVersion = robotVersion;
       this.jointMap = jointMap;
    }
 
@@ -80,30 +83,48 @@ public class ValkyrieCollisionBasedSelectionModel implements RobotCollisionModel
          }
 
          { // Elbow
-            JointBasics elbowPitch = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
-            MovingReferenceFrame elbowPitchFrame = elbowPitch.getFrameAfterJoint();
-            FrameCapsule3D elbowShape = new FrameCapsule3D(elbowPitchFrame, 0.08, 0.05);
-            elbowShape.getPosition().set(0.0, 0.0, 0.0);
-            elbowShape.getAxis().set(Axis3D.Z);
-            collidables.add(new Collidable(elbowPitch.getSuccessor(), collisionMask, collisionGroup, elbowShape));
+            if (robotVersion.hasHands())
+            {
+               JointBasics elbowPitch = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
+               MovingReferenceFrame elbowPitchFrame = elbowPitch.getFrameAfterJoint();
+               FrameCapsule3D elbowShape = new FrameCapsule3D(elbowPitchFrame, 0.08, 0.05);
+               elbowShape.getPosition().set(0.0, 0.0, 0.0);
+               elbowShape.getAxis().set(Axis3D.Z);
+               collidables.add(new Collidable(elbowPitch.getSuccessor(), collisionMask, collisionGroup, elbowShape));
+            }
+            else
+            {
+               JointBasics elbow = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_PITCH), multiBodySystem);
+               MovingReferenceFrame elbowFrame = elbow.getFrameAfterJoint();
+               FrameCapsule3D forearmShape = new FrameCapsule3D(elbowFrame, 0.26, 0.055);
+               forearmShape.getPosition().set(-0.03, robotSide.negateIfRightSide(0.21), 0.0);
+               forearmShape.getAxis().set(Axis3D.Y);
+               collidables.add(new Collidable(elbow.getSuccessor(), collisionMask, collisionGroup, forearmShape));
+            }
          }
 
          { // Forearm
-            JointBasics elbowRoll = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), multiBodySystem);
-            MovingReferenceFrame elbowRollFrame = elbowRoll.getFrameAfterJoint();
-            FrameCapsule3D forearmShape = new FrameCapsule3D(elbowRollFrame, 0.15, 0.075);
-            forearmShape.getPosition().set(0.0, robotSide.negateIfRightSide(0.14), 0.0);
-            forearmShape.getAxis().set(Axis3D.Y);
-            collidables.add(new Collidable(elbowRoll.getSuccessor(), collisionMask, collisionGroup, forearmShape));
+            if (robotVersion.hasHands())
+            {
+               JointBasics elbowRoll = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), multiBodySystem);
+               MovingReferenceFrame elbowRollFrame = elbowRoll.getFrameAfterJoint();
+               FrameCapsule3D forearmShape = new FrameCapsule3D(elbowRollFrame, 0.15, 0.075);
+               forearmShape.getPosition().set(0.0, robotSide.negateIfRightSide(0.14), 0.0);
+               forearmShape.getAxis().set(Axis3D.Y);
+               collidables.add(new Collidable(elbowRoll.getSuccessor(), collisionMask, collisionGroup, forearmShape));
+            }
          }
 
          { // Hand
-            RigidBodyBasics hand = RobotCollisionModel.findRigidBody(jointMap.getHandName(robotSide), multiBodySystem);
-            MovingReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
-            FrameCapsule3D handShape = new FrameCapsule3D(handFrame, 0.02, 0.055);
-            handShape.getPosition().set(-0.007, robotSide.negateIfRightSide(0.062), -0.01);
-            handShape.getAxis().set(Axis3D.Y);
-            collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShape));
+            if (robotVersion.hasHands())
+            {
+               RigidBodyBasics hand = RobotCollisionModel.findRigidBody(jointMap.getHandName(robotSide), multiBodySystem);
+               MovingReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
+               FrameCapsule3D handShape = new FrameCapsule3D(handFrame, 0.02, 0.055);
+               handShape.getPosition().set(-0.007, robotSide.negateIfRightSide(0.062), -0.01);
+               handShape.getAxis().set(Axis3D.Y);
+               collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShape));
+            }
          }
       }
 
@@ -141,8 +162,8 @@ public class ValkyrieCollisionBasedSelectionModel implements RobotCollisionModel
             RigidBodyBasics thigh = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem)
                                                        .getPredecessor();
             MovingReferenceFrame thighFrame = thigh.getParentJoint().getFrameAfterJoint();
-            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.22, 0.12);
-            thighShape.getPosition().set(0.02, robotSide.negateIfRightSide(0.09), -0.22);
+            FrameCapsule3D thighShape = new FrameCapsule3D(thighFrame, 0.27, 0.13);
+            thighShape.getPosition().set(0.02, robotSide.negateIfRightSide(0.09), -0.23);
             thighShape.getAxis().set(new Vector3D(0.0, 0.0, 1.0));
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShape));
          }

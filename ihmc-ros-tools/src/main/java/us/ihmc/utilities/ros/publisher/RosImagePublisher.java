@@ -60,20 +60,26 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
         publish(message);
    }
 
-   public void publish(int width, int height, ChannelBuffer channelBuffer)
+   public Image createMessage(int width, int height, ChannelBuffer channelBuffer)
    {
       Image message = getMessage();
       Header header = message.getHeader();
 
       header.setSeq(seq++);
 
+      message.setIsBigendian((byte) 0);
+      message.setStep(width * 2);
       message.setHeight(height);
       message.setWidth(width);
       message.setEncoding("16UC1");
 
       message.setData(channelBuffer);
+      return message;
+   }
 
-      publish(message);
+   public void publish(Image message)
+   {
+      super.publish(message);
    }
 
    public static int floatTo16BitInt(float fval)

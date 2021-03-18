@@ -28,8 +28,9 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.string.StringTools;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,7 +56,7 @@ public class LookAndStepLocalizationTask
 
    public static class LookAndStepBodyPathLocalization extends LookAndStepLocalizationTask
    {
-      private SingleThreadSizeOneQueueExecutor executor;
+      private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input swingSleepCompleteInput = new Input();
@@ -65,22 +66,22 @@ public class LookAndStepLocalizationTask
       {
          lastCommandedFootsteps = lookAndStep.lastCommandedFootsteps;
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
-         finishedWalkingNotification = lookAndStep.helper.createWalkingCompletedNotification();
-         ros2EmptyPublisher = lookAndStep.helper::publishROS2;
+         finishedWalkingNotification = lookAndStep.helper.subscribeToWalkingCompletedViaNotification();
+         ros2EmptyPublisher = lookAndStep.helper::publish;
          bodyPathPlanning = lookAndStep.bodyPathPlanning;
          behaviorStateReference = lookAndStep.behaviorStateReference;
          bodyPathLocalizationOutput = lookAndStep.footstepPlanning::acceptLocalizationResult;
          statusLogger = lookAndStep.statusLogger;
-         uiPublisher = lookAndStep.helper::publishToUI;
+         uiPublisher = lookAndStep.helper::publish;
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
          isBeingReset = lookAndStep.isBeingReset;
          stepping = lookAndStep.stepping;
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
 
-         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+         executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-         bodyPathPlanInput.addCallback(data -> executor.submitTask(this::snapshotAndRun));
-         swingSleepCompleteInput.addCallback(() -> executor.submitTask(this::snapshotAndRun));
+         bodyPathPlanInput.addCallback(data -> executor.clearQueueAndExecute(this::snapshotAndRun));
+         swingSleepCompleteInput.addCallback(() -> executor.clearQueueAndExecute(this::snapshotAndRun));
       }
 
       public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)

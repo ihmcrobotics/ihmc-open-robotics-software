@@ -18,7 +18,7 @@ mainDependencies {
    api("org.apache.lucene:lucene-analyzers-common:4.3.0")
    api("org.apache.lucene:lucene-core:4.3.0")
    api("org.apache.lucene:lucene-queryparser:4.3.0")
-   api("net.java.jinput:jinput:2.0.6-ihmc")
+   api("net.java.jinput:jinput:2.0.6-ihmc2")
    api("com.google.guava:guava:18.0")
 
    api("us.ihmc:ihmc-commons:0.30.4")

@@ -7,7 +7,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
 public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
@@ -18,7 +18,7 @@ public class AtlasDirectRobotInterface implements RobotLowLevelMessenger
    private final IHMCROS2Publisher<AbortWalkingMessage> abortWalkingPublisher;
    private final IHMCROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
 
-   public AtlasDirectRobotInterface(ROS2Node ros2Node, DRCRobotModel robotModel)
+   public AtlasDirectRobotInterface(ROS2NodeInterface ros2Node, DRCRobotModel robotModel)
    {
       ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
       lowLevelModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AtlasLowLevelControlModeMessage.class, inputTopic);

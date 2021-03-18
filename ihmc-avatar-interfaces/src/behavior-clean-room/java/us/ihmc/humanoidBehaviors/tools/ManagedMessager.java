@@ -121,27 +121,9 @@ public class ManagedMessager implements Messager
    }
 
    @Override
-   public void startMessager() throws Exception
-   {
-      messager.startMessager();
-   }
-
-   @Override
-   public void closeMessager() throws Exception
-   {
-      messager.closeMessager();
-   }
-
-   @Override
    public boolean isMessagerOpen()
    {
       return messager.isMessagerOpen();
-   }
-
-   @Override
-   public void notifyMessagerStateListeners()
-   {
-      messager.notifyMessagerStateListeners();
    }
 
    @Override
@@ -154,6 +136,24 @@ public class ManagedMessager implements Messager
    public boolean removeMessagerStateListener(MessagerStateListener listener)
    {
       return messager.removeMessagerStateListener(listener);
+   }
+
+   @Override
+   public void startMessager() throws Exception
+   {
+      messager.startMessager();
+   }
+
+   @Override
+   public void closeMessager() throws Exception
+   {
+      messager.closeMessager();
+   }
+
+   @Override
+   public void notifyMessagerStateListeners()
+   {
+      messager.notifyMessagerStateListeners();
    }
 
    @Override

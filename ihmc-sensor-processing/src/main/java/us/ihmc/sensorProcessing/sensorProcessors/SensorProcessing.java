@@ -265,7 +265,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    };
 
-   public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions, SensorProcessingConfiguration sensorProcessingConfiguration,
+   public SensorProcessing(StateEstimatorSensorDefinitions stateEstimatorSensorDefinitions,
+                           SensorProcessingConfiguration sensorProcessingConfiguration,
                            YoRegistry parentRegistry)
    {
       this.updateDT = sensorProcessingConfiguration.getEstimatorDT();
@@ -567,7 +568,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                             processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed list of the names of the sensors that need to be processed.
     */
-   public Map<String, Integer> addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
+   public Map<String, Integer> addSensorAlphaFilterOnlyForSpecifiedSensors(DoubleProvider alphaFilter,
+                                                                           boolean forVizOnly,
+                                                                           SensorType sensorType,
                                                                            String... sensorsToBeProcessed)
    {
       return addSensorAlphaFilterWithSensorsToIgnore(alphaFilter, forVizOnly, sensorType, invertSensorSelection(sensorType, sensorsToBeProcessed));
@@ -582,7 +585,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                        processing stage, nor as the output of the sensor processing.
     * @param sensorsToIgnore list of the names of the sensors to ignore.
     */
-   public Map<String, Integer> addSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
+   public Map<String, Integer> addSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter,
+                                                                       boolean forVizOnly,
+                                                                       SensorType sensorType,
                                                                        String... sensorsToIgnore)
    {
       Map<String, Integer> processorIDMap;
@@ -607,7 +612,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return Collections.unmodifiableMap(processorIDMap);
    }
 
-   private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
+   private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(DoubleProvider alphaFilter,
+                                                                boolean forVizOnly,
+                                                                SensorType sensorType,
                                                                 List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
@@ -639,7 +646,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return processorsIDs;
    }
 
-   private Map<String, Integer> addForceSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
+   private Map<String, Integer> addForceSensorAlphaFilterWithSensorsToIgnore(DoubleProvider alphaFilter,
+                                                                             boolean forVizOnly,
+                                                                             SensorType sensorType,
                                                                              List<String> sensorsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
@@ -671,7 +680,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return processorsIDs;
    }
 
-   private Map<String, Integer> addJointAlphaFilterWithJointsToIgnore(DoubleProvider alphaFilter, boolean forVizOnly, SensorType sensorType,
+   private Map<String, Integer> addJointAlphaFilterWithJointsToIgnore(DoubleProvider alphaFilter,
+                                                                      boolean forVizOnly,
+                                                                      SensorType sensorType,
                                                                       List<String> jointsToIgnore)
    {
       Map<String, Integer> processorsIDs = new HashMap<>();
@@ -731,7 +742,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                            processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     */
-   public void addJointSensorsOverrideOnlyForSpecifiedJoints(double constantPosition, double constantVelocity, boolean forVizOnly,
+   public void addJointSensorsOverrideOnlyForSpecifiedJoints(double constantPosition,
+                                                             double constantVelocity,
+                                                             boolean forVizOnly,
                                                              String... jointsToBeProcessed)
    {
       addJointSensorsOverrideWithJointsToIgnore(constantPosition,
@@ -834,7 +847,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     * @throws RuntimeException if both {@code scale} and {@code bias} are {@code null}.
     */
-   public void addJointPositionAffineTransformOnlyForSpecifiedJoints(DoubleProvider scale, DoubleProvider bias, boolean forVizOnly,
+   public void addJointPositionAffineTransformOnlyForSpecifiedJoints(DoubleProvider scale,
+                                                                     DoubleProvider bias,
+                                                                     boolean forVizOnly,
                                                                      String... jointsToBeProcessed)
    {
       addJointPositionAffineTransformWithJointsToIgnore(scale, bias, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
@@ -919,7 +934,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                            processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be filtered.
     */
-   public void addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(PolynomialReadOnly polynomialToApply, boolean forVizOnly,
+   public void addJointPositionPolynomialProcessorOnlyForSpecifiedJoints(PolynomialReadOnly polynomialToApply,
+                                                                         boolean forVizOnly,
                                                                          String... jointsToBeProcessed)
    {
       addJointPositionPolynomialProcessorWithJointsToIgnore(polynomialToApply, forVizOnly, invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
@@ -964,14 +980,17 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       }
    }
 
-   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
+   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                   DoubleProvider maximumDeflection,
                                                    boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
    public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+                                                                     DoubleProvider maximumDeflection,
+                                                                     boolean forVizOnly,
+                                                                     String... jointsToIgnore)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
@@ -985,15 +1004,32 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
     */
-   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
-                                                   Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
+   public void addJointPositionElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                   DoubleProvider maximumDeflection,
+                                                   Map<String, Integer> torqueProcessorIDs,
+                                                   boolean forVizOnly)
    {
       addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
+   public void addJointPositionElasticyCompensatorOnlyForSpecifiedJoints(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                                         DoubleProvider maximumDeflection,
+                                                                         Map<String, Integer> torqueProcessorIDs,
+                                                                         boolean forVizOnly,
+                                                                         String... jointsToBeProcessed)
+   {
+      addJointPositionElasticyCompensatorWithJointsToIgnore(stiffnesses,
+                                                            maximumDeflection,
+                                                            torqueProcessorIDs,
+                                                            forVizOnly,
+                                                            invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+   }
+
    public void addJointPositionElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs,
-                                                                     boolean forVizOnly, String... jointsToIgnore)
+                                                                     DoubleProvider maximumDeflection,
+                                                                     Map<String, Integer> torqueProcessorIDs,
+                                                                     boolean forVizOnly,
+                                                                     String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -1048,8 +1084,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @return a provider to get the output of the new processor.
     * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
     */
-   public DoubleProvider computeJointPositionUsingCoupling(String nameOfJointMaster, String nameOfJointSlave, DoubleProvider couplingRatio,
-                                                           DoubleProvider couplingBias, boolean forVizOnly)
+   public DoubleProvider computeJointPositionUsingCoupling(String nameOfJointMaster,
+                                                           String nameOfJointSlave,
+                                                           DoubleProvider couplingRatio,
+                                                           DoubleProvider couplingBias,
+                                                           boolean forVizOnly)
    {
       OneDoFJointBasics jointMaster = jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(nameOfJointMaster)).findFirst().get();
       return computeJointPositionUsingCoupling(jointMaster::getQ, nameOfJointSlave, couplingRatio, couplingBias, forVizOnly);
@@ -1074,8 +1113,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @return a provider to get the output of the new processor.
     * @throws RuntimeException if both {@code couplingRatio} and {@code couplingBias} are {@code null}.
     */
-   public DoubleProvider computeJointPositionUsingCoupling(DoubleProvider jointMasterPositionProvider, String nameOfJointSlave, DoubleProvider couplingRatio,
-                                                           DoubleProvider couplingBias, boolean forVizOnly)
+   public DoubleProvider computeJointPositionUsingCoupling(DoubleProvider jointMasterPositionProvider,
+                                                           String nameOfJointSlave,
+                                                           DoubleProvider couplingRatio,
+                                                           DoubleProvider couplingBias,
+                                                           boolean forVizOnly)
    {
       if (couplingRatio == null && couplingBias == null)
          throw new RuntimeException("Cannot create joint position coupling without giving either a couplingRatio or couplingBias.");
@@ -1135,14 +1177,17 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          outputJointPositions.put(joint, filteredJointPosition);
    }
 
-   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                   DoubleProvider maximumDeflection,
                                                    boolean forVizOnly)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly);
    }
 
    public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, boolean forVizOnly, String... jointsToIgnore)
+                                                                     DoubleProvider maximumDeflection,
+                                                                     boolean forVizOnly,
+                                                                     String... jointsToIgnore)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, null, forVizOnly, jointsToIgnore);
    }
@@ -1156,15 +1201,19 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     * @param forVizOnly  if set to true, the result will not be used as the input of the next
     *                    processing stage, nor as the output of the sensor processing.
     */
-   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses, DoubleProvider maximumDeflection,
-                                                   Map<String, Integer> torqueProcessorIDs, boolean forVizOnly)
+   public void addJointVelocityElasticyCompensator(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
+                                                   DoubleProvider maximumDeflection,
+                                                   Map<String, Integer> torqueProcessorIDs,
+                                                   boolean forVizOnly)
    {
       addJointVelocityElasticyCompensatorWithJointsToIgnore(stiffnesses, maximumDeflection, forVizOnly);
    }
 
    public void addJointVelocityElasticyCompensatorWithJointsToIgnore(Map<OneDoFJointBasics, ? extends DoubleProvider> stiffnesses,
-                                                                     DoubleProvider maximumDeflection, Map<String, Integer> torqueProcessorIDs,
-                                                                     boolean forVizOnly, String... jointsToIgnore)
+                                                                     DoubleProvider maximumDeflection,
+                                                                     Map<String, Integer> torqueProcessorIDs,
+                                                                     boolean forVizOnly,
+                                                                     String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)
@@ -1296,7 +1345,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                            processing stage, nor as the output of the sensor processing.
     * @param jointsToBeProcessed list of the names of the joints that need to be processed.
     */
-   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly,
+   public void computeJointVelocityWithBacklashCompensatorOnlyForSpecifiedJoints(DoubleProvider alphaFilter,
+                                                                                 DoubleProvider slopTime,
+                                                                                 boolean forVizOnly,
                                                                                  String... jointsToBeProcessed)
    {
       computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(alphaFilter,
@@ -1317,7 +1368,9 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                       processing stage, nor as the output of the sensor processing.
     * @param jointsToIgnore list of the names of the joints to ignore.
     */
-   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(DoubleProvider alphaFilter, DoubleProvider slopTime, boolean forVizOnly,
+   public void computeJointVelocityWithBacklashCompensatorWithJointsToIgnore(DoubleProvider alphaFilter,
+                                                                             DoubleProvider slopTime,
+                                                                             boolean forVizOnly,
                                                                              String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
@@ -1553,8 +1606,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                              processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed  list of the names of the sensors that need to be filtered.
     */
-   public Map<String, Integer> addIMUMahonyFusionOnlyForSpecifiedSensors(double proportionalGain, double integralGain, boolean useStateEstimatorData,
-                                                                         boolean forVizOnly, String... sensorsToBeProcessed)
+   public Map<String, Integer> addIMUMahonyFusionOnlyForSpecifiedSensors(double proportionalGain,
+                                                                         double integralGain,
+                                                                         boolean useStateEstimatorData,
+                                                                         boolean forVizOnly,
+                                                                         String... sensorsToBeProcessed)
    {
       return addIMUMahonyFusionWithSensorsToIgnore(proportionalGain,
                                                    integralGain,
@@ -1584,8 +1640,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                              processing stage, nor as the output of the sensor processing.
     * @param sensorsToIgnore       list of the names of the sensors to ignore.
     */
-   public Map<String, Integer> addIMUMahonyFusionWithSensorsToIgnore(double proportionalGain, double integralGain, boolean useStateEstimatorData,
-                                                                     boolean forVizOnly, String... sensorsToIgnore)
+   public Map<String, Integer> addIMUMahonyFusionWithSensorsToIgnore(double proportionalGain,
+                                                                     double integralGain,
+                                                                     boolean useStateEstimatorData,
+                                                                     boolean forVizOnly,
+                                                                     String... sensorsToIgnore)
    {
       Map<String, Integer> processorIDs = new HashMap<>();
 
@@ -1708,7 +1767,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
     *                             processing stage, nor as the output of the sensor processing.
     * @param sensorsToBeProcessed list of the names of the sensors that need to be filtered.
     */
-   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(DoubleProvider slopTime, boolean forVizOnly,
+   public Map<String, Integer> addIMUAngularVelocityBacklashFilterOnlyForSpecifiedSensors(DoubleProvider slopTime,
+                                                                                          boolean forVizOnly,
                                                                                           String... sensorsToBeProcessed)
    {
       return addIMUAngularVelocityBacklashFilterWithSensorsToIgnore(slopTime, forVizOnly, invertSensorSelection(IMU_ANGULAR_VELOCITY, sensorsToBeProcessed));
@@ -1915,7 +1975,8 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return delayEstimatorMap;
    }
 
-   public Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow, List<String> jointsToIgnore,
+   public Map<OneDoFJointBasics, OneDoFJointFourierAnalysis> addJointFourierAnalysis(double estimationWindow,
+                                                                                     List<String> jointsToIgnore,
                                                                                      JointDesiredOutputListReadOnly outputDataHolder)
    {
       LinkedHashMap<OneDoFJointBasics, OneDoFJointFourierAnalysis> jointFourierAnalysisMap = new LinkedHashMap<>();
@@ -1974,8 +2035,21 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return createStiffnessWithJointsToIgnore(nameSuffix, defaultStiffness, jointSpecificStiffness);
    }
 
-   public Map<OneDoFJointBasics, DoubleProvider> createStiffnessWithJointsToIgnore(String nameSuffix, double defaultStiffness,
-                                                                                   Map<String, Double> jointSpecificStiffness, String... jointsToIgnore)
+   public Map<OneDoFJointBasics, DoubleProvider> createStiffnessOnlyForSpecifiedJoints(String nameSuffix,
+                                                                                       double defaultStiffness,
+                                                                                       Map<String, Double> jointSpecificStiffness,
+                                                                                       String... jointsToBeProcessed)
+   {
+      return createStiffnessWithJointsToIgnore(nameSuffix,
+                                               defaultStiffness,
+                                               jointSpecificStiffness,
+                                               invertSensorSelection(allJointSensorNames, jointsToBeProcessed));
+   }
+
+   public Map<OneDoFJointBasics, DoubleProvider> createStiffnessWithJointsToIgnore(String nameSuffix,
+                                                                                   double defaultStiffness,
+                                                                                   Map<String, Double> jointSpecificStiffness,
+                                                                                   String... jointsToIgnore)
    {
       List<String> jointToIgnoreList = new ArrayList<>();
       if (jointsToIgnore != null && jointsToIgnore.length > 0)

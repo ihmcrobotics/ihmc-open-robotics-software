@@ -87,6 +87,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    private final LookAndStepBehavior lookAndStepBehavior;
    private final BehaviorHelper helper;
    private ScheduledFuture<?> stateMachineTask = null;
+   private PausablePeriodicThread toolboxWakerThread;
 
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
    private Runnable doorDetectedCallback = () -> {};
@@ -100,8 +101,8 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    {
       this.helper = helper;
       DRCRobotModel robotModel = helper.getRobotModel();
-      ROS2NodeInterface ros2Node = helper.getManagedROS2Node();
-      Messager behaviorMessager = helper.getManagedMessager();
+      ROS2NodeInterface ros2Node = helper.getROS2Node();
+      Messager behaviorMessager = helper.getMessager();
 
       String robotName = robotModel.getSimpleRobotName();
       executorService = Executors.newSingleThreadScheduledExecutor();
@@ -111,7 +112,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
 
-      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, ros2Node));
+      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, helper.getROS1Node(), ros2Node, false));
 
       teleopState = new TeleopState(robotModel,ros2Node);
       lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
@@ -170,13 +171,14 @@ public class BuildingExplorationBehavior implements BehaviorInterface
                                                                                                           ToolboxStateMessage.class,
                                                                                                           ObjectDetectorToolboxModule.getInputTopic(robotName));
 
-      new PausablePeriodicThread("ToolboxWaker", 1.0, true, () ->
+      toolboxWakerThread = new PausablePeriodicThread("ToolboxWaker", 1.0, true, () ->
       {
          ToolboxStateMessage wakeUpMessage = new ToolboxStateMessage();
          wakeUpMessage.setRequestedToolboxState(ToolboxStateMessage.WAKE_UP);
          fiducialDetectorPublisher.publish(wakeUpMessage);
          objectDetectorPublisher.publish(wakeUpMessage);
-      }).start();
+      });
+      toolboxWakerThread.start();
    }
 
    @Override
@@ -252,6 +254,13 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          LogTools.info("Stop requested. Shutting down on next update");
          stopRequested.set(true);
       }
+   }
+
+   @Override
+   public void destroy()
+   {
+      toolboxWakerThread.destroy();
+      executorService.shutdown();
    }
 
    private StateMachine<BuildingExplorationStateName, State> buildStateMachine()
@@ -484,7 +493,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          stepCounter.set(0);
          lookAndStepStarted = false;
 
-         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
+         helper.publish(LookAndStepBehaviorAPI.RESET);
 
          LogTools.info("Enabling look and step behavior");
          lookAndStepBehavior.setEnabled(true);
@@ -616,7 +625,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
          lookAndStepStarted = false;
          numberOfStepsToIgnoreDebris = 0;
-         helper.publishROS2(LookAndStepBehaviorAPI.RESET);
+         helper.publish(LookAndStepBehaviorAPI.RESET);
       }
    }
 

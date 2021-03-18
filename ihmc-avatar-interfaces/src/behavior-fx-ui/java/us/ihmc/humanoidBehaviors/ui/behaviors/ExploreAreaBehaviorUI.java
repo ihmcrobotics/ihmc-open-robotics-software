@@ -34,7 +34,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.JavaFXLivePlanarRegionsGraphic;
-import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
+import us.ihmc.javafx.JavaFXGraphicTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;

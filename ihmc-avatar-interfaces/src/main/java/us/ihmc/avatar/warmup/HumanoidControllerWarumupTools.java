@@ -38,6 +38,7 @@ public class HumanoidControllerWarumupTools
       catch (Exception e)
       {
          PrintTools.info("Warmup failed with an exception.");
+         e.printStackTrace();
       }
       double duration = 0.001 * (System.currentTimeMillis() - startTime);
       PrintTools.info("Warmup took " + duration + "s.");
