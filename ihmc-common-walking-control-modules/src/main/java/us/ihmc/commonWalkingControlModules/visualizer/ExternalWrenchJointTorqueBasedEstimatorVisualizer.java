@@ -165,8 +165,8 @@ public class ExternalWrenchJointTorqueBasedEstimatorVisualizer
 
          if (soleFrame != null)
          {
-            cop2D = new YoFramePoint2D(prefix + "InSole", "", soleFrame, registry);
-            cop3D = new YoFramePoint3D(prefix + "InWorld", "", ReferenceFrame.getWorldFrame(), registry);
+            cop2D = new YoFramePoint2D(prefix + "CoPInSole", "", soleFrame, registry);
+            cop3D = new YoFramePoint3D(prefix + "CoPInWorld", "", ReferenceFrame.getWorldFrame(), registry);
 
             YoGraphicPosition copYoGraphic = new YoGraphicPosition(prefix + "CoP", cop3D, 0.008, copAppearance, copGraphicType);
             YoArtifactPosition copArtifact = copYoGraphic.createArtifact();
