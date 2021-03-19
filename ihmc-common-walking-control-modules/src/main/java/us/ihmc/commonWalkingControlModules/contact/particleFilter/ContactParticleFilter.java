@@ -57,7 +57,8 @@ public class ContactParticleFilter
    private final DMatrixRMaj jointspaceResidualMagnitude = new DMatrixRMaj(1, 1);
    private final YoDouble yoJointspaceResidualMagnitude = new YoDouble("jointspaceResidualMagnitude", registry);
 
-   private final ContactPointEvaluator contactPointEvaluator = new ContactPointEvaluator();
+   private final DynamicsBasedPointEvaluator dynamicsBasedPointEvaluator;
+   private final FlatGroundBasedContactEvaluator heightBasedEvaluator = new FlatGroundBasedContactEvaluator();
    private final ContactPointProjector contactPointProjector;
 
    // If non-empty will consider all rigid bodies
@@ -117,11 +118,13 @@ public class ContactParticleFilter
                                 YoRegistry parentRegistry)
    {
       this.joints = joints;
-      this.externalTorqueDisturbanceObserver = new ExternalTorqueDisturbanceObserver(joints, dt, dynamicMatrixUpdater, registry);
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
-      this.systemJacobian = new DMatrixRMaj(estimationVariables, dofs);
       this.jointNoiseVariance = CommonOps_DDRM.identity(dofs);
       this.jointNoiseVarianceInv = CommonOps_DDRM.identity(dofs);
+
+      this.externalTorqueDisturbanceObserver = new ExternalTorqueDisturbanceObserver(joints, dt, dynamicMatrixUpdater, registry);
+      this.dynamicsBasedPointEvaluator = new DynamicsBasedPointEvaluator(dofs, externalTorqueDisturbanceObserver, jointNoiseVariance);
+      this.systemJacobian = new DMatrixRMaj(estimationVariables, dofs);
       this.contactPointProjector = new ContactPointProjector(collidables);
       this.averageProjectedParticle = new ContactPointParticle("averageParticle", joints);
 
@@ -180,7 +183,7 @@ public class ContactParticleFilter
    public void initializeJointspaceEstimator()
    {
       externalTorqueDisturbanceObserver.initialize();
-      contactPointEvaluator.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
+      dynamicsBasedPointEvaluator.setCoefficientOfFriction(coefficientOfFriction.getDoubleValue());
    }
 
    public void initializeParticleFilter()
@@ -249,30 +252,19 @@ public class ContactParticleFilter
 
    public void computeParticleFilterEstimation()
    {
-      DMatrixRMaj observedExternalJointTorque = externalTorqueDisturbanceObserver.getObservedExternalJointTorque();
-
       double totalWeight = 0.0;
 
       // Evaluate likelihood of each point
       for (int i = 0; i < numberOfParticles; i++)
       {
          ContactPointParticle contactPoint = contactPointParticles[i];
-         DMatrixRMaj contactPointJacobian = contactPoint.computeContactJacobian();
 
-         for (int j = 0; j < contactPointJacobian.getNumCols(); j++)
-         {
-            int column = contactPoint.getSystemJacobianIndex(j);
-            MatrixTools.setMatrixBlock(systemJacobian, 0, column, contactPointJacobian, 0, j, estimationVariables, 1, 1.0);
-         }
+         double pDynamics = dynamicsBasedPointEvaluator.computeProbability(contactPoint);
+         double pHeight = heightBasedEvaluator.computeProbability(contactPoint);
+         double particleProbability = pDynamics * pHeight;
 
-         double likelihoodCost = contactPointEvaluator.computeMaximumLikelihoodForce(observedExternalJointTorque,
-                                                                                     systemJacobian,
-                                                                                     jointNoiseVariance,
-                                                                                     contactPointParticles[i].getContactPointFrame());
-
-         double likelihoodWeight = Math.exp(-0.5 * likelihoodCost);
-         contactPointProbabilities[i].set(likelihoodWeight);
-         totalWeight += likelihoodWeight;
+         contactPointProbabilities[i].set(particleProbability);
+         totalWeight += particleProbability;
       }
 
       for (int i = 0; i < numberOfParticles; i++)
@@ -383,12 +375,8 @@ public class ContactParticleFilter
          MatrixTools.setMatrixBlock(systemJacobian, 0, column, contactPointJacobian, 0, j, estimationVariables, 1, 1.0);
       }
 
-      contactPointEvaluator.computeMaximumLikelihoodForce(externalTorqueDisturbanceObserver.getObservedExternalJointTorque(),
-                                                          systemJacobian,
-                                                          jointNoiseVariance,
-                                                          averageProjectedParticle.getContactPointFrame());
-
-      estimatedExternalForce.set(contactPointEvaluator.getEstimatedForce());
+      dynamicsBasedPointEvaluator.computeProbability(averageProjectedParticle);
+      estimatedExternalForce.set(dynamicsBasedPointEvaluator.getEstimatedForce());
    }
 
    public void setDoFVariance(int dofIndex, double variance)
