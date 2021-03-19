@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
@@ -120,6 +122,25 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              WalkingControllerParameters walkingControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters)
    {
+      this(contactableBodiesFactory,
+           footForceSensorNames,
+           footContactSensorNames,
+           wristSensorNames,
+           highLevelControllerParameters,
+           walkingControllerParameters,
+           copTrajectoryParameters,
+           new DefaultSplitFractionCalculatorParameters());
+   }
+
+   public HighLevelHumanoidControllerFactory(ContactableBodiesFactory<RobotSide> contactableBodiesFactory,
+                                             SideDependentList<String> footForceSensorNames,
+                                             SideDependentList<String> footContactSensorNames,
+                                             SideDependentList<String> wristSensorNames,
+                                             HighLevelControllerParameters highLevelControllerParameters,
+                                             WalkingControllerParameters walkingControllerParameters,
+                                             CoPTrajectoryParameters copTrajectoryParameters,
+                                             SplitFractionCalculatorParametersReadOnly splitFractionCalculatorParameters)
+   {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.copTrajectoryParameters = copTrajectoryParameters;
@@ -142,6 +163,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
+      managerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
    }
 
    private ContinuousStepGenerator continuousStepGenerator;
