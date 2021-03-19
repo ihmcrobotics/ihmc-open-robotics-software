@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.tools.Timer;
@@ -119,7 +120,11 @@ public class LookAndStepFootstepPlanningTask
                                  () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No capturability based status. ", () -> capturabilityBasedStatus == null);
          suppressor.addCondition(() -> "No localization result. ", () -> localizationResult == null);
-         suppressor.addCondition("Planner failed and operator is reviewing.", () -> plannerFailedLastTime.get() && operatorReviewEnabledSupplier.get());
+         TypedNotification<Boolean> reviewApprovalNotification = lookAndStep.helper.subscribeViaNotification(ReviewApproval);
+         Supplier<Boolean> operatorJustRejected = () -> reviewApprovalNotification.poll() && !reviewApprovalNotification.read();
+         suppressor.addCondition("Planner failed and operator is reviewing and hasn't just rejected.", () -> plannerFailedLastTime.get()
+                                                                                                             && operatorReviewEnabledSupplier.get()
+                                                                                                             && !operatorJustRejected.get());
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
