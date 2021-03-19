@@ -260,7 +260,7 @@ public class WholeBodyControllerBoundCalculator
          double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT;
          double qDotMin = MathTools.clamp(qDotMinFromFD, velocityLimitLower, velocityLimitUpper);
 
-         qDDotMin = (qDotMin - joint.getQd()) / controlDT;
+         qDDotMin = 2.0 * (qDotMin - joint.getQd()) / controlDT;
          qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
          qDDotMinToPack.set(index, 0, qDDotMin);
          lowerHardLimits.get(joint).set(qDDotMin);
@@ -270,7 +270,7 @@ public class WholeBodyControllerBoundCalculator
          double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT;
          double qDotMax = MathTools.clamp(qDotMaxFromFD, velocityLimitLower, velocityLimitUpper);
 
-         qDDotMax = (qDotMax - joint.getQd()) / controlDT;
+         qDDotMax = 2.0 * (qDotMax - joint.getQd()) / controlDT;
          qDDotMax = MathTools.clamp(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
          qDDotMaxToPack.set(index, 0, qDDotMax);
          upperHardLimits.get(joint).set(qDDotMax);
