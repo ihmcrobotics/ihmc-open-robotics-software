@@ -40,7 +40,7 @@ public class PredefinedContactExternalForceSolverTest
 {
    private static double controlDT = 1e-4;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
-   private static final boolean keepSCSUp = true;
+   private static final boolean keepSCSUp = false;
 
    private YoRegistry registry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -76,18 +76,20 @@ public class PredefinedContactExternalForceSolverTest
       gravityCoriolisExternalWrenchMatrixCalculator.setGravitionalAcceleration(-gravity);
       CompositeRigidBodyMassMatrixCalculator massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootBody);
 
-      this.dynamicMatrixUpdater = (m, cqg, tau) ->
+      this.dynamicMatrixUpdater = (m, cqg, tau, qdd) ->
       {
          m.set(massMatrixCalculator.getMassMatrix());
          gravityCoriolisExternalWrenchMatrixCalculator.compute();
          cqg.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
          MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+
+         // TODO
       };
    }
 
    private void setupDoublePendulumDynamicMatrixUpdater(DoublePendulumRobot doublePendulumRobot)
    {
-      this.dynamicMatrixUpdater = (m, cqg, tau) ->
+      this.dynamicMatrixUpdater = (m, cqg, tau, qdd) ->
       {
          doublePendulumRobot.updateManipulatorMatrices();
          m.set(doublePendulumRobot.getH());
@@ -97,6 +99,8 @@ public class PredefinedContactExternalForceSolverTest
          DMatrixRMaj G = doublePendulumRobot.getG();
          CommonOps_DDRM.mult(C, Qd, cqg);
          CommonOps_DDRM.addEquals(cqg, G);
+
+         // TODO
 
          tau.set(0, 0, doublePendulumRobot.getJoint1().getTau());
          tau.set(1, 0, doublePendulumRobot.getJoint2().getTau());
@@ -108,7 +112,7 @@ public class PredefinedContactExternalForceSolverTest
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
+      externalForceSolver = new PredefinedContactExternalForceSolver(joints, true, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
       externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
       externalForceSolver.setEstimatorGain(5.0);
       externalForceSolver.setSolverAlpha(1e-6);
@@ -175,6 +179,8 @@ public class PredefinedContactExternalForceSolverTest
       cleanup();
    }
 
+   // don't enable as a test.
+   // this is showing a drawback of the current approach of filtering in jointspace then projecting afterwards
    public void testDoublePendulumRandomMotionWithExternalForce()
    {
       DoublePendulumRobot doublePendulumRobot = setupDoublePendulum(false);
@@ -280,7 +286,7 @@ public class PredefinedContactExternalForceSolverTest
          blockingSimulationRunner.simulateAndBlock(30.0);
          YoFrameVector3D estimatedExternalForce = externalForceSolver.getEstimatedExternalWrenches()[0].getLinearPart();
          YoFrameVector3D simulatedExternalForce = externalForcePoint.getYoForce();
-         boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, epsilon);
+         boolean estimationSucceeded = estimatedExternalForce.epsilonEquals(simulatedExternalForce, 1e-3);
 
          if (!estimationSucceeded)
             cleanup();

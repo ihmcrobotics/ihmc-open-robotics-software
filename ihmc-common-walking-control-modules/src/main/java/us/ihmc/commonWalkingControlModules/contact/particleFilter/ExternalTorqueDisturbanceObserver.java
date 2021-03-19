@@ -16,14 +16,14 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.util.Arrays;
 
 /**
- * Module to estimate unknown external contact. This class estimates an array of joint torques based on the discrepency between
- * the expected and actual system behavior. In the below paper, this module tau_ext, i.e. the "generalized external forces", which
+ * This class estimates an array of joint torques based on the discrepency between the expected and actual system behavior
+ * In the below paper, this module tau_ext, i.e. the "generalized external forces", which
  * can in turn be used to estimate taskspace forces in a number of different ways.
  *
  * Implementation based on Haddadin, et. al:
  * <a href="www.repo.uni-hannover.de/bitstream/handle/123456789/3543/VorndammeSchHad2017_accepted.pdf">Collision Detection, Isolation and Identification for Humanoids</a>
  */
-public class JointspaceExternalContactEstimator implements RobotController
+public class ExternalTorqueDisturbanceObserver implements ExternalTorqueEstimator
 {
    private static final double defaultEstimatorGain = 0.7;
 
@@ -56,10 +56,10 @@ public class JointspaceExternalContactEstimator implements RobotController
 
    private boolean firstTick = true;
 
-   public JointspaceExternalContactEstimator(JointBasics[] joints,
-                                             double dt,
-                                             ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
-                                             YoRegistry parentRegistry)
+   public ExternalTorqueDisturbanceObserver(JointBasics[] joints,
+                                            double dt,
+                                            ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
+                                            YoRegistry parentRegistry)
    {
       this.joints = joints;
       this.dt = dt;
@@ -135,7 +135,7 @@ public class JointspaceExternalContactEstimator implements RobotController
    {
       massMatrixPrev.set(massMatrix);
 
-      dynamicMatrixUpdater.update(massMatrix, coriolisGravityTerm, tau);
+      dynamicMatrixUpdater.update(massMatrix, coriolisGravityTerm, tau, null);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, qd);
 
       if (firstTick)
@@ -173,6 +173,7 @@ public class JointspaceExternalContactEstimator implements RobotController
       }
    }
 
+   @Override
    public DMatrixRMaj getObservedExternalJointTorque()
    {
       return observedExternalJointTorque;
@@ -189,6 +190,7 @@ public class JointspaceExternalContactEstimator implements RobotController
       this.requestInitialize.set(true);
    }
 
+   @Override
    public void setEstimatorGain(double estimatorGain)
    {
       this.estimationGain.set(estimatorGain);

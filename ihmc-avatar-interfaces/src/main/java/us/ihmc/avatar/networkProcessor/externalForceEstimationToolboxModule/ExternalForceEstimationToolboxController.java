@@ -134,17 +134,21 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       this.massMatrix = new DMatrixRMaj(degreesOfFreedom, degreesOfFreedom);
       this.coriolisGravityMatrix = new DMatrixRMaj(degreesOfFreedom, 1);
 
-      ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater = (massMatrix, coriolisGravityMatrix, tau) ->
+      ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater = (massMatrix, coriolisGravityMatrix, tau, qdd) ->
       {
          massMatrix.set(this.massMatrix);
          coriolisGravityMatrix.set(this.coriolisGravityMatrix);
          tau.set(controllerDesiredTau);
+         if (qdd != null)
+         {
+            qdd.set(controllerDesiredQdd);
+         }
       };
 
       RobotCollisionModel collisionModel = robotModel.getHumanoidRobotKinematicsCollisionModel();
       List<Collidable> collidables = collisionModel.getRobotCollidables(fullRobotModel.getRootBody());
 
-      predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
+      predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, true, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
       contactParticleFilter = new ContactParticleFilter(joints, updateDT, dynamicMatrixUpdater, collidables, graphicsListRegistry, registry);
 
       // for debugging
@@ -249,9 +253,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       dynamicsMatrixCalculator.compute();
       dynamicsMatrixCalculator.getMassMatrix(massMatrix);
       dynamicsMatrixCalculator.getCoriolisMatrix(coriolisGravityMatrix);
-
-      CommonOps_DDRM.mult(massMatrix, controllerDesiredQdd, controllerDesiredTau);
-      CommonOps_DDRM.addEquals(controllerDesiredTau, coriolisGravityMatrix);
+      dynamicsMatrixCalculator.computeTauGivenQddot(dynamicsMatrixCalculator, controllerDesiredQdd, controllerDesiredTau);
 
       if (estimateContactPosition.getBooleanValue())
       {

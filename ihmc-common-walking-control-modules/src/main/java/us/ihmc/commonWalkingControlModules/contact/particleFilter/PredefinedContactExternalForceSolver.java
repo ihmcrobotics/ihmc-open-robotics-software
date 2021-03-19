@@ -25,7 +25,7 @@ import java.util.stream.IntStream;
 
 public class PredefinedContactExternalForceSolver implements RobotController
 {
-   public static final double forceGraphicScale = 0.035;
+   public static double forceGraphicScale = 0.035;
    private static final int maximumNumberOfContactPoints = 10;
 
    private final String name = getClass().getSimpleName();
@@ -36,7 +36,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
    private final int dofs;
 
    private final List<PredefinedContactPoint> contactPoints = new ArrayList<>();
-   private final JointspaceExternalContactEstimator jointspaceExternalContactEstimator;
+   private final ExternalTorqueEstimator externalTorqueEstimator;
 
    private final YoFixedFrameSpatialVector[] estimatedExternalWrenches = new YoFixedFrameSpatialVector[maximumNumberOfContactPoints];
    private final YoFramePoint3D[] contactPointPositions = new YoFramePoint3D[maximumNumberOfContactPoints];
@@ -49,6 +49,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    public PredefinedContactExternalForceSolver(JointBasics[] joints,
+                                               boolean useDisturbanceObserverForTorqueEstimation,
                                                double dt,
                                                ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
                                                YoGraphicsListRegistry graphicsListRegistry,
@@ -57,7 +58,15 @@ public class PredefinedContactExternalForceSolver implements RobotController
       this.solverAlpha.set(0.001);
       this.joints = joints;
 
-      this.jointspaceExternalContactEstimator = new JointspaceExternalContactEstimator(joints, dt, dynamicMatrixUpdater, registry);
+      if (useDisturbanceObserverForTorqueEstimation)
+      {
+         this.externalTorqueEstimator = new ExternalTorqueDisturbanceObserver(joints, dt, dynamicMatrixUpdater, registry);
+      }
+      else
+      {
+         this.externalTorqueEstimator = new FilterBasedExternalTorqueEstimator(joints, dt, dynamicMatrixUpdater, registry);
+      }
+
       this.dofs = Arrays.stream(joints).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
 
       for (int i = 0; i < maximumNumberOfContactPoints; i++)
@@ -113,13 +122,13 @@ public class PredefinedContactExternalForceSolver implements RobotController
       estimatedExternalWrenchMatrix = new DMatrixRMaj(decisionVariables, 1);
 
       forceEstimateSolver = new DampedLeastSquaresSolver(dofs, solverAlpha.getDoubleValue());
-      jointspaceExternalContactEstimator.initialize();
+      externalTorqueEstimator.initialize();
    }
 
    @Override
    public void doControl()
    {
-      jointspaceExternalContactEstimator.doControl();
+      externalTorqueEstimator.doControl();
 
       // compute jacobian
       CommonOps_DDRM.fill(externalWrenchJacobian, 0.0);
@@ -140,7 +149,7 @@ public class PredefinedContactExternalForceSolver implements RobotController
       }
 
       // solve for external wrench
-      DMatrixRMaj observedExternalJointTorque = jointspaceExternalContactEstimator.getObservedExternalJointTorque();
+      DMatrixRMaj observedExternalJointTorque = externalTorqueEstimator.getObservedExternalJointTorque();
 
       CommonOps_DDRM.transpose(externalWrenchJacobian, externalWrenchJacobianTranspose);
       forceEstimateSolver.setA(externalWrenchJacobianTranspose);
@@ -189,6 +198,6 @@ public class PredefinedContactExternalForceSolver implements RobotController
 
    public void setEstimatorGain(double estimatorGain)
    {
-      jointspaceExternalContactEstimator.setEstimatorGain(estimatorGain);
+      externalTorqueEstimator.setEstimatorGain(estimatorGain);
    }
 }

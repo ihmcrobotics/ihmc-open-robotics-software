@@ -68,6 +68,7 @@ public class MovingBaseRobotArmController implements RobotController
 
    private final WholeBodyControllerCore controllerCore;
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    private final YoDouble handWeight = new YoDouble("handWeight", registry);
    private final SymmetricYoPIDSE3Gains handPositionGains = new SymmetricYoPIDSE3Gains("handPosition", registry);
@@ -114,6 +115,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       controlCoreToolbox = new WholeBodyControlCoreToolbox(controlDT, gravityZ, null, controlledJoints, centerOfMassFrame,
                                                                                        optimizationSettings, yoGraphicsListRegistry, registry);
+      jointDesiredOutputList = new JointDesiredOutputList(controlCoreToolbox.getJointIndexHandler().getIndexedOneDoFJoints());
 
       if (USE_PRIVILEGED_CONFIGURATION)
          controlCoreToolbox.setJointPrivilegedConfigurationParameters(new JointPrivilegedConfigurationParameters());
@@ -230,6 +232,7 @@ public class MovingBaseRobotArmController implements RobotController
 
       ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      jointDesiredOutputList.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
       if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF
             || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
@@ -367,5 +370,10 @@ public class MovingBaseRobotArmController implements RobotController
    public WholeBodyControlCoreToolbox getControlCoreToolbox()
    {
       return controlCoreToolbox;
+   }
+
+   public JointDesiredOutputList getJointDesiredOutputList()
+   {
+      return jointDesiredOutputList;
    }
 }

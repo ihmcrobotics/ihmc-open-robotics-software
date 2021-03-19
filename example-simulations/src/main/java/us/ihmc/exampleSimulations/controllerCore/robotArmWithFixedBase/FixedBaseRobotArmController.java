@@ -72,6 +72,7 @@ public class FixedBaseRobotArmController implements RobotController
    private final OrientationFeedbackControlCommand handOrientationCommand = new OrientationFeedbackControlCommand();
    private final SpatialFeedbackControlCommand handSpatialCommand = new SpatialFeedbackControlCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
+   private final JointDesiredOutputList jointDesiredOutputList;
 
    private final WholeBodyControlCoreToolbox controlCoreToolbox;
    private final WholeBodyControllerCore controllerCore;
@@ -137,6 +138,7 @@ public class FixedBaseRobotArmController implements RobotController
       JointDesiredOutputList lowLevelControllerCoreOutput = new JointDesiredOutputList(MultiBodySystemTools.filterJoints(controlledJoints, OneDoFJointBasics.class));
 
       controllerCore = new WholeBodyControllerCore(controlCoreToolbox, new FeedbackControllerTemplate(allPossibleCommands), lowLevelControllerCoreOutput, registry);
+      jointDesiredOutputList = new JointDesiredOutputList(controlCoreToolbox.getJointIndexHandler().getIndexedOneDoFJoints());
 
       yoGraphicsListRegistry.registerYoGraphic("desireds", new YoGraphicCoordinateSystem("targetFrame", handTargetPosition, handTargetOrientation, 0.15,
                                                                                          YoAppearance.Red()));
@@ -226,6 +228,7 @@ public class FixedBaseRobotArmController implements RobotController
 
       ControllerCoreOutput controllerCoreOutput = controllerCore.getControllerCoreOutput();
       JointDesiredOutputListReadOnly lowLevelOneDoFJointDesiredDataHolder = controllerCoreOutput.getLowLevelOneDoFJointDesiredDataHolder();
+      jointDesiredOutputList.overwriteWith(lowLevelOneDoFJointDesiredDataHolder);
 
       if (controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.OFF
             || controllerCoreMode.getEnumValue() == WholeBodyControllerCoreMode.VIRTUAL_MODEL)
@@ -342,6 +345,11 @@ public class FixedBaseRobotArmController implements RobotController
    public void setToRandomConfiguration()
    {
       setRandomConfiguration.set(true);
+   }
+
+   public JointDesiredOutputList getJointDesiredOutputList()
+   {
+      return jointDesiredOutputList;
    }
 
    @Override

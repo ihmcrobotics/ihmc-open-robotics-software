@@ -15,16 +15,19 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.simulationconstructionset.*;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /*package private*/ class ExternalForceEstimationSimulation
 {
    private static double controlDT = 5.0e-5;
+   private static final boolean useDisturbanceObserverForTorqueEstimation = false;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -37,21 +40,32 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
    public ExternalForceEstimationSimulation()
    {
-//      robot = setupFixedBaseArmRobot();
-      robot = setupMovingBaseRobotArm();
+      robot = setupFixedBaseArmRobot();
+//      robot = setupMovingBaseRobotArm();
 
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      PredefinedContactExternalForceSolver externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
+      PredefinedContactExternalForceSolver.forceGraphicScale = 0.3;
+      PredefinedContactExternalForceSolver externalForceSolver = new PredefinedContactExternalForceSolver(joints,
+                                                                                                          useDisturbanceObserverForTorqueEstimation,
+                                                                                                          controlDT,
+                                                                                                          dynamicMatrixUpdater,
+                                                                                                          yoGraphicsListRegistry,
+                                                                                                          null);
       externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
+      externalForceSolver.initialize();
       robot.setController(externalForceSolver);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, parameters);
 
-      YoGraphicVector forceVector = new YoGraphicVector("forceVector", externalForcePoint.getYoPosition(), externalForcePoint.getYoForce(), 0.001, YoAppearance.Red());
+      YoGraphicVector forceVector = new YoGraphicVector("forceVector",
+                                                        externalForcePoint.getYoPosition(),
+                                                        externalForcePoint.getYoForce(),
+                                                        PredefinedContactExternalForceSolver.forceGraphicScale,
+                                                        YoAppearance.Red());
       YoGraphicPosition forcePoint = new YoGraphicPosition("forcePoint", externalForcePoint.getYoPosition(), 0.01, YoAppearance.Red());
       yoGraphicsListRegistry.registerYoGraphic("externalForceVectorGraphic", forceVector);
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
@@ -72,15 +86,24 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       scs.startOnAThread();
    }
 
-   private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox)
+   private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox, JointDesiredOutputList jointDesiredOutputList)
    {
       DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
-      this.dynamicMatrixUpdater = (m, cqg, tau) ->
+
+      this.dynamicMatrixUpdater = (m, cqg, tau, qdd) ->
       {
+         if (jointDesiredOutputList != null && qdd != null)
+         {
+            for (int i = 0; i < jointDesiredOutputList.getNumberOfJointsWithDesiredOutput(); i++)
+            {
+               qdd.set(i, 0, jointDesiredOutputList.getJointDesiredOutput(i).getDesiredAcceleration());
+            }
+         }
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+
          dynamicsMatrixCalculator.compute();
          dynamicsMatrixCalculator.getBodyMassMatrix(m);
          dynamicsMatrixCalculator.getBodyCoriolisMatrix(cqg);
-         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
    }
 
@@ -92,6 +115,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       FixedBaseRobotArmController controller = new FixedBaseRobotArmController(robot, controlDT, yoGraphicsListRegistry);
       controller.setToRandomConfiguration();
       robot.setController(controller);
+      controller.initialize();
       joints = controller.getControlCoreToolbox().getJointIndexHandler().getIndexedOneDoFJoints();
 
       controller.getHandTargetPosition().add(0.2, 0.2, -0.3);
@@ -103,7 +127,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       wristYawJoint.addExternalForcePoint(externalForcePoint);
 
 //      setupDynamicMatrixSolverWithoutControllerCoreToolbox();
-      setupDynamicMatrixSolverWithControllerCoreToolbox(controller.getControlCoreToolbox());
+      setupDynamicMatrixSolverWithControllerCoreToolbox(controller.getControlCoreToolbox(), controller.getJointDesiredOutputList());
 
       return robot;
    }
@@ -116,6 +140,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       MovingBaseRobotArmController controller = new MovingBaseRobotArmController(robot, controlDT, yoGraphicsListRegistry);
 
       robot.setController(controller);
+      controller.initialize();
       joints = controller.getControlCoreToolbox().getJointIndexHandler().getIndexedOneDoFJoints();
 
       controller.getHandTargetPosition().add(0.2, 0.2, -0.3);
@@ -127,7 +152,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       wristYawJoint.addExternalForcePoint(externalForcePoint);
 
 //      setupDynamicMatrixSolverWithoutControllerCoreToolbox();
-      setupDynamicMatrixSolverWithControllerCoreToolbox(controller.getControlCoreToolbox());
+      setupDynamicMatrixSolverWithControllerCoreToolbox(controller.getControlCoreToolbox(), null);
 
       return robot;
    }

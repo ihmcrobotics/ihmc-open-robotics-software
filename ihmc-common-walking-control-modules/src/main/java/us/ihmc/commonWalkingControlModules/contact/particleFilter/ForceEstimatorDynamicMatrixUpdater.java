@@ -11,5 +11,5 @@ public interface ForceEstimatorDynamicMatrixUpdater
     * @param coriolisGravityMatrixToUpdate (C * qd + g) in the above equation
     * @param tauToUpdate tau in the above equation
     */
-   void update(DMatrixRMaj massMatrixToUpdate, DMatrixRMaj coriolisGravityMatrixToUpdate, DMatrixRMaj tauToUpdate);
+   void update(DMatrixRMaj massMatrixToUpdate, DMatrixRMaj coriolisGravityMatrixToUpdate, DMatrixRMaj tauToUpdate, DMatrixRMaj qddToUpdate);
 }
