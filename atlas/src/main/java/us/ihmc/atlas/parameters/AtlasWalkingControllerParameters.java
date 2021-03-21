@@ -67,6 +67,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private AtlasSteppingParameters steppingParameters;
    private LeapOfFaithParameters leapOfFaithParameters;
 
+   private final JointLimitParameters spineJointLimitParameters;
+   private final JointLimitParameters kneeJointLimitParameters;
+   private final JointLimitParameters ankleJointLimitParameters;
+
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
       this.target = target;
@@ -89,6 +93,21 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       leapOfFaithParameters = new AtlasLeapOfFaithParameters(runningOnRealRobot);
 
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
+
+      JointLimitParameters jointLimitParameters = new JointLimitParameters();
+      jointLimitParameters.setMaxAbsJointVelocity(9.0);
+      jointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
+      jointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
+      jointLimitParameters.setVelocityControlGain(30.0);
+
+      spineJointLimitParameters = jointLimitParameters;
+      kneeJointLimitParameters = jointLimitParameters;
+
+      ankleJointLimitParameters = new JointLimitParameters();
+      ankleJointLimitParameters.setMaxAbsJointVelocity(9.0);
+      ankleJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toDegrees(10.0));
+      ankleJointLimitParameters.setJointLimitFilterBreakFrequency(30.0);
+      ankleJointLimitParameters.setVelocityControlGain(30.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -481,20 +500,27 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
       String leftKnyName = jointMap.getLegJointName(RobotSide.LEFT, LegJointName.KNEE_PITCH);
       String rightKnyName = jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.KNEE_PITCH);
-      String[] joints = {bkxName, bkyName, leftKnyName, rightKnyName};
+      String leftAkyName = jointMap.getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH);
+      String rightAkyName = jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
+      String[] joints = {bkxName, bkyName, leftKnyName, rightKnyName, leftAkyName, rightAkyName};
       return joints;
    }
 
    /** {@inheritDoc} */
    @Override
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
-      JointLimitParameters parameters = new JointLimitParameters();
-      parameters.setMaxAbsJointVelocity(9.0);
-      parameters.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI / 180.0);
-      parameters.setJointLimitFilterBreakFrequency(15.0);
-      parameters.setVelocityControlGain(30.0);
-      return parameters;
+      if (jointMap.getSpineJointName(jointName) == SpineJointName.SPINE_ROLL || jointMap.getSpineJointName(jointName) == SpineJointName.SPINE_PITCH)
+         return spineJointLimitParameters;
+      else if (jointMap.getLegJointName(jointName) != null)
+      {
+         if (jointMap.getLegJointName(jointName).getRight() == LegJointName.KNEE_PITCH)
+            return kneeJointLimitParameters;
+         else if (jointMap.getLegJointName(jointName).getRight() == LegJointName.ANKLE_PITCH)
+            return ankleJointLimitParameters;
+      }
+
+      return null;
    }
 
    /** {@inheritDoc} */
