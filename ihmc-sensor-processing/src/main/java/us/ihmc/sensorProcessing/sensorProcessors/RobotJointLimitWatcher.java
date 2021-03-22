@@ -47,23 +47,27 @@ public class RobotJointLimitWatcher implements RobotController
       }
 
       YoDouble jointLimitThresholdPercentage = new YoDouble("jointLimitThresholdPercentage", registry);
-      jointLimitThresholdPercentage.addListener(v ->
-                                                {
-                                                   for (int i = 0; i < jointThresholds.size(); i++)
-                                                   {
-                                                      OneDoFJointReadOnly oneDoFJoint = jointThresholds.first(i);
-
-                                                      double range = oneDoFJoint.getJointLimitUpper() - oneDoFJoint.getJointLimitLower();
-                                                      double thresholdAmount = range * jointLimitThresholdPercentage.getDoubleValue();
-                                                      double lowerLimit = oneDoFJoint.getJointLimitLower() + thresholdAmount;
-                                                      double upperLimit = oneDoFJoint.getJointLimitUpper() - thresholdAmount;
-
-                                                      jointThresholds.second(i).setValue(lowerLimit);
-                                                      jointThresholds.third(i).setValue(upperLimit);
-                                                   }
-                                                });
+      jointLimitThresholdPercentage.addListener(v -> updateThresholds(jointThresholds, jointLimitThresholdPercentage.getDoubleValue()));
       jointLimitThresholdPercentage.set(0.0);
+      updateThresholds(jointThresholds, jointLimitThresholdPercentage.getDoubleValue());
    }
+
+   protected static void updateThresholds(TripleList<OneDoFJointReadOnly, MutableDouble, MutableDouble> jointThresholds, double thresholdPercentage)
+   {
+      for (int i = 0; i < jointThresholds.size(); i++)
+      {
+         OneDoFJointReadOnly oneDoFJoint = jointThresholds.first(i);
+
+         double range = oneDoFJoint.getJointLimitUpper() - oneDoFJoint.getJointLimitLower();
+         double thresholdAmount = range * thresholdPercentage;
+         double lowerLimit = oneDoFJoint.getJointLimitLower() + thresholdAmount;
+         double upperLimit = oneDoFJoint.getJointLimitUpper() - thresholdAmount;
+
+         jointThresholds.second(i).setValue(lowerLimit);
+         jointThresholds.third(i).setValue(upperLimit);
+      }
+   }
+
    
    public RobotJointLimitWatcher(OneDoFJointBasics[] oneDoFJoints)
    {
