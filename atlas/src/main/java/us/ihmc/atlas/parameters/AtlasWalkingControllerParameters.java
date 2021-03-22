@@ -109,7 +109,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       ankleJointLimitParameters = new JointLimitParameters();
       ankleJointLimitParameters.setMaxAbsJointVelocity(5.0);
       ankleJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(20.0));
-      ankleJointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
+      ankleJointLimitParameters.setJointLimitFilterBreakFrequency(10.0);
       ankleJointLimitParameters.setVelocityControlGain(90.0);
 
       for (RobotSide robotSide : RobotSide.values)
