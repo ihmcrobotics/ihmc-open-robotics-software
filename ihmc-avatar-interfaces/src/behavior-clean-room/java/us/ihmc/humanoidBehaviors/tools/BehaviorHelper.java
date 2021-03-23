@@ -214,26 +214,35 @@ public class BehaviorHelper
             = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
       GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
       gpuPlanarRegionUpdater.attachROS2Tuner(managedROS2Node);
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+
+//      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+//      RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
+//      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
+//      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+
+      RemoteSyncedRobotModel syncedRobot = getOrCreateRobotInterface().newSyncedRobot();
+
+      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
+
       RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
       ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
       MapsenseTools.createROS1Callback(topic, ros1Node, rawGPUPlanarRegionList ->
       {
          executorService.clearQueueAndExecute(() ->
          {
-            robotConfigurationDataBuffer.updateFullRobotModel(false, rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs(), fullRobotModel, null);
-            try
-            {
-               referenceFrames.updateFrames();
-            }
-            catch (NotARotationMatrixException e)
-            {
-               LogTools.error(e.getMessage());
-            }
+//            robotConfigurationDataBuffer.updateFullRobotModel(false, rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs(), fullRobotModel, null);
+//            try
+//            {
+//               referenceFrames.updateFrames();
+//            }
+//            catch (NotARotationMatrixException e)
+//            {
+//               LogTools.error(e.getMessage());
+//            }
+
+            syncedRobot.update();
+
             PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
             try
             {
