@@ -72,6 +72,7 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
+   public static final MessagerAPIFactory.Topic<Double> MeasuredPlanarRegionDelay = topic("MeasuredPlanarRegionDelay");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
