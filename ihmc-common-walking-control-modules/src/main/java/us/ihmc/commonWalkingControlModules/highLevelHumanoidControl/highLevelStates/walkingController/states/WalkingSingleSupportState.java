@@ -244,7 +244,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       updateHeightManager();
 
 
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime);
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime, balanceManager.getFinalDesiredCoMVelocity(), balanceManager.getFinalDesiredCoMAcceleration());
 
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {

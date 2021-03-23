@@ -64,11 +64,11 @@ public class UpDownExplorer
    public UpDownExplorer(BehaviorHelper behaviorHelper, RemoteREAInterface rea)
    {
       this.behaviorHelper = behaviorHelper;
-      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getManagedMessager());
+      upDownFlatAreaFinder = new UpDownFlatAreaFinder(behaviorHelper.getMessager());
       this.rea = rea;
 
-      behaviorHelper.createUICallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
-      upDownCenter = behaviorHelper.createUIInput(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
+      behaviorHelper.subscribeViaCallback(UpDownExplorationEnabled, enabled -> { if (enabled) state = UpDownState.TRAVERSING; });
+      upDownCenter = behaviorHelper.subscribeViaReference(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
    public void onNavigateEntry(RemoteSyncedRobotModel syncedRobot)

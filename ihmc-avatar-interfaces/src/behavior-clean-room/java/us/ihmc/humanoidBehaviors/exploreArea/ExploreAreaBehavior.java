@@ -55,13 +55,13 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
    public ExploreAreaBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      messager = helper.getManagedMessager();
+      messager = helper.getMessager();
       statusLogger = helper.getOrCreateStatusLogger();
       robotInterface = helper.getOrCreateRobotInterface();
 
-      explore = helper.createUIInput(ExploreArea, false);
-      helper.createUICallback(Parameters, parameters::setAllFromStrings);
-      lookAndStepReachedGoal = helper.createROS2Notification(LookAndStepBehaviorAPI.REACHED_GOAL);
+      explore = helper.subscribeViaReference(ExploreArea, false);
+      helper.subscribeViaCallback(Parameters, parameters::setAllFromStrings);
+      lookAndStepReachedGoal = helper.subscribeViaNotification(LookAndStepBehaviorAPI.REACHED_GOAL);
 
       statusLogger.info("Initializing explore area behavior");
 
@@ -92,7 +92,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
          }
          else
          {
-            helper.publishToUI(CurrentState, Stop);
+            helper.publish(CurrentState, Stop);
             robotInterface.pauseWalking();
             return SUCCESS;
          }
@@ -150,7 +150,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             if (noWhereToExploreSupplier.get())
                return;
 
-            helper.publishToUI(CurrentState, LookAndStep);
+            helper.publish(CurrentState, LookAndStep);
 
             List<Pose3DReadOnly> bestBodyPath = bestBodyPathSupplier.get();
             Pose3D goal = new Pose3D(bestBodyPath.get(bestBodyPath.size() - 1));
@@ -158,10 +158,10 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
             exploredGoalPosesSoFarSupplier.get().add(goal);
 
             statusLogger.info("Walking to {}", StringTools.zUpPoseString(goal));
-            helper.publishToUI(WalkingToPose, goal);
+            helper.publish(WalkingToPose, goal);
 
             messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-            helper.publishToUI(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
+            helper.publish(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();
          }

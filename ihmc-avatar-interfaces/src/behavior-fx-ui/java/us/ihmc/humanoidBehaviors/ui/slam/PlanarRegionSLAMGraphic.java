@@ -10,7 +10,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParam
 import us.ihmc.humanoidBehaviors.ui.graphics.MeshGraphic;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.javafx.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;

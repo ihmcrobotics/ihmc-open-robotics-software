@@ -25,7 +25,7 @@ mainDependencies {
    api("org.reflections:reflections:0.9.10")
    api("com.hierynomus:sshj:0.27.0")
 
-   api("net.java.jinput:jinput:2.0.6-ihmc")
+   api("net.java.jinput:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:euclid-geometry:0.16.2")
    api("us.ihmc:ihmc-yovariables:0.9.8")
@@ -49,7 +49,8 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-behaviors:source")
    api("us.ihmc:ihmc-mocap:source")
    api("us.ihmc:ihmc-robot-models:source")
-   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-graphics-javafx:source")
+   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-robot-data-visualizer:source")
    api("us.ihmc:ihmc-footstep-planning:source")
@@ -64,7 +65,8 @@ behaviorFxUiDependencies {
    api(ihmc.sourceSetProject("main"))
    api(ihmc.sourceSetProject("behavior-clean-room"))
    api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
-   api("us.ihmc:ihmc-robot-models-visualizers:source")
+   api("us.ihmc:ihmc-graphics-javafx:source")
+   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
 }

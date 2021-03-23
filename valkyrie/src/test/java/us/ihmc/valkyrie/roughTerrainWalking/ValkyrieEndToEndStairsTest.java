@@ -46,10 +46,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
          }
       };
       if (useVal2Scale)
-      {
-         robotModel.setModelSizeScale(0.925170);
-         robotModel.setModelMassScale(0.925170);
-      }
+         robotModel.setVal2Scale();
       return robotModel;
    }
 
@@ -73,14 +70,14 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    public void testDownStairsSlow(TestInfo testInfo) throws Exception
    {
       Random random = new Random(53415);
-      testStairs(testInfo, true, false, 0.9, 0.25, 0.0, createFootstepCorruptor(random, 0.025, 0.10, 0.05, 0.2, 0.2, 0.2));
+      testStairs(testInfo, true, false, 0.9, 0.25, 0.0, createFootstepCorruptor(random, 0.025, 0.06, 0.025, 0.2, 0.2, 0.2));
    }
 
    @Test
    @Tag("humanoid-rough-terrain-slow")
    public void testUpStairs(TestInfo testInfo) throws Exception
    {
-      testStairs(testInfo, false, true, 1.0, 0.25, 0.0);
+      testStairs(testInfo, false, true, 1.0, 0.25, 0.025);
    }
 
    @Test
@@ -88,7 +85,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
    public void testDownStairs(TestInfo testInfo) throws Exception
    {
       Random random = new Random(53415);
-      testStairs(testInfo, false, false, 1.0, 0.35, 0.0, createFootstepCorruptor(random, 0.025, 0.10, 0.05, 0.2, 0.2, 0.2));
+      testStairs(testInfo, false, false, 1.4, 0.35, 0.0, createFootstepCorruptor(random, 0.025, 0.10, 0.05, 0.2, 0.2, 0.2));
    }
 
    @Test
@@ -238,7 +235,7 @@ public class ValkyrieEndToEndStairsTest extends HumanoidEndToEndStairsTest
       double footWidth = robotModel.getWalkingControllerParameters().getSteppingParameters().getFootWidth();
       double footOffsetX = 0.025;
 
-      testStairs(testInfo, false, false, 1.0, 0.25, 0.0, footsteps ->
+      testStairs(testInfo, false, false, 1.2, 0.25, 0.0, footsteps ->
       {
          int numberOfSteps = footsteps.getFootstepDataList().size();
          for (int i = 0; i < numberOfSteps; i++)

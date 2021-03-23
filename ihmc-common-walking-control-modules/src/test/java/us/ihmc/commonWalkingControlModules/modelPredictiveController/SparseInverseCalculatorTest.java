@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCTestHelper;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -44,7 +45,7 @@ public class SparseInverseCalculatorTest
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
       MPCQPInputCalculator inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
-      ContactPlaneHelper contactPlaneHelper = new ContactPlaneHelper(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       FramePose3D contactPose = new FramePose3D();
       contactPose.getPosition().set(dcmObjective);

@@ -14,15 +14,15 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
+import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -48,13 +48,24 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
+import us.ihmc.valkyrie.diagnostic.ValkyrieDiagnosticParameters;
 import us.ihmc.valkyrie.fingers.SimulatedValkyrieFingerController;
 import us.ihmc.valkyrie.fingers.ValkyrieHandModel;
-import us.ihmc.valkyrie.parameters.*;
+import us.ihmc.valkyrie.parameters.ValkyrieCoPTrajectoryParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieCollisionBoxProvider;
+import us.ihmc.valkyrie.parameters.ValkyrieContactPointParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieFootstepPlannerParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
+import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
+import us.ihmc.valkyrie.parameters.ValkyrieSensorInformation;
+import us.ihmc.valkyrie.parameters.ValkyrieStateEstimatorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieUIParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.sensors.ValkyrieSensorSuiteManager;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.UIParameters;
+import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
 public class ValkyrieRobotModel implements DRCRobotModel
 {
@@ -111,6 +122,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       controllerDT = target == RobotTarget.SCS ? 0.004 : 0.006;
       estimatorDT = 0.002;
       simulateDT = estimatorDT / 3.0;
+   }
+
+   public void setVal2Scale()
+   {
+      setModelSizeScale(0.925170);
+      setModelMassScale(0.925170);
    }
 
    public ValkyrieRobotVersion getRobotVersion()
@@ -557,16 +574,10 @@ public class ValkyrieRobotModel implements DRCRobotModel
    {
       return "/us/ihmc/valkyrie/parameters/controller_simulation.xml";
    }
-   
+
    public static String getHardwareParameterResourceName()
    {
       return "/us/ihmc/valkyrie/parameters/controller_hardware.xml";
-   }
-
-   @Override
-   public SliderBoardParameters getSliderBoardParameters()
-   {
-      return new ValkyrieSliderBoardParameters();
    }
 
    @Override
@@ -619,12 +630,6 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return new ValkyrieFootstepPlanningParameters();
-   }
-
-   @Override
    public CoPTrajectoryParameters getCoPTrajectoryParameters()
    {
       if (copTrajectoryParameters == null)
@@ -673,15 +678,31 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      return new ValkyrieKinematicsCollisionModel(getJointMap());
+      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
+      {
+         return new ValkyrieArmMassSimCollisionModel(getJointMap());
+      }
+      else
+      {
+         return new ValkyrieKinematicsCollisionModel(getJointMap());
+      }
    }
 
    @Override
    public RobotCollisionModel getSimulationRobotCollisionModel(CollidableHelper helper, String robotCollisionMask, String... environmentCollisionMasks)
    {
-      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
-      collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
-      return collisionModel;
+      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
+      {
+         ValkyrieArmMassSimCollisionModel collisionModel = new ValkyrieArmMassSimCollisionModel(getJointMap(), true);
+         collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+         return collisionModel;
+      }
+      else
+      {
+         ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(getJointMap());
+         collisionModel.setCollidableHelper(helper, robotCollisionMask, environmentCollisionMasks);
+         return collisionModel;
+      }
    }
 
    @Override
@@ -693,9 +714,15 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public DiagnosticParameters getDiagnoticParameters()
+   {
+      return new ValkyrieDiagnosticParameters(getJointMap(), getSensorInformation(), target == RobotTarget.REAL_ROBOT);
+   }
+
+   @Override
    public UIParameters getUIParameters()
    {
-      return new ValkyrieUIParameters(getRobotPhysicalProperties(), getJointMap());
+      return new ValkyrieUIParameters(robotVersion, getRobotPhysicalProperties(), getJointMap());
    }
 
    @Override
@@ -708,5 +735,11 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public String toString()
    {
       return getSimpleRobotName();
+   }
+
+   @Override
+   public RobotLowLevelMessenger newRobotLowLevelMessenger(ROS2NodeInterface ros2Node)
+   {
+      return new ValkyrieDirectRobotInterface(ros2Node, this);
    }
 }

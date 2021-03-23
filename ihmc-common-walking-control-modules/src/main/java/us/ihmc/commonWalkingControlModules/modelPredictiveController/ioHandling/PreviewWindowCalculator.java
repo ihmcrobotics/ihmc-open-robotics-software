@@ -34,6 +34,8 @@ public class PreviewWindowCalculator
    private final RecyclingArrayList<ContactPlaneProvider> previewWindowContacts = new RecyclingArrayList<>(ContactPlaneProvider::new);
    private final RecyclingArrayList<ContactPlaneProvider> fullContactSet = new RecyclingArrayList<>(ContactPlaneProvider::new);
 
+   private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
+
    public PreviewWindowCalculator(YoRegistry parentRegistry)
    {
       activeSegment.set(-1);
@@ -102,8 +104,7 @@ public class PreviewWindowCalculator
             break;
       }
 
-      cropInitialSegmentLength(previewWindowContacts.get(0), timeAtStartOfWindow);
-
+      contactSegmentHelper.cropInitialSegmentLength(previewWindowContacts.get(0), timeAtStartOfWindow);
 
       double previewWindowLength = 0.0;
       double flightDuration = 0.0;
@@ -116,7 +117,7 @@ public class PreviewWindowCalculator
             flightDuration += duration;
       }
 
-      ContactPlaneProvider trimmedFinalSegment = trimFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength);
+      ContactPlaneProvider trimmedFinalSegment = contactSegmentHelper.trimFinalSegmentLength(previewWindowContacts.getLast(), previewWindowLength, maximumPreviewWindowDuration.getDoubleValue());
       previewWindowLength += previewWindowContacts.getLast().getTimeInterval().getDuration();
 
       fullContactSet.clear();
@@ -141,48 +142,6 @@ public class PreviewWindowCalculator
          throw new IllegalArgumentException("The full contact sequence is not valid.");
 
       return previewWindowLength + flightDuration;
-   }
-
-   private final FramePoint3D modifiedCoPLocation = new FramePoint3D();
-
-   private void cropInitialSegmentLength(ContactPlaneProvider contact, double timeAtStartOfWindow)
-   {
-      TimeIntervalBasics timeInterval = contact.getTimeInterval();
-      if (timeAtStartOfWindow > timeInterval.getEndTime())
-         throw new IllegalArgumentException("Bad initial segment.");
-
-      double segmentDuration = Math.min(timeInterval.getDuration(), 10.0);
-      double alphaIntoSegment = (timeAtStartOfWindow - timeInterval.getStartTime()) / segmentDuration;
-      modifiedCoPLocation.interpolate(contact.getECMPStartPosition(), contact.getECMPEndPosition(), alphaIntoSegment);
-
-      timeInterval.setStartTime(timeAtStartOfWindow);
-      contact.setStartECMPPosition(modifiedCoPLocation);
-   }
-
-   private final ContactPlaneProvider splitSegmentRemaining = new ContactPlaneProvider();
-
-   private ContactPlaneProvider trimFinalSegmentLength(ContactPlaneProvider contact, double timeAtStartOfSegment)
-   {
-      TimeIntervalBasics timeInterval = contact.getTimeInterval();
-      double maxSegmentDuration = maximumPreviewWindowDuration.getDoubleValue() - timeAtStartOfSegment;
-      if (maxSegmentDuration > timeInterval.getDuration())
-         return null;
-
-      double segmentDuration = Math.min(timeInterval.getDuration(), 10.0);
-      double alphaIntoSegment = maxSegmentDuration / segmentDuration;
-      modifiedCoPLocation.interpolate(contact.getECMPStartPosition(), contact.getECMPEndPosition(), alphaIntoSegment);
-
-      splitSegmentRemaining.set(contact);
-
-      double splitTime = maxSegmentDuration + timeInterval.getStartTime();
-
-      contact.setEndTime(splitTime);
-      contact.setEndECMPPosition(modifiedCoPLocation);
-
-      splitSegmentRemaining.setStartTime(splitTime);
-      splitSegmentRemaining.setStartECMPPosition(modifiedCoPLocation);
-
-      return splitSegmentRemaining;
    }
 
    /**
