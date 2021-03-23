@@ -18,6 +18,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -27,6 +28,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
@@ -34,7 +36,6 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.log.*;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -110,6 +111,8 @@ public class FootstepPlannerLogVisualizerController
    private CheckBox showSnapAndWiggledStep;
    @FXML
    private CheckBox showIdealStep;
+   @FXML
+   private CheckBox showBodyBox;
 
    @FXML
    private Text iterationRange;
@@ -138,6 +141,7 @@ public class FootstepPlannerLogVisualizerController
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, showSnappedStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, showSnapAndWiggledStep.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, showIdealStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowBodyBox, showBodyBox.selectedProperty(), true);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
       {
@@ -336,6 +340,7 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, footstepPlannerLog.getStatusPacket().getBodyPath());
 
       // set graphics
+      messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowOccupancyMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterNavigableExtrusions, false);
@@ -343,7 +348,6 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowClusterRawPoints, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowStartVisibilityMap, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowFootstepPlan, false); // hide plan by default
-      messager.submitMessage(FootstepPlannerMessagerAPI.BindStartToRobot, false);
       messager.submitMessage(FootstepPlannerMessagerAPI.ShowLogGraphics, true);
 
       // set graph data
@@ -560,6 +564,7 @@ public class FootstepPlannerLogVisualizerController
          if (newValue != null)
          {
             messager.submitMessage(FootstepPlannerMessagerAPI.TouchdownStepToVisualize, Pair.of(newValue.graphNode.getSecondStep(), newValue.edgeData.getEndStepSnapData()));
+            messager.submitMessage(FootstepPlannerMessagerAPI.LoggedCollisionBoxes, newValue.collisionBoxes);
             selectedRow.set(newValue);
          }
       };
@@ -705,6 +710,7 @@ public class FootstepPlannerLogVisualizerController
       private final RigidBodyTransform snappedEndStepTransform = new RigidBodyTransform();
       private final RigidBodyTransform snapAndWiggledEndStepTransform = new RigidBodyTransform();
       private final boolean expanded;
+      private final List<Box3D> collisionBoxes = new ArrayList<>();
 
       public ChildStepProperty(FootstepPlannerEdgeData edgeData,
                                boolean expanded)
@@ -726,6 +732,63 @@ public class FootstepPlannerLogVisualizerController
             DiscreteFootstepTools.getSnappedStepTransform(graphNode.getSecondStep(), snapData.getSnapTransform(), snappedEndStepTransform);
             snapAndWiggledEndStepTransform.set(snapData.getSnappedStepTransform(graphNode.getSecondStep()));
          }
+
+         if (footstepPlannerLog != null && footstepPlannerLog.getFootstepParametersPacket().getCheckForBodyBoxCollisions())
+         {
+            Box3D footstepBox = new Box3D();
+            double boxSizeX = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxDepth();
+            double boxSizeY = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxWidth();
+            double boxSizeZ = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxHeight();
+            footstepBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+
+            double bodyBoxBaseX = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxBaseX();
+            double bodyBoxBaseY = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxBaseY();
+            double bodyBoxBaseZ = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxBaseZ();
+
+            // Taken from FootstepPlannerBodyCollision detector.
+            // TODO add in dynamic graphics...
+
+            DiscreteFootstep footstep = graphNode.getSecondStep();
+            double stepHeight = DiscreteFootstepTools.getSnappedStepHeight(footstep, snapData.getSnapTransform());
+            LatticePoint latticePoint = createLatticePoint(footstep, bodyBoxBaseX, bodyBoxBaseY);
+
+            // add final step
+            setBoxPose(latticePoint, bodyBoxBaseZ, stepHeight, boxSizeZ, footstepBox);
+            collisionBoxes.add(footstepBox);
+
+            long intermediateBodyBoxChecks = footstepPlannerLog.getFootstepParametersPacket().getIntermediateBodyBoxChecks();
+            if (intermediateBodyBoxChecks >= 1)
+            {
+               // add interpolated poses
+               DiscreteFootstep previousFootstep = graphNode.getFirstStep();
+               LatticePoint previousLatticePoint = createLatticePoint(previousFootstep, bodyBoxBaseX, bodyBoxBaseY);
+
+               for (int i = 0; i < intermediateBodyBoxChecks; i++)
+               {
+                  Box3D interpolatedBox = new Box3D();
+                  interpolatedBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+                  double alpha = (i + 1) / ((double) intermediateBodyBoxChecks + 1);
+                  LatticePoint interpolatedPoint = DiscreteFootstepTools.interpolate(latticePoint, previousLatticePoint, alpha);
+                  setBoxPose(interpolatedPoint, bodyBoxBaseZ, stepHeight, boxSizeZ, interpolatedBox);
+                  collisionBoxes.add(interpolatedBox);
+               }
+            }
+         }
+      }
+
+      private LatticePoint createLatticePoint(DiscreteFootstep footstep, double bodyBoxBaseX, double bodyBoxBaseY)
+      {
+         double lateralOffsetSign = footstep.getRobotSide().negateIfLeftSide(1.0);
+         double offsetX = bodyBoxBaseX * Math.cos(footstep.getYaw()) - lateralOffsetSign * bodyBoxBaseY * Math.sin(footstep.getYaw());
+         double offsetY = bodyBoxBaseX * Math.sin(footstep.getYaw()) + lateralOffsetSign * bodyBoxBaseY * Math.cos(footstep.getYaw());
+         return new LatticePoint(footstep.getX() + offsetX, footstep.getY() + offsetY, footstep.getYaw());
+      }
+
+      private void setBoxPose(LatticePoint latticePoint, double bodyBoxBaseZ, double stepHeight, double boxSizeZ, Box3D collisionBox)
+      {
+         collisionBox.getPose().getTranslation().set(latticePoint.getX(), latticePoint.getY(), stepHeight + bodyBoxBaseZ + 0.5 * boxSizeZ);
+         collisionBox.getPose().getRotation().setYawPitchRoll(latticePoint.getYaw(), 0.0, 0.0);
+
       }
 
       public String getSolution()

@@ -52,9 +52,17 @@ public class KinematicsToolboxSnapshotDescription
       controllerConfiguration = new RobotConfigurationData(other.controllerConfiguration);
       ikSolution = new KinematicsToolboxOutputStatus(other.ikSolution);
       ikPrivilegedConfiguration = new KinematicsToolboxPrivilegedConfigurationMessage(other.ikPrivilegedConfiguration);
-      centerOfMassAnchor = new CenterOfMassMotionControlAnchorDescription(other.centerOfMassAnchor);
       sixDoFAnchors = other.sixDoFAnchors.stream().map(SixDoFMotionControlAnchorDescription::new).collect(Collectors.toList());
       oneDoFAnchors = other.oneDoFAnchors.stream().map(OneDoFMotionControlAnchorDescription::new).collect(Collectors.toList());
+
+      if (other.centerOfMassAnchor == null)
+      {
+         centerOfMassAnchor = new CenterOfMassMotionControlAnchorDescription();
+      }
+      else
+      {
+         centerOfMassAnchor = new CenterOfMassMotionControlAnchorDescription(other.centerOfMassAnchor);
+      }
    }
 
    public static KinematicsToolboxSnapshotDescription fromJSON(JsonNode node)

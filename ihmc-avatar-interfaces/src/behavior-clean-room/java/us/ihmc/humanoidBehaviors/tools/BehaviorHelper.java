@@ -4,16 +4,24 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
+import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
+import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -22,20 +30,28 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
-import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
-import us.ihmc.humanoidBehaviors.tools.ros2.ROS2TypelessInput;
-import us.ihmc.messager.Messager;
+import us.ihmc.communication.ros2.ManagedROS2Node;
+import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.communication.ros2.ROS2TypelessInput;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
+import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
+import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ActivationReference;
+import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -76,8 +92,10 @@ public class BehaviorHelper
 {
    private final DRCRobotModel robotModel;
    private final ManagedMessager managedMessager;
+   private final RosNodeInterface ros1Node;
    private final ManagedROS2Node managedROS2Node;
    private final ROS2PublisherMap ros2PublisherMap;
+   private final ROS2ControllerPublisherMap ros2ControllerPublisherMap;
    private RemoteHumanoidRobotInterface robot;
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
@@ -86,15 +104,26 @@ public class BehaviorHelper
    private FootstepPlanningModule footstepPlanner;
    private StatusLogger statusLogger;
 
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
+   {
+      this(robotModel, messager, ros1Node, ros2Node, true);
+   }
+
+   public BehaviorHelper(DRCRobotModel robotModel,
+                         Messager messager,
+                         RosNodeInterface ros1Node,
+                         ROS2NodeInterface ros2Node,
+                         boolean commsEnabledToStart)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);
+      this.ros1Node = ros1Node;
       managedROS2Node = new ManagedROS2Node(ros2Node);
 
       ros2PublisherMap = new ROS2PublisherMap(managedROS2Node);
+      ros2ControllerPublisherMap = new ROS2ControllerPublisherMap(ros2Node, robotModel.getSimpleRobotName(), ros2PublisherMap);
 
-      setCommunicationCallbacksEnabled(false);
+      setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
 
    // Construction-only methods:
@@ -137,10 +166,20 @@ public class BehaviorHelper
       return bodyPathPlanner;
    }
 
+   public RemoteSyncedRobotModel newSyncedRobot()
+   {
+      return getOrCreateRobotInterface().newSyncedRobot();
+   }
+
    public VisibilityGraphPathPlanner newBodyPathPlanner()
    {
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       return new VisibilityGraphPathPlanner(visibilityGraphsParameters, new ObstacleAvoidanceProcessor(visibilityGraphsParameters));
+   }
+
+   public RobotLowLevelMessenger newRobotLowLevelMessenger()
+   {
+      return robotModel.newRobotLowLevelMessenger(managedROS2Node);
    }
 
    public FootstepPlanningModule getOrCreateFootstepPlanner()
@@ -153,7 +192,7 @@ public class BehaviorHelper
    public StatusLogger getOrCreateStatusLogger()
    {
       if (statusLogger == null)
-         statusLogger = new StatusLogger(this::publishToUI);
+         statusLogger = new StatusLogger(this::publish);
       return statusLogger;
    }
 
@@ -167,122 +206,164 @@ public class BehaviorHelper
                                      walkingControllerParameters);
    }
 
-   public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
+   public void subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
+   {
+      boolean daemon = true;
+      int queueSize = 1;
+      ResettableExceptionHandlingExecutorService executorService
+            = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
+      GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
+      gpuPlanarRegionUpdater.attachROS2Tuner(managedROS2Node);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
+      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
+      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
+      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
+      ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
+      MapsenseTools.createROS1Callback(topic, ros1Node, rawGPUPlanarRegionList ->
+      {
+         executorService.clearQueueAndExecute(() ->
+         {
+            robotConfigurationDataBuffer.updateFullRobotModel(false, rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs(), fullRobotModel, null);
+            try
+            {
+               referenceFrames.updateFrames();
+            }
+            catch (NotARotationMatrixException e)
+            {
+               LogTools.error(e.getMessage());
+            }
+            PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+            try
+            {
+               planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
+               planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+            }
+            catch (NotARotationMatrixException e)
+            {
+               LogTools.error(e.getMessage());
+            }
+            callback.accept(planarRegionsList);
+         });
+      });
+   }
+
+   public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
       new IHMCROS2Callback<>(managedROS2Node, topic, callback);
    }
 
-   public void createROS2Callback(ROS2Topic<Empty> topic, Runnable callback)
+   public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
       new IHMCROS2Callback<>(managedROS2Node, topic, message -> callback.run());
    }
 
    // TODO: Move to remote robot interface?
-   public <T> void createROS2ControllerCallback(Class<T> messageClass, Consumer<T> callback)
+   public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
       new IHMCROS2Callback<>(managedROS2Node, ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
-   public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
+   public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
    {
-      createROS2Callback(topic, planarRegionsListMessage ->
+      subscribeViaCallback(topic, planarRegionsListMessage ->
       {
          callback.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       });
    }
 
-   public Supplier<PlanarRegionsList> createROS2PlanarRegionsListInput(ROS2Topic<PlanarRegionsListMessage> topic)
+   public Supplier<PlanarRegionsList> subscribeToPlanarRegionsViaReference(ROS2Topic<PlanarRegionsListMessage> topic)
    {
       ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(managedROS2Node, topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
    }
 
-   public <T> ROS2Input<T> createROS2Input(ROS2Topic<T> topic)
+   public <T> ROS2Input<T> subscribe(ROS2Topic<T> topic)
    {
       return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
    }
 
-   public ROS2TypelessInput createROS2TypelessInput(ROS2Topic<Empty> topic)
+   public ROS2TypelessInput subscribeTypeless(ROS2Topic<Empty> topic)
    {
       return new ROS2TypelessInput(managedROS2Node, topic);
    }
 
-   public Notification createROS2Notification(ROS2Topic<Empty> topic)
+   public Notification subscribeViaNotification(ROS2Topic<Empty> topic)
    {
       Notification notification = new Notification();
       new ROS2Callback<>(managedROS2Node, Empty.class, topic, message -> notification.set());
       return notification;
    }
 
-   public <T> void publishROS2(ROS2Topic<T> topic, T message)
+   public <T> void publish(ROS2Topic<T> topic, T message)
    {
       ros2PublisherMap.publish(topic, message);
    }
 
-   public void publishROS2(ROS2Topic<Pose3D> topic, Pose3D message)
+   public void publish(ROS2Topic<Pose3D> topic, Pose3D message)
    {
       ros2PublisherMap.publish(topic, message);
    }
 
-   public void publishROS2(ROS2Topic<Empty> topic)
+   public void publish(ROS2Topic<Empty> topic)
    {
       ros2PublisherMap.publish(topic);
+   }
+
+   public void publishToController(Object message)
+   {
+      ros2ControllerPublisherMap.publish(message);
    }
 
    // UI Communication Methods:
    // Extract into class?
 
-   public <T> void publishToUI(Topic<T> topic, T message)
+   public <T> void publish(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
    }
 
-   public void publishToUI(Topic<Object> topic)
+   public void publish(Topic<Object> topic)
    {
       managedMessager.submitMessage(topic, new Object());
    }
 
-   public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
+   public ActivationReference<Boolean> subscribeViaActivationReference(Topic<Boolean> topic)
    {
       return managedMessager.createBooleanActivationReference(topic);
    }
 
-   public <T> void createUICallback(Topic<T> topic, TopicListener<T> listener)
+   public <T> void subscribeViaCallback(Topic<T> topic, TopicListener<T> listener)
    {
       managedMessager.registerTopicListener(topic, listener);
    }
 
-   public <T> AtomicReference<T> createUIInput(Topic<T> topic, T initialValue)
+   public <T> AtomicReference<T> subscribeViaReference(Topic<T> topic, T initialValue)
    {
       return managedMessager.createInput(topic, initialValue);
    }
 
-   public Notification createUINotification(Topic<Object> topic)
+   public Notification subscribeTypelessViaNotification(Topic<Object> topic)
    {
       Notification notification = new Notification();
-      createUICallback(topic, object -> notification.set());
+      subscribeViaCallback(topic, object -> notification.set());
       return notification;
    }
 
-   public <T extends K, K> TypedNotification<K> createUITypedNotification(Topic<T> topic)
+   public <T extends K, K> TypedNotification<K> subscribeViaNotification(Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();
-      createUICallback(topic, message -> typedNotification.set(message));
+      subscribeViaCallback(topic, typedNotification::set);
       return typedNotification;
    }
 
    // ROS 2 Methods:
 
-   public ROS2PlanarRegionsInput createPlanarRegionsInput(String specifier)
-   {
-      ROS2Topic topic = ROS2Tools.REA.withOutput().withTypeName(PlanarRegionsListMessage.class).withSuffix(specifier);
-      return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, topic.getName());
-   }
-
-   public Notification createWalkingCompletedNotification()
+   public Notification subscribeToWalkingCompletedViaNotification()
    {
       Notification notification = new Notification();
-      createROS2ControllerCallback(WalkingStatusMessage.class, walkingStatusMessage -> {
+      subscribeToControllerViaCallback(WalkingStatusMessage.class, walkingStatusMessage -> {
          if (walkingStatusMessage.getWalkingStatus() == WalkingStatusMessage.COMPLETED)
          {
             notification.set();
@@ -319,12 +400,17 @@ public class BehaviorHelper
       managedMessager.setEnabled(enabled);
    }
 
-   public Messager getManagedMessager()
+   public Messager getMessager()
    {
       return managedMessager;
    }
 
-   public ManagedROS2Node getManagedROS2Node()
+   public RosNodeInterface getROS1Node()
+   {
+      return ros1Node;
+   }
+
+   public ROS2NodeInterface getROS2Node()
    {
       return managedROS2Node;
    }

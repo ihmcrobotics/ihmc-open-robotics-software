@@ -23,8 +23,32 @@ public interface StateTransitionCondition
     * condition is requested.
     * 
     * @param timeInCurrentState the time spent in the current state, or {@link Double#NaN} if the time
-    *           information is unavailable.
+    *                           information is unavailable.
     * @return {@code true} to request a transition, {@code false} otherwise.
     */
    boolean testCondition(double timeInCurrentState);
+
+   /**
+    * Indicates whether, when the transition is requested, the {@link State#onExit(double)} of the
+    * state being left should be invoked (default) or skipped.
+    * 
+    * @return {@code true} (default) to perform {@link State#onExit(double)} of the state being left,
+    *         or {@code false} to skip it.
+    */
+   default boolean performOnExit()
+   {
+      return true;
+   }
+
+   /**
+    * Indicates whether, when the transition is requested, the {@link State#onEntry()} of the state
+    * being entered should be invoked (default) or skipped.
+    * 
+    * @return {@code true} (default) to perform {@link State#onEntry()} of the state being entered, or
+    *         {@code false} to skip it.
+    */
+   default boolean performOnEntry()
+   {
+      return true;
+   }
 }

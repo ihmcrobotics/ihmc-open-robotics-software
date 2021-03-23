@@ -57,6 +57,7 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_
 // TODO: Add reviewing; Add status logger to visualizer
 @Execution(ExecutionMode.SAME_THREAD)
 @TestMethodOrder(OrderAnnotation.class)
+@Disabled // TODO: Need to rewrite this test for the new setup
 public class AtlasLookAndStepBehaviorTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize"));

@@ -14,8 +14,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.ejml.EjmlParameters;
-import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.reflections.Reflections;
@@ -37,7 +35,20 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -67,7 +78,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccele
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -151,6 +161,7 @@ public class CrossRobotCommandRandomTools
       set.add(ControllerCoreCommand.class);
       set.add(ControllerCoreOutput.class);
       set.add(CenterOfPressureDataHolder.class);
+      set.add(DesiredExternalWrenchHolder.class);
       set.add(HumanoidRobotContextJointData.class);
       set.add(RobotMotionStatusHolder.class);
       set.add(LowLevelOneDoFJointDesiredDataHolder.class);
@@ -1142,7 +1153,7 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static LinearMomentumRateCostCommand nextLinearMomentumRateCostCommand(Random random,  RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   public static LinearMomentumRateCostCommand nextLinearMomentumRateCostCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       LinearMomentumRateCostCommand next = new LinearMomentumRateCostCommand();
       next.setCommandId(random.nextInt());
@@ -1410,6 +1421,30 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static DesiredExternalWrenchHolder nextDesiredExternalWrenchHolder(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      return nextDesiredExternalWrenchHolder(random, false, rootBody, possibleFrames);
+   }
+
+   public static DesiredExternalWrenchHolder nextDesiredExternalWrenchHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                             ReferenceFrame... possibleFrames)
+   {
+      DesiredExternalWrenchHolder next = new DesiredExternalWrenchHolder();
+
+      List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
+      int numberOfBodies = random.nextInt(allBodies.size());
+      if (ensureNonEmptyCommand)
+         numberOfBodies = Math.max(numberOfBodies, 1);
+
+      for (int bodyIndex = 0; bodyIndex < numberOfBodies; bodyIndex++)
+      {
+         RigidBodyBasics rigidBody = allBodies.remove(random.nextInt(allBodies.size()));
+         next.registerRigidBody(rigidBody, nextWrench(random, rigidBody.getBodyFixedFrame()));
+      }
+
+      return next;
+   }
+
    public static HumanoidRobotContextJointData nextHumanoidRobotContextJointData(Random random)
    {
       return nextHumanoidRobotContextJointData(random, false);
@@ -1665,6 +1700,7 @@ public class CrossRobotCommandRandomTools
    {
       ControllerCoreOutput next = new ControllerCoreOutput();
       next.setCenterOfPressureData(nextCenterOfPressureDataHolder(random, rootBody, possibleFrames));
+      next.setDesiredExternalWrenchData(nextDesiredExternalWrenchHolder(random, rootBody, possibleFrames));
       next.setLinearMomentumRate(nextFrameVector3D(random, possibleFrames));
       next.setRootJointDesiredConfigurationData(nextRootJointDesiredConfigurationData(random, possibleFrames));
       next.setLowLevelOneDoFJointDesiredDataHolder(nextJointDesiredOutputListBasics(random, rootBody, possibleFrames));

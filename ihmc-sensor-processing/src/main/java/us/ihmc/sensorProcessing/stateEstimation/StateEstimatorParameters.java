@@ -1,14 +1,13 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
+import java.util.Collections;
+import java.util.List;
 
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 
 public abstract class StateEstimatorParameters implements SensorProcessingConfiguration
 {
-   public abstract boolean isRunningOnRealRobot();
-
    @Override
    public abstract double getEstimatorDT();
 
@@ -19,29 +18,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
       return false;
    }
 
-   public boolean useIMUsForSpineJointVelocityEstimation()
+   public List<IMUBasedJointStateEstimatorParameters> getIMUBasedJointStateEstimatorParameters()
    {
-      return false;
-   }
-
-   public double getBreakFrequencyForSpineJointVelocityEstimation()
-   {
-      return Double.NaN;
-   }
-
-   public double getBreakFrequencyForSpineJointPositionEstimation()
-   {
-      return Double.NaN;
-   }
-
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      return null;
-   }
-
-   public double getIMUJointVelocityEstimationBacklashSlopTime()
-   {
-      return 0.0;
+      return Collections.emptyList();
    }
 
    public boolean requestWristForceSensorCalibrationAtStart()
@@ -77,10 +56,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    }
 
    /**
-    * When the IMU yaw drift cannot be estimated, the estimated rate of the yaw drift can be used
-    * to partially compensate for the drift.
-    * Works well when the yaw drift is linear.
-    * When false, the yaw drift will only be compensated whn the robot is standing.
+    * When the IMU yaw drift cannot be estimated, the estimated rate of the yaw drift can be used to
+    * partially compensate for the drift. Works well when the yaw drift is linear. When false, the yaw
+    * drift will only be compensated whn the robot is standing.
     */
    public boolean integrateEstimatedIMUYawDriftRate()
    {
@@ -88,8 +66,8 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    }
 
    /**
-    * The estimation of the yaw drift uses the position of the feet that are loaded and static.
-    * This is the delay from the moment a foot becomes loaded and the moment it is used in the estimation.
+    * The estimation of the yaw drift uses the position of the feet that are loaded and static. This is
+    * the delay from the moment a foot becomes loaded and the moment it is used in the estimation.
     */
    public double getIMUYawDriftEstimatorDelayBeforeTrustingFoot()
    {
@@ -97,9 +75,9 @@ public abstract class StateEstimatorParameters implements SensorProcessingConfig
    }
 
    /**
-    * The estimation of the yaw drift uses the position of the feet that are loaded and static.
-    * This the maximum value for the linear velocity magnitude for each foot.
-    * The estimation will start when all feet are loaded and static.
+    * The estimation of the yaw drift uses the position of the feet that are loaded and static. This
+    * the maximum value for the linear velocity magnitude for each foot. The estimation will start when
+    * all feet are loaded and static.
     */
    public double getIMUYawDriftFootLinearVelocityThreshold()
    {

@@ -55,6 +55,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final String name;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private ROS2Node ros2Node;
+   private boolean manageROS2Node = false;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
 
@@ -331,8 +332,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.clearCustomTerminationConditions();
    }
 
-   public boolean registerRosNode(ROS2Node ros2Node)
+   public boolean registerRosNode(ROS2Node ros2Node, boolean manageROS2Node)
    {
+      this.manageROS2Node = manageROS2Node;
       if (this.ros2Node != null)
          return false;
       this.ros2Node = ros2Node;
@@ -482,7 +484,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    @Override
    public void closeAndDispose()
    {
-      if (ros2Node != null)
+      if (manageROS2Node && ros2Node != null)
       {
          ros2Node.destroy();
          ros2Node = null;

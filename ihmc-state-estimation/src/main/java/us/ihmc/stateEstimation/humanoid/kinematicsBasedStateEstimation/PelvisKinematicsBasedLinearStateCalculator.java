@@ -318,7 +318,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
          if (tempCoP2d.containsNaN())
          {
-            tempCoP2d.setToZero();
+            tempCoP2d.setToZero(footFrame);
          }
          else
          {
@@ -363,7 +363,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
       }
       else
       {
-         tempCoP2d.setToZero();
+         tempCoP2d.setToZero(footFrame);
       }
    }
 

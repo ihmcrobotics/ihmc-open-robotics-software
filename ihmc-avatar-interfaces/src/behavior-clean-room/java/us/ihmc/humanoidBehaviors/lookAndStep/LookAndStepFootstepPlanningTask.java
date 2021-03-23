@@ -5,9 +5,9 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.tools.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -33,6 +33,8 @@ import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,14 +57,14 @@ public class LookAndStepFootstepPlanningTask
    protected RemoteSyncedRobotModel syncedRobot;
    protected LookAndStepReview<FootstepPlanEtcetera> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlanEtcetera> autonomousOutput;
-   protected Runnable planningFailedNotifier;
+   protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<RobotSide> lastStanceSideReference;
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
       // instance variables
-      private SingleThreadSizeOneQueueExecutor executor;
+      private ResettableExceptionHandlingExecutorService executor;
       private ControllerStatusTracker controllerStatusTracker;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
 
@@ -72,7 +74,6 @@ public class LookAndStepFootstepPlanningTask
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
-      private final Timer planningFailedTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
       public void initialize(LookAndStepBehavior lookAndStep)
@@ -81,7 +82,7 @@ public class LookAndStepFootstepPlanningTask
          lookAndStepParameters = lookAndStep.lookAndStepParameters;
          footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
-         uiPublisher = lookAndStep.helper::publishToUI;
+         uiPublisher = lookAndStep.helper::publish;
          footstepPlanningModule = lookAndStep.helper.getOrCreateFootstepPlanner();
          defaultFootPolygons = FootstepPlanningModuleLauncher.createFootPolygons(lookAndStep.helper.getRobotModel());
          lastStanceSideReference = lookAndStep.lastStanceSide;
@@ -100,13 +101,11 @@ public class LookAndStepFootstepPlanningTask
 
          review.initialize(statusLogger, "footstep plan", lookAndStep.approvalNotification, autonomousOutput);
 
-         planningFailedNotifier = planningFailedTimer::reset;
+         executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-         executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
-
-         localizationResultInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
-         planarRegionsInput.addCallback(data -> executor.submitTask(this::evaluateAndRun));
-         footstepCompletedInput.addCallback(() -> executor.submitTask(this::evaluateAndRun));
+         localizationResultInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         planarRegionsInput.addCallback(data -> executor.clearQueueAndExecute(this::evaluateAndRun));
+         footstepCompletedInput.addCallback(() -> executor.clearQueueAndExecute(this::evaluateAndRun));
 
          suppressor = new BehaviorTaskSuppressor(statusLogger, "Footstep planning");
          suppressor.addCondition("Not in footstep planning state", () -> !behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING));
@@ -121,6 +120,11 @@ public class LookAndStepFootstepPlanningTask
                                  () -> capturabilityBasedStatusReceptionTimerSnapshot.isExpired());
          suppressor.addCondition(() -> "No capturability based status. ", () -> capturabilityBasedStatus == null);
          suppressor.addCondition(() -> "No localization result. ", () -> localizationResult == null);
+         TypedNotification<Boolean> reviewApprovalNotification = lookAndStep.helper.subscribeViaNotification(ReviewApproval);
+         Supplier<Boolean> operatorJustRejected = () -> reviewApprovalNotification.poll() && !reviewApprovalNotification.read();
+         suppressor.addCondition("Planner failed and operator is reviewing and hasn't just rejected.", () -> plannerFailedLastTime.get()
+                                                                                                             && operatorReviewEnabledSupplier.get()
+                                                                                                             && !operatorJustRejected.get());
          suppressor.addCondition("Planning failed recently", () -> planningFailureTimerSnapshot.isRunning());
          suppressor.addCondition("Plan being reviewed", review::isBeingReviewed);
          suppressor.addCondition("Robot disconnected", () -> robotDataReceptionTimerSnaphot.isExpired());
@@ -139,7 +143,12 @@ public class LookAndStepFootstepPlanningTask
 
       public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
       {
-         planarRegionsInput.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+         acceptPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      }
+
+      public void acceptPlanarRegions(PlanarRegionsList planarRegionsList)
+      {
+         planarRegionsInput.set(planarRegionsList);
          planarRegionsExpirationTimer.reset();
       }
 
@@ -183,6 +192,11 @@ public class LookAndStepFootstepPlanningTask
          {
             performTask();
          }
+      }
+
+      public void destroy()
+      {
+         executor.destroy();
       }
    }
 
@@ -303,7 +317,7 @@ public class LookAndStepFootstepPlanningTask
 
          statusLogger.info("Footstep planning failure. Aborting task...");
          plannerFailedLastTime.set(true);
-         planningFailedNotifier.run();
+         planningFailedTimer.reset();
       }
       else
       {

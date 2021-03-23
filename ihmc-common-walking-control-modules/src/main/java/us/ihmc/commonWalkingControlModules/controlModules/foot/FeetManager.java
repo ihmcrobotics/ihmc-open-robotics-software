@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
@@ -26,6 +25,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
@@ -34,7 +34,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -114,6 +113,7 @@ public class FeetManager
          explorationParameters = new ExplorationParameters(registry);
       }
       FootholdRotationParameters footholdRotationParameters = new FootholdRotationParameters(registry);
+      SupportStateParameters supportStateParameters = new SupportStateParameters(walkingControllerParameters, registry);
 
       boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
       DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
@@ -136,6 +136,7 @@ public class FeetManager
                                                                      controllerToolbox,
                                                                      explorationParameters,
                                                                      footholdRotationParameters,
+                                                                     supportStateParameters,
                                                                      minWeightFractionPerFoot,
                                                                      maxWeightFractionPerFoot,
                                                                      registry);
@@ -190,8 +191,13 @@ public class FeetManager
 
    public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
    {
+      requestSwing(upcomingSwingSide, footstep, swingTime, null, null);
+   }
+
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration)
+   {
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep, swingTime);
+      footControlModule.setFootstep(footstep, swingTime, finalCoMVelocity, finalCoMAcceleration);
       setContactStateForSwing(upcomingSwingSide);
    }
 

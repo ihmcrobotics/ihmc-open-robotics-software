@@ -12,7 +12,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
+import us.ihmc.javafx.JavaFXGraphicTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 
 import java.util.List;
