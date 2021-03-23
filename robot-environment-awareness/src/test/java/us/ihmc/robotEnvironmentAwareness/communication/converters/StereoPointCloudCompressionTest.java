@@ -16,7 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 
-public class PointCloudCompressionTest
+public class StereoPointCloudCompressionTest
 {
 
    @Test
@@ -48,21 +48,21 @@ public class PointCloudCompressionTest
 
          Point3D[] inputPointCloud = pointSet.toArray(new Point3D[inputNumberOfPoints]);
          int[] inputColors = new int[inputNumberOfPoints];
-         StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(inputTimestamp,
-                                                                                          inputPointCloud,
-                                                                                          inputColors,
-                                                                                          inputNumberOfPoints,
-                                                                                          minimumResolution,
-                                                                                          null);
+         StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(inputTimestamp,
+                                                                                                inputPointCloud,
+                                                                                                inputColors,
+                                                                                                inputNumberOfPoints,
+                                                                                                minimumResolution,
+                                                                                                null);
 
          assertEquals(inputTimestamp, message.getTimestamp());
          assertEquals(inputNumberOfPoints, message.getNumberOfPoints());
          EuclidCoreTestTools.assertTuple3DEquals(center, message.getPointCloudCenter(), 1.0e-12);
 
-         int[] outputColors = PointCloudCompression.decompressColorsToIntArray(message);
+         int[] outputColors = StereoPointCloudCompression.decompressColorsToIntArray(message);
          assertArrayEquals(inputColors, outputColors);
 
-         Point3D[] outputPointCloud = PointCloudCompression.decompressPointCloudToArray(message);
+         Point3D[] outputPointCloud = StereoPointCloudCompression.decompressPointCloudToArray(message);
 
          assertEquals(inputNumberOfPoints, outputColors.length);
 

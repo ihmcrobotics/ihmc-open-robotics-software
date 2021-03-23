@@ -22,18 +22,11 @@ import us.ihmc.tools.compression.LZ4CompressionImplementation;
 /**
  * This class should be used to create and unpack a {@link StereoVisionPointCloudMessage}.
  */
-public class PointCloudCompression
+public class StereoPointCloudCompression
 {
    private static final int OCTREE_DEPTH = 16;
    private static final double OCTREE_RESOLUTION_TO_SIZE_RATIO = Math.pow(2.0, OCTREE_DEPTH) - 1;
-   private static final ThreadLocal<LZ4CompressionImplementation> compressorThreadLocal = new ThreadLocal<LZ4CompressionImplementation>()
-   {
-      @Override
-      protected LZ4CompressionImplementation initialValue()
-      {
-         return new LZ4CompressionImplementation();
-      }
-   };
+   private static final ThreadLocal<LZ4CompressionImplementation> compressorThreadLocal = ThreadLocal.withInitial(LZ4CompressionImplementation::new);
 
    /**
     * Compresses the given point-cloud by doing the following:

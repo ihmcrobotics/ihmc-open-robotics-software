@@ -3,10 +3,8 @@ package us.ihmc.avatar.slamTools;
 import java.io.File;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -28,7 +26,7 @@ import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
@@ -290,12 +288,12 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       }
       numberOfSourcePoints.set(numberOfPointsInWindow);
 
-      StereoVisionPointCloudMessage dummyMessageForSourcePoints = PointCloudCompression.compressPointCloud(0612L,
-                                                                                                           pointsInPreviousWindow,
-                                                                                                           colors,
-                                                                                                           pointsInPreviousWindow.length,
-                                                                                                           0.005,
-                                                                                                           null);
+      StereoVisionPointCloudMessage dummyMessageForSourcePoints = StereoPointCloudCompression.compressPointCloud(0612L,
+                                                                                                                 pointsInPreviousWindow,
+                                                                                                                 colors,
+                                                                                                                 pointsInPreviousWindow.length,
+                                                                                                                 0.005,
+                                                                                                                 null);
       dummyMessageForSourcePoints.getSensorPosition().set(frame2.getCorrectedSensorPoseInWorld().getTranslation());
       dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getCorrectedSensorPoseInWorld().getRotation());
       frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints, normalEstimationParameters);

@@ -20,7 +20,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.ros2.ROS2Node;
@@ -126,7 +126,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
       }
 
       double minimumResolution = 0.001;
-      StereoVisionPointCloudMessage stereoVisionMessage = PointCloudCompression.compressPointCloud(timestamp, pointCloud, colorsInteger, numberOfPoints, minimumResolution, null);
+      StereoVisionPointCloudMessage stereoVisionMessage = StereoPointCloudCompression.compressPointCloud(timestamp, pointCloud, colorsInteger, numberOfPoints, minimumResolution, null);
 
       stereoVisionPublisher.publish(stereoVisionMessage);
 
