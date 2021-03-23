@@ -144,11 +144,4 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    }
 
 
-   private void pitchTorso(double angle)
-   {
-      ChestTrajectoryMessage message = HumanoidMessageTools.createChestTrajectoryMessage(0.5,
-              new YawPitchRoll(0.0, angle, 0.0),
-              ReferenceFrame.getWorldFrame());
-      drcSimulationTestHelper.publishToController(message);
-   }
 }
