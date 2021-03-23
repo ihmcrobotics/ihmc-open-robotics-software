@@ -80,6 +80,8 @@ public class ToeOffManager
    private final DoubleProvider kneeLowerLimitToTriggerToeOff;
    private final DoubleProvider icpPercentOfStanceForDSToeOff;
    private final DoubleProvider icpPercentOfStanceForSSToeOff;
+   private final YoDouble currentICPPercentOfStanceForSSToeOff = new YoDouble("currentICPPercentOfStanceForSSToeOff", registry);
+   private final YoDouble desiredICPPercentOfStanceForSSToeOff = new YoDouble("desiredICPPercentOfStanceForSSToeOff", registry);
 
    private final YoDouble icpProximityToLeadingFootForDSToeOff = new YoDouble("icpProximityToLeadingFootForDSToeOff", registry);
    private final YoDouble icpProximityToLeadingFootForSSToeOff = new YoDouble("icpProximityToLeadingFootForSSToeOff", registry);
@@ -358,6 +360,8 @@ public class ToeOffManager
                                                    nextFootPosition,
                                                    percentProximity);
       icpProximityToLeadingFootForSSToeOff.set(requiredProximity);
+      currentICPPercentOfStanceForSSToeOff.set(currentICPProximityToLeadingFoot.getDoubleValue() / toLeadingFoot.length());
+      desiredICPPercentOfStanceForSSToeOff.set(desiredICPProximityToLeadingFoot.getDoubleValue() / toLeadingFoot.length());
 
       checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
