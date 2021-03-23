@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -22,7 +23,7 @@ public class PointCloudMessageTools
       }
 
       // TODO: make parameters to method
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null);
+      StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(System.nanoTime(), pointArray, colors, pointArray.length, 0.005, null);
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
       return message;
@@ -38,14 +39,7 @@ public class PointCloudMessageTools
       LidarScanMessage message = new LidarScanMessage();
 
       // TODO: apply filters
-
-      for (Point3DReadOnly scanPoint : scan)
-      {
-         message.getScan().add(scanPoint.getX32());
-         message.getScan().add(scanPoint.getY32());
-         message.getScan().add(scanPoint.getZ32());
-      }
-
+      LidarPointCloudCompression.compressPointCloud(scan.size(), message, (i, j) -> (float) scan.get(i).getElement(j));
       message.setRobotTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
       message.setPointCloudConfidence(1.0);

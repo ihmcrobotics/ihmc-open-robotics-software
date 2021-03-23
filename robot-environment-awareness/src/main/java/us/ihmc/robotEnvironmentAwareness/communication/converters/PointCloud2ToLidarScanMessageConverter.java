@@ -5,6 +5,7 @@ import gnu.trove.list.array.TByteArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
@@ -106,7 +107,7 @@ public class PointCloud2ToLidarScanMessageConverter
 
                           lidarScanMessage.setSequenceId(counter.getAndIncrement());
                           lidarScanMessage.getScan().clear();
-                          lidarScanMessage.getScan().add(points);
+                          LidarPointCloudCompression.compressPointCloud(points.length, lidarScanMessage, (i, j) -> points[3 * i + j]);
                           lidarScanMessagePublisher.publish(lidarScanMessage);
                        }
 
