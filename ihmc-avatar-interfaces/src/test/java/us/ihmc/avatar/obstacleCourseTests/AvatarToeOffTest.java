@@ -4,7 +4,6 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
@@ -78,7 +77,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    }
 
    @Test
-   @Disabled
    public void testToeOffWithDifferentStepLengths() throws SimulationExceededMaximumTimeException
    {
       int numberOfSteps = 3;
