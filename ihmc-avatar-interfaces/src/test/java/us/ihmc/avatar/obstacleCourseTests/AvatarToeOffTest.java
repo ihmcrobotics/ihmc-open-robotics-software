@@ -2,7 +2,6 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -18,15 +17,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AvatarToeOffTest implements MultiRobotTestInterface
 {
@@ -87,17 +83,11 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    {
       int numberOfSteps = 3;
 
-      double icpProximity = 0.0;
-      double icpPercentLengthToLeadingFoot = 0.25;
-      double ecmpProximity = 0.04; //0.045
-
       setupTest();
 
       double initialXPosition = 0.0;
       for(double stepLength = getStepLength(); stepLength <= getMaxStepLength(); stepLength += 0.25)
       {
-         // adjust toe off parameters
-         setYoVariablesToDoToeOffInSS(icpProximity, icpPercentLengthToLeadingFoot, ecmpProximity);
 
          // take steps
          walkForward(stepLength, numberOfSteps, initialXPosition);
@@ -153,20 +143,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
-   private void setYoVariablesToDoToeOffInSS(double icpProximity, double icpPercentLengthToLeadingFoot, double ecmpProximity)
-   {
-      YoDouble yoICPProximity, yoICPPercent, yoECMPProximity;
-
-      YoBoolean toeOffInSS = (YoBoolean) drcSimulationTestHelper.getYoVariable("doToeOffIfPossibleInSingleSupport");
-      yoICPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("icpProximityForToeOff");
-      yoICPPercent = (YoDouble) drcSimulationTestHelper.getYoVariable("icpPercentOfStanceForSSToeOff");
-      yoECMPProximity = (YoDouble) drcSimulationTestHelper.getYoVariable("ecmpProximityForToeOff");
-
-      toeOffInSS.set(true);
-      yoICPProximity.set(icpProximity);
-      yoICPPercent.set(icpPercentLengthToLeadingFoot);
-      yoECMPProximity.set(ecmpProximity);
-   }
 
    private void pitchTorso(double angle)
    {
