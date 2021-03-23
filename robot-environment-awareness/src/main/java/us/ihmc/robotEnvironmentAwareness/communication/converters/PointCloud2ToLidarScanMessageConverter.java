@@ -2,11 +2,13 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
+import javafx.geometry.Point3D;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -39,8 +41,8 @@ public class PointCloud2ToLidarScanMessageConverter
    private static final double SENSOR_POSE_Y = 0.0;
    private static final double SENSOR_POSE_Z = 1.0;
    private static final double SENSOR_POSE_YAW = 0.0;
-   private static final double SENSOR_POSE_PITCH = 0.78;
-   private static final double SENSOR_POSE_ROLL = 0.0;
+   private static final double SENSOR_POSE_PITCH = 0.0;
+   private static final double SENSOR_POSE_ROLL = -2.35;
 
    private final AtomicReference<PointCloud2> pointCloud2Message = new AtomicReference<>();
    private final AtomicInteger counter = new AtomicInteger();
@@ -49,8 +51,7 @@ public class PointCloud2ToLidarScanMessageConverter
    public PointCloud2ToLidarScanMessageConverter(String topicName, double poseX, double poseY, double poseZ, double poseYaw, double posePitch, double poseRoll)
          throws URISyntaxException
    {
-//      URI rosMasterURI = new URI("http://localhost:11311");
-      URI rosMasterURI = new URI("http://precision:11311/");
+      URI rosMasterURI = new URI("http://localhost:11311");
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, getClass().getSimpleName());
       Pose3D sensorPose = new Pose3D(poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
 
@@ -70,6 +71,10 @@ public class PointCloud2ToLidarScanMessageConverter
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
       lidarScanMessage.getLidarPosition().set(sensorPose.getPosition());
       lidarScanMessage.getLidarOrientation().set(sensorPose.getOrientation());
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.getTranslation().set(poseX, poseY, poseZ);
+      transform.getRotation().setYawPitchRoll(poseYaw, posePitch, poseRoll);
 
       new Thread(() ->
                  {
@@ -102,9 +107,12 @@ public class PointCloud2ToLidarScanMessageConverter
                              packBytes(bytes, startIndex + 8, pointCloud.getData());
                              float z = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
 
-                             points[3 * i + 0] = x;
-                             points[3 * i + 1] = y;
-                             points[3 * i + 2] = z;
+                             Pose3D dataPoint = new Pose3D(x, y, z, 0.0, 0.0, 0.0);
+                             dataPoint.applyTransform(transform);
+
+                             points[3 * i + 0] = (float) dataPoint.getX();
+                             points[3 * i + 1] = (float) dataPoint.getY();
+                             points[3 * i + 2] = (float) dataPoint.getZ();
                           }
 
                           lidarScanMessage.setSequenceId(counter.getAndIncrement());
