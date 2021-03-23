@@ -32,7 +32,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PointCloud2ToLidarScanMessageConverter
 {
-   private static final String POINT_CLOUD_2_TOPIC_NAME = "/os_cloud_node/points";
+//   private static final String POINT_CLOUD_2_TOPIC_NAME = "/os_cloud_node/points";
+   private static final String POINT_CLOUD_2_TOPIC_NAME = "/camera/depth/color/points";
 
    private static final double SENSOR_POSE_X = 0.0;
    private static final double SENSOR_POSE_Y = 0.0;
@@ -48,7 +49,8 @@ public class PointCloud2ToLidarScanMessageConverter
    public PointCloud2ToLidarScanMessageConverter(String topicName, double poseX, double poseY, double poseZ, double poseYaw, double posePitch, double poseRoll)
          throws URISyntaxException
    {
-      URI rosMasterURI = new URI("http://localhost:11311");
+//      URI rosMasterURI = new URI("http://localhost:11311");
+      URI rosMasterURI = new URI("http://precision:11311/");
       RosMainNode rosMainNode = new RosMainNode(rosMasterURI, getClass().getSimpleName());
       Pose3D sensorPose = new Pose3D(poseX, poseY, poseZ, poseYaw, posePitch, poseRoll);
 
@@ -107,7 +109,7 @@ public class PointCloud2ToLidarScanMessageConverter
 
                           lidarScanMessage.setSequenceId(counter.getAndIncrement());
                           lidarScanMessage.getScan().clear();
-                          LidarPointCloudCompression.compressPointCloud(points.length, lidarScanMessage, (i, j) -> points[3 * i + j]);
+                          LidarPointCloudCompression.compressPointCloud(numberOfPoints, lidarScanMessage, (index, element) -> points[3 * index + element]);
                           lidarScanMessagePublisher.publish(lidarScanMessage);
                        }
 
