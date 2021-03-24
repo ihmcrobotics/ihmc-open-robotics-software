@@ -6,6 +6,11 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameter
 
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {
+   default double getPlanarRegionDelayTuner()
+   {
+      return get(planarRegionDelayTuner);
+   }
+
    default boolean getAutomaticallyInjectSupportRegions()
    {
       return get(automaticallyInjectSupportRegions);

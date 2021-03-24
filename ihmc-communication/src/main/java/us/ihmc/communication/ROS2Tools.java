@@ -2,9 +2,12 @@ package us.ihmc.communication;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
+import std_msgs.msg.dds.Empty;
+import std_msgs.msg.dds.Float64;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
@@ -124,6 +127,7 @@ public class ROS2Tools
    public static final ROS2Topic<PlanarRegionsListMessage> MAPSENSE_REGIONS = MAPSENSE_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
    /** Output regions from experimental mapping module which assembles the above outputs */
    public static final ROS2Topic<PlanarRegionsListMessage> MAP_REGIONS = MAPPING_MODULE.withOutput().withTypeName(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<Float64> MAPSENSE_REGIONS_DELAY_OFFSET = MAPSENSE_MODULE.withType(Float64.class).withSuffix("delay_offset");
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
@@ -382,6 +386,16 @@ public class ROS2Tools
       {
          exceptionHandler.handleException(e);
       }
+   }
+
+   public static <T> void createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      new IHMCROS2Callback<>(ros2Node, topic, callback);
+   }
+
+   public static <T> void createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
+   {
+      new IHMCROS2Callback<>(ros2Node, topic, message -> callback.run());
    }
 
    public static <T> RealtimeROS2Subscription<T> createQueuedSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,

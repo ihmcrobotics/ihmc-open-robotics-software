@@ -8,6 +8,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
+import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepFootstepPlanningTask.LookAndStepFootstepPlanning;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepBodyPathLocalization;
@@ -54,6 +55,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    final SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
    final ControllerStatusTracker controllerStatusTracker;
    final TypedNotification<Boolean> approvalNotification;
+   private final DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
 
    /**
     * At any time the behavior will be executing on one of this tasks
@@ -146,11 +148,13 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
-      helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, message ->
-      {
-         supportRegionsPublisher.acceptPlanarRegions(message);
-         footstepPlanning.acceptPlanarRegions(message);
-      });
+      delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING,
+                                                   message ->
+                                                   {
+                                                      supportRegionsPublisher.acceptPlanarRegions(message);
+                                                      footstepPlanning.acceptPlanarRegions(message);
+                                                   });
+
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
       helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, status ->
       {
@@ -182,6 +186,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    public void destroy()
    {
+      delayFixedPlanarRegionsSubscription.destroy();
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();
