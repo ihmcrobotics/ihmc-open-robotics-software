@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -26,6 +27,7 @@ public class CollisionFreeSwingCalculatorTest
 
    private final SwingPlannerParametersBasics swingParameters = new DefaultSwingPlannerParameters();
    private final WalkingControllerParameters walkingControllerParameters = new ProxyAtlasWalkingControllerParameters();
+   private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);
 
    @Test
    public void testFlatGround()
@@ -56,11 +58,11 @@ public class CollisionFreeSwingCalculatorTest
       double boxHeight = 0.2;
 
       PlanarRegionsList boxOnGround = boxOnGround(boxLengthX, boxHeight);
-      double xOffset = 0.5 * Math.max(walkingControllerParameters.getSteppingParameters().getFootForwardOffset(),
-                                      walkingControllerParameters.getSteppingParameters().getFootBackwardOffset());
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
       double xClearance = 0.05;
 
-      SideDependentList<Pose3D> initialStance = new SideDependentList<>(side -> new Pose3D(-0.5 * boxLengthX - xClearance - xOffset,
+      SideDependentList<Pose3D> initialStance = new SideDependentList<>(side -> new Pose3D(-0.5 * boxLengthX - xClearance - footForwardOffset,
                                                                                            0.5
                                                                                            * side.negateIfRightSide(walkingControllerParameters.getSteppingParameters()
                                                                                                                                                .getInPlaceWidth()),
@@ -71,11 +73,13 @@ public class CollisionFreeSwingCalculatorTest
       FootstepPlan footstepPlan = new FootstepPlan();
 
       RobotSide steppingSide = RobotSide.LEFT;
-      FramePose3D footstep = new FramePose3D(initialStance.get(steppingSide));
-      footstep.getPosition().addX(xOffset + xClearance + xOffset);
+      FramePose3D footstep = new FramePose3D();
+      footstep.setX(0.5 * boxLengthX + xClearance + footBackwardOffset);
+      footstep.setY(initialStance.get(steppingSide).getY());
       footstepPlan.addFootstep(steppingSide, footstep);
 
       runTest(boxOnGround, initialStance, footstepPlan);
+
    }
 
    @Test
@@ -85,11 +89,11 @@ public class CollisionFreeSwingCalculatorTest
       double boxHeight = 0.3;
 
       PlanarRegionsList boxOnGround = boxOnGround(boxLengthX, boxHeight);
-      double xOffset = 0.5 * Math.max(walkingControllerParameters.getSteppingParameters().getFootForwardOffset(),
-                                      walkingControllerParameters.getSteppingParameters().getFootBackwardOffset());
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
       double xClearance = 0.05;
 
-      SideDependentList<Pose3D> initialStance = new SideDependentList<>(side -> new Pose3D(-0.5 * boxLengthX - xClearance - xOffset,
+      SideDependentList<Pose3D> initialStance = new SideDependentList<>(side -> new Pose3D(-0.5 * boxLengthX - xClearance - footForwardOffset,
                                                                                            0.5
                                                                                            * side.negateIfRightSide(walkingControllerParameters.getSteppingParameters()
                                                                                                                                                .getInPlaceWidth()),
@@ -100,8 +104,9 @@ public class CollisionFreeSwingCalculatorTest
       FootstepPlan footstepPlan = new FootstepPlan();
 
       RobotSide steppingSide = RobotSide.LEFT;
-      FramePose3D footstep = new FramePose3D(initialStance.get(steppingSide));
-      footstep.getPosition().addX(xOffset + xClearance + xOffset);
+      FramePose3D footstep = new FramePose3D();
+      footstep.setX(0.5 * boxLengthX + xClearance + footBackwardOffset);
+      footstep.setY(initialStance.get(steppingSide).getY());
       footstepPlan.addFootstep(steppingSide, footstep);
 
       runTest(boxOnGround, initialStance, footstepPlan);
@@ -140,6 +145,7 @@ public class CollisionFreeSwingCalculatorTest
 
          CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(swingParameters,
                                                                                          walkingControllerParameters,
+                                                                                         footPolygons,
                                                                                          scs,
                                                                                          graphicsListRegistry,
                                                                                          scs.getRootRegistry());
@@ -155,9 +161,7 @@ public class CollisionFreeSwingCalculatorTest
       }
       else
       {
-         CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(swingParameters,
-                                                                                         walkingControllerParameters);
-
+         CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(swingParameters, walkingControllerParameters, footPolygons);
          swingCalculator.setPlanarRegionsList(planarRegionsList);
          swingCalculator.computeSwingTrajectories(initialStance, footstepPlan);
       }
