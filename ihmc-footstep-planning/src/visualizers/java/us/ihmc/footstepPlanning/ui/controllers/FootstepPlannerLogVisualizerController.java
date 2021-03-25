@@ -36,7 +36,6 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLog;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.log.*;
-import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader.LoadRequestType;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -565,7 +564,7 @@ public class FootstepPlannerLogVisualizerController
          if (newValue != null)
          {
             messager.submitMessage(FootstepPlannerMessagerAPI.TouchdownStepToVisualize, Pair.of(newValue.graphNode.getSecondStep(), newValue.edgeData.getEndStepSnapData()));
-            messager.submitMessage(FootstepPlannerMessagerAPI.LoggedCollisionBox, newValue.collisionBox);
+            messager.submitMessage(FootstepPlannerMessagerAPI.LoggedCollisionBoxes, newValue.collisionBoxes);
             selectedRow.set(newValue);
          }
       };
@@ -711,7 +710,7 @@ public class FootstepPlannerLogVisualizerController
       private final RigidBodyTransform snappedEndStepTransform = new RigidBodyTransform();
       private final RigidBodyTransform snapAndWiggledEndStepTransform = new RigidBodyTransform();
       private final boolean expanded;
-      private final Box3D collisionBox = new Box3D();
+      private final List<Box3D> collisionBoxes = new ArrayList<>();
 
       public ChildStepProperty(FootstepPlannerEdgeData edgeData,
                                boolean expanded)
@@ -734,12 +733,13 @@ public class FootstepPlannerLogVisualizerController
             snapAndWiggledEndStepTransform.set(snapData.getSnappedStepTransform(graphNode.getSecondStep()));
          }
 
-         if (footstepPlannerLog.getFootstepParametersPacket().getCheckForBodyBoxCollisions())
+         if (footstepPlannerLog != null && footstepPlannerLog.getFootstepParametersPacket().getCheckForBodyBoxCollisions())
          {
+            Box3D footstepBox = new Box3D();
             double boxSizeX = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxDepth();
             double boxSizeY = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxWidth();
             double boxSizeZ = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxHeight();
-            collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+            footstepBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
 
             double bodyBoxBaseX = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxBaseX();
             double bodyBoxBaseY = footstepPlannerLog.getFootstepParametersPacket().getBodyBoxBaseY();
@@ -750,19 +750,45 @@ public class FootstepPlannerLogVisualizerController
 
             DiscreteFootstep footstep = graphNode.getSecondStep();
             double stepHeight = DiscreteFootstepTools.getSnappedStepHeight(footstep, snapData.getSnapTransform());
+            LatticePoint latticePoint = createLatticePoint(footstep, bodyBoxBaseX, bodyBoxBaseY);
 
-            double lateralOffsetSign = footstep.getRobotSide().negateIfLeftSide(1.0);
-            double offsetX = bodyBoxBaseX * Math.cos(footstep.getYaw()) - lateralOffsetSign * bodyBoxBaseY * Math.sin(footstep.getYaw());
-            double offsetY = bodyBoxBaseX * Math.sin(footstep.getYaw()) + lateralOffsetSign * bodyBoxBaseY * Math.cos(footstep.getYaw());
-            LatticePoint latticePoint = new LatticePoint(footstep.getX() + offsetX, footstep.getY() + offsetY, footstep.getYaw());
+            // add final step
+            setBoxPose(latticePoint, bodyBoxBaseZ, stepHeight, boxSizeZ, footstepBox);
+            collisionBoxes.add(footstepBox);
 
-            collisionBox.getPose().getTranslation().set(latticePoint.getX(), latticePoint.getY(), stepHeight + bodyBoxBaseZ + 0.5 * boxSizeZ);
-            collisionBox.getPose().getRotation().setYawPitchRoll(latticePoint.getYaw(), 0.0, 0.0);
+            long intermediateBodyBoxChecks = footstepPlannerLog.getFootstepParametersPacket().getIntermediateBodyBoxChecks();
+            if (intermediateBodyBoxChecks >= 1)
+            {
+               // add interpolated poses
+               DiscreteFootstep previousFootstep = graphNode.getFirstStep();
+               LatticePoint previousLatticePoint = createLatticePoint(previousFootstep, bodyBoxBaseX, bodyBoxBaseY);
+
+               for (int i = 0; i < intermediateBodyBoxChecks; i++)
+               {
+                  Box3D interpolatedBox = new Box3D();
+                  interpolatedBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+                  double alpha = (i + 1) / ((double) intermediateBodyBoxChecks + 1);
+                  LatticePoint interpolatedPoint = DiscreteFootstepTools.interpolate(latticePoint, previousLatticePoint, alpha);
+                  setBoxPose(interpolatedPoint, bodyBoxBaseZ, stepHeight, boxSizeZ, interpolatedBox);
+                  collisionBoxes.add(interpolatedBox);
+               }
+            }
          }
-         else
-         {
-            collisionBox.setToNaN();
-         }
+      }
+
+      private LatticePoint createLatticePoint(DiscreteFootstep footstep, double bodyBoxBaseX, double bodyBoxBaseY)
+      {
+         double lateralOffsetSign = footstep.getRobotSide().negateIfLeftSide(1.0);
+         double offsetX = bodyBoxBaseX * Math.cos(footstep.getYaw()) - lateralOffsetSign * bodyBoxBaseY * Math.sin(footstep.getYaw());
+         double offsetY = bodyBoxBaseX * Math.sin(footstep.getYaw()) + lateralOffsetSign * bodyBoxBaseY * Math.cos(footstep.getYaw());
+         return new LatticePoint(footstep.getX() + offsetX, footstep.getY() + offsetY, footstep.getYaw());
+      }
+
+      private void setBoxPose(LatticePoint latticePoint, double bodyBoxBaseZ, double stepHeight, double boxSizeZ, Box3D collisionBox)
+      {
+         collisionBox.getPose().getTranslation().set(latticePoint.getX(), latticePoint.getY(), stepHeight + bodyBoxBaseZ + 0.5 * boxSizeZ);
+         collisionBox.getPose().getRotation().setYawPitchRoll(latticePoint.getYaw(), 0.0, 0.0);
+
       }
 
       public String getSolution()

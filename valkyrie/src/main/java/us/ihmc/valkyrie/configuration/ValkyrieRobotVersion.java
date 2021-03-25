@@ -88,4 +88,19 @@ public enum ValkyrieRobotVersion
             throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
       }
    }
+
+   public boolean hasHands()
+   {
+      switch (this)
+      {
+         case DEFAULT:
+         case FINGERLESS:
+            return true;
+         case ARM_MASS_SIM:
+         case ARMLESS:
+            return false;
+         default:
+            throw new RuntimeException("ValkyrieRobotVersion: Unimplemented enumeration case : " + this);
+      }
+   }
 }
