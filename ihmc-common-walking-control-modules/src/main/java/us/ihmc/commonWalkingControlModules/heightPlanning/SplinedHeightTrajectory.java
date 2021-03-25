@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -115,7 +116,12 @@ public class SplinedHeightTrajectory
       for (int i = 1; i < numberOfWaypoints - 1; i++)
       {
          CoMHeightTrajectoryWaypoint waypoint = waypoints.get(i);
-         double alpha = (waypoint.getX() - startWaypoint.getX()) / (endWaypoint.getX() - startWaypoint.getX());
+         double distanceIn = waypoint.getX() - startWaypoint.getX();
+         double alpha;
+         if (MathTools.epsilonEquals(distanceIn, 0.0, 1e-4))
+            alpha = 0.0;
+         else
+            alpha = distanceIn / (endWaypoint.getX() - startWaypoint.getX());
          heightWaypoints.add(waypoint.getHeight());
          alphaWaypoints.add(alpha);
       }
@@ -204,11 +210,33 @@ public class SplinedHeightTrajectory
       CoMHeightTrajectoryWaypoint endWaypoint = waypoints.get(waypoints.size() - 1);
 
       double xLength = Math.max(1.0, Math.abs(endWaypoint.getX() - startWaypoint.getX()));
+      double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
+
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
 
       trajectoryGenerator.compute(percentAlongSegment);
-
       double z = trajectoryGenerator.getPosition();
+
+      tempFramePoint.setIncludingFrame(referenceFrame, 0.0, 0.0, z);
+      tempFramePoint.changeFrame(worldFrame);
+
+      comHeightPartialDerivativesDataToPack.zero();
+      comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, tempFramePoint.getZ());
+      pointOnSplineToPack.set(splineQuery, z);
+
+      if (MathTools.epsilonEquals(xLength, 0.0, 1e-5) || MathTools.epsilonEquals(length, 0.0, 1e-5) || heightWaypoints.size() == 2)
+      {
+         partialDzDs.set(0.0);
+         partialD2zDs2.set(0.0);
+         partialD3zDs3.set(0.0);
+
+         partialDsDx.set(0.0);
+         partialDsDy.set(0.0);
+
+         return percentAlongSegment;
+      }
+
+
       double dzds = trajectoryGenerator.getVelocity() / xLength ;
       double d2zds2 = trajectoryGenerator.getAcceleration() / MathTools.square(xLength);
       double d3zds3 = trajectoryGenerator.getJerk() / MathTools.pow(xLength, 3);
@@ -216,7 +244,6 @@ public class SplinedHeightTrajectory
       partialD2zDs2.set(d2zds2);
       partialD3zDs3.set(d3zds3);
 
-      double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
       double dsdx = (contactFrameOnePosition.getX() - contactFrameZeroPosition.getX()) / length;
       double dsdy = (contactFrameOnePosition.getY() - contactFrameZeroPosition.getY()) / length;
       partialDsDx.set(dsdx);
@@ -243,10 +270,6 @@ public class SplinedHeightTrajectory
       double d3zdx2dy = d3zds3 * dsdx * dsdx * dsdy + 2.0 * d2zds2 * dsdx * d2sdxdy + d2zds2 * d2sdx2 * dsdy + dzds * d3sdx2dy;
       double d3zdxdy2 = d3zds3 * dsdx * dsdy * dsdy + 2.0 * d2zds2 * dsdy * d2sdxdy + d2zds2 * dsdx * d2sdy2 + dzds * d3sdxdy2;
 
-      tempFramePoint.setIncludingFrame(referenceFrame, 0.0, 0.0, z);
-      tempFramePoint.changeFrame(worldFrame);
-
-      comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, tempFramePoint.getZ());
       comHeightPartialDerivativesDataToPack.setPartialDzDx(dzdx);
       comHeightPartialDerivativesDataToPack.setPartialDzDy(dzdy);
       comHeightPartialDerivativesDataToPack.setPartialD2zDxDy(d2zdxdy);
@@ -256,8 +279,6 @@ public class SplinedHeightTrajectory
       comHeightPartialDerivativesDataToPack.setPartialD3zDy3(d3zdy3);
       comHeightPartialDerivativesDataToPack.setPartialD3zDx2Dy(d3zdx2dy);
       comHeightPartialDerivativesDataToPack.setPartialD3zDxDy2(d3zdxdy2);
-
-      pointOnSplineToPack.set(splineQuery, z);
 
       return percentAlongSegment;
    }
