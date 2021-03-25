@@ -269,7 +269,7 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
 
             movingPolygonsInSole.get(swingSide).setIncludingFrame(nextPolygon);
          }
-         computeCoPPointsForFinalTransfer(state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide(),
+         computeCoPPointsForFinalTransfer(state.getFootstep(numberOfUpcomingFootsteps - 1).getRobotSide().getOppositeSide(),
                                           state.getFinalTransferDuration(),
                                           finalTransferWeightDistribution.getDoubleValue());
 
