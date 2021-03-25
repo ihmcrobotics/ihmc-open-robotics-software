@@ -236,6 +236,45 @@ public class LookAheadCoMHeightTrajectoryGenerator
       heightOffsetHandler.setReferenceFrame(frameOfSupportLeg);
    }
 
+   public void initializeToNominalHeight()
+   {
+      heightWaypoints.clear();
+
+      transferToPosition.setToZero(soleFrames.get(RobotSide.LEFT));
+      transferFromPosition.setToZero(soleFrames.get(RobotSide.RIGHT));
+      transferToPosition.changeFrame(frameOfSupportLeg);
+      transferFromPosition.changeFrame(frameOfSupportLeg);
+
+      yoTransferFromPosition.setMatchingFrame(transferFromPosition);
+      yoTransferToPosition.setMatchingFrame(transferToPosition);
+
+      tempFramePoint.setToZero(frameOfSupportLeg);
+      tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+      tempFramePoint.changeFrame(worldFrame);
+
+      double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
+
+      CoMHeightTrajectoryWaypoint startWaypoint = getWaypointInFrame(frameOfSupportLeg);
+      startWaypoint.setHeight(nominalHeightAboveGround.getDoubleValue());
+      startWaypoint.setMinMax(nominalHeightAboveGround.getDoubleValue() - 0.05, nominalHeightAboveGround.getDoubleValue() + 0.05);
+      startWaypoint.setXY(transferFromPosition.getX(), midstanceY);
+
+      CoMHeightTrajectoryWaypoint endWaypoint = getWaypointInFrame(frameOfSupportLeg);
+      endWaypoint.setHeight(nominalHeightAboveGround.getDoubleValue());
+      endWaypoint.setMinMax(nominalHeightAboveGround.getDoubleValue() - 0.05, nominalHeightAboveGround.getDoubleValue() + 0.05);
+      endWaypoint.setXY(transferToPosition.getX(), midstanceY);
+
+      desiredCoMPositionAtStart.set(desiredCoMPosition);
+      desiredCoMPositionAtStart.setZ(tempFramePoint.getZ());
+
+      for (int i = 0; i < heightWaypoints.size(); i++)
+         heightWaypoints.get(i).update();
+
+      splinedHeightTrajectory.clearWaypoints();
+      splinedHeightTrajectory.addWaypoints(heightWaypoints);
+      splinedHeightTrajectory.computeSpline();
+   }
+
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       FramePoint3DReadOnly transferToFootstepPosition = transferToAndNextFootstepsData.getTransferToPosition();
