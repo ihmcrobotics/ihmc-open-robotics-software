@@ -120,6 +120,11 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.minMaxHeightInterpolationPercentage, minMaxHeightInterpolationPercentage);
    }
 
+   default void setMinMaxPercentageToKeepDefaultWaypoint(double minMaxPercentageToKeepDefaultWaypoint)
+   {
+      set(SwingPlannerParameterKeys.minMaxPercentageToKeepDefaultWaypoint, minMaxPercentageToKeepDefaultWaypoint);
+   }
+
    default void set(SwingPlannerParametersPacket packet)
    {
       setDoInitialFastApproximation(packet.getDoInitialFastApproximation());

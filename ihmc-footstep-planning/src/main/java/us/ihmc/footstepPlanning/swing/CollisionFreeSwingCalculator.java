@@ -62,7 +62,7 @@ public class CollisionFreeSwingCalculator
 
    private final List<FramePoint3D> defaultWaypoints = new ArrayList<>();
    private final List<FramePoint3D> modifiedWapoints = new ArrayList<>();
-   private final List<SE3TrajectoryPoint> waypointPoses = new ArrayList<>();
+   private final List<Double> modifiedWapointPercentages = new ArrayList<>();
 
    private final FramePose3D solePose = new FramePose3D();
    private final PoseReferenceFrame solePoseFrame = new PoseReferenceFrame("solePose", ReferenceFrame.getWorldFrame());
@@ -80,6 +80,9 @@ public class CollisionFreeSwingCalculator
    private final int footstepGraphicCapacity = 100;
    private final SideDependentList<FootstepVisualizer[]> footstepVisualizers = new SideDependentList<>();
    private final SideDependentList<MutableInt> footstepVisualizerIndices = new SideDependentList<>(side -> new MutableInt());
+
+   private final YoFramePoseUsingYawPitchRoll soleFrameGraphicPose;
+   private final YoGraphicPolygon footPolygonGraphic;
 
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator;
 
@@ -136,9 +139,20 @@ public class CollisionFreeSwingCalculator
             footstepVisualizers.put(robotSide, footstepVisualizerArray);
          }
 
+         soleFrameGraphicPose = new YoFramePoseUsingYawPitchRoll("soleGraphicPose", ReferenceFrame.getWorldFrame(), registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D("footPolygon", "", ReferenceFrame.getWorldFrame(), footPolygons.get(RobotSide.LEFT).getNumberOfVertices(), registry);
+         yoFootPolygon.set(footPolygons.get(RobotSide.LEFT));
+         footPolygonGraphic = new YoGraphicPolygon("soleGraphicPolygon", yoFootPolygon, soleFrameGraphicPose, 1.0, YoAppearance.RGBColorFromHex(0x386166));
+         graphicsList.add(footPolygonGraphic);
+
          graphicsList.add(yoCollisionBoxGraphic);
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
          parentRegistry.addChild(registry);
+      }
+      else
+      {
+         soleFrameGraphicPose = null;
+         footPolygonGraphic = null;
       }
    }
 
@@ -221,8 +235,14 @@ public class CollisionFreeSwingCalculator
       for (int i = 0; i < 30; i++)
       {
          positionTrajectoryGenerator.doOptimizationUpdate();
-         if (visualize)
-            tickAndUpdatable.tickAndUpdate();
+      }
+
+      if (visualize)
+      {
+         yoCollisionBoxGraphic.setPoseToNaN();
+         soleFrameGraphicPose.setToNaN();
+         footPolygonGraphic.update();
+         tickAndUpdatable.tickAndUpdate();
       }
    }
 
@@ -262,6 +282,7 @@ public class CollisionFreeSwingCalculator
          {
             solePose.getPosition().add(shiftAmount);
             modifiedWapoints.add(new FramePoint3D(solePose.getPosition()));
+            modifiedWapointPercentages.add(percentage);
 
             solePoseFrame.setPoseAndUpdate(solePose);
 
@@ -308,6 +329,15 @@ public class CollisionFreeSwingCalculator
 
    private void recomputeTrajectory()
    {
+      if (modifiedWapointPercentages.get(0) > swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
+      {
+         modifiedWapoints.add(new FramePoint3D(defaultWaypoints.get(0)));
+      }
+      if (modifiedWapointPercentages.get(modifiedWapoints.size() - 1) < 1.0 - swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
+      {
+         modifiedWapoints.add(new FramePoint3D(defaultWaypoints.get(1)));
+      }
+
       positionTrajectoryGenerator.reset();
       positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
       positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
@@ -318,8 +348,32 @@ public class CollisionFreeSwingCalculator
       for (int i = 0; i < 30; i++)
       {
          positionTrajectoryGenerator.doOptimizationUpdate();
-         if (visualize)
+      }
+
+      if (visualize)
+      {
+         yoCollisionBoxGraphic.setPoseToNaN();
+         tickAndUpdatable.tickAndUpdate();
+      }
+
+      if (visualize)
+      {
+         yoCollisionBoxGraphic.setPoseToNaN();
+         double deltaPercentage = 1.0 / (numberOfCollisionChecks - 1);
+
+         for (int i = 0; i < numberOfCollisionChecks; i++)
+         {
+            double percentage = i * deltaPercentage;
+            positionTrajectoryGenerator.compute(percentage);
+
+            FramePoint3DReadOnly trajectoryPosition = positionTrajectoryGenerator.getPosition();
+            solePose.getPosition().set(trajectoryPosition);
+            solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
+            soleFrameGraphicPose.set(solePose);
+            footPolygonGraphic.update();
+
             tickAndUpdatable.tickAndUpdate();
+         }
       }
    }
 
@@ -392,7 +446,9 @@ public class CollisionFreeSwingCalculator
       }
 
       if (visualize)
+      {
          tickAndUpdatable.tickAndUpdate();
+      }
    }
 
    private FootstepVisualizer getNextFootstepVisualizer(RobotSide robotSide)
@@ -414,14 +470,13 @@ public class CollisionFreeSwingCalculator
    private class FootstepVisualizer
    {
       private final YoFramePoseUsingYawPitchRoll soleFramePose;
-      private final YoFrameConvexPolygon2D yoFootPolygon;
       private final YoGraphicPolygon footPolygonViz;
 
       FootstepVisualizer(RobotSide robotSide, ConvexPolygon2D footPolygon, YoGraphicsList yoGraphicsList)
       {
          String namePrefix = robotSide.getLowerCaseName() + "Foot" + footGraphicIndices.get(robotSide).getAndIncrement();
          this.soleFramePose = new YoFramePoseUsingYawPitchRoll(namePrefix + "graphicPolygon", ReferenceFrame.getWorldFrame(), registry);
-         this.yoFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "yoPolygon", "", ReferenceFrame.getWorldFrame(), footPolygon.getNumberOfVertices(), registry);
+         YoFrameConvexPolygon2D yoFootPolygon = new YoFrameConvexPolygon2D(namePrefix + "yoPolygon", "", ReferenceFrame.getWorldFrame(), footPolygon.getNumberOfVertices(), registry);
          yoFootPolygon.set(footPolygon);
          footPolygonViz = new YoGraphicPolygon(namePrefix + "graphicPolygon", yoFootPolygon, soleFramePose, 1.0, footPolygonAppearances.get(robotSide));
          yoGraphicsList.add(footPolygonViz);
@@ -438,22 +493,5 @@ public class CollisionFreeSwingCalculator
          soleFramePose.setToNaN();
          footPolygonViz.update();
       }
-   }
-
-   public static void main(String[] args)
-   {
-      GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
-
-      Box3D box3D = new Box3D();
-      box3D.getSize().set(1.0, 1.0, 1.0);
-
-      ConvexPolytope3D polytope3D = new ConvexPolytope3D();
-      polytope3D.addVertex(new Point3D(0.5, 0.0, 0.0));
-      polytope3D.addVertex(new Point3D(0.5, 1.0, 0.0));
-      polytope3D.addVertex(new Point3D(0.5, 0.0, 1.0));
-      polytope3D.addVertex(new Point3D(1.0, 1.0, 1.0));
-
-      EuclidShape3DCollisionResult euclidShape3DCollisionResult = collisionDetector.evaluateCollision(box3D, polytope3D);
-      System.out.println(euclidShape3DCollisionResult.getPointOnA());
    }
 }
