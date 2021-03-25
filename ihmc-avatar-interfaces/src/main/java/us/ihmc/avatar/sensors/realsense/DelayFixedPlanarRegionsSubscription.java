@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -36,7 +37,8 @@ public class DelayFixedPlanarRegionsSubscription
    private final Consumer<PlanarRegionsList> callback;
    private final MutableDouble delayOffset = new MutableDouble();
    private final FullHumanoidRobotModel fullRobotModel;
-   private IHMCROS2Callback robotConfigurationDataSubscriber;
+   private final RobotROSClockCalculator rosClockCalculator;
+   private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
 
    private boolean enabled = false;
 
@@ -49,6 +51,8 @@ public class DelayFixedPlanarRegionsSubscription
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
       this.callback = callback;
+
+      rosClockCalculator = robotModel.getROSClockCalculator();
 
       ROS2Tools.createCallbackSubscription2(ros2Node, ROS2Tools.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
 
@@ -87,27 +91,38 @@ public class DelayFixedPlanarRegionsSubscription
             double seconds = delayOffset.getValue();
             //      LogTools.info("Latest delay: {}", seconds);
             timestamp -= Conversions.secondsToNanoseconds(seconds);
-            robotConfigurationDataBuffer.updateFullRobotModel(true, timestamp, fullRobotModel, null);
-            try
+
+            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
+
+            if (controllerTime == -1L || robotConfigurationDataBuffer.getNewestTimestamp() == -1L)
             {
-               referenceFrames.updateFrames();
-            }
-            catch (NotARotationMatrixException e)
-            {
-               LogTools.error(e.getMessage());
+               return;
             }
 
-            PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-            try
+            boolean waitIfNecessary = true;
+            if (robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null) != -1L)
             {
-               planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-               planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+               try
+               {
+                  referenceFrames.updateFrames();
+               }
+               catch (NotARotationMatrixException e)
+               {
+                  LogTools.error(e.getMessage());
+               }
+
+               PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
+               try
+               {
+                  planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
+                  planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+               }
+               catch (NotARotationMatrixException e)
+               {
+                  LogTools.error(e.getMessage());
+               }
+               callback.accept(planarRegionsList);
             }
-            catch (NotARotationMatrixException e)
-            {
-               LogTools.error(e.getMessage());
-            }
-            callback.accept(planarRegionsList);
          });
       }
    }
