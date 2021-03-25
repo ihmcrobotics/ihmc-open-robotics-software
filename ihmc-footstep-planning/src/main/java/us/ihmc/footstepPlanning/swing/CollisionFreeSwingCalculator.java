@@ -5,12 +5,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -21,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -30,6 +29,7 @@ import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,10 +57,15 @@ public class CollisionFreeSwingCalculator
 
    private final FramePose3D solePose = new FramePose3D();
    private final PoseReferenceFrame solePoseFrame = new PoseReferenceFrame("solePose", ReferenceFrame.getWorldFrame());
-   private final Vector3D boxBaseInSoleFrame = new Vector3D();
-   private final FramePose3D boxBasePose = new FramePose3D();
+   private final Vector3D boxCenterInSoleFrame = new Vector3D();
+   private final FramePose3D boxCenterPose = new FramePose3D();
    private final YoFramePoseUsingYawPitchRoll collisionBoxPose = new YoFramePoseUsingYawPitchRoll("collisionBoxPose", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicShape yoCollisionBoxGraphic;
+   private final List<FramePose3D> collisionPoses = new ArrayList<>();
+   private final FrameBox3D collisionBox = new FrameBox3D();
+
+   private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
+   private final YoBoolean collisionDetected = new YoBoolean("collisionDetected", registry);
 
    private PlanarRegionsList planarRegionsList;
    private final int footstepGraphicCapacity = 100;
@@ -92,14 +97,11 @@ public class CollisionFreeSwingCalculator
       double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
       double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
       double boxBaseInSoleFrameX = 0.5 * (footForwardOffset - footBackwardOffset);
-      boxBaseInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.0);
+      boxCenterInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.5 * swingPlannerParameters.getCollisionBoxHeight());
 
-      double boxSizeX = footForwardOffset + footBackwardOffset + 2.0 * swingPlannerParameters.getCollisionBoxExtraX();
-      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth() + 2.0 * swingPlannerParameters.getCollisionBoxExtraY();
-      double boxSizeZ = swingPlannerParameters.getCollisionBoxHeight() + 2.0 * swingPlannerParameters.getCollisionBoxExtraZ();
+      updateBoxSize();
       Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
-      collisionBoxGraphic.translate(0.0, 0.0, 0.5 * boxSizeZ);
-      collisionBoxGraphic.addCube(boxSizeX, boxSizeY, boxSizeZ, true, YoAppearance.RGBColorFromHex(0x824e38));
+      collisionBoxGraphic.addCube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true, YoAppearance.RGBColorFromHex(0x824e38));
       yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic", collisionBoxGraphic, collisionBoxPose, 1.0);
 
       visualize = parentRegistry != null;
@@ -123,6 +125,16 @@ public class CollisionFreeSwingCalculator
       }
    }
 
+   private void updateBoxSize()
+   {
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double boxSizeX = footForwardOffset + footBackwardOffset + 2.0 * swingPlannerParameters.getCollisionBoxExtraX();
+      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth() + 2.0 * swingPlannerParameters.getCollisionBoxExtraY();
+      double boxSizeZ = swingPlannerParameters.getCollisionBoxHeight() + 2.0 * swingPlannerParameters.getCollisionBoxExtraZ();
+      collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
+   }
+
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -135,6 +147,7 @@ public class CollisionFreeSwingCalculator
          return;
       }
 
+      updateBoxSize();
       updateFootstepGraphics(initialStanceFootPoses, footstepPlan);
 
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
@@ -193,6 +206,8 @@ public class CollisionFreeSwingCalculator
    private void checkForCollisions()
    {
       double deltaPercentage = (1.0 - 2.0 * swingPlannerParameters.getMinMaxCheckerPercentage()) / (numberOfCollisionChecks - 1);
+      collisionPoses.clear();
+
       for (int i = 0; i < numberOfCollisionChecks; i++)
       {
          double percentage = swingPlannerParameters.getMinMaxCheckerPercentage() + i * deltaPercentage;
@@ -203,16 +218,40 @@ public class CollisionFreeSwingCalculator
          solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
          solePoseFrame.setPoseAndUpdate(solePose);
 
-         boxBasePose.setToZero(solePoseFrame);
-         boxBasePose.getPosition().set(boxBaseInSoleFrame);
-         boxBasePose.changeFrame(ReferenceFrame.getWorldFrame());
+         boxCenterPose.setToZero(solePoseFrame);
+         boxCenterPose.getPosition().set(boxCenterInSoleFrame);
+         boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         collisionBox.getPose().set(boxCenterPose);
+         collisionDetected.set(checkForCollision());
+         if (collisionDetected.getBooleanValue())
+         {
+            collisionPoses.add(new FramePose3D(solePose));
+         }
 
          if (visualize)
          {
-            yoCollisionBoxGraphic.setPose(boxBasePose);
+            yoCollisionBoxGraphic.setPose(boxCenterPose);
             tickAndUpdatable.tickAndUpdate();
          }
       }
+   }
+
+   private boolean checkForCollision()
+   {
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
+         {
+            if (collisionDetector.evaluateCollision(planarRegion, collisionBox).areShapesColliding())
+            {
+               return true;
+            }
+         }
+      }
+
+      return false;
    }
 
    private void updateFootstepGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
