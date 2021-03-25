@@ -145,6 +145,27 @@ public class CollisionFreeSwingCalculatorTest
       runTest(stairRegions, stanceSteps, footstepPlan);
    }
 
+   @Test
+   public void testUpOverCinders1()
+   {
+      DataSet cindersDataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
+      PlanarRegionsList cindersRegions = cindersDataSet.getPlanarRegionsList();
+
+      SideDependentList<Pose3D> stanceSteps = new SideDependentList<>();
+      stanceSteps.put(RobotSide.LEFT,  new Pose3D(new Point3D( 0.488,  0.110, -0.000 ), new Quaternion(-0.002, -0.008, -0.199,  0.980 )));
+      stanceSteps.put(RobotSide.RIGHT, new Pose3D(new Point3D( 0.344, -0.240, -0.000 ), new Quaternion(-0.002, -0.008, -0.198,  0.980 )));
+
+      FootstepPlan footstepPlan = new FootstepPlan();
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.700, -0.300,  0.109 ), new Quaternion(-0.001, -0.004, -0.174,  0.985 )));
+      footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.950, -0.100,  0.110 ), new Quaternion(-0.001, -0.004, -0.174,  0.985 )));
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.258, -0.452,  0.203 ), new Quaternion(-0.001, -0.004, -0.173,  0.985 )));
+      footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.500, -0.250,  0.204 ), new Quaternion(-0.001, -0.004, -0.174,  0.985 )));
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.834, -0.601,  0.120 ), new Quaternion( 0.000,  0.000, -0.164,  0.986 )));
+      footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.906, -0.393,  0.120 ), new Quaternion( 0.000,  0.000, -0.164,  0.986 )));
+
+      runTest(cindersRegions, stanceSteps, footstepPlan);
+   }
+
    private PlanarRegionsList flatGround()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
