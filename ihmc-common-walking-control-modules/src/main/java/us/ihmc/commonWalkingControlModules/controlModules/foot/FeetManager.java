@@ -400,26 +400,26 @@ public class FeetManager
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(Footstep, RobotSide)}.
+    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(FramePoint3DReadOnly, RobotSide)}.
     *
     * @param nextFootstep footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoDoubleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   public boolean canDoDoubleSupportToeOff(FramePoint3DReadOnly nextFootstep, RobotSide transferToSide)
    {
       return toeOffManager.canDoDoubleSupportToeOff(nextFootstep, transferToSide);
    }
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(Footstep, RobotSide)}.
+    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(FramePoint3DReadOnly, RobotSide)}.
     *
     * @param nextFootstep footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoSingleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   public boolean canDoSingleSupportToeOff(FramePoint3DReadOnly nextFootstep, RobotSide transferToSide)
    {
       return toeOffManager.canDoSingleSupportToeOff(nextFootstep, transferToSide);
    }

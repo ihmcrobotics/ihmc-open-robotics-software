@@ -203,8 +203,7 @@ public abstract class TransferState extends WalkingState
       }
 
       double extraToeOffHeight = 0.0;
-      RobotSide swingSide = transferToSide.getOppositeSide();
-      if (feetManager.canDoDoubleSupportToeOff(nextFootstep, swingSide))
+      if (feetManager.canDoDoubleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), transferToSide)) // FIXME should this be swing side?
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
