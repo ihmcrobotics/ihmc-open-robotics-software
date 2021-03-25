@@ -1,6 +1,7 @@
 package us.ihmc.avatar;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
+import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import org.junit.jupiter.api.AfterEach;
@@ -12,6 +13,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -102,7 +104,6 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       System.out.println(selectedLocation.getStartingLocationOffset().getAdditionalOffset());
 
-
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
@@ -169,6 +170,38 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
       PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
                                                                                                                              desiredPelvisHeight);
       drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
+
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 + trajectoryTime);
+      assertTrue(success);
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   @Test
+   public void testHighFoot() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(DRCObstacleCourseStartingLocation.DEFAULT);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      double trajectoryTime = 1.0;
+
+      FramePose3D footPose = new FramePose3D(fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame());
+      footPose.getPosition().addZ(0.5);
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(RobotSide.LEFT, trajectoryTime, footPose);
+
+      drcSimulationTestHelper.publishToController(footTrajectoryMessage);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0 + trajectoryTime);
       assertTrue(success);
