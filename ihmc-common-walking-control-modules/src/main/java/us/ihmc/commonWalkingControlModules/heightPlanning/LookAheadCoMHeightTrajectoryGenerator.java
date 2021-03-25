@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.heightPlanning;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -33,7 +33,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class BetterLookAheadCoMHeightTrajectoryGenerator
+public class LookAheadCoMHeightTrajectoryGenerator
 {
    private static final double defaultPercentageInOffset = 0.05;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -91,17 +91,17 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final SplinedHeightTrajectory splinedHeightTrajectory;
 
-   public BetterLookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
-                                                      double nominalHeightAboveGround,
-                                                      double maximumHeightAboveGround,
-                                                      double defaultOffsetHeightAboveGround,
-                                                      double doubleSupportPercentageIn,
-                                                      ReferenceFrame centerOfMassFrame,
-                                                      ReferenceFrame frameOfHeight,
-                                                      SideDependentList<? extends ReferenceFrame> soleFrames,
-                                                      DoubleProvider yoTime,
-                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                      YoRegistry parentRegistry)
+   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
+                                                double nominalHeightAboveGround,
+                                                double maximumHeightAboveGround,
+                                                double defaultOffsetHeightAboveGround,
+                                                double doubleSupportPercentageIn,
+                                                ReferenceFrame centerOfMassFrame,
+                                                ReferenceFrame frameOfHeight,
+                                                SideDependentList<? extends ReferenceFrame> soleFrames,
+                                                DoubleProvider yoTime,
+                                                YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                YoRegistry parentRegistry)
    {
       this(minimumHeightAboveGround,
            nominalHeightAboveGround,
@@ -117,18 +117,18 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
            parentRegistry);
    }
 
-   public BetterLookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
-                                                      double nominalHeightAboveGround,
-                                                      double maximumHeightAboveGround,
-                                                      double defaultOffsetHeightAboveGround,
-                                                      double doubleSupportPercentageIn,
-                                                      double hipWidth,
-                                                      ReferenceFrame centerOfMassFrame,
-                                                      ReferenceFrame frameOfHeight,
-                                                      SideDependentList<? extends ReferenceFrame> soleFrames,
-                                                      DoubleProvider yoTime,
-                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
-                                                      YoRegistry parentRegistry)
+   public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
+                                                double nominalHeightAboveGround,
+                                                double maximumHeightAboveGround,
+                                                double defaultOffsetHeightAboveGround,
+                                                double doubleSupportPercentageIn,
+                                                double hipWidth,
+                                                ReferenceFrame centerOfMassFrame,
+                                                ReferenceFrame frameOfHeight,
+                                                SideDependentList<? extends ReferenceFrame> soleFrames,
+                                                DoubleProvider yoTime,
+                                                YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.frameOfHeight = frameOfHeight;
@@ -236,7 +236,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       heightOffsetHandler.setReferenceFrame(frameOfSupportLeg);
    }
 
-   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       FramePoint3DReadOnly transferToFootstepPosition = transferToAndNextFootstepsData.getTransferToPosition();
       this.extraToeOffHeight.set(extraToeOffHeight);

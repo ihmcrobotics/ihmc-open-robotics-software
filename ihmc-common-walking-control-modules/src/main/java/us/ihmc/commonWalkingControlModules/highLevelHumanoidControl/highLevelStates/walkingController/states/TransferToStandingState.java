@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
@@ -23,8 +22,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.lang.ref.Reference;
 
 public class TransferToStandingState extends WalkingState
 {
@@ -165,7 +162,7 @@ public class TransferToStandingState extends WalkingState
       RobotSide transferFromSide = getSideThatCouldBeOnToes();
       transferFromSide = transferFromSide == null ? RobotSide.RIGHT : transferFromSide;
       RobotSide transferToSide = transferFromSide.getOppositeSide();
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
+      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
             .createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
 
       double extraToeOffHeight = 0.0;

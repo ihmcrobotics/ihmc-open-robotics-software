@@ -8,13 +8,13 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class NewTransferToAndNextFootstepsData
+public class TransferToAndNextFootstepsData
 {
    private final FramePoint3D transferToPosition = new FramePoint3D();
    private final FramePoint2D comAtEndOfState = new FramePoint2D();
    private RobotSide transferToSide;
 
-   public NewTransferToAndNextFootstepsData()
+   public TransferToAndNextFootstepsData()
    {
       comAtEndOfState.setToNaN();
    }

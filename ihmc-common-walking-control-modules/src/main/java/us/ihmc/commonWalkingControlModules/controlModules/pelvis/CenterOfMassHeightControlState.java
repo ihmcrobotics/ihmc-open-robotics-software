@@ -7,8 +7,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.heightPlanning.BetterLookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightPartialDerivativesDataBasics;
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesCalculator;
 import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesSmoother;
@@ -73,7 +73,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final ReferenceFrame centerOfMassFrame;
    private final CenterOfMassJacobian centerOfMassJacobian;
    private final MovingReferenceFrame pelvisFrame;
-   private final BetterLookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
+   private final LookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator;
 
    private final FramePoint3D statusDesiredPosition = new FramePoint3D();
    private final FramePoint3D statusActualPosition = new FramePoint3D();
@@ -114,9 +114,9 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       parentRegistry.addChild(registry);
    }
 
-   public BetterLookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                                                WalkingControllerParameters walkingControllerParameters,
-                                                                                CommonHumanoidReferenceFrames referenceFrames)
+   public LookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                                                          WalkingControllerParameters walkingControllerParameters,
+                                                                          CommonHumanoidReferenceFrames referenceFrames)
    {
       double ankleToGround = Double.NEGATIVE_INFINITY;
       for (RobotSide robotSide : RobotSide.values)
@@ -145,18 +145,18 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double doubleSupportPercentageIn = 0.3;
 
-      return new BetterLookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-                                                             nominalHeightAboveGround,
-                                                             maximumHeightAboveGround,
-                                                             defaultOffsetHeightAboveGround,
-                                                             doubleSupportPercentageIn,
-                                                             hipWidth,
-                                                             centerOfMassFrame,
-                                                             pelvisFrame,
-                                                             referenceFrames.getSoleZUpFrames(),
-                                                             controllerToolbox.getYoTime(),
-                                                             controllerToolbox.getYoGraphicsListRegistry(),
-                                                             registry);
+      return new LookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
+                                                       nominalHeightAboveGround,
+                                                       maximumHeightAboveGround,
+                                                       defaultOffsetHeightAboveGround,
+                                                       doubleSupportPercentageIn,
+                                                       hipWidth,
+                                                       centerOfMassFrame,
+                                                       pelvisFrame,
+                                                       referenceFrames.getSoleZUpFrames(),
+                                                       controllerToolbox.getYoTime(),
+                                                       controllerToolbox.getYoGraphicsListRegistry(),
+                                                       registry);
    }
 
 
@@ -174,7 +174,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comHeightTimeDerivativesSmoother.reset();
    }
 
-   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
