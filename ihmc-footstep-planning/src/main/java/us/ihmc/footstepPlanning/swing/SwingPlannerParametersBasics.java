@@ -115,6 +115,11 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.minMaxCheckerPercentage, minMaxCheckerPercentage);
    }
 
+   default void setMinMaxHeightInterpolationPercentage(double minMaxHeightInterpolationPercentage)
+   {
+      set(SwingPlannerParameterKeys.minMaxHeightInterpolationPercentage, minMaxHeightInterpolationPercentage);
+   }
+
    default void set(SwingPlannerParametersPacket packet)
    {
       setDoInitialFastApproximation(packet.getDoInitialFastApproximation());

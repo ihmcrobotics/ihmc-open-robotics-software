@@ -157,6 +157,11 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.minMaxCheckerPercentage);
    }
 
+   default double getMinMaxHeightInterpolationPercentage()
+   {
+      return get(SwingPlannerParameterKeys.minMaxHeightInterpolationPercentage);
+   }
+
    default SwingPlannerParametersPacket getAsPacket()
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();
