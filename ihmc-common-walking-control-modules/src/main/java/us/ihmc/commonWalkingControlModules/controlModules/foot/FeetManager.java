@@ -535,6 +535,11 @@ public class FeetManager
       return toeOffManager.useToeLineContactInTransfer();
    }
 
+   public boolean isUsingPointContactInToeOff(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).isUsingPointContactInToeOff();
+   }
+
    /**
     * Computes the desired toe off point, and sets the contact state in the foot control module to the toe off state.
     *

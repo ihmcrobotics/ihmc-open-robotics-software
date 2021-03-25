@@ -178,7 +178,7 @@ public abstract class TransferState extends WalkingState
          }
       }
       // switch to point toe off from line toe off
-      else if (feetManager.okForLineToeOff() && !feetManager.useToeLineContactInTransfer())
+      else if (!feetManager.isUsingPointContactInToeOff(trailingLeg) && !feetManager.useToeLineContactInTransfer())
       {
          FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
          controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);

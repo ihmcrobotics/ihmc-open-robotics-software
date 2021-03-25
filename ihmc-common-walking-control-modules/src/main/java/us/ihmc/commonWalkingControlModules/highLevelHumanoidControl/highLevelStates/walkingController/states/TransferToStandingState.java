@@ -88,7 +88,7 @@ public class TransferToStandingState extends WalkingState
          return;
 
       // switch to point toe off from line toe off
-      if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && feetManager.okForLineToeOff() && !feetManager.useToeLineContactInTransfer())
+      if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes) && !feetManager.useToeLineContactInTransfer())
         {
            FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
             controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
@@ -127,7 +127,6 @@ public class TransferToStandingState extends WalkingState
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
 
-
       balanceManager.resetPushRecovery();
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
@@ -162,13 +161,13 @@ public class TransferToStandingState extends WalkingState
       RobotSide transferFromSide = getSideThatCouldBeOnToes();
       transferFromSide = transferFromSide == null ? RobotSide.RIGHT : transferFromSide;
       RobotSide transferToSide = transferFromSide.getOppositeSide();
-      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
-            .createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(transferFromSide) == FootControlModule.ConstraintType.TOES)
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
+      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
+            .createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
