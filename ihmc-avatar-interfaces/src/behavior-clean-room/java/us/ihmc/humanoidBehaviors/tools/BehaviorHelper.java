@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.ros2.ROS2ControllerPublisherMap;
+import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
@@ -197,7 +198,7 @@ public class BehaviorHelper
 
    public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
    {
-      return new DelayFixedPlanarRegionsSubscription(ros1Node, managedROS2Node, robotModel, topic, callback);
+      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros1Node, managedROS2Node, robotModel, topic, callback);
    }
 
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)

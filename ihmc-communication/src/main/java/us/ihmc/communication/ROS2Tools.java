@@ -388,14 +388,14 @@ public class ROS2Tools
       }
    }
 
-   public static <T> void createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
+   public static <T> IHMCROS2Callback createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<T> topic, Consumer<T> callback)
    {
-      new IHMCROS2Callback<>(ros2Node, topic, callback);
+      return new IHMCROS2Callback<>(ros2Node, topic, callback);
    }
 
-   public static <T> void createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
+   public static <T> IHMCROS2Callback createCallbackSubscription2(ROS2NodeInterface ros2Node, ROS2Topic<Empty> topic, Runnable callback)
    {
-      new IHMCROS2Callback<>(ros2Node, topic, message -> callback.run());
+      return new IHMCROS2Callback<>(ros2Node, topic, message -> callback.run());
    }
 
    public static <T> RealtimeROS2Subscription<T> createQueuedSubscriptionTypeNamed(RealtimeROS2Node realtimeROS2Node,
