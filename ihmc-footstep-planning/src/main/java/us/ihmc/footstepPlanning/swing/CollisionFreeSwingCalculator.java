@@ -9,17 +9,21 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -34,6 +38,7 @@ public class CollisionFreeSwingCalculator
 {
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+   private static final int numberOfCollisionChecks = 15;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final boolean visualize;
@@ -49,6 +54,13 @@ public class CollisionFreeSwingCalculator
 
    private final List<FramePoint3D> waypointPositions = new ArrayList<>();
    private final List<SE3TrajectoryPoint> waypointPoses = new ArrayList<>();
+
+   private final FramePose3D solePose = new FramePose3D();
+   private final PoseReferenceFrame solePoseFrame = new PoseReferenceFrame("solePose", ReferenceFrame.getWorldFrame());
+   private final Vector3D boxBaseInSoleFrame = new Vector3D();
+   private final FramePose3D boxBasePose = new FramePose3D();
+   private final YoFramePoseUsingYawPitchRoll collisionBoxPose = new YoFramePoseUsingYawPitchRoll("collisionBoxPose", ReferenceFrame.getWorldFrame(), registry);
+   private final YoGraphicShape yoCollisionBoxGraphic;
 
    private PlanarRegionsList planarRegionsList;
    private final int footstepGraphicCapacity = 100;
@@ -77,6 +89,19 @@ public class CollisionFreeSwingCalculator
       this.tickAndUpdatable = tickAndUpdatable;
       this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, maxWaypoints, maxWaypoints, ReferenceFrame.getWorldFrame());
 
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double boxBaseInSoleFrameX = 0.5 * (footForwardOffset - footBackwardOffset);
+      boxBaseInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.0);
+
+      double boxSizeX = footForwardOffset + footBackwardOffset + 2.0 * swingPlannerParameters.getCollisionBoxExtraX();
+      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth() + 2.0 * swingPlannerParameters.getCollisionBoxExtraY();
+      double boxSizeZ = swingPlannerParameters.getCollisionBoxHeight() + 2.0 * swingPlannerParameters.getCollisionBoxExtraZ();
+      Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
+      collisionBoxGraphic.translate(0.0, 0.0, 0.5 * boxSizeZ);
+      collisionBoxGraphic.addCube(boxSizeX, boxSizeY, boxSizeZ, true, YoAppearance.RGBColorFromHex(0x824e38));
+      yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic", collisionBoxGraphic, collisionBoxPose, 1.0);
+
       visualize = parentRegistry != null;
       if (visualize)
       {
@@ -92,8 +117,8 @@ public class CollisionFreeSwingCalculator
             footstepVisualizers.put(robotSide, footstepVisualizerArray);
          }
 
+         graphicsList.add(yoCollisionBoxGraphic);
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
-
          parentRegistry.addChild(registry);
       }
    }
@@ -120,6 +145,7 @@ public class CollisionFreeSwingCalculator
          endOfSwingPose.set(footstep.getFootstepPose());
 
          computeDefaultTrajectory();
+         checkForCollisions();
       }
    }
 
@@ -161,6 +187,31 @@ public class CollisionFreeSwingCalculator
          positionTrajectoryGenerator.doOptimizationUpdate();
          if (visualize)
             tickAndUpdatable.tickAndUpdate();
+      }
+   }
+
+   private void checkForCollisions()
+   {
+      double deltaPercentage = (1.0 - 2.0 * swingPlannerParameters.getMinMaxCheckerPercentage()) / (numberOfCollisionChecks - 1);
+      for (int i = 0; i < numberOfCollisionChecks; i++)
+      {
+         double percentage = swingPlannerParameters.getMinMaxCheckerPercentage() + i * deltaPercentage;
+         positionTrajectoryGenerator.compute(percentage);
+
+         FramePoint3DReadOnly trajectoryPosition = positionTrajectoryGenerator.getPosition();
+         solePose.getPosition().set(trajectoryPosition);
+         solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
+         solePoseFrame.setPoseAndUpdate(solePose);
+
+         boxBasePose.setToZero(solePoseFrame);
+         boxBasePose.getPosition().set(boxBaseInSoleFrame);
+         boxBasePose.changeFrame(ReferenceFrame.getWorldFrame());
+
+         if (visualize)
+         {
+            yoCollisionBoxGraphic.setPose(boxBasePose);
+            tickAndUpdatable.tickAndUpdate();
+         }
       }
    }
 
