@@ -17,7 +17,7 @@ basicsDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("net.java.jinput:jinput:2.0.6-ihmc")
+   api("net.java.jinput:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid-frame:0.16.2")
    api("us.ihmc:euclid-frame-shape:0.16.2")
    api("us.ihmc:euclid-shape:0.16.2")

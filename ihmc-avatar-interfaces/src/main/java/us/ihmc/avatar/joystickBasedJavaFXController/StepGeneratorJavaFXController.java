@@ -266,9 +266,8 @@ public class StepGeneratorJavaFXController
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
       double collisionBoxHeight = 1.0;
-      double collisionXYProximityCheck = 0.01;
       collisionDetector = new BoundingBoxCollisionDetector();
-      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
+      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight);
    }
 
    public void update(long now)
