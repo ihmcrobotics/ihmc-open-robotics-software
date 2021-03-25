@@ -1672,7 +1672,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          String angularVelocitySuffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, angularVelocityProcessors.size());
 
          ReferenceFrame sensorFrame = imuDefinition.getIMUFrame();
-         YoFrameQuaternion processedOrientation = new YoFrameQuaternion(orientationPrefix, orientationSuffix, sensorFrame, registry);
+         YoFrameQuaternion processedOrientation = new YoFrameQuaternion(orientationPrefix, orientationSuffix, sensorFrame.getRootFrame(), registry);
          YoFrameVector3D processedAngularVelocity = new YoFrameVector3D(angularVelocityPrefix, angularVelocitySuffix, sensorFrame, registry);
 
          YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName,

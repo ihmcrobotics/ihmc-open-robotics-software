@@ -74,6 +74,11 @@ public class IMUBasedJointVelocityEstimator
     */
    public void compute()
    {
+      for (int i = 0; i < joints.length; i++)
+      {
+         joints[i].updateFrame();
+      }
+
       jacobian.compute();
       // jacobian is 6xn
       CommonOps_DDRM.extract(jacobian.getJacobianMatrix(), 0, 3, 0, joints.length, jacobianAngularPart64F, 0, 0);
@@ -92,7 +97,6 @@ public class IMUBasedJointVelocityEstimator
 
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJointBasics joint = joints[i];
          double qd_IMU = qd_estimated.get(i, 0);
          jointVelocitiesFromIMU[i].set(qd_IMU);
       }
