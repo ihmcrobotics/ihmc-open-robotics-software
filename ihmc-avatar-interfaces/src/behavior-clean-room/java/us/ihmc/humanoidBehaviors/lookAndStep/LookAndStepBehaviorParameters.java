@@ -9,7 +9,6 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final DoubleStoredPropertyKey planarRegionDelayTuner = keys.addDoubleKey("Planar region delay tuner");
    public static final BooleanStoredPropertyKey automaticallyInjectSupportRegions = keys.addBooleanKey("Automatically inject support regions");
    public static final BooleanStoredPropertyKey enableBipedalSupportRegions = keys.addBooleanKey("Enable bipedal support regions");
    public static final BooleanStoredPropertyKey flatGroundBodyPathPlan = keys.addBooleanKey("Flat ground body path plan");

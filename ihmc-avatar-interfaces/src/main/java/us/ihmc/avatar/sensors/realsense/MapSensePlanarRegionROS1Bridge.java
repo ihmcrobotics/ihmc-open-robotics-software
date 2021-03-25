@@ -38,8 +38,6 @@ public class MapSensePlanarRegionROS1Bridge
 
       MapsenseTools.createROS1Callback(ros1Node, this::acceptMessage);
 
-
-
       publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MAPSENSE_REGIONS);
 
       boolean daemon = true;
