@@ -2,6 +2,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
+import org.apache.commons.lang.mutable.MutableInt;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -10,6 +11,8 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.ScriptedFootstepGenerator;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -24,7 +27,9 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoEnum;
 
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
@@ -34,10 +39,13 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    @BeforeEach
-   public void showMemoryUsageBeforeTest()
+   public void setup()
    {
-
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
+
+      simulationTestingParameters.setKeepSCSUp(true);
+      simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp() && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
    @AfterEach
@@ -62,12 +70,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
    @Test
    public void testWalkingOffOfLargePlatform() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
-      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_LARGE_PLATFORM;
-
-      System.out.println(selectedLocation.getStartingLocationOffset().getAdditionalOffset());
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
@@ -91,14 +94,22 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
                                                                                       new Point3D(-5.8 - 0.15, -7.471 + 0.15, 0.05),
                                                                                       footRotation);
 
+      YoEnum<FootControlModule.ConstraintType> leftFootState = ((YoEnum<FootControlModule.ConstraintType>) drcSimulationTestHelper.getYoVariable("rightFootCurrentState"));
+
       drcSimulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+      assertEquals(FootControlModule.ConstraintType.TOES, leftFootState.getEnumValue());
+
+      MutableInt leftFootStateChanges = new MutableInt(0);
+      leftFootState.addListener(v -> leftFootStateChanges.increment());
 
       drcSimulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(secondStep));
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
+      assertEquals(2, leftFootStateChanges);
 
       drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
       drcSimulationTestHelper.checkNothingChanged();
