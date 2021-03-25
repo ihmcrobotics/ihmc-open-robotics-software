@@ -201,7 +201,7 @@ public class ToeOffManager
       checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
       checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
 
-      forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, true);
+      forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, toeOffParameters.forceToeOffAtJointLimit());
 
       lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff", registry, toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
 
