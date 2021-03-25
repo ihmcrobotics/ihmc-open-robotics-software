@@ -30,70 +30,37 @@ public class FullRobotModelCorruptor
 
    public FullRobotModelCorruptor(String namePrefix, final FullHumanoidRobotModel fullRobotModel, YoRegistry parentRegistry)
    {
+      for (RigidBodyBasics rigidBody : fullRobotModel.getPelvis().subtreeIterable())
+      {
+         createMassAndCoMOffsetCorruptors(namePrefix, rigidBody.getName(), rigidBody);
+      }
+
       RobotSpecificJointNames robotSpecificJointNames = fullRobotModel.getRobotSpecificJointNames();
       LegJointName[] legJointNames = robotSpecificJointNames.getLegJointNames();
       ArmJointName[] armJointNames = robotSpecificJointNames.getArmJointNames();
       SpineJointName[] spineJointNames = robotSpecificJointNames.getSpineJointNames();
 
-      String chestName = "chest";
-      final RigidBodyBasics chest = fullRobotModel.getChest();
-      createMassAndCoMOffsetCorruptors(namePrefix, chestName, chest);
-
-      String pelvisName = "pelvis";
-      final RigidBodyBasics pelvis = fullRobotModel.getPelvis();
-      createMassAndCoMOffsetCorruptors(namePrefix, pelvisName, pelvis);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
-
-         String thighName = sidePrefix + "Thigh";
-         final RigidBodyBasics thigh = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getPredecessor();
-         createMassAndCoMOffsetCorruptors(namePrefix, thighName, thigh);
-
-         String shinName = sidePrefix + "Shin";
-         final RigidBodyBasics shin = fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH).getSuccessor();
-         createMassAndCoMOffsetCorruptors(namePrefix, shinName, shin);
-
-         String footName = sidePrefix + "Foot";
-         final RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
-         createMassAndCoMOffsetCorruptors(namePrefix, footName, foot);
-      }
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         for (ArmJointName armJointName : armJointNames)
-         {
-            OneDoFJointBasics armJoint = fullRobotModel.getArmJoint(robotSide, armJointName);
-            if (armJoint == null)
-               continue;
-
-            RigidBodyBasics rigidBody = armJoint.getSuccessor();
-            createMassAndCoMOffsetCorruptors(namePrefix, rigidBody.getName(), rigidBody);
-         }
-      }
-
-//      final YoFrameVector hipYawOffset = new YoFrameVector("hipYawOffset", null, registry);
-//      VariableChangedListener hipYawOffsetChangedListener = new VariableChangedListener()
-//      {
-//         @Override
-//         public void notifyOfVariableChange(YoVariable v)
-//         {
-//            for (RobotSide robotSide : RobotSide.values)
-//            {
-//               OneDoFJoint hipYawJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW);
-//               ReferenceFrame frameBeforeJoint = hipYawJoint.getFrameBeforeJoint();
-//
-//               RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
-//               Vector3D offsetVector = hipYawOffset.getVector3dCopy();
-//               offsetVector.setY(robotSide.negateIfRightSide(offsetVector.getY()));
-//               postCorruptionTransform.setTranslation(offsetVector);
-//               frameBeforeJoint.corruptTransformToParentPostMultiply(postCorruptionTransform);
-//            }
-//         }
-//      };
-//      hipYawOffset.attachVariableChangedListener(hipYawOffsetChangedListener);
-//      variableChangedListeners.add(hipYawOffsetChangedListener);
+      //      final YoFrameVector hipYawOffset = new YoFrameVector("hipYawOffset", null, registry);
+      //      VariableChangedListener hipYawOffsetChangedListener = new VariableChangedListener()
+      //      {
+      //         @Override
+      //         public void notifyOfVariableChange(YoVariable v)
+      //         {
+      //            for (RobotSide robotSide : RobotSide.values)
+      //            {
+      //               OneDoFJoint hipYawJoint = fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW);
+      //               ReferenceFrame frameBeforeJoint = hipYawJoint.getFrameBeforeJoint();
+      //
+      //               RigidBodyTransform postCorruptionTransform = new RigidBodyTransform();
+      //               Vector3D offsetVector = hipYawOffset.getVector3dCopy();
+      //               offsetVector.setY(robotSide.negateIfRightSide(offsetVector.getY()));
+      //               postCorruptionTransform.setTranslation(offsetVector);
+      //               frameBeforeJoint.corruptTransformToParentPostMultiply(postCorruptionTransform);
+      //            }
+      //         }
+      //      };
+      //      hipYawOffset.attachVariableChangedListener(hipYawOffsetChangedListener);
+      //      variableChangedListeners.add(hipYawOffsetChangedListener);
 
       // Joint Calibration offset errors:
       for (RobotSide robotSide : RobotSide.values)
@@ -122,35 +89,35 @@ public class FullRobotModelCorruptor
 
    private void createJointAngleCorruptor(String namePrefix, String name, OneDoFJointBasics oneDoFJoint)
    {
-//      name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
-//      final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
-//      final Vector3D jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
-//
-//      final RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
-//
-//      final YoDouble offset = new YoDouble(name + "Offset", registry);
-//
-//      VariableChangedListener jointOffsetChangedListener = new VariableChangedListener()
-//      {
-//         @Override
-//         public void notifyOfVariableChange(YoVariable v)
-//         {
-//            AxisAngle axisAngle = new AxisAngle(jointAxis, offset.getDoubleValue());
-//            preCorruptionTransform.setRotationAndZeroTranslation(axisAngle);
-//            frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
-//         }
-//      };
-//      offset.addVariableChangedListener(jointOffsetChangedListener);
-//      variableChangedListeners.add(jointOffsetChangedListener);
+      //      name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
+      //      final ReferenceFrame frameBeforeJoint = oneDoFJoint.getFrameBeforeJoint();
+      //      final Vector3D jointAxis = oneDoFJoint.getJointAxis().getVectorCopy();
+      //
+      //      final RigidBodyTransform preCorruptionTransform = new RigidBodyTransform();
+      //
+      //      final YoDouble offset = new YoDouble(name + "Offset", registry);
+      //
+      //      VariableChangedListener jointOffsetChangedListener = new VariableChangedListener()
+      //      {
+      //         @Override
+      //         public void notifyOfVariableChange(YoVariable v)
+      //         {
+      //            AxisAngle axisAngle = new AxisAngle(jointAxis, offset.getDoubleValue());
+      //            preCorruptionTransform.setRotationAndZeroTranslation(axisAngle);
+      //            frameBeforeJoint.corruptTransformToParentPreMultiply(preCorruptionTransform);
+      //         }
+      //      };
+      //      offset.addVariableChangedListener(jointOffsetChangedListener);
+      //      variableChangedListeners.add(jointOffsetChangedListener);
    }
 
    private void createMassAndCoMOffsetCorruptors(String namePrefix, String name, final RigidBodyBasics rigidBody)
    {
-      if(rigidBody == null)
+      if (rigidBody == null)
       {
          return;
       }
-      
+
       name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
       final YoDouble massVariable = new YoDouble(name + "Mass", registry);
       massVariable.set(rigidBody.getInertia().getMass());

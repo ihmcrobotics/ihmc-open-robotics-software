@@ -23,6 +23,8 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 {
+   private static final boolean publishOctree = false;
+
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
@@ -102,7 +104,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
             depthRegionPublisher.publish(lastPlanarRegionsListMessage);
       }
 
-      if (ocTree != null && ocTree.getRoot() != null)
+      if (publishOctree && ocTree != null && ocTree.getRoot() != null)
       {
          OcTreeKeyListMessage ocTreeMessage = OcTreeMessageConverter.createOcTreeDataMessage(ocTree);
          ocTreePublisher.publish(ocTreeMessage);
