@@ -187,11 +187,19 @@ public class CollisionFreeSwingCalculator
          startOfSwingPose.set((i < 2 ? initialStanceFootPoses.get(stepSide) : footstepPlan.getFootstep(i - 2).getFootstepPose()));
          endOfSwingPose.set(footstep.getFootstepPose());
 
+         positionTrajectoryGenerator.reset();
+         defaultWaypoints.clear();
+         modifiedWapoints.clear();
+         modifiedWapointPercentages.clear();
+
          solverStep.set(SolverStep.COMPUTING_DEFUALT_TRAJECTORY);
          computeDefaultTrajectory();
 
          solverStep.set(SolverStep.FINDING_COLLIDING_POSES);
          checkForCollisionsAlongDefaultTrajectory();
+
+         if (modifiedWapoints.isEmpty())
+            continue;
 
          solverStep.set(SolverStep.RECOMPUTE_TRAJECTORY);
          recomputeTrajectory();
@@ -200,9 +208,6 @@ public class CollisionFreeSwingCalculator
 
    private void computeDefaultTrajectory()
    {
-      positionTrajectoryGenerator.reset();
-      defaultWaypoints.clear();
-
       // see TwoWaypointSwingGenerator.initialize() for trajectoryType DEFAULT
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
@@ -331,9 +336,9 @@ public class CollisionFreeSwingCalculator
    {
       if (modifiedWapointPercentages.get(0) > swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
       {
-         modifiedWapoints.add(new FramePoint3D(defaultWaypoints.get(0)));
+         modifiedWapoints.add(0, new FramePoint3D(defaultWaypoints.get(0)));
       }
-      if (modifiedWapointPercentages.get(modifiedWapoints.size() - 1) < 1.0 - swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
+      if (modifiedWapointPercentages.get(modifiedWapointPercentages.size() - 1) < 1.0 - swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
       {
          modifiedWapoints.add(new FramePoint3D(defaultWaypoints.get(1)));
       }
@@ -345,7 +350,7 @@ public class CollisionFreeSwingCalculator
       positionTrajectoryGenerator.initialize();
 
       positionTrajectoryGenerator.setShouldVisualize(visualize);
-      for (int i = 0; i < 30; i++)
+      for (int i = 0; i < 70; i++)
       {
          positionTrajectoryGenerator.doOptimizationUpdate();
       }
