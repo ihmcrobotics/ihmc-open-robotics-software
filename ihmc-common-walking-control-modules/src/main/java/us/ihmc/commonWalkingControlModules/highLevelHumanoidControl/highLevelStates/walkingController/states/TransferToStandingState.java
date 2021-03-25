@@ -85,17 +85,35 @@ public class TransferToStandingState extends WalkingState
 
    public void switchToPointToeOffIfAlreadyInLine()
    {
+      RobotSide sideOnToes = getSideThatCouldBeOnToes();
+
+      if (sideOnToes == null)
+         return;
+
       // switch to point toe off from line toe off
-      for (RobotSide sideOnToes : RobotSide.values)
-      {
-         if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && feetManager.okForLineToeOff() && !feetManager.useToeLineContactInTransfer())
-         {
-            FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
+      if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && feetManager.okForLineToeOff() && !feetManager.useToeLineContactInTransfer())
+        {
+           FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
             controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
             feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
          }
-      }
    }
+
+   private RobotSide getSideThatCouldBeOnToes()
+   {
+      WalkingStateEnum previousWalkingState = getPreviousWalkingStateEnum();
+      if (previousWalkingState == null)
+         return null;
+
+      RobotSide sideOnToes = null;
+      if (previousWalkingState.isSingleSupport())
+         sideOnToes = previousWalkingState.getSupportSide();
+      else if (previousWalkingState.getTransferToSide() != null)
+         sideOnToes = previousWalkingState.getTransferToSide().getOppositeSide();
+
+      return sideOnToes;
+   }
+
 
    @Override
    public boolean isDone(double timeInState)
@@ -144,9 +162,17 @@ public class TransferToStandingState extends WalkingState
 
       failureDetectionControlModule.setNextFootstep(null);
 
+      RobotSide transferFromSide = getSideThatCouldBeOnToes();
+      transferFromSide = transferFromSide == null ? RobotSide.RIGHT : transferFromSide;
+      RobotSide transferToSide = transferFromSide.getOppositeSide();
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
-            .createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT);
+            .createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
+
       double extraToeOffHeight = 0.0;
+      if (feetManager.getCurrentConstraintType(transferFromSide) == FootControlModule.ConstraintType.TOES)
+         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
+
+      comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
