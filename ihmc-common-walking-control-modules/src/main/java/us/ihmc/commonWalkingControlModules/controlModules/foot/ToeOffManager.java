@@ -180,8 +180,7 @@ public class ToeOffManager
                         YoRegistry parentRegistry)
    {
       ToeOffParameters toeOffParameters = walkingControllerParameters.getToeOffParameters();
-      legInspector = new LegJointLimitsInspector(toeOffParameters);
-      parentRegistry.addChild(legInspector.getRegistry());
+      legInspector = new LegJointLimitsInspector(toeOffParameters, parentRegistry);
 
       doToeOffIfPossibleInDoubleSupport = new BooleanParameter("doToeOffIfPossibleInDoubleSupport", registry, toeOffParameters.doToeOffIfPossible());
       doToeOffIfPossibleInSingleSupport = new BooleanParameter("doToeOffIfPossibleInSingleSupport", registry, toeOffParameters.doToeOffIfPossibleInSingleSupport());

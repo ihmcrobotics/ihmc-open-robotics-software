@@ -35,11 +35,12 @@ public class LegJointLimitsInspector
             isRearKneePitchHittingLowerLimit,
             largeGlitchWindowSize);
 
-    public LegJointLimitsInspector(ToeOffParameters toeOffParameters)
+    public LegJointLimitsInspector(ToeOffParameters toeOffParameters, YoRegistry parentRegistry)
     {
         ankleLowerLimitToTriggerToeOff = new DoubleParameter("ankleLowerLimitToTriggerToeOff", registry, toeOffParameters.getAnkleLowerLimitToTriggerToeOff());
         kneeUpperLimitToTriggerToeOff = new DoubleParameter("kneeUpperLimitToTriggerToeOff", registry, toeOffParameters.getKneeUpperLimitToTriggerToeOff());
         kneeLowerLimitToTriggerToeOff = new DoubleParameter("kneeLowerLimitToTriggerToeOff", registry, toeOffParameters.getKneeLowerLimitToTriggerToeOff());
+        parentRegistry.addChild(registry);
     }
 
     public void reset()
@@ -97,10 +98,5 @@ public class LegJointLimitsInspector
     public double getKneeMaxLowerLimitToTriggerToeOff()
     {
         return kneeMaxLowerLimitToTriggerToeOff.getDoubleValue();
-    }
-
-    public YoRegistry getRegistry()
-    {
-        return registry;
     }
 }
