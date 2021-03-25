@@ -19,6 +19,7 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessor;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.HeadingAndVelocityEvaluationScriptParameters;
@@ -104,6 +105,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private final HighLevelControllerParameters highLevelControllerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters;
+   private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
    private final RobotContactPointParameters<RobotSide> contactPointParameters;
 
    private final Point3D scsCameraPosition = new Point3D(6.0, -2.0, 4.5);
@@ -147,6 +149,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       this.highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
       this.walkingControllerParameters = robotModel.getWalkingControllerParameters();
       this.copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
+      this.splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
       this.contactPointParameters = robotModel.getContactPointParameters();
    }
 
@@ -480,7 +483,8 @@ public class DRCSimulationStarter implements SimulationStarterInterface
                                                                  wristForceSensorNames,
                                                                  highLevelControllerParameters,
                                                                  walkingControllerParameters,
-                                                                 copTrajectoryParameters);
+                                                                 copTrajectoryParameters,
+                                                                 splitFractionParameters);
       setupHighLevelStates(controllerFactory);
 
       controllerFactory.attachControllerFailureListeners(controllerFailureListeners);

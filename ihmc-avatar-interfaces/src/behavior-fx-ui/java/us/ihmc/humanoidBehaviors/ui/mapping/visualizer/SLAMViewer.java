@@ -15,7 +15,7 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SLAMViewer
@@ -89,7 +89,7 @@ public class SLAMViewer
 
    public void addStereoMessage(StereoVisionPointCloudMessage message, Color sensorPoseColor, Color pointCloudColor)
    {
-      stereoVisionPointCloudGraphic.addPointsMeshes(PointCloudCompression.decompressPointCloudToArray(message), pointCloudColor);
+      stereoVisionPointCloudGraphic.addPointsMeshes(StereoPointCloudCompression.decompressPointCloudToArray(message), pointCloudColor);
       stereoVisionPointCloudGraphic.addSensorPoseMesh(MessageTools.unpackSensorPose(message), sensorPoseColor);
    }
 

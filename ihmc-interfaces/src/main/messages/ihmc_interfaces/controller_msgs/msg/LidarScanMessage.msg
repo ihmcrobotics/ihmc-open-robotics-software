@@ -15,4 +15,7 @@ float64 sensor_pose_confidence 1.0
 # The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
 # The confidence of the point cloud represents the quality of the collected point cloud data.
 float64 point_cloud_confidence 1.0
-float32[<=200000] scan
+# Number of points in the pointcloud
+int32 number_of_points
+# Compressed pointcloud data. See us.ihmc.communication.packets.LidarPointCloudCompression for method to compress and decompress
+byte[<=2000000] scan
