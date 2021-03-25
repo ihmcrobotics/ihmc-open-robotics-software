@@ -174,6 +174,11 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comHeightTimeDerivativesSmoother.reset();
    }
 
+   public void initializeToNominalDesiredHeight()
+   {
+      centerOfMassTrajectoryGenerator.initializeToNominalHeight();
+   }
+
    public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       centerOfMassTrajectoryGenerator.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
