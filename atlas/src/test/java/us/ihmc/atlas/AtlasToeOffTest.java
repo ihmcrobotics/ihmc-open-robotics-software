@@ -1,5 +1,6 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.atlas.parameters.AtlasToeOffParameters;
@@ -15,6 +16,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasToeOffTest extends AvatarToeOffTest
 {
     @Test
+    @Disabled
     public void testToeOffTakingShortStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.1);
@@ -23,6 +25,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     }
 
     @Test
+    @Disabled
     public void testToeOffTakingShortStepDownCheckingAnkleLimitsWithExperimentalPhysicsEngine(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setUseExperimentalPhysicsEngine(true);
@@ -32,6 +35,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     }
 
     @Test
+    @Disabled
     public void testToeOffTakingMediumStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.2);
@@ -40,6 +44,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
     }
 
     @Test
+    @Disabled
     public void testToeOffTakingHighStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
         setStepHeight(-0.3);
