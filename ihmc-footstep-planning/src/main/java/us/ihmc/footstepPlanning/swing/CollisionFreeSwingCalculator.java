@@ -2,11 +2,15 @@ package us.ihmc.footstepPlanning.swing;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -14,8 +18,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
@@ -23,11 +27,18 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class CollisionFreeSwingCalculator
 {
+   private static final FrameVector3D zeroVector = new FrameVector3D();
+   private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
+
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final boolean visualize;
 
+   private final int maxWaypoints = 5;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final TickAndUpdatable tickAndUpdatable;
@@ -36,9 +47,15 @@ public class CollisionFreeSwingCalculator
    private final FramePose3D startOfSwingPose = new FramePose3D();
    private final FramePose3D endOfSwingPose = new FramePose3D();
 
+   private final List<FramePoint3D> waypointPositions = new ArrayList<>();
+   private final List<SE3TrajectoryPoint> waypointPoses = new ArrayList<>();
+
    private PlanarRegionsList planarRegionsList;
+   private final int footstepGraphicCapacity = 100;
    private final SideDependentList<FootstepVisualizer[]> footstepVisualizers = new SideDependentList<>();
    private final SideDependentList<MutableInt> footstepVisualizerIndices = new SideDependentList<>(side -> new MutableInt());
+
+   private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator;
 
    public CollisionFreeSwingCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
                                        WalkingControllerParameters walkingControllerParameters,
@@ -58,6 +75,7 @@ public class CollisionFreeSwingCalculator
       this.walkingControllerParameters = walkingControllerParameters;
       this.footPolygons = footPolygons;
       this.tickAndUpdatable = tickAndUpdatable;
+      this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, maxWaypoints, maxWaypoints, ReferenceFrame.getWorldFrame());
 
       visualize = parentRegistry != null;
       if (visualize)
@@ -65,7 +83,7 @@ public class CollisionFreeSwingCalculator
          YoGraphicsList graphicsList = new YoGraphicsList(getClass().getSimpleName());
          for (RobotSide robotSide : RobotSide.values())
          {
-            FootstepVisualizer[] footstepVisualizerArray = new FootstepVisualizer[50];
+            FootstepVisualizer[] footstepVisualizerArray = new FootstepVisualizer[footstepGraphicCapacity];
             for (int i = 0; i < footstepVisualizerArray.length; i++)
             {
                footstepVisualizerArray[i] = new FootstepVisualizer(robotSide, footPolygons.get(robotSide), graphicsList);
@@ -93,6 +111,57 @@ public class CollisionFreeSwingCalculator
       }
 
       updateFootstepGraphics(initialStanceFootPoses, footstepPlan);
+
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         RobotSide stepSide = footstep.getRobotSide();
+         startOfSwingPose.set((i < 2 ? initialStanceFootPoses.get(stepSide) : footstepPlan.getFootstep(i - 2).getFootstepPose()));
+         endOfSwingPose.set(footstep.getFootstepPose());
+
+         computeDefaultTrajectory();
+      }
+   }
+
+   private void computeDefaultTrajectory()
+   {
+      waypointPositions.clear();
+
+      // see TwoWaypointSwingGenerator.initialize() for trajectoryType DEFAULT
+      double[] defaultWaypointProportions = new double[] {0.15, 0.85};
+      double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+
+      for (int i = 0; i < 2; i++)
+      {
+         FramePoint3D waypoint = new FramePoint3D();
+         waypoint.interpolate(startOfSwingPose.getPosition(), endOfSwingPose.getPosition(), defaultWaypointProportions[i]);
+         waypoint.addZ(defaultSwingHeightFromStanceFoot);
+         waypointPositions.add(waypoint);
+      }
+
+      double zDifference = Math.abs(startOfSwingPose.getZ() - endOfSwingPose.getZ());
+      boolean obstacleClearance = zDifference > walkingControllerParameters.getSwingTrajectoryParameters().getMinHeightDifferenceForStepUpOrDown();
+      if (obstacleClearance)
+      {
+         double maxStepZ = Math.max(startOfSwingPose.getZ(), endOfSwingPose.getZ());
+         for (int i = 0; i < 2; i++)
+         {
+            waypointPositions.get(i).setZ(maxStepZ + defaultSwingHeightFromStanceFoot);
+         }
+      }
+
+      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
+      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
+      positionTrajectoryGenerator.setWaypoints(waypointPositions);
+      positionTrajectoryGenerator.initialize();
+
+      positionTrajectoryGenerator.setShouldVisualize(visualize);
+      for (int i = 0; i < 30; i++)
+      {
+         positionTrajectoryGenerator.doOptimizationUpdate();
+         if (visualize)
+            tickAndUpdatable.tickAndUpdate();
+      }
    }
 
    private void updateFootstepGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
@@ -128,7 +197,8 @@ public class CollisionFreeSwingCalculator
          footstepVisualizer.visualizeFootstep(footstep.getFootstepPose());
       }
 
-      tickAndUpdatable.tickAndUpdate();
+      if (visualize)
+         tickAndUpdatable.tickAndUpdate();
    }
 
    private FootstepVisualizer getNextFootstepVisualizer(RobotSide robotSide)
@@ -138,7 +208,7 @@ public class CollisionFreeSwingCalculator
 
       if (indexToGet >= footstepVisualizer.length)
       {
-         throw new RuntimeException("Not enough footstep graphics allocated");
+         throw new RuntimeException("footstepGraphicCapacity is too low");
       }
 
       return footstepVisualizer[indexToGet];
