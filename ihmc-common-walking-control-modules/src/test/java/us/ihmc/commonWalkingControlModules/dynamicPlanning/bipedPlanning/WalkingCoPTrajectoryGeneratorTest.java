@@ -2,11 +2,15 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.YoSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -122,6 +126,192 @@ public class WalkingCoPTrajectoryGeneratorTest
       assertEquals(time, contactStateProviders.get(5).getTimeInterval().getEndTime(), epsilon);
       time += (1.0 - transferSplitFraction) * finalTransferTime;
       assertEquals(time, contactStateProviders.get(6).getTimeInterval().getEndTime(), epsilon);
+
+      if (visualize)
+         CoPTrajectoryVisualizer.visualize(copTrajectory);
+   }
+
+   @Test
+   public void testSingleBigStepDownWithRightFoot()
+   {
+      double stanceWidth = 0.4;
+      YoRegistry registry = new YoRegistry("test");
+      SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
+      SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
+
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
+      DefaultSplitFractionCalculatorParameters splitFractionCalculatorParameters = new DefaultSplitFractionCalculatorParameters();
+      splitFractionCalculatorParameters.setCalculateSplitFractionsFromPositions(true);
+      splitFractionCalculatorParameters.setCalculateSplitFractionsFromArea(false);
+
+      registry.addChild(parameters.getRegistry());
+      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
+                                                                                      splitFractionCalculatorParameters,
+                                                                                      CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
+                                                                                      registry);
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      copTrajectory.registerState(state);
+
+      state.setInitialCoP(new FramePoint3D());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+      }
+
+      Footstep footstep = new Footstep();
+      footstep.getFootstepPose().getPosition().set(0.5, -0.5 * stanceWidth, -0.5);
+      footstep.setRobotSide(RobotSide.RIGHT);
+
+      double swingTime = 1.0;
+      double transferTime = 0.6;
+      double finalTransferTime = 1.0;
+      FootstepTiming timing = new FootstepTiming();
+      timing.setTimings(swingTime, transferTime);
+
+      state.setFinalTransferDuration(finalTransferTime);
+      state.addFootstep(footstep);
+      state.addFootstepTiming(timing);
+      state.initializeStance(polygons, soleFrames);
+
+      copTrajectory.compute(state);
+
+      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      for (int i = 0; i < contactStateProviders.size() - 1; i++)
+      {
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
+         assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
+      }
+
+      double defaultTransferSplitFraction = parameters.getDefaultTransferSplitFraction();
+      double swingShiftFraction = parameters.getDefaultSwingDurationShiftFraction();
+      double swingSplitFraction = parameters.getDefaultSwingSplitFraction();
+      double transferSplitFractionAtStepDown = splitFractionCalculatorParameters.getTransferSplitFractionAtFullDepth();
+
+      // check the timings
+      double time = 0.0;
+      assertEquals(time, contactStateProviders.get(0).getTimeInterval().getStartTime(), epsilon);
+      time += Math.min(defaultTransferSplitFraction * transferTime, parameters.getDurationForContinuityMaintenanceSegment());
+      assertEquals(time, contactStateProviders.get(0).getTimeInterval().getEndTime(), epsilon);
+      time += transferTime -  Math.min(defaultTransferSplitFraction * transferTime, parameters.getDurationForContinuityMaintenanceSegment());
+      assertEquals(time, contactStateProviders.get(1).getTimeInterval().getEndTime(), epsilon);
+      time += swingShiftFraction * swingSplitFraction * swingTime;
+      assertEquals(time, contactStateProviders.get(2).getTimeInterval().getEndTime(), epsilon);
+      time += swingShiftFraction * (1.0 - swingSplitFraction) * swingTime;
+      assertEquals(time, contactStateProviders.get(3).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - swingShiftFraction) * swingTime;
+      assertEquals(time, contactStateProviders.get(4).getTimeInterval().getEndTime(), epsilon);
+      time += transferSplitFractionAtStepDown * finalTransferTime;
+      assertEquals(time, contactStateProviders.get(5).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - transferSplitFractionAtStepDown) * finalTransferTime;
+      assertEquals(time, contactStateProviders.get(6).getTimeInterval().getEndTime(), epsilon);
+
+      FramePoint3D leftFoot = new FramePoint3D(soleFrames.get(RobotSide.LEFT));
+      FramePoint3D rightFoot = new FramePoint3D(footstep.getFootstepPose().getPosition());
+
+      leftFoot.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePoint3D expectedMidpoint = new FramePoint3D();
+      expectedMidpoint.interpolate(leftFoot, rightFoot, splitFractionCalculatorParameters.getTransferFinalWeightDistributionAtFullDepth());
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
+
+      if (visualize)
+         CoPTrajectoryVisualizer.visualize(copTrajectory);
+   }
+
+   @Test
+   public void testSingleBigStepDownWithLeftFoot()
+   {
+      double stanceWidth = 0.4;
+      YoRegistry registry = new YoRegistry("test");
+      SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
+      SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
+
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
+      DefaultSplitFractionCalculatorParameters splitFractionCalculatorParameters = new DefaultSplitFractionCalculatorParameters();
+      splitFractionCalculatorParameters.setCalculateSplitFractionsFromPositions(true);
+      splitFractionCalculatorParameters.setCalculateSplitFractionsFromArea(false);
+
+      registry.addChild(parameters.getRegistry());
+      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
+                                                                                      splitFractionCalculatorParameters,
+                                                                                      CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
+                                                                                      registry);
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      copTrajectory.registerState(state);
+
+      state.setInitialCoP(new FramePoint3D());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         soleFrames.get(robotSide).setPositionWithoutChecksAndUpdate(0.0,  robotSide.negateIfRightSide(0.5) * stanceWidth, 0.0);
+         polygons.put(robotSide, new FrameConvexPolygon2D(soleFrames.get(robotSide), CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon()));
+      }
+
+      Footstep footstep = new Footstep();
+      footstep.getFootstepPose().getPosition().set(0.5, 0.5 * stanceWidth, -0.5);
+      footstep.setRobotSide(RobotSide.LEFT);
+
+      double swingTime = 1.0;
+      double transferTime = 0.6;
+      double finalTransferTime = 1.0;
+      FootstepTiming timing = new FootstepTiming();
+      timing.setTimings(swingTime, transferTime);
+
+      state.setFinalTransferDuration(finalTransferTime);
+      state.addFootstep(footstep);
+      state.addFootstepTiming(timing);
+      state.initializeStance(polygons, soleFrames);
+
+      copTrajectory.compute(state);
+
+      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      for (int i = 0; i < contactStateProviders.size() - 1; i++)
+      {
+         EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
+         assertEquals(contactStateProviders.get(i).getTimeInterval().getEndTime(), contactStateProviders.get(i + 1).getTimeInterval().getStartTime(), epsilon);
+      }
+
+      double defaultTransferSplitFraction = parameters.getDefaultTransferSplitFraction();
+      double swingShiftFraction = parameters.getDefaultSwingDurationShiftFraction();
+      double swingSplitFraction = parameters.getDefaultSwingSplitFraction();
+      double transferSplitFractionAtStepDown = splitFractionCalculatorParameters.getTransferSplitFractionAtFullDepth();
+
+      // check the timings
+      double time = 0.0;
+      assertEquals(time, contactStateProviders.get(0).getTimeInterval().getStartTime(), epsilon);
+      time += Math.min(defaultTransferSplitFraction * transferTime, parameters.getDurationForContinuityMaintenanceSegment());
+      assertEquals(time, contactStateProviders.get(0).getTimeInterval().getEndTime(), epsilon);
+      time += transferTime -  Math.min(defaultTransferSplitFraction * transferTime, parameters.getDurationForContinuityMaintenanceSegment());
+      assertEquals(time, contactStateProviders.get(1).getTimeInterval().getEndTime(), epsilon);
+      time += swingShiftFraction * swingSplitFraction * swingTime;
+      assertEquals(time, contactStateProviders.get(2).getTimeInterval().getEndTime(), epsilon);
+      time += swingShiftFraction * (1.0 - swingSplitFraction) * swingTime;
+      assertEquals(time, contactStateProviders.get(3).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - swingShiftFraction) * swingTime;
+      assertEquals(time, contactStateProviders.get(4).getTimeInterval().getEndTime(), epsilon);
+      time += transferSplitFractionAtStepDown * finalTransferTime;
+      assertEquals(time, contactStateProviders.get(5).getTimeInterval().getEndTime(), epsilon);
+      time += (1.0 - transferSplitFractionAtStepDown) * finalTransferTime;
+      assertEquals(time, contactStateProviders.get(6).getTimeInterval().getEndTime(), epsilon);
+
+      FramePoint3D leftFoot = new FramePoint3D(footstep.getFootstepPose().getPosition());
+      FramePoint3D rightFoot = new FramePoint3D(soleFrames.get(RobotSide.RIGHT));
+
+      rightFoot.changeFrame(ReferenceFrame.getWorldFrame());
+      FramePoint3D expectedMidpoint = new FramePoint3D();
+      expectedMidpoint.interpolate(rightFoot, leftFoot, splitFractionCalculatorParameters.getTransferFinalWeightDistributionAtFullDepth());
+
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
+      EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
 
       if (visualize)
          CoPTrajectoryVisualizer.visualize(copTrajectory);
