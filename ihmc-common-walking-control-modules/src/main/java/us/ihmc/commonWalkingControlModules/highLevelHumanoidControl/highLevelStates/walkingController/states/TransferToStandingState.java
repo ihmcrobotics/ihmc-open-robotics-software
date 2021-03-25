@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
@@ -12,8 +13,10 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -72,8 +75,26 @@ public class TransferToStandingState extends WalkingState
    {
       balanceManager.computeICPPlan();
 
+      switchToPointToeOffIfAlreadyInLine();
+
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
+   }
+
+   private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
+
+   public void switchToPointToeOffIfAlreadyInLine()
+   {
+      // switch to point toe off from line toe off
+      for (RobotSide sideOnToes : RobotSide.values)
+      {
+         if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && feetManager.okForLineToeOff() && !feetManager.useToeLineContactInTransfer())
+         {
+            FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
+            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
+            feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
+         }
+      }
    }
 
    @Override
@@ -90,13 +111,15 @@ public class TransferToStandingState extends WalkingState
    {
       balanceManager.clearICPPlan();
       balanceManager.clearSwingFootTrajectory();
+
+
       balanceManager.resetPushRecovery();
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
 
-
       // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
       // restore the full foot contact.
+      // TODO don't restore the foot to full contact necessarily. need to figure out how to detect that it's ok
       if (previousStateEnum != null && previousStateEnum.isDoubleSupport())
          feetManager.initializeContactStatesForDoubleSupport(null);
 
