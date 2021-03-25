@@ -201,7 +201,7 @@ public class ToeOffManager
       checkECMPForToeOff = new BooleanParameter("checkECMPForToeOff", registry, toeOffParameters.checkECMPLocationToTriggerToeOff());
       checkCoPForToeOff = new BooleanParameter("checkCoPForToeOff", registry, toeOffParameters.checkCoPLocationToTriggerToeOff());
 
-      forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, toeOffParameters.forceToeOffAtJointLimit());
+      forceToeOffAtJointLimit = new BooleanParameter("forceToeOffAtJointLimit", registry, true);
 
       lookAtTwoStepCapturabilityForToeOff = new BooleanParameter("lookAtTwoStepCapturabilityForToeOff", registry, toeOffParameters.lookAtTwoStepCapturabilityForToeOff());
 
@@ -753,6 +753,11 @@ public class ToeOffManager
       return isSteppingUp.getValue();
    }
 
+   public boolean useToeLineContactInTransfer()
+   {
+      return useToeLineContactInTransfer.getValue();
+   }
+
    private enum ToeContact
    {
       POINT, LINE
@@ -999,4 +1004,5 @@ public class ToeOffManager
          return true;
       }
    }
+
 }
