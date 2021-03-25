@@ -18,6 +18,12 @@ public class ValkyrieToeOffTest extends AvatarToeOffTest
    }
 
    @Override
+   public double getMaxStepLength()
+   {
+      return 0.8;
+   }
+
+   @Override
    public int getNumberOfSteps()
    {
       return 4;
