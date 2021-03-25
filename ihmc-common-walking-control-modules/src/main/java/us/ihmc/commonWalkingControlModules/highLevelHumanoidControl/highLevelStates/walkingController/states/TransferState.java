@@ -149,7 +149,7 @@ public abstract class TransferState extends WalkingState
    {
       RobotSide trailingLeg = transferToSide.getOppositeSide();
 
-      if ( feetManager.getCurrentConstraintType(trailingLeg) != FootControlModule.ConstraintType.TOES)
+      if (feetManager.getCurrentConstraintType(trailingLeg) != FootControlModule.ConstraintType.TOES)
       {
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
@@ -176,6 +176,14 @@ public abstract class TransferState extends WalkingState
             feetManager.requestLineToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
             return true;
          }
+      }
+      // switch to point toe off from line toe off
+      else if (feetManager.okForLineToeOff() && !feetManager.useToeLineContactInTransfer())
+      {
+         FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
+         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(trailingLeg), filteredDesiredCoP);
+         feetManager.requestPointToeOff(trailingLeg, trailingFootExitCMP, filteredDesiredCoP);
+         return true;
       }
       return false;
    }
