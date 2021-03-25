@@ -132,6 +132,31 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded);
    }
 
+   default double getCollisionBoxHeight()
+   {
+      return get(SwingPlannerParameterKeys.collisionBoxHeight);
+   }
+
+   default double getCollisionBoxExtraX()
+   {
+      return get(SwingPlannerParameterKeys.collisionBoxExtraX);
+   }
+
+   default double getCollisionBoxExtraY()
+   {
+      return get(SwingPlannerParameterKeys.collisionBoxExtraY);
+   }
+
+   default double getCollisionBoxExtraZ()
+   {
+      return get(SwingPlannerParameterKeys.collisionBoxExtraZ);
+   }
+
+   default double getMinMaxCheckerPercentage()
+   {
+      return get(SwingPlannerParameterKeys.minMaxCheckerPercentage);
+   }
+
    default SwingPlannerParametersPacket getAsPacket()
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();

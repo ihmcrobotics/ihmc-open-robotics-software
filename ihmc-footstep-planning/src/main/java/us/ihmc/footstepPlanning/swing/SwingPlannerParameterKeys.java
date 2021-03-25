@@ -28,4 +28,11 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey  adjustmentIncrementDistanceGain         = keys.addDoubleKey("Adjustment increment distance gain", 0.95);
    public static final DoubleStoredPropertyKey  minimumHeightAboveFloorForCollision     = keys.addDoubleKey("Minimum height above floor for collision", 0.03);
    public static final DoubleStoredPropertyKey additionalSwingTimeIfExpanded             = keys.addDoubleKey("Additional swing time if expanded", 0.25);
+
+   // parameters for custom SE3 point planner
+   public static final DoubleStoredPropertyKey collisionBoxHeight = keys.addDoubleKey("Collision box height", 0.06);
+   public static final DoubleStoredPropertyKey collisionBoxExtraX = keys.addDoubleKey("Collision box extra x", 0.03);
+   public static final DoubleStoredPropertyKey collisionBoxExtraY = keys.addDoubleKey("Collision box extra y", 0.03);
+   public static final DoubleStoredPropertyKey collisionBoxExtraZ = keys.addDoubleKey("Collision box extra z", 0.03);
+   public static final DoubleStoredPropertyKey minMaxCheckerPercentage = keys.addDoubleKey("Min max checker percentage", 0.08);
 }
