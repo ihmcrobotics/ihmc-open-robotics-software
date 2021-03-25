@@ -2,6 +2,8 @@ package us.ihmc.wholeBodyController;
 
 import java.io.InputStream;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.robotics.robotSide.RobotSegment;
@@ -15,6 +17,11 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
    public StateEstimatorParameters getStateEstimatorParameters();
 
    public CoPTrajectoryParameters getCoPTrajectoryParameters();
+
+   default SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new DefaultSplitFractionCalculatorParameters();
+   }
 
 	public WalkingControllerParameters getWalkingControllerParameters();
 
