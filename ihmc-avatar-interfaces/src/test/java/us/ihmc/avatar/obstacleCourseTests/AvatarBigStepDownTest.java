@@ -111,7 +111,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
-      assertEquals(2, leftFootStateChanges);
+      assertEquals(2, leftFootStateChanges.getValue());
 
       assertTrue(success);
 
