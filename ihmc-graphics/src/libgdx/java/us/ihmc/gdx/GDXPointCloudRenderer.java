@@ -64,7 +64,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
       this.pointsToRender = pointsToRender;
    }
 
-   public void render()
+   public void updateMesh()
    {
       if (pointsToRender != null && !pointsToRender.isEmpty())
       {
