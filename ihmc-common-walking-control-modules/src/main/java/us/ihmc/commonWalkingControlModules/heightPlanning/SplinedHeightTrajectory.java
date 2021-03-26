@@ -6,6 +6,7 @@ import java.util.List;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.trajectories.OptimizedTrajectoryGenerator;
+import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -117,8 +118,9 @@ public class SplinedHeightTrajectory
       {
          CoMHeightTrajectoryWaypoint waypoint = waypoints.get(i);
          double distanceIn = waypoint.getX() - startWaypoint.getX();
+         double totalDistance = endWaypoint.getX() - startWaypoint.getX();
          double alpha;
-         if (MathTools.epsilonEquals(distanceIn, 0.0, 1e-4))
+         if (MathTools.epsilonEquals(distanceIn, 0.0, Epsilons.ONE_TRILLIONTH) && MathTools.epsilonEquals(totalDistance, 0.0, Epsilons.ONE_TRILLIONTH))
             alpha = 0.0;
          else
             alpha = distanceIn / (endWaypoint.getX() - startWaypoint.getX());
