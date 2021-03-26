@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.tools;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -14,14 +13,14 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 
 import java.util.Random;
 
-public class AngleToolsTest
+public class MPCAngleToolsTest
 {
    @Test
    public void findAxisAngleError()
    {
       Random random = new Random(1738L);
 
-      AngleTools angleTools = new AngleTools();
+      MPCAngleTools angleTools = new MPCAngleTools();
 
       for (int iter = 0; iter < 500; iter++)
       {
@@ -41,7 +40,7 @@ public class AngleToolsTest
          rotationFromError.setRotationVector(error);
          reconstructedOrientationB.append(rotationFromError);
 
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientationB, reconstructedOrientationB, 1e-5);
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientationB, reconstructedOrientationB, 7.5e-2);
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(expectedError, error, 1e-5);
       }
    }
