@@ -3,7 +3,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -35,11 +37,26 @@ public class LegJointLimitsInspector
             isRearKneePitchHittingLowerLimit,
             largeGlitchWindowSize);
 
+    private final BooleanProvider doToeOffWhenHittingAnkleLimit;
+    private final BooleanProvider doToeOffWhenHittingLeadingKneeUpperLimit;
+    private final BooleanProvider doToeOffWhenHittingRearKneeLowerLimit;
+
+    private final YoBoolean needToSwitchToToeOffForJointLimit = new YoBoolean("needToSwitchToToeOffForJointLimit", registry);
+    private final YoBoolean needToSwitchToToeOffForAnkleLimit = new YoBoolean("needToSwitchToToeOffForAnkleLimit", registry);
+    private final YoBoolean needToSwitchToToeOffForLeadingKneeAtLimit = new YoBoolean("needToSwitchToToeOffForLeadingKneeAtLimit", registry);
+    private final YoBoolean needToSwitchToToeOffForTrailingKneeAtLimit = new YoBoolean("needToSwitchToToeOffForTrailingKneeAtLimit", registry);
+
     public LegJointLimitsInspector(ToeOffParameters toeOffParameters, YoRegistry parentRegistry)
     {
         ankleLowerLimitToTriggerToeOff = new DoubleParameter("ankleLowerLimitToTriggerToeOff", registry, toeOffParameters.getAnkleLowerLimitToTriggerToeOff());
         kneeUpperLimitToTriggerToeOff = new DoubleParameter("kneeUpperLimitToTriggerToeOff", registry, toeOffParameters.getKneeUpperLimitToTriggerToeOff());
         kneeLowerLimitToTriggerToeOff = new DoubleParameter("kneeLowerLimitToTriggerToeOff", registry, toeOffParameters.getKneeLowerLimitToTriggerToeOff());
+
+        doToeOffWhenHittingAnkleLimit = new BooleanParameter("doToeOffWhenHittingAnkleLimit", registry, toeOffParameters.doToeOffWhenHittingAnkleLimit());
+        doToeOffWhenHittingLeadingKneeUpperLimit = new BooleanParameter("doToeOffWhenHittingLeadingKneeUpperLimit", registry, toeOffParameters.doToeOffWhenHittingLeadingKneeUpperLimit());
+        doToeOffWhenHittingRearKneeLowerLimit = new BooleanParameter("doToeOffWhenHittingRearKneeLowerLimit", registry, toeOffParameters.doToeOffWhenHittingTrailingKneeLowerLimit());
+
+        needToSwitchToToeOffForJointLimit.set(false);
         parentRegistry.addChild(registry);
     }
 
@@ -54,6 +71,16 @@ public class LegJointLimitsInspector
         ankleMaxLowerLimitForToeOff.set(Math.max(anklePitch.getJointLimitLower() + jointLimitThreshold, ankleLowerLimitToTriggerToeOff.getValue()));
         isRearAnklePitchHittingLimit.set(anklePitch.getQ() < ankleMaxLowerLimitForToeOff.getDoubleValue());
         isRearAnklePitchHittingLimitFilt.update();
+
+        // check if we need to switch to toe off due to ankle limits
+        if (!doToeOffWhenHittingAnkleLimit.getValue())
+            needToSwitchToToeOffForAnkleLimit.set(false);
+        else
+            needToSwitchToToeOffForAnkleLimit.set(isRearAnklePitchHittingLimitFilt.getBooleanValue());
+
+        // update if ankle limit was reached
+        if(isRearAnklePitchHittingLimitFilt.getBooleanValue())
+            needToSwitchToToeOffForJointLimit.set(true);
     }
 
     public void updateLeadingKneeUpperLimitsStatus(OneDoFJointBasics kneePitch)
@@ -61,6 +88,16 @@ public class LegJointLimitsInspector
         kneeMinUpperLimitToTriggerToeOff.set(Math.min(kneePitch.getJointLimitUpper() - jointLimitThreshold, kneeUpperLimitToTriggerToeOff.getValue()));
         isLeadingKneePitchHittingUpperLimit.set(kneePitch.getQ() > kneeMinUpperLimitToTriggerToeOff.getDoubleValue());
         isLeadingKneePitchHittingUpperLimitFilt.update();
+
+        // check if we need to switch to toe off due to leading knee limits
+        if (!doToeOffWhenHittingLeadingKneeUpperLimit.getValue())
+            needToSwitchToToeOffForLeadingKneeAtLimit.set(false);
+        else
+            needToSwitchToToeOffForLeadingKneeAtLimit.set(isLeadingKneePitchHittingUpperLimitFilt.getBooleanValue());
+
+        // update if leading knee limit was reached
+        if(isLeadingKneePitchHittingUpperLimitFilt.getBooleanValue())
+            needToSwitchToToeOffForJointLimit.set(true);
     }
 
     public void updateTrailingKneeLowerLimitsStatus(OneDoFJointBasics kneePitch)
@@ -68,6 +105,21 @@ public class LegJointLimitsInspector
         kneeMaxLowerLimitToTriggerToeOff.set(Math.max(kneePitch.getJointLimitLower() + jointLimitThreshold, kneeLowerLimitToTriggerToeOff.getValue()));
         isRearKneePitchHittingLowerLimit.set(kneePitch.getQ() < kneeMaxLowerLimitToTriggerToeOff.getDoubleValue());
         isRearKneePitchHittingLowerLimitFilt.update();
+
+        // check if we need to switch to toe off due to trailing knee limits
+        if (!doToeOffWhenHittingRearKneeLowerLimit.getValue())
+            needToSwitchToToeOffForTrailingKneeAtLimit.set(false);
+        else
+            needToSwitchToToeOffForTrailingKneeAtLimit.set(isRearKneePitchHittingLowerLimitFilt.getBooleanValue());
+
+        // update if trailing knee limit was reached
+        if(isRearKneePitchHittingLowerLimitFilt.getBooleanValue())
+            needToSwitchToToeOffForJointLimit.set(true);
+    }
+
+    public boolean needToSwitchToToeOffDueToJointLimit()
+    {
+        return needToSwitchToToeOffForJointLimit.getBooleanValue();
     }
 
     public boolean isRearAnklePitchHittingLowerLimitFilt()
