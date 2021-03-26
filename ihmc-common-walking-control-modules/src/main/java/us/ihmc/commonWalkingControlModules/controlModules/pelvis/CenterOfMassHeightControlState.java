@@ -271,6 +271,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       double zCurrent = comPosition.getZ();
 
+      // FIXME should we be using the desired values instead of the current values?
       if (controlPelvisHeightInsteadOfCoMHeight.getBooleanValue())
       {
          pelvisPosition.setToZero(pelvisFrame);

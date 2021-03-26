@@ -242,6 +242,15 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
       transferToPosition.setToZero(soleFrames.get(RobotSide.LEFT));
       transferFromPosition.setToZero(soleFrames.get(RobotSide.RIGHT));
+
+      transferToPosition.changeFrame(worldFrame);
+      transferFromPosition.changeFrame(worldFrame);
+
+      if (transferToPosition.getZ() > transferFromPosition.getZ())
+         setSupportLeg(RobotSide.RIGHT);
+      else
+         setSupportLeg(RobotSide.LEFT);
+
       transferToPosition.changeFrame(frameOfSupportLeg);
       transferFromPosition.changeFrame(frameOfSupportLeg);
 
