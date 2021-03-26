@@ -13,6 +13,11 @@ public abstract class DiscretizationCalculatorTest
 {
    public abstract DiscretizationCalculator getCalculator();
 
+   public double getEpsilon()
+   {
+      return 1e-3;
+   }
+
    @Test
    public void testEquivalent()
    {
@@ -53,9 +58,11 @@ public abstract class DiscretizationCalculatorTest
 
          calculator.compute(subA, subB, subC, Ad, Bd, Cd, tickDuration);
 
-         MatrixTestTools.assertMatrixEquals(CdExpected, Cd, 1e-3);
-         MatrixTestTools.assertMatrixEquals(BdExpected, Bd, 1e-3);
-         MatrixTestTools.assertMatrixEquals(AdExpected, Ad, 1e-3);
+         MatrixTestTools.assertMatrixEquals(CdExpected, Cd, getEpsilon());
+         MatrixTestTools.assertMatrixEquals(BdExpected, Bd, getEpsilon());
+         MatrixTestTools.assertMatrixEquals(AdExpected, Ad, getEpsilon());
       }
    }
+
+
 }
