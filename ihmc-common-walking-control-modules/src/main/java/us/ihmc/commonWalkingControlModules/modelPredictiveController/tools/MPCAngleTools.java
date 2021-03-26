@@ -24,10 +24,14 @@ public class MPCAngleTools
 
    public void computeRotationError(Matrix3DReadOnly rotationA, Matrix3DReadOnly rotationB, Vector3DBasics errorVectorToPack)
    {
-      rotationA.inverseTransform(rotationB, transformedRotationB);
-      rotationB.inverseTransform(rotationA, transformedRotationA);
+      transformedRotationB.set(rotationA);
+      transformedRotationB.multiplyInvertThis(rotationB);
+      transformedRotationA.set(rotationB);
+      transformedRotationA.multiplyInvertThis(rotationA);
+
       transformedRotationB.sub(transformedRotationA);
       transformedRotationB.scale(0.5);
+
       errorVectorToPack.setX(transformedRotationB.getM21());
       errorVectorToPack.setY(transformedRotationB.getM02());
       errorVectorToPack.setZ(transformedRotationB.getM10());

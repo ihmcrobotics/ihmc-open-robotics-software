@@ -22,26 +22,27 @@ public class MPCAngleToolsTest
 
       MPCAngleTools angleTools = new MPCAngleTools();
 
-      for (int iter = 0; iter < 500; iter++)
+      for (int iter = 0; iter < 100; iter++)
       {
          FrameQuaternionReadOnly orientationA = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
-         FrameVector3DReadOnly expectedError = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame(), new Vector3D(0.05, 0.05, 0.05));
+         FrameVector3DReadOnly expectedOrientationError = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame(), new Vector3D(0.05, 0.05, 0.05));
 
          AxisAngle rotationFromError = new AxisAngle();
-         rotationFromError.setRotationVector(expectedError);
+         rotationFromError.setRotationVector(expectedOrientationError);
          FrameQuaternion orientationB = new FrameQuaternion();
          orientationB.set(orientationA);
          orientationB.append(rotationFromError);
 
-         FrameVector3D error = new FrameVector3D();
-         angleTools.computeRotationError(orientationA, orientationB, error);
+         FrameVector3D errorBetweenTwoOrientations = new FrameVector3D();
+         angleTools.computeRotationError(orientationA, orientationB, errorBetweenTwoOrientations);
 
          FrameQuaternion reconstructedOrientationB = new FrameQuaternion(orientationA);
-         rotationFromError.setRotationVector(error);
+         rotationFromError.setRotationVector(errorBetweenTwoOrientations);
          reconstructedOrientationB.append(rotationFromError);
 
-         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(orientationB, reconstructedOrientationB, 7.5e-2);
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(expectedError, error, 1e-5);
+         String failureMessage = "Failed on iteration " + iter;
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(failureMessage, expectedOrientationError, errorBetweenTwoOrientations, 1e-4);
+         EuclidFrameTestTools.assertFrameQuaternionGeometricallyEquals(failureMessage, orientationB, reconstructedOrientationB, 1e-4);
       }
    }
 }
