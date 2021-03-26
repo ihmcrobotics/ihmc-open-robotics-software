@@ -5,7 +5,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.AngularVelocityOrientationMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.AngleTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -15,7 +15,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class AngularVelocitySE3ModelPredictiveController extends SE3ModelPredictiveController
 {
-   private final AngleTools angleTools = new AngleTools();
+   private final MPCAngleTools angleTools = new MPCAngleTools();
 
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 

@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
-public class AngleTools
+public class MPCAngleTools
 {
    private final Matrix3D rotationA = new Matrix3D();
    private final Matrix3D rotationB = new Matrix3D();
