@@ -27,6 +27,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnviro
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -43,7 +44,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp() && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -95,6 +95,8 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
                                                                                       footRotation);
 
       YoEnum<FootControlModule.ConstraintType> leftFootState = ((YoEnum<FootControlModule.ConstraintType>) drcSimulationTestHelper.getYoVariable("rightFootCurrentState"));
+      YoBoolean forceToeOffAtJointLimit = ((YoBoolean) drcSimulationTestHelper.getYoVariable("forceToeOffAtJointLimit"));
+      forceToeOffAtJointLimit.set(true);
 
       drcSimulationTestHelper.publishToController(HumanoidMessageTools.createFootstepDataListMessage(firstStep));
 
@@ -110,9 +112,6 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
 
       assertEquals(2, leftFootStateChanges);
-
-      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
-      drcSimulationTestHelper.checkNothingChanged();
 
       assertTrue(success);
 
