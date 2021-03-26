@@ -350,7 +350,7 @@ public class CollisionFreeSwingCalculator
       positionTrajectoryGenerator.initialize();
 
       positionTrajectoryGenerator.setShouldVisualize(visualize);
-      for (int i = 0; i < 70; i++)
+      for (int i = 0; i < 30; i++)
       {
          positionTrajectoryGenerator.doOptimizationUpdate();
       }

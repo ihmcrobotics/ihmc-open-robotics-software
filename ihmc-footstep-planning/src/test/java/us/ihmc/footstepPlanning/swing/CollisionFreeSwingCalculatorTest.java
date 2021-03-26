@@ -59,10 +59,10 @@ public class CollisionFreeSwingCalculatorTest
    }
 
    @Test
-   public void testOverBox1()
+   public void testSmallBox()
    {
-      double boxLengthX = 0.2;
-      double boxHeight = 0.2;
+      double boxLengthX = 0.15;
+      double boxHeight = 0.15;
 
       PlanarRegionsList boxOnGround = boxOnGround(boxLengthX, boxHeight);
       double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
@@ -90,7 +90,7 @@ public class CollisionFreeSwingCalculatorTest
    }
 
    @Test
-   public void testOverBox2()
+   public void testBigBox()
    {
       double boxLengthX = 0.3;
       double boxHeight = 0.3;
@@ -146,7 +146,7 @@ public class CollisionFreeSwingCalculatorTest
    }
 
    @Test
-   public void testUpOverCinders1()
+   public void testOverCinders1()
    {
       DataSet cindersDataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
       PlanarRegionsList cindersRegions = cindersDataSet.getPlanarRegionsList();
@@ -162,6 +162,27 @@ public class CollisionFreeSwingCalculatorTest
       footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.500, -0.250,  0.204 ), new Quaternion(-0.001, -0.004, -0.174,  0.985 )));
       footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.834, -0.601,  0.120 ), new Quaternion( 0.000,  0.000, -0.164,  0.986 )));
       footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 1.906, -0.393,  0.120 ), new Quaternion( 0.000,  0.000, -0.164,  0.986 )));
+
+      runTest(cindersRegions, stanceSteps, footstepPlan);
+   }
+
+   @Test
+   public void testOverCinders2()
+   {
+      DataSet cindersDataSet = DataSetIOTools.loadDataSet(DataSetName._20191213_134839_Cinders);
+      PlanarRegionsList cindersRegions = cindersDataSet.getPlanarRegionsList();
+
+      SideDependentList<Pose3D> stanceSteps = new SideDependentList<>();
+      stanceSteps.put(RobotSide.LEFT,  new Pose3D(new Point3D(-0.148,  0.176, -0.000 ), new Quaternion( 0.005, -0.006,  0.613,  0.790 )));
+      stanceSteps.put(RobotSide.RIGHT, new Pose3D(new Point3D( 0.210,  0.084, -0.000 ), new Quaternion( 0.005, -0.006,  0.614,  0.790 )));
+
+      FootstepPlan footstepPlan = new FootstepPlan();
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.300,  0.420, -0.039 ), new Quaternion( 0.000,  0.016,  0.500,  0.866 )));
+      footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.150,  0.880,  0.065 ), new Quaternion( 0.001,  0.016,  0.643,  0.766 )));
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.511,  1.142,  0.149 ), new Quaternion( 0.001,  0.021,  0.503,  0.864 )));
+      footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.379,  1.621,  0.126 ), new Quaternion( 0.116,  0.089,  0.633,  0.761 )));
+      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.767,  1.953,  0.130 ), new Quaternion( 0.000,  0.000,  0.613,  0.790 )));
+      footstepPlan.addFootstep(RobotSide.LEFT , new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D( 0.553,  2.007,  0.130 ), new Quaternion( 0.000,  0.000,  0.613,  0.790 )));
 
       runTest(cindersRegions, stanceSteps, footstepPlan);
    }
