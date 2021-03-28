@@ -39,7 +39,7 @@ public class CollisionFreeSwingCalculator
 {
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-   private static final int numberOfCollisionChecks = 15;
+   private static final int numberOfKnotPoints = 12;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final boolean visualize;
@@ -56,17 +56,8 @@ public class CollisionFreeSwingCalculator
    private final List<FramePoint3D> modifiedWapoints = new ArrayList<>();
    private final List<Double> modifiedWapointPercentages = new ArrayList<>();
 
-   private final FramePose3D solePose = new FramePose3D();
-   private final PoseReferenceFrame solePoseFrame = new PoseReferenceFrame("solePose", ReferenceFrame.getWorldFrame());
-   private final Vector3D boxCenterInSoleFrame = new Vector3D();
-   private final FramePose3D boxCenterPose = new FramePose3D();
-   private final YoFramePoseUsingYawPitchRoll collisionBoxPose = new YoFramePoseUsingYawPitchRoll("collisionBoxPose", ReferenceFrame.getWorldFrame(), registry);
-   private final YoGraphicShape yoCollisionBoxGraphic;
-   private final FrameBox3D collisionBox = new FrameBox3D();
-   private final YoFrameVector3D shiftAmount = new YoFrameVector3D("shiftAmount", ReferenceFrame.getWorldFrame(), registry);
-
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
-   private final YoBoolean collisionDetected = new YoBoolean("collisionDetected", registry);
+   private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
 
    private PlanarRegionsList planarRegionsList;
    private final int footstepGraphicCapacity = 100;
@@ -75,15 +66,14 @@ public class CollisionFreeSwingCalculator
 
    private final YoFramePoseUsingYawPitchRoll soleFrameGraphicPose;
    private final YoGraphicPolygon footPolygonGraphic;
-   private final BagOfBalls modifiedWaypointVisualization;
 
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator;
 
    private enum SolverStep
    {
       COMPUTING_DEFUALT_TRAJECTORY,
-      FINDING_COLLIDING_POSES,
-      RECOMPUTE_TRAJECTORY
+      INITIALIZE_KNOT_POINTS,
+      OPTIMIZING_TRAJECTORY
    }
 
    public CollisionFreeSwingCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
@@ -105,17 +95,12 @@ public class CollisionFreeSwingCalculator
       this.tickAndUpdatable = tickAndUpdatable;
       this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 200, 100, ReferenceFrame.getWorldFrame());
 
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double boxBaseInSoleFrameX = 0.5 * (footForwardOffset - footBackwardOffset);
-      boxCenterInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.5 * swingPlannerParameters.getCollisionBoxHeight());
-
-      updateBoxSize(0.0);
-      Graphics3DObject collisionBoxGraphic = new Graphics3DObject();
-      AppearanceDefinition collisionBoxColor = YoAppearance.RGBColorFromHex(0x824e38);
-      collisionBoxColor.setTransparency(0.5);
-      collisionBoxGraphic.addCube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true, collisionBoxColor);
-      yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic", collisionBoxGraphic, collisionBoxPose, 1.0);
+      for (int i = 0; i < numberOfKnotPoints; i++)
+      {
+         double pMinMax = swingPlannerParameters.getMinMaxCheckerPercentage();
+         double percentage = pMinMax + (1.0 - 2.0 * pMinMax) * i / (numberOfKnotPoints - 1);
+         swingKnotPoints.add(new SwingKnotPoint(i, percentage, swingPlannerParameters, walkingControllerParameters, graphicsListRegistry, registry));
+      }
 
       visualize = parentRegistry != null;
       if (visualize)
@@ -138,9 +123,6 @@ public class CollisionFreeSwingCalculator
          footPolygonGraphic = new YoGraphicPolygon("soleGraphicPolygon", yoFootPolygon, soleFrameGraphicPose, 1.0, YoAppearance.RGBColorFromHex(0x386166));
          graphicsList.add(footPolygonGraphic);
 
-         modifiedWaypointVisualization = new BagOfBalls(numberOfCollisionChecks, 0.03, "adjustedWP", registry, graphicsListRegistry);
-
-         graphicsList.add(yoCollisionBoxGraphic);
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
          parentRegistry.addChild(registry);
       }
@@ -148,18 +130,7 @@ public class CollisionFreeSwingCalculator
       {
          soleFrameGraphicPose = null;
          footPolygonGraphic = null;
-         modifiedWaypointVisualization = null;
       }
-   }
-
-   private void updateBoxSize(double collisionBoxExtraZ)
-   {
-      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
-      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double boxSizeX = footForwardOffset + footBackwardOffset + 2.0 * swingPlannerParameters.getCollisionBoxExtraX();
-      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth() + 2.0 * swingPlannerParameters.getCollisionBoxExtraY();
-      double boxSizeZ = swingPlannerParameters.getCollisionBoxHeight() + 2.0 * collisionBoxExtraZ;
-      collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -191,14 +162,11 @@ public class CollisionFreeSwingCalculator
          solverStep.set(SolverStep.COMPUTING_DEFUALT_TRAJECTORY);
          computeDefaultTrajectory();
 
-         solverStep.set(SolverStep.FINDING_COLLIDING_POSES);
-         checkForCollisionsAlongDefaultTrajectory();
-
-         if (modifiedWapoints.isEmpty())
-            continue;
-
-         solverStep.set(SolverStep.RECOMPUTE_TRAJECTORY);
-         recomputeTrajectory();
+//         solverStep.set(SolverStep.INITIALIZE_KNOT_POINTS);
+//         checkForCollisionsAlongDefaultTrajectory();
+//
+//         solverStep.set(SolverStep.OPTIMIZING_TRAJECTORY);
+//         recomputeTrajectory();
       }
    }
 
@@ -238,186 +206,172 @@ public class CollisionFreeSwingCalculator
          positionTrajectoryGenerator.doOptimizationUpdate();
       }
 
+      for (int i = 0; i < numberOfKnotPoints; i++)
+      {
+         SwingKnotPoint knotPoint = swingKnotPoints.get(i);
+         double percentage = knotPoint.getPercentage();
+         positionTrajectoryGenerator.compute(percentage);
+         knotPoint.getWaypoint().getPosition().set(positionTrajectoryGenerator.getPosition());
+         knotPoint.getWaypoint().getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
+         knotPoint.update();
+      }
+
       if (visualize)
       {
-         yoCollisionBoxGraphic.setPoseToNaN();
+         for (int i = 0; i < numberOfKnotPoints; i++)
+         {
+            swingKnotPoints.get(i).updateGraphics();
+         }
+
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
          tickAndUpdatable.tickAndUpdate();
       }
    }
 
-   private void checkForCollisionsAlongDefaultTrajectory()
-   {
-      double minPercentageToCheck = swingPlannerParameters.getMinMaxCheckerPercentage();
-      double maxPercentageToCheck = 1.0 - swingPlannerParameters.getMinMaxCheckerPercentage();
-      double deltaPercentage = (1.0 - 2.0 * swingPlannerParameters.getMinMaxCheckerPercentage()) / (numberOfCollisionChecks - 1);
-
-      for (int i = 0; i < numberOfCollisionChecks; i++)
-      {
-         double percentage = swingPlannerParameters.getMinMaxCheckerPercentage() + i * deltaPercentage;
-         positionTrajectoryGenerator.compute(percentage);
-
-         double alphaExtraHeight = computeAlphaExtraHeight(percentage, minPercentageToCheck, maxPercentageToCheck);
-         updateBoxSize(alphaExtraHeight * swingPlannerParameters.getCollisionBoxExtraZ());
-
-         FramePoint3DReadOnly trajectoryPosition = positionTrajectoryGenerator.getPosition();
-         solePose.getPosition().set(trajectoryPosition);
-         solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
-         solePoseFrame.setPoseAndUpdate(solePose);
-
-         boxCenterPose.setToZero(solePoseFrame);
-         boxCenterPose.getPosition().set(boxCenterInSoleFrame);
-         boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
-         collisionBox.getPose().set(boxCenterPose);
-
-         if (visualize)
-         {
-            // render pre-shifted collision box
-            yoCollisionBoxGraphic.setPose(boxCenterPose);
-            tickAndUpdatable.tickAndUpdate();
-         }
-
-         collisionDetected.set(checkForCollision());
-         if (collisionDetected.getBooleanValue())
-         {
-            solePose.getPosition().add(shiftAmount);
-            modifiedWapoints.add(new FramePoint3D(solePose.getPosition()));
-            modifiedWapointPercentages.add(percentage);
-
-            solePoseFrame.setPoseAndUpdate(solePose);
-
-            boxCenterPose.setToZero(solePoseFrame);
-            boxCenterPose.getPosition().set(boxCenterInSoleFrame);
-            boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
-            collisionBox.getPose().set(boxCenterPose);
-         }
-         else
-         {
-            continue;
-         }
-
-         if (visualize)
-         {
-            // render shifted collision box
-            yoCollisionBoxGraphic.setPose(boxCenterPose);
-            tickAndUpdatable.tickAndUpdate();
-         }
-      }
-   }
-
-   /**
-    * Extruding the collision box vertically up/down is tricky since it can easily collide with the ground.
-    * To avoid this the extrusion amount starts at 0.0, ramps up to a max value, then ramps back down.
-    */
-   private double computeAlphaExtraHeight(double percentage, double minPercentageToCheck, double maxPercentageToCheck)
-   {
-      double minPForMaxHeight = swingPlannerParameters.getMinMaxHeightInterpolationPercentage();
-      double maxPForMaxHeight = 1.0 - swingPlannerParameters.getMinMaxHeightInterpolationPercentage();
-      if (MathTools.intervalContains(percentage, minPForMaxHeight, maxPForMaxHeight))
-      {
-         return 1.0;
-      }
-      else if (percentage < 0.5)
-      {
-         return EuclidCoreTools.interpolate(0.0, 1.0, (percentage - minPercentageToCheck) / (minPForMaxHeight - minPercentageToCheck));
-      }
-      else
-      {
-         return EuclidCoreTools.interpolate(1.0, 0.0, (percentage - maxPForMaxHeight) / (maxPercentageToCheck - maxPForMaxHeight));
-      }
-   }
-
-   private void recomputeTrajectory()
-   {
-      if (modifiedWapointPercentages.get(0) > swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
-      {
-         modifiedWapoints.add(0, new FramePoint3D(defaultWaypoints.get(0)));
-      }
-      if (modifiedWapointPercentages.get(modifiedWapointPercentages.size() - 1) < 1.0 - swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
-      {
-         modifiedWapoints.add(new FramePoint3D(defaultWaypoints.get(1)));
-      }
-
-      positionTrajectoryGenerator.reset();
-      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
-      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
-      positionTrajectoryGenerator.setWaypoints(modifiedWapoints);
-      positionTrajectoryGenerator.initialize();
-
-      positionTrajectoryGenerator.setShouldVisualize(visualize);
-      for (int i = 0; i < 30; i++)
-      {
-         positionTrajectoryGenerator.doOptimizationUpdate();
-      }
-
-      if (visualize)
-      {
-         // show optimized trajectory
-         yoCollisionBoxGraphic.setPoseToNaN();
-
-         modifiedWaypointVisualization.reset();
-         for (int j = 0; j < modifiedWapoints.size(); j++)
-         {
-            modifiedWaypointVisualization.setBall(modifiedWapoints.get(j));
-         }
-
-         tickAndUpdatable.tickAndUpdate();
-
-         // show foot polygon path
-         yoCollisionBoxGraphic.setPoseToNaN();
-         double deltaPercentage = 1.0 / (numberOfCollisionChecks - 1);
-
-         for (int i = 0; i < numberOfCollisionChecks; i++)
-         {
-            double percentage = i * deltaPercentage;
-            positionTrajectoryGenerator.compute(percentage);
-
-            FramePoint3DReadOnly trajectoryPosition = positionTrajectoryGenerator.getPosition();
-            solePose.getPosition().set(trajectoryPosition);
-            solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
-            soleFrameGraphicPose.set(solePose);
-            footPolygonGraphic.update();
-
-            tickAndUpdatable.tickAndUpdate();
-         }
-      }
-   }
-
-   private boolean checkForCollision()
-   {
-      double maxDistance = -1.0;
-      EuclidShape3DCollisionResult maxPenetrationCollisionResult = null;
-
-      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-      {
-         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
-
-         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
-         {
-            EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
-            collisionDetector.evaluateCollision(collisionBox, planarRegion, collisionResult);
-            double distance = Math.abs(collisionResult.getDistance());
-
-            if (collisionResult.areShapesColliding() && (maxPenetrationCollisionResult == null || collisionResult.getSignedDistance() > maxDistance))
-            {
-               maxDistance = distance;
-               maxPenetrationCollisionResult = collisionResult;
-            }
-         }
-      }
-
-      if (maxPenetrationCollisionResult == null)
-      {
-         return false;
-      }
-      else
-      {
-         shiftAmount.set(maxPenetrationCollisionResult.getPointOnB());
-         shiftAmount.sub(maxPenetrationCollisionResult.getPointOnA());
-         return true;
-      }
-   }
+//   private void checkForCollisionsAlongDefaultTrajectory()
+//   {
+//      double minPercentageToCheck = swingPlannerParameters.getMinMaxCheckerPercentage();
+//      double maxPercentageToCheck = 1.0 - swingPlannerParameters.getMinMaxCheckerPercentage();
+//      double deltaPercentage = (1.0 - 2.0 * swingPlannerParameters.getMinMaxCheckerPercentage()) / (numberOfKnotPoints - 1);
+//
+//      for (int i = 0; i < numberOfKnotPoints; i++)
+//      {
+//         double percentage = swingPlannerParameters.getMinMaxCheckerPercentage() + i * deltaPercentage;
+//         positionTrajectoryGenerator.compute(percentage);
+//
+//         double alphaExtraHeight = computeAlphaExtraHeight(percentage, minPercentageToCheck, maxPercentageToCheck);
+//
+//         FramePoint3DReadOnly trajectoryPosition = positionTrajectoryGenerator.getPosition();
+//         solePose.getPosition().set(trajectoryPosition);
+//         solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
+//
+//
+//         if (visualize)
+//         {
+//            // render pre-shifted collision box
+//            yoCollisionBoxGraphic.setPose(boxCenterPose);
+//            tickAndUpdatable.tickAndUpdate();
+//         }
+//
+//         collisionDetected.set(checkForCollision());
+//         if (collisionDetected.getBooleanValue())
+//         {
+//            solePose.getPosition().add(shiftAmount);
+//            modifiedWapoints.add(new FramePoint3D(solePose.getPosition()));
+//            modifiedWapointPercentages.add(percentage);
+//
+//            solePoseFrame.setPoseAndUpdate(solePose);
+//
+//            boxCenterPose.setToZero(solePoseFrame);
+//            boxCenterPose.getPosition().set(boxCenterInSoleFrame);
+//            boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
+//            collisionBox.getPose().set(boxCenterPose);
+//         }
+//         else
+//         {
+//            continue;
+//         }
+//
+//         if (visualize)
+//         {
+//            // render shifted collision box
+//            yoCollisionBoxGraphic.setPose(boxCenterPose);
+//            tickAndUpdatable.tickAndUpdate();
+//         }
+//      }
+//   }
+//
+//   private void recomputeTrajectory()
+//   {
+//      if (modifiedWapointPercentages.get(0) > swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
+//      {
+//         modifiedWapoints.add(0, new FramePoint3D(defaultWaypoints.get(0)));
+//      }
+//      if (modifiedWapointPercentages.get(modifiedWapointPercentages.size() - 1) < 1.0 - swingPlannerParameters.getMinMaxPercentageToKeepDefaultWaypoint())
+//      {
+//         modifiedWapoints.add(new FramePoint3D(defaultWaypoints.get(1)));
+//      }
+//
+//      positionTrajectoryGenerator.reset();
+//      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
+//      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
+//      positionTrajectoryGenerator.setWaypoints(modifiedWapoints);
+//      positionTrajectoryGenerator.initialize();
+//
+//      positionTrajectoryGenerator.setShouldVisualize(visualize);
+//      for (int i = 0; i < 30; i++)
+//      {
+//         positionTrajectoryGenerator.doOptimizationUpdate();
+//      }
+//
+//      if (visualize)
+//      {
+//         // show optimized trajectory
+//         yoCollisionBoxGraphic.setPoseToNaN();
+//
+//         modifiedWaypointVisualization.reset();
+//         for (int j = 0; j < modifiedWapoints.size(); j++)
+//         {
+//            modifiedWaypointVisualization.setBall(modifiedWapoints.get(j));
+//         }
+//
+//         tickAndUpdatable.tickAndUpdate();
+//
+//         // show foot polygon path
+//         yoCollisionBoxGraphic.setPoseToNaN();
+//         double deltaPercentage = 1.0 / (numberOfKnotPoints - 1);
+//
+//         for (int i = 0; i < numberOfKnotPoints; i++)
+//         {
+//            double percentage = i * deltaPercentage;
+//            positionTrajectoryGenerator.compute(percentage);
+//
+//            FramePoint3DReadOnly trajectoryPosition = positionTrajectoryGenerator.getPosition();
+//            solePose.getPosition().set(trajectoryPosition);
+//            solePose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
+//            soleFrameGraphicPose.set(solePose);
+//            footPolygonGraphic.update();
+//
+//            tickAndUpdatable.tickAndUpdate();
+//         }
+//      }
+//   }
+//
+//   private boolean checkForCollision()
+//   {
+//      double maxDistance = -1.0;
+//      EuclidShape3DCollisionResult maxPenetrationCollisionResult = null;
+//
+//      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+//      {
+//         PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
+//
+//         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(collisionBox.getBoundingBox()))
+//         {
+//            EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
+//            collisionDetector.evaluateCollision(collisionBox, planarRegion, collisionResult);
+//            double distance = Math.abs(collisionResult.getDistance());
+//
+//            if (collisionResult.areShapesColliding() && (maxPenetrationCollisionResult == null || collisionResult.getSignedDistance() > maxDistance))
+//            {
+//               maxDistance = distance;
+//               maxPenetrationCollisionResult = collisionResult;
+//            }
+//         }
+//      }
+//
+//      if (maxPenetrationCollisionResult == null)
+//      {
+//         return false;
+//      }
+//      else
+//      {
+//         shiftAmount.set(maxPenetrationCollisionResult.getPointOnB());
+//         shiftAmount.sub(maxPenetrationCollisionResult.getPointOnA());
+//         return true;
+//      }
+//   }
 
    private void initializeGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
@@ -452,7 +406,6 @@ public class CollisionFreeSwingCalculator
          footstepVisualizer.visualizeFootstep(footstep.getFootstepPose());
       }
 
-      modifiedWaypointVisualization.reset();
       tickAndUpdatable.tickAndUpdate();
    }
 
