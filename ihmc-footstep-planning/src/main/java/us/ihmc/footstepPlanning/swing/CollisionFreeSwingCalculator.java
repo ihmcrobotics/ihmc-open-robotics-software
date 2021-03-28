@@ -11,24 +11,16 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
-import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.SE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -83,6 +75,7 @@ public class CollisionFreeSwingCalculator
 
    private final YoFramePoseUsingYawPitchRoll soleFrameGraphicPose;
    private final YoGraphicPolygon footPolygonGraphic;
+   private final BagOfBalls modifiedWaypointVisualization;
 
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator;
 
@@ -145,6 +138,8 @@ public class CollisionFreeSwingCalculator
          footPolygonGraphic = new YoGraphicPolygon("soleGraphicPolygon", yoFootPolygon, soleFrameGraphicPose, 1.0, YoAppearance.RGBColorFromHex(0x386166));
          graphicsList.add(footPolygonGraphic);
 
+         modifiedWaypointVisualization = new BagOfBalls(numberOfCollisionChecks, 0.03, "adjustedWP", registry, graphicsListRegistry);
+
          graphicsList.add(yoCollisionBoxGraphic);
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
          parentRegistry.addChild(registry);
@@ -153,6 +148,7 @@ public class CollisionFreeSwingCalculator
       {
          soleFrameGraphicPose = null;
          footPolygonGraphic = null;
+         modifiedWaypointVisualization = null;
       }
    }
 
@@ -178,7 +174,7 @@ public class CollisionFreeSwingCalculator
          return;
       }
 
-      updateFootstepGraphics(initialStanceFootPoses, footstepPlan);
+      initializeGraphics(initialStanceFootPoses, footstepPlan);
 
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
@@ -357,12 +353,18 @@ public class CollisionFreeSwingCalculator
 
       if (visualize)
       {
+         // show optimized trajectory
          yoCollisionBoxGraphic.setPoseToNaN();
-         tickAndUpdatable.tickAndUpdate();
-      }
 
-      if (visualize)
-      {
+         modifiedWaypointVisualization.reset();
+         for (int j = 0; j < modifiedWapoints.size(); j++)
+         {
+            modifiedWaypointVisualization.setBall(modifiedWapoints.get(j));
+         }
+
+         tickAndUpdatable.tickAndUpdate();
+
+         // show foot polygon path
          yoCollisionBoxGraphic.setPoseToNaN();
          double deltaPercentage = 1.0 / (numberOfCollisionChecks - 1);
 
@@ -417,7 +419,7 @@ public class CollisionFreeSwingCalculator
       }
    }
 
-   private void updateFootstepGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
+   private void initializeGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
       if (!visualize)
       {
@@ -450,10 +452,8 @@ public class CollisionFreeSwingCalculator
          footstepVisualizer.visualizeFootstep(footstep.getFootstepPose());
       }
 
-      if (visualize)
-      {
-         tickAndUpdatable.tickAndUpdate();
-      }
+      modifiedWaypointVisualization.reset();
+      tickAndUpdatable.tickAndUpdate();
    }
 
    private FootstepVisualizer getNextFootstepVisualizer(RobotSide robotSide)
