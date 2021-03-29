@@ -105,13 +105,18 @@ public class DelayFixedPlanarRegionsSubscription
             timestamp -= Conversions.secondsToNanoseconds(seconds);
 
             long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
-
-            if (controllerTime == -1L || robotConfigurationDataBuffer.getNewestTimestamp() == -1L)
+            if (controllerTime == -1L)
             {
                return;
             }
 
-            boolean waitIfNecessary = true;
+            long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+            if (newestTimestamp == -1L)
+            {
+               return;
+            }
+
+            boolean waitIfNecessary = false; // dangerous if true! need a timeout
             if (robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null) != -1L)
             {
                try
