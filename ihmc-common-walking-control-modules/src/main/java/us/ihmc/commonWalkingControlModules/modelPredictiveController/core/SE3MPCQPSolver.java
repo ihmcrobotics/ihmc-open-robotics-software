@@ -20,7 +20,6 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
    private final YoDouble firstOrientationRateVariableRegularization = new YoDouble("firstOrientationRateVariableRegularization", registry);
    private final YoDouble secondOrientationRateVariableRegularization = new YoDouble("secondOrientationRateVariableRegularization", registry);
 
-   private final MomentumOrientationInputCalculator momentumOrientationInputCalculator;
    private final AngularVelocityOrientationInputCalculator angularVelocityOrientationInputCalculator;
 
    public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, YoRegistry parentRegistry)
@@ -41,7 +40,6 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
       this.indexHandler = indexHandler;
 
-      momentumOrientationInputCalculator = new MomentumOrientationInputCalculator(indexHandler, mass, gravityZ);
       angularVelocityOrientationInputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
 
       firstOrientationVariableRegularization.set(1e-8);
@@ -125,12 +123,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
    public void submitMPCCommand(MPCCommand<?> command)
    {
-      if (command.getCommandType() == MPCCommandType.ORIENTATION_MOMENTUM_DYNAMICS)
-      {
-         submitOrientationDynamicsCommand((DiscreteMomentumOrientationCommand) command);
-         return;
-      }
-      else if (command.getCommandType() == MPCCommandType.ORIENTATION_VELOCITY_DYNAMICS)
+       if (command.getCommandType() == MPCCommandType.ORIENTATION_DYNAMICS)
       {
          submitOrientationDynamicsCommand((DiscreteAngularVelocityOrientationCommand) command);
          return;
@@ -139,12 +132,6 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
       super.submitMPCCommand(command);
    }
 
-   public void submitOrientationDynamicsCommand(DiscreteMomentumOrientationCommand command)
-   {
-      boolean success = momentumOrientationInputCalculator.compute(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
-   }
 
    public void submitOrientationDynamicsCommand(DiscreteAngularVelocityOrientationCommand command)
    {

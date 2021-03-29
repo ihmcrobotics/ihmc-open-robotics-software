@@ -18,9 +18,7 @@ public class CommandProvider
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoAccelerationObjectiveCommand> rhoAccelerationObjectiveCommandPool = new RecyclingArrayList<>(RhoAccelerationObjectiveCommand::new);
-   private final RecyclingArrayList<DiscreteMomentumOrientationCommand> discreteMomentumOrientationCommandPool = new RecyclingArrayList<>(
-         DiscreteMomentumOrientationCommand::new);
-   private final RecyclingArrayList<DiscreteAngularVelocityOrientationCommand> discreteAngularVelocityOrientationCommandPool = new RecyclingArrayList<>(
+   private final RecyclingArrayList<DiscreteAngularVelocityOrientationCommand> discreteOrientationCommandPool = new RecyclingArrayList<>(
          DiscreteAngularVelocityOrientationCommand::new);
 
 
@@ -40,8 +38,7 @@ public class CommandProvider
       comVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
       rhoAccelerationObjectiveCommandPool.clear();
-      discreteMomentumOrientationCommandPool.clear();
-      discreteAngularVelocityOrientationCommandPool.clear();
+      discreteOrientationCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -99,13 +96,8 @@ public class CommandProvider
       return rhoAccelerationObjectiveCommandPool.add();
    }
 
-   public DiscreteMomentumOrientationCommand getNextDiscreteMomentumOrientationCommand()
-   {
-      return discreteMomentumOrientationCommandPool.add();
-   }
-
    public DiscreteAngularVelocityOrientationCommand getNextDiscreteAngularVelocityOrientationCommand()
    {
-      return discreteAngularVelocityOrientationCommandPool.add();
+      return discreteOrientationCommandPool.add();
    }
 }

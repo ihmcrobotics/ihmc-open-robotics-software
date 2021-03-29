@@ -46,7 +46,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
 
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.ORIENTATION_VELOCITY_DYNAMICS;
+      return MPCCommandType.ORIENTATION_DYNAMICS;
    }
 
    public void clear()

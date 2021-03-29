@@ -3,8 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.AngularVelocitySE3ModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -67,7 +66,7 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
-   private final AngularVelocitySE3ModelPredictiveController comTrajectoryPlanner;
+   private final SE3ModelPredictiveController comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -87,12 +86,12 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-      comTrajectoryPlanner = new AngularVelocitySE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
-                                                                             controllerToolbox.getGravityZ(),
-                                                                             1.0,
-                                                                             controllerToolbox.getFullRobotModel().getTotalMass(),
-                                                                             controllerToolbox.getControlDT(),
-                                                                             registry);
+      comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
+                                                              controllerToolbox.getGravityZ(),
+                                                              1.0,
+                                                              controllerToolbox.getFullRobotModel().getTotalMass(),
+                                                              controllerToolbox.getControlDT(),
+                                                              registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
