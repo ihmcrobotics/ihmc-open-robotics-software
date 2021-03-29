@@ -106,6 +106,7 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
       catch (NullPointerException nullPointerException)
       {
          LogTools.error(nullPointerException.getMessage());
+         nullPointerException.printStackTrace();
       }
    }
 }

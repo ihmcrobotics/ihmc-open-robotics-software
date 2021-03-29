@@ -22,6 +22,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.function.Consumer;
 
@@ -34,6 +35,7 @@ public class DelayFixedPlanarRegionsSubscription
    private final HumanoidReferenceFrames referenceFrames;
    private final ROS2NodeInterface ros2Node;
    private final DRCRobotModel robotModel;
+   private final String topic;
    private final Consumer<PlanarRegionsList> callback;
    private final MutableDouble delayOffset = new MutableDouble();
    private final FullHumanoidRobotModel fullRobotModel;
@@ -41,15 +43,16 @@ public class DelayFixedPlanarRegionsSubscription
    private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
 
    private boolean enabled = false;
+   private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
 
-   public DelayFixedPlanarRegionsSubscription(RosNodeInterface ros1Node,
-                                              ROS2NodeInterface ros2Node,
+   public DelayFixedPlanarRegionsSubscription(ROS2NodeInterface ros2Node,
                                               DRCRobotModel robotModel,
                                               String topic,
                                               Consumer<PlanarRegionsList> callback)
    {
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
+      this.topic = topic;
       this.callback = callback;
 
       rosClockCalculator = robotModel.getROSClockCalculator();
@@ -71,7 +74,16 @@ public class DelayFixedPlanarRegionsSubscription
 
       RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
       sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
-      MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
+   }
+
+   public void subscribe(RosNodeInterface ros1Node)
+   {
+      subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
+   }
+
+   public void unsubscribe(RosNodeInterface ros1Node)
+   {
+      ros1Node.removeSubscriber(subscriber);
    }
 
    private void acceptRobotConfigurationData(RobotConfigurationData robotConfigurationData)
