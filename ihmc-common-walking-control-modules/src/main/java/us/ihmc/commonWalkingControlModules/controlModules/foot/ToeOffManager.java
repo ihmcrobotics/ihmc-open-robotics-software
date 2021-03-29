@@ -78,7 +78,7 @@ public class ToeOffManager
    private final YoDouble desiredICPPercentOfStanceForSSToeOff = new YoDouble("desiredICPPercentOfStanceForSSToeOff", registry);
 
    private final YoDouble icpProximityToLeadingFootForDSToeOff = new YoDouble("icpProximityToLeadingFootForDSToeOff", registry);
-   private final YoDouble icpProximityToLeadingFootForSSToeOff = new YoDouble("icpProximityToLeadingFootForSSToeOff", registry);
+//   private final YoDouble icpProximityToLeadingFootForSSToeOff = new YoDouble("icpProximityToLeadingFootForSSToeOff", registry);
    private final DoubleProvider icpProximityForToeOff;
    private final DoubleProvider ecmpProximityForToeOff;
    private final DoubleProvider copProximityForToeOff;
@@ -117,8 +117,8 @@ public class ToeOffManager
    private final YoDouble copProximityToOnToes = new YoDouble("copProximityToOnToes", registry);
    private final YoDouble desiredICPProximityToOnToes = new YoDouble("desiredICPProximityToOnToes", registry);
    private final YoDouble currentICPProximityToOnToes = new YoDouble("currentICPProximityToOnToes", registry);
-   private final YoDouble desiredICPProximityToLeadingFoot = new YoDouble("desiredICPProximityToLeadingFoot", registry);
-   private final YoDouble currentICPProximityToLeadingFoot = new YoDouble("currentICPProximityToLeadingFoot", registry);
+//   private final YoDouble desiredICPProximityToLeadingFoot = new YoDouble("desiredICPProximityToLeadingFoot", registry);
+//   private final YoDouble currentICPProximityToLeadingFoot = new YoDouble("currentICPProximityToLeadingFoot", registry);
 
    private final SideDependentList<YoPlaneContactState> footContactStates;
    private final List<FramePoint3D> contactStatePoints = new ArrayList<>();
@@ -312,16 +312,13 @@ public class ToeOffManager
       }
 
       ReferenceFrame soleFrame = nextFootstep.getSoleReferenceFrame();
-      double requiredProximity = checkICPLocations(trailingLeg,
-                                                   desiredICP,
-                                                   currentICP,
-                                                   toeContact.getToeOffPoint(),
-                                                   nextFootSupportPolygon,
-                                                   soleFrame,
-                                                   percentProximity);
-      icpProximityToLeadingFootForSSToeOff.set(requiredProximity);
-      currentICPPercentOfStanceForSSToeOff.set(currentICPProximityToLeadingFoot.getDoubleValue() / toLeadingFoot.length());
-      desiredICPPercentOfStanceForSSToeOff.set(desiredICPProximityToLeadingFoot.getDoubleValue() / toLeadingFoot.length());
+      checkICPLocations(trailingLeg,
+                        desiredICP,
+                        currentICP,
+                        toeContact.getToeOffPoint(),
+                        nextFootSupportPolygon,
+                        soleFrame,
+                        percentProximity);
 
       checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
@@ -401,14 +398,14 @@ public class ToeOffManager
       }
 
       ReferenceFrame soleFrame = feet.get(trailingLeg.getOppositeSide()).getSoleFrame();
-      double requiredProximity = checkICPLocations(trailingLeg,
-                                                   desiredICP,
-                                                   currentICP,
-                                                   toeContact.getToeOffPoint(),
-                                                   leadingFootSupportPolygon,
-                                                   soleFrame,
-                                                   percentProximity);
-      icpProximityToLeadingFootForDSToeOff.set(requiredProximity);
+      checkICPLocations(trailingLeg,
+                        desiredICP,
+                        currentICP,
+                        toeContact.getToeOffPoint(),
+                        leadingFootSupportPolygon,
+                        soleFrame,
+                        percentProximity);
+//      icpProximityToLeadingFootForDSToeOff.set(requiredProximity);
 
       checkCoPLocation(desiredCoP);
       checkECMPLocation(desiredECMP);
@@ -515,7 +512,7 @@ public class ToeOffManager
       }
    }
 
-   private double checkICPLocations(RobotSide trailingLeg,
+   private void checkICPLocations(RobotSide trailingLeg,
                                     FramePoint2DReadOnly desiredICP,
                                     FramePoint2DReadOnly currentICP,
                                     FramePoint2DReadOnly toeOffPoint,
@@ -525,33 +522,33 @@ public class ToeOffManager
    {
       desiredICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(desiredICP));
       currentICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(currentICP));
-      desiredICPProximityToLeadingFoot.set(leadingFootSupportPolygon.signedDistance(desiredICP));
-      currentICPProximityToLeadingFoot.set(leadingFootSupportPolygon.signedDistance(currentICP));
 
-      double requiredProximityToLeadingFoot;
-      if (percentProximity > 0.0)
-         requiredProximityToLeadingFoot = computeRequiredICPProximity(trailingLeg, nextSoleFrame, toeOffPoint, percentProximity);
-      else
-         requiredProximityToLeadingFoot = 0.0;
+      computeDistanceToLeadingFoot(trailingLeg, nextSoleFrame, toeOffPoint); //TODO check if need handling negative percentProximity
+
+      currentICPPercentOfStanceForSSToeOff.set(leadingFootSupportPolygon.signedDistance(desiredICP) / toLeadingFoot.length());
+      desiredICPPercentOfStanceForSSToeOff.set(leadingFootSupportPolygon.signedDistance(currentICP) / toLeadingFoot.length());
 
       boolean isDesiredICPOKForToeOff = desiredICPProximityToOnToes.getDoubleValue() < icpProximityForToeOff.getValue();
-      isDesiredICPOKForToeOff &= desiredICPProximityToLeadingFoot.getDoubleValue() < requiredProximityToLeadingFoot;
+      isDesiredICPOKForToeOff &= desiredICPPercentOfStanceForSSToeOff.getDoubleValue() < percentProximity;
 
       boolean isCurrentICPOKForToeOff = currentICPProximityToOnToes.getDoubleValue() < icpProximityForToeOff.getValue();
-      isCurrentICPOKForToeOff &= currentICPProximityToLeadingFoot.getDoubleValue() < requiredProximityToLeadingFoot;
+      isCurrentICPOKForToeOff &= currentICPPercentOfStanceForSSToeOff.getDoubleValue() < percentProximity;
 
       this.isCurrentICPOKForToeOff.set(isCurrentICPOKForToeOff);
       this.isDesiredICPOKForToeOff.set(isDesiredICPOKForToeOff);
       this.isCurrentICPOKForToeOffFilt.update();
       this.isDesiredICPOKForToeOffFilt.update();
-
-      return requiredProximityToLeadingFoot;
    }
 
-   private double computeRequiredICPProximity(RobotSide trailingLeg,
+   private void checkAnkleLimitForToeOff(RobotSide trailingLeg)
+   {
+      OneDoFJointBasics anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
+      legInspector.updateTrailingAnkleLowerLimitsStatus(anklePitch);
+   }
+
+   private double computeDistanceToLeadingFoot(RobotSide trailingLeg,
                                               ReferenceFrame nextSoleFrame,
-                                              FramePoint2DReadOnly toeOffPoint,
-                                              double percentOfStanceForToeOff)
+                                              FramePoint2DReadOnly toeOffPoint)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempLeadingFootPosition.setToZero(nextSoleFrame);
@@ -565,13 +562,7 @@ public class ToeOffManager
       toLeadingFoot.set(tempLeadingFootPosition);
       toLeadingFoot.sub(tempPoint);
 
-      return percentOfStanceForToeOff * toLeadingFoot.length();
-   }
-
-   private void checkAnkleLimitForToeOff(RobotSide trailingLeg)
-   {
-      OneDoFJointBasics anklePitch = fullRobotModel.getLegJoint(trailingLeg, LegJointName.ANKLE_PITCH);
-      legInspector.updateTrailingAnkleLowerLimitsStatus(anklePitch);
+      return toLeadingFoot.length();
    }
 
    private void checkLeadingKneeUpperLimitForToeOff(RobotSide leadingLeg)
