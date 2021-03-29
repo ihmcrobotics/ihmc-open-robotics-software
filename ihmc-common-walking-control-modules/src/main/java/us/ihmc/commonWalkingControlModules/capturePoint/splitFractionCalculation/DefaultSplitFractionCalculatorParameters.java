@@ -1,70 +1,161 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
-public class DefaultSplitFractionCalculatorParameters implements SplitFractionCalculatorParametersReadOnly
+public class DefaultSplitFractionCalculatorParameters implements SplitFractionCalculatorParametersBasics
 {
+   private boolean calculateSplitFractionsFromPositions = false;
+   private boolean calculateSplitFractionsFromArea = false;
+
+   private double defaultTransferSplitFraction = 0.5;
+   private double stepHeightForLargeStepDown = 0.15;
+   private double largestStepDownHeight = 0.25;
+
+   private double transferSplitFractionAtFullDepth = 0.3;
+   private double transferWeightDistributionAtFullDepth = 0.75;
+
+   private double fractionLoadIfFootHasFullSupport = 0.5;
+   private double fractionTimeOnFootIfFootHasFullSupport = 0.5;
+   private double fractionLoadIfOtherFootHasNoWidth = 0.5;
+   private double fractionTimeOnFootIfOtherFootHasNoWidth = 0.5;
+
+   @Override
    public boolean calculateSplitFractionsFromPositions()
    {
-      return false;
+      return calculateSplitFractionsFromPositions;
    }
 
+   @Override
+   public void setCalculateSplitFractionsFromPositions(boolean calculateSplitFractionsFromPositions)
+   {
+      this.calculateSplitFractionsFromPositions = calculateSplitFractionsFromPositions;
+   }
+
+   @Override
    public boolean calculateSplitFractionsFromArea()
    {
-      return false;
+      return calculateSplitFractionsFromArea;
+   }
+
+   @Override
+   public void setCalculateSplitFractionsFromArea(boolean calculateSplitFractionsFromArea)
+   {
+      this.calculateSplitFractionsFromArea = calculateSplitFractionsFromArea;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getDefaultTransferSplitFraction()
    {
-      return 0.5;
+      return defaultTransferSplitFraction;
+   }
+
+   @Override
+   public void setDefaultTransferSplitFraction(double splitFraction)
+   {
+      this.defaultTransferSplitFraction = splitFraction;
    }
 
    /** {@inheritDoc} */
-
+   @Override
    public double getStepHeightForLargeStepDown()
    {
-      return 0.15;
+      return stepHeightForLargeStepDown;
+   }
+
+   @Override
+   public void setStepHeightForLargeStepDown(double height)
+   {
+      this.stepHeightForLargeStepDown = height;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getLargestStepDownHeight()
    {
-      return 0.25;
+      return largestStepDownHeight;
+   }
+
+   @Override
+   public void setLargestStepDownHeight(double height)
+   {
+      this.largestStepDownHeight = height;
    }
 
 
    /** {@inheritDoc} */
+   @Override
    public double getTransferSplitFractionAtFullDepth()
    {
-      return 0.3;
+      return transferSplitFractionAtFullDepth;
+   }
+
+   @Override
+   public void setTransferSplitFractionAtFullDepth(double splitFraction)
+   {
+      this.transferSplitFractionAtFullDepth = splitFraction;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getTransferWeightDistributionAtFullDepth()
    {
-      return 0.75;
+      return transferWeightDistributionAtFullDepth;
+   }
+
+   @Override
+   public void setTransferWeightDistributionAtFullDepth(double weightDistribution)
+   {
+      this.transferWeightDistributionAtFullDepth = weightDistribution;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getFractionLoadIfFootHasFullSupport()
    {
-      return 0.5;
+      return fractionLoadIfFootHasFullSupport;
+   }
+
+   @Override
+   public void setFractionLoadIfFootHasFullSupport(double fractionLoad)
+   {
+      this.fractionLoadIfFootHasFullSupport = fractionLoad;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getFractionTimeOnFootIfFootHasFullSupport()
    {
-      return 0.5;
+      return fractionTimeOnFootIfFootHasFullSupport;
+   }
+
+   @Override
+   public void setFractionTimeOnFootIfFootHasFullSupport(double fractionTime)
+   {
+      this.fractionTimeOnFootIfFootHasFullSupport = fractionTime;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getFractionLoadIfOtherFootHasNoWidth()
    {
-      return 0.5;
+      return fractionLoadIfOtherFootHasNoWidth;
+   }
+
+   @Override
+   public void setFractionLoadIfOtherFootHasNoWidth(double fractionLoad)
+   {
+      this.fractionLoadIfOtherFootHasNoWidth = fractionLoad;
    }
 
    /** {@inheritDoc} */
+   @Override
    public double getFractionTimeOnFootIfOtherFootHasNoWidth()
    {
-      return 0.5;
+      return fractionTimeOnFootIfOtherFootHasNoWidth;
+   }
+
+   @Override
+   public void setFractionTimeOnFootIfOtherFootHasNoWidth(double fractionTime)
+   {
+      this.fractionTimeOnFootIfOtherFootHasNoWidth = fractionTime;
    }
 }

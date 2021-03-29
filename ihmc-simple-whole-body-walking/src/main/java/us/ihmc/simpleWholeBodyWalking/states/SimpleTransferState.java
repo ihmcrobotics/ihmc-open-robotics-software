@@ -1,7 +1,7 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -106,7 +106,7 @@ public abstract class SimpleTransferState extends SimpleWalkingState
       double extraToeOffHeight = 0.0;
 
       balanceManager.getFinalDesiredCoMPosition(desiredCoM);
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
             transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
    }
