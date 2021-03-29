@@ -154,6 +154,7 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                       supportRegionsPublisher.acceptPlanarRegions(message);
                                                       footstepPlanning.acceptPlanarRegions(message);
                                                    });
+      delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Node());
       delayFixedPlanarRegionsSubscription.setEnabled(true);
 
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
