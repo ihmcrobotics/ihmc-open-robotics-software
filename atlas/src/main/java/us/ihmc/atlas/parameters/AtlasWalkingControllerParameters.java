@@ -94,10 +94,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
-     double thresholdMarginFraction = 0.02;
-     double distanceDeadBandSize = 0.0;
-     double velocityDeadBandSize = 0.6;
-
       spineJointLimitParameters = new JointLimitParameters();
       spineJointLimitParameters.setMaxAbsJointVelocity(9.0);
       spineJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
@@ -109,12 +105,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
       kneeJointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
       kneeJointLimitParameters.setVelocityControlGain(60.0);
+      kneeJointLimitParameters.setVelocityDeadbandSize(0.6);
 
       ankleJointLimitParameters = new JointLimitParameters();
       ankleJointLimitParameters.setMaxAbsJointVelocity(5.0);
       ankleJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(20.0));
       ankleJointLimitParameters.setJointLimitFilterBreakFrequency(10.0);
       ankleJointLimitParameters.setVelocityControlGain(90.0);
+      ankleJointLimitParameters.setVelocityDeadbandSize(0.6);
+      ankleJointLimitParameters.setRangeOfMotionMarginFraction(0.02);
 
       for (RobotSide robotSide : RobotSide.values)
       {
