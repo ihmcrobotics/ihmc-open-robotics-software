@@ -141,6 +141,9 @@ public class WholeBodyControllerBoundCalculator
             jointLimitParameters.get(joint).set(params);
             filterAlphas.get(joint).set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
             velocityGains.get(joint).set(params.getVelocityControlGain());
+            romMarginFractions.get(joint).set(params.getRangeOfMotionMarginFraction());
+            velocityDeadbandSizes.get(joint).set(params.getVelocityDeadbandSize());
+            distanceDeadbandSizes.get(joint).set(params.getDistanceDeadbandSize());
          }
       }
    }
@@ -184,6 +187,10 @@ public class WholeBodyControllerBoundCalculator
 
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
+
+      double limitMargin = romMarginFractions.get(joint).getDoubleValue() * (jointLimitUpper - jointLimitLower);
+      jointLimitUpper -= limitMargin;
+      jointLimitLower += limitMargin;
 
       double velocityLimitLower;
       double velocityLimitUpper;
