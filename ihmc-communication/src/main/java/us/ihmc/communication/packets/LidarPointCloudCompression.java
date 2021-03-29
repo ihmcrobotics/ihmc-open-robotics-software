@@ -15,7 +15,8 @@ public class LidarPointCloudCompression
 {
    private static final ThreadLocal<LZ4CompressionImplementation> compressorThreadLocal = ThreadLocal.withInitial(LZ4CompressionImplementation::new);
    public static final double POINT_RESOLUTION = 0.003;
-   private static final boolean debug = true;
+   private static final int maxPointCloudSize = 260000;
+   private static final boolean debug = false;
 
    public static void compressPointCloud(int pointCloudSize, LidarScanMessage messageToPack, LidarPointCoordinateFunction coordinateFunction)
    {
@@ -25,7 +26,7 @@ public class LidarPointCloudCompression
       ByteBuffer byteBuffer = ByteBuffer.allocate(pointCloudSizeInBytes);
       IntBuffer pointCloudBuffer = byteBuffer.asIntBuffer();
 
-      for (int i = 0; i < pointCloudSize; i++)
+      for (int i = 0; i < Math.min(pointCloudSize, maxPointCloudSize); i++)
       {
          for (int j = 0; j < 3; j++)
          {

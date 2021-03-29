@@ -162,6 +162,7 @@ public class UserDesiredFootstepDataMessageGenerator
       footstepCommandList.setExecutionMode(ExecutionMode.OVERRIDE);
       footstepCommandList.setDefaultSwingDuration(swingTime.getDoubleValue());
       footstepCommandList.setDefaultTransferDuration(transferTime.getDoubleValue());
+      footstepCommandList.setOffsetFootstepsHeightWithExecutionError(true);
 
       commandInputManager.submitCommand(footstepCommandList);
    }

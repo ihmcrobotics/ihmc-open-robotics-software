@@ -2,11 +2,13 @@ package us.ihmc.robotEnvironmentAwareness.communication.converters;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import gnu.trove.list.array.TByteArrayList;
+import javafx.geometry.Point3D;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
@@ -32,14 +34,15 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class PointCloud2ToLidarScanMessageConverter
 {
-   private static final String POINT_CLOUD_2_TOPIC_NAME = "/os_cloud_node/points";
+//   private static final String POINT_CLOUD_2_TOPIC_NAME = "/os_cloud_node/points";
+   private static final String POINT_CLOUD_2_TOPIC_NAME = "/camera/depth/color/points";
 
    private static final double SENSOR_POSE_X = 0.0;
    private static final double SENSOR_POSE_Y = 0.0;
    private static final double SENSOR_POSE_Z = 1.0;
    private static final double SENSOR_POSE_YAW = 0.0;
-   private static final double SENSOR_POSE_PITCH = 0.78;
-   private static final double SENSOR_POSE_ROLL = 0.0;
+   private static final double SENSOR_POSE_PITCH = 0.0;
+   private static final double SENSOR_POSE_ROLL = -2.35;
 
    private final AtomicReference<PointCloud2> pointCloud2Message = new AtomicReference<>();
    private final AtomicInteger counter = new AtomicInteger();
@@ -68,6 +71,10 @@ public class PointCloud2ToLidarScanMessageConverter
       LidarScanMessage lidarScanMessage = new LidarScanMessage();
       lidarScanMessage.getLidarPosition().set(sensorPose.getPosition());
       lidarScanMessage.getLidarOrientation().set(sensorPose.getOrientation());
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      transform.getTranslation().set(poseX, poseY, poseZ);
+      transform.getRotation().setYawPitchRoll(poseYaw, posePitch, poseRoll);
 
       new Thread(() ->
                  {
@@ -100,14 +107,17 @@ public class PointCloud2ToLidarScanMessageConverter
                              packBytes(bytes, startIndex + 8, pointCloud.getData());
                              float z = ByteBuffer.wrap(bytes).order(byteOrder).getFloat();
 
-                             points[3 * i + 0] = x;
-                             points[3 * i + 1] = y;
-                             points[3 * i + 2] = z;
+                             Pose3D dataPoint = new Pose3D(x, y, z, 0.0, 0.0, 0.0);
+                             dataPoint.applyTransform(transform);
+
+                             points[3 * i + 0] = (float) dataPoint.getX();
+                             points[3 * i + 1] = (float) dataPoint.getY();
+                             points[3 * i + 2] = (float) dataPoint.getZ();
                           }
 
                           lidarScanMessage.setSequenceId(counter.getAndIncrement());
                           lidarScanMessage.getScan().clear();
-                          LidarPointCloudCompression.compressPointCloud(points.length, lidarScanMessage, (i, j) -> points[3 * i + j]);
+                          LidarPointCloudCompression.compressPointCloud(numberOfPoints, lidarScanMessage, (index, element) -> points[3 * index + element]);
                           lidarScanMessagePublisher.publish(lidarScanMessage);
                        }
 
