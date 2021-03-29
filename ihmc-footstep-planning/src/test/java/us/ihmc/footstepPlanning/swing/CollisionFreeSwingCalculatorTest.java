@@ -132,15 +132,15 @@ public class CollisionFreeSwingCalculatorTest
       FootstepPlan footstepPlan = new FootstepPlan();
       footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.051,  0.720,  0.108 ), new Quaternion( 0.007, -0.001,  0.997, -0.072 )));
       footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.024,  0.252,  0.106 ), new Quaternion( 0.007, -0.001,  0.996, -0.087 )));
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.345,  0.550,  0.279 ), new Quaternion( 0.005,  0.000,  0.985, -0.174 )));
-      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.317,  0.152,  0.279 ), new Quaternion( 0.005,  0.001,  1.000, -0.000 )));
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.607,  0.503,  0.460 ), new Quaternion( 0.002,  0.001,  0.996, -0.087 )));
-      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.588,  0.197,  0.460 ), new Quaternion( 0.002,  0.001,  0.996, -0.088 )));
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.879,  0.352,  0.621 ), new Quaternion(-0.008,  0.000,  0.985, -0.174 )));
-      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.863,  0.148,  0.621 ), new Quaternion(-0.008, -0.001,  1.000, -0.000 )));
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-2.100,  0.514,  0.782 ), new Quaternion(-0.004, -0.002,  0.996, -0.087 )));
-      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-2.076,  0.150,  0.781 ), new Quaternion(-0.004, -0.002,  0.996, -0.087 )));
-      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-2.550,  0.360,  0.965 ), new Quaternion( 0.000,  0.000,  1.000,  0.001 )));
+//      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.345,  0.550,  0.279 ), new Quaternion( 0.005,  0.000,  0.985, -0.174 )));
+//      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.317,  0.152,  0.279 ), new Quaternion( 0.005,  0.001,  1.000, -0.000 )));
+//      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.607,  0.503,  0.460 ), new Quaternion( 0.002,  0.001,  0.996, -0.087 )));
+//      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.588,  0.197,  0.460 ), new Quaternion( 0.002,  0.001,  0.996, -0.088 )));
+//      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.879,  0.352,  0.621 ), new Quaternion(-0.008,  0.000,  0.985, -0.174 )));
+//      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-1.863,  0.148,  0.621 ), new Quaternion(-0.008, -0.001,  1.000, -0.000 )));
+//      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-2.100,  0.514,  0.782 ), new Quaternion(-0.004, -0.002,  0.996, -0.087 )));
+//      footstepPlan.addFootstep(RobotSide.LEFT,  new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-2.076,  0.150,  0.781 ), new Quaternion(-0.004, -0.002,  0.996, -0.087 )));
+//      footstepPlan.addFootstep(RobotSide.RIGHT, new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(-2.550,  0.360,  0.965 ), new Quaternion( 0.000,  0.000,  1.000,  0.001 )));
 
       runTest(stairRegions, stanceSteps, footstepPlan);
    }

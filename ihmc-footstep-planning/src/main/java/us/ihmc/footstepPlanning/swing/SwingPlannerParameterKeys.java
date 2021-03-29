@@ -34,7 +34,9 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey collisionBoxExtraX = keys.addDoubleKey("Collision box extra x", 0.07);
    public static final DoubleStoredPropertyKey collisionBoxExtraY = keys.addDoubleKey("Collision box extra y", 0.04);
    public static final DoubleStoredPropertyKey collisionBoxExtraZ = keys.addDoubleKey("Collision box extra z", 0.04);
-   public static final DoubleStoredPropertyKey minMaxCheckerPercentage = keys.addDoubleKey("Min max checker percentage", 0.2);
+   public static final DoubleStoredPropertyKey minMaxCheckerPercentage = keys.addDoubleKey("Min max checker percentage", 0.15);
    public static final DoubleStoredPropertyKey minMaxHeightInterpolationPercentage = keys.addDoubleKey("Min max height interpolation percentage", 0.25);
-   public static final DoubleStoredPropertyKey minMaxPercentageToKeepDefaultWaypoint = keys.addDoubleKey("Min max percentage to keep default waypoint", 0.3);
+   public static final DoubleStoredPropertyKey maxDisplacementLow = keys.addDoubleKey("Max displacement low", 0.01);
+   public static final DoubleStoredPropertyKey maxDisplacementHigh = keys.addDoubleKey("Max displacement high", 0.1);
+   public static final DoubleStoredPropertyKey displacementInterpolationCutoff = keys.addDoubleKey("Displacement interpolation cutoff", 0.4);
 }
