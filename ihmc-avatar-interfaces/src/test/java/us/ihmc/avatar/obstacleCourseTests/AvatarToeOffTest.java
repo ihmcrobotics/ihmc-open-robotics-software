@@ -34,6 +34,7 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setRunMultiThreaded(false);
    }
 
@@ -100,11 +101,29 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       setupTest(testInfo, flatGround);
 
-      walkForward(getStepLength(), getNumberOfSteps());
+      walkForward(getStepLength(), getNumberOfSteps(), 0.0);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
    }
 
    @Test
+   public void testToeOffWithDifferentStepLengths(TestInfo testInfo) throws SimulationExceededMaximumTimeException
+   {
+      int numberOfSteps = 3;
+      setupTest(testInfo, new FlatGroundEnvironment());
+
+      double initialXPosition = 0.0;
+      for(double stepLength = getStepLength(); stepLength <= getMaxStepLength(); stepLength += 0.25)
+      {
+
+         transferTime += 0.02;
+
+         // take steps
+         walkForward(stepLength, numberOfSteps, initialXPosition);
+         initialXPosition += numberOfSteps*stepLength;
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps*(transferTime+swingTime) + 3.0));
+      }
+   }
+
    public void testToeOffTakingStep(TestInfo testInfo) throws SimulationExceededMaximumTimeException
    {
       StepsEnvironment steps = new StepsEnvironment();
@@ -132,9 +151,9 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
-   private void walkForward(double stepLength, int steps) throws SimulationExceededMaximumTimeException
+   private void walkForward(double stepLength, int steps, double initialXPosition) throws SimulationExceededMaximumTimeException
    {
-      walkForward(stepLength, steps, 0.0, 0.0);
+      walkForward(stepLength, steps, initialXPosition, 0.0);
    }
 
    private void walkForward(double stepLength, int steps, double initialXPosition, double stepHeight) throws SimulationExceededMaximumTimeException
@@ -222,4 +241,6 @@ public abstract class AvatarToeOffTest implements MultiRobotTestInterface
          return terrainObject;
       }
    }
+
+
 }

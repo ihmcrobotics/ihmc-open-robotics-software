@@ -1,45 +1,48 @@
 package us.ihmc.commonWalkingControlModules.desiredFootStep;
 
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class TransferToAndNextFootstepsData
 {
-   private Footstep transferFromFootstep;
-   private Footstep transferFromDesiredFootstep;
-   private Footstep transferToFootstep;
+   private final FramePoint3D transferToPosition = new FramePoint3D();
+   private final FramePoint2D comAtEndOfState = new FramePoint2D();
    private RobotSide transferToSide;
 
-   private Footstep nextFootstep;
-
-   public Footstep getTransferToFootstep()
+   public TransferToAndNextFootstepsData()
    {
-      return transferToFootstep;
+      comAtEndOfState.setToNaN();
    }
 
-   public Footstep getTransferFromFootstep()
+   public FramePoint3DReadOnly getTransferToPosition()
    {
-      return transferFromFootstep;
+      return transferToPosition;
    }
 
-   public void setTransferFromFootstep(Footstep transferFromFootstep)
+   public void setComAtEndOfState(FramePoint3DReadOnly comAtEndOfState)
    {
-      this.transferFromFootstep = transferFromFootstep;
+      this.comAtEndOfState.set(comAtEndOfState);
    }
 
-   public void setTransferToFootstep(Footstep transferToFootstep)
+   public FramePoint2DReadOnly getCoMAtEndOfState()
    {
-      this.transferToFootstep = transferToFootstep;
+      return comAtEndOfState;
    }
 
-   public Footstep getTransferFromDesiredFootstep()
+   public void setTransferToPosition(FramePoint3DReadOnly transferToPosition)
    {
-      return transferFromDesiredFootstep;
+      this.transferToPosition.set(transferToPosition);
    }
 
-   public void setTransferFromDesiredFootstep(Footstep previousDesiredFootstep)
+   public void setTransferToPosition(ReferenceFrame referenceFrame)
    {
-      this.transferFromDesiredFootstep = previousDesiredFootstep;
+      transferToPosition.setToZero(referenceFrame);
+      transferToPosition.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
    public RobotSide getTransferToSide()
@@ -51,14 +54,6 @@ public class TransferToAndNextFootstepsData
    {
       this.transferToSide = transferToSide;
    }
-
-   public Footstep getNextFootstep()
-   {
-      return nextFootstep;
-   }
-
-   public void setNextFootstep(Footstep nextFootstep)
-   {
-      this.nextFootstep = nextFootstep;
-   }
 }
+
+

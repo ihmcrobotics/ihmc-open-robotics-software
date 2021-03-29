@@ -354,7 +354,8 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          estimatedOrientation.invert();
 
       yoIntegralTerm.setToZero();
-      yawRateBiasEstimate.set(0.0);
+      if (yawRateBiasEstimate != null)
+         yawRateBiasEstimate.set(0.0);
       hasBeenInitialized.set(true);
    }
 
