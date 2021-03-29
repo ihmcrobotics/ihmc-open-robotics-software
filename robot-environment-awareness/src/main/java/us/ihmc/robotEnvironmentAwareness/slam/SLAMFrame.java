@@ -24,7 +24,7 @@ import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
@@ -167,7 +167,7 @@ public class SLAMFrame
       correctedLocalPoseInWorld.set(uncorrectedLocalPoseInWorld);
       correctedSensorPoseInWorld.set(uncorrectedSensorPoseInWorld);
 
-      uncorrectedPointCloudInWorld = PointCloudCompression.decompressPointCloudToArray(message);
+      uncorrectedPointCloudInWorld = StereoPointCloudCompression.decompressPointCloudToArray(message);
       pointCloudInLocalFrame = SLAMTools.createConvertedPointsToSensorPose(uncorrectedLocalPoseInWorld, uncorrectedPointCloudInWorld,
                                                                            computeInParallel);
 

@@ -5,20 +5,7 @@ import java.util.List;
 
 import us.ihmc.atlas.diagnostic.AtlasDiagnosticParameters;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
-import us.ihmc.atlas.parameters.AtlasCoPTrajectoryParameters;
-import us.ihmc.atlas.parameters.AtlasCollisionMeshDefinitionDataHolder;
-import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.atlas.parameters.AtlasFootstepPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasHighLevelControllerParameters;
-import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
-import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSensorInformation;
-import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
-import us.ihmc.atlas.parameters.AtlasStateEstimatorParameters;
-import us.ihmc.atlas.parameters.AtlasSwingPlannerParameters;
-import us.ihmc.atlas.parameters.AtlasUIParameters;
-import us.ihmc.atlas.parameters.AtlasVisibilityGraphParameters;
-import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
+import us.ihmc.atlas.parameters.*;
 import us.ihmc.atlas.ros.AtlasPPSTimestampOffsetProvider;
 import us.ihmc.atlas.sensors.AtlasCollisionBoxProvider;
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
@@ -35,6 +22,7 @@ import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
@@ -272,6 +260,12 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    public CoPTrajectoryParameters getCoPTrajectoryParameters()
    {
       return new AtlasCoPTrajectoryParameters();
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new AtlasICPSplitFractionCalculatorParameters();
    }
 
    @Override

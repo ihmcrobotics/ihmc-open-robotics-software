@@ -7,6 +7,8 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
@@ -66,6 +68,7 @@ public class HighLevelControlManagerFactory
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
+   private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -132,6 +135,11 @@ public class HighLevelControlManagerFactory
       this.copTrajectoryParameters = copTrajectoryParameters;
    }
 
+   public void setSplitFractionParameters(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
+   {
+      this.splitFractionParameters = splitFractionParameters;
+   }
+
    public BalanceManager getOrCreateBalanceManager()
    {
       if (balanceManager != null)
@@ -149,6 +157,7 @@ public class HighLevelControlManagerFactory
       balanceManager = new BalanceManager(controllerToolbox,
                                           walkingControllerParameters,
                                           copTrajectoryParameters,
+                                          splitFractionParameters,
                                           registry);
       return balanceManager;
    }

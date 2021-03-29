@@ -53,12 +53,12 @@ module controller_msgs
         long number_of_points;
         /**
          * The compressed pointcloud.
-         * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
          */
         sequence<octet, 2000000> point_cloud;
         /**
          * The compressed colors.
-         * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
          */
         sequence<octet, 700000> colors;
       };

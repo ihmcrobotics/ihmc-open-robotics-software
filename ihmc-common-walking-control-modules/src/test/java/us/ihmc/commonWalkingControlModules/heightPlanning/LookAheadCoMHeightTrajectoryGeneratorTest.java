@@ -6,7 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
+public class LookAheadCoMHeightTrajectoryGeneratorTest
 {
    private static  boolean visualize = false;
    private static final double minimumHeight = 0.75;
@@ -41,7 +41,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    @Test
    public void testFlat()
    {
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, 0.0);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, -0.125, 0.0);
@@ -58,7 +58,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    {
       double length = 0.75;
       double dsRatio = 0.3;
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, 0.0, nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, 0.0);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), length, -0.125, 0.0);
@@ -77,7 +77,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    {
       double length = 1.25;
       double dsRatio = 0.3;
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.1, 0.0, nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, 0.0);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), length, -0.125, 0.0);
@@ -94,7 +94,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    public void testFlatKindOfWeird()
    {
       nominalHeight = minimumHeight - 0.05;
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, 0.0);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.5, -0.125, 0.0);
@@ -108,7 +108,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    @Test
    public void testFlatEasyMultiStep()
    {
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, -0.164, 0.0);
@@ -122,7 +122,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    @Test
    public void testFlatMultiStep()
    {
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.4, -0.164, 0.0);
@@ -136,7 +136,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    @Test
    public void testTrickyCaseGoingUp()
    {
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.57273, -0.02010, 0.80325);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.60080, -0.19949, -0.00120);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.2, 0.0);
@@ -153,7 +153,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    {
       double stepDownHeight = -0.4;
 
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -stepDownHeight + nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, -stepDownHeight);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, -0.125, 0.0);
@@ -170,7 +170,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    {
       double stepDownHeight = -0.2;
 
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -stepDownHeight + nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, -stepDownHeight);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, -0.125, 0.0);
@@ -187,7 +187,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    {
       double stepHeight = 0.2;
 
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+      TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, nominalHeight);
       FramePoint3D start = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.125, 0.0);
       FramePoint3D end = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, -0.125, stepHeight);
@@ -201,7 +201,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    private void runTest(FramePoint3DReadOnly startFoot,
                         FramePoint3DReadOnly startPosition,
                         RobotSide stepSide,
-                        NewTransferToAndNextFootstepsData transferToAndNextFootstepsData)
+                        TransferToAndNextFootstepsData transferToAndNextFootstepsData)
    {
       runTest(startFoot, startPosition, stepSide, transferToAndNextFootstepsData, true);
    }
@@ -209,7 +209,7 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
    private void runTest(FramePoint3DReadOnly startFoot,
                         FramePoint3DReadOnly startPosition,
                         RobotSide stepSide,
-                        NewTransferToAndNextFootstepsData transferToAndNextFootstepsData,
+                        TransferToAndNextFootstepsData transferToAndNextFootstepsData,
                         boolean inTransfer)
    {
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -222,17 +222,17 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
          soleFrames.put(robotSide, new PoseReferenceFrame(robotSide.getLowerCaseName() + "Frame", ReferenceFrame.getWorldFrame()));
       }
       PoseReferenceFrame comFrame = new PoseReferenceFrame("comFrame", ReferenceFrame.getWorldFrame());
-      BetterLookAheadCoMHeightTrajectoryGenerator lookAhead = new BetterLookAheadCoMHeightTrajectoryGenerator(minimumHeight,
-                                                                                                              nominalHeight,
-                                                                                                              maximumHeight,
-                                                                                                              0.0,
-                                                                                                              doubleSupportIn,
-                                                                                                              comFrame,
-                                                                                                              comFrame,
-                                                                                                              soleFrames,
-                                                                                                              robot.getYoTime(),
-                                                                                                              graphicsListRegistry,
-                                                                                                              registry);
+      LookAheadCoMHeightTrajectoryGenerator lookAhead = new LookAheadCoMHeightTrajectoryGenerator(minimumHeight,
+                                                                                                  nominalHeight,
+                                                                                                  maximumHeight,
+                                                                                                  0.0,
+                                                                                                  doubleSupportIn,
+                                                                                                  comFrame,
+                                                                                                  comFrame,
+                                                                                                  soleFrames,
+                                                                                                  robot.getYoTime(),
+                                                                                                  graphicsListRegistry,
+                                                                                                  registry);
 
       RobotSide supportSide = stepSide.getOppositeSide();
 

@@ -6,12 +6,13 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javafx.PrivateAnimationTimer;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -49,8 +50,8 @@ public class LiveStereoVisionPointCloudGraphic extends Group
    {
       threadQueue.clearQueueAndExecute(() ->
       {
-         Point3D32[] points = PointCloudCompression.decompressPointCloudToArray32(message);
-         int[] colors = PointCloudCompression.decompressColorsToIntArray(message);
+         Point3D32[] points = StereoPointCloudCompression.decompressPointCloudToArray32(message);
+         int[] colors = StereoPointCloudCompression.decompressColorsToIntArray(message);
          buildMesh(points, colors);
       });
    }
@@ -59,19 +60,16 @@ public class LiveStereoVisionPointCloudGraphic extends Group
    {
       threadQueue.clearQueueAndExecute(() ->
       {
-         int numberOfPoints = message.getScan().size() / 3;
+         int numberOfPoints = message.getNumberOfPoints();
          Point3D32[] points = new Point3D32[numberOfPoints];
          int[] colors = new int[numberOfPoints];
-
-         for (int i = 0; i < numberOfPoints; i++)
+         LidarPointCloudCompression.decompressPointCloud(message.getScan(), numberOfPoints, (i, x, y, z) ->
          {
             points[i] = new Point3D32();
-            points[i].setX(message.getScan().get(i * 3));
-            points[i].setY(message.getScan().get(i * 3 + 1));
-            points[i].setZ(message.getScan().get(i * 3 + 2));
-
-            colors[i] = 0;
-         }
+            points[i].setX(x);
+            points[i].setY(y);
+            points[i].setZ(z);
+         });
 
          buildMesh(points, colors);
       });
