@@ -343,7 +343,7 @@ public class ToeOffManager
          onToesSupportPolygon.update();
       }
 
-      trailingFootSupportPolygon.clear();
+      trailingFootSupportPolygon.clear(feet.get(trailingLeg).getSoleFrame());
       for (int i = 0; i < feet.get(trailingLeg).getTotalNumberOfContactPoints(); i++)
          trailingFootSupportPolygon.addVertex(feet.get(trailingLeg).getContactPoints2d().get(i));
       trailingFootSupportPolygon.update();
@@ -436,7 +436,7 @@ public class ToeOffManager
          onToesSupportPolygon.update();
       }
 
-      trailingFootSupportPolygon.clear();
+      trailingFootSupportPolygon.clear(feet.get(trailingLeg).getSoleFrame());
       for (int i = 0; i < feet.get(trailingLeg).getTotalNumberOfContactPoints(); i++)
          trailingFootSupportPolygon.addVertex(feet.get(trailingLeg).getContactPoints2d().get(i));
       trailingFootSupportPolygon.update();
