@@ -9,7 +9,6 @@ public class JointLimitParameters
 
    private double rangeOfMotionMarginFraction;
    private double velocityDeadbandSize;
-   private double distanceDeadbandSize;
 
    public JointLimitParameters()
    {
@@ -19,7 +18,6 @@ public class JointLimitParameters
       velocityControlGain = 0.0;
       rangeOfMotionMarginFraction = 0.0;
       velocityDeadbandSize = 0.0;
-      distanceDeadbandSize = 0.0;
    }
 
    public double getMaxAbsJointVelocity()
@@ -82,15 +80,6 @@ public class JointLimitParameters
       this.velocityDeadbandSize = velocityDeadbandSize;
    }
 
-   public double getDistanceDeadbandSize()
-   {
-      return distanceDeadbandSize;
-   }
-
-   public void setDistanceDeadbandSize(double distanceDeadbandSize)
-   {
-      this.distanceDeadbandSize = distanceDeadbandSize;
-   }
 
    public void set(JointLimitParameters other)
    {
@@ -100,7 +89,6 @@ public class JointLimitParameters
       velocityControlGain = other.velocityControlGain;
       setRangeOfMotionMarginFraction(other.getRangeOfMotionMarginFraction());
       setVelocityDeadbandSize(other.getVelocityDeadbandSize());
-      setDistanceDeadbandSize(other.getDistanceDeadbandSize());
    }
 
    @Override
@@ -124,8 +112,6 @@ public class JointLimitParameters
             return false;
          if (rangeOfMotionMarginFraction != other.rangeOfMotionMarginFraction)
             return false;
-         if (distanceDeadbandSize != other.distanceDeadbandSize)
-            return false;
          if (velocityDeadbandSize != other.velocityDeadbandSize)
             return false;
          return true;
@@ -141,7 +127,6 @@ public class JointLimitParameters
    {
       return getClass().getSimpleName() + ": qd max: " + maxAbsJointVelocity + ", joint limit distance for qd max: " + jointLimitDistanceForMaxVelocity
             + ", joint limit filter break frequency: " + jointLimitFilterBreakFrequency + ", velocity control gain: " + velocityControlGain
-            + ", range of motion margin fraction: " + rangeOfMotionMarginFraction + ", distance deadband size: " + distanceDeadbandSize
-            + ", velocity deadband size: " + velocityDeadbandSize;
+            + ", range of motion margin fraction: " + rangeOfMotionMarginFraction +  ", velocity deadband size: " + velocityDeadbandSize;
    }
 }
