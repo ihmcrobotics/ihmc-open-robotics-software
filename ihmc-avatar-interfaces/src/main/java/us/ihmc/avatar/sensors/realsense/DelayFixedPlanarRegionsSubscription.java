@@ -44,6 +44,7 @@ public class DelayFixedPlanarRegionsSubscription
 
    private boolean enabled = false;
    private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
+   private double delay = 0.0;
 
    public DelayFixedPlanarRegionsSubscription(ROS2NodeInterface ros2Node,
                                               DRCRobotModel robotModel,
@@ -107,18 +108,23 @@ public class DelayFixedPlanarRegionsSubscription
             long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
             if (controllerTime == -1L)
             {
+               delay = Double.NaN;
                return;
             }
 
             long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
             if (newestTimestamp == -1L)
             {
+               delay = Double.NaN;
                return;
             }
 
             boolean waitIfNecessary = false; // dangerous if true! need a timeout
-            if (robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null) != -1L)
+            long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
+            if (selectedTimestamp != -1L)
             {
+               delay = controllerTime - timestamp;
+
                try
                {
                   referenceFrames.updateFrames();
@@ -168,5 +174,10 @@ public class DelayFixedPlanarRegionsSubscription
       }
 
       this.enabled = enabled;
+   }
+
+   public double getDelay()
+   {
+      return delay;
    }
 }
