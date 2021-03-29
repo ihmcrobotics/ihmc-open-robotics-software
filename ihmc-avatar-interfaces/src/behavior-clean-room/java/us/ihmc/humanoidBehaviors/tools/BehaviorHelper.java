@@ -198,7 +198,7 @@ public class BehaviorHelper
 
    public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
    {
-      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros1Node, managedROS2Node, robotModel, topic, callback);
+      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(managedROS2Node, robotModel, topic, callback);
    }
 
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
