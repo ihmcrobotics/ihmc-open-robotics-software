@@ -1,7 +1,7 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -82,7 +82,7 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
 
       failureDetectionControlModule.setNextFootstep(null);
 
-      NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
+      TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(
             RobotSide.LEFT);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();

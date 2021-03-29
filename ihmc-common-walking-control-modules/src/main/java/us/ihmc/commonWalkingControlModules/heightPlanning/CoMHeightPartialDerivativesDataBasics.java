@@ -4,6 +4,20 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
 public interface CoMHeightPartialDerivativesDataBasics extends CoMHeightPartialDerivativesDataReadOnly
 {
+   default void zero()
+   {
+      setCoMHeight(getFrameOfCoMHeight(),0.0);
+      setPartialDzDx(0.0);
+      setPartialDzDy(0.0);
+      setPartialD2zDx2(0.0);
+      setPartialD2zDy2(0.0);
+      setPartialD2zDxDy(0.0);
+      setPartialD3zDx3(0.0);
+      setPartialD3zDy3(0.0);
+      setPartialD3zDx2Dy(0.0);
+      setPartialD3zDxDy2(0.0);
+   }
+
    default void set(CoMHeightPartialDerivativesDataReadOnly centerOfMassHeightPartialDerivativesData)
    {
       setCoMHeight(centerOfMassHeightPartialDerivativesData.getFrameOfCoMHeight(), centerOfMassHeightPartialDerivativesData.getComHeight());

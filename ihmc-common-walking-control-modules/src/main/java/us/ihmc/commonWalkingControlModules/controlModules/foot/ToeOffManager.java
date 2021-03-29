@@ -339,13 +339,13 @@ public class ToeOffManager
          onToesSupportPolygon.update();
       }
 
-      ReferenceFrame soleFrame = nextFootstep.getSoleReferenceFrame();
+      FramePoint3DReadOnly nextFootPosition = nextFootstep.getFootstepPose().getPosition();
       double requiredProximity = checkICPLocations(trailingLeg,
                                                    desiredICP,
                                                    currentICP,
                                                    toeContact.getToeOffPoint(),
                                                    nextFootSupportPolygon,
-                                                   soleFrame,
+                                                   nextFootPosition,
                                                    percentProximity);
       icpProximityToLeadingFootForSSToeOff.set(requiredProximity);
 
@@ -357,7 +357,7 @@ public class ToeOffManager
 
       if (doToeOffIfPossibleInSingleSupport.getValue())
       {
-         toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
+         toeContact.isReadyToSwitchToToeOff(trailingLeg, nextFootPosition);
       }
       else
       {
@@ -426,13 +426,13 @@ public class ToeOffManager
          onToesSupportPolygon.update();
       }
 
-      ReferenceFrame soleFrame = feet.get(trailingLeg.getOppositeSide()).getSoleFrame();
+      nextFrontFootPosition.setToZero(feet.get(trailingLeg.getOppositeSide()).getSoleFrame());
       double requiredProximity = checkICPLocations(trailingLeg,
                                                    desiredICP,
                                                    currentICP,
                                                    toeContact.getToeOffPoint(),
                                                    leadingFootSupportPolygon,
-                                                   soleFrame,
+                                                   nextFrontFootPosition,
                                                    percentProximity);
       icpProximityToLeadingFootForDSToeOff.set(requiredProximity);
 
@@ -444,7 +444,7 @@ public class ToeOffManager
 
       if (doToeOffIfPossibleInDoubleSupport.getValue())
       {
-         toeContact.isReadyToSwitchToToeOff(trailingLeg, soleFrame);
+         toeContact.isReadyToSwitchToToeOff(trailingLeg, nextFrontFootPosition);
       }
       else
       {
@@ -546,7 +546,7 @@ public class ToeOffManager
                                     FramePoint2DReadOnly currentICP,
                                     FramePoint2DReadOnly toeOffPoint,
                                     FrameConvexPolygon2DReadOnly leadingFootSupportPolygon,
-                                    ReferenceFrame nextSoleFrame,
+                                    FramePoint3DReadOnly nextFootPosition,
                                     double percentProximity)
    {
       desiredICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(desiredICP));
@@ -556,7 +556,7 @@ public class ToeOffManager
 
       double requiredProximityToLeadingFoot;
       if (percentProximity > 0.0)
-         requiredProximityToLeadingFoot = computeRequiredICPProximity(trailingLeg, nextSoleFrame, toeOffPoint, percentProximity);
+         requiredProximityToLeadingFoot = computeRequiredICPProximity(trailingLeg, nextFootPosition, toeOffPoint, percentProximity);
       else
          requiredProximityToLeadingFoot = 0.0;
 
@@ -575,12 +575,12 @@ public class ToeOffManager
    }
 
    private double computeRequiredICPProximity(RobotSide trailingLeg,
-                                              ReferenceFrame nextSoleFrame,
+                                              FramePoint3DReadOnly nextFootPosition,
                                               FramePoint2DReadOnly toeOffPoint,
                                               double percentOfStanceForToeOff)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
-      tempLeadingFootPosition.setToZero(nextSoleFrame);
+      tempLeadingFootPosition.setIncludingFrame(nextFootPosition);
       tempLeadingFootPosition.changeFrameAndProjectToXYPlane(trailingFootFrame);
       //      tempTrailingFootPosition.setToZero(trailingFootFrame);
 
@@ -633,11 +633,11 @@ public class ToeOffManager
       return isRearKneePitchHittingLowerLimitFilt.getBooleanValue();
    }
 
-   private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
+   private boolean isFrontFootWellPositionedForToeOff(RobotSide trailingLeg, FramePoint3DReadOnly frontFootPosition)
    {
       ReferenceFrame trailingFootFrame = feet.get(trailingLeg).getSoleFrame();
       tempTrailingFootPosition.setToZero(trailingFootFrame);
-      tempLeadingFootPosition.setToZero(frontFootFrame);
+      tempLeadingFootPosition.setIncludingFrame(frontFootPosition);
       tempLeadingFootPosition.changeFrameAndProjectToXYPlane(trailingFootFrame);
 
       if (Math.abs(tempLeadingFootPosition.getY()) > inPlaceWidth)
@@ -647,7 +647,7 @@ public class ToeOffManager
 
       leadingFootPosition.set(tempLeadingFootPosition.getX(), tempLeadingFootPosition.getY());
 
-      tempLeadingFootPositionInWorld.setToZero(frontFootFrame);
+      tempLeadingFootPositionInWorld.setIncludingFrame(frontFootPosition);
       tempTrailingFootPositionInWorld.setToZero(trailingFootFrame);
       tempLeadingFootPositionInWorld.changeFrame(worldFrame);
       tempTrailingFootPositionInWorld.changeFrame(worldFrame);
@@ -674,42 +674,43 @@ public class ToeOffManager
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * @param nextFootstep footstep to consider.
+    * @param nextFootstepPosition footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoSingleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   public boolean canDoSingleSupportToeOff(FramePoint3DReadOnly nextFootstepPosition, RobotSide transferToSide)
    {
       if (!doToeOffIfPossibleInSingleSupport.getValue())
          return false;
 
-      return canDoToeOff(nextFootstep, transferToSide);
+      return canDoToeOff(nextFootstepPosition, transferToSide);
    }
 
    /**
-    * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * @param nextFootstep footstep to consider.
+    * Checks whether or not the next footstep in {@param nextFootstepPosition} is in correct location to achieve toe off.
+    * @param nextFootstepPosition footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoDoubleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   public boolean canDoDoubleSupportToeOff(FramePoint3DReadOnly nextFootstepPosition, RobotSide transferToSide)
    {
       if (!doToeOffIfPossibleInDoubleSupport.getValue())
          return false;
 
-      return canDoToeOff(nextFootstep, transferToSide);
+      return canDoToeOff(nextFootstepPosition, transferToSide);
    }
 
-   public boolean canDoToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   private final FramePoint3D nextFrontFootPosition = new FramePoint3D();
+
+   public boolean canDoToeOff(FramePoint3DReadOnly nextFootstepPosition, RobotSide transferToSide)
    {
       RobotSide nextTrailingLeg = transferToSide.getOppositeSide();
-      ReferenceFrame nextFrontFootFrame;
-      if (nextFootstep != null)
-         nextFrontFootFrame = nextFootstep.getSoleReferenceFrame();
+      if (nextFootstepPosition != null)
+         nextFrontFootPosition.setIncludingFrame(nextFootstepPosition);
       else
-         nextFrontFootFrame = feet.get(nextTrailingLeg.getOppositeSide()).getSoleFrame();
+         nextFrontFootPosition.setToZero(feet.get(nextTrailingLeg.getOppositeSide()).getSoleFrame());
 
-      this.isFrontFootWellPositionedForToeOff.set(isFrontFootWellPositionedForToeOff(nextTrailingLeg, nextFrontFootFrame));
+      this.isFrontFootWellPositionedForToeOff.set(isFrontFootWellPositionedForToeOff(nextTrailingLeg, nextFrontFootPosition));
       return this.isFrontFootWellPositionedForToeOff.getBooleanValue();
    }
 
@@ -741,9 +742,9 @@ public class ToeOffManager
    /**
     * Call after any of the following methods to get whether the upcoming footstep corresponds to a step up or not:
     * <ul>
-    * <li>{@link #canDoToeOff(Footstep, RobotSide)}
-    * <li>{@link #canDoSingleSupportToeOff(Footstep, RobotSide)}
-    * <li>{@link #canDoDoubleSupportToeOff(Footstep, RobotSide)}
+    * <li>{@link #canDoToeOff(FramePoint3DReadOnly, RobotSide)}
+    * <li>{@link #canDoSingleSupportToeOff(FramePoint3DReadOnly, RobotSide)}
+    * <li>{@link #canDoDoubleSupportToeOff(FramePoint3DReadOnly, RobotSide)}
     * </ul>
     * 
     * @return whether the upcoming footstep corresponds to a step up or not.
@@ -751,6 +752,11 @@ public class ToeOffManager
    public boolean isSteppingUp()
    {
       return isSteppingUp.getValue();
+   }
+
+   public boolean useToeLineContactInTransfer()
+   {
+      return useToeLineContactInTransfer.getValue();
    }
 
    private enum ToeContact
@@ -769,7 +775,7 @@ public class ToeOffManager
                                                    RobotSide trailingSide,
                                                    FrameConvexPolygon2DReadOnly leadingSupportPolygon);
 
-      public abstract void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame);
+      public abstract void isReadyToSwitchToToeOff(RobotSide trailingLeg, FramePoint3DReadOnly frontFootPosition);
 
       public abstract boolean evaluateToeOffConditions(RobotSide trailingLeg);
 
@@ -830,9 +836,9 @@ public class ToeOffManager
       }
 
       @Override
-      public void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
+      public void isReadyToSwitchToToeOff(RobotSide trailingLeg, FramePoint3DReadOnly frontFootPosition)
       {
-         isFrontFootWellPositionedForToeOff.set(isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame));
+         isFrontFootWellPositionedForToeOff.set(isFrontFootWellPositionedForToeOff(trailingLeg, frontFootPosition));
          if (!isFrontFootWellPositionedForToeOff.getBooleanValue())
          {
             doLineToeOff.set(false);
@@ -925,9 +931,9 @@ public class ToeOffManager
       }
 
       @Override
-      public void isReadyToSwitchToToeOff(RobotSide trailingLeg, ReferenceFrame frontFootFrame)
+      public void isReadyToSwitchToToeOff(RobotSide trailingLeg, FramePoint3DReadOnly frontFootPosition)
       {
-         isFrontFootWellPositionedForToeOff.set(isFrontFootWellPositionedForToeOff(trailingLeg, frontFootFrame));
+         isFrontFootWellPositionedForToeOff.set(isFrontFootWellPositionedForToeOff(trailingLeg, frontFootPosition));
          if (!isFrontFootWellPositionedForToeOff.getBooleanValue())
          {
             doPointToeOff.set(false);
@@ -999,4 +1005,5 @@ public class ToeOffManager
          return true;
       }
    }
+
 }
