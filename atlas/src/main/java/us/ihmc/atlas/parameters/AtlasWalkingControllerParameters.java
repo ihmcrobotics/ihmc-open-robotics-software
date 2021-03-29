@@ -94,6 +94,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
+     double thresholdMarginFraction = 0.02;
+     double distanceDeadBandSize = 0.0;
+     double velocityDeadBandSize = 0.6;
+
       spineJointLimitParameters = new JointLimitParameters();
       spineJointLimitParameters.setMaxAbsJointVelocity(9.0);
       spineJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
