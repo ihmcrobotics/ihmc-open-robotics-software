@@ -6,6 +6,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 
+/**
+ * This classes discretizes a continuous system. It just assumes a constant state rate, and integrates that constant rate for the time step.
+ */
 public class DiscreteDiscretizationCalculator implements DiscretizationCalculator
 {
    @Override

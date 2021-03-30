@@ -6,6 +6,10 @@ import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.matrixlib.MatrixTools;
 
+/**
+ * This classes discretizes a continuous system. It uses the bilinear transform (aka Tustin transform), as outlined here:
+ * {@url https://en.wikipedia.org/wiki/Discretization}
+ */
 public class BilinearDiscretizationCalculator implements DiscretizationCalculator
 {
    private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.general(6, 6);
