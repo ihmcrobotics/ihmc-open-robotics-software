@@ -90,6 +90,7 @@ public class WholeBodyControllerBoundCalculator
          jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
          jointLimitTypes[jointIndex] = JointLimitEnforcement.DEFAULT;
          jointLimitParameters[jointIndex] = new JointLimitParameters();
+         jointLimitData[jointIndex] = new JointLimitData();
 
          YoDouble filterAlpha = new YoDouble("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
          YoDouble velocityDeadband = new YoDouble("joint_limit_velocity_deadband" + joint.getName(), parentRegistry);
