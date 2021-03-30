@@ -32,7 +32,7 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                           HighLevelControllerState finalControllerState, OneDoFJointBasics[] controlledJoints,
                                           HighLevelControllerParameters highLevelControllerParameters)
    {
-      super(namePrefix, controllerState, highLevelControllerParameters, controlledJoints);
+      super(namePrefix, controllerState, controlledJoints);
 
       this.initialControllerState = initialControllerState;
       this.finalControllerState = finalControllerState;
@@ -102,8 +102,6 @@ public class SmoothTransitionControllerState extends HighLevelControllerState
                                                           walkingJointCommand.getJointDesiredOutput(joint),
                                                           gainRatio);
       }
-
-      lowLevelOneDoFJointDesiredDataHolder.completeWith(getStateSpecificJointSettings());
    }
 
    @Override
