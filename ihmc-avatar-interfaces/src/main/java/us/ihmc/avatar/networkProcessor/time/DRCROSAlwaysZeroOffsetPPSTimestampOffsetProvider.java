@@ -3,12 +3,12 @@ package us.ihmc.avatar.networkProcessor.time;
 
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.ihmcPerception.time.AlwaysZeroOffsetPPSTimestampOffsetProvider;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosNodeInterface;
 
 public class DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider extends AlwaysZeroOffsetPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
 {
    @Override
-   public void attachToRosMainNode(RosMainNode rosMainNode)
+   public void subscribeROS1(RosNodeInterface ros1Node)
    {
    }
 }

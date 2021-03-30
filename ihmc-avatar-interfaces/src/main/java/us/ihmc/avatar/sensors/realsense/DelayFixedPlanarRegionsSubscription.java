@@ -45,6 +45,7 @@ public class DelayFixedPlanarRegionsSubscription
    private boolean enabled = false;
    private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
    private double delay = 0.0;
+   private RosNodeInterface ros1Node;
 
    public DelayFixedPlanarRegionsSubscription(ROS2NodeInterface ros2Node,
                                               DRCRobotModel robotModel,
@@ -57,6 +58,9 @@ public class DelayFixedPlanarRegionsSubscription
       this.callback = callback;
 
       rosClockCalculator = robotModel.getROSClockCalculator();
+      ROS2Tools.createCallbackSubscription2(ros2Node,
+                                            ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                            rosClockCalculator::receivedRobotConfigurationData);
 
       ROS2Tools.createCallbackSubscription2(ros2Node, ROS2Tools.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
 
@@ -79,12 +83,15 @@ public class DelayFixedPlanarRegionsSubscription
 
    public void subscribe(RosNodeInterface ros1Node)
    {
+      this.ros1Node = ros1Node;
+      rosClockCalculator.subscribeROS1(ros1Node);
       subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
    }
 
    public void unsubscribe(RosNodeInterface ros1Node)
    {
       ros1Node.removeSubscriber(subscriber);
+      rosClockCalculator.unsubscribeROS1(ros1Node);
    }
 
    private void acceptRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -105,6 +112,13 @@ public class DelayFixedPlanarRegionsSubscription
             //      LogTools.info("Latest delay: {}", seconds);
             timestamp -= Conversions.secondsToNanoseconds(seconds);
 
+
+            if (!rosClockCalculator.offsetIsDetermined())
+            {
+               delay = Double.NaN;
+               return;
+            }
+
             long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
             if (controllerTime == -1L)
             {
@@ -123,7 +137,9 @@ public class DelayFixedPlanarRegionsSubscription
             long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
             if (selectedTimestamp != -1L)
             {
-               delay = controllerTime - timestamp;
+               long currentTimeInWall = ros1Node.getCurrentTime().totalNsecs();
+               long selectedTimeInWall = selectedTimestamp - rosClockCalculator.getCurrentTimestampOffset();
+               delay = Conversions.nanosecondsToSeconds(currentTimeInWall - selectedTimeInWall);
 
                try
                {
