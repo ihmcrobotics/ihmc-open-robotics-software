@@ -141,6 +141,13 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
                                                                      RobotSide stanceSide = state.getFootstep(0).getRobotSide().getOppositeSide();
                                                                      return state.getFootPose(stanceSide);
                                                                   });
+
+      positionSplitFractionCalculator.setTrailingSupportPoseProvider(() ->
+                                                                  {
+                                                                     RobotSide trailingSide = state.getFootstep(0).getRobotSide();
+                                                                     return state.getFootPose(trailingSide);
+                                                                  });
+
       positionSplitFractionCalculator.setStepPoseGetter((i) -> state.getFootstep(i).getFootstepPose());
 
       areaSplitFractionCalculator.setNumberOfStepsProvider(state::getNumberOfFootstep);

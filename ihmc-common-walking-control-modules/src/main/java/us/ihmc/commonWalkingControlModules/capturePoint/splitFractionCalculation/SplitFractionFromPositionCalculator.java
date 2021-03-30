@@ -14,12 +14,14 @@ public class SplitFractionFromPositionCalculator
 {
    private final FramePose3D stanceFootPose = new FramePose3D();
    private final FramePose3D nextFootPose = new FramePose3D();
+   private final FramePose3D trailingFootPose = new FramePose3D();
 
    private final SplitFractionCalculatorParametersReadOnly splitFractionParameters;
 
    private IntSupplier numberOfStepsProvider;
    private IntFunction<FramePose3DReadOnly> stepPoseGetter;
    private Supplier<? extends Pose3DReadOnly> firstSupportPoseProvider;
+   private Supplier<? extends Pose3DReadOnly> trailingSupportPoseProvider;
    private DoubleSupplier finalTransferWeightDistributionProvider;
    private DoubleSupplier finalTransferSplitFractionProvider;
    private IntToDoubleFunction transferWeightDistributionProvider;
@@ -84,6 +86,11 @@ public class SplitFractionFromPositionCalculator
       this.firstSupportPoseProvider = firstSupportPoseProvider;
    }
 
+   public void setTrailingSupportPoseProvider(Supplier<? extends Pose3DReadOnly> trailingSupportPoseProvider)
+   {
+      this.trailingSupportPoseProvider = trailingSupportPoseProvider;
+   }
+
    public void setStepPoseGetter(IntFunction<FramePose3DReadOnly> stepPoseGetter)
    {
       this.stepPoseGetter = stepPoseGetter;
@@ -104,18 +111,20 @@ public class SplitFractionFromPositionCalculator
          if (stepNumber == 0)
          {
             stanceFootPose.setIncludingFrame(worldFrame, firstSupportPoseProvider.get());
+            trailingFootPose.setIncludingFrame(worldFrame, trailingSupportPoseProvider.get());
          }
          else
          {
             stanceFootPose.set(stepPoseGetter.apply(stepNumber - 1));
+            trailingFootPose.set(stepPoseGetter.apply(stepNumber - 1));
          }
 
          nextFootPose.set(stepPoseGetter.apply(stepNumber));
 
          // This step is a big step down.
          double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
-
-         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
+         double trailingLegToNextStepHeight = nextFootPose.getZ() - trailingFootPose.getZ();
+         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown() || trailingLegToNextStepHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
          {
             double alpha = Math.min(1.0,
                                     (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
