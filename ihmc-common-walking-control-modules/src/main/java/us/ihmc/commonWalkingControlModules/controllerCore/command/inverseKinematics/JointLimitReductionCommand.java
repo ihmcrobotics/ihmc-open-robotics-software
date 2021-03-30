@@ -9,6 +9,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
+/**
+ * Use {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters} in the
+ * {@link us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand} instead
+ */
+@Deprecated
 public class JointLimitReductionCommand implements InverseKinematicsCommand<JointLimitReductionCommand>, InverseDynamicsCommand<JointLimitReductionCommand>
 {
    private static final int initialCapacity = 40;
