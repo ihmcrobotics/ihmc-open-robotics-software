@@ -86,14 +86,13 @@ public class CollisionFreeSwingCalculatorTest
       footstepPlan.addFootstep(steppingSide, footstep);
 
       runTest(boxOnGround, initialStance, footstepPlan);
-
    }
 
    @Test
    public void testBigBox()
    {
       double boxLengthX = 0.3;
-      double boxHeight = 0.3;
+      double boxHeight = 0.2;
 
       swingParameters.set(SwingPlannerParameterKeys.maxDisplacementHigh, 0.4);
       swingParameters.set(SwingPlannerParameterKeys.maxDisplacementLow, 0.1);
@@ -118,6 +117,65 @@ public class CollisionFreeSwingCalculatorTest
       footstep.setX(0.5 * boxLengthX + xClearance + footBackwardOffset);
       footstep.setY(initialStance.get(steppingSide).getY());
       footstepPlan.addFootstep(steppingSide, footstep);
+
+      runTest(boxOnGround, initialStance, footstepPlan);
+   }
+
+   @Test
+   public void testStepUpAndDown()
+   {
+      double boxLengthX = 0.3;
+      double boxHeight = 0.3;
+
+      swingParameters.set(SwingPlannerParameterKeys.maxDisplacementHigh, 0.4);
+      swingParameters.set(SwingPlannerParameterKeys.maxDisplacementLow, 0.1);
+
+      PlanarRegionsList boxOnGround = boxOnGround(boxLengthX, boxHeight);
+      double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
+      double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
+      double xClearance = 0.03;
+
+      SideDependentList<Pose3D> initialStance = new SideDependentList<>(side -> new Pose3D(-0.5 * boxLengthX - xClearance - footForwardOffset,
+                                                                                           0.5
+                                                                                           * side.negateIfRightSide(walkingControllerParameters.getSteppingParameters()
+                                                                                                                                               .getInPlaceWidth()),
+                                                                                           0.0,
+                                                                                           0.0,
+                                                                                           0.0,
+                                                                                           0.0));
+      FootstepPlan footstepPlan = new FootstepPlan();
+
+      {
+         RobotSide steppingSide0 = RobotSide.LEFT;
+         FramePose3D footstep0 = new FramePose3D();
+         footstep0.setZ(boxHeight);
+         footstep0.setY(0.5 * walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
+         footstepPlan.addFootstep(steppingSide0, footstep0);
+      }
+
+      {
+         RobotSide steppingSide1 = RobotSide.RIGHT;
+         FramePose3D footstep1 = new FramePose3D();
+         footstep1.setZ(boxHeight);
+         footstep1.setY(-0.5 * walkingControllerParameters.getSteppingParameters().getInPlaceWidth());
+         footstepPlan.addFootstep(steppingSide1, footstep1);
+      }
+
+      {
+         RobotSide steppingSide2 = RobotSide.LEFT;
+         FramePose3D footstep2 = new FramePose3D();
+         footstep2.setX(0.5 * boxLengthX + xClearance + footBackwardOffset);
+         footstep2.setY(initialStance.get(steppingSide2).getY());
+         footstepPlan.addFootstep(steppingSide2, footstep2);
+      }
+
+      {
+         RobotSide steppingSide3 = RobotSide.LEFT;
+         FramePose3D footstep3 = new FramePose3D();
+         footstep3.setX(0.5 * boxLengthX + xClearance + footBackwardOffset);
+         footstep3.setY(-initialStance.get(steppingSide3).getY());
+         footstepPlan.addFootstep(steppingSide3, footstep3);
+      }
 
       runTest(boxOnGround, initialStance, footstepPlan);
    }
