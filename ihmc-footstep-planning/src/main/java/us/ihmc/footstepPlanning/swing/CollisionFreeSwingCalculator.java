@@ -38,8 +38,8 @@ public class CollisionFreeSwingCalculator
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private static final int numberOfKnotPoints = 12;
-
-   private static final double collisionWeight = 10.0;
+   private static final double motionCorrelationAlpha = 0.5;
+   private static final double collisionGradientScale = 0.4;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoInteger iterations = new YoInteger("iterations", registry);
@@ -57,9 +57,8 @@ public class CollisionFreeSwingCalculator
    private final List<FramePoint3D> defaultWaypoints = new ArrayList<>();
 
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
-   private final Vector3D totalGradient = new Vector3D();
    private final Vector3D collisionGradient = new Vector3D();
-   private final Vector3D smoothnessGradient = new Vector3D();
+   private final Vector3D scaledGradient = new Vector3D();
 
    private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
    private final List<FramePoint3DReadOnly> fullTrajectoryPoints = new ArrayList<>();
@@ -253,7 +252,7 @@ public class CollisionFreeSwingCalculator
    {
       iterations.set(0);
 
-      int maxIterations = 70;
+      int maxIterations = 30;
       for (int i = 0; i < maxIterations; i++)
       {
          iterations.increment();
@@ -262,7 +261,7 @@ public class CollisionFreeSwingCalculator
          for (int j = 0; j < numberOfKnotPoints; j++)
          {
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
-            totalGradient.setToZero();
+//            totalGradient.setToZero();
 
             // collision gradient
             boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList);
@@ -270,28 +269,36 @@ public class CollisionFreeSwingCalculator
             {
                EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
                collisionGradient.sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
-               collisionGradient.scale(0.4);
-               totalGradient.add(collisionGradient);
+               collisionGradient.scale(collisionGradientScale);
                intersectionDistance.set(Math.max(intersectionDistance.getDoubleValue(), collisionResult.getDistance()));
             }
-
-            // smoothness gradient
-            smoothnessCost.set(computeSmoothnessCost());
-            Point3D currentPosition = new Point3D(knotPoint.getCurrentWaypoint().getPosition());
-
-            for (int k = 0; k < 3; k++)
+            else
             {
-               double gradientEpsilon = 1e-7;
-               knotPoint.getCurrentWaypoint().getPosition().setToZero();
-               knotPoint.getCurrentWaypoint().getPosition().setElement(k, gradientEpsilon);
-               knotPoint.getCurrentWaypoint().getPosition().add(currentPosition);
-               double fxi = computeSmoothnessCost();
-
-               smoothnessGradient.setElement(k, -1e-5 * (fxi - smoothnessCost.getDoubleValue()) / gradientEpsilon);
+               continue;
             }
 
-            totalGradient.add(smoothnessGradient);
-            knotPoint.shiftWaypoint(totalGradient);
+//            // smoothness gradient
+//            smoothnessCost.set(computeSmoothnessCost());
+//            Point3D currentPosition = new Point3D(knotPoint.getCurrentWaypoint().getPosition());
+//
+//            for (int k = 0; k < 3; k++)
+//            {
+//               double gradientEpsilon = 1e-7;
+//               knotPoint.getCurrentWaypoint().getPosition().setToZero();
+//               knotPoint.getCurrentWaypoint().getPosition().setElement(k, gradientEpsilon);
+//               knotPoint.getCurrentWaypoint().getPosition().add(currentPosition);
+//               double fxi = computeSmoothnessCost();
+//
+//               smoothnessGradient.setElement(k, -1e-5 * (fxi - smoothnessCost.getDoubleValue()) / gradientEpsilon);
+//            }
+
+            for (int k = 0; k < numberOfKnotPoints; k++)
+            {
+               int indexDifference = Math.abs(k - j);
+               scaledGradient.set(collisionGradient);
+               scaledGradient.scale(exp(motionCorrelationAlpha, indexDifference));
+               swingKnotPoints.get(k).shiftWaypoint(scaledGradient);
+            }
 
             if (visualize)
             {
@@ -304,6 +311,21 @@ public class CollisionFreeSwingCalculator
             tickAndUpdatable.tickAndUpdate();
          }
       }
+   }
+
+   /* exponent function assuming non-negative positive exponent */
+   private static double exp(double base, int exponent)
+   {
+      double value = 1.0;
+      int i = 0;
+
+      while (i < exponent)
+      {
+         value *= base;
+         i++;
+      }
+
+      return value;
    }
 
    private final Vector3D estimatedAcceleration = new Vector3D();
