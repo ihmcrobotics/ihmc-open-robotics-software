@@ -142,8 +142,8 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
-      estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame.getRootFrame(), registry);
-      estimatedAngularVelocity = new YoFrameVector3D(namePrefix, nameSuffix, sensorFrame, registry);
+      estimatedOrientation = new YoFrameQuaternion(namePrefix + "EstimatedOrientation", nameSuffix, sensorFrame.getRootFrame(), registry);
+      estimatedAngularVelocity = new YoFrameVector3D(namePrefix + "EstimatedAngularVelocity", nameSuffix, sensorFrame, registry);
 
       yoErrorTerm = new YoFrameVector3D("ErrorTerm", nameSuffix, sensorFrame, registry);
       yoIntegralTerm = new YoFrameVector3D("IntegralTerm", nameSuffix, sensorFrame, registry);
@@ -438,6 +438,11 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    public YoFrameQuaternion getEstimatedOrientation()
    {
       return estimatedOrientation;
+   }
+
+   public YoFrameVector3D getEstimatedAngularVelocity()
+   {
+      return estimatedAngularVelocity;
    }
 
    public YoFrameVector3D getErrorTerm()
