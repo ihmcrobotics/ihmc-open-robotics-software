@@ -28,6 +28,8 @@ import java.util.function.Consumer;
 
 public class DelayFixedPlanarRegionsSubscription
 {
+   public static final double INITIAL_DELAY_OFFSET = 0.07; // TODO: Put in a stored property set
+
    private final ResettableExceptionHandlingExecutorService executorService;
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final ReferenceFrame sensorFrame;
@@ -37,7 +39,7 @@ public class DelayFixedPlanarRegionsSubscription
    private final DRCRobotModel robotModel;
    private final String topic;
    private final Consumer<PlanarRegionsList> callback;
-   private final MutableDouble delayOffset = new MutableDouble();
+   private final MutableDouble delayOffset = new MutableDouble(INITIAL_DELAY_OFFSET);
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
    private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
