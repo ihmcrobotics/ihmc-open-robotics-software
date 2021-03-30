@@ -93,6 +93,7 @@ public class ToeOffManager
    private final YoBoolean isDesiredCoPOKForToeOff = new YoBoolean("isDesiredCoPOKForToeOff", registry);
    private final YoBoolean isFrontFootWellPositionedForToeOff = new YoBoolean("isFrontFootWellPositionedForToeOff", registry);
 
+   private final YoBoolean icpIsInsideSupportFoot = new YoBoolean("icpIsInsideSupportFoot", registry);
    private final YoBoolean needToSwitchToToeOffForJointLimit = new YoBoolean("needToSwitchToToeOffForJointLimit", registry);
    private final YoBoolean needToSwitchToToeOffForAnkleLimit = new YoBoolean("needToSwitchToToeOffForAnkleLimit", registry);
    private final YoBoolean needToSwitchToToeOffForLeadingKneeAtLimit = new YoBoolean("needToSwitchToToeOffForLeadingKneeAtLimit", registry);
@@ -147,6 +148,7 @@ public class ToeOffManager
    private final SideDependentList<? extends ContactablePlaneBody> feet;
    private final SideDependentList<FrameConvexPolygon2D> footDefaultPolygons;
    private final FrameConvexPolygon2D leadingFootSupportPolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D trailingFootSupportPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D nextFootSupportPolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2D onToesSupportPolygon = new FrameConvexPolygon2D();
 
@@ -262,6 +264,8 @@ public class ToeOffManager
       isRearAnklePitchHittingLimit.set(false);
       isRearAnklePitchHittingLimitFilt.set(false);
 
+      icpIsInsideSupportFoot.set(true);
+
       isDesiredICPOKForToeOff.set(false);
       isDesiredICPOKForToeOffFilt.set(false);
 
@@ -338,6 +342,12 @@ public class ToeOffManager
          onToesSupportPolygon.addVertex(finalDesiredICP);
          onToesSupportPolygon.update();
       }
+
+      trailingFootSupportPolygon.clear(feet.get(trailingLeg).getSoleFrame());
+      for (int i = 0; i < feet.get(trailingLeg).getTotalNumberOfContactPoints(); i++)
+         trailingFootSupportPolygon.addVertex(feet.get(trailingLeg).getContactPoints2d().get(i));
+      trailingFootSupportPolygon.update();
+      trailingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       FramePoint3DReadOnly nextFootPosition = nextFootstep.getFootstepPose().getPosition();
       double requiredProximity = checkICPLocations(trailingLeg,
@@ -425,6 +435,12 @@ public class ToeOffManager
          onToesSupportPolygon.addVertex(finalDesiredICP);
          onToesSupportPolygon.update();
       }
+
+      trailingFootSupportPolygon.clear(feet.get(trailingLeg).getSoleFrame());
+      for (int i = 0; i < feet.get(trailingLeg).getTotalNumberOfContactPoints(); i++)
+         trailingFootSupportPolygon.addVertex(feet.get(trailingLeg).getContactPoints2d().get(i));
+      trailingFootSupportPolygon.update();
+      trailingFootSupportPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       nextFrontFootPosition.setToZero(feet.get(trailingLeg.getOppositeSide()).getSoleFrame());
       double requiredProximity = checkICPLocations(trailingLeg,
@@ -549,6 +565,8 @@ public class ToeOffManager
                                     FramePoint3DReadOnly nextFootPosition,
                                     double percentProximity)
    {
+      icpIsInsideSupportFoot.set(trailingFootSupportPolygon.isPointInside(currentICP));
+
       desiredICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(desiredICP));
       currentICPProximityToOnToes.set(onToesSupportPolygon.signedDistance(currentICP));
       desiredICPProximityToLeadingFoot.set(leadingFootSupportPolygon.signedDistance(desiredICP));
@@ -871,7 +889,7 @@ public class ToeOffManager
          needToSwitchToToeOffForTrailingKneeAtLimit.set(trailingKneeAtLimit);
          needToSwitchToToeOffForJointLimit.set(ankleAtLimit || leadingKneeAtLimit || trailingKneeAtLimit);
 
-         if (forceToeOffAtJointLimit.getValue() && needToSwitchToToeOffForJointLimit.getBooleanValue())
+         if (forceToeOffAtJointLimit.getValue() && needToSwitchToToeOffForJointLimit.getBooleanValue() && !icpIsInsideSupportFoot.getBooleanValue())
          {
             doLineToeOff.set(true);
             computeToeLineContact.set(updateLineContactDuringToeOff.getValue());

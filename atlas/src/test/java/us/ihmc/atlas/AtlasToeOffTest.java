@@ -16,6 +16,12 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 public class AtlasToeOffTest extends AvatarToeOffTest
 {
     @Test
+    public void testToeOffWithDifferentStepLengths(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    {
+        super.testToeOffWithDifferentStepLengths(testInfo);
+    }
+
+    @Test
     @Disabled
     public void testToeOffTakingShortStepDownCheckingAnkleLimits(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {
@@ -94,7 +100,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
                             @Override
                             public double getECMPProximityForToeOff()
                             {
-                                return 0.1;
+                                return 0.04;
                             }
 
                             @Override
@@ -106,7 +112,7 @@ public class AtlasToeOffTest extends AvatarToeOffTest
                             @Override
                             public double getICPPercentOfStanceForSSToeOff()
                             {
-                                return 0.20;
+                                return 0.25;
                             }
                         };
                     }

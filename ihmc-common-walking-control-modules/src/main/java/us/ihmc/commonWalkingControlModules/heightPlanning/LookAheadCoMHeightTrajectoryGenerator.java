@@ -24,6 +24,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3Trajector
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -67,7 +68,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final YoFramePoint3D yoTransferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoTransferToPosition = new YoFramePoint3D("transferToPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D desiredCoMPositionAtStart = new YoFramePoint3D("desiredCoMPositionAtStart", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint3D desiredCoMPositionAtEnd = new YoFramePoint3D("desiredCoMPositionAtEnd", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint2D desiredCoMPositionAtEnd = new YoFramePoint2D("desiredCoMPositionAtEnd", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
@@ -312,9 +313,10 @@ public class LookAheadCoMHeightTrajectoryGenerator
       startCoMPosition.setY(midstanceY);
       endCoMPosition.setY(midstanceY);
 
-      if (!transferToAndNextFootstepsData.getCoMAtEndOfState().containsNaN())
+      desiredCoMPositionAtEnd.set(transferToAndNextFootstepsData.getCoMAtEndOfState());
+
+      if (!desiredCoMPositionAtEnd.containsNaN())
       {
-         desiredCoMPositionAtEnd.set(transferToAndNextFootstepsData.getCoMAtEndOfState());
          tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState(), 0.0);
          tempFramePoint.changeFrame(frameOfSupportLeg);
          tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
@@ -328,7 +330,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
       else
       {
-         desiredCoMPositionAtEnd.setToNaN();
          doubleSupportExchange.set(nominalDoubleSupportExchange.getDoubleValue());
       }
 
@@ -415,6 +416,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                                  startWaypointX,
                                                  startWaypointY,
                                                  startGroundHeight);
+      startMinHeight = Math.min(startMinHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
+      startMaxHeight = Math.max(startMaxHeight, startCoMPosition.getZ() - heightOffsetHandler.getOffsetHeightAboveGround());
       double firstMinHeight = findWaypointHeight(minimumHeight,
                                                  hipWidth.getDoubleValue(),
                                                  startAnkleX,
@@ -429,6 +432,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                                  firstMidpointX,
                                                  firstMidpointY,
                                                  startGroundHeight);
+      firstMinHeight = Math.min(firstMinHeight, startMinHeight);
+      firstMaxHeight = Math.min(firstMaxHeight, startMaxHeight);
 
       double exchangeInFromMinHeight = findWaypointHeight(minimumHeight,
                                                         hipWidth.getDoubleValue(),
@@ -508,6 +513,9 @@ public class LookAheadCoMHeightTrajectoryGenerator
                                                  endGroundHeight);
       double endMinHeight = minimumHeight + endGroundHeight;
       double endMaxHeight = maximumHeight + endGroundHeight;
+      
+      fourthMinHeight = Math.min(fourthMinHeight, endMinHeight);
+      fourthMaxHeight = Math.min(fourthMaxHeight, endMaxHeight);
 
       startWaypoint.setMinMax(startMinHeight, startMaxHeight);
       firstMidpoint.setMinMax(firstMinHeight, firstMaxHeight);
