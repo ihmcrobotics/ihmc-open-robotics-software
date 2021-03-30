@@ -55,6 +55,8 @@ public class LinearMPCTrajectoryHandler
    private final CoMTrajectorySegment comSegmentToAppend = new CoMTrajectorySegment();
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
 
+   private boolean hasTrajectory = false;
+
    public LinearMPCTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
@@ -72,6 +74,12 @@ public class LinearMPCTrajectoryHandler
       comTrajectory.clear();
       vrpTrajectories.clear();
       fullContactSet.clear();
+      hasTrajectory = false;
+   }
+
+   public boolean hasTrajectory()
+   {
+      return hasTrajectory;
    }
 
    /**
@@ -107,6 +115,14 @@ public class LinearMPCTrajectoryHandler
       removeInfoOutsidePreviewWindow();
       overwriteTrajectoryOutsidePreviewWindow(positionInitializationCalculator.getOmega());
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
+   }
+
+   public void initializeTrajectory(FramePoint3DReadOnly end, double omega, double duration)
+   {
+      positionInitializationCalculator.initializeTrajectory(end, duration);
+      overwriteTrajectoryOutsidePreviewWindow(omega);
+
+      hasTrajectory = true;
    }
 
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
@@ -173,6 +189,8 @@ public class LinearMPCTrajectoryHandler
 
       overwriteTrajectoryOutsidePreviewWindow(omega);
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
+
+      hasTrajectory = true;
 
       if (vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
@@ -319,6 +337,21 @@ public class LinearMPCTrajectoryHandler
    public FramePoint3DReadOnly getDesiredVRPPositionOutsidePreview()
    {
       return positionInitializationCalculator.getDesiredVRPPosition();
+   }
+
+   public void removeCompletedSegments(double timeToCrop)
+   {
+      while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
+         comTrajectory.removeSegment(0);
+
+      if (comTrajectory.getCurrentNumberOfSegments() < 1)
+      {
+         hasTrajectory = false;
+         return;
+      }
+
+      for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments(); i++)
+         comTrajectory.getSegment(i).getTimeInterval().shiftInterval(-timeToCrop);
    }
 
    public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()
