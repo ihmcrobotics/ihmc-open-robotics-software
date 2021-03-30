@@ -7,7 +7,7 @@ import multisense_ros.StampedPps;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.commons.Conversions;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.RosTimestampSubscriber;
 
 public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
@@ -23,14 +23,12 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
 
    private static AtlasPPSTimestampOffsetProvider instance = null;
 
-   private RosMainNode rosMainNode;
+   private RosNodeInterface ros1Node;
    private long multisensePPSTimestamp = -1;
 
    private AtlasPPSTimestampOffsetProvider(AtlasSensorInformation sensorInformation)
    {
       ppsTopic = sensorInformation.getPPSRosTopic();
-
-      setupPPSSubscriber();
    }
 
    private void setupPPSSubscriber()
@@ -49,15 +47,25 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
    }
 
    @Override
-   public void attachToRosMainNode(RosMainNode rosMainNode)
+   public void subscribeROS1(RosNodeInterface ros1Node)
    {
       synchronized (lock)
       {
-         if (this.rosMainNode == null)
+         if (this.ros1Node == null)
          {
-            rosMainNode.attachSubscriber(ppsTopic, ppsSubscriber);
-            this.rosMainNode = rosMainNode;
+            setupPPSSubscriber();
+            ros1Node.attachSubscriber(ppsTopic, ppsSubscriber);
+            this.ros1Node = ros1Node;
          }
+      }
+   }
+
+   @Override
+   public void unsubscribeROS1(RosNodeInterface ros1Node)
+   {
+      synchronized (lock)
+      {
+         ros1Node.removeSubscriber(ppsSubscriber);
       }
    }
 
@@ -97,12 +105,12 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
    {
       synchronized (lock)
       {
-         if (rosMainNode != null && rosMainNode.isStarted())
+         if (ros1Node != null && ros1Node.isStarted())
          {
             long lastPPSTimestampFromRobot = packet.getSyncTimestamp();
 
             long ppsFromRobotAge = packet.getMonotonicTime() - lastPPSTimestampFromRobot;
-            long ppsFromROSAge = rosMainNode.getCurrentTime().totalNsecs() - multisensePPSTimestamp;
+            long ppsFromROSAge = ros1Node.getCurrentTime().totalNsecs() - multisensePPSTimestamp;
 
             // Check if timestamps are approximately the same age. If not, we discard this measurement and wait for the next one.
             if (Math.abs(ppsFromRobotAge - ppsFromROSAge) > Conversions.millisecondsToNanoseconds(100))
@@ -132,5 +140,4 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
          }
       }
    }
-
 }

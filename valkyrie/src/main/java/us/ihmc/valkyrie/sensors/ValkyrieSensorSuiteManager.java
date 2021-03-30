@@ -168,7 +168,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
          stereoVisionPointCloudPublisher.receiveStereoPointCloudFromROS1(multisenseStereoParameters.getRosTopic(), rosMainNode);
       }
 
-      rosClockCalculator.setROSMainNode(rosMainNode);
+      rosClockCalculator.subscribeROS1(rosMainNode);
    }
 
    @Override

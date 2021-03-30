@@ -206,7 +206,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
                                                                 rosMainNode);
       }
 
-      rosClockCalculator.setROSMainNode(rosMainNode);
+      rosClockCalculator.subscribeROS1(rosMainNode);
    }
 
    @Override

@@ -1,16 +1,20 @@
 package us.ihmc.avatar.ros;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosNodeInterface;
 
 public interface RobotROSClockCalculator
 {
    /**
     * Overrides this method for calculators that requires to subscribe to a ROS topic.
-    * 
+    *
     * @param rosMainNode
     */
-   default void setROSMainNode(RosMainNode rosMainNode)
+   default void subscribeROS1(RosNodeInterface rosMainNode)
+   {
+   }
+
+   default void unsubscribeROS1(RosNodeInterface ros1Node)
    {
    }
 
@@ -54,4 +58,14 @@ public interface RobotROSClockCalculator
     * @return the robot monotonic time.
     */
    long computeRobotMonotonicTime(long rosTime);
+
+   default boolean offsetIsDetermined()
+   {
+      return true;
+   }
+
+   default long getCurrentTimestampOffset()
+   {
+      return 0L;
+   }
 }
