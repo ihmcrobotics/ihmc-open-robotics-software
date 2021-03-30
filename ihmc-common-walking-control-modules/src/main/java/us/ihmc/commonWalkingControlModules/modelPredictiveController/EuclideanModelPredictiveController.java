@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
@@ -721,5 +722,23 @@ public abstract class EuclideanModelPredictiveController
    public List<ContactPlaneProvider> getContactStateProviders()
    {
       return linearTrajectoryHandler.getFullPlanningSequence();
+   }
+
+   public boolean hasTrajectories()
+   {
+      return linearTrajectoryHandler.hasTrajectory();
+   }
+
+   public void reset()
+   {
+      linearTrajectoryHandler.clearTrajectory();
+   }
+
+   public MultipleCoMSegmentTrajectoryGenerator getCoMTrajectory()
+   {
+      if (!hasTrajectories())
+         throw new RuntimeException("CoM Trajectories are not calculated");
+
+      return linearTrajectoryHandler.getComTrajectory();
    }
 }

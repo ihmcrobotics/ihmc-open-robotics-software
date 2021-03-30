@@ -2,7 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
@@ -12,6 +14,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -19,9 +23,13 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+
+import java.util.List;
 
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
@@ -66,6 +74,12 @@ public class JumpingBalanceManager
    private final StandingCoPTrajectoryGenerator copTrajectoryForStanding;
    private final JumpingCoPTrajectoryGenerator copTrajectoryForJumping;
 
+
+   private final BooleanProvider useAngularMomentumOffset = new BooleanParameter("useAngularMomentumOffset", registry, false);
+   private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
+   private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
+
+   private final AngularMomentumHandler angularMomentumHandler;
    private final SE3ModelPredictiveController comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
@@ -85,6 +99,11 @@ public class JumpingBalanceManager
       chestFrame = chest.getBodyFixedFrame();
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
+
+
+      angularMomentumHandler = new AngularMomentumHandler(totalMass, gravityZ, controllerToolbox.getCenterOfMassJacobian(),
+                                                          controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
+
 
       comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
                                                               controllerToolbox.getGravityZ(),
@@ -151,6 +170,8 @@ public class JumpingBalanceManager
       comTrajectoryPlanner.setNominalCoMHeight(height);
    }
 
+
+
    public void compute()
    {
       yoDesiredDCM.set(comTrajectoryPlanner.getDesiredDCMPosition());
@@ -179,6 +200,8 @@ public class JumpingBalanceManager
    public void computeCoMPlanForStanding()
    {
       plannerTimer.startMeasurement();
+
+      computeAngularMomentumOffset.set(useAngularMomentumOffsetInStanding.getValue() && useAngularMomentumOffset.getValue());
 
       touchdownCoMPosition.setToNaN();
       touchdownDCMPosition.setToNaN();
@@ -223,6 +246,8 @@ public class JumpingBalanceManager
       plannerTimer.startMeasurement();
       copTrajectoryState.setJumpingGoal(jumpingGoal);
 
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
+
       // update online to account for foot slip
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -239,7 +264,29 @@ public class JumpingBalanceManager
                                                        timeInSupportSequence.getDoubleValue());
 //      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
-      comTrajectoryPlanner.solveForTrajectory(copTrajectoryForJumping.getContactStateProviders());
+      List<ContactPlaneProvider> contactStateProviders = copTrajectoryForJumping.getContactStateProviders();
+      if (computeAngularMomentumOffset.getValue())
+      {
+         if (comTrajectoryPlanner.hasTrajectories())
+         {
+            angularMomentumHandler.solveForAngularMomentumTrajectory(copTrajectoryState,
+                                                                     contactStateProviders,
+                                                                     comTrajectoryPlanner.getCoMTrajectory());
+            contactStateProviders = angularMomentumHandler.computeECMPTrajectory(contactStateProviders);
+         }
+         else
+         {
+            angularMomentumHandler.resetAngularMomentum();
+         }
+
+         angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
+      }
+      else
+      {
+         comTrajectoryPlanner.reset();
+      }
+
+      comTrajectoryPlanner.solveForTrajectory(contactStateProviders);
 
       comTrajectoryPlanner.compute(Math.max(totalStateDuration.getDoubleValue() - timeInSupportSequence.getDoubleValue(), 0.0));
       touchdownCoMPosition.set(comTrajectoryPlanner.getDesiredCoMPosition());
@@ -301,6 +348,16 @@ public class JumpingBalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
+   }
+
+   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   {
+      angularMomentumHandler.setSwingFootTrajectory(swingTrajectory);
+   }
+
+   public void clearSwingFootTrajectory()
+   {
+      angularMomentumHandler.clearSwingFootTrajectory();
    }
 
    public void initializeCoMPlanForStanding()
