@@ -4,7 +4,13 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.EfficientMatrixExponentialCalculator;
 
- public class EfficientFirstOrderHoldDiscretizationCalculator implements DiscretizationCalculator
+ /**
+  * This uses the state exponential to compute the dynamics over the discrete period. It assumes a constant control signal so that this is a
+  * closed form.
+  *
+  * The state matrix can be be assembled across the top. Then, the exponential is computed, with the discrete ones being extracted.
+  */
+public class EfficientFirstOrderHoldDiscretizationCalculator implements DiscretizationCalculator
 {
    private final EfficientMatrixExponentialCalculator matrixExponentialCalculator = new EfficientMatrixExponentialCalculator(6, 10, 10);
 

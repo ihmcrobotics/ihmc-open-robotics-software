@@ -8,6 +8,12 @@ import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
 
+/**
+ * This uses the state exponential to compute the dynamics over the discrete period. It assumes a constant control signal so that this is a
+ * closed form.
+ *
+ * The state matrix can be be assembled across the top. Then, the exponential is computed, with the discrete ones being extracted.
+ */
 public class FirstOrderHoldDiscretizationCalculator implements DiscretizationCalculator
 {
    private final MatrixExponentialCalculator matrixExponentialCalculator = new MatrixExponentialCalculator(6);
