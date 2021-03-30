@@ -117,12 +117,7 @@ public class WholeBodyControllerBoundCalculator
       for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJoints(); commandJointIndex++)
       {
          OneDoFJointBasics joint = command.getJoint(commandJointIndex);
-         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         double originalJointLimitLower = joint.getJointLimitLower();
-         double originalJointLimitUpper = joint.getJointLimitUpper();
-         double limitReduction = command.getJointLimitReductionFactor(commandJointIndex) * jointsRangeOfMotion.get(jointIndex, 0);
-         jointLowerLimits.set(jointIndex, 0, originalJointLimitLower + limitReduction);
-         jointUpperLimits.set(jointIndex, 0, originalJointLimitUpper - limitReduction);
+         romMarginFractions.get(joint).set(command.getJointLimitReductionFactor(commandJointIndex));
       }
    }
 
