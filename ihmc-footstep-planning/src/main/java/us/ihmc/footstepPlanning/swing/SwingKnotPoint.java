@@ -183,6 +183,7 @@ public class SwingKnotPoint
    public boolean doCollisionCheck(ExpandingPolytopeAlgorithm collisionDetector, PlanarRegionsList planarRegionsList)
    {
       this.collisionResult.setToZero();
+      this.collisionResult.setSignedDistance(Double.POSITIVE_INFINITY);
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
@@ -191,8 +192,8 @@ public class SwingKnotPoint
          {
             EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
             collisionDetector.evaluateCollision(collisionBox, planarRegion, collisionResult);
-            if (collisionResult.areShapesColliding() && (!this.collisionResult.areShapesColliding()
-                                                         || collisionResult.getDistance() > this.collisionResult.getDistance()))
+
+            if (collisionResult.getSignedDistance() < this.collisionResult.getSignedDistance())
             {
                this.collisionResult.set(collisionResult);
             }
