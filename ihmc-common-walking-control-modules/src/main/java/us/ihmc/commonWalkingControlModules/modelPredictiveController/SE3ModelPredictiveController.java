@@ -6,11 +6,9 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.AngularVelocityOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -83,7 +81,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
-      this.orientationTrajectoryHandler = new AngularVelocityOrientationMPCTrajectoryHandler(indexHandler);
+      this.orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler);
 
       registry.addChild(orientationTrajectoryHandler.getRegistry());
 
@@ -132,7 +130,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       super.extractSolution(solutionCoefficients);
 
-      orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, linearTrajectoryHandler.getComTrajectory(), currentTimeInState.getDoubleValue(), orientationPreviewWindowDuration.getDoubleValue());
+      orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, currentTimeInState.getDoubleValue(), orientationPreviewWindowDuration.getDoubleValue());
    }
 
    @Override
