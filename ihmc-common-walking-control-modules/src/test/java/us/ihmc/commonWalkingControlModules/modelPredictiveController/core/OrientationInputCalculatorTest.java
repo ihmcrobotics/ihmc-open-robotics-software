@@ -32,7 +32,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class AngularVelocityOrientationInputCalculatorTest
+public class OrientationInputCalculatorTest
 {
    private static final double gravityZ = -9.81;
    private static final double omega = 3.0;
@@ -78,7 +78,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -178,7 +178,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -277,7 +277,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact1);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -420,7 +420,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -531,7 +531,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -611,7 +611,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -800,7 +800,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -914,7 +914,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1023,7 +1023,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1136,7 +1136,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1249,7 +1249,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1372,7 +1372,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1509,7 +1509,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact0);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -1664,7 +1664,7 @@ public class AngularVelocityOrientationInputCalculatorTest
       contactProviders.add(contact1);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      AngularVelocityOrientationInputCalculator inputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -2014,7 +2014,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static void assertRateFromAngularErrorIsCorrect(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                           AngularVelocityOrientationInputCalculator inputCalculator,
+                                                           OrientationInputCalculator inputCalculator,
                                                            DiscreteAngularVelocityOrientationCommand command)
    {
       FrameVector3DReadOnly expectedAngularVelocityErrorRateFromAngularError = computeExpectedAngularVelocityErrorRateFromAngularError(
@@ -2036,7 +2036,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static void assertRateFromAngularVelocityErrorIsCorrect(FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                   AngularVelocityOrientationInputCalculator inputCalculator,
+                                                                   OrientationInputCalculator inputCalculator,
                                                                    DiscreteAngularVelocityOrientationCommand command)
    {
       FrameVector3DReadOnly angularErrorRateFromAngularVelocityError = computeExpectedAngularErrorRateFromAngularVelocityError(angularVelocityErrorAtCurrentTick);
@@ -2056,7 +2056,7 @@ public class AngularVelocityOrientationInputCalculatorTest
 
    private static void assertRateFromContactIsCorrect(FramePoint3DReadOnly comPosition,
                                                       DMatrixRMaj trajectoryCoefficients,
-                                                      AngularVelocityOrientationInputCalculator inputCalculator,
+                                                      OrientationInputCalculator inputCalculator,
                                                       DiscreteAngularVelocityOrientationCommand command)
    {
 
@@ -2080,7 +2080,7 @@ public class AngularVelocityOrientationInputCalculatorTest
                                            FrameVector3DReadOnly angularErrorAtCurrentTick,
                                            FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                            DMatrixRMaj trajectoryCoefficients,
-                                           AngularVelocityOrientationInputCalculator inputCalculator,
+                                           OrientationInputCalculator inputCalculator,
                                            DiscreteAngularVelocityOrientationCommand command)
    {
       FrameVector3DReadOnly expectedAngularErrorRate = computeExpectedAngularErrorRate(angularErrorAtCurrentTick,
@@ -2114,7 +2114,7 @@ public class AngularVelocityOrientationInputCalculatorTest
                                            FrameVector3DReadOnly angularErrorAtCurrentTick,
                                            FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                            DMatrixRMaj trajectoryCoefficients,
-                                           AngularVelocityOrientationInputCalculator inputCalculator,
+                                           OrientationInputCalculator inputCalculator,
                                            DiscreteAngularVelocityOrientationCommand command)
    {
       assertRateFromAngularErrorIsCorrect(angularErrorAtCurrentTick, inputCalculator, command);
@@ -2127,7 +2127,7 @@ public class AngularVelocityOrientationInputCalculatorTest
                                            FrameVector3DReadOnly angularErrorAtCurrentTick,
                                            FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                            DMatrixRMaj trajectoryCoefficients,
-                                           AngularVelocityOrientationInputCalculator inputCalculator,
+                                           OrientationInputCalculator inputCalculator,
                                            DiscreteAngularVelocityOrientationCommand command,
                                            QPInputTypeA qpInputToTest)
    {
@@ -2165,7 +2165,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    private static FrameVector3DReadOnly computeActualAngularErrorRate(FrameVector3DReadOnly angularErrorAtCurrentTick,
                                                                       FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                                                       DMatrixRMaj trajectoryCoefficients,
-                                                                      AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                      OrientationInputCalculator inputCalculator)
    {
       FrameVector3D actualAngularErrorRate = new FrameVector3D();
       actualAngularErrorRate.set(computeActualRateVector(angularErrorAtCurrentTick,
@@ -2179,7 +2179,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    private static FrameVector3DReadOnly computeActualAngularVelocityErrorRate(FrameVector3DReadOnly angularErrorAtCurrentTick,
                                                                               FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                                                               DMatrixRMaj trajectoryCoefficients,
-                                                                              AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                              OrientationInputCalculator inputCalculator)
    {
       FrameVector3D actualAngularVelocityErrorRate = new FrameVector3D();
       actualAngularVelocityErrorRate.set(3, computeActualRateVector(angularErrorAtCurrentTick,
@@ -2191,7 +2191,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static FrameVector3DReadOnly computeActualAngularErrorRateFromAngularError(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                                                      AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                                      OrientationInputCalculator inputCalculator)
    {
       FrameVector3D angularErrorRateFromAngularError = new FrameVector3D();
       angularErrorRateFromAngularError.set(computeActualRateVectorFromAngularError(angularErrorAtCurrentTick, inputCalculator));
@@ -2200,7 +2200,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static FrameVector3DReadOnly computeActualAngularVelocityErrorRateFromAngularError(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                                                              AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                                              OrientationInputCalculator inputCalculator)
    {
       FrameVector3D actualAngularVelocityErrorRateFromAngularError = new FrameVector3D();
       actualAngularVelocityErrorRateFromAngularError.set(3, computeActualRateVectorFromAngularError(angularErrorAtCurrentTick, inputCalculator));
@@ -2209,7 +2209,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static FrameVector3DReadOnly computeActualAngularErrorRateFromAngularVelocityError(FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                                              AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                                              OrientationInputCalculator inputCalculator)
    {
       FrameVector3D angularErrorRateFromAngularError = new FrameVector3D();
       angularErrorRateFromAngularError.set(computeActualRateVectorFromAngularVelocityError(angularVelocityErrorAtCurrentTick, inputCalculator));
@@ -2218,7 +2218,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static FrameVector3DReadOnly computeActualAngularVelocityErrorRateFromAngularVelocityError(FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                                                      AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                                                      OrientationInputCalculator inputCalculator)
    {
       FrameVector3D actualAngularVelocityErrorRateFromAngularError = new FrameVector3D();
       actualAngularVelocityErrorRateFromAngularError.set(3, computeActualRateVectorFromAngularVelocityError(angularVelocityErrorAtCurrentTick, inputCalculator));
@@ -2227,7 +2227,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static FrameVector3DReadOnly computeActualAngularErrorRateFromContact(DMatrixRMaj trajectoryCoefficients,
-                                                                                 AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                                 OrientationInputCalculator inputCalculator)
    {
       FrameVector3D angularErrorRateFromContact = new FrameVector3D();
       angularErrorRateFromContact.set(computeActualRateVectorFromContact(trajectoryCoefficients, inputCalculator));
@@ -2236,7 +2236,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static FrameVector3DReadOnly computeActualAngularVelocityErrorRateFromContact(DMatrixRMaj trajectoryCoefficients,
-                                                                                         AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                                         OrientationInputCalculator inputCalculator)
    {
       FrameVector3D actualAngularVelocityErrorRateFromContact = new FrameVector3D();
       actualAngularVelocityErrorRateFromContact.set(3, computeActualRateVectorFromContact(trajectoryCoefficients, inputCalculator));
@@ -2247,7 +2247,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    private static DMatrixRMaj computeActualRateVector(FrameVector3DReadOnly angularErrorAtCurrentTick,
                                                       FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                                       DMatrixRMaj trajectoryCoefficients,
-                                                      AngularVelocityOrientationInputCalculator inputCalculator)
+                                                      OrientationInputCalculator inputCalculator)
    {
       DMatrixRMaj stateVector = new DMatrixRMaj(6, 1);
       DMatrixRMaj rateVector = new DMatrixRMaj(6, 1);
@@ -2264,7 +2264,7 @@ public class AngularVelocityOrientationInputCalculatorTest
 
 
    private static DMatrixRMaj computeActualRateVectorFromAngularError(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                                      AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                      OrientationInputCalculator inputCalculator)
    {
       DMatrixRMaj angleErrorStateVector = new DMatrixRMaj(6, 1);
       DMatrixRMaj rateFromAngleError = new DMatrixRMaj(6, 1);
@@ -2277,7 +2277,7 @@ public class AngularVelocityOrientationInputCalculatorTest
    }
 
    private static DMatrixRMaj computeActualRateVectorFromAngularVelocityError(FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                      AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                      OrientationInputCalculator inputCalculator)
    {
       DMatrixRMaj velocityErrorStateVector = new DMatrixRMaj(6, 1);
       DMatrixRMaj rateFromAngularVelocityError = new DMatrixRMaj(6, 1);
@@ -2291,7 +2291,7 @@ public class AngularVelocityOrientationInputCalculatorTest
 
 
    private static DMatrixRMaj computeActualRateVectorFromContact(DMatrixRMaj trajectoryCoefficients,
-                                                                 AngularVelocityOrientationInputCalculator inputCalculator)
+                                                                 OrientationInputCalculator inputCalculator)
    {
       DMatrixRMaj rateFromContact = new DMatrixRMaj(6, 1);
 

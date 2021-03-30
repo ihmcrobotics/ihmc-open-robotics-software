@@ -17,7 +17,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
-public class AngularVelocityOrientationInputCalculator
+public class OrientationInputCalculator
 {
 
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
@@ -67,7 +67,7 @@ public class AngularVelocityOrientationInputCalculator
    private static final DMatrixRMaj identity3 = CommonOps_DDRM.identity(3);
    private static final DMatrixRMaj identity6 = CommonOps_DDRM.identity(6);
 
-   public AngularVelocityOrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
       this.indexHandler = indexHandler;
       this.mass = mass;

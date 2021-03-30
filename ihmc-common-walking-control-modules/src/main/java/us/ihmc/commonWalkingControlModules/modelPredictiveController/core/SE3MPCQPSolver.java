@@ -20,7 +20,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
    private final YoDouble firstOrientationRateVariableRegularization = new YoDouble("firstOrientationRateVariableRegularization", registry);
    private final YoDouble secondOrientationRateVariableRegularization = new YoDouble("secondOrientationRateVariableRegularization", registry);
 
-   private final AngularVelocityOrientationInputCalculator angularVelocityOrientationInputCalculator;
+   private final OrientationInputCalculator orientationInputCalculator;
 
    public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, YoRegistry parentRegistry)
    {
@@ -40,7 +40,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
       this.indexHandler = indexHandler;
 
-      angularVelocityOrientationInputCalculator = new AngularVelocityOrientationInputCalculator(indexHandler, mass, gravityZ);
+      orientationInputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
 
       firstOrientationVariableRegularization.set(1e-8);
       secondOrientationVariableRegularization.set(1e-8);
@@ -135,7 +135,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
    public void submitOrientationDynamicsCommand(DiscreteAngularVelocityOrientationCommand command)
    {
-      boolean success = angularVelocityOrientationInputCalculator.compute(qpInputTypeA, command);
+      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
       if (success)
          addInput(qpInputTypeA);
    }
