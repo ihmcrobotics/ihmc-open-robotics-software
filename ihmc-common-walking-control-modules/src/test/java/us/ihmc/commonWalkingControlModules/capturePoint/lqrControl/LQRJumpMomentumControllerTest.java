@@ -21,8 +21,6 @@ import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-
 public class LQRJumpMomentumControllerTest
 {
    private static final double omega = 3.0;
@@ -243,7 +241,7 @@ public class LQRJumpMomentumControllerTest
 
       LQRCommonValues commonValues = new LQRCommonValues();
       commonValues.computeDynamicsMatrix(omega);
-      commonValues.computeEquivalentCostValues(controller.defaultMomentumRateWeight, controller.defaultVrpTrackingWeight);
+      commonValues.computeEquivalentCostValues(LQRMomentumController.defaultMomentumRateWeight, LQRMomentumController.defaultVrpTrackingWeight);
 
       AlgebraicS1Function finalS1Function = new AlgebraicS1Function();
       FlightS1Function flightS1Function = new FlightS1Function();
