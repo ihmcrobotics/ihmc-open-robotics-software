@@ -120,6 +120,7 @@ public class JumpingCoPTrajectoryGeneratorState extends YoSaveableModuleState
 
    public void clear()
    {
+      jumpingGoal.reset();
    }
 
    public void setInitialCoP(FramePoint3DReadOnly initialCoP)

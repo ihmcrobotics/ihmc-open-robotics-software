@@ -20,7 +20,7 @@ import java.util.List;
 /**
  * This is the an implementation fo {@link ContactStateProvider} for bipeds. It could be used to compute fancy CoP locations, if desired.
  */
-public class SimpleBipedContactPhase implements ContactStateProvider
+public class SimpleBipedContactPhase implements ContactStateProvider<SimpleBipedContactPhase>
 {
    private final TimeInterval timeInterval = new TimeInterval();
    private final List<RobotSide> feetInContact = new ArrayList<>();

@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * This is the an implementation fo {@link ContactStateProvider} for quadruped. It could be used to compute fancy CoP locations, if desired.
  */
-public class QuadrupedContactPhase implements ContactStateProvider
+public class QuadrupedContactPhase implements ContactStateProvider<QuadrupedContactPhase>
 {
    private final TimeInterval timeInterval = new TimeInterval();
    private final List<RobotQuadrant> feetInContact = new ArrayList<>();
