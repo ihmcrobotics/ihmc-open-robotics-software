@@ -35,6 +35,8 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class JumpingBalanceManager
 {
+   private static final double nominalHeight = 1.0;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -79,7 +81,7 @@ public class JumpingBalanceManager
    private final BooleanProvider useAngularMomentumOffsetInStanding = new BooleanParameter("useAngularMomentumOffsetInStanding", registry, true);
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
-   private final AngularMomentumHandler angularMomentumHandler;
+   private final AngularMomentumHandler<ContactPlaneProvider> angularMomentumHandler;
    private final SE3ModelPredictiveController comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
@@ -100,15 +102,20 @@ public class JumpingBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
 
-
-      angularMomentumHandler = new AngularMomentumHandler(totalMass, gravityZ, controllerToolbox.getCenterOfMassJacobian(),
-                                                          controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
-
+      double totalMass = controllerToolbox.getFullRobotModel().getTotalMass();
+      double gravityZ = controllerToolbox.getGravityZ();
+      angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
+                                                            gravityZ,
+                                                            controllerToolbox.getCenterOfMassJacobian(),
+                                                            controllerToolbox.getReferenceFrames().getSoleFrames(),
+                                                            ContactPlaneProvider::new,
+                                                            registry,
+                                                            yoGraphicsListRegistry);
 
       comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
-                                                              controllerToolbox.getGravityZ(),
-                                                              1.0,
-                                                              controllerToolbox.getFullRobotModel().getTotalMass(),
+                                                              gravityZ,
+                                                              nominalHeight,
+                                                              totalMass,
                                                               controllerToolbox.getControlDT(),
                                                               registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
@@ -350,9 +357,9 @@ public class JumpingBalanceManager
       totalStateDuration.set(Double.NaN);
    }
 
-   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   public void setSwingFootTrajectory(RobotSide swingSide, MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      angularMomentumHandler.setSwingFootTrajectory(swingTrajectory);
+      angularMomentumHandler.setSwingFootTrajectory(swingSide, swingTrajectory);
    }
 
    public void clearSwingFootTrajectory()

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingCoPTrajectoryGeneratorState;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -150,9 +151,9 @@ public class ThreePotatoAngularMomentumCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void setSwingTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   public void setSwingTrajectory(RobotSide swingSide, MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      footTrajectoryPredictor.setSwingTrajectory(swingTrajectory);
+      footTrajectoryPredictor.setSwingTrajectory(swingSide, swingTrajectory);
    }
 
    public void clearSwingTrajectory()
@@ -161,6 +162,11 @@ public class ThreePotatoAngularMomentumCalculator
    }
 
    public void predictFootTrajectories(CoPTrajectoryGeneratorState state)
+   {
+      footTrajectoryPredictor.compute(state);
+   }
+
+   public void predictFootTrajectories(JumpingCoPTrajectoryGeneratorState state)
    {
       footTrajectoryPredictor.compute(state);
    }

@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -14,7 +15,7 @@ import java.util.List;
  * Provides the contact state that constitutes the contact sequence used by the {@link CoMTrajectoryPlannerInterface}. This includes
  * the starting and ending eCMP position, the time interval, and the contact state {@link ContactState}.
  */
-public interface ContactStateProvider extends TimeIntervalProvider
+public interface ContactStateProvider<T extends ContactStateProvider<T>> extends TimeIntervalProvider, Settable<T>
 {
    /**
     * Provides the starting eCMP position for the current contact state.

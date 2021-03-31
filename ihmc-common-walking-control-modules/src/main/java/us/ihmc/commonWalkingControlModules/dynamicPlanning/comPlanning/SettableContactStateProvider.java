@@ -17,7 +17,7 @@ import java.util.List;
  * This is the most basic implementation fo a contact state provider for the {@link CoMTrajectoryPlannerInterface}. This is really useful for visualizing
  * what will happen for certain sequences, as it allows the user to directly specify where the start and end ECMP positions are and the contact time intervals.
  */
-public class SettableContactStateProvider implements ContactStateProvider
+public class SettableContactStateProvider implements ContactStateBasics<SettableContactStateProvider>
 {
    private ContactState contactState = ContactState.IN_CONTACT;
    private final FramePoint3D startECMPPosition = new FramePoint3D();
@@ -45,14 +45,9 @@ public class SettableContactStateProvider implements ContactStateProvider
       bodiesInContact.clear();
    }
 
-   public void set(ContactStateProvider other)
+   public void set(SettableContactStateProvider other)
    {
-      setStartECMPPosition(other.getECMPStartPosition());
-      setEndECMPPosition(other.getECMPEndPosition());
-      setStartECMPVelocity(other.getECMPStartVelocity());
-      setEndECMPVelocity(other.getECMPEndVelocity());
-      setTimeInterval(other.getTimeInterval());
-      setContactState(other.getContactState());
+      this.set((ContactStateProvider<?>) other);
    }
 
    public void setStartECMPPosition(FramePoint3DReadOnly startECMPPosition)
@@ -168,7 +163,7 @@ public class SettableContactStateProvider implements ContactStateProvider
       getTimeInterval().setEndTime(endTime);
    }
 
-   public void setStartFromEnd(ContactStateProvider previousContactState)
+   public void setStartFromEnd(ContactStateProvider<?> previousContactState)
    {
       setStartTime(previousContactState.getTimeInterval().getEndTime());
       setStartECMPPosition(previousContactState.getECMPEndPosition());
