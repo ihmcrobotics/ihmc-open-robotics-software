@@ -173,9 +173,19 @@ public class FootstepDataListCommand extends QueueableCommand<FootstepDataListCo
       return areFootstepsAdjustable;
    }
 
+   public void setOffsetFootstepsWithExecutionError(boolean offsetFootstepsWithExecutionError)
+   {
+      this.offsetFootstepsWithExecutionError = offsetFootstepsWithExecutionError;
+   }
+
    public boolean isOffsetFootstepsWithExecutionError()
    {
       return offsetFootstepsWithExecutionError;
+   }
+
+   public void setOffsetFootstepsHeightWithExecutionError(boolean offsetFootstepsHeightWithExecutionError)
+   {
+      this.offsetFootstepsHeightWithExecutionError = offsetFootstepsHeightWithExecutionError;
    }
 
    public boolean isOffsetFootstepsHeightWithExecutionError()

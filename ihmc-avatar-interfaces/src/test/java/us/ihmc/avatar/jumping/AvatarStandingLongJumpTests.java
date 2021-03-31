@@ -79,7 +79,7 @@ public abstract class AvatarStandingLongJumpTests
 
       boolean success = blockingSimulationRunner.simulateAndBlockAndCatchExceptions(1.0);
       testHelper.triggerSquat(true);
-      success &= blockingSimulationRunner.simulateAndBlockAndCatchExceptions(0.5);
+      success &= blockingSimulationRunner.simulateAndBlockAndCatchExceptions(0.4);
 
       JumpingGoal jumpingGoal = new JumpingGoal();
       jumpingGoal.setGoalLength(jumpLength);

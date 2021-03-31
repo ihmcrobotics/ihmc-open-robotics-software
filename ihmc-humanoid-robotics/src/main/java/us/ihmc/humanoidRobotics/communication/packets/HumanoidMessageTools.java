@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -1278,6 +1279,15 @@ public class HumanoidMessageTools
       return createFootstepDataListMessage(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
    }
 
+
+   public static FootstepDataListMessage createFootstepDataListMessage(FootstepDataMessage... footstepDataList)
+   {
+      List<FootstepDataMessage> messageList = new ArrayList<>();
+      for (FootstepDataMessage message : footstepDataList)
+         messageList.add(message);
+
+      return createFootstepDataListMessage(messageList, -1.0);
+   }
    /**
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *

@@ -205,7 +205,8 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
                                                                                                     wristForceSensorNames,
                                                                                                     highLevelControllerParameters,
                                                                                                     walkingControllerParameters,
-                                                                                                    copTrajectoryParameters);
+                                                                                                    copTrajectoryParameters,
+                                                                                                    robotModel.getSplitFractionCalculatorParameters());
 
       controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
