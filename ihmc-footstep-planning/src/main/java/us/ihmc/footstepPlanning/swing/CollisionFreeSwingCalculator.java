@@ -41,7 +41,6 @@ public class CollisionFreeSwingCalculator
 {
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-   private static final double motionCorrelationAlpha = 0.65;
    private static final double collisionGradientScale = 0.5;
    private static final double collisionDistanceEpsilon = 1e-4;
 
@@ -66,12 +65,7 @@ public class CollisionFreeSwingCalculator
    private final List<Vector3D> collisionGradients = new ArrayList<>();
    private final List<Vector3D> convolvedGradients = new ArrayList<>();
    private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
-
    private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
-   private final List<FramePoint3DReadOnly> fullTrajectoryPoints = new ArrayList<>();
-   private final List<Vector3D> estimatedVelocities = new ArrayList<>();
-   private final TDoubleArrayList estimatedDistancesSquared = new TDoubleArrayList();
-   private final TDoubleArrayList estimatedAccelerationsSquared = new TDoubleArrayList();
 
    private PlanarRegionsList planarRegionsList;
    private final int footstepGraphicCapacity = 100;
@@ -106,22 +100,6 @@ public class CollisionFreeSwingCalculator
       this.tickAndUpdatable = tickAndUpdatable;
       this.graphicsListRegistry = graphicsListRegistry;
       this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 200, 100, ReferenceFrame.getWorldFrame());
-      setupKnotPoints();
-
-      while (estimatedVelocities.size() < swingPlannerParameters.getNumberOfKnotPoints() + 2)
-      {
-         estimatedVelocities.add(new Vector3D());
-      }
-
-      estimatedDistancesSquared.ensureCapacity(swingPlannerParameters.getNumberOfKnotPoints() + 1);
-      estimatedAccelerationsSquared.ensureCapacity(swingPlannerParameters.getNumberOfKnotPoints() + 1);
-
-      fullTrajectoryPoints.add(startOfSwingPose.getPosition());
-      for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
-      {
-         fullTrajectoryPoints.add(swingKnotPoints.get(i).getCurrentWaypoint().getPosition());
-      }
-      fullTrajectoryPoints.add(endOfSwingPose.getPosition());
 
       visualize = parentRegistry != null;
       if (visualize)
@@ -168,7 +146,7 @@ public class CollisionFreeSwingCalculator
 
          collisionGradients.add(new Vector3D());
          convolvedGradients.add(new Vector3D());
-         convolutionWeights.add(exp(motionCorrelationAlpha, i));
+         convolutionWeights.add(exp(swingPlannerParameters.getMotionCorrelationAlpha(), i));
       }
    }
 
@@ -184,10 +162,7 @@ public class CollisionFreeSwingCalculator
          return;
       }
 
-      if (swingPlannerParameters.getNumberOfKnotPoints() != swingKnotPoints.size())
-      {
-         setupKnotPoints();
-      }
+      setupKnotPoints();
 
       for (int i = 0; i < swingKnotPoints.size(); i++)
       {
