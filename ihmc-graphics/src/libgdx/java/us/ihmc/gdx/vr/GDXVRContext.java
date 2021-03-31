@@ -48,6 +48,9 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.AffineTransform;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -311,6 +314,14 @@ public class GDXVRContext implements Disposable {
 	// offsets for translation and rotation from tracker to world space
 	private final Vector3 trackerSpaceOriginToWorldSpaceTranslationOffset = new Vector3();
 	private final Matrix4 trackerSpaceToWorldspaceRotationOffset = new Matrix4();
+	private final RigidBodyTransformReadOnly toZUpXForward = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(0.0)),
+	                                                                        new Point3D());
+	private final RigidBodyTransformReadOnly toZForwardYUp;
+	{
+		RigidBodyTransform toXForwardZUpTemp = new RigidBodyTransform(toZUpXForward);
+		toXForwardZUpTemp.invert();
+		toZForwardYUp = toXForwardZUpTemp;
+	}
 	
 	/**
 	 * Creates a new GDXVRContext, initializes the VR system, and
@@ -390,7 +401,17 @@ public class GDXVRContext implements Disposable {
 	public Matrix4 getTrackerSpaceToWorldspaceRotationOffset () {
 		return trackerSpaceToWorldspaceRotationOffset;
 	}
-	
+
+	public RigidBodyTransformReadOnly getToZForwardYUp()
+	{
+		return toZForwardYUp;
+	}
+
+	public RigidBodyTransformReadOnly getToZUpXForward()
+	{
+		return toZUpXForward;
+	}
+
 	/**
 	 * Adds a {@link VRDeviceListener} to receive events
 	 */
