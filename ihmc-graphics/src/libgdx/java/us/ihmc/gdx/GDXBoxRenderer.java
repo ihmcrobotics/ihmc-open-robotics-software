@@ -16,18 +16,22 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
+import ihmc_msgs.GDXBoxesMessage;
+import ihmc_msgs.GDXBoxMessage;
+
+
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 
 
-public class GDXPointCloudRenderer implements RenderableProvider
+public class GDXBoxRenderer implements RenderableProvider
 {
    private static final int SIZE_AND_ROTATION_USAGE = 1 << 9;
    private static boolean POINT_SPRITES_ENABLED = false;
    private Renderable renderable;
    private float[] vertices;
-//   private MeshBuilder newMesh;
+   //   private MeshBuilder newMesh;
    private short[] indices;
-//   private ShaderProgram shader_obj = new ShaderProgram("","");
+   //   private ShaderProgram shader_obj = new ShaderProgram("","");
 
    private final VertexAttributes vertexAttributes = new VertexAttributes(
          new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
@@ -55,8 +59,8 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
       vertices = new float[size * vertexSize];
       indices = new short[size * vertexSize];
-//      newMesh = new MeshBuilder();
-//      newMesh.begin(vertexAttributes, GL20.GL_POINTS);
+      //      newMesh = new MeshBuilder();
+      //      newMesh.begin(vertexAttributes, GL20.GL_POINTS);
 
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
@@ -64,7 +68,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
       ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
       renderable.shader = new ParticleShader(renderable, config);
-//      ((ParticleShader) renderable.shader).set(ShaderProgram.COLOR_ATTRIBUTE., Color.RED);
+      //      ((ParticleShader) renderable.shader).set(ShaderProgram.COLOR_ATTRIBUTE., Color.RED);
       renderable.shader.init();
    }
 
@@ -73,12 +77,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
       this.color = color;
    }
 
-//   @Override
-//   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-//   {
-//      if (enabled)
-//         renderables.add(renderable);
-//   }
+   //   @Override
+   //   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   //   {
+   //      if (enabled)
+   //         renderables.add(renderable);
+   //   }
 
    public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
    {
@@ -111,7 +115,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
 
-//            indices[i] = (short)i;
+            //            indices[i] = (short)i;
          }
 
          renderable.meshPart.size = pointsToRender.size();
@@ -120,12 +124,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
          updateClusterMesh(Clusters);
 
          renderable.meshPart.update();
-//         newMesh.addMesh(vertices, indices);
+         //         newMesh.addMesh(vertices, indices);
       }
    }
 
    public void updateCluster(){
-//      kdtree
+      //      kdtree
    }
 
    public void updateClusterMesh(RecyclingArrayList<RecyclingArrayList<Point3D32>> clusters){
@@ -158,20 +162,20 @@ public class GDXPointCloudRenderer implements RenderableProvider
          }
          renderable.meshPart.size = pointsToRender.size();
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
-//         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-//         renderable.meshPart.mesh.render(new ShaderProgram("",""),GL20.GL_TRIANGLE_STRIP, 0, 4);
+         //         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+         //         renderable.meshPart.mesh.render(new ShaderProgram("",""),GL20.GL_TRIANGLE_STRIP, 0, 4);
 
          renderable.meshPart.update();
 
-//         MeshBuilder newMesh = new MeshBuilder();
-//         newMesh.addMesh(vertices, indices);
+         //         MeshBuilder newMesh = new MeshBuilder();
+         //         newMesh.addMesh(vertices, indices);
       }
    }
 
-//   public void render(){
-//      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-//      renderable.meshPart.mesh.render(new ShaderProgram("",""),GL20.GL_TRIANGLE_STRIP, 0, 4);
-//   }
+   //   public void render(){
+   //      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+   //      renderable.meshPart.mesh.render(new ShaderProgram("",""),GL20.GL_TRIANGLE_STRIP, 0, 4);
+   //   }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

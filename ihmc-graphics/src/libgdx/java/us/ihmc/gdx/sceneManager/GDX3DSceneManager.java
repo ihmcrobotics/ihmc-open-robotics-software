@@ -76,6 +76,7 @@ public class GDX3DSceneManager
       viewport.setUnitsPerPixel(1.0f); // TODO: Is this relevant for high DPI displays?
 
       GDX3DSceneTools.glClearGray();
+
       Gdx.gl.glEnable(GL32.GL_TEXTURE_2D);
    }
 
