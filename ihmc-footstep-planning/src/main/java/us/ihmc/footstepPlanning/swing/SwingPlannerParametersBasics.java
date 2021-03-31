@@ -90,35 +90,25 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded, additionalSwingTimeIfExpanded);
    }
 
-   default void setCollisionBoxHeight(double collisionBoxHeight)
-   {
-      set(SwingPlannerParameterKeys.collisionBoxHeight, collisionBoxHeight);
-   }
-
-   default void setCollisionBoxExtraX(double collisionBoxExtraX)
-   {
-      set(SwingPlannerParameterKeys.collisionBoxExtraX, collisionBoxExtraX);
-   }
-
-   default void setCollisionBoxExtraY(double collisionBoxExtraY)
-   {
-      set(SwingPlannerParameterKeys.collisionBoxExtraY, collisionBoxExtraY);
-   }
-
-   default void setCollisionBoxExtraZ(double collisionBoxExtraZ)
-   {
-      set(SwingPlannerParameterKeys.collisionBoxExtraZ, collisionBoxExtraZ);
-   }
-
-   default void setMinMaxCheckerPercentage(double minMaxCheckerPercentage)
-   {
-      set(SwingPlannerParameterKeys.minMaxCheckerPercentage, minMaxCheckerPercentage);
-   }
-
-   default void setMinMaxHeightInterpolationPercentage(double minMaxHeightInterpolationPercentage)
-   {
-      set(SwingPlannerParameterKeys.minMaxHeightInterpolationPercentage, minMaxHeightInterpolationPercentage);
-   }
+//   default void setCollisionBoxExtraX(double collisionBoxExtraX)
+//   {
+//      set(SwingPlannerParameterKeys.collisionBoxExtraX, collisionBoxExtraX);
+//   }
+//
+//   default void setCollisionBoxExtraY(double collisionBoxExtraY)
+//   {
+//      set(SwingPlannerParameterKeys.collisionBoxExtraY, collisionBoxExtraY);
+//   }
+//
+//   default void setCollisionBoxExtraZ(double collisionBoxExtraZ)
+//   {
+//      set(SwingPlannerParameterKeys.collisionBoxExtraZ, collisionBoxExtraZ);
+//   }
+//
+//   default void setMinMaxHeightInterpolationPercentage(double minMaxHeightInterpolationPercentage)
+//   {
+//      set(SwingPlannerParameterKeys.minMaxHeightInterpolationPercentage, minMaxHeightInterpolationPercentage);
+//   }
 
    default void set(SwingPlannerParametersPacket packet)
    {

@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
 import controller_msgs.msg.dds.SwingPlannerParametersPacket;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
@@ -132,34 +133,74 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded);
    }
 
-   default double getCollisionBoxHeight()
+   default double getExtraSizePercentageLow(Axis3D axis)
    {
-      return get(SwingPlannerParameterKeys.collisionBoxHeight);
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeXLow);
+         case Y:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeYLow);
+         case Z:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeZLow);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
    }
 
-   default double getCollisionBoxExtraX()
+   default double getExtraSizePercentageHigh(Axis3D axis)
    {
-      return get(SwingPlannerParameterKeys.collisionBoxExtraX);
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeXHigh);
+         case Y:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeYHigh);
+         case Z:
+            return get(SwingPlannerParameterKeys.percentageExtraSizeZHigh);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
    }
 
-   default double getCollisionBoxExtraY()
+   default double getExtraSizeLow(Axis3D axis)
    {
-      return get(SwingPlannerParameterKeys.collisionBoxExtraY);
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.extraSizeXLow);
+         case Y:
+            return get(SwingPlannerParameterKeys.extraSizeYLow);
+         case Z:
+            return get(SwingPlannerParameterKeys.extraSizeZLow);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
    }
 
-   default double getCollisionBoxExtraZ()
+   default double getExtraSizeHigh(Axis3D axis)
    {
-      return get(SwingPlannerParameterKeys.collisionBoxExtraZ);
+      switch (axis)
+      {
+         case X:
+            return get(SwingPlannerParameterKeys.extraSizeXHigh);
+         case Y:
+            return get(SwingPlannerParameterKeys.extraSizeYHigh);
+         case Z:
+            return get(SwingPlannerParameterKeys.extraSizeZHigh);
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
    }
 
-   default double getMinMaxCheckerPercentage()
+   default double getPercentageLowMaxDisplacement()
    {
-      return get(SwingPlannerParameterKeys.minMaxCheckerPercentage);
+      return get(SwingPlannerParameterKeys.percentageMaxDisplacementLow);
    }
 
-   default double getMinMaxHeightInterpolationPercentage()
+   default double getPercentageHighMaxDisplacement()
    {
-      return get(SwingPlannerParameterKeys.minMaxHeightInterpolationPercentage);
+      return get(SwingPlannerParameterKeys.percentageMaxDisplacementHigh);
    }
 
    default double getMaxDisplacementLow()
@@ -170,11 +211,6 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
    default double getMaxDisplacementHigh()
    {
       return get(SwingPlannerParameterKeys.maxDisplacementHigh);
-   }
-
-   default double getDisplacementInterpolationCutoff()
-   {
-      return get(SwingPlannerParameterKeys.displacementInterpolationCutoff);
    }
 
    default SwingPlannerParametersPacket getAsPacket()

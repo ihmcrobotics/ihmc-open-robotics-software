@@ -2,12 +2,12 @@ package us.ihmc.footstepPlanning.swing;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -21,14 +21,20 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import static us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator.interpolate;
+
 public class SwingKnotPoint
 {
+   private static final double collisionBoxHeight = 0.4;
+
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final double percentage;
@@ -69,7 +75,7 @@ public class SwingKnotPoint
       waypointPoseFrame = new PoseReferenceFrame("waypointPoseFrame" + index, ReferenceFrame.getWorldFrame());
       collisionBoxPose = new YoFramePoseUsingYawPitchRoll("collisionBoxPose" + index, ReferenceFrame.getWorldFrame(), registry);
 
-      // go ahead and initialize so the log viewer has the correct dimensions
+      // go ahead and initialize so the log viewer renders the correct dimensions
       initializeBoxParameters();
 
       if (graphicsListRegistry == null)
@@ -85,7 +91,7 @@ public class SwingKnotPoint
          yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic" + index, collisionBoxGraphic, collisionBoxPose, 1.0);
          graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), yoCollisionBoxGraphic);
 
-         YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index, currentWaypoint.getPosition(), 0.03, YoAppearance.Black());
+         YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index, currentWaypoint.getPosition(), 0.01, YoAppearance.Black());
          graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), waypointPositionGraphic);
       }
    }
@@ -93,20 +99,23 @@ public class SwingKnotPoint
    // call once per footstep plan
    public void initializeBoxParameters()
    {
-      double minPercentageToCheck = swingPlannerParameters.getMinMaxCheckerPercentage();
-      double maxPercentageToCheck = 1.0 - swingPlannerParameters.getMinMaxCheckerPercentage();
-      double alphaExtraHeight = computeAlphaExtraHeight(percentage, minPercentageToCheck, maxPercentageToCheck);
-      double collisionBoxExtraZ = alphaExtraHeight * swingPlannerParameters.getCollisionBoxExtraZ();
-
+      // set default size
       double footForwardOffset = walkingControllerParameters.getSteppingParameters().getFootForwardOffset();
       double footBackwardOffset = walkingControllerParameters.getSteppingParameters().getFootBackwardOffset();
-      double boxSizeX = footForwardOffset + footBackwardOffset + 2.0 * swingPlannerParameters.getCollisionBoxExtraX();
-      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth() + 2.0 * swingPlannerParameters.getCollisionBoxExtraY();
-      double boxSizeZ = swingPlannerParameters.getCollisionBoxHeight() + 2.0 * collisionBoxExtraZ;
+      double boxSizeX = footForwardOffset + footBackwardOffset;
+      double boxSizeY = walkingControllerParameters.getSteppingParameters().getFootWidth();
+      double boxSizeZ = collisionBoxHeight;
       collisionBox.getSize().set(boxSizeX, boxSizeY, boxSizeZ);
 
+      // add extra size
+      for (int i = 0; i < 3; i++)
+      {
+         double extraSize = computeExtraSize(percentage, i);
+         collisionBox.getSize().setElement(i, collisionBox.getSize().getElement(i) + extraSize);
+      }
+
       double boxBaseInSoleFrameX = 0.5 * (footForwardOffset - footBackwardOffset);
-      boxCenterInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.5 * swingPlannerParameters.getCollisionBoxHeight());
+      boxCenterInSoleFrame.set(boxBaseInSoleFrameX, 0.0, 0.5 * collisionBoxHeight);
    }
 
    public YoFramePose3D getStartingWaypoint()
@@ -138,6 +147,19 @@ public class SwingKnotPoint
 
    public void shiftWaypoint(Vector3DReadOnly displacement)
    {
+      double scale = computeMaximumDisplacementScale(displacement);
+      if (scale < 1e-8)
+      {
+         return;
+      }
+
+      currentWaypoint.getPosition().set(tempPose.getPosition());
+      waypointDisplacement.set(startingWaypoint.getPosition().distance(currentWaypoint.getPosition()));
+      updateCollisionBox();
+   }
+
+   public double computeMaximumDisplacementScale(Vector3DReadOnly displacement)
+   {
       double adjustmentScale = 1.0;
 
       // try max of 5 times to scale down and check if valid to shift
@@ -153,12 +175,12 @@ public class SwingKnotPoint
             break;
          adjustmentScale *= 0.5;
          if (i == maxAttempts - 1)
-            return;
+         {
+            return 0.0;
+         }
       }
 
-      currentWaypoint.getPosition().set(tempPose.getPosition());
-      waypointDisplacement.set(startingWaypoint.getPosition().distance(currentWaypoint.getPosition()));
-      updateCollisionBox();
+      return adjustmentScale;
    }
 
    private void updateCollisionBox()
@@ -209,30 +231,25 @@ public class SwingKnotPoint
    }
 
    /**
-    * Extruding the collision box vertically up/down is tricky since it can easily collide with the ground.
-    * To avoid this the extrusion amount starts at 0.0, ramps up to a max value, then ramps back down.
+    * Extruding the collision box outward is tricky since it can easily collide with the ground at the start/end.
+    * To avoid this amount to expand is smoothly interpolated.
     */
-   private double computeAlphaExtraHeight(double percentage, double minPercentageToCheck, double maxPercentageToCheck)
+   private double computeExtraSize(double percentage, int axisIndex)
    {
-      double minPForMaxHeight = swingPlannerParameters.getMinMaxHeightInterpolationPercentage();
-      double maxPForMaxHeight = 1.0 - swingPlannerParameters.getMinMaxHeightInterpolationPercentage();
-      if (MathTools.intervalContains(percentage, minPForMaxHeight, maxPForMaxHeight))
-      {
-         return 1.0;
-      }
-      else if (percentage < 0.5)
-      {
-         return EuclidCoreTools.interpolate(0.0, 1.0, (percentage - minPercentageToCheck) / (minPForMaxHeight - minPercentageToCheck));
-      }
-      else
-      {
-         return EuclidCoreTools.interpolate(1.0, 0.0, (percentage - maxPForMaxHeight) / (maxPercentageToCheck - maxPForMaxHeight));
-      }
+      Axis3D axis = Axis3D.values()[axisIndex];
+      double percentageLow = swingPlannerParameters.getExtraSizePercentageLow(axis);
+      double percentageHigh = swingPlannerParameters.getExtraSizePercentageHigh(axis);
+      double extraSizeLow = swingPlannerParameters.getExtraSizeLow(axis);
+      double extraSizeHigh = swingPlannerParameters.getExtraSizeHigh(axis);
+      return interpolate(percentage, percentageLow, percentageHigh, extraSizeLow, extraSizeHigh);
    }
 
-   public void updateGraphics()
+   public void updateGraphics(boolean showBox)
    {
-      yoCollisionBoxGraphic.setPose(boxCenterPose);
+      if (showBox)
+         yoCollisionBoxGraphic.setPose(boxCenterPose);
+      else
+         yoCollisionBoxGraphic.setPoseToNaN();
    }
 }
 
