@@ -4,15 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -36,11 +34,12 @@ public class GDXVRManager implements RenderableProvider
    private boolean skipHeadset = false;
    private boolean holdingTouchpadToMove = false;
    private Point3D initialVRSpacePosition = new Point3D();
-   private RotationMatrix initialVRSpaceOrientation = new RotationMatrix();
-   private RigidBodyTransform initialVRSpaceTransform = new RigidBodyTransform();
-   private RigidBodyTransform initialVRControllerTransform = new RigidBodyTransform();
-   private RigidBodyTransform currentVRControllerTransform = new RigidBodyTransform();
-   private RigidBodyTransform deltaVRControllerTransform = new RigidBodyTransform();
+   private Point3D initialVRControllerPosition = new Point3D();
+   private Point3D currentVRControllerPosition = new Point3D();
+   private Vector3D deltaVRControllerPosition = new Vector3D();
+   private Point3D resultVRSpacePosition = new Point3D();
+   private Point3D lastVRSpacePosition = new Point3D();
+   private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
 
    public void create()
    {
@@ -123,13 +122,11 @@ public class GDXVRManager implements RenderableProvider
          {
             if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
             {
+               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
+               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
+               context.getToZUpXForward().transform(initialVRSpacePosition);
+               lastVRSpacePosition.set(initialVRSpacePosition);
                holdingTouchpadToMove = true;
-               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerTransform);
-               Vector3 vrSpaceTranslation = context.getTrackerSpaceOriginToWorldSpaceTranslationOffset();
-               Matrix4 vrSpaceOrientation = context.getTrackerSpaceToWorldspaceRotationOffset();
-               GDXTools.toEuclid(vrSpaceTranslation, initialVRSpacePosition);
-               GDXTools.toEuclid(vrSpaceOrientation, initialVRSpaceOrientation);
-               initialVRSpaceTransform.set(initialVRSpaceOrientation, initialVRSpacePosition);
             }
          }
 
@@ -151,7 +148,24 @@ public class GDXVRManager implements RenderableProvider
 
    public void render(GDX3DSceneManager sceneManager)
    {
-      GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerTransform);
+      if (holdingTouchpadToMove)
+      {
+         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
+//         resultVRSpacePosition.set(initialVRSpacePosition);
+//         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
+//         resultVRSpacePosition.sub(deltaVRControllerPosition);
+//         resultVRSpacePosition.sub(lastVRSpacePosition);
+//         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//         lastVRSpacePosition.set(resultVRSpacePosition);
+         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
+         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
+      }
+      else
+      {
+         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
+
+      }
 
       context.begin();
       renderScene(GDXVRContext.Eye.Left, sceneManager);
