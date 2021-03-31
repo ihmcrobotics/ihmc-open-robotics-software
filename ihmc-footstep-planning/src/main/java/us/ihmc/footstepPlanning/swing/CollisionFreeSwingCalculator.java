@@ -14,6 +14,7 @@ import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
@@ -221,7 +222,9 @@ public class CollisionFreeSwingCalculator
       positionTrajectoryGenerator.setShouldVisualize(visualize);
       for (int i = 0; i < 30; i++)
       {
-         positionTrajectoryGenerator.doOptimizationUpdate();
+         boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
+         if (isDone)
+            break;
       }
 
       for (int i = 0; i < numberOfKnotPoints; i++)
@@ -238,6 +241,7 @@ public class CollisionFreeSwingCalculator
                                                   swingPlannerParameters.getPercentageHighMaxDisplacement(),
                                                   swingPlannerParameters.getMaxDisplacementLow(),
                                                   swingPlannerParameters.getMaxDisplacementHigh()));
+         knotPoint.initializeWaypointAdjustmentFrame(positionTrajectoryGenerator.getVelocity(), startOfSwingPose.getPosition(), endOfSwingPose.getPosition());
       }
 
       if (visualize)
@@ -275,6 +279,7 @@ public class CollisionFreeSwingCalculator
                EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
                collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
                collisionGradients.get(j).scale(collisionGradientScale);
+               swingKnotPoints.get(j).project(collisionGradients.get(j));
                intersectionDistance.set(Math.max(intersectionDistance.getDoubleValue(), collisionResult.getDistance()));
                intersectionFound = true;
             }
@@ -327,7 +332,7 @@ public class CollisionFreeSwingCalculator
    }
 
    /* exponent function assuming non-negative positive exponent */
-   private static double exp(double base, int exponent)
+   static double exp(double base, int exponent)
    {
       double value = 1.0;
       int i = 0;
@@ -343,13 +348,13 @@ public class CollisionFreeSwingCalculator
 
    /*
     * Different from the Vector3DBasics.scaleAdd, which scales the mutated vector
-    * b = b + alpha * a
+    * a = a + alpha * b
     */
-   private static void scaleAdd(Vector3D vectorB, double alpha, Vector3DReadOnly vectorA)
+   static void scaleAdd(Vector3DBasics vectorA, double alpha, Vector3DReadOnly vectorB)
    {
-      vectorB.addX(alpha * vectorA.getX());
-      vectorB.addY(alpha * vectorA.getY());
-      vectorB.addZ(alpha * vectorA.getZ());
+      vectorA.addX(alpha * vectorB.getX());
+      vectorA.addY(alpha * vectorB.getY());
+      vectorA.addZ(alpha * vectorB.getZ());
    }
 
    /*
