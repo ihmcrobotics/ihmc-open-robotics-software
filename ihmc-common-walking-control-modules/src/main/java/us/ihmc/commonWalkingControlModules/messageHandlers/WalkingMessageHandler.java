@@ -7,8 +7,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commons.MathTools;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -23,7 +22,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
@@ -777,10 +775,10 @@ public class WalkingMessageHandler
          footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
-   private final NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
+   private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
 
 
-   public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
+   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
       transferToAndNextFootstepsData.setTransferToPosition(soleFrames.get(transferToSide));
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
@@ -788,7 +786,7 @@ public class WalkingMessageHandler
       return transferToAndNextFootstepsData;
    }
 
-   public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
+   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
       transferToAndNextFootstepsData.setTransferToPosition(transferToFootstep.getFootstepPose().getPosition());
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
