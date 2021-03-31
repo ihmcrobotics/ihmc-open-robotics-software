@@ -125,7 +125,7 @@ public class CollisionFreeSwingCalculatorTest
    public void testStepUpAndDown()
    {
       double boxLengthX = 0.3;
-      double boxHeight = 0.3;
+      double boxHeight = 0.2;
 
       swingParameters.set(SwingPlannerParameterKeys.maxDisplacementHigh, 0.4);
       swingParameters.set(SwingPlannerParameterKeys.maxDisplacementLow, 0.1);

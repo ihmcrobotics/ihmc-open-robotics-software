@@ -13,8 +13,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -38,13 +38,13 @@ public class CollisionFreeSwingCalculator
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private static final int numberOfKnotPoints = 12;
-   private static final double motionCorrelationAlpha = 0.5;
+   private static final double motionCorrelationAlpha = 0.65;
    private static final double collisionGradientScale = 0.4;
+   private static final double extraDistance = 0.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoInteger iterations = new YoInteger("iterations", registry);
    private final YoDouble intersectionDistance = new YoDouble("intersectionDistance", registry);
-   private final YoDouble smoothnessCost = new YoDouble("smoothnessCost", registry);
    private final boolean visualize;
 
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
@@ -55,10 +55,12 @@ public class CollisionFreeSwingCalculator
    private final FramePose3D endOfSwingPose = new FramePose3D();
 
    private final List<FramePoint3D> defaultWaypoints = new ArrayList<>();
+   private final List<FramePoint3D> modifiedWaypoints = new ArrayList<>();
 
    private final ExpandingPolytopeAlgorithm collisionDetector = new ExpandingPolytopeAlgorithm();
-   private final Vector3D collisionGradient = new Vector3D();
-   private final Vector3D scaledGradient = new Vector3D();
+   private final List<Vector3D> collisionGradients = new ArrayList<>();
+   private final List<Vector3D> convolvedGradients = new ArrayList<>();
+   private final TDoubleArrayList convolutionWeights = new TDoubleArrayList();
 
    private final List<SwingKnotPoint> swingKnotPoints = new ArrayList<>();
    private final List<FramePoint3DReadOnly> fullTrajectoryPoints = new ArrayList<>();
@@ -98,9 +100,12 @@ public class CollisionFreeSwingCalculator
 
       for (int i = 0; i < numberOfKnotPoints; i++)
       {
-         double pMinMax = swingPlannerParameters.getMinMaxCheckerPercentage();
-         double percentage = pMinMax + (1.0 - 2.0 * pMinMax) * i / (numberOfKnotPoints - 1);
+         double percentage = (i + 1.0) / (numberOfKnotPoints + 1.0);
          swingKnotPoints.add(new SwingKnotPoint(i, percentage, swingPlannerParameters, walkingControllerParameters, graphicsListRegistry, registry));
+
+         collisionGradients.add(new Vector3D());
+         convolvedGradients.add(new Vector3D());
+         convolutionWeights.add(exp(motionCorrelationAlpha, i));
       }
 
       while (estimatedVelocities.size() < numberOfKnotPoints + 2)
@@ -161,6 +166,11 @@ public class CollisionFreeSwingCalculator
          return;
       }
 
+      for (int i = 0; i < swingKnotPoints.size(); i++)
+      {
+         swingKnotPoints.get(i).initializeBoxParameters();
+      }
+
       initializeGraphics(initialStanceFootPoses, footstepPlan);
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
@@ -173,7 +183,8 @@ public class CollisionFreeSwingCalculator
          defaultWaypoints.clear();
 
          initializeKnotPoints();
-         optimizeTrajectory();
+         optimizeKnotPoints();
+         recomputeTrajectory();
       }
    }
 
@@ -222,14 +233,18 @@ public class CollisionFreeSwingCalculator
          tempPose.getOrientation().interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), percentage);
 
          knotPoint.initialize(tempPose);
-         knotPoint.setMaxDisplacement(computeMaxDisplacement(percentage));
+         knotPoint.setMaxDisplacement(interpolate(percentage,
+                                                  swingPlannerParameters.getPercentageLowMaxDisplacement(),
+                                                  swingPlannerParameters.getPercentageHighMaxDisplacement(),
+                                                  swingPlannerParameters.getMaxDisplacementLow(),
+                                                  swingPlannerParameters.getMaxDisplacementHigh()));
       }
 
       if (visualize)
       {
          for (int i = 0; i < numberOfKnotPoints; i++)
          {
-            swingKnotPoints.get(i).updateGraphics();
+            swingKnotPoints.get(i).updateGraphics(true);
          }
 
          soleFrameGraphicPose.setToNaN();
@@ -238,17 +253,7 @@ public class CollisionFreeSwingCalculator
       }
    }
 
-   private double computeMaxDisplacement(double percentage)
-   {
-      double minPercentage = swingPlannerParameters.getMinMaxCheckerPercentage();
-      double displacementInterpolationCutoff = swingPlannerParameters.getDisplacementInterpolationCutoff();
-
-      double effectivePercentage = percentage < 0.5 ? percentage : 1.0 - percentage;
-      double alpha = MathTools.clamp((effectivePercentage - minPercentage) / (displacementInterpolationCutoff - minPercentage), 0.0, 1.0);
-      return EuclidCoreTools.interpolate(swingPlannerParameters.getMaxDisplacementLow(), swingPlannerParameters.getMaxDisplacementHigh(), alpha);
-   }
-
-   private void optimizeTrajectory()
+   private void optimizeKnotPoints()
    {
       iterations.set(0);
 
@@ -257,58 +262,66 @@ public class CollisionFreeSwingCalculator
       {
          iterations.increment();
          intersectionDistance.set(0.0);
+         boolean intersectionFound = false;
 
          for (int j = 0; j < numberOfKnotPoints; j++)
          {
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
-//            totalGradient.setToZero();
 
             // collision gradient
             boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList);
             if (collisionDetected)
             {
                EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
-               collisionGradient.sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
-               collisionGradient.scale(collisionGradientScale);
+               collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
+               collisionGradients.get(j).scale(collisionGradientScale);
                intersectionDistance.set(Math.max(intersectionDistance.getDoubleValue(), collisionResult.getDistance()));
+               intersectionFound = true;
             }
             else
             {
+               collisionGradients.get(j).setToZero();
+//               EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
+//               collisionGradients.get(j).sub(collisionResult.getPointOnA(), collisionResult.getPointOnB());
+//               collisionGradients.get(j)
+//                                 .scale(EuclidCoreTools.interpolate(collisionGradientScale * knotPoint.getDimensionInterpolationAlpha(),
+//                                                                    0.0,
+//                                                                    MathTools.clamp(collisionResult.getDistance() / extraDistance, 0.0, 1.0)));
                continue;
             }
 
-//            // smoothness gradient
-//            smoothnessCost.set(computeSmoothnessCost());
-//            Point3D currentPosition = new Point3D(knotPoint.getCurrentWaypoint().getPosition());
-//
-//            for (int k = 0; k < 3; k++)
-//            {
-//               double gradientEpsilon = 1e-7;
-//               knotPoint.getCurrentWaypoint().getPosition().setToZero();
-//               knotPoint.getCurrentWaypoint().getPosition().setElement(k, gradientEpsilon);
-//               knotPoint.getCurrentWaypoint().getPosition().add(currentPosition);
-//               double fxi = computeSmoothnessCost();
-//
-//               smoothnessGradient.setElement(k, -1e-5 * (fxi - smoothnessCost.getDoubleValue()) / gradientEpsilon);
-//            }
+            if (collisionGradients.get(j).lengthSquared() > 1e-8)
+            {
+               double scale = swingKnotPoints.get(j).computeMaximumDisplacementScale(collisionGradients.get(j));
+               collisionGradients.get(j).scale(scale);
+            }
+         }
 
+         for (int j = 0; j < numberOfKnotPoints; j++)
+         {
+            convolvedGradients.get(j).setToZero();
             for (int k = 0; k < numberOfKnotPoints; k++)
             {
-               int indexDifference = Math.abs(k - j);
-               scaledGradient.set(collisionGradient);
-               scaledGradient.scale(exp(motionCorrelationAlpha, indexDifference));
-               swingKnotPoints.get(k).shiftWaypoint(scaledGradient);
+               int indexDifference = Math.abs(j - k);
+               double scale = convolutionWeights.get(indexDifference);
+               scaleAdd(convolvedGradients.get(j), scale, collisionGradients.get(k));
             }
+            swingKnotPoints.get(j).shiftWaypoint(convolvedGradients.get(j));
 
             if (visualize)
             {
-               knotPoint.updateGraphics();
+               swingKnotPoints.get(j).updateGraphics(swingKnotPoints.get(j).getCollisionResult().areShapesColliding());
             }
          }
 
          if (visualize)
          {
             tickAndUpdatable.tickAndUpdate();
+         }
+
+         if (!intersectionFound)
+         {
+            break;
          }
       }
    }
@@ -326,6 +339,65 @@ public class CollisionFreeSwingCalculator
       }
 
       return value;
+   }
+
+   /*
+    * Different from the Vector3DBasics.scaleAdd, which scales the mutated vector
+    * b = b + alpha * a
+    */
+   private static void scaleAdd(Vector3D vectorB, double alpha, Vector3DReadOnly vectorA)
+   {
+      vectorB.addX(alpha * vectorA.getX());
+      vectorB.addY(alpha * vectorA.getY());
+      vectorB.addZ(alpha * vectorA.getZ());
+   }
+
+   /*
+    * Trapezoid-shaped interpolation used for a few parameters to make sure the start/end of swing have smaller collision boxes and don't
+    * move too much, while the middle can.
+    */
+   static double interpolate(double percentage, double percentageLow, double percentageHigh, double valueLow, double valueHigh)
+   {
+      double effectivePercentage = percentage < 0.5 ? percentage : 1.0 - percentage;
+      double alpha = MathTools.clamp((effectivePercentage - percentageLow) / (percentageHigh - percentageLow), 0.0, 1.0);
+      return EuclidCoreTools.interpolate(valueLow, valueHigh, alpha);
+   }
+
+   private void recomputeTrajectory()
+   {
+      modifiedWaypoints.clear();
+      for (int i = 0; i < swingKnotPoints.size(); i++)
+      {
+         modifiedWaypoints.add(new FramePoint3D(swingKnotPoints.get(i).getCurrentWaypoint().getPosition()));
+      }
+
+      positionTrajectoryGenerator.reset();
+      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
+      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
+      positionTrajectoryGenerator.setWaypoints(modifiedWaypoints);
+      positionTrajectoryGenerator.initialize();
+
+      positionTrajectoryGenerator.setShouldVisualize(visualize);
+      for (int i = 0; i < 30; i++)
+      {
+         positionTrajectoryGenerator.doOptimizationUpdate();
+      }
+
+      if (visualize)
+      {
+         for (int i = 0; i < numberOfKnotPoints; i++)
+         {
+            swingKnotPoints.get(i).updateGraphics(false);
+         }
+
+         soleFrameGraphicPose.setToNaN();
+         footPolygonGraphic.update();
+
+         for (int i = 0; i < 10; i++)
+         {
+            tickAndUpdatable.tickAndUpdate();
+         }
+      }
    }
 
    private final Vector3D estimatedAcceleration = new Vector3D();
