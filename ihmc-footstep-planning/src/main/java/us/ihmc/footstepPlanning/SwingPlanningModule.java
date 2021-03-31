@@ -3,12 +3,14 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
+import us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -17,10 +19,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Consumer;
 
 public class SwingPlanningModule
 {
@@ -32,12 +30,14 @@ public class SwingPlanningModule
 
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
+   private final CollisionFreeSwingCalculator collisionFreeSwingCalculator;
 
    private double nominalSwingTrajectoryLength;
 
    public SwingPlanningModule(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                               SwingPlannerParametersBasics swingPlannerParameters,
-                              WalkingControllerParameters walkingControllerParameters)
+                              WalkingControllerParameters walkingControllerParameters,
+                              SideDependentList<ConvexPolygon2D> footPolygons)
 
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
@@ -48,6 +48,7 @@ public class SwingPlanningModule
       {
          this.adaptiveSwingTrajectoryCalculator = null;
          this.swingOverPlanarRegionsTrajectoryExpander = null;
+         this.collisionFreeSwingCalculator = null;
       }
       else
       {
@@ -55,6 +56,7 @@ public class SwingPlanningModule
          this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
+         this.collisionFreeSwingCalculator = new CollisionFreeSwingCalculator(swingPlannerParameters, walkingControllerParameters, footPolygons);
       }
    }
 
@@ -78,9 +80,14 @@ public class SwingPlanningModule
          adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
          adaptiveSwingTrajectoryCalculator.setSwingParameters(startFootPoses, footstepPlan);
       }
-      else if (swingPlannerType == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
+      else if (swingPlannerType == SwingPlannerType.TWO_WAYPOINT_POSITION && swingOverPlanarRegionsTrajectoryExpander != null)
       {
          computeSwingWaypoints(planarRegionsList, footstepPlan, startFootPoses);
+      }
+      else if (swingPlannerType == SwingPlannerType.MULTI_WAYPOINT_POSITION && collisionFreeSwingCalculator != null)
+      {
+         collisionFreeSwingCalculator.setPlanarRegionsList(planarRegionsList);
+         collisionFreeSwingCalculator.computeSwingTrajectories(startFootPoses, footstepPlan);
       }
    }
 
