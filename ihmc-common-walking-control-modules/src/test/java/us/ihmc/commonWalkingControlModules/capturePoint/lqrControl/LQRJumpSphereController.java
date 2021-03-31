@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -26,9 +25,9 @@ public class LQRJumpSphereController implements SphereControllerInterface
    private final YoFrameVector3D lqrForce = new YoFrameVector3D("lqrForce", ReferenceFrame.getWorldFrame(), registry);
 
    private final CoMTrajectoryProvider dcmPlan;
-   private final List<ContactStateProvider> contactStateProviders = new ArrayList<>();
+   private final List<SettableContactStateProvider> contactStateProviders = new ArrayList<>();
 
-   public LQRJumpSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider dcmPlan, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public LQRJumpSphereController(SphereRobot sphereRobot, CoMTrajectoryProvider dcmPlan)
    {
       this.scsRobot = sphereRobot.getScsRobot();
       this.sphereRobot = sphereRobot;
@@ -96,7 +95,7 @@ public class LQRJumpSphereController implements SphereControllerInterface
       return sphereRobot.getScsRobot().getYoTime().getDoubleValue() - contactStateProviders.get(phase).getTimeInterval().getStartTime();
    }
 
-   public void solveForTrajectory(List<? extends ContactStateProvider> stateProviders)
+   public void solveForTrajectory(List<SettableContactStateProvider> stateProviders)
    {
       contactStateProviders.clear();
       contactStateProviders.addAll(stateProviders);

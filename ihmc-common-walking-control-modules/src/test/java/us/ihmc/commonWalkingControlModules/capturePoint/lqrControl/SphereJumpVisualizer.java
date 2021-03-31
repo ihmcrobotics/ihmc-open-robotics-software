@@ -83,7 +83,7 @@ public class SphereJumpVisualizer
          CoMTrajectoryPlanner dcmPlan = new CoMTrajectoryPlanner(gravity, desiredHeight, registry);
          dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry2));
 
-         controller2 = new LQRSphereController(sphereRobot2, dcmPlan, yoGraphicsListRegistry2);
+         controller2 = new LQRSphereController(sphereRobot2, dcmPlan);
 
          pushController2 = createPusher(sphereRobot2, yoGraphicsListRegistry2);
          setupGroundContactModel(sphereRobot2.getScsRobot());
@@ -110,7 +110,7 @@ public class SphereJumpVisualizer
          CoMTrajectoryPlanner dcmPlan = new CoMTrajectoryPlanner(gravity, desiredHeight, registry);
          dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry3));
 
-         controller3 = new LQRJumpSphereController(sphereRobot2, dcmPlan, yoGraphicsListRegistry3);
+         controller3 = new LQRJumpSphereController(sphereRobot2, dcmPlan);
 
          pushController3 = createPusher(sphereRobot2, yoGraphicsListRegistry3);
          setupGroundContactModel(sphereRobot2.getScsRobot());
@@ -191,7 +191,7 @@ public class SphereJumpVisualizer
       robot.setGroundContactModel(groundContactModel);
    }
 
-   public void setTrajectories(List<? extends ContactStateProvider> contacts)
+   public void setTrajectories(List<SettableContactStateProvider> contacts)
    {
       if (controller1 != null)
       {
@@ -207,11 +207,11 @@ public class SphereJumpVisualizer
       }
    }
 
-   private static List<? extends ContactStateProvider> copyContactsWithShift(List<? extends ContactStateProvider> contacts, Vector3DReadOnly shift)
+   private static List<SettableContactStateProvider> copyContactsWithShift(List<SettableContactStateProvider> contacts, Vector3DReadOnly shift)
    {
       List<SettableContactStateProvider> newContacts = new ArrayList<>();
 
-      for (ContactStateProvider contact : contacts)
+      for (SettableContactStateProvider contact : contacts)
       {
          SettableContactStateProvider newContact = new SettableContactStateProvider();
          newContact.getTimeInterval().set(contact.getTimeInterval());
@@ -244,9 +244,9 @@ public class SphereJumpVisualizer
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static List<ContactStateProvider> createContacts()
+   private static List<SettableContactStateProvider> createContacts()
    {
-      List<ContactStateProvider> contacts = new ArrayList<>();
+      List<SettableContactStateProvider> contacts = new ArrayList<>();
 
       double contactPosition = 0.0;
 
@@ -292,9 +292,9 @@ public class SphereJumpVisualizer
       return contacts;
    }
 
-   private static List<ContactStateProvider> createRunningContacts()
+   private static List<SettableContactStateProvider> createRunningContacts()
    {
-      List<ContactStateProvider> contacts = new ArrayList<>();
+      List<SettableContactStateProvider> contacts = new ArrayList<>();
 
       double contactPosition = 0.0;
 
