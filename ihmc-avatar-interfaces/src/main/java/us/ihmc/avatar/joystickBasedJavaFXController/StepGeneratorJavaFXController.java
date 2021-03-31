@@ -337,6 +337,9 @@ public class StepGeneratorJavaFXController
 
          JoystickStepParameters stepParameters = stepParametersReference.get();
          continuousStepGenerator.setFootstepTiming(stepParameters.getSwingDuration(), stepParameters.getTransferDuration());
+         continuousStepGenerator.setStepTurningLimits(stepParameters.getTurnMaxAngleInward(), stepParameters.getTurnMaxAngleOutward());
+         continuousStepGenerator.setStepWidths(stepParameters.getDefaultStepWidth(), stepParameters.getMinStepWidth(), stepParameters.getMaxStepWidth());
+         continuousStepGenerator.setMaxStepLength(stepParameters.getMaxStepLength());
          continuousStepGenerator.update(Double.NaN);
 
          List<Node> footstepsToVisualize = footstepsToVisualizeReference.getAndSet(null);
