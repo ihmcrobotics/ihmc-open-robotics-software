@@ -126,9 +126,19 @@ public class SplitFractionFromPositionCalculator
          double trailingLegToNextStepHeight = nextFootPose.getZ() - trailingFootPose.getZ();
          if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown() || trailingLegToNextStepHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
          {
-            double alpha = Math.min(1.0,
-                                    (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
-                                          splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
+            double alpha;
+            if(stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
+            {
+               alpha = Math.min(1.0,
+                       (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
+                               splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
+            }
+            else
+            {
+               alpha = Math.min(1.0,
+                       (Math.abs(trailingLegToNextStepHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
+                               splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
+            }
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
                                                                                 splitFractionParameters.getTransferSplitFractionAtFullDepth(),
                                                                                 alpha);
