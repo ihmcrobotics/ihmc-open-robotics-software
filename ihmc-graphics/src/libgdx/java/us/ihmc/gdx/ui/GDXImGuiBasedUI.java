@@ -93,7 +93,6 @@ public class GDXImGuiBasedUI
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle(), windowTitle);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
-
    }
 
    public ImGuiDockingSetup getImGuiDockingSetup()

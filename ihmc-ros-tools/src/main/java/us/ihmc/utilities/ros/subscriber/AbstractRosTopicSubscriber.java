@@ -22,7 +22,6 @@ public abstract class AbstractRosTopicSubscriber<T> implements RosTopicSubscribe
    public void connected()
    {
       LogTools.info("Connected: {}", messageType);
-
    }
 
    public void registered(Subscriber<T> subscriber)
