@@ -150,7 +150,8 @@ public class CommunicationHelper
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       return new SwingPlanningModule(footstepPlannerParameters,
                                      swingPlannerParameters,
-                                     walkingControllerParameters);
+                                     walkingControllerParameters,
+                                     createFootPolygons());
    }
 
    public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)

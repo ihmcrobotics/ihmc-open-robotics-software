@@ -113,7 +113,8 @@ public class AStarFootstepPlanner
 
       this.swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters,
                                                          swingPlannerParameters,
-                                                         walkingControllerParameters);
+                                                         walkingControllerParameters,
+                                                         footPolygons);
    }
 
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)

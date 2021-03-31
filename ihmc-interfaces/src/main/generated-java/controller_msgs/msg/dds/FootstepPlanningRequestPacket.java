@@ -14,8 +14,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
-   public static final byte SWING_PLANNER_TYPE_POSITION = (byte) 1;
-   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
+   public static final byte SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION = (byte) 1;
+   public static final byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = (byte) 2;
+   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 3;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
