@@ -65,6 +65,7 @@ public class SwingKnotPoint
    private final YoFramePose3D waypointAdjustmentPose;
 
    private final YoGraphicShape yoCollisionBoxGraphic;
+   private final YoGraphicCoordinateSystem adjustmentGraphic;
 
    public SwingKnotPoint(int index,
                          double percentage,
@@ -96,6 +97,7 @@ public class SwingKnotPoint
       if (graphicsListRegistry == null)
       {
          yoCollisionBoxGraphic = null;
+         adjustmentGraphic = null;
       }
       else
       {
@@ -110,7 +112,7 @@ public class SwingKnotPoint
          yoCollisionBoxGraphic = new YoGraphicShape("collisionGraphic" + index, collisionBoxGraphic, collisionBoxPose, 1.0);
          graphicsListRegistry.registerYoGraphic(boxListName, yoCollisionBoxGraphic);
 
-         YoGraphicCoordinateSystem adjustmentGraphic = new YoGraphicCoordinateSystem("waypointAdjGraphic" + index, waypointAdjustmentPose, 0.1);
+         adjustmentGraphic = new YoGraphicCoordinateSystem("waypointAdjGraphic" + index, waypointAdjustmentPose, 0.1);
          graphicsListRegistry.registerYoGraphic(waypointFrameListName, adjustmentGraphic);
 
          YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index, currentWaypoint.getPosition(), 0.01, YoAppearance.Black());

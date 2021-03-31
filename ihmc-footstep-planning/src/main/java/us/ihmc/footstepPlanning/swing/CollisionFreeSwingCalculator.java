@@ -13,11 +13,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
@@ -38,16 +41,17 @@ public class CollisionFreeSwingCalculator
 {
    private static final FrameVector3D zeroVector = new FrameVector3D();
    private static final Vector3D infiniteWeight = new Vector3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
-   private static final int numberOfKnotPoints = 12;
    private static final double motionCorrelationAlpha = 0.65;
-   private static final double collisionGradientScale = 0.4;
-   private static final double extraDistance = 0.0;
+   private static final double collisionGradientScale = 0.5;
+   private static final double collisionDistanceEpsilon = 1e-4;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoGraphicsListRegistry graphicsListRegistry;
    private final YoInteger iterations = new YoInteger("iterations", registry);
-   private final YoDouble intersectionDistance = new YoDouble("intersectionDistance", registry);
+   private final YoDouble maxCollisionDistance = new YoDouble("maxCollisionDistance", registry);
    private final boolean visualize;
 
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final TickAndUpdatable tickAndUpdatable;
@@ -80,45 +84,40 @@ public class CollisionFreeSwingCalculator
    private final FramePose3D tempPose = new FramePose3D();
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator;
 
-   public CollisionFreeSwingCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
+   public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                       SwingPlannerParametersReadOnly swingPlannerParameters,
                                        WalkingControllerParameters walkingControllerParameters,
                                        SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this(swingPlannerParameters, walkingControllerParameters, footPolygons, null, null, null);
+      this(footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons, null, null, null);
    }
 
-   public CollisionFreeSwingCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
+   public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                       SwingPlannerParametersReadOnly swingPlannerParameters,
                                        WalkingControllerParameters walkingControllerParameters,
                                        SideDependentList<ConvexPolygon2D> footPolygons,
                                        TickAndUpdatable tickAndUpdatable,
                                        YoGraphicsListRegistry graphicsListRegistry,
                                        YoRegistry parentRegistry)
    {
+      this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
       this.tickAndUpdatable = tickAndUpdatable;
+      this.graphicsListRegistry = graphicsListRegistry;
       this.positionTrajectoryGenerator = new PositionOptimizedTrajectoryGenerator("", registry, graphicsListRegistry, 200, 100, ReferenceFrame.getWorldFrame());
+      setupKnotPoints();
 
-      for (int i = 0; i < numberOfKnotPoints; i++)
-      {
-         double percentage = (i + 1.0) / (numberOfKnotPoints + 1.0);
-         swingKnotPoints.add(new SwingKnotPoint(i, percentage, swingPlannerParameters, walkingControllerParameters, graphicsListRegistry, registry));
-
-         collisionGradients.add(new Vector3D());
-         convolvedGradients.add(new Vector3D());
-         convolutionWeights.add(exp(motionCorrelationAlpha, i));
-      }
-
-      while (estimatedVelocities.size() < numberOfKnotPoints + 2)
+      while (estimatedVelocities.size() < swingPlannerParameters.getNumberOfKnotPoints() + 2)
       {
          estimatedVelocities.add(new Vector3D());
       }
 
-      estimatedDistancesSquared.ensureCapacity(numberOfKnotPoints + 1);
-      estimatedAccelerationsSquared.ensureCapacity(numberOfKnotPoints + 1);
+      estimatedDistancesSquared.ensureCapacity(swingPlannerParameters.getNumberOfKnotPoints() + 1);
+      estimatedAccelerationsSquared.ensureCapacity(swingPlannerParameters.getNumberOfKnotPoints() + 1);
 
       fullTrajectoryPoints.add(startOfSwingPose.getPosition());
-      for (int i = 0; i < numberOfKnotPoints; i++)
+      for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
       {
          fullTrajectoryPoints.add(swingKnotPoints.get(i).getCurrentWaypoint().getPosition());
       }
@@ -155,6 +154,24 @@ public class CollisionFreeSwingCalculator
       }
    }
 
+   private void setupKnotPoints()
+   {
+      swingKnotPoints.clear();
+      collisionGradients.clear();
+      convolvedGradients.clear();
+      convolutionWeights.clear();
+
+      for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
+      {
+         double percentage = (i + 1.0) / (swingPlannerParameters.getNumberOfKnotPoints() + 1.0);
+         swingKnotPoints.add(new SwingKnotPoint(i, percentage, swingPlannerParameters, walkingControllerParameters, graphicsListRegistry, registry));
+
+         collisionGradients.add(new Vector3D());
+         convolvedGradients.add(new Vector3D());
+         convolutionWeights.add(exp(motionCorrelationAlpha, i));
+      }
+   }
+
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
@@ -165,6 +182,11 @@ public class CollisionFreeSwingCalculator
       if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
          return;
+      }
+
+      if (swingPlannerParameters.getNumberOfKnotPoints() != swingKnotPoints.size())
+      {
+         setupKnotPoints();
       }
 
       for (int i = 0; i < swingKnotPoints.size(); i++)
@@ -186,12 +208,19 @@ public class CollisionFreeSwingCalculator
          initializeKnotPoints();
          optimizeKnotPoints();
          recomputeTrajectory();
+
+         for (int j = 0; j < swingKnotPoints.size(); j++)
+         {
+            footstep.getCustomWaypointPositions().add(new Point3D(swingKnotPoints.get(j).getCurrentWaypoint().getPosition()));
+         }
+
+         footstep.setSwingDuration(calculateSwingTime(startOfSwingPose.getPosition(), endOfSwingPose.getPosition()));
       }
    }
 
    private void initializeKnotPoints()
    {
-      // see TwoWaypointSwingGenerator.initialize() for trajectoryType DEFAULT
+      // see TwoWaypointSwingGenerator.initialize() for trajectoryTypes DEFAULT and OBSTACLE_CLEARANCE
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
 
@@ -227,7 +256,7 @@ public class CollisionFreeSwingCalculator
             break;
       }
 
-      for (int i = 0; i < numberOfKnotPoints; i++)
+      for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
       {
          SwingKnotPoint knotPoint = swingKnotPoints.get(i);
          double percentage = knotPoint.getPercentage();
@@ -246,7 +275,7 @@ public class CollisionFreeSwingCalculator
 
       if (visualize)
       {
-         for (int i = 0; i < numberOfKnotPoints; i++)
+         for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
          {
             swingKnotPoints.get(i).updateGraphics(true);
          }
@@ -265,10 +294,10 @@ public class CollisionFreeSwingCalculator
       for (int i = 0; i < maxIterations; i++)
       {
          iterations.increment();
-         intersectionDistance.set(0.0);
+         maxCollisionDistance.set(0.0);
          boolean intersectionFound = false;
 
-         for (int j = 0; j < numberOfKnotPoints; j++)
+         for (int j = 0; j < swingPlannerParameters.getNumberOfKnotPoints(); j++)
          {
             SwingKnotPoint knotPoint = swingKnotPoints.get(j);
 
@@ -280,37 +309,33 @@ public class CollisionFreeSwingCalculator
                collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
                collisionGradients.get(j).scale(collisionGradientScale);
                swingKnotPoints.get(j).project(collisionGradients.get(j));
-               intersectionDistance.set(Math.max(intersectionDistance.getDoubleValue(), collisionResult.getDistance()));
+               maxCollisionDistance.set(Math.max(maxCollisionDistance.getDoubleValue(), collisionResult.getDistance()));
                intersectionFound = true;
             }
             else
             {
                collisionGradients.get(j).setToZero();
-//               EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
-//               collisionGradients.get(j).sub(collisionResult.getPointOnA(), collisionResult.getPointOnB());
-//               collisionGradients.get(j)
-//                                 .scale(EuclidCoreTools.interpolate(collisionGradientScale * knotPoint.getDimensionInterpolationAlpha(),
-//                                                                    0.0,
-//                                                                    MathTools.clamp(collisionResult.getDistance() / extraDistance, 0.0, 1.0)));
                continue;
             }
 
-            if (collisionGradients.get(j).lengthSquared() > 1e-8)
+            if (swingKnotPoints.get(j).getCollisionResult().areShapesColliding())
             {
                double scale = swingKnotPoints.get(j).computeMaximumDisplacementScale(collisionGradients.get(j));
                collisionGradients.get(j).scale(scale);
             }
          }
 
-         for (int j = 0; j < numberOfKnotPoints; j++)
+         for (int j = 0; j < swingPlannerParameters.getNumberOfKnotPoints(); j++)
          {
             convolvedGradients.get(j).setToZero();
-            for (int k = 0; k < numberOfKnotPoints; k++)
+            for (int k = 0; k < swingPlannerParameters.getNumberOfKnotPoints(); k++)
             {
                int indexDifference = Math.abs(j - k);
                double scale = convolutionWeights.get(indexDifference);
                scaleAdd(convolvedGradients.get(j), scale, collisionGradients.get(k));
             }
+
+            swingKnotPoints.get(j).project(convolvedGradients.get(j));
             swingKnotPoints.get(j).shiftWaypoint(convolvedGradients.get(j));
 
             if (visualize)
@@ -324,7 +349,7 @@ public class CollisionFreeSwingCalculator
             tickAndUpdatable.tickAndUpdate();
          }
 
-         if (!intersectionFound)
+         if (!intersectionFound || maxCollisionDistance.getDoubleValue() < collisionDistanceEpsilon)
          {
             break;
          }
@@ -370,6 +395,11 @@ public class CollisionFreeSwingCalculator
 
    private void recomputeTrajectory()
    {
+      if (!visualize)
+      {
+         return;
+      }
+
       modifiedWaypoints.clear();
       for (int i = 0; i < swingKnotPoints.size(); i++)
       {
@@ -385,54 +415,23 @@ public class CollisionFreeSwingCalculator
       positionTrajectoryGenerator.setShouldVisualize(visualize);
       for (int i = 0; i < 30; i++)
       {
-         positionTrajectoryGenerator.doOptimizationUpdate();
+         boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
+         if (isDone)
+            break;
       }
 
-      if (visualize)
+      for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
       {
-         for (int i = 0; i < numberOfKnotPoints; i++)
-         {
-            swingKnotPoints.get(i).updateGraphics(false);
-         }
-
-         soleFrameGraphicPose.setToNaN();
-         footPolygonGraphic.update();
-
-         for (int i = 0; i < 10; i++)
-         {
-            tickAndUpdatable.tickAndUpdate();
-         }
+         swingKnotPoints.get(i).updateGraphics(false);
       }
-   }
 
-   private final Vector3D estimatedAcceleration = new Vector3D();
+      soleFrameGraphicPose.setToNaN();
+      footPolygonGraphic.update();
 
-   private double computeSmoothnessCost()
-   {
-      estimatedVelocities.get(0).sub(fullTrajectoryPoints.get(1), fullTrajectoryPoints.get(0));
-      estimatedVelocities.get(numberOfKnotPoints + 1).sub(fullTrajectoryPoints.get(numberOfKnotPoints + 1), fullTrajectoryPoints.get(numberOfKnotPoints));
-
-      for (int i = 1; i < numberOfKnotPoints + 1; i++)
+      for (int i = 0; i < 10; i++)
       {
-         estimatedVelocities.get(i).sub(fullTrajectoryPoints.get(i + 1), fullTrajectoryPoints.get(i - 1));
+         tickAndUpdatable.tickAndUpdate();
       }
-
-      estimatedDistancesSquared.clear();
-      for (int i = 0; i < numberOfKnotPoints + 1; i++)
-      {
-         estimatedDistancesSquared.add(fullTrajectoryPoints.get(i).distanceSquared(fullTrajectoryPoints.get(i + 1)));
-      }
-
-      double cost = 0.0;
-
-      for (int i = 0; i < numberOfKnotPoints + 1; i++)
-      {
-         estimatedAcceleration.sub(estimatedVelocities.get(i + 1), estimatedVelocities.get(i));
-         double estimatedAccelerationSquared = estimatedAcceleration.lengthSquared();
-         cost += estimatedAccelerationSquared / estimatedDistancesSquared.get(i);
-      }
-
-      return cost;
    }
 
    private void initializeGraphics(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
@@ -469,6 +468,18 @@ public class CollisionFreeSwingCalculator
       }
 
       tickAndUpdatable.tickAndUpdate();
+   }
+
+   public double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
+   {
+      double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
+
+      double maxStepZ = footstepPlannerParameters.getMaxStepZ();
+      double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
+
+      double stepDistance = startPosition.distance(endPosition);
+      double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);
+      return swingPlannerParameters.getMinimumSwingTime() + alpha * (swingPlannerParameters.getMaximumSwingTime() - swingPlannerParameters.getMinimumSwingTime());
    }
 
    private FootstepVisualizer getNextFootstepVisualizer(RobotSide robotSide)

@@ -213,6 +213,16 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.maxDisplacementHigh);
    }
 
+   default int getNumberOfKnotPoints()
+   {
+      return get(SwingPlannerParameterKeys.numberOfKnotPoints);
+   }
+
+   default double getMotionCorrelationAlpha()
+   {
+      return get(SwingPlannerParameterKeys.motionCorrelationAlpha);
+   }
+
    default SwingPlannerParametersPacket getAsPacket()
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();

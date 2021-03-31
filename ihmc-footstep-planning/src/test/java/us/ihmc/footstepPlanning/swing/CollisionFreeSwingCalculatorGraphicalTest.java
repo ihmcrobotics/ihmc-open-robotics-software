@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.swing;
 
-import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,7 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -28,15 +28,15 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
-public class CollisionFreeSwingCalculatorTest
+public class CollisionFreeSwingCalculatorGraphicalTest
 {
    private static final boolean runSCS = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
 
+   private final FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
    private final SwingPlannerParametersBasics swingParameters = new DefaultSwingPlannerParameters();
    private final WalkingControllerParameters walkingControllerParameters = new ProxyAtlasWalkingControllerParameters();
    private final SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon);
 
-   @Test
    public void testFlatGround()
    {
       PlanarRegionsList flatGround = flatGround();
@@ -58,7 +58,6 @@ public class CollisionFreeSwingCalculatorTest
       runTest(flatGround, initialStance, footstepPlan);
    }
 
-   @Test
    public void testSmallBox()
    {
       double boxLengthX = 0.15;
@@ -88,7 +87,6 @@ public class CollisionFreeSwingCalculatorTest
       runTest(boxOnGround, initialStance, footstepPlan);
    }
 
-   @Test
    public void testBigBox()
    {
       double boxLengthX = 0.3;
@@ -121,7 +119,6 @@ public class CollisionFreeSwingCalculatorTest
       runTest(boxOnGround, initialStance, footstepPlan);
    }
 
-   @Test
    public void testStepUpAndDown()
    {
       double boxLengthX = 0.3;
@@ -180,7 +177,6 @@ public class CollisionFreeSwingCalculatorTest
       runTest(boxOnGround, initialStance, footstepPlan);
    }
 
-   @Test
    public void testUpStairs()
    {
       DataSet stairsDataSet = DataSetIOTools.loadDataSet(DataSetName._20200513_151318_StairsIHMC_Bottom);
@@ -206,7 +202,6 @@ public class CollisionFreeSwingCalculatorTest
       runTest(stairRegions, stanceSteps, footstepPlan);
    }
 
-   @Test
    public void testOverCinders1()
    {
       DataSet cindersDataSet = DataSetIOTools.loadDataSet(DataSetName._20190220_172417_EOD_Cinders);
@@ -227,7 +222,6 @@ public class CollisionFreeSwingCalculatorTest
       runTest(cindersRegions, stanceSteps, footstepPlan);
    }
 
-   @Test
    public void testOverCinders2()
    {
       DataSet cindersDataSet = DataSetIOTools.loadDataSet(DataSetName._20191213_134839_Cinders);
@@ -279,7 +273,8 @@ public class CollisionFreeSwingCalculatorTest
          Graphics3DObjectTools.addPlanarRegionsList(planarRegionsGraphics, planarRegionsList, appearances);
          scs.addStaticLinkGraphics(planarRegionsGraphics);
 
-         CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(swingParameters,
+         CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
+                                                                                         swingParameters,
                                                                                          walkingControllerParameters,
                                                                                          footPolygons,
                                                                                          scs,
@@ -297,9 +292,24 @@ public class CollisionFreeSwingCalculatorTest
       }
       else
       {
-         CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(swingParameters, walkingControllerParameters, footPolygons);
+         CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
+                                                                                         swingParameters,
+                                                                                         walkingControllerParameters,
+                                                                                         footPolygons);
          swingCalculator.setPlanarRegionsList(planarRegionsList);
          swingCalculator.computeSwingTrajectories(initialStance, footstepPlan);
       }
+   }
+
+   public static void main(String[] args)
+   {
+      CollisionFreeSwingCalculatorGraphicalTest graphicalTest = new CollisionFreeSwingCalculatorGraphicalTest();
+//      graphicalTest.testFlatGround();
+//      graphicalTest.testSmallBox();
+      graphicalTest.testBigBox();
+//      graphicalTest.testStepUpAndDown();
+//      graphicalTest.testUpStairs();
+//      graphicalTest.testOverCinders1();
+//      graphicalTest.testOverCinders2();
    }
 }
