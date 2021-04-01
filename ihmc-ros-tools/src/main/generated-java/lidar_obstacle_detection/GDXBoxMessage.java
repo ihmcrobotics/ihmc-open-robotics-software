@@ -3,23 +3,23 @@ package lidar_obstacle_detection;
 public interface GDXBoxMessage extends org.ros.internal.message.Message {
    static final java.lang.String _TYPE = "lidar_obstacle_detection/GDXBoxMessage";
    static final java.lang.String _DEFINITION =
-          "float64 x_min\n"
-         +"float64 y_min\n"
-         +"float64 z_min\n"
-         +"float64 x_max\n"
-         +"float64 y_max\n"
-         +"float64 z_max\n";
-   double getx_min();
-   void setx_min(double value);
-   double  gety_min();
-   void sety_min(double value);
-   double  getz_min();
-   void setz_min(double value);
-   double  getx_max();
-   void setx_max(double value);
-   double  gety_max();
-   void sety_max(double value);
-   double  getz_max();
-   void setz_max(double value);
+          "float64 xMin\n"
+         +"float64 yMin\n"
+         +"float64 zMin\n"
+         +"float64 xMax\n"
+         +"float64 yMax\n"
+         +"float64 zMax\n";
+   double getXMin();
+   void setXMin(double xMin);
+   double  getYMin();
+   void setYMin(double yMin);
+   double  getZMin();
+   void setZMin(double zMin);
+   double  getXMax();
+   void setXMax(double xMax);
+   double  getYMax();
+   void setYMax(double yMax);
+   double  getZMax();
+   void setZMax(double zMax);
 
 }

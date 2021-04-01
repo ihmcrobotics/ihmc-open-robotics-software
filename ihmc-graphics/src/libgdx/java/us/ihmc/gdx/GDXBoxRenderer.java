@@ -16,8 +16,8 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.log.LogTools;
 
-import ihmc_msgs.GDXBoxesMessage;
-import ihmc_msgs.GDXBoxMessage;
+//import ihmc_msgs.GDXBoxesMessage;
+//import ihmc_msgs.GDXBoxMessage;
 
 
 import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
@@ -47,7 +47,7 @@ public class GDXBoxRenderer implements RenderableProvider
    private RecyclingArrayList<RecyclingArrayList<Point3D32>> Clusters;
    private Color color = Color.RED;
 
-   public void create(int size)
+   public void create()
    {
       if (!POINT_SPRITES_ENABLED)
          enablePointSprites();
@@ -57,14 +57,14 @@ public class GDXBoxRenderer implements RenderableProvider
       renderable.meshPart.offset = 0;
       renderable.material = new Material(ColorAttribute.createDiffuse(color));
 
-      vertices = new float[size * vertexSize];
-      indices = new short[size * vertexSize];
+      vertices = new float[vertexSize];
+      indices = new short[vertexSize];
       //      newMesh = new MeshBuilder();
       //      newMesh.begin(vertexAttributes, GL20.GL_POINTS);
 
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
-      renderable.meshPart.mesh = new Mesh(true, size, 0, vertexAttributes);
+      renderable.meshPart.mesh = new Mesh(true, 1, 0, vertexAttributes);
 
       ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
       renderable.shader = new ParticleShader(renderable, config);
