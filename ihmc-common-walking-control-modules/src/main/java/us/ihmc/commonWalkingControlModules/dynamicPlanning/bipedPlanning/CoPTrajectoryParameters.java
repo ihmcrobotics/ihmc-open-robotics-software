@@ -17,7 +17,7 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
 
    private static final double defaultStepLengthToPutExitCoPOnToes = 0.2;
    private static final double defaultStepHeightToPutExitCoPOnToesSteppingDown = -0.1;
-   private static final double defaultStepLengthToPutExitCoPOnToesSteppingDown = 0.2;
+   private static final double defaultStepLengthToPutExitCoPOnToesSteppingDown = 0.16;
 
    private static final boolean defaultPlanWithExitCMPOnToes = false;
    private static final boolean defaultPlanWithExitCMPOnToesWhenSteppingDown = true;
