@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation;
 
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -122,23 +123,14 @@ public class SplitFractionFromPositionCalculator
          nextFootPose.set(stepPoseGetter.apply(stepNumber));
 
          // This step is a big step down.
-         double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
-         double trailingLegToNextStepHeight = nextFootPose.getZ() - trailingFootPose.getZ();
-         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown() || trailingLegToNextStepHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
+         double nextStepHeight = nextFootPose.getZ() - stanceFootPose.getZ();
+         double trailingStepHeight = nextFootPose.getZ() - trailingFootPose.getZ();
+         double stepDownHeight = Math.min(nextStepHeight, trailingStepHeight);
+         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
          {
-            double alpha;
-            if(stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
-            {
-               alpha = Math.min(1.0,
-                       (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
-                               splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
-            }
-            else
-            {
-               alpha = Math.min(1.0,
-                       (Math.abs(trailingLegToNextStepHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
-                               splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
-            }
+            double alpha = Math.min(1.0,
+                    (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
+                            splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
                                                                                 splitFractionParameters.getTransferSplitFractionAtFullDepth(),
                                                                                 alpha);
