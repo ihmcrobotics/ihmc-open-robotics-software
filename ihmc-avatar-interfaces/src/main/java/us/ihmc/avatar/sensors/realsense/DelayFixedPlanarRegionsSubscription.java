@@ -22,11 +22,14 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.function.Consumer;
 
 public class DelayFixedPlanarRegionsSubscription
 {
+   public static final double INITIAL_DELAY_OFFSET = 0.07; // TODO: Put in a stored property set
+
    private final ResettableExceptionHandlingExecutorService executorService;
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private final ReferenceFrame sensorFrame;
@@ -34,25 +37,32 @@ public class DelayFixedPlanarRegionsSubscription
    private final HumanoidReferenceFrames referenceFrames;
    private final ROS2NodeInterface ros2Node;
    private final DRCRobotModel robotModel;
+   private final String topic;
    private final Consumer<PlanarRegionsList> callback;
-   private final MutableDouble delayOffset = new MutableDouble();
+   private final MutableDouble delayOffset = new MutableDouble(INITIAL_DELAY_OFFSET);
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
    private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
 
    private boolean enabled = false;
+   private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
+   private double delay = 0.0;
+   private RosNodeInterface ros1Node;
 
-   public DelayFixedPlanarRegionsSubscription(RosNodeInterface ros1Node,
-                                              ROS2NodeInterface ros2Node,
+   public DelayFixedPlanarRegionsSubscription(ROS2NodeInterface ros2Node,
                                               DRCRobotModel robotModel,
                                               String topic,
                                               Consumer<PlanarRegionsList> callback)
    {
       this.ros2Node = ros2Node;
       this.robotModel = robotModel;
+      this.topic = topic;
       this.callback = callback;
 
       rosClockCalculator = robotModel.getROSClockCalculator();
+      ROS2Tools.createCallbackSubscription2(ros2Node,
+                                            ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
+                                            rosClockCalculator::receivedRobotConfigurationData);
 
       ROS2Tools.createCallbackSubscription2(ros2Node, ROS2Tools.MAPSENSE_REGIONS_DELAY_OFFSET, message -> delayOffset.setValue(message.getData()));
 
@@ -71,7 +81,19 @@ public class DelayFixedPlanarRegionsSubscription
 
       RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
       sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
-      MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
+   }
+
+   public void subscribe(RosNodeInterface ros1Node)
+   {
+      this.ros1Node = ros1Node;
+      rosClockCalculator.subscribeToROS1Topics(ros1Node);
+      subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
+   }
+
+   public void unsubscribe(RosNodeInterface ros1Node)
+   {
+      ros1Node.removeSubscriber(subscriber);
+      rosClockCalculator.unsubscribeFromROS1Topics(ros1Node);
    }
 
    private void acceptRobotConfigurationData(RobotConfigurationData robotConfigurationData)
@@ -92,16 +114,35 @@ public class DelayFixedPlanarRegionsSubscription
             //      LogTools.info("Latest delay: {}", seconds);
             timestamp -= Conversions.secondsToNanoseconds(seconds);
 
-            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
 
-            if (controllerTime == -1L || robotConfigurationDataBuffer.getNewestTimestamp() == -1L)
+            if (!rosClockCalculator.offsetIsDetermined())
             {
+               delay = Double.NaN;
                return;
             }
 
-            boolean waitIfNecessary = true;
-            if (robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null) != -1L)
+            long controllerTime = rosClockCalculator.computeRobotMonotonicTime(timestamp);
+            if (controllerTime == -1L)
             {
+               delay = Double.NaN;
+               return;
+            }
+
+            long newestTimestamp = robotConfigurationDataBuffer.getNewestTimestamp();
+            if (newestTimestamp == -1L)
+            {
+               delay = Double.NaN;
+               return;
+            }
+
+            boolean waitIfNecessary = false; // dangerous if true! need a timeout
+            long selectedTimestamp = robotConfigurationDataBuffer.updateFullRobotModel(waitIfNecessary, controllerTime, fullRobotModel, null);
+            if (selectedTimestamp != -1L)
+            {
+               long currentTimeInWall = ros1Node.getCurrentTime().totalNsecs();
+               long selectedTimeInWall = selectedTimestamp - rosClockCalculator.getCurrentTimestampOffset();
+               delay = Conversions.nanosecondsToSeconds(currentTimeInWall - selectedTimeInWall);
+
                try
                {
                   referenceFrames.updateFrames();
@@ -151,5 +192,10 @@ public class DelayFixedPlanarRegionsSubscription
       }
 
       this.enabled = enabled;
+   }
+
+   public double getDelay()
+   {
+      return delay;
    }
 }

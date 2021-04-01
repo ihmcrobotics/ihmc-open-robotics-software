@@ -21,21 +21,19 @@ public class MapsenseTools
       zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
    }
 
-   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(RosNodeInterface ros1Node,
-                                                                                                   ROS2NodeInterface ros2Node,
+   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
                                                                                                    DRCRobotModel robotModel,
                                                                                                    Consumer<PlanarRegionsList> callback)
    {
-      return subscribeToPlanarRegionsWithDelayCompensation(ros1Node, ros2Node, robotModel, RosTools.MAPSENSE_REGIONS, callback);
+      return subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, RosTools.MAPSENSE_REGIONS, callback);
    }
 
-   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(RosNodeInterface ros1Node,
-                                                                                                   ROS2NodeInterface ros2Node,
+   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
                                                                                                    DRCRobotModel robotModel,
                                                                                                    String topic,
                                                                                                    Consumer<PlanarRegionsList> callback)
    {
-      return new DelayFixedPlanarRegionsSubscription(ros1Node, ros2Node, robotModel, topic, callback);
+      return new DelayFixedPlanarRegionsSubscription(ros2Node, robotModel, topic, callback);
    }
 
    public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(RosNodeInterface ros1Node, Consumer<RawGPUPlanarRegionList> callback)
