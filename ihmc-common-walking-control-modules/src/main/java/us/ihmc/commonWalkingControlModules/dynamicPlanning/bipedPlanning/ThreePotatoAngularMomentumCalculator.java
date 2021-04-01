@@ -399,7 +399,7 @@ public class ThreePotatoAngularMomentumCalculator
       }
    }
 
-   public MultipleSegmentPositionTrajectoryGenerator<?> getAngularMomentumTrajectories()
+   public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getAngularMomentumTrajectories()
    {
       if (useHeightScaledAngularMomentum.getValue())
          return heightScaledAngularMomentumTrajectory;

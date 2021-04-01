@@ -287,6 +287,7 @@ public class JumpingBalanceManager
          }
 
          angularMomentumHandler.computeAngularMomentum(timeInSupportSequence.getDoubleValue());
+         comTrajectoryPlanner.setInternalAngularMomentumTrajectory(angularMomentumHandler.getAngularMomentumTrajectories());
       }
       else
       {

@@ -15,6 +15,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -158,6 +160,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setTimeOfConstraint(0.0);
       objectiveToPack.setEndingDiscreteTickId(0);
 
+      linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
       orientationTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
 
       FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
@@ -168,14 +171,17 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
       tempVector.setToZero();
+      // FIXME potentially  make this non-zero
       objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
-      tempVector.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentum());
-      objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+      if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+         objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+      else
+         objectiveToPack.setDesiredInternalAngularMomentumRate(tempVector);
 
       objectiveToPack.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
       objectiveToPack.setDesiredCoMPosition(currentCoMPosition);
-      objectiveToPack.setDesiredCoMAcceleration(tempVector); // FIXME
+      objectiveToPack.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
 
       angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
 
@@ -233,7 +239,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
             tempVector.setToZero();
             objective.setDesiredNetAngularMomentumRate(tempVector);
-            objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+            if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+               objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+            else
+               objective.setDesiredInternalAngularMomentumRate(tempVector);
 
             objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
@@ -323,7 +332,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.currentBodyAngularVelocity.setMatchingFrame(bodyAngularVelocity);
    }
 
-
+   public void setInternalAngularMomentumTrajectory(MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> internalAngularMomentumTrajectory)
+   {
+      this.orientationTrajectoryHandler.setInternalAngularMomentumTrajectory(internalAngularMomentumTrajectory);
+   }
 
    public FrameOrientation3DReadOnly getDesiredBodyOrientationSolution()
    {
