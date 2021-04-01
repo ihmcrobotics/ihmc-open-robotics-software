@@ -36,7 +36,7 @@ public class BoxSubscriber extends AbstractRosTopicSubscriber<GDXBoxMessage>
       this.BoxIsAvailable = true;
       if (true)
       {
-         System.out.println("Received Message:" + message.getx_min());
+         System.out.println("Received Message:" + message.getZMax());
 //         for (int i = 0; i < message.getNumOfRegions(); i++)
 //         {
 //            List<RawGPUPlanarRegion> regions = message.getRegions();
