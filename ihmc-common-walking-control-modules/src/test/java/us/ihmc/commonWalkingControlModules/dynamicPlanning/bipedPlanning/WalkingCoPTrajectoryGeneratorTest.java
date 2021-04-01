@@ -5,13 +5,14 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.YoSplitFractionCalculatorParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -21,13 +22,14 @@ import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.awt.*;
 import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
 public class WalkingCoPTrajectoryGeneratorTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
 
    @BeforeEach
    public void setup()
@@ -312,6 +314,84 @@ public class WalkingCoPTrajectoryGeneratorTest
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(5).getECMPEndPosition(), 1e-5);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPStartPosition(), 1e-5);
       EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(expectedMidpoint, contactStateProviders.get(6).getECMPEndPosition(), 1e-5);
+
+      if (visualize)
+         CoPTrajectoryVisualizer.visualize(copTrajectory);
+   }
+
+   @Test
+   public void testWeirdStepDown()
+   {
+      YoRegistry registry = new YoRegistry("test");
+      SideDependentList<PoseReferenceFrame> soleFrames = CoPTrajectoryGeneratorTestTools.createSoleFrames();
+      SideDependentList<FrameConvexPolygon2D> polygons = new SideDependentList<>();
+
+      CoPTrajectoryParameters parameters = new CoPTrajectoryParameters();
+      DefaultSplitFractionCalculatorParameters splitFractionCalculatorParameters = new DefaultSplitFractionCalculatorParameters();
+      splitFractionCalculatorParameters.setCalculateSplitFractionsFromPositions(true);
+      splitFractionCalculatorParameters.setCalculateSplitFractionsFromArea(false);
+      splitFractionCalculatorParameters.setStepHeightForLargeStepDown(0.1);
+      splitFractionCalculatorParameters.setLargestStepDownHeight(0.15);
+      splitFractionCalculatorParameters.setTransferSplitFractionAtFullDepth(0.3);
+      splitFractionCalculatorParameters.setTransferWeightDistributionAtFullDepth(0.75);
+      splitFractionCalculatorParameters.setTransferFinalWeightDistributionAtFullDepth(0.8);
+
+      registry.addChild(parameters.getRegistry());
+      WalkingCoPTrajectoryGenerator copTrajectory = new WalkingCoPTrajectoryGenerator(parameters,
+                                                                                      splitFractionCalculatorParameters,
+                                                                                      CoPTrajectoryGeneratorTestTools.createDefaultSupportPolygon(),
+                                                                                      registry);
+      CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      copTrajectory.registerState(state);
+
+      state.setInitialCoP(new FramePoint3D(ReferenceFrame.getWorldFrame(), 2.3497, 0.8024, 0.2613));
+
+      FramePose3D leftFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                 new Point3D(2.1486, 0.7727, 0.2502),
+                                                 new Quaternion(-0.03736, 0.148, 0.4505, 0.8796));
+      FramePose3D rightFootPose = new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                 new Point3D(2.5466, 0.8474, 0.3083),
+                                                 new Quaternion(-0.0124, 0.0057, 0.2141, 0.9767));
+      soleFrames.get(RobotSide.LEFT).setPoseAndUpdate(leftFootPose);
+      soleFrames.get(RobotSide.RIGHT).setPoseAndUpdate(rightFootPose);
+
+      ConvexPolygon2D leftFootPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D rightFootPolygon = new ConvexPolygon2D();
+
+      leftFootPolygon.addVertex(0.11, -0.0);
+      leftFootPolygon.update();
+
+      rightFootPolygon.addVertex(-0.11, 0.055);
+      rightFootPolygon.addVertex(0.11, 0.0425);
+      rightFootPolygon.addVertex(0.11, -0.0425);
+      rightFootPolygon.addVertex(-0.11, -0.055);
+      rightFootPolygon.update();
+
+      polygons.put(RobotSide.LEFT, new FrameConvexPolygon2D(soleFrames.get(RobotSide.LEFT), leftFootPolygon));
+      polygons.put(RobotSide.RIGHT, new FrameConvexPolygon2D(soleFrames.get(RobotSide.RIGHT), rightFootPolygon));
+
+      Footstep footstep = new Footstep();
+      footstep.getFootstepPose().getPosition().set(2.5162, 1.1913, 0.1341);
+      footstep.getFootstepPose().getOrientation().set(-0.0047, -0.0129, 0.1081, 0.994);
+      footstep.setRobotSide(RobotSide.LEFT);
+      footstep.setPredictedContactPoints(rightFootPolygon.getVertexBufferView());
+
+      double swingTime = 1.2817;
+      double transferTime = 1.0;
+      double finalTransferTime = 0.8;
+      FootstepTiming timing = new FootstepTiming();
+      timing.setTimings(swingTime, transferTime);
+
+      state.setFinalTransferDuration(finalTransferTime);
+      state.setPercentageStandingWeightDistributionOnLeftFoot(0.2);
+      state.addFootstep(footstep);
+      state.addFootstepTiming(timing);
+      state.initializeStance(polygons, soleFrames);
+
+      copTrajectory.compute(state);
+
 
       if (visualize)
          CoPTrajectoryVisualizer.visualize(copTrajectory);
