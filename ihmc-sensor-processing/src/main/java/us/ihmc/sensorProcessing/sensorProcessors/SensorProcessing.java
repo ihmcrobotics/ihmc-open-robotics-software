@@ -1676,6 +1676,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          YoFrameVector3D processedAngularVelocity = new YoFrameVector3D(angularVelocityPrefix, angularVelocitySuffix, sensorFrame, registry);
 
          YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName,
+                                                          imuName,
                                                           orientationSuffix,
                                                           updateDT,
                                                           sensorFrame,
