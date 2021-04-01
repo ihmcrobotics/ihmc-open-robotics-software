@@ -1,15 +1,12 @@
 package us.ihmc.utilities.ros.subscriber;
 
-import ihmc_msgs.GDXBoxesMessage;
-import ihmc_msgs.GDXBoxMessage;
+import lidar_obstacle_detection.GDXBoxesMessage;
 import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.List;
 
-public class BoxesSubscriber extends AbstractRosTopicSubscriber<ihmc_msgs.GDXBoxesMessage>
+public class BoxesSubscriber extends AbstractRosTopicSubscriber<GDXBoxesMessage>
 {
    private boolean DEBUG = false;
 
@@ -37,9 +34,9 @@ public class BoxesSubscriber extends AbstractRosTopicSubscriber<ihmc_msgs.GDXBox
    {
       this.Boxes = message;
       this.BoxIsAvailable = true;
-      if (DEBUG)
+      if (true)
       {
-         System.out.println("Received Message:" + message.getBoundingBoxes().size());
+         System.out.println("Received Message:");
          //         for (int i = 0; i < message.getNumOfRegions(); i++)
          //         {
          //            List<RawGPUPlanarRegion> regions = message.getRegions();
