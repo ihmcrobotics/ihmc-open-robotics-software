@@ -140,10 +140,11 @@ public class SplitFractionFromPositionCalculator
                double currentSplitFraction = finalTransferSplitFractionProvider.getAsDouble();
                double currentWeightDistribution = finalTransferWeightDistributionProvider.getAsDouble();
 
-               double weightDistributionToSet;
+               double weightDistributionToSet, splitFractionToSet;
                if(MathTools.epsilonCompare(nextFootPose.getZ(), stanceFootPose.getZ(), splitFractionParameters.getStepHeightForLargeStepDown()))
-               {
+               { // next step is close to a squaring up step
                   weightDistributionToSet = defaultWeightDistribution;
+                  splitFractionToSet = defaultTransferSplitFraction;
                }
                else
                {
@@ -154,9 +155,8 @@ public class SplitFractionFromPositionCalculator
                   weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution,
                           currentWeightDistribution,
                           defaultWeightDistribution);
+                  splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
                }
-
-               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
 
                finalTransferSplitFractionConsumer.accept(splitFractionToSet);
                finalTransferWeightDistributionConsumer.accept(weightDistributionToSet);
