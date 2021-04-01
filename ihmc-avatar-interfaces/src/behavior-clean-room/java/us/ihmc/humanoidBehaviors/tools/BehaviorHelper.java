@@ -15,42 +15,32 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.*;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.exceptions.NotARotationMatrixException;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.SwingPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.ros2.ROS2TypelessInput;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
-import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.*;
-import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.ActivationReference;
-import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -206,63 +196,25 @@ public class BehaviorHelper
                                      walkingControllerParameters);
    }
 
-   public void subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
+   public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
    {
-      boolean daemon = true;
-      int queueSize = 1;
-      ResettableExceptionHandlingExecutorService executorService
-            = MissingThreadTools.newSingleThreadExecutor("ROS1PlanarRegionsSubscriber", daemon, queueSize);
-      GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
-      gpuPlanarRegionUpdater.attachROS2Tuner(managedROS2Node);
-      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      RobotConfigurationDataBuffer robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
-      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()), robotConfigurationDataBuffer::update);
-      HumanoidReferenceFrames referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-      RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
-      ReferenceFrame sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
-      MapsenseTools.createROS1Callback(topic, ros1Node, rawGPUPlanarRegionList ->
-      {
-         executorService.clearQueueAndExecute(() ->
-         {
-            robotConfigurationDataBuffer.updateFullRobotModel(false, rawGPUPlanarRegionList.getHeader().getStamp().totalNsecs(), fullRobotModel, null);
-            try
-            {
-               referenceFrames.updateFrames();
-            }
-            catch (NotARotationMatrixException e)
-            {
-               LogTools.error(e.getMessage());
-            }
-            PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
-            try
-            {
-               planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-               planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
-            }
-            catch (NotARotationMatrixException e)
-            {
-               LogTools.error(e.getMessage());
-            }
-            callback.accept(planarRegionsList);
-         });
-      });
+      return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(managedROS2Node, robotModel, topic, callback);
    }
 
    public <T> void subscribeViaCallback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      new IHMCROS2Callback<>(managedROS2Node, topic, callback);
+      ROS2Tools.createCallbackSubscription2(managedROS2Node, topic, callback);
    }
 
    public void subscribeViaCallback(ROS2Topic<Empty> topic, Runnable callback)
    {
-      new IHMCROS2Callback<>(managedROS2Node, topic, message -> callback.run());
+      ROS2Tools.createCallbackSubscription2(managedROS2Node, topic, message -> callback.run());
    }
 
    // TODO: Move to remote robot interface?
    public <T> void subscribeToControllerViaCallback(Class<T> messageClass, Consumer<T> callback)
    {
-      new IHMCROS2Callback<>(managedROS2Node, ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
+      subscribeViaCallback(ControllerAPIDefinition.getTopic(messageClass, robotModel.getSimpleRobotName()), callback);
    }
 
    public void subscribeToPlanarRegionsViaCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)

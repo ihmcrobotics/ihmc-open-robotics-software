@@ -72,7 +72,7 @@ public class RosModule implements CloseableAndDisposable
       String rosTopicPrefix = "/ihmc_ros/" + robotName;
 
       this.rosClockCalculator = rosClockCalculator;
-      this.rosClockCalculator.setROSMainNode(rosMainNode);
+      this.rosClockCalculator.subscribeToROS1Topics(rosMainNode);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
                                                     robotConfigurationDataTopicName,
