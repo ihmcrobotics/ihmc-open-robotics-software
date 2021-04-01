@@ -5,9 +5,11 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -35,6 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class YoIMUMahonyFilter implements ProcessingYoVariable
 {
    private static final double MIN_MAGNITUDE = 1.0e-5;
+   private static final double GRAVITY_DEFAULT_VALUE = 9.81;
 
    public static final Vector3DReadOnly ACCELERATION_REFERENCE = Axis3D.Z;
    public static final Vector3DReadOnly NORTH_REFERENCE = Axis3D.X;
@@ -46,82 +49,22 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    private final YoFrameQuaternion estimatedOrientation;
    private final YoFrameVector3D estimatedAngularVelocity;
 
-   private final YoFrameVector3D yoErrorTerm;
-   private final YoFrameVector3D yoIntegralTerm;
+   private final YoFrameVector3D orientationError;
+   private final YoFrameVector3D angularVelocityBias;
 
    private final YoDouble proportionalGain;
    private final YoDouble integralGain;
 
-   private final YoBoolean enableYawRateBiasCorrection;
    private final YoDouble zeroAngularVelocityThreshold;
+   private final YoDouble zeroLinearAccelerationThreshold;
    private final YoDouble yawRateBiasGain;
-   private final YoDouble yawRateBiasEstimate;
-   private final YoFrameVector3D yawRateBiasError;
 
    private final double updateDT;
+   private double gravityMagnitude = GRAVITY_DEFAULT_VALUE;
 
    private final YoBoolean hasBeenInitialized;
 
    private final ReferenceFrame sensorFrame;
-
-   public YoIMUMahonyFilter(String imuName,
-                            String nameSuffix,
-                            double updateDT,
-                            ReferenceFrame sensorFrame,
-                            YoFrameQuaternion estimatedOrientation,
-                            YoFrameVector3D estimatedAngularVelocity,
-                            YoRegistry parentRegistry)
-   {
-      this(imuName, nameSuffix, updateDT, false, sensorFrame, estimatedOrientation, estimatedAngularVelocity, parentRegistry);
-   }
-
-   public YoIMUMahonyFilter(String imuName,
-                            String nameSuffix,
-                            double updateDT,
-                            boolean createYawRateBiasEstimator,
-                            ReferenceFrame sensorFrame,
-                            YoFrameQuaternion estimatedOrientation,
-                            YoFrameVector3D estimatedAngularVelocity,
-                            YoRegistry parentRegistry)
-   {
-      this.updateDT = updateDT;
-      this.sensorFrame = sensorFrame;
-
-      YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
-      parentRegistry.addChild(registry);
-
-      estimatedOrientation.checkReferenceFrameMatch(sensorFrame.getRootFrame());
-      if (estimatedAngularVelocity != null)
-         estimatedAngularVelocity.checkReferenceFrameMatch(sensorFrame);
-
-      this.estimatedOrientation = estimatedOrientation;
-      this.estimatedAngularVelocity = estimatedAngularVelocity;
-
-      yoErrorTerm = new YoFrameVector3D("ErrorTerm", nameSuffix, sensorFrame, registry);
-      yoIntegralTerm = new YoFrameVector3D("IntegralTerm", nameSuffix, sensorFrame, registry);
-
-      proportionalGain = new YoDouble("ProportionalGain" + nameSuffix, registry);
-      integralGain = new YoDouble("IntegralGain" + nameSuffix, registry);
-
-      if (createYawRateBiasEstimator)
-      {
-         enableYawRateBiasCorrection = new YoBoolean("EnableYawRateBiasCorrection" + nameSuffix, registry);
-         zeroAngularVelocityThreshold = new YoDouble("ZeroAngularVelocityThreshold" + nameSuffix, registry);
-         yawRateBiasGain = new YoDouble("YawRateBiasFilterGain" + nameSuffix, registry);
-         yawRateBiasEstimate = new YoDouble("YawRateBiasEstimate" + nameSuffix, registry);
-         yawRateBiasError = new YoFrameVector3D("YawRateBiasError", nameSuffix, sensorFrame, registry);
-      }
-      else
-      {
-         enableYawRateBiasCorrection = null;
-         zeroAngularVelocityThreshold = null;
-         yawRateBiasGain = null;
-         yawRateBiasEstimate = null;
-         yawRateBiasError = null;
-      }
-
-      hasBeenInitialized = new YoBoolean("HasBeenInitialized" + nameSuffix, registry);
-   }
 
    public YoIMUMahonyFilter(String imuName, String namePrefix, String nameSuffix, double updateDT, ReferenceFrame sensorFrame, YoRegistry parentRegistry)
    {
@@ -136,39 +79,70 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
                             ReferenceFrame sensorFrame,
                             YoRegistry parentRegistry)
    {
+      this(imuName, namePrefix, nameSuffix, updateDT, createYawRateBiasEstimator, sensorFrame, null, null, parentRegistry);
+   }
+
+   public YoIMUMahonyFilter(String imuName,
+                            String namePrefix,
+                            String nameSuffix,
+                            double updateDT,
+                            ReferenceFrame sensorFrame,
+                            YoFrameQuaternion estimatedOrientation,
+                            YoFrameVector3D estimatedAngularVelocity,
+                            YoRegistry parentRegistry)
+   {
+      this(imuName, namePrefix, nameSuffix, updateDT, false, sensorFrame, estimatedOrientation, estimatedAngularVelocity, parentRegistry);
+   }
+
+   public YoIMUMahonyFilter(String imuName,
+                            String namePrefix,
+                            String nameSuffix,
+                            double updateDT,
+                            boolean createYawRateBiasEstimator,
+                            ReferenceFrame sensorFrame,
+                            YoFrameQuaternion estimatedOrientation,
+                            YoFrameVector3D estimatedAngularVelocity,
+                            YoRegistry parentRegistry)
+   {
       this.updateDT = updateDT;
       this.sensorFrame = sensorFrame;
 
       YoRegistry registry = new YoRegistry(imuName + "MahonyFilter");
       parentRegistry.addChild(registry);
 
-      estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame.getRootFrame(), registry);
-      estimatedAngularVelocity = new YoFrameVector3D(namePrefix, nameSuffix, sensorFrame, registry);
+      if (estimatedOrientation != null)
+         estimatedOrientation.checkReferenceFrameMatch(sensorFrame.getRootFrame());
+      else
+         estimatedOrientation = new YoFrameQuaternion(namePrefix, nameSuffix, sensorFrame.getRootFrame(), registry);
 
-      yoErrorTerm = new YoFrameVector3D("ErrorTerm", nameSuffix, sensorFrame, registry);
-      yoIntegralTerm = new YoFrameVector3D("IntegralTerm", nameSuffix, sensorFrame, registry);
+      if (estimatedAngularVelocity != null)
+         estimatedAngularVelocity.checkReferenceFrameMatch(sensorFrame);
+      else
+         estimatedAngularVelocity = new YoFrameVector3D(namePrefix, nameSuffix, sensorFrame, registry);
 
-      proportionalGain = new YoDouble("ProportionalGain" + nameSuffix, registry);
-      integralGain = new YoDouble("IntegralGain" + nameSuffix, registry);
+      this.estimatedOrientation = estimatedOrientation;
+      this.estimatedAngularVelocity = estimatedAngularVelocity;
+
+      orientationError = new YoFrameVector3D(namePrefix + "OrientationError", nameSuffix, sensorFrame, registry);
+      angularVelocityBias = new YoFrameVector3D(namePrefix + "AngularVelocityBias", nameSuffix, sensorFrame, registry);
+
+      proportionalGain = new YoDouble(namePrefix + "ProportionalGain" + nameSuffix, registry);
+      integralGain = new YoDouble(namePrefix + "IntegralGain" + nameSuffix, registry);
+
+      zeroLinearAccelerationThreshold = new YoDouble(namePrefix + "ZeroLinearAccelerationThreshold" + nameSuffix, registry);
 
       if (createYawRateBiasEstimator)
       {
-         enableYawRateBiasCorrection = new YoBoolean("EnableYawRateBiasCorrection" + nameSuffix, registry);
-         zeroAngularVelocityThreshold = new YoDouble("ZeroAngularVelocityThreshold" + nameSuffix, registry);
-         yawRateBiasGain = new YoDouble("YawRateBiasGain" + nameSuffix, registry);
-         yawRateBiasEstimate = new YoDouble("YawRateBiasEstimate" + nameSuffix, registry);
-         yawRateBiasError = new YoFrameVector3D("YawRateBiasError", nameSuffix, sensorFrame, registry);
+         zeroAngularVelocityThreshold = new YoDouble(namePrefix + "ZeroAngularVelocityThreshold" + nameSuffix, registry);
+         yawRateBiasGain = new YoDouble(namePrefix + "YawRateBiasGain" + nameSuffix, registry);
       }
       else
       {
-         enableYawRateBiasCorrection = null;
          zeroAngularVelocityThreshold = null;
          yawRateBiasGain = null;
-         yawRateBiasEstimate = null;
-         yawRateBiasError = null;
       }
 
-      hasBeenInitialized = new YoBoolean("HasBeenInitialized" + nameSuffix, registry);
+      hasBeenInitialized = new YoBoolean(namePrefix + "HasBeenInitialized" + nameSuffix, registry);
    }
 
    /**
@@ -220,9 +194,32 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       this.integralGain.set(integralGain);
    }
 
-   public void setYawDriftParameters(boolean enableCorrection, double zeroAngularVelocityThreshold, double gain)
+   /**
+    * Sets the gains for this filter.
+    * 
+    * @param proportionalGain                gain used to correct the orientation according to the
+    *                                        estimated error.
+    * @param integralGain                    gain used to update the gyroscope bias according to the
+    *                                        estimated error.
+    * @param zeroLinearAccelerationThreshold when and only when the magnitude of the linear
+    *                                        acceleration magnitude is less that this threshold, the
+    *                                        integral term is updated. Set to {@code 0.0} to always
+    *                                        update the integral term.
+    */
+   public void setGains(double proportionalGain, double integralGain, double zeroLinearAccelerationThreshold)
    {
-      enableYawRateBiasCorrection.set(enableCorrection);
+      this.proportionalGain.set(proportionalGain);
+      this.integralGain.set(integralGain);
+      this.zeroLinearAccelerationThreshold.set(zeroLinearAccelerationThreshold);
+   }
+
+   public void setGravityMagnitude(double gravityMagnitude)
+   {
+      this.gravityMagnitude = gravityMagnitude;
+   }
+
+   public void setYawDriftParameters(double zeroAngularVelocityThreshold, double gain)
+   {
       this.zeroAngularVelocityThreshold.set(zeroAngularVelocityThreshold);
       yawRateBiasGain.set(gain);
    }
@@ -250,7 +247,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       Vector3DReadOnly inputLinearAcceleration = rawLinearAcceleration;
 
       if (rawMagneticVector != null)
-         update(inputAngularVelocity, inputLinearAcceleration, (Vector3DReadOnly) rawMagneticVector);
+         update(inputAngularVelocity, inputLinearAcceleration, rawMagneticVector);
       else
          update(inputAngularVelocity, inputLinearAcceleration);
    }
@@ -283,39 +280,28 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          return;
       }
 
-      boolean success = computeOrientationError((QuaternionReadOnly) estimatedOrientation, inputLinearAcceleration, inputMagneticVector, yoErrorTerm);
+      boolean success = computeOrientationError(estimatedOrientation, inputLinearAcceleration, inputMagneticVector, orientationError);
 
       if (success)
       {
-         angularVelocityTerm.scaleAdd(proportionalGain.getValue(), yoErrorTerm, inputAngularVelocity);
+         angularVelocityTerm.scaleAdd(proportionalGain.getValue(), orientationError, inputAngularVelocity);
 
-         if (integralGain.getValue() > 0.0)
-         {
-            yoIntegralTerm.scaleAdd(integralGain.getValue() * updateDT, yoErrorTerm, yoIntegralTerm);
-            angularVelocityTerm.add(yoIntegralTerm);
-         }
-         else
-         {
-            yoIntegralTerm.setToZero();
-         }
+         boolean hasIntegralTerm = updateIntegralTerm(angularVelocityBias,
+                                                      inputMagneticVector != null,
+                                                      estimatedOrientation,
+                                                      inputAngularVelocity,
+                                                      inputLinearAcceleration,
+                                                      orientationError);
+         if (hasIntegralTerm)
+            angularVelocityTerm.add(angularVelocityBias);
 
-         angularVelocityUnbiased.add(inputAngularVelocity, yoIntegralTerm);
+         angularVelocityUnbiased.add(inputAngularVelocity, angularVelocityBias);
       }
       else
       {
-         yoErrorTerm.setToZero();
+         orientationError.setToZero();
          angularVelocityTerm.set(inputAngularVelocity);
          angularVelocityUnbiased.set(inputAngularVelocity);
-      }
-
-      if (yawRateBiasError != null)
-      {
-         updateYawRateBiasEstimator(estimatedOrientation, angularVelocityUnbiased, yawRateBiasError);
-         if (enableYawRateBiasCorrection.getValue())
-         {
-            angularVelocityTerm.add(yawRateBiasError);
-            angularVelocityUnbiased.add(yawRateBiasError);
-         }
       }
 
       rotationUpdate.setAndScale(updateDT, angularVelocityTerm);
@@ -324,18 +310,6 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
       if (estimatedAngularVelocity != null)
          estimatedAngularVelocity.set(angularVelocityUnbiased);
-   }
-
-   private void updateYawRateBiasEstimator(QuaternionReadOnly orientation, Vector3DReadOnly angularVelocity, Vector3DBasics yawRateVector)
-   {
-      if (angularVelocity.lengthSquared() > MathTools.square(zeroAngularVelocityThreshold.getValue()))
-         return;
-
-      orientation.transform(angularVelocity, yawRateVector);
-
-      yawRateBiasEstimate.set(EuclidCoreTools.interpolate(yawRateBiasEstimate.getValue(), yawRateVector.getZ(), yawRateBiasGain.getValue()));
-      yawRateVector.set(0, 0, -yawRateBiasEstimate.getValue());
-      orientation.inverseTransform(yawRateVector);
    }
 
    @Override
@@ -353,20 +327,73 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       else
          estimatedOrientation.invert();
 
-      yoIntegralTerm.setToZero();
-      if (yawRateBiasEstimate != null)
-         yawRateBiasEstimate.set(0.0);
+      angularVelocityBias.setToZero();
       hasBeenInitialized.set(true);
    }
 
    // ------------------------------------------------ //
-   // Intermediate variables for computing the orientation error
+   // Intermediate variables for computing the orientation error and the integral term.
    private final Vector3D m = new Vector3D();
    private final Vector3D mRef = new Vector3D();
 
    private final Vector3D a = new Vector3D();
    private final Vector3D aRef = new Vector3D();
+
+   private final Vector3D normalPart = new Vector3D();
+   private final Vector3D tangentialPart = new Vector3D();
    // ------------------------------------------------ //
+
+   private boolean updateIntegralTerm(Vector3DBasics integralTerm,
+                                      boolean hasMagneticVector,
+                                      Orientation3DReadOnly orientation,
+                                      Vector3DReadOnly angularVelocity,
+                                      Vector3DReadOnly linearAcceleration,
+                                      Vector3DReadOnly errorTerm)
+   {
+      if (!Double.isFinite(integralGain.getValue()) || integralGain.getValue() <= 0.0)
+      {
+         integralTerm.setToZero();
+         return false;
+      }
+
+      orientation.inverseTransform(ACCELERATION_REFERENCE, aRef);
+      a.setAndScale(gravityMagnitude, aRef); // Acceleration when the IMU is stationary
+      a.sub(linearAcceleration, a); // Current acceleration without gravity.
+
+      // Update the integral term when the threshold is not set or the a cc
+      if (zeroLinearAccelerationThreshold.getValue() > 0.0 && a.lengthSquared() > MathTools.square(zeroLinearAccelerationThreshold.getValue()))
+         return true;
+
+      integralTerm.scaleAdd(integralGain.getValue() * updateDT, errorTerm, integralTerm);
+
+      if (hasMagneticVector)
+         return true;
+
+      if (yawRateBiasGain != null)
+      {
+         if (angularVelocity.lengthSquared() > MathTools.square(zeroAngularVelocityThreshold.getValue()))
+            return true;
+
+         double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
+         normalPart.setAndScale(normalPartMagnitude, aRef);
+         tangentialPart.sub(integralTerm, normalPart);
+         double yawRateError = -angularVelocity.dot(aRef);
+         double ajustedNormalMagnitude = EuclidCoreTools.interpolate(normalPartMagnitude, yawRateError, yawRateBiasGain.getValue());
+         normalPart.scale(ajustedNormalMagnitude / normalPartMagnitude);
+         integralTerm.add(normalPart, tangentialPart);
+      }
+      else
+      {
+         // If we don't have a magnetic vector, the error around the gravity vector cannot be estimated. So we slowly decay it.
+         double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
+         normalPart.setAndScale(normalPartMagnitude, aRef);
+         tangentialPart.sub(integralTerm, normalPart);
+         normalPart.scale(1.0 - integralGain.getValue());
+         integralTerm.add(normalPart, tangentialPart);
+      }
+
+      return true;
+   }
 
    /**
     * Estimates the error in orientation based on the measurements from the accelerometer and
@@ -443,12 +470,12 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
    public YoFrameVector3D getErrorTerm()
    {
-      return yoErrorTerm;
+      return orientationError;
    }
 
    public YoFrameVector3D getIntegralTerm()
    {
-      return yoIntegralTerm;
+      return angularVelocityBias;
    }
 
    /**
