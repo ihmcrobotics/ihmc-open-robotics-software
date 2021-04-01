@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.humanoidBehaviors.tools.perception;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -19,7 +19,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static us.ihmc.humanoidBehaviors.tools.SimulatedREAModule.SimulatedREAModuleMode.*;
+import static us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule.SimulatedREAModuleMode.*;
 
 /**
  * Acts as REA, reporting currently visible area as planar regions.
