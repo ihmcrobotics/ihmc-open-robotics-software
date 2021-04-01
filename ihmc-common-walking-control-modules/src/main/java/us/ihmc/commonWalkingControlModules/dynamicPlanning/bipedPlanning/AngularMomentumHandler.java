@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -103,7 +104,7 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       copPositionToPack.subY(desiredECMPOffset.getY());
    }
 
-   public MultipleSegmentPositionTrajectoryGenerator<?> getAngularMomentumTrajectories()
+   public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getAngularMomentumTrajectories()
    {
       return angularMomentumCalculator.getAngularMomentumTrajectories();
    }
