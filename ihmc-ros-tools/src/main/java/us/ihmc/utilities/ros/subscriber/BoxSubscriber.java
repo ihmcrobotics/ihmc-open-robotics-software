@@ -59,7 +59,7 @@ public class BoxSubscriber extends AbstractRosTopicSubscriber<ihmc_msgs.GDXBoxMe
    public static void main(String[] args) throws URISyntaxException
    {
       URI rosMasterURI = new URI("http://localhost:11311/");
-      RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "GPUPlanarRegionSubscriber");
+      RosMainNode rosMainNode = new RosMainNode(rosMasterURI, "GPUBoxSubscriber");
       BoxSubscriber subscriber = new BoxSubscriber();
       rosMainNode.attachSubscriber("/box", subscriber);
       rosMainNode.execute();
