@@ -140,14 +140,23 @@ public class SplitFractionFromPositionCalculator
                double currentSplitFraction = finalTransferSplitFractionProvider.getAsDouble();
                double currentWeightDistribution = finalTransferWeightDistributionProvider.getAsDouble();
 
-               double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth(),
-                                                                                        alpha);
+               double weightDistributionToSet;
+               if(MathTools.epsilonCompare(nextFootPose.getZ(), stanceFootPose.getZ(), splitFractionParameters.getStepHeightForLargeStepDown()))
+               {
+                  weightDistributionToSet = defaultWeightDistribution;
+               }
+               else
+               {
+                  double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
+                          splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth(),
+                          alpha);
+
+                  weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution,
+                          currentWeightDistribution,
+                          defaultWeightDistribution);
+               }
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
-               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution,
-                                                                                            currentWeightDistribution,
-                                                                                            defaultWeightDistribution);
 
                finalTransferSplitFractionConsumer.accept(splitFractionToSet);
                finalTransferWeightDistributionConsumer.accept(weightDistributionToSet);
