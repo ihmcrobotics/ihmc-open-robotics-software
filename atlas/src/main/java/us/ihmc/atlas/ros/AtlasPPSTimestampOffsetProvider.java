@@ -47,7 +47,7 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
    }
 
    @Override
-   public void subscribeROS1(RosNodeInterface ros1Node)
+   public void subscribeToROS1Topics(RosNodeInterface ros1Node)
    {
       synchronized (lock)
       {
@@ -61,7 +61,7 @@ public class AtlasPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffset
    }
 
    @Override
-   public void unsubscribeROS1(RosNodeInterface ros1Node)
+   public void unsubscribeFromROS1Topics(RosNodeInterface ros1Node)
    {
       synchronized (lock)
       {
