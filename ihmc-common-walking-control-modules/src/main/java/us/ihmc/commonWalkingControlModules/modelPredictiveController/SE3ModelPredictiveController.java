@@ -92,10 +92,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       orientationPreviewWindowDuration.set(0.25);
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
-      qpSolver.setMaxNumberOfIterations(10000);
+      qpSolver.setMaxNumberOfIterations(1000);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e1);
-      qpSolver.setSecondOrientationVariableRegularization(1e-1);
+      qpSolver.setFirstOrientationVariableRegularization(1e-2);
+      qpSolver.setSecondOrientationVariableRegularization(1e-5);
 
       parentRegistry.addChild(registry);
    }
