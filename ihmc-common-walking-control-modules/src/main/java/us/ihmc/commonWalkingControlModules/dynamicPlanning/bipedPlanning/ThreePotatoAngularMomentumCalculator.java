@@ -270,22 +270,6 @@ public class ThreePotatoAngularMomentumCalculator
       angularMomentumPredictionTimer.stopMeasurement();
    }
 
-   public FrameVector3DReadOnly getDesiredAngularMomentum()
-   {
-      if (useHeightScaledAngularMomentum.getValue())
-         return desiredScaledAngularMomentum;
-      else
-         return desiredAngularMomentum;
-   }
-
-   public FrameVector3DReadOnly getDesiredAngularMomentumRate()
-   {
-      if (useHeightScaledAngularMomentum.getValue())
-         return desiredScaledAngularMomentumRate;
-      else
-         return desiredAngularMomentumRate;
-   }
-
    private final FramePoint3D potatoPosition = new FramePoint3D();
    private final FrameVector3D potatoVelocity = new FrameVector3D();
 
@@ -406,12 +390,41 @@ public class ThreePotatoAngularMomentumCalculator
       }
    }
 
+
+   public boolean useHeightScaledAngularMomentum()
+   {
+      return useHeightScaledAngularMomentum.getValue();
+   }
+
+
+   public FrameVector3DReadOnly getDesiredAngularMomentum()
+   {
+      return desiredAngularMomentum;
+   }
+
+   public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentum()
+   {
+      return desiredScaledAngularMomentum;
+   }
+
+   public FrameVector3DReadOnly getDesiredAngularMomentumRate()
+   {
+      return desiredAngularMomentumRate;
+   }
+
+   public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentumRate()
+   {
+      return desiredScaledAngularMomentumRate;
+   }
+
    public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getAngularMomentumTrajectories()
    {
-      if (useHeightScaledAngularMomentum.getValue())
-         return heightScaledAngularMomentumTrajectory;
-      else
-         return angularMomentumTrajectory;
+      return angularMomentumTrajectory;
+   }
+
+   public MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> getHeightScaledAngularMomentumTrajectories()
+   {
+      return heightScaledAngularMomentumTrajectory;
    }
 
    private void computeAngularMomentumAtInstant(PositionTrajectoryGenerator comTrajectory,
