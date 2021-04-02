@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.corruptors;
 import java.util.ArrayList;
 
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -12,6 +13,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.RobotSpecificJointNames;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -120,6 +122,9 @@ public class FullRobotModelCorruptor
 
       name = FormattingTools.addPrefixAndKeepCamelCase(namePrefix, name);
       final YoDouble massVariable = new YoDouble(name + "Mass", registry);
+      YoVector3D momentOfInertiaDiagonal = new YoVector3D(name + "MoIDiagonal", registry);
+      Matrix3DBasics momentOfInertia = rigidBody.getInertia().getMomentOfInertia();
+      momentOfInertiaDiagonal.set(momentOfInertia.getM00(), momentOfInertia.getM11(), momentOfInertia.getM22());
       massVariable.set(rigidBody.getInertia().getMass());
 
       YoVariableChangedListener massVariableChangedListener = new YoVariableChangedListener()
@@ -130,8 +135,22 @@ public class FullRobotModelCorruptor
             rigidBody.getInertia().setMass(massVariable.getDoubleValue());
          }
       };
+
+      YoVariableChangedListener moiListener = new YoVariableChangedListener()
+      {
+         @Override
+         public void changed(YoVariable source)
+         {
+            rigidBody.getInertia().getMomentOfInertia().setM00(momentOfInertiaDiagonal.getX());
+            rigidBody.getInertia().getMomentOfInertia().setM11(momentOfInertiaDiagonal.getY());
+            rigidBody.getInertia().getMomentOfInertia().setM22(momentOfInertiaDiagonal.getZ());
+         }
+      };
+
       massVariable.addListener(massVariableChangedListener);
       variableChangedListeners.add(massVariableChangedListener);
+      momentOfInertiaDiagonal.attachVariableChangedListener(moiListener);
+      variableChangedListeners.add(moiListener);
 
       FramePoint3D originalCoMOffset = new FramePoint3D();
       rigidBody.getCenterOfMass(originalCoMOffset);
