@@ -426,7 +426,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       if (magneticVector != null)
       {
          double norm = magneticVector.length();
-         if (norm >= MIN_MAGNITUDE)
+         if (Double.isFinite(norm) && norm >= MIN_MAGNITUDE)
          {
             m.setAndScale(1.0 / norm, magneticVector);
 
@@ -445,7 +445,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       {
          double norm = acceleration.length();
 
-         if (norm >= MIN_MAGNITUDE)
+         if (Double.isFinite(norm) && norm >= MIN_MAGNITUDE)
          {
             a.setAndScale(1.0 / norm, acceleration);
 
