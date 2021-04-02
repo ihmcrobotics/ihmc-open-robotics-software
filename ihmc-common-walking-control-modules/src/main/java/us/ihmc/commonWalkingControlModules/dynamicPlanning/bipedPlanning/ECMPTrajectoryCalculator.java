@@ -7,6 +7,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -19,6 +20,8 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.Co
 
 public class ECMPTrajectoryCalculator<T extends ContactStateBasics<T>>
 {
+   private static final boolean debug = false;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RecyclingArrayList<T> contactStateProviders;
    private final double weight;
@@ -87,10 +90,18 @@ public class ECMPTrajectoryCalculator<T extends ContactStateBasics<T>>
 
          T eCMPTrajectory = contactStateProviders.get(i);
 
+         if (!eCMPTrajectory.getContactState().isLoadBearing())
+            continue;
+
          desiredAngularMomentumTrajectories.compute(startTime + 1e-8);
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
+
+         if (debug && offset.containsNaN())
+            LogTools.info("Error.");
+         if (debug && ecmpVelocity.containsNaN())
+            LogTools.info("Error.");
 
          ecmpPosition.set(copTrajectory.getECMPStartPosition());
          ecmpPosition.add(offset.getX(), offset.getY(), 0.0);
@@ -104,6 +115,11 @@ public class ECMPTrajectoryCalculator<T extends ContactStateBasics<T>>
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPEndVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
+
+         if (debug && offset.containsNaN())
+            LogTools.info("Error.");
+         if (debug && ecmpVelocity.containsNaN())
+            LogTools.info("Error.");
 
          ecmpPosition.set(copTrajectory.getECMPEndPosition());
          ecmpPosition.add(offset.getX(), offset.getY(), 0.0);
