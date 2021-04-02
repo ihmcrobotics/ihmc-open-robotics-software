@@ -46,7 +46,8 @@ public class ThreePotatoAngularMomentumCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final boolean visualize = false;
+   private static final boolean debug = false;
+   private static final boolean visualize = true;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoDouble potatoMass = new YoDouble("PotatoMass", registry);
@@ -353,10 +354,16 @@ public class ThreePotatoAngularMomentumCalculator
                totalTorque.add(torque);
             }
 
+            if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
+               throw new RuntimeException("Error.");
             angularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
 
-            totalAngularMomentum.scale(gravityZ / (gravityZ + comTrajectories.getAcceleration().getZ()));
+            if (!MathTools.isLessThanOrEqualToWithPrecision(comTrajectories.getAcceleration().getZ(), gravityZ, 1e-3))
+               totalAngularMomentum.scale(gravityZ / (gravityZ + comTrajectories.getAcceleration().getZ()));
+
             scaledAngularMomentumEstimator.addObjectivePosition(timeInInterval, totalAngularMomentum);
+            if (debug && totalAngularMomentum.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
+               throw new RuntimeException("Error.");
          }
 
          angularMomentumEstimator.initialize();
@@ -420,6 +427,9 @@ public class ThreePotatoAngularMomentumCalculator
 
       torqueToPack.cross(relativePotatoPosition, relativePotatoAcceleration);
       torqueToPack.scale(potatoMass);
+
+      if (debug && torqueToPack.containsNaN() || Double.isInfinite(totalAngularMomentum.length()))
+         throw new RuntimeException("Error.");
    }
 
    private void computeAngularMomentumAtInstant(PositionTrajectoryGenerator comTrajectory,
