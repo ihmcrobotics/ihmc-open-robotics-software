@@ -1,7 +1,9 @@
-package us.ihmc.gdx.tools;
+package us.ihmc.gdx;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Mesh;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
@@ -68,12 +70,6 @@ public class GDXModelPrimitives
    {
       return buildModelInstance(meshBuilder -> meshBuilder.addSphere(radius, color), "sphere");
    }
-
-   public static ModelInstance createBox(float lx, float ly, float lz, Color color)
-   {
-      return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
-   }
-
 
    public static ModelInstance createArrow(double length, Color color)
    {
