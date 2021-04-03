@@ -36,7 +36,7 @@ public class BoxesSubscriber extends AbstractRosTopicSubscriber<GDXBoxesMessage>
       this.BoxIsAvailable = true;
       if (true)
       {
-         System.out.println("Received Message:");
+         System.out.println("Received Message:"+message.getBoxes().toString());
          //         for (int i = 0; i < message.getNumOfRegions(); i++)
          //         {
          //            List<RawGPUPlanarRegion> regions = message.getRegions();
