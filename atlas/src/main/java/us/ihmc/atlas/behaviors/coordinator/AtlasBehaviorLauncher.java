@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
 

@@ -27,7 +27,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
-import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
+import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepVisualizationGroup;
 import us.ihmc.behaviors.javafx.graphics.DoorGraphic;

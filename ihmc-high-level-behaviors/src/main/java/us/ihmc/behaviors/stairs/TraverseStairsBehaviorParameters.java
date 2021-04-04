@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.stairs;
+package us.ihmc.behaviors.stairs;
 
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.stairs;
+package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
