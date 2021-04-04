@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
+package us.ihmc.behaviors.tools.behaviorTrees;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.Notification;

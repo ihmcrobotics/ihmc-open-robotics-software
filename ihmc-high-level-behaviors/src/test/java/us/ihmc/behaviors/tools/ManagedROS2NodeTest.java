@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.behaviors.tools;
 
 import org.junit.jupiter.api.Test;
 import std_msgs.msg.dds.String;

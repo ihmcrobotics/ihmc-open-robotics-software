@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
+package us.ihmc.behaviors.tools.behaviorTrees;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Disabled;
