@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
 import org.apache.logging.log4j.Level;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;

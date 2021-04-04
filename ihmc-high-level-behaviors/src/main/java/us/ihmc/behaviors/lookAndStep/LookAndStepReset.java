@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
@@ -7,8 +7,8 @@ import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.OperatorReviewEnabledToUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.ResetForUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.OperatorReviewEnabledToUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.ResetForUI;
 
 public class LookAndStepReset
 {

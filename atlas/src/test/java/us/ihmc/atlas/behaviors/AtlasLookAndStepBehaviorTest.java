@@ -30,9 +30,9 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
@@ -52,7 +52,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
 
 // TODO: Add reviewing; Add status logger to visualizer
 @Execution(ExecutionMode.SAME_THREAD)

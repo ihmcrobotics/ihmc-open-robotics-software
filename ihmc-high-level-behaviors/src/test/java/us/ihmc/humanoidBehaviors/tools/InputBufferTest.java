@@ -1,9 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.humanoidBehaviors.lookAndStep.InputBuffer;
-
-import java.util.function.Supplier;
+import us.ihmc.behaviors.lookAndStep.InputBuffer;
 
 import static org.junit.jupiter.api.Assertions.*;
 

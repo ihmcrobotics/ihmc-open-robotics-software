@@ -1,8 +1,8 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.State.BODY_PATH_PLANNING;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.PlanarRegionsForUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehavior.State.BODY_PATH_PLANNING;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.PlanarRegionsForUI;
 
 import java.util.ArrayList;
 import java.util.List;

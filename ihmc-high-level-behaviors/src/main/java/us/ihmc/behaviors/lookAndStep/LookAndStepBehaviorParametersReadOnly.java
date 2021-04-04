@@ -1,8 +1,8 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters.*;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters.*;
 
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {

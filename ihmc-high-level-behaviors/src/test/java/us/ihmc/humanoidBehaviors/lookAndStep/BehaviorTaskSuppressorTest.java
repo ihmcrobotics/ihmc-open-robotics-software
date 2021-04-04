@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
+import us.ihmc.behaviors.lookAndStep.BehaviorTaskSuppressor;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.messager.MessagerAPIFactory;
 
