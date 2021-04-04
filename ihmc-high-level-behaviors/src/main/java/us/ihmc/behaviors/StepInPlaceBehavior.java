@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors;
+package us.ihmc.behaviors;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;

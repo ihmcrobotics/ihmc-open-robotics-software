@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.javafx;
 
-import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.behaviors.BehaviorDefinition;
 
 public class JavaFXBehaviorUIDefinition extends BehaviorDefinition
 {

@@ -7,7 +7,7 @@ import javafx.scene.text.*;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;

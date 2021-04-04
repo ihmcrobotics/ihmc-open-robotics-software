@@ -5,7 +5,7 @@ import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;

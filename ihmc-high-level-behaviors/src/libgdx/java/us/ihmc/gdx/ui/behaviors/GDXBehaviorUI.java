@@ -8,7 +8,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.behaviors.RemoteBehaviorInterface;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;

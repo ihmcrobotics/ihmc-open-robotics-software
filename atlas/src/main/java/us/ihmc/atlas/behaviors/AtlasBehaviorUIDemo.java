@@ -11,7 +11,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;

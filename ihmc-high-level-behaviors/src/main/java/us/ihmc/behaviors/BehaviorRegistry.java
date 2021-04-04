@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors;
+package us.ihmc.behaviors;
 
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;

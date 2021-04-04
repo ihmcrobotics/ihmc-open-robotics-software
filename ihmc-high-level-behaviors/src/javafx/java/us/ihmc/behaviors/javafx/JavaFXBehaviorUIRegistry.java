@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.javafx;
 
 import us.ihmc.behaviors.javafx.behaviors.*;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.javafx.behaviors.coordinator.BuildingExplorationBehaviorUI;
 

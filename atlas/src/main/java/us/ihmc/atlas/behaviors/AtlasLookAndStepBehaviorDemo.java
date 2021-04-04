@@ -5,7 +5,7 @@ import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;

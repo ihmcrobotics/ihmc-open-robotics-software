@@ -1,6 +1,6 @@
 package us.ihmc.gdx.ui.behaviors.registry;
 
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.behaviors.BehaviorRegistry;
 
 import java.util.LinkedHashSet;
 
