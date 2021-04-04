@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree.utility;
+package us.ihmc.behaviors.tools.behaviorTree.utility;
 
 import us.ihmc.commons.MathTools;
 
