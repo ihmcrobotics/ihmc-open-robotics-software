@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.waypoints;
+package us.ihmc.behaviors.waypoints;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;

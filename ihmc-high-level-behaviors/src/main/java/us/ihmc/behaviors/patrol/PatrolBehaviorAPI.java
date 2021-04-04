@@ -7,7 +7,7 @@ import us.ihmc.behaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.behaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.behaviors.tools.footstepPlanner.TunedFootstepPlannerParameters;
 import us.ihmc.behaviors.upDownExploration.UpDownResult;
-import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
+import us.ihmc.behaviors.waypoints.WaypointSequence;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
