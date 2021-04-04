@@ -266,9 +266,11 @@ public class JumpingBalanceManager
       MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
       chestPose.setToZero(chestFrame);
       chestPose.changeFrame(worldFrame);
-      comTrajectoryPlanner.setCurrentCenterOfMassState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
-                                                       controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
-                                                       timeInSupportSequence.getDoubleValue());
+      comTrajectoryPlanner.setCurrentState(controllerToolbox.getCenterOfMassJacobian().getCenterOfMass(),
+                                           controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity(),
+                                           chestPose.getOrientation(),
+                                           chestFrame.getTwistOfFrame().getAngularPart(),
+                                           timeInSupportSequence.getDoubleValue());
 //      comTrajectoryPlanner.setCurrentBodyOrientationState(chestPose.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
       List<ContactPlaneProvider> contactStateProviders = copTrajectoryForJumping.getContactStateProviders();
