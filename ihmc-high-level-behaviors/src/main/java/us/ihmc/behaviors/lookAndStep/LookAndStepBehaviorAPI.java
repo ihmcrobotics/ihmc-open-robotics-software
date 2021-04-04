@@ -1,11 +1,10 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;

@@ -5,7 +5,7 @@ import javafx.stage.Stage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.robotics.robotSide.RobotSide;

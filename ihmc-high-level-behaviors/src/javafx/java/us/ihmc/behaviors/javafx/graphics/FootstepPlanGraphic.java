@@ -10,7 +10,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javafx.PrivateAnimationTimer;

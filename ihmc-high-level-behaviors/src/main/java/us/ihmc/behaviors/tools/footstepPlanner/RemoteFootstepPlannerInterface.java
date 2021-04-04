@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
+package us.ihmc.behaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;

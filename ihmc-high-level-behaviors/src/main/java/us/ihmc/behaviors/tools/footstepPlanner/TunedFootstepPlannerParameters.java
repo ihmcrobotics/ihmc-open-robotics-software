@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
+package us.ihmc.behaviors.tools.footstepPlanner;
 
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;

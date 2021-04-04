@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
+package us.ihmc.behaviors.tools.footstepPlanner;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

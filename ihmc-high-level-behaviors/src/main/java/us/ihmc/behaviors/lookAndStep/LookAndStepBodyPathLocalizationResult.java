@@ -2,7 +2,7 @@ package us.ihmc.behaviors.lookAndStep;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
