@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.behaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
@@ -9,36 +9,33 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.function.Supplier;
 
-public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList>
+public class Head360Simulator implements Supplier<PlanarRegionsList>
 {
+   private final PointCloudPolygonizer polygonizer;
    private volatile PlanarRegionsList map;
 
    private RemoteSyncedRobotModel syncedRobot;
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
-   public MultisenseHeadStereoSimulator(PlanarRegionsList map,
-                                        DRCRobotModel robotModel,
-                                        ROS2NodeInterface ros2Node,
-                                        double range,
-                                        int sphereScanSize)
+   public Head360Simulator(PlanarRegionsList map, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       this.map = map;
 
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
       neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
-      double verticalFOV = 80.0;
-      double horizontalFOV = 80.0;
-      simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, sphereScanSize, neckFrame);
+      simulatedDepthCamera = new SimulatedDepthCamera(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, neckFrame);
+      polygonizer = new PointCloudPolygonizer();
    }
 
-   public PlanarRegionsList computeRegions()
+   @Override
+   public PlanarRegionsList get()
    {
       syncedRobot.update();
 
       if (syncedRobot.hasReceivedFirstMessage())
       {
-         return simulatedDepthCamera.computeAndPolygonize(map);
+         return polygonizer.polygonize(simulatedDepthCamera.computeRegionPointMapFrame(map));
       }
       else
       {
@@ -46,15 +43,4 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
          return new PlanarRegionsList();
       }
    }
-   @Override
-   public PlanarRegionsList get()
-   {
-      return computeRegions();
-   }
-
-   public void setMap(PlanarRegionsList map)
-   {
-      this.map = map;
-   }
-
 }
