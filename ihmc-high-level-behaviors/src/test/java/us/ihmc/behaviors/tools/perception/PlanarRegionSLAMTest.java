@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.behaviors.tools.perception;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.behaviors.tools.perception;
 
 import javafx.application.Platform;
 import javafx.stage.Stage;
