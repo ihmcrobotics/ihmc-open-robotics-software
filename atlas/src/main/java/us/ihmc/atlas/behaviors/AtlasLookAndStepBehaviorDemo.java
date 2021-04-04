@@ -6,8 +6,8 @@ import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
@@ -44,7 +44,7 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
       selectEnvironment();
    }
 
-   private BehaviorUI behaviorUI;
+   private JavaFXBehaviorUI behaviorUI;
    private final BehaviorModule behaviorModule;
    private AtlasPerceptionSimulation perceptionStack;
 
@@ -63,12 +63,12 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
       if (RUN_LIDAR_AND_CAMERA_SIMULATION)
          ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
       behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER);
 
       LogTools.info("Creating behavior user interface");
-      behaviorUI = BehaviorUI.create(behaviorRegistry,
+      behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,
                                      createRobotModel(),
                                      COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER,
                                      "localhost",

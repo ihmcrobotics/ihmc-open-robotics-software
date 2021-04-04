@@ -22,9 +22,9 @@ import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIDefinition;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.javafx.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.javafx.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.javafx.editors.SnappedPositionEditor.EditMode;
@@ -44,9 +44,9 @@ import java.util.HashMap;
 
 import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
 
-public class PatrolBehaviorUI extends BehaviorUIInterface
+public class PatrolBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(PatrolBehavior.DEFINITION, PatrolBehaviorUI::new);
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(PatrolBehavior.DEFINITION, PatrolBehaviorUI::new);
 
    @FXML private Button placeWaypoints;
    @FXML private Button goToWaypoint;
@@ -265,7 +265,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
 
    private final void mouseClicked(MouseEvent event)
    {
-      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == null && !upDownExploration.isSelected())
+      if (!event.isConsumed() && event.isStillSincePress() && JavaFXBehaviorUI.ACTIVE_EDITOR == null && !upDownExploration.isSelected())
       {
          PickResult pickResult = event.getPickResult();
          Node intersectedNode = pickResult.getIntersectedNode();

@@ -6,8 +6,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 
 public class AtlasBehaviorUI
@@ -18,7 +18,9 @@ public class AtlasBehaviorUI
 
       JavaFXApplicationCreator.createAJavaFXApplication();
 
-      BehaviorUI.createInterprocess(BehaviorUIRegistry.DEFAULT_BEHAVIORS, drcRobotModel, NetworkParameters.getHost(NetworkParameterKeys.networkManager));
+      JavaFXBehaviorUI.createInterprocess(JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS,
+                                          drcRobotModel,
+                                          NetworkParameters.getHost(NetworkParameterKeys.networkManager));
    }
 
    public static void main(String[] args)

@@ -2,11 +2,11 @@ package us.ihmc.humanoidBehaviors.javafx;
 
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 
-public class BehaviorUIDefinition extends BehaviorDefinition
+public class JavaFXBehaviorUIDefinition extends BehaviorDefinition
 {
-   private final BehaviorUIInterfaceConstructor behaviorUISupplier;
+   private final JavaFXBehaviorUIInterfaceConstructor behaviorUISupplier;
 
-   public BehaviorUIDefinition(BehaviorDefinition definition, BehaviorUIInterfaceConstructor behaviorUISupplier)
+   public JavaFXBehaviorUIDefinition(BehaviorDefinition definition, JavaFXBehaviorUIInterfaceConstructor behaviorUISupplier)
    {
       super(definition.getName(),
             definition.getBehaviorSupplier(),
@@ -15,7 +15,7 @@ public class BehaviorUIDefinition extends BehaviorDefinition
       this.behaviorUISupplier = behaviorUISupplier;
    }
 
-   public BehaviorUIInterfaceConstructor getBehaviorUISupplier()
+   public JavaFXBehaviorUIInterfaceConstructor getBehaviorUISupplier()
    {
       return behaviorUISupplier;
    }
