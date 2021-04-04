@@ -6,8 +6,8 @@ import javafx.scene.layout.Pane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIDefinition;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.javafx.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.javafx.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
@@ -16,9 +16,9 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 
-public class NavigationBehaviorUI extends BehaviorUIInterface
+public class NavigationBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(NavigationBehavior.DEFINITION, NavigationBehaviorUI::new);
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(NavigationBehavior.DEFINITION, NavigationBehaviorUI::new);
 
    private final FootstepPlanGraphic footstepPlanGraphic;
    private final BodyPathPlanGraphic bodyPathPlanGraphic;

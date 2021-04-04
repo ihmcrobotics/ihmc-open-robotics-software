@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.humanoidBehaviors.javafx.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.javafx.model.interfaces.PositionEditable;
 import us.ihmc.javafx.PrivateAnimationTimer;
@@ -56,7 +56,7 @@ public class SnappedPositionEditor
       this.onExit = onExit;
       this.editMode = editMode;
 
-      BehaviorUI.claimEditing(this);
+      JavaFXBehaviorUI.claimEditing(this);
 
       sceneNode.addEventHandler(MouseEvent.MOUSE_MOVED, mouseMoved);
       sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
@@ -100,7 +100,7 @@ public class SnappedPositionEditor
       sceneNode.removeEventHandler(MouseEvent.MOUSE_CLICKED, mouseClicked);
       selectedGraphic.setMouseTransparent(false);
 
-      BehaviorUI.ACTIVE_EDITOR = null; // do this before exit because it probably switches to new editor
+      JavaFXBehaviorUI.ACTIVE_EDITOR = null; // do this before exit because it probably switches to new editor
 
       onExit.accept(exitType);
    }
@@ -116,7 +116,7 @@ public class SnappedPositionEditor
 
    private void mouseClicked(MouseEvent event)
    {
-      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == this)
+      if (!event.isConsumed() && event.isStillSincePress() && JavaFXBehaviorUI.ACTIVE_EDITOR == this)
       {
          LogTools.debug("consume mouseClicked");
          event.consume();

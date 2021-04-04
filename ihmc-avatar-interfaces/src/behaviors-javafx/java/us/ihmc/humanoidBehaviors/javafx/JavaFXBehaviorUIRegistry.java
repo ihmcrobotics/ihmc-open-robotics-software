@@ -7,10 +7,10 @@ import us.ihmc.humanoidBehaviors.javafx.behaviors.coordinator.BuildingExploratio
 
 import java.util.LinkedHashSet;
 
-public class BehaviorUIRegistry extends BehaviorRegistry
+public class JavaFXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final BehaviorUIRegistry DEFAULT_BEHAVIORS = new BehaviorUIRegistry();
-   public static final BehaviorUIRegistry ARCHIVED_BEHAVIORS = new BehaviorUIRegistry();
+   public static final JavaFXBehaviorUIRegistry DEFAULT_BEHAVIORS = new JavaFXBehaviorUIRegistry();
+   public static final JavaFXBehaviorUIRegistry ARCHIVED_BEHAVIORS = new JavaFXBehaviorUIRegistry();
    static
    {
       DEFAULT_BEHAVIORS.register(BuildingExplorationBehaviorUI.DEFINITION);
@@ -24,21 +24,21 @@ public class BehaviorUIRegistry extends BehaviorRegistry
       ARCHIVED_BEHAVIORS.register(NavigationBehaviorUI.DEFINITION);
    }
 
-   private final LinkedHashSet<BehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
+   private final LinkedHashSet<JavaFXBehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
    private int numberOfUIs = 0;
    private String nameOfOnlyUIBehavior;
 
-   public static BehaviorUIRegistry of(BehaviorUIDefinition... entries)
+   public static JavaFXBehaviorUIRegistry of(JavaFXBehaviorUIDefinition... entries)
    {
-      BehaviorUIRegistry registry = new BehaviorUIRegistry();
-      for (BehaviorUIDefinition entry : entries)
+      JavaFXBehaviorUIRegistry registry = new JavaFXBehaviorUIRegistry();
+      for (JavaFXBehaviorUIDefinition entry : entries)
       {
          registry.register(entry);
       }
       return registry;
    }
 
-   public void register(BehaviorUIDefinition definition)
+   public void register(JavaFXBehaviorUIDefinition definition)
    {
       super.register(definition);
       uiDefinitionEntries.add(definition);
@@ -50,7 +50,7 @@ public class BehaviorUIRegistry extends BehaviorRegistry
       }
    }
 
-   public LinkedHashSet<BehaviorUIDefinition> getUIDefinitionEntries()
+   public LinkedHashSet<JavaFXBehaviorUIDefinition> getUIDefinitionEntries()
    {
       return uiDefinitionEntries;
    }

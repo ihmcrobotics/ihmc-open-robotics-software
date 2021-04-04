@@ -38,14 +38,14 @@ import java.util.Map;
 /**
  * This class constructs a UI for behavior operation.
  */
-public class BehaviorUI
+public class JavaFXBehaviorUI
 {
    private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
 
    private BorderPane mainPane;
    private final Messager behaviorMessager;
    private final ROS2Node ros2Node;
-   private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
+   private final Map<String, JavaFXBehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
    private final Map<String, Boolean> enabledUIs = new HashMap<>();
    private JavaFXLinuxGUIRecorder guiRecorder;
    private ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>();
@@ -61,22 +61,22 @@ public class BehaviorUI
    @FXML private Button stopRecording;
    private BehaviorDirectRobotUI behaviorDirectRobotUI;
 
-   public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
+   public static JavaFXBehaviorUI createInterprocess(JavaFXBehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
       return create(behaviorUIRegistry, robotModel, CommunicationMode.INTERPROCESS, CommunicationMode.INTERPROCESS, behaviorModuleAddress, null);
    }
 
-   public static BehaviorUI createIntraprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
+   public static JavaFXBehaviorUI createIntraprocess(JavaFXBehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
    {
       return create(behaviorUIRegistry, robotModel, CommunicationMode.INTRAPROCESS, CommunicationMode.INTRAPROCESS, null, behaviorSharedMemoryMessager);
    }
 
-   public static BehaviorUI create(BehaviorUIRegistry behaviorUIRegistry,
-                                   DRCRobotModel robotModel,
-                                   CommunicationMode ros2CommunicationMode,
-                                   CommunicationMode messagerCommunicationMode,
-                                   String behaviorModuleAddress,
-                                   Messager behaviorSharedMemoryMessager)
+   public static JavaFXBehaviorUI create(JavaFXBehaviorUIRegistry behaviorUIRegistry,
+                                         DRCRobotModel robotModel,
+                                         CommunicationMode ros2CommunicationMode,
+                                         CommunicationMode messagerCommunicationMode,
+                                         String behaviorModuleAddress,
+                                         Messager behaviorSharedMemoryMessager)
    {
 
       if (messagerCommunicationMode == CommunicationMode.INTRAPROCESS && behaviorSharedMemoryMessager == null)
@@ -86,10 +86,10 @@ public class BehaviorUI
 
       Messager messager = messagerCommunicationMode == CommunicationMode.INTRAPROCESS
             ? behaviorSharedMemoryMessager : RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress);
-      return new BehaviorUI(behaviorUIRegistry, messager, robotModel, ros2CommunicationMode.getPubSubImplementation());
+      return new JavaFXBehaviorUI(behaviorUIRegistry, messager, robotModel, ros2CommunicationMode.getPubSubImplementation());
    }
 
-   public BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   public JavaFXBehaviorUI(JavaFXBehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
    {
       this.behaviorMessager = behaviorMessager;
 
@@ -137,15 +137,15 @@ public class BehaviorUI
          behaviorDirectRobotUI = new BehaviorDirectRobotUI();
          bottom.setRight(behaviorDirectRobotUI.getDirectRobotAnchorPane());
 
-         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
+         for (JavaFXBehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
          {
             if (uiDefinitionEntry.getBehaviorUISupplier() != null)
             {
-               BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().create(subScene3D,
-                                                                                                          sideVisualizationArea,
-                                                                                                          ros2Node,
-                                                                                                          behaviorMessager,
-                                                                                                          robotModel);
+               JavaFXBehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().create(subScene3D,
+                                                                                                                sideVisualizationArea,
+                                                                                                                ros2Node,
+                                                                                                                behaviorMessager,
+                                                                                                                robotModel);
                behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
 
                if (behaviorUIRegistry.getNumberOfUIs() == 1)
@@ -281,13 +281,13 @@ public class BehaviorUI
 
    public static void claimEditing(Object claimingEditor)
    {
-      if (BehaviorUI.ACTIVE_EDITOR != null)
+      if (JavaFXBehaviorUI.ACTIVE_EDITOR != null)
       {
          throw new RuntimeException("Only one editor may be active at a time.");
       }
       else
       {
-         BehaviorUI.ACTIVE_EDITOR = claimingEditor;
+         JavaFXBehaviorUI.ACTIVE_EDITOR = claimingEditor;
          LogTools.debug("editor activated: {}", claimingEditor.getClass().getSimpleName());
       }
    }
@@ -298,7 +298,7 @@ public class BehaviorUI
          robotVisualizer.destroy();
       if (parameterServer != null)
          parameterServer.destroy();
-      for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
+      for (JavaFXBehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
       {
          behaviorUIInterface.destroy();
       }

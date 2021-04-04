@@ -30,8 +30,8 @@ import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI;
 import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
 import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIDefinition;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.javafx.graphics.JavaFXGraphicPrimitives;
 import us.ihmc.humanoidBehaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.javafx.JavaFXGraphicTools;
@@ -51,9 +51,9 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
 import static us.ihmc.humanoidBehaviors.javafx.graphics.JavaFXGraphicPrimitives.*;
 
-public class ExploreAreaBehaviorUI extends BehaviorUIInterface
+public class ExploreAreaBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUI::new);
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(ExploreAreaBehavior.DEFINITION, ExploreAreaBehaviorUI::new);
 
    @FXML private CheckBox exploreAreaCheckBox;
    @FXML private TextField stateTextField;

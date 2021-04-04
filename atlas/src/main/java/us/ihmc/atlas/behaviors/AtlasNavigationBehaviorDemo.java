@@ -9,8 +9,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.javafx.behaviors.NavigationBehaviorUI;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
@@ -47,12 +47,12 @@ public class AtlasNavigationBehaviorDemo
       ThreadTools.startAThread(this::planarRegionsMappingModule, "PlanarRegionsMappingModule");
       ThreadTools.startAThread(this::kinematicsSimulation, "KinematicsSimulation");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(NavigationBehaviorUI.DEFINITION);
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(NavigationBehaviorUI.DEFINITION);
 
       BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(behaviorRegistry, createRobotModel());
 
       LogTools.info("Creating behavior user interface");
-      BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+      JavaFXBehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
    }
 
    private void simulatedREAModule()

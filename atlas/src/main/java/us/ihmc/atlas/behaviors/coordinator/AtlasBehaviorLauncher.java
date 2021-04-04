@@ -7,7 +7,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepBehaviorUI;
 
 public class AtlasBehaviorLauncher
@@ -15,7 +15,7 @@ public class AtlasBehaviorLauncher
    public static void main(String[] args)
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
-      BehaviorRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION, TraverseStairsBehavior.DEFINITION);
+      BehaviorRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION, TraverseStairsBehavior.DEFINITION);
       BehaviorModule.createInterprocess(behaviorRegistry, robotModel);
    }
 }

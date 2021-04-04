@@ -11,7 +11,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.function.Consumer;
 
-public abstract class BehaviorUIInterface
+public abstract class JavaFXBehaviorUIInterface
 {
    private final SubScene sceneNode;
    private final Pane visualizationPane;
@@ -22,7 +22,7 @@ public abstract class BehaviorUIInterface
    private final Group group3D = new Group();
    private final Pane pane = JavaFXMissingTools.loadFromFXML(this);
 
-   protected BehaviorUIInterface(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   protected JavaFXBehaviorUIInterface(SubScene sceneNode, Pane visualizationPane, ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.sceneNode = sceneNode;
       this.visualizationPane = visualizationPane;

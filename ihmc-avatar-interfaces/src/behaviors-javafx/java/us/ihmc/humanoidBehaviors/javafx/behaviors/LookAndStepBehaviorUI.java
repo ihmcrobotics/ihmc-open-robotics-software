@@ -21,8 +21,8 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIDefinition;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.javafx.editors.WalkingGoalPlacementEditor;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
@@ -31,9 +31,9 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepBehaviorUI extends BehaviorUIInterface
+public class LookAndStepBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(LookAndStepBehavior.DEFINITION, LookAndStepBehaviorUI::new);
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION, LookAndStepBehaviorUI::new);
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
    private final FootstepPlannerParametersBasics footstepPlannerParameters;

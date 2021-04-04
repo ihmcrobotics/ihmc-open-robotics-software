@@ -26,8 +26,8 @@ import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIDefinition;
-import us.ihmc.humanoidBehaviors.javafx.BehaviorUIInterface;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIDefinition;
+import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepVisualizationGroup;
 import us.ihmc.humanoidBehaviors.javafx.editors.WalkingGoalPlacementEditor;
 import us.ihmc.humanoidBehaviors.javafx.graphics.DoorGraphic;
@@ -39,10 +39,10 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
 
-public class BuildingExplorationBehaviorUI extends BehaviorUIInterface
+public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final BehaviorUIDefinition DEFINITION = new BehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
-                                                                                  BuildingExplorationBehaviorUI::new);
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+                                                                                              BuildingExplorationBehaviorUI::new);
 
    @FXML private ComboBox<BuildingExplorationStateName> requestedState;
    @FXML private Spinner<Double> goalX;
