@@ -91,10 +91,10 @@ public class DirectRobotUI
       syncedRobotForHeightSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
       syncedRobotForChestSlider = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
+      robotLowLevelMessenger = robotModel.newRobotLowLevelMessenger(ros2Node);
+
       if (robotName.toLowerCase().contains("atlas"))
       {
-         robotLowLevelMessenger = new AtlasDirectRobotInterface(ros2Node, robotModel);
-
          neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                            ControllerAPIDefinition.getTopic(NeckTrajectoryMessage.class, robotName));
          chestTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node,
@@ -197,7 +197,7 @@ public class DirectRobotUI
       }
       else if (robotName.toLowerCase().contains("valkyrie"))
       {
-         robotLowLevelMessenger = new ValkyrieDirectRobotInterface(ros2Node, robotModel);
+         // TODO
       }
       else
       {

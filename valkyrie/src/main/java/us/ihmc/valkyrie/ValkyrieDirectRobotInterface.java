@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.javafx.tools;
+package us.ihmc.valkyrie;
 
 import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.HighLevelStateMessage;
