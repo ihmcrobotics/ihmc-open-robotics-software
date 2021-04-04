@@ -1,9 +1,9 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.BehaviorTaskSuppressor.NOOP;
+import static us.ihmc.behaviors.lookAndStep.BehaviorTaskSuppressor.NOOP;
 
 public class SuppressionCondition
 {

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
 /**
  * This class is hostile to null data. It will throw RuntimeExceptions if null data is passed in

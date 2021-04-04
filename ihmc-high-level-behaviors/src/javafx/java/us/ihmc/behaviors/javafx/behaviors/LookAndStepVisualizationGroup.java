@@ -13,8 +13,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
 
 public class LookAndStepVisualizationGroup extends Group
 {

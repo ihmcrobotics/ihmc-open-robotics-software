@@ -1,11 +1,11 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.behaviors.lookAndStep;
 
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.CurrentState;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.CurrentState;
 
 public class BehaviorStateReference<E extends Enum<E>>
 {
