@@ -18,7 +18,10 @@ public class SE3MPCTrajectoryViewer extends LinearMPCTrajectoryViewer
    private static final int numberOfVectors = 100;
    private static final double dt = 0.1;
 
-   private static final Vector3D radii = new Vector3D(0.05, 0.1, 0.05);
+   private static final double tallAxis = 0.1;
+   private static final double wideAxis = 0.075;
+   private static final double forwardAxis = 0.05;
+   private static final Vector3D radii = new Vector3D(forwardAxis, wideAxis, tallAxis);
 
    private final BagOfEllipses orientationTrajectoryVectors;
 

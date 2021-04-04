@@ -99,7 +99,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       qpSolver.setMaxNumberOfIterations(1000);
 
       qpSolver.setFirstOrientationVariableRegularization(1e-2);
-      qpSolver.setSecondOrientationVariableRegularization(1e-5);
+      qpSolver.setSecondOrientationVariableRegularization(1e-2);
 
       parentRegistry.addChild(registry);
    }
