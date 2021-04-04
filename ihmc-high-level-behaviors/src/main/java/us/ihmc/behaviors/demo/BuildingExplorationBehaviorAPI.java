@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.demo;
+package us.ihmc.behaviors.demo;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.euclid.geometry.Pose3D;

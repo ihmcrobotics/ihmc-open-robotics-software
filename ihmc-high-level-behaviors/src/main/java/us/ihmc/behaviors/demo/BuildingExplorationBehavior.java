@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.demo;
+package us.ihmc.behaviors.demo;
 
 import controller_msgs.msg.dds.*;
 import std_msgs.msg.dds.Empty;
@@ -57,8 +57,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
 
 public class BuildingExplorationBehavior implements BehaviorInterface
 {
