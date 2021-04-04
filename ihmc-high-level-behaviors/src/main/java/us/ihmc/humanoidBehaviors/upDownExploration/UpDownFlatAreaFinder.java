@@ -27,7 +27,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.behaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;

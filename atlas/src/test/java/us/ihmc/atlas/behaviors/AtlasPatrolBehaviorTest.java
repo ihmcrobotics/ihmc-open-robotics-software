@@ -10,8 +10,8 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.behaviors.patrol.PatrolBehavior;
+import us.ihmc.behaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;

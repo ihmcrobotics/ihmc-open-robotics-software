@@ -1,7 +1,7 @@
-package us.ihmc.humanoidBehaviors.patrol;
+package us.ihmc.behaviors.patrol;
 
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
+import static us.ihmc.behaviors.patrol.PatrolBehavior.PatrolBehaviorState.*;
+import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.*;
 
 import java.util.concurrent.atomic.AtomicReference;
 

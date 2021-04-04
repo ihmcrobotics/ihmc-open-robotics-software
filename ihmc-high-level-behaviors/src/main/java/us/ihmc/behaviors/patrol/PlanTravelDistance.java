@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.patrol;
+package us.ihmc.behaviors.patrol;
 
 public enum PlanTravelDistance
 {

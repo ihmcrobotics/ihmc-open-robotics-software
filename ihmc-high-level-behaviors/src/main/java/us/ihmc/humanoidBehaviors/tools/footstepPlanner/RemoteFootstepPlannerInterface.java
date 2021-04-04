@@ -18,7 +18,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
+import us.ihmc.behaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
