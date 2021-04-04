@@ -12,7 +12,7 @@ import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
+import us.ihmc.behaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
