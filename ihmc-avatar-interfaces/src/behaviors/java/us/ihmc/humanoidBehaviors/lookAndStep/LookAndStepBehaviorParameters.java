@@ -5,7 +5,7 @@ import us.ihmc.tools.property.*;
 public class LookAndStepBehaviorParameters extends StoredPropertySet implements LookAndStepBehaviorParametersReadOnly
 {
    public static final String PROJECT_NAME = "ihmc-open-robotics-software";
-   public static final String TO_RESOURCE_FOLDER = "ihmc-avatar-interfaces/src/behavior-clean-room/resources";
+   public static final String TO_RESOURCE_FOLDER = "ihmc-avatar-interfaces/src/behaviors/resources";
 
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 

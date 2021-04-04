@@ -20,7 +20,7 @@ public class ExploreAreaBehaviorParameters extends StoredPropertySet
       super(keys,
             ExploreAreaBehaviorParameters.class,
             "ihmc-open-robotics-software",
-            "ihmc-avatar-interfaces/src/behavior-clean-room/resources");
+            "ihmc-avatar-interfaces/src/behaviors/resources");
 
       load();
    }
