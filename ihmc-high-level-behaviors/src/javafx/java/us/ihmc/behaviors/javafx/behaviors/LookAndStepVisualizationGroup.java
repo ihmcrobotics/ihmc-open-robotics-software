@@ -5,7 +5,7 @@ import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import us.ihmc.behaviors.javafx.graphics.BodyPathPlanGraphic;
 import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.humanoidBehaviors.tools.ManagedMessager;
+import us.ihmc.behaviors.tools.ManagedMessager;
 import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.behaviors.javafx.graphics.FootstepPlanGraphic;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;

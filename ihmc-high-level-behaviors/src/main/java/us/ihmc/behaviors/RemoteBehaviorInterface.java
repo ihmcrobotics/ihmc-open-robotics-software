@@ -4,7 +4,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
+import us.ihmc.behaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.kryo.KryoMessager;
 

@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.behaviors.tools.ManagedMessager;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.SharedMemoryMessager;

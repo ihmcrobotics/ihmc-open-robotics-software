@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.behaviors.tools;
 
 import java.util.ArrayList;
 import java.util.Arrays;

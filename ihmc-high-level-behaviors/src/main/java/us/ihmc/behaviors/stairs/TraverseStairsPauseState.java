@@ -2,7 +2,7 @@ package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 
