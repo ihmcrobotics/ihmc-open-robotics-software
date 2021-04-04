@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors;
+package us.ihmc.behaviors;
 
 public interface BehaviorInterface
 {

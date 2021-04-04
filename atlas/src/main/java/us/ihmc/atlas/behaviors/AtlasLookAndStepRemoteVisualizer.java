@@ -3,8 +3,8 @@ package us.ihmc.atlas.behaviors;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
+import us.ihmc.behaviors.BehaviorRegistry;
+import us.ihmc.behaviors.RemoteBehaviorInterface;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.pubsub.DomainFactory;
 

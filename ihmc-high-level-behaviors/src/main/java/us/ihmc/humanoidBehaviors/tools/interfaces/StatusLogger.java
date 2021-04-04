@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.interfaces;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.message.ParameterizedMessage;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
 

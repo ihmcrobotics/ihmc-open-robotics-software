@@ -1,6 +1,6 @@
 package us.ihmc.gdx.ui.behaviors.registry;
 
-import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.behaviors.BehaviorDefinition;
 
 public class GDXBehaviorUIDefinition extends BehaviorDefinition
 {

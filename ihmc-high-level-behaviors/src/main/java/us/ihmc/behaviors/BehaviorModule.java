@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors;
+package us.ihmc.behaviors;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 
@@ -30,7 +30,7 @@ import us.ihmc.utilities.ros.RosTools;
 
 import java.util.*;
 
-import static us.ihmc.humanoidBehaviors.BehaviorModule.API.BehaviorSelection;
+import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
 
 public class BehaviorModule
 {
