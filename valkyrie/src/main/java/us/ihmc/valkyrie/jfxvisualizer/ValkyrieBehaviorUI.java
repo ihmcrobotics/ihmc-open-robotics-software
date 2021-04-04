@@ -2,8 +2,8 @@ package us.ihmc.valkyrie.jfxvisualizer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 /**

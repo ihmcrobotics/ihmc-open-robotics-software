@@ -5,7 +5,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.RemoteBehaviorInterface;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
+import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.pubsub.DomainFactory;
 
 public class AtlasLookAndStepRemoteVisualizer

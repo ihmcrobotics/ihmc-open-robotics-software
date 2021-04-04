@@ -6,10 +6,10 @@ import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
+import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.humanoidBehaviors.javafx.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 
 import static us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments.TRIPLE_PLATFORM_HEIGHT;

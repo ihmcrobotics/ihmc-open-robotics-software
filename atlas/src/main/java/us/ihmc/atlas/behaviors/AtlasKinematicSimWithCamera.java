@@ -13,7 +13,7 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
-import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
+import us.ihmc.humanoidBehaviors.javafx.simulation.RobotAndMapViewer;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;

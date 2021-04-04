@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Tag;
@@ -21,7 +20,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.SLAMViewer;
+import us.ihmc.humanoidBehaviors.javafx.mapping.visualizer.SLAMViewer;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
