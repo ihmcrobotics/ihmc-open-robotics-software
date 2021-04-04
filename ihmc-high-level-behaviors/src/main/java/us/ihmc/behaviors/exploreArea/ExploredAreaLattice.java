@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;

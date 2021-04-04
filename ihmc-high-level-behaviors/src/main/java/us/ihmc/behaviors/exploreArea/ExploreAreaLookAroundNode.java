@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
@@ -33,8 +33,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.*;
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 
 public class ExploreAreaLookAroundNode extends SequenceNode
 {

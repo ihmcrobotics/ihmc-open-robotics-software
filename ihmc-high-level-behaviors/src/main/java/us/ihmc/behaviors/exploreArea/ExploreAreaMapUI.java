@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import javafx.animation.AnimationTimer;
 import javafx.scene.Scene;

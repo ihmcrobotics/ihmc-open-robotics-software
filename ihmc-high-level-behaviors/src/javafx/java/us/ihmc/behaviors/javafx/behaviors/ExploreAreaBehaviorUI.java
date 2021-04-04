@@ -28,11 +28,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorParameters;
-import us.ihmc.humanoidBehaviors.exploreArea.TemporaryConvexPolygon2DMessage;
-import us.ihmc.humanoidBehaviors.exploreArea.TemporaryPlanarRegionMessage;
+import us.ihmc.behaviors.exploreArea.ExploreAreaBehavior;
+import us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI;
+import us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorParameters;
+import us.ihmc.behaviors.exploreArea.TemporaryConvexPolygon2DMessage;
+import us.ihmc.behaviors.exploreArea.TemporaryPlanarRegionMessage;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.javafx.JavaFXGraphicTools;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
@@ -48,7 +48,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.LookAndStep;
 
 public class ExploreAreaBehaviorUI extends JavaFXBehaviorUIInterface
 {

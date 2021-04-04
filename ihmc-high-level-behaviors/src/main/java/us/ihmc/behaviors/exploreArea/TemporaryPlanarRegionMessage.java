@@ -1,6 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
-
-import java.util.ArrayList;
+package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.PlanarRegion;
