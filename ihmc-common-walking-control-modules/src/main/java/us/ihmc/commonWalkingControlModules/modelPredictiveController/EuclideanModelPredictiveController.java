@@ -235,10 +235,8 @@ public abstract class EuclideanModelPredictiveController
       if (cornerPointViewer != null)
          cornerPointViewer.updateCornerPoints(linearTrajectoryHandler, previewWindowCalculator.getFullPlanningSequence());
 
-      if (trajectoryViewer != null)
-      {
-         updateCoMTrajectoryViewer();
-      }
+      updateCoMTrajectoryViewer();
+
       mpcExtractionTime.stopMeasurement();
       mpcTotalTime.stopMeasurement();
    }
@@ -605,7 +603,8 @@ public abstract class EuclideanModelPredictiveController
 
    protected void updateCoMTrajectoryViewer()
    {
-      trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
+      if (trajectoryViewer != null)
+         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
    }
 
    public void compute(double timeInPhase,

@@ -8,12 +8,15 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPC
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
@@ -51,6 +54,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
    final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
+   private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
    final SE3MPCQPSolver qpSolver;
 
@@ -275,6 +279,18 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       }
 
       return commandList;
+   }
+
+   @Override
+   public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+   }
+
+   protected void updateCoMTrajectoryViewer()
+   {
+      if (trajectoryViewer != null)
+         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
    }
 
    @Override
