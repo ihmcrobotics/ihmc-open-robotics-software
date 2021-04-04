@@ -5,13 +5,13 @@ import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.exploreArea.ExploreAreaBehavior;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.behaviors.ExploreAreaBehaviorUI;
+import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 
@@ -27,7 +27,7 @@ public class AtlasExploreAreaBehaviorDemo extends AtlasSimulationBasics
       selectEnvironment();
    }
 
-   private BehaviorUI behaviorUI;
+   private JavaFXBehaviorUI behaviorUI;
    private final BehaviorModule behaviorModule;
    private AtlasPerceptionSimulation perceptionStack;
 
@@ -48,16 +48,16 @@ public class AtlasExploreAreaBehaviorDemo extends AtlasSimulationBasics
       if (RUN_LIDAR_AND_CAMERA_SIMULATION)
          ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(ExploreAreaBehaviorUI.DEFINITION, LookAndStepBehaviorUI.DEFINITION);
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(ExploreAreaBehaviorUI.DEFINITION, LookAndStepBehaviorUI.DEFINITION);
 
       behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER);
 
       LogTools.info("Creating behavior user interface");
-      behaviorUI = BehaviorUI.create(behaviorRegistry,
-                                     createRobotModel(),
-                                     COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER,
-                                     "localhost",
-                                     behaviorModule.getMessager());
+      behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,
+                                           createRobotModel(),
+                                           COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER,
+                                           "localhost",
+                                           behaviorModule.getMessager());
       behaviorUI.selectBehavior(ExploreAreaBehavior.DEFINITION);
 
       behaviorUI.addOnCloseRequestListener(() -> ThreadTools.startAThread(() -> {
