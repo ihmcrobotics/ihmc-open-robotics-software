@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.javafx.simulation;
+package us.ihmc.humanoidBehaviors.simulation;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
