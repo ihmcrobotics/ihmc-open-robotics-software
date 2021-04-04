@@ -172,12 +172,19 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
       tempVector.setToZero();
-      // FIXME potentially  make this non-zero
-      objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
       if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+      {
          objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+         if (contactPlaneHelperPool.get(0).size() > 0)
+            objectiveToPack.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+         else
+            objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
+      }
       else
+      {
+         objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
          objectiveToPack.setDesiredInternalAngularMomentumRate(tempVector);
+      }
 
       objectiveToPack.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
@@ -239,11 +246,19 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
             objective.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
             tempVector.setToZero();
-            objective.setDesiredNetAngularMomentumRate(tempVector);
             if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+            {
                objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               if (contactPlaneHelperPool.get(0).size() > 0)
+                  objective.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               else
+                  objective.setDesiredNetAngularMomentumRate(tempVector);
+            }
             else
+            {
+               objective.setDesiredNetAngularMomentumRate(tempVector);
                objective.setDesiredInternalAngularMomentumRate(tempVector);
+            }
 
             objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
