@@ -33,7 +33,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.tools.*;
 import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
-import us.ihmc.humanoidBehaviors.javafx.simulation.RobotAndMapViewer;
+import us.ihmc.behaviors.javafx.simulation.RobotAndMapViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;

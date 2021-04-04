@@ -7,8 +7,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.BehaviorRegistry;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
-import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
 
 public class AtlasBehaviorLauncher
 {

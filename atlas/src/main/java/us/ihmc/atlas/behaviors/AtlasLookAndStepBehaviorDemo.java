@@ -6,9 +6,9 @@ import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 
