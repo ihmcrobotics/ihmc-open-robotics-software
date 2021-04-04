@@ -7,7 +7,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.behaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
+import us.ihmc.behaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;

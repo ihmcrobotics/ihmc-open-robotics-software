@@ -1,6 +1,6 @@
 package us.ihmc.behaviors;
 
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 
 /**
  * A behavior's constructor should implement this interface enabling

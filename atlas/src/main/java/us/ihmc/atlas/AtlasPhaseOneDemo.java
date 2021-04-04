@@ -14,7 +14,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
+import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;

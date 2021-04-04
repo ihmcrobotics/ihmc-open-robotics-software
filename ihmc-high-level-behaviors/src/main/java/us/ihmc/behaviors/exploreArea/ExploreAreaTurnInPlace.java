@@ -17,7 +17,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;

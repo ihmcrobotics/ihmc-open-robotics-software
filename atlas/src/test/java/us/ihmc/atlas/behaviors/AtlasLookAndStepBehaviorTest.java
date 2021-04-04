@@ -33,7 +33,7 @@ import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;

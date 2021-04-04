@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools;
+package us.ihmc.behaviors.tools;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
