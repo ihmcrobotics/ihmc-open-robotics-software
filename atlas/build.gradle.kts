@@ -65,8 +65,8 @@ mainDependencies {
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-parameter-tuner:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
-   api("us.ihmc:ihmc-avatar-interfaces-behavior-clean-room:source")
-   api("us.ihmc:ihmc-avatar-interfaces-behavior-fx-ui:source")
+   api("us.ihmc:ihmc-avatar-interfaces-behaviors:source")
+   api("us.ihmc:ihmc-avatar-interfaces-behaviors-javafx:source")
 }
 
 testDependencies {
