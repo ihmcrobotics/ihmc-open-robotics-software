@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
+package us.ihmc.behaviors.tools.behaviorTrees;
 
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeAction;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
+package us.ihmc.behaviors.tools.behaviorTrees;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

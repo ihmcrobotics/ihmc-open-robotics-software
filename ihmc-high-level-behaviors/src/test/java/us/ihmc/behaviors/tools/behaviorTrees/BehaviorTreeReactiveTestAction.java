@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
+package us.ihmc.behaviors.tools.behaviorTrees;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
