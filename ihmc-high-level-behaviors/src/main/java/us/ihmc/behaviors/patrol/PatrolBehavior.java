@@ -27,7 +27,7 @@ import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownExplorer;
+import us.ihmc.behaviors.upDownExploration.UpDownExplorer;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;

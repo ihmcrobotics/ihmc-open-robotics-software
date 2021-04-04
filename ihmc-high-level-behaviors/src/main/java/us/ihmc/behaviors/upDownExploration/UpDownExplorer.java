@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.upDownExploration;
+package us.ihmc.behaviors.upDownExploration;
 
 import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
 import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;

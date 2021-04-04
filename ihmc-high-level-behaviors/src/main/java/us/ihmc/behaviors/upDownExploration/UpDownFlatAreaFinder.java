@@ -1,11 +1,11 @@
-package us.ihmc.humanoidBehaviors.upDownExploration;
+package us.ihmc.behaviors.upDownExploration;
 
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.ANGLE_SUCCESS;
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.HIT_MAX_ANGLE_TO_SEARCH;
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.STILL_ANGLING;
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.HIT_MAX_SEARCH_DISTANCE;
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.STILL_SEARCHING;
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.WAYPOINT_FOUND;
+import static us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.ANGLE_SUCCESS;
+import static us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.HIT_MAX_ANGLE_TO_SEARCH;
+import static us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.STILL_ANGLING;
+import static us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.HIT_MAX_SEARCH_DISTANCE;
+import static us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.STILL_SEARCHING;
+import static us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.WAYPOINT_FOUND;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -28,7 +28,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.behaviors.patrol.PatrolBehaviorAPI;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownSequence.UpDown;
+import us.ihmc.behaviors.upDownExploration.UpDownSequence.UpDown;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
