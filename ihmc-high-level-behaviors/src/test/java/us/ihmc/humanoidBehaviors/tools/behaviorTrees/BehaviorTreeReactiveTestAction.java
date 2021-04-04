@@ -2,12 +2,12 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeAction;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
 
 public class BehaviorTreeReactiveTestAction implements BehaviorTreeAction
 {

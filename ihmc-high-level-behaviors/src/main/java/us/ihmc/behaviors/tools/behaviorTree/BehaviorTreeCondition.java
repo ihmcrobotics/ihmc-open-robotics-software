@@ -1,8 +1,8 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree;
+package us.ihmc.behaviors.tools.behaviorTree;
 
 import java.util.function.BooleanSupplier;
 
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 /**
  * A behavior tree action that draws from a boolean supplier.

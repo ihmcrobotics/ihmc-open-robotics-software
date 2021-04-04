@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.exploreArea;
 
+import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -9,7 +10,6 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.messager.Messager;
 import us.ihmc.tools.UnitConversions;
@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.*;
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
 {

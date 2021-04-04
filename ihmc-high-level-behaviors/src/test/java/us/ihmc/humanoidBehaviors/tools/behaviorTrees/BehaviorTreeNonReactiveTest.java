@@ -3,12 +3,12 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSuccessfulAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.FallbackNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.LoopSequenceNode;
+import us.ihmc.behaviors.tools.behaviorTree.AlwaysSuccessfulAction;
+import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
+import us.ihmc.behaviors.tools.behaviorTree.LoopSequenceNode;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 public class BehaviorTreeNonReactiveTest
 {

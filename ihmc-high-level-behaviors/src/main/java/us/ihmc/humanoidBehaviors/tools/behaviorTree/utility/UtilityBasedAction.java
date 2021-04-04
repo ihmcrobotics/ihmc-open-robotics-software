@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.tools.behaviorTree.utility;
 
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeAction;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeAction;
 
 import java.util.ArrayList;
 

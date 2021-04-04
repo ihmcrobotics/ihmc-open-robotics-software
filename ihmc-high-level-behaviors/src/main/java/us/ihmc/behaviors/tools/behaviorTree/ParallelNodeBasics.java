@@ -1,10 +1,10 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree;
+package us.ihmc.behaviors.tools.behaviorTree;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 
 /**
  * A Technique for Parallelism with Behavior Trees

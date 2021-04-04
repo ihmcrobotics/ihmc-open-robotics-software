@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree;
+package us.ihmc.behaviors.tools.behaviorTree;
 
 public class UtilitySelectorNode extends BehaviorTreeControlFlowNodeBasics
 {
