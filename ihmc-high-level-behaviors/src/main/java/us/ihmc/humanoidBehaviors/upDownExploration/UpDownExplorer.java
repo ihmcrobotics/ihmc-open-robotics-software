@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.upDownExploration;
 
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
+import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownCenter;
+import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.UpDownExplorationEnabled;
 
 import java.util.Optional;
 import java.util.Random;

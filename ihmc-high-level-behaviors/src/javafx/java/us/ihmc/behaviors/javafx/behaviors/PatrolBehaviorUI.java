@@ -25,9 +25,9 @@ import us.ihmc.behaviors.javafx.graphics.UpDownGoalGraphic;
 import us.ihmc.behaviors.javafx.model.FXUIActionMap;
 import us.ihmc.behaviors.javafx.model.FXUITrigger;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
-import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior.PatrolBehaviorState;
+import us.ihmc.behaviors.patrol.PatrolBehavior;
+import us.ihmc.behaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
+import us.ihmc.behaviors.patrol.PatrolBehavior.PatrolBehaviorState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.behaviors.javafx.graphics.FootstepPlanGraphic;
@@ -41,7 +41,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI.*;
+import static us.ihmc.behaviors.patrol.PatrolBehaviorAPI.*;
 
 public class PatrolBehaviorUI extends JavaFXBehaviorUIInterface
 {
