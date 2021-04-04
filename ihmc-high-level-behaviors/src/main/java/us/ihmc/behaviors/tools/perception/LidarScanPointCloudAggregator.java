@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.behaviors.tools.perception;
 
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 

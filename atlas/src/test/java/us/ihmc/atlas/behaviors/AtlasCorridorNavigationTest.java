@@ -33,7 +33,7 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
 import us.ihmc.behaviors.javafx.simulation.RobotAndMapViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;

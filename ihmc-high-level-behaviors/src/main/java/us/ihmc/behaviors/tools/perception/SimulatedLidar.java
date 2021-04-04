@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.perception;
+package us.ihmc.behaviors.tools.perception;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

@@ -12,7 +12,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.behaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
