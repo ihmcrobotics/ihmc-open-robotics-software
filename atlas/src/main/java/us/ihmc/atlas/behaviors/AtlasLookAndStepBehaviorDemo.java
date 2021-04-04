@@ -9,7 +9,7 @@ import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.humanoidBehaviors.simulation.EnvironmentInitialSetup;
+import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 
 import static us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments.TRIPLE_PLATFORM_HEIGHT;

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.simulation;
+package us.ihmc.behaviors.simulation;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
