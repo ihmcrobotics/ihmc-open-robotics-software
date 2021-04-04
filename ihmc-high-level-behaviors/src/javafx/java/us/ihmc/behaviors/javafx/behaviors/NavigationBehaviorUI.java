@@ -8,7 +8,7 @@ import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.behaviors.javafx.graphics.BodyPathPlanGraphic;
 import us.ihmc.behaviors.navigation.NavigationBehavior;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.javafx.graphics.FootstepPlanGraphic;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;

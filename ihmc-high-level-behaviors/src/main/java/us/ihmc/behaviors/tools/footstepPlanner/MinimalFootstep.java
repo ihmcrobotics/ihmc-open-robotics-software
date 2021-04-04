@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
+package us.ihmc.behaviors.tools.footstepPlanner;
 
 import java.util.ArrayList;
 

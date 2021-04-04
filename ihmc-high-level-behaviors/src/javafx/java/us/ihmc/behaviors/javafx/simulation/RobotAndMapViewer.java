@@ -15,7 +15,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.javafx.graphics.FootstepPlanGraphic;
 import us.ihmc.behaviors.javafx.graphics.PositionGraphic;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;

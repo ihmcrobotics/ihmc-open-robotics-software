@@ -5,7 +5,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.behaviors.patrol.PatrolBehavior.OperatorPlanReviewResult;
 import us.ihmc.behaviors.patrol.PatrolBehavior.PatrolBehaviorState;
-import us.ihmc.humanoidBehaviors.tools.footstepPlanner.TunedFootstepPlannerParameters;
+import us.ihmc.behaviors.tools.footstepPlanner.TunedFootstepPlannerParameters;
 import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointSequence;
 import us.ihmc.messager.MessagerAPIFactory;
