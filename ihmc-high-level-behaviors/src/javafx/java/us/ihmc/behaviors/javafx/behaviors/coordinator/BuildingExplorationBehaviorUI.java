@@ -24,9 +24,9 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationStateName;
+import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
+import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
+import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepVisualizationGroup;
@@ -37,7 +37,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
-import static us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 
 public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 {
