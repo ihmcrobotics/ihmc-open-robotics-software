@@ -57,24 +57,7 @@ mainDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
-behaviorsDependencies {
-   api(ihmc.sourceSetProject("main"))
-}
-
-behaviorsJavafxDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api(ihmc.sourceSetProject("behaviors"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
-   api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-path-planning-visualizers:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
-}
-
 testDependencies {
-   api(ihmc.sourceSetProject("behaviors"))
-   api(ihmc.sourceSetProject("behaviors-javafx"))
-   api(ihmc.sourceSetProject("behaviors-libgdx"))
    api(ihmc.sourceSetProject("visualizers"))
 
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
