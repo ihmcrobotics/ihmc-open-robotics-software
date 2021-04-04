@@ -1,7 +1,6 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;

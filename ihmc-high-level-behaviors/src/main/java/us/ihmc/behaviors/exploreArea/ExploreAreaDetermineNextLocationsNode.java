@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -26,9 +26,9 @@ import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.*;
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
 
 public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
 {

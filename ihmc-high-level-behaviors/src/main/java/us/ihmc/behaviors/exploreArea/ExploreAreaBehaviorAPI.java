@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.euclid.geometry.BoundingBox3D;

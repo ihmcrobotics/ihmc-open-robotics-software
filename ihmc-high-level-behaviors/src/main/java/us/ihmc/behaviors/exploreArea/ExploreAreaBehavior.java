@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.*;
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.*;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehaviorState.*;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface

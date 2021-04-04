@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.exploreArea;
+package us.ihmc.behaviors.exploreArea;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
@@ -24,7 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.humanoidBehaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
+import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
 
 public class ExploreAreaTurnInPlace extends ParallelNodeBasics
 {
