@@ -28,7 +28,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
-import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.robotSide.RobotSide;
