@@ -7,14 +7,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.behaviors.javafx.graphics.BodyPathPlanGraphic;
-import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
+import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.javafx.graphics.FootstepPlanGraphic;
 import us.ihmc.behaviors.javafx.graphics.live.JavaFXLivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
+import static us.ihmc.behaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 
 public class NavigationBehaviorUI extends JavaFXBehaviorUIInterface
 {
