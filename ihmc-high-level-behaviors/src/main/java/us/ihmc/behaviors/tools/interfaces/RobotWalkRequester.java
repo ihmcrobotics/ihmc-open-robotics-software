@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.interfaces;
+package us.ihmc.behaviors.tools.interfaces;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;

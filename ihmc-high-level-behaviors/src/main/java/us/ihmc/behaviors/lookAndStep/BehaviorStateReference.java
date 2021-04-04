@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
-import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 
 import java.util.concurrent.atomic.AtomicReference;
 
