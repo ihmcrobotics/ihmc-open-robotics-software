@@ -6,8 +6,8 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.Sphere;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder;
-import us.ihmc.humanoidBehaviors.upDownExploration.UpDownResult;
+import us.ihmc.behaviors.upDownExploration.UpDownFlatAreaFinder;
+import us.ihmc.behaviors.upDownExploration.UpDownResult;
 import us.ihmc.javafx.JavaFXGraphicTools;
 
 import java.util.ArrayList;

@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.upDownExploration;
+package us.ihmc.behaviors.upDownExploration;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

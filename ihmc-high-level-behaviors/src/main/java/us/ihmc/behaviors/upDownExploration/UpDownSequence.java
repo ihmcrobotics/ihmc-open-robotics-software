@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.upDownExploration;
+package us.ihmc.behaviors.upDownExploration;
 
 /**
  * TODO Decide whether to remove. Might not be needed.

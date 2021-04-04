@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.upDownExploration;
+package us.ihmc.behaviors.upDownExploration;
 
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
