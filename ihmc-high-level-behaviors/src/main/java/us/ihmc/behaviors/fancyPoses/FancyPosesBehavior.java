@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.fancyPoses;
+package us.ihmc.behaviors.fancyPoses;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

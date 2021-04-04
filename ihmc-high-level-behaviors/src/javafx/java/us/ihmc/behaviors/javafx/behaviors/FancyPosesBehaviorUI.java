@@ -6,7 +6,7 @@ import javafx.scene.layout.Pane;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
-import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
+import us.ihmc.behaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 

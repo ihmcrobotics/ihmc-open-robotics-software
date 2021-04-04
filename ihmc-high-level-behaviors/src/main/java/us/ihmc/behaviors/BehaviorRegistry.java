@@ -1,7 +1,7 @@
 package us.ihmc.behaviors;
 
 import us.ihmc.behaviors.exploreArea.ExploreAreaBehavior;
-import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
+import us.ihmc.behaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.navigation.NavigationBehavior;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehavior;
