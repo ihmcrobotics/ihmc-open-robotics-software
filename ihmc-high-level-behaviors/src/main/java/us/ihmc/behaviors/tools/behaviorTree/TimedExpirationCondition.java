@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree;
+package us.ihmc.behaviors.tools.behaviorTree;
 
 import us.ihmc.commons.time.Stopwatch;
 

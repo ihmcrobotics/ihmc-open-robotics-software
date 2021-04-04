@@ -3,15 +3,15 @@ package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.FallbackNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.SequenceNode;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.TimedExpirationCondition;
+import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
+import us.ihmc.behaviors.tools.behaviorTree.SequenceNode;
+import us.ihmc.behaviors.tools.behaviorTree.TimedExpirationCondition;
 import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 public class BehaviorTreeReactiveTest
 {

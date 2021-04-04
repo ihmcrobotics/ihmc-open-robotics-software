@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree;
+package us.ihmc.behaviors.tools.behaviorTree;
 
 /**
  * Core building block of behavior trees. The status that gets passed up the tree.

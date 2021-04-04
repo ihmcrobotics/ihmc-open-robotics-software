@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools.behaviorTrees;
 
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeAction;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 
 public class BehaviorTreeConstantInstantTestAction implements BehaviorTreeAction
 {

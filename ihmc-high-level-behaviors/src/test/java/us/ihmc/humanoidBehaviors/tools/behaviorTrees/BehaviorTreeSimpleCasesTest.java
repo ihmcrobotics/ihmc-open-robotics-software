@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeAction;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.SequenceNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeAction;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.SequenceNode;
 
 class BehaviorTreeSimpleCasesTest
 {

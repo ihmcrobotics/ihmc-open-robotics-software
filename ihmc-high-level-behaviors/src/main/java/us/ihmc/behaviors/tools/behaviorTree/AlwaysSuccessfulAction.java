@@ -1,6 +1,6 @@
-package us.ihmc.humanoidBehaviors.tools.behaviorTree;
+package us.ihmc.behaviors.tools.behaviorTree;
 
-import static us.ihmc.humanoidBehaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 /**
  * Experimental action. Not sure about this one.
