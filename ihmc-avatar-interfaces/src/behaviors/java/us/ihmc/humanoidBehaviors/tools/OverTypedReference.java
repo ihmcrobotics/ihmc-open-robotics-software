@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.javafx.references;
+package us.ihmc.humanoidBehaviors.tools;
 
 import java.util.concurrent.atomic.AtomicReference;
 

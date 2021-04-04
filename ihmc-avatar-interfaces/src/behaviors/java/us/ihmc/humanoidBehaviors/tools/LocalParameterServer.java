@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.javafx.tools;
+package us.ihmc.humanoidBehaviors.tools;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;

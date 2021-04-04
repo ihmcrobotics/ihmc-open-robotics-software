@@ -11,7 +11,7 @@ import us.ihmc.humanoidBehaviors.javafx.BehaviorUI;
 import us.ihmc.humanoidBehaviors.javafx.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.javafx.behaviors.ExploreAreaBehaviorUI;
 import us.ihmc.humanoidBehaviors.javafx.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.simulation.EnvironmentInitialSetup;
+import us.ihmc.humanoidBehaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 

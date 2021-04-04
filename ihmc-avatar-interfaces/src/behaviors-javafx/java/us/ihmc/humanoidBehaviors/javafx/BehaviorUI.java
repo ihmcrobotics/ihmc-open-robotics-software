@@ -24,7 +24,7 @@ import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
 import us.ihmc.humanoidBehaviors.javafx.tools.JavaFXRemoteRobotVisualizer;
-import us.ihmc.humanoidBehaviors.javafx.tools.LocalParameterServer;
+import us.ihmc.humanoidBehaviors.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;

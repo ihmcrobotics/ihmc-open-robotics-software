@@ -10,7 +10,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.javafx.graphics.LabelGraphic;
-import us.ihmc.humanoidBehaviors.javafx.tools.LocalParameterServer;
+import us.ihmc.humanoidBehaviors.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
