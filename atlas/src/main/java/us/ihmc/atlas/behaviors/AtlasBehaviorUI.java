@@ -6,8 +6,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUI;
-import us.ihmc.humanoidBehaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 
 public class AtlasBehaviorUI
