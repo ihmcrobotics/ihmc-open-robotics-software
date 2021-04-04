@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.javafx.tools;
+package us.ihmc.atlas;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
