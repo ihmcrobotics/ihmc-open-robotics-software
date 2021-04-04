@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.stairs;
+package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import std_msgs.msg.dds.Empty;
@@ -22,7 +22,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehaviorAPI.create;
+import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.create;
 
 public class TraverseStairsBehavior implements BehaviorInterface
 {

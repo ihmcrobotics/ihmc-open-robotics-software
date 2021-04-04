@@ -2,7 +2,7 @@ package us.ihmc.behaviors.javafx;
 
 import us.ihmc.behaviors.javafx.behaviors.*;
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.javafx.behaviors.coordinator.BuildingExplorationBehaviorUI;
 
 import java.util.LinkedHashSet;

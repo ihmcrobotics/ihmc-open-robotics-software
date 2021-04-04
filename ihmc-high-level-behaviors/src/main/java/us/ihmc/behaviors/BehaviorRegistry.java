@@ -5,7 +5,7 @@ import us.ihmc.behaviors.fancyPoses.FancyPosesBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.navigation.NavigationBehavior;
 import us.ihmc.behaviors.patrol.PatrolBehavior;
-import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 
 import java.util.HashSet;

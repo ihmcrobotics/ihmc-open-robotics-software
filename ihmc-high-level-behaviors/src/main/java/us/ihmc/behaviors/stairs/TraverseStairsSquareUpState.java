@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.stairs;
+package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
