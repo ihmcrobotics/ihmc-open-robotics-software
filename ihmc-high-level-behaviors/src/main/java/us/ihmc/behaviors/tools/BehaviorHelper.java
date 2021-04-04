@@ -26,7 +26,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.communication.ros2.ManagedROS2Node;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
 import us.ihmc.communication.ros2.ROS2TypelessInput;

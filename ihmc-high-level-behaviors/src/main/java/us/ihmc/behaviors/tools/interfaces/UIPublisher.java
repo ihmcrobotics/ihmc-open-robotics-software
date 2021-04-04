@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.interfaces;
+package us.ihmc.behaviors.tools.interfaces;
 
 import us.ihmc.messager.MessagerAPIFactory;
 

@@ -15,7 +15,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepLocalizationTask.LookAndStepBody
 import us.ihmc.behaviors.lookAndStep.LookAndStepSteppingTask.LookAndStepStepping;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;

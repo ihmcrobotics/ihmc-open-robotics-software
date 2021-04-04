@@ -13,7 +13,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;

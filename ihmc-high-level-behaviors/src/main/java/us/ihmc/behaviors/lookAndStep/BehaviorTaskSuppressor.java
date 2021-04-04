@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import org.apache.logging.log4j.Level;
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;

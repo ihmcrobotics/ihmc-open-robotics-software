@@ -15,7 +15,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessagerUpdateThread;
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;

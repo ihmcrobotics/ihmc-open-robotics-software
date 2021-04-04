@@ -5,7 +5,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.ROS2NodeInterface;

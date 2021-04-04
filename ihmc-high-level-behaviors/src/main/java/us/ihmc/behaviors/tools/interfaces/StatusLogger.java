@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.tools.interfaces;
+package us.ihmc.behaviors.tools.interfaces;
 
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.logging.log4j.Level;
