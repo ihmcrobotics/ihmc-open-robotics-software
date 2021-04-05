@@ -40,5 +40,6 @@ libgdxDependencies {
 testDependencies {
    api(ihmc.sourceSetProject("javafx"))
    api(ihmc.sourceSetProject("libgdx"))
+   api("us.ihmc:ihmc-graphics-libgdx-test:source")
    api("us.ihmc:ihmc-path-planning-test:source")
 }
