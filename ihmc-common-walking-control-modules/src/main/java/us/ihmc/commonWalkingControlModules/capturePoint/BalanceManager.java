@@ -837,6 +837,7 @@ public class BalanceManager
 
       angularMomentumHandler.clearSwingFootTrajectory();
 
+      copTrajectory.setHoldSplitFractions(false);
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
