@@ -11,7 +11,7 @@ public class OrientationInputCalculator
 {
    private final SE3MPCIndexHandler indexHandler;
 
-   private final OrientationDynamicsCalculator dynamicsCalculator;
+   final OrientationDynamicsCalculator dynamicsCalculator;
 
    private static final DMatrixRMaj identity6 = CommonOps_DDRM.identity(6);
 
