@@ -65,6 +65,8 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
    private int shiftFractionCounter = 0;
    private int weightDistributionCounter = 0;
 
+   private boolean holdSplitFractionParameters = false;
+
    private CoPPointViewer viewer = null;
 
    public WalkingCoPTrajectoryGenerator(CoPTrajectoryParameters parameters,
@@ -187,8 +189,11 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       for (RobotSide robotSide : RobotSide.values)
          stepFrames.get(robotSide).clear();
 
-      finalTransferSplitFraction.set(parameters.getDefaultFinalTransferSplitFraction());
-      finalTransferWeightDistribution.set(parameters.getDefaultFinalTransferWeightDistribution());
+      if(!holdSplitFractionParameters)
+      {
+         finalTransferSplitFraction.set(parameters.getDefaultFinalTransferSplitFraction());
+         finalTransferWeightDistribution.set(parameters.getDefaultFinalTransferWeightDistribution());
+      }
       for (int i = 0; i < transferSplitFractions.size(); i++)
       {
          transferSplitFractions.get(i).setToNaN();
@@ -201,6 +206,16 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
          transferSplitFractions.add().set(parameters.getDefaultTransferSplitFraction());
          transferWeightDistributions.add().set(parameters.getDefaultTransferWeightDistribution());
       }
+   }
+
+   public void isRequestingToHoldSplitFraction()
+   {
+      holdSplitFractionParameters = positionSplitFractionCalculator.isRequestingBigStepDown();
+   }
+
+   public void setHoldSplitFractions(boolean hold)
+   {
+      holdSplitFractionParameters = hold;
    }
 
    private final FrameConvexPolygon2DBasics nextPolygon = new FrameConvexPolygon2D();
