@@ -30,7 +30,6 @@ import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
@@ -66,7 +65,8 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final ImBoolean editModeChecked = new ImBoolean(false);
 
    private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
-   private final ArrayList<Path> dataSetPaths = new ArrayList<>();
+   private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
+   private final ArrayList<Path> reaDataSetPaths = new ArrayList<>();
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -193,28 +193,62 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       if (ImGui.button(ImGuiTools.uniqueLabel(this, "Reload Paths")))
       {
-         dataSetPaths.clear();
-         Path pathPlanningDataSetsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software")
-                                                  .resolve("ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets");
+         Path openRoboticsSoftwarePath = PathTools.findDirectoryInline("ihmc-open-robotics-software");
+         pathPlanningDataSetPaths.clear();
+         Path pathPlanningDataSetsPath = openRoboticsSoftwarePath.resolve("ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets");
          PathTools.walkFlat(pathPlanningDataSetsPath, (path, pathType) ->
          {
             if (pathType == BasicPathVisitor.PathType.DIRECTORY)
             {
-               dataSetPaths.add(path);
+               pathPlanningDataSetPaths.add(path.resolve("PlanarRegions"));
+            }
+            return FileVisitResult.CONTINUE;
+         });
+         reaDataSetPaths.clear();
+         Path reaDataSetsPath = openRoboticsSoftwarePath.resolve("robot-environment-awareness/Data/PlanarRegion");
+         PathTools.walkFlat(reaDataSetsPath, (path, pathType) ->
+         {
+            if (pathType == BasicPathVisitor.PathType.DIRECTORY)
+            {
+               reaDataSetPaths.add(path);
             }
             return FileVisitResult.CONTINUE;
          });
       }
 
+      ImGui.text("Path planning data sets:");
+      renderDataSetPathWidgets(pathPlanningDataSetPaths);
+      ImGui.text("REA data sets:");
+      renderDataSetPathWidgets(reaDataSetPaths);
+
+      //      ImGui.list
+
+      ImGui.end();
+
+      for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
+      {
+         if (planarRegionsGraphic != null)
+         {
+            planarRegionsGraphic.render();
+         }
+      }
+   }
+
+   private void renderDataSetPathWidgets(ArrayList<Path> dataSetPaths)
+   {
       for (Path dataSetPath : dataSetPaths)
       {
          String dataSetName = dataSetPath.getFileName().toString();
+         if (dataSetName.equals("PlanarRegions"))
+         {
+            dataSetName = dataSetPath.getParent().getFileName().toString();
+         }
          GDXPlanarRegionsGraphic graphic = planarRegionGraphics.get(dataSetName);
          if (ImGui.checkbox(ImGuiTools.uniqueLabel(this, dataSetName), graphic != null))
          {
             if (graphic == null)
             {
-               PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(dataSetPath.resolve("PlanarRegions").toFile());
+               PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(dataSetPath.toFile());
                GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
                planarRegionsGraphic.generateMeshesAsync(planarRegionsList);
                planarRegionGraphics.put(dataSetName, planarRegionsGraphic);
@@ -224,18 +258,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
                graphic.destroy();
                planarRegionGraphics.put(dataSetName, null);
             }
-         }
-      }
-
-//      ImGui.list
-
-      ImGui.end();
-
-      for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
-      {
-         if (planarRegionsGraphic != null)
-         {
-            planarRegionsGraphic.render();
          }
       }
    }
