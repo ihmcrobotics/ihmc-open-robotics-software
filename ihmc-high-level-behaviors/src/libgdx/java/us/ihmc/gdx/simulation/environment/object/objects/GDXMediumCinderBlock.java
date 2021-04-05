@@ -1,4 +1,4 @@
-package us.ihmc.gdx.simulation.environment.objects;
+package us.ihmc.gdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
