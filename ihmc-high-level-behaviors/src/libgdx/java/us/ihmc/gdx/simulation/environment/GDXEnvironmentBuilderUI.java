@@ -7,7 +7,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI();
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI("Environment Builder");
    private final GDXEnvironmentBuilderPanel environmentBuilderUI = new GDXEnvironmentBuilderPanel();
 
    public GDXEnvironmentBuilderUI()

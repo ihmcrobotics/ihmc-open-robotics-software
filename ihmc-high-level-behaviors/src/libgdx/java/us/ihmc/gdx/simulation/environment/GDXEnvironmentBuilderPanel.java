@@ -11,6 +11,8 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,12 +21,21 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.gdx.vr.VRDeviceAdapter;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspacePathTools;
+
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
 
@@ -53,6 +64,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private GDXModelInstance modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ImBoolean editModeChecked = new ImBoolean(false);
+
+   private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
+   private final ArrayList<Path> dataSetPaths = new ArrayList<>();
+
    public void create(GDXImGuiBasedUI baseUI)
    {
       this.baseUI = baseUI;
@@ -170,9 +185,59 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       ImGui.begin(ImGuiTools.uniqueLabel(this, "Planar Region Data Sets"));
 
+      /**
+       * Folders:
+       * ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets/20001201_205030_SingleSquare
+       *
+       */
+
+      if (ImGui.button(ImGuiTools.uniqueLabel(this, "Reload Paths")))
+      {
+         dataSetPaths.clear();
+         Path pathPlanningDataSetsPath = PathTools.findDirectoryInline("ihmc-open-robotics-software")
+                                                  .resolve("ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets");
+         PathTools.walkFlat(pathPlanningDataSetsPath, (path, pathType) ->
+         {
+            if (pathType == BasicPathVisitor.PathType.DIRECTORY)
+            {
+               dataSetPaths.add(path);
+            }
+            return FileVisitResult.CONTINUE;
+         });
+      }
+
+      for (Path dataSetPath : dataSetPaths)
+      {
+         String dataSetName = dataSetPath.getFileName().toString();
+         GDXPlanarRegionsGraphic graphic = planarRegionGraphics.get(dataSetName);
+         if (ImGui.checkbox(ImGuiTools.uniqueLabel(this, dataSetName), graphic != null))
+         {
+            if (graphic == null)
+            {
+               PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(dataSetPath.resolve("PlanarRegions").toFile());
+               GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+               planarRegionsGraphic.generateMeshesAsync(planarRegionsList);
+               planarRegionGraphics.put(dataSetName, planarRegionsGraphic);
+            }
+            else
+            {
+               graphic.destroy();
+               planarRegionGraphics.put(dataSetName, null);
+            }
+         }
+      }
+
 //      ImGui.list
 
       ImGui.end();
+
+      for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
+      {
+         if (planarRegionsGraphic != null)
+         {
+            planarRegionsGraphic.render();
+         }
+      }
    }
 
    public String getWindowName()
@@ -188,6 +253,14 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
+      {
+         if (planarRegionsGraphic != null)
+         {
+            planarRegionsGraphic.getRenderables(renderables, pool);
+         }
+      }
+
       for (GDXModelInstance placedModel : modelInput.getInstances())
       {
          placedModel.getRenderables(renderables, pool);
