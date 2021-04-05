@@ -29,6 +29,8 @@ public class SplitFractionFromPositionCalculator
    private IntDoubleConsumer transferWeightDistributionConsumer;
    private IntDoubleConsumer transferSplitFractionConsumer;
 
+   private boolean requestToHoldSplitFractions = false;
+
    public SplitFractionFromPositionCalculator(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
    {
       this.splitFractionParameters = splitFractionParameters;
@@ -89,10 +91,16 @@ public class SplitFractionFromPositionCalculator
       this.stepPoseGetter = stepPoseGetter;
    }
 
+   public boolean isRequestingBigStepDown()
+   {
+      return requestToHoldSplitFractions;
+   }
+
    public void computeSplitFractionsFromPosition()
    {
       if (numberOfStepsProvider.getAsInt() == 0 || !splitFractionParameters.calculateSplitFractionsFromPositions())
       {
+         requestToHoldSplitFractions = false;
          return;
       }
 
@@ -126,6 +134,8 @@ public class SplitFractionFromPositionCalculator
 
             if (stepNumber == numberOfStepsProvider.getAsInt() - 1)
             { // this is the last step
+               requestToHoldSplitFractions = true;
+
                double currentSplitFraction = finalTransferSplitFractionProvider.getAsDouble();
                double currentWeightDistribution = finalTransferWeightDistributionProvider.getAsDouble();
 
@@ -157,7 +167,11 @@ public class SplitFractionFromPositionCalculator
 
                transferSplitFractionConsumer.accept(stepNumber + 1, splitFractionToSet);
                transferWeightDistributionConsumer.accept(stepNumber + 1, weightDistributionToSet);
+               requestToHoldSplitFractions = false;
             }
+         }
+         else {
+            requestToHoldSplitFractions = false;
          }
       }
    }
