@@ -162,7 +162,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());
    }
 
-   private static PlanarRegionsList createPlanarRegions()
+   public static PlanarRegionsList createPlanarRegions()
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
 
