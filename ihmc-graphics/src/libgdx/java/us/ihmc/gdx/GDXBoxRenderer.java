@@ -1,38 +1,33 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.Application;
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.*;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.VertexAttribute;
+import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
+import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
+import com.badlogic.gdx.graphics.g3d.model.Node;
+import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL32;
+import lidar_obstacle_detection.Box3D32;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.shape.primitives.Box3D;
-import us.ihmc.log.LogTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
+
 
 //import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+//import us.ihmc.javafx.JavaFXGraphicTools;
+//import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 //import us.ihmc.humanoidBehaviors.ui.graphics.JavaFXGraphicPrimitives;
-import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
-
-
-
-
-import us.ihmc.gdx.GDXModelPrimitives;
-
 //import ihmc_msgs.GDXBoxesMessage;
 //import ihmc_msgs.GDXBoxMessage;
-
-
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
 
 
 public class GDXBoxRenderer implements RenderableProvider
@@ -55,36 +50,59 @@ public class GDXBoxRenderer implements RenderableProvider
    private final int vertexColorOffset = (short) (vertexAttributes.findByUsage(VertexAttributes.Usage.ColorUnpacked).offset / 4);
    private final int vertexSizeAndPositionOffset = (short) (vertexAttributes.findByUsage(SIZE_AND_ROTATION_USAGE).offset / 4);
 
-   private RecyclingArrayList<BoundingBox3D> BoxesToRender;
+   private RecyclingArrayList<Box3D32> BoxesToRender;
    private RecyclingArrayList<RecyclingArrayList<BoundingBox3D>> BoxClusters;
    private Color color = Color.RED;
    GDXModelPrimitives GDXModelPrimitives = new GDXModelPrimitives();
 //   JavaFXGraphicPrimitives JavaFXGraphicPrimitives  = new JavaFXGraphicPrimitives();
 //   private ModelInstance ModelInstance = new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3));
+//   GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+
+   private final ModelBuilder modelBuilder = new ModelBuilder();
+   private Model model;
+   private int partIndex = 0;
+   private final float boxSize = 1.0f;
+   private final float distance = 5.0f;
+   float lx = 0.0f;
+   float ly = 0.0f;
+   float lz = 0.0f;
 
 
-   public void create()
+
+   public void create(int size)
    {
       if (!BOX_ENABLED)
          enableBoxes();
 
+//      renderable = new Renderable();
+//      renderable.meshPart.primitiveType = GL20.GL_POINTS;
 //      renderable.meshPart.offset = 0;
 //      renderable.material = new Material(ColorAttribute.createDiffuse(color));
 //
-//      vertices = new float[vertexSize];
-//      indices = new short[vertexSize];
-//      //      newMesh = new MeshBuilder();
+//      vertices = new float[size * vertexSize];
+//      indices = new short[size * vertexSize];
+//      MeshBuilder newMesh = new MeshBuilder();
 //      //      newMesh.begin(vertexAttributes, GL20.GL_POINTS);
 //
 //      if (renderable.meshPart.mesh != null)
 //         renderable.meshPart.mesh.dispose();
-//      renderable.meshPart.mesh = new Mesh(true, 1, 0, vertexAttributes);
+//      renderable.meshPart.mesh = new Mesh(true, size, 0, vertexAttributes);
 //
 //      ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
 //      renderable.shader = new ParticleShader(renderable, config);
 //      //      ((ParticleShader) renderable.shader).set(ShaderProgram.COLOR_ATTRIBUTE., Color.RED);
 //      renderable.shader.init();
-      GeometryTools GeometryTools = new GeometryTools();
+
+      modelBuilder.begin();
+      buildBoxPart(distance, distance, distance, boxSize,boxSize,boxSize,Color.GREEN);
+      buildBoxPart(-distance, distance, distance,boxSize,boxSize,boxSize, Color.DARK_GRAY);
+      buildBoxPart(distance, -distance, distance,boxSize,boxSize,boxSize, Color.RED);
+      buildBoxPart(-distance, -distance, distance,boxSize,boxSize,boxSize, Color.ORANGE);
+      buildBoxPart(distance, distance, -distance, boxSize,boxSize,boxSize,Color.BLUE);
+      buildBoxPart(-distance, distance, -distance,boxSize,boxSize,boxSize, Color.BLACK);
+      buildBoxPart(distance, -distance, -distance, boxSize,boxSize,boxSize,Color.WHITE);
+      buildBoxPart(-distance, -distance, -distance, boxSize,boxSize,boxSize,Color.YELLOW);
+      model = modelBuilder.end();
 
    }
 
@@ -100,7 +118,7 @@ public class GDXBoxRenderer implements RenderableProvider
    //         renderables.add(renderable);
    //   }
 
-   public void setBoxRender(RecyclingArrayList<BoundingBox3D> BoxesToRender)
+   public void setBoxRender(RecyclingArrayList<Box3D32>BoxesToRender)
    {
       this.BoxesToRender = BoxesToRender;
    }
@@ -160,10 +178,10 @@ public class GDXBoxRenderer implements RenderableProvider
          {
             int offset = i * vertexSize;
 
-            BoundingBox3D box3D = BoxesToRender.get(i);
-            vertices[offset] = box3D.getMinPoint().getX32();
-            vertices[offset + 1] = box3D.getMinPoint().getX32();
-            vertices[offset + 2] = box3D.getMinPoint().getZ32();
+            Box3D32 box3D = BoxesToRender.get(i);
+            vertices[offset] = (float) box3D.getXMin();
+            vertices[offset + 1] = (float) box3D.getYMin();
+            vertices[offset + 2] = (float) box3D.getZMin();
 
             // color [0.0f - 1.0f]
             vertices[offset + 3] = 0.5f; // red (not working yet)
@@ -213,5 +231,16 @@ public class GDXBoxRenderer implements RenderableProvider
 //         Gdx.gl.glEnable(0x8861); // GL_POINT_OES
 //      }
       BOX_ENABLED = true;
+   }
+
+   private void buildBoxPart(float x, float y, float z, float boxSize_x, float boxSize_y, float boxSize_z, Color color)
+   {
+      Node node = modelBuilder.node();
+      node.translation.set(x, y, z);
+      MeshPartBuilder partBuilder = modelBuilder.part("box" + partIndex++,
+                                                      GL20.GL_TRIANGLES,
+                                                      VertexAttributes.Usage.Position | VertexAttributes.Usage.Normal,
+                                                      new Material(ColorAttribute.createDiffuse(color)));
+      BoxShapeBuilder.build(partBuilder, boxSize_x, boxSize_y, boxSize_z);
    }
 }
