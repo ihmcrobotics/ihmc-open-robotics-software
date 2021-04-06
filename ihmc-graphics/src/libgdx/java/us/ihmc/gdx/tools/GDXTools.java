@@ -74,6 +74,19 @@ public class GDXTools
       euclidAffine.getTranslation().setZ(gdxAffine.val[Matrix4.M23]);
    }
 
+   public static void toEuclid(Matrix4 gdxAffine, RotationMatrix euclidRotationMatrix)
+   {
+      euclidRotationMatrix.set(gdxAffine.val[Matrix4.M00],
+                               gdxAffine.val[Matrix4.M01],
+                               gdxAffine.val[Matrix4.M02],
+                               gdxAffine.val[Matrix4.M10],
+                               gdxAffine.val[Matrix4.M11],
+                               gdxAffine.val[Matrix4.M12],
+                               gdxAffine.val[Matrix4.M20],
+                               gdxAffine.val[Matrix4.M21],
+                               gdxAffine.val[Matrix4.M22]);
+   }
+
    public static void toGDX(RigidBodyTransform rigidBodyTransform, Matrix4 gdxAffineToPack)
    {
       gdxAffineToPack.val[Matrix4.M00] = (float) rigidBodyTransform.getM00();

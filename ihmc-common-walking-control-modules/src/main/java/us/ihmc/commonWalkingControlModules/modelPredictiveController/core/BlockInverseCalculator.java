@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.matrixlib.NativeMatrix;
+import us.ihmc.tools.functional.IntDoubleConsumer;
+
+import java.util.function.IntUnaryOperator;
 
 /**
  * This is a custom inverse matrix calculator that exploits the block diagonal nature of the cost Hessian in the MPC problem. Note that this has the underlying
@@ -13,10 +16,12 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
 
    private final NativeMatrix blockToInvert = new NativeMatrix(0, 0);
    private final NativeMatrix invertedBlock = new NativeMatrix(0, 0);
+   private final IntUnaryOperator blockSizeProvider;
 
-   public BlockInverseCalculator(LinearMPCIndexHandler indexHandler)
+   public BlockInverseCalculator(LinearMPCIndexHandler indexHandler, IntUnaryOperator blockSizeProvider)
    {
       this.indexHandler = indexHandler;
+      this.blockSizeProvider = blockSizeProvider;
    }
 
    @Override
@@ -28,7 +33,7 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
       for (int i = 0; i < indexHandler.getNumberOfSegments(); i++)
       {
          int start = indexHandler.getComCoefficientStartIndex(i);
-         int blockSize = indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment;
+         int blockSize = blockSizeProvider.applyAsInt(i);
          int end = start + blockSize;
 
          blockToInvert.reshape(blockSize, blockSize);
