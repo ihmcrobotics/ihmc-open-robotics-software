@@ -10,12 +10,9 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 
+import javafx.scene.paint.Color;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.MeshDataGenerator;
-import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.graphicsDescription.ModifiableMeshDataHolder;
-import us.ihmc.jMonkeyEngineToolkit.jme.JMEMeshDataInterpreter;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class PlanarRegionNode extends Node
@@ -28,7 +25,7 @@ public class PlanarRegionNode extends Node
       this.planarRegion = planarRegion;
       String geometryName = getClass().getSimpleName() + id;
 
-      Geometry regionGeometry = createRegionGeometry(planarRegion, geometryName);
+      Geometry regionGeometry = createRegionGeometry(planarRegion, geometryName, JMEColorConversions.toJavaFXColor(color));
 
       Material regionMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
       regionMaterial.setBoolean("UseMaterialColors",true);
@@ -47,20 +44,19 @@ public class PlanarRegionNode extends Node
    {
       return planarRegion;
    }
-   private Geometry createRegionGeometry(PlanarRegion planarRegion, String geometryName)
-   {
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      planarRegion.getTransformToWorld(transformToWorld);
-      ModifiableMeshDataHolder modifiableMeshDataHolder = new ModifiableMeshDataHolder();
 
-      for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
+   private Geometry createRegionGeometry(PlanarRegion planarRegion, String geometryName, Color color)
+   {
+      RigidBodyTransform transformToWorld = planarRegion.getTransformToWorldCopy();
+
+      JMEMultiColorMeshBuilder meshBuilder = new JMEMultiColorMeshBuilder();
+      meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), 0.01, color, true);
+      for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
       {
-         ConvexPolygon2D convexPolygon = planarRegion.getConvexPolygon(polygonIndex);
-         MeshDataHolder polygon = MeshDataGenerator.Polygon(transformToWorld, convexPolygon);
-         modifiableMeshDataHolder.add(polygon, true);
+         meshBuilder.addPolygon(transformToWorld, convexPolygon, color);
       }
 
-      Mesh regionMesh = JMEMeshDataInterpreter.interpretMeshData(modifiableMeshDataHolder.createMeshDataHolder());
+      Mesh regionMesh = meshBuilder.generateMesh();
       return new Geometry(geometryName, regionMesh);
    }
 }
