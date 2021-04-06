@@ -544,9 +544,9 @@ public class BalanceManager
       copTrajectoryState.getFootstep(0).set(footstep);
    }
 
-   public void updateRequestToHoldSplitFractionParameters()
+   public void setHoldSplitFractions(boolean hold)
    {
-      copTrajectory.isRequestingToHoldSplitFraction();
+      copTrajectory.setHoldSplitFractions(hold);
    }
 
    public void computeICPPlan()
@@ -843,7 +843,6 @@ public class BalanceManager
 
       angularMomentumHandler.clearSwingFootTrajectory();
 
-      copTrajectory.setHoldSplitFractions(false);
       copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
