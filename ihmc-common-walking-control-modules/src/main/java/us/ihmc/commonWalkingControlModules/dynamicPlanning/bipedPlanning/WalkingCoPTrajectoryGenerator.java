@@ -208,11 +208,6 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       }
    }
 
-   public void isRequestingToHoldSplitFraction()
-   {
-      holdSplitFractionParameters = positionSplitFractionCalculator.isRequestingBigStepDown();
-   }
-
    public void setHoldSplitFractions(boolean hold)
    {
       holdSplitFractionParameters = hold;
