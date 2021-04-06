@@ -6,12 +6,15 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -387,5 +390,32 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
    {
       return desiredBodyAngularVelocityFeedForward;
+   }
+
+   private final FrameVector3D momentArm = new FrameVector3D();
+   private final FrameVector3D pointTorque = new FrameVector3D();
+   private final FrameVector3D netTorque = new FrameVector3D();
+
+   public void computeAngularMomentumRateOfChange(FrameVector3DBasics angularMomentumRateOfChange, double time)
+   {
+      int segment = getCurrentSegmentIndex();
+      FramePoint3DReadOnly comPosition = linearTrajectoryHandler.getDesiredCoMPosition();
+
+      netTorque.setToZero();
+      for (int contactIdx = 0; contactIdx < contactPlaneHelperPool.get(segment).size(); contactIdx++)
+      {
+         MPCContactPlane contactPlane = contactPlaneHelperPool.get(segment).get(contactIdx);
+         contactPlane.computeContactForce(omega.getValue(), time);
+         for (int pointIdx = 0; pointIdx < contactPlane.getNumberOfContactPoints(); pointIdx++)
+         {
+            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(pointIdx);
+            momentArm.sub(contactPoint.getBasisVectorOrigin(), comPosition);
+            pointTorque.cross(momentArm, contactPoint.getContactAcceleration());
+
+            netTorque.add(pointTorque);
+         }
+      }
+
+      angularMomentumRateOfChange.setMatchingFrame(netTorque);
    }
 }
