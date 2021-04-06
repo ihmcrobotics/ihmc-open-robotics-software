@@ -17,6 +17,7 @@ public class LidarPointCloudCompression
    public static final double POINT_RESOLUTION = 0.003;
    private static final int maxPointCloudSize = 260000;
    private static final boolean debug = false;
+   private static boolean hasPrintedStackTrace = false;
 
    public static void compressPointCloud(int pointCloudSize, LidarScanMessage messageToPack, LidarPointCoordinateFunction coordinateFunction)
    {
@@ -46,7 +47,11 @@ public class LidarPointCloudCompression
       catch (LZ4Exception e)
       {
          // TODO See why the compression would fail and how to fix it.
-         e.printStackTrace();
+         if (!hasPrintedStackTrace)
+         {
+            hasPrintedStackTrace = true;
+            e.printStackTrace();
+         }
          return;
       }
 
