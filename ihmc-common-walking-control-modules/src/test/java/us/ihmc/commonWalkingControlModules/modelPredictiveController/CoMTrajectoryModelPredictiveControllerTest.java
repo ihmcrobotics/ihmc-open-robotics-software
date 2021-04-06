@@ -152,7 +152,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       EjmlUnitTests.assertEquals(expectedContactForceMatrix, contactForceMatrix, epsilon);
 
-      assertCoefficientsEqual(expectedSolutionMatrix, mpc.trajectoryHandler);
+      assertCoefficientsEqual(expectedSolutionMatrix, mpc.linearTrajectoryHandler);
 
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredCoMPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredVRPPosition(), epsilon);

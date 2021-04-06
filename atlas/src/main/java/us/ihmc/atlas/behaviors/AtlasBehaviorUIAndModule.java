@@ -7,20 +7,19 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.humanoidBehaviors.demo.BuildingExplorationBehavior;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 public class AtlasBehaviorUIAndModule
 {
-   private BehaviorUIRegistry behaviorRegistry;
+   private JavaFXBehaviorUIRegistry behaviorRegistry;
 
-   public AtlasBehaviorUIAndModule(BehaviorUIRegistry behaviorRegistry)
+   public AtlasBehaviorUIAndModule(JavaFXBehaviorUIRegistry behaviorRegistry)
    {
       this.behaviorRegistry = behaviorRegistry;
 
@@ -49,7 +48,7 @@ public class AtlasBehaviorUIAndModule
       BehaviorModule behaviorModule = new BehaviorModule(behaviorRegistry, robotModel, ros2CommunicationMode, behaviorMessagerCommunicationMode);
 
       LogTools.info("Starting behavior UI");
-      BehaviorUI behaviorUI = BehaviorUI.create(behaviorRegistry,
+      JavaFXBehaviorUI behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,
                                                 robotModel,
                                                 ros2CommunicationMode,
                                                 behaviorMessagerCommunicationMode,
@@ -64,6 +63,6 @@ public class AtlasBehaviorUIAndModule
 
    public static void main(String[] args)
    {
-      new AtlasBehaviorUIAndModule(BehaviorUIRegistry.DEFAULT_BEHAVIORS);
+      new AtlasBehaviorUIAndModule(JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS);
    }
 }
