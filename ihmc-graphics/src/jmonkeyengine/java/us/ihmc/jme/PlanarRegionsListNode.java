@@ -1,6 +1,5 @@
 package us.ihmc.jme;
 
-import com.jme3.app.LegacyApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
@@ -15,9 +14,9 @@ public class PlanarRegionsListNode extends Node
    private final List<ColorRGBA> randomColors = new ArrayList<>();
    private final AssetManager assetManager;
 
-   public PlanarRegionsListNode(LegacyApplication application, PlanarRegionsList planarRegionsList)
+   public PlanarRegionsListNode(AssetManager assetManager, PlanarRegionsList planarRegionsList)
    {
-      this.assetManager = application.getAssetManager();
+      this.assetManager = assetManager;
 
       List<PlanarRegionNode> regionNodes = createNewPlanarRegions(planarRegionsList);
       for (PlanarRegionNode regionNode : regionNodes)
