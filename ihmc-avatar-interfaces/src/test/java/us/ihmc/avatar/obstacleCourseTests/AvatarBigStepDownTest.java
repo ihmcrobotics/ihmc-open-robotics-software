@@ -43,7 +43,7 @@ public abstract class AvatarBigStepDownTest implements MultiRobotTestInterface
    public void setup()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      simulationTestingParameters.setKeepSCSUp(true);
+
       simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp() && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
