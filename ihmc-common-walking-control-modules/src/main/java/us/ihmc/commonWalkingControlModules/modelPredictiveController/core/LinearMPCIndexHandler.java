@@ -20,10 +20,10 @@ public class LinearMPCIndexHandler
 
    protected int totalProblemSize = 0;
 
-   private final int numberOfBasisVectorsPerContactPoint;
-   private final TIntArrayList comStartIndices = new TIntArrayList();
-   private final TIntArrayList rhoStartIndices = new TIntArrayList();
-   private final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
+   protected final int numberOfBasisVectorsPerContactPoint;
+   protected final TIntArrayList comStartIndices = new TIntArrayList();
+   protected final TIntArrayList rhoStartIndices = new TIntArrayList();
+   protected final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
 
    protected final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
 

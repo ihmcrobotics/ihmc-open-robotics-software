@@ -1,7 +1,7 @@
 package us.ihmc.atlas.ros;
 
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.ui.video.JavaFXROS2VideoViewer;
+import us.ihmc.behaviors.javafx.video.JavaFXROS2VideoViewer;
 
 public class RealsenseL515VideoViewer
 {

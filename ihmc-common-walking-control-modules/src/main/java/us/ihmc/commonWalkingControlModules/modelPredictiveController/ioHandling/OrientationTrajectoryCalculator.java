@@ -76,6 +76,11 @@ public class OrientationTrajectoryCalculator
       desiredAngularVelocity.setIncludingFrame(trajectory.getAngularVelocity());
    }
 
+   public MultipleWaypointsOrientationTrajectoryGenerator getOrientationTrajectory()
+   {
+      return trajectory;
+   }
+
    public FrameOrientation3DReadOnly getDesiredOrientation()
    {
       return desiredOrientation;

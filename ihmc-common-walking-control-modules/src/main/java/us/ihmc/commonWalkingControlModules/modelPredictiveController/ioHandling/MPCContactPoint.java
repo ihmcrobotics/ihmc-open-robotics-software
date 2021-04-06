@@ -448,6 +448,7 @@ public class MPCContactPoint
       return contactWrenchCoefficientMatrix;
    }
 
+
    public void computeContactForce(double omega, double time)
    {
       double omega2 = omega * omega;
@@ -473,6 +474,12 @@ public class MPCContactPoint
 
       if (viewer != null)
          viewer.update(basisVectorOrigin, contactAcceleration, basisMagnitudes);
+   }
+
+   public void clearViz()
+   {
+      if (viewer != null)
+         viewer.reset();
    }
 
    public FrameVector3DReadOnly getContactAcceleration()
