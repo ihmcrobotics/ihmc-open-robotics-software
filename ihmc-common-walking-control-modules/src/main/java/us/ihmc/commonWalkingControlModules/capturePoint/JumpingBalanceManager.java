@@ -245,6 +245,16 @@ public class JumpingBalanceManager
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
+
+      FrameVector3DBasics linearMomentumRate = new FrameVector3D(comTrajectoryPlanner.getDesiredCoMAcceleration());
+      linearMomentumRate.scale(controllerToolbox.getFullRobotModel().getTotalMass());
+      FrameVector3DBasics angularMomentumRate = new FrameVector3D();
+      comTrajectoryPlanner.computeAngularMomentumRateOfChange(angularMomentumRate, timeInSupportSequence.getDoubleValue());
+
+      jumpingMomentumRateControlModuleInput.setDesiredLinearMomentumRateOfChange(linearMomentumRate);
+      jumpingMomentumRateControlModuleInput.setDesiredAngularMomentumRateOfChange(angularMomentumRate);
+
+
       plannerTimer.stopMeasurement();
    }
 
@@ -313,6 +323,14 @@ public class JumpingBalanceManager
          throw new IllegalArgumentException("What?");
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
+
+      FrameVector3DBasics linearMomentumRate = new FrameVector3D(comTrajectoryPlanner.getDesiredCoMAcceleration());
+      linearMomentumRate.scale(controllerToolbox.getFullRobotModel().getTotalMass());
+      FrameVector3DBasics angularMomentumRate = new FrameVector3D();
+      comTrajectoryPlanner.computeAngularMomentumRateOfChange(angularMomentumRate, timeInSupportSequence.getDoubleValue());
+
+      jumpingMomentumRateControlModuleInput.setDesiredLinearMomentumRateOfChange(linearMomentumRate);
+      jumpingMomentumRateControlModuleInput.setDesiredAngularMomentumRateOfChange(angularMomentumRate);
 
       plannerTimer.stopMeasurement();
    }
