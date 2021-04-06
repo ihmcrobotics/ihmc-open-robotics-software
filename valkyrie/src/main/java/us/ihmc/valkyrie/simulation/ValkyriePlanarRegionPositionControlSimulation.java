@@ -154,9 +154,11 @@ public class ValkyriePlanarRegionPositionControlSimulation
       });
 
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
-      simulationStarter.createSimulation(networkProcessorParameters, true, false);
+      simulationStarter.createSimulation(networkProcessorParameters, true, true);
       simulationStarter.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(null);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setFastSimulate(true, 10);
+      simulationStarter.getSimulationConstructionSet().skipLoadingDefaultConfiguration();
+      simulationStarter.getSimulationConstructionSet().setupGraph("t");
 
       KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 10, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());
