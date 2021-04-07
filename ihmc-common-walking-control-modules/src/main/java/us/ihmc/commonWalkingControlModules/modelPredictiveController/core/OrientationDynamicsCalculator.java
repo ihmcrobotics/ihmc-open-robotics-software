@@ -21,6 +21,7 @@ import us.ihmc.robotics.MatrixMissingTools;
 import java.util.ArrayList;
 import java.util.List;
 
+// TODO this needs to be cleaned up
 public class OrientationDynamicsCalculator
 {
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
