@@ -1,32 +1,24 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
-import us.ihmc.robotics.time.TimeIntervalProvider;
 import us.ihmc.robotics.time.TimeIntervalReadOnly;
 import us.ihmc.robotics.time.TimeIntervalTools;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
-import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 import static us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator.defaultMaximumNumberOfWaypoints;
 
-public class MultipleSegmentWrenchTrajectoryGenerator implements ReferenceFrameHolder
+public class MultipleWrenchSegmentTrajectoryGenerator implements ReferenceFrameHolder
 {
    private final String namePrefix;
 
@@ -42,12 +34,12 @@ public class MultipleSegmentWrenchTrajectoryGenerator implements ReferenceFrameH
 
    private final FixedFrameWrenchBasics currentWrench;
 
-   public MultipleSegmentWrenchTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
+   public MultipleWrenchSegmentTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
       this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
    }
 
-   public MultipleSegmentWrenchTrajectoryGenerator(String namePrefix,
+   public MultipleWrenchSegmentTrajectoryGenerator(String namePrefix,
                                                    int maximumNumberOfSegments,
                                                    ReferenceFrame referenceFrame,
                                                    YoRegistry parentRegistry)
