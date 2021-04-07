@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class LinearMPCQPSolver
 {
-   private static  final boolean debug = true;
+   private static  final boolean debug = false;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
