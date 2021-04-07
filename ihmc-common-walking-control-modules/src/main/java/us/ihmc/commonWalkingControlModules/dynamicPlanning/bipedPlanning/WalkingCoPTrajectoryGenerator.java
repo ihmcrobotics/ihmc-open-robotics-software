@@ -193,18 +193,18 @@ public class WalkingCoPTrajectoryGenerator extends CoPTrajectoryGenerator
       {
          finalTransferSplitFraction.set(parameters.getDefaultFinalTransferSplitFraction());
          finalTransferWeightDistribution.set(parameters.getDefaultFinalTransferWeightDistribution());
-      }
-      for (int i = 0; i < transferSplitFractions.size(); i++)
-      {
-         transferSplitFractions.get(i).setToNaN();
-         transferWeightDistributions.get(i).setToNaN();
-      }
-      transferSplitFractions.clear();
-      transferWeightDistributions.clear();
-      for (int i = 0; i < state.getNumberOfFootstep(); i++)
-      {
-         transferSplitFractions.add().set(parameters.getDefaultTransferSplitFraction());
-         transferWeightDistributions.add().set(parameters.getDefaultTransferWeightDistribution());
+         for (int i = 0; i < transferSplitFractions.size(); i++)
+         {
+            transferSplitFractions.get(i).setToNaN();
+            transferWeightDistributions.get(i).setToNaN();
+         }
+         transferSplitFractions.clear();
+         transferWeightDistributions.clear();
+         for (int i = 0; i < state.getNumberOfFootstep(); i++)
+         {
+            transferSplitFractions.add().set(parameters.getDefaultTransferSplitFraction());
+            transferWeightDistributions.add().set(parameters.getDefaultTransferWeightDistribution());
+         }
       }
    }
 
