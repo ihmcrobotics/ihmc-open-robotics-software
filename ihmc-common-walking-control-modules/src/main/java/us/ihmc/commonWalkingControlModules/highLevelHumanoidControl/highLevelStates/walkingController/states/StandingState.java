@@ -96,6 +96,7 @@ public class StandingState extends WalkingState
       balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
       balanceManager.initializeICPPlanForStanding();
+      balanceManager.setHoldSplitFractions(false);
 
       if (holdDesiredHeightConstantWhenStanding)
       {
