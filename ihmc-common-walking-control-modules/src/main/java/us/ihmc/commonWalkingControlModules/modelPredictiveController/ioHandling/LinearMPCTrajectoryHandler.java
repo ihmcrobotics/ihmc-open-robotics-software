@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectorySegment;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -50,6 +47,7 @@ public class LinearMPCTrajectoryHandler
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
 
    private final MultipleCoMSegmentTrajectoryGenerator comTrajectory;
+   private final MultipleWrenchSegmentTrajectoryGenerator wrenchTrajectory;
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
 
    private final CoMTrajectorySegment comSegmentToAppend = new CoMTrajectorySegment();
@@ -64,6 +62,7 @@ public class LinearMPCTrajectoryHandler
 
       positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
+      wrenchTrajectory = new MultipleWrenchSegmentTrajectoryGenerator("desiredWrenchTrajectory", ReferenceFrame.getWorldFrame(), registry);
    }
 
    /**
@@ -72,6 +71,7 @@ public class LinearMPCTrajectoryHandler
    public void clearTrajectory()
    {
       comTrajectory.clear();
+      wrenchTrajectory.clear();
       vrpTrajectories.clear();
       fullContactSet.clear();
       hasTrajectory = false;
@@ -170,6 +170,7 @@ public class LinearMPCTrajectoryHandler
 
          fullContactSet.add().set(fullContactSequence.get(i));
          comTrajectory.appendSegment(timeInterval, omega, coefficientArray, startRow);
+         wrenchTrajectory.appendSegment(timeInterval, omega, contactPlaneHelpers.get(i));
 
          double duration = Math.min(timeInterval.getDuration(), sufficientlyLongTime);
          computeVRPBoundaryConditionsFromCoefficients(startRow,
@@ -206,6 +207,7 @@ public class LinearMPCTrajectoryHandler
             fullContactSet.remove(lastIndx);
             vrpTrajectories.remove(lastIndx);
             comTrajectory.removeSegment(lastIndx);
+            wrenchTrajectory.removeSegment(lastIndx);
          }
       }
    }
@@ -263,6 +265,7 @@ public class LinearMPCTrajectoryHandler
       }
 
       comTrajectory.initialize();
+      wrenchTrajectory.initialize();
    }
 
    private void overwriteContactsOutsidePreviewWindow(List<ContactPlaneProvider> contactsToUse)
@@ -312,6 +315,7 @@ public class LinearMPCTrajectoryHandler
    public void compute(double timeInPhase)
    {
       comTrajectory.compute(timeInPhase);
+      wrenchTrajectory.compute(timeInPhase);
    }
 
    public void computeOutsidePreview(double timeInPhase)
@@ -341,6 +345,8 @@ public class LinearMPCTrajectoryHandler
 
    public void removeCompletedSegments(double timeToCrop)
    {
+      throw new NotImplementedException();
+      /*
       while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
          comTrajectory.removeSegment(0);
 
@@ -352,11 +358,18 @@ public class LinearMPCTrajectoryHandler
 
       for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments(); i++)
          comTrajectory.getSegment(i).getTimeInterval().shiftInterval(-timeToCrop);
+
+       */
    }
 
    public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()
    {
       return comTrajectory;
+   }
+
+   public MultipleWrenchSegmentTrajectoryGenerator getWrenchTrajectory()
+   {
+      return wrenchTrajectory;
    }
 
    public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
