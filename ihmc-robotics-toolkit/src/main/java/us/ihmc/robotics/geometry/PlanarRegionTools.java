@@ -1028,7 +1028,7 @@ public class PlanarRegionTools
 
       for (PlanarRegion region : regions.getPlanarRegionsAsList())
       {
-         Point3D intersection = closestPointOnPlane(point, region);
+         Point3D intersection = closestPointOnPlanarRegion(point, region);
          double distance = intersection.distance(point);
 
          if (closestPoint == null || distance < smallestDistance)
@@ -1041,19 +1041,24 @@ public class PlanarRegionTools
       return closestPoint;
    }
 
+   public static double distanceToPlanarRegion(Point3D pointInWorld, PlanarRegion planarRegion)
+   {
+      return pointInWorld.distance(closestPointOnPlanarRegion(pointInWorld, planarRegion));
+   }
+
    /**
     * Projects the given point in the world onto the planar region, returning the closest point in the world on the region to
     * the provided point.
     */
-   public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, PlanarRegion region)
+   public static Point3D closestPointOnPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
-      return closestPointOnPlane(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), region.getTransformToLocal());
+      return closestPointOnPlanarRegion(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), region.getTransformToLocal());
    }
 
-   public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld,
-                                             ConvexPolygon2DReadOnly regionConvexHull,
-                                             RigidBodyTransformReadOnly regionToWorld,
-                                             RigidBodyTransformReadOnly regionToLocal)
+   public static Point3D closestPointOnPlanarRegion(Point3DReadOnly pointInWorld,
+                                                    ConvexPolygon2DReadOnly regionConvexHull,
+                                                    RigidBodyTransformReadOnly regionToWorld,
+                                                    RigidBodyTransformReadOnly regionToLocal)
    {
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
@@ -1249,7 +1254,7 @@ public class PlanarRegionTools
 
    public static boolean isPointOnRegion(PlanarRegion region, Point3D point, double epsilon)
    {
-      Point3D closestPoint = closestPointOnPlane(point, region);
+      Point3D closestPoint = closestPointOnPlanarRegion(point, region);
       return closestPoint.epsilonEquals(point, epsilon);
    }
 }
