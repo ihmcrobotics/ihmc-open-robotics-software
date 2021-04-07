@@ -8,12 +8,10 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlan
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -26,7 +24,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
-import us.ihmc.robotics.geometry.AngleTools;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -1238,8 +1235,8 @@ public class OrientationInputCalculatorTest
 
       for (int i = 0; i < command.getNumberOfContacts(); i++)
       {
-         for (int j = 0; j < command.getContactPlaneHelper(i).getNumberOfContactPoints(); j++)
-            allContactPoints.add(command.getContactPlaneHelper(i).getContactPointHelper(j));
+         for (int j = 0; j < command.getContactPlane(i).getNumberOfContactPoints(); j++)
+            allContactPoints.add(command.getContactPlane(i).getContactPointHelper(j));
       }
 
       FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);

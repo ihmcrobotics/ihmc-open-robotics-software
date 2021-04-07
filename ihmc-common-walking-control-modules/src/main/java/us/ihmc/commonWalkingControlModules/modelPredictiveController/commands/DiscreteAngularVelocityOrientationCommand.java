@@ -172,7 +172,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
       setCurrentBodyAngularVelocityErrorInBodyFrame(other.getCurrentBodyAngularVelocityError());
 
       for (int i = 0; i < other.getNumberOfContacts(); i++)
-         addContactPlaneHelper(other.getContactPlaneHelper(i));
+         addContactPlaneHelper(other.getContactPlane(i));
    }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()
@@ -250,7 +250,7 @@ public class DiscreteAngularVelocityOrientationCommand implements MPCCommand<Dis
       return contactPlaneHelpers.size();
    }
 
-   public MPCContactPlane getContactPlaneHelper(int i)
+   public MPCContactPlane getContactPlane(int i)
    {
       return contactPlaneHelpers.get(i);
    }
