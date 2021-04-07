@@ -263,7 +263,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
             if (orientationTrajectoryHandler.hasInternalAngularMomentum())
             {
                objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-               if (contactPlaneHelperPool.get(0).size() > 0)
+               if (contactPlaneHelperPool.get(segment).size() > 0)
                   objective.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
                else
                   objective.setDesiredNetAngularMomentumRate(tempVector);
