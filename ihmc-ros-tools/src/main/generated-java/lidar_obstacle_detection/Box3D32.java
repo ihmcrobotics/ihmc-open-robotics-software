@@ -1,6 +1,7 @@
 package lidar_obstacle_detection;
 
 import org.ros.internal.message.RawMessage;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 
 public class Box3D32 implements GDXBoxMessage
 {
@@ -25,6 +26,10 @@ public class Box3D32 implements GDXBoxMessage
 
    private double zMax;
 
+   RigidBodyTransform Transform;
+
+
+
    /**
     * Creates a new point and initializes it coordinates to zero.
     */
@@ -36,6 +41,7 @@ public class Box3D32 implements GDXBoxMessage
       this.yMax = 0;
       this.zMin = 0;
       this.zMax = 0;
+      this.Transform.set(1,0,0,0,0,1,0,0,0,0,1,0);
    }
 
    /**
@@ -69,6 +75,9 @@ public class Box3D32 implements GDXBoxMessage
       this.yMax = pointArray[3];
       this.zMin = pointArray[4];
       this.zMax = pointArray[5];
+      this.Transform.set(pointArray[6],pointArray[7],pointArray[8],pointArray[9],pointArray[10]
+                        ,pointArray[11],pointArray[12],pointArray[13],pointArray[14],pointArray[15]
+                        ,pointArray[16],pointArray[17]);
    }
 
    @Override
@@ -143,13 +152,23 @@ public class Box3D32 implements GDXBoxMessage
       this.zMax = zMax;
    }
 
+   public RigidBodyTransform getTransform()
+   {
+      return this.Transform;
+   }
+
+   public void setTrasform(RigidBodyTransform transform)
+   {
+      this.Transform = transform;
+   }
+
    @Override
    public RawMessage toRawMessage()
    {
       return this.toRawMessage();
    }
 
-   public void set(GDXBoxMessage gdxBoxMessage)
+   public void set(GDXBoxMessage gdxBoxMessage, RigidBodyTransform Transform)
    {
       this.xMin = gdxBoxMessage.getXMin();
       this.xMax = gdxBoxMessage.getXMax();
@@ -157,5 +176,15 @@ public class Box3D32 implements GDXBoxMessage
       this.yMax = gdxBoxMessage.getYMax();
       this.zMin = gdxBoxMessage.getZMin();
       this.zMax = gdxBoxMessage.getZMax();
+      this.Transform = Transform;
+   }
+   public void set(Box3D32 box){
+      this.xMin = box.xMin;
+      this.xMax = box.xMax;
+      this.yMin = box.yMin;
+      this.yMax = box.yMax;
+      this.zMin = box.zMin;
+      this.zMax = box.zMax;
+      this.Transform = box.Transform;
    }
 }
