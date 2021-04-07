@@ -44,7 +44,7 @@ public class PawCliffDetectionTools
 
       for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
       {
-         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(pawInWorld, intersectingRegion);
+         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlanarRegion(pawInWorld, intersectingRegion);
 
          double heightOfPointFromPaw = closestPointInWorld.getZ() - pawInWorld.getZ();
          double distanceToPoint = pawInWorld.distanceXY(closestPointInWorld);
@@ -88,7 +88,7 @@ public class PawCliffDetectionTools
 
       for (PlanarRegion intersectingRegion : intersectingRegions)
       {
-         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlane(pawInWorld, intersectingRegion);
+         Point3DReadOnly closestPointInWorld = PlanarRegionTools.closestPointOnPlanarRegion(pawInWorld, intersectingRegion);
 
          double heightOfPointFromPaw = closestPointInWorld.getZ() - pawInWorld.getZ();
 

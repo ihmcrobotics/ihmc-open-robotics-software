@@ -482,7 +482,7 @@ public class SwingOverPlanarRegionsTest
 
             for (PlanarRegion planarRegion : request.getPlanarRegionsList().getPlanarRegionsAsList())
             {
-               Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlane(desiredPosition, planarRegion);
+               Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlanarRegion(desiredPosition, planarRegion);
                FramePoint3D collisionRelativeToEndFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
                FramePoint3D collisionRelativeToStartFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
                collisionRelativeToEndFoot.changeFrame(endFootPoseFrame);
