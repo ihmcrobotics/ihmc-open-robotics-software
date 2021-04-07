@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
@@ -47,7 +48,6 @@ public class LinearMPCTrajectoryHandler
    private final DMatrixRMaj coefficientArray = new DMatrixRMaj(0, 3);
 
    private final MultipleCoMSegmentTrajectoryGenerator comTrajectory;
-   private final MultipleWrenchSegmentTrajectoryGenerator wrenchTrajectory;
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
 
    private final CoMTrajectorySegment comSegmentToAppend = new CoMTrajectorySegment();
@@ -62,7 +62,6 @@ public class LinearMPCTrajectoryHandler
 
       positionInitializationCalculator = new CoMTrajectoryPlanner(gravityZ, nominalCoMHeight, registry);
       comTrajectory = new MultipleCoMSegmentTrajectoryGenerator("desiredCoMTrajectory", registry);
-      wrenchTrajectory = new MultipleWrenchSegmentTrajectoryGenerator("desiredWrenchTrajectory", ReferenceFrame.getWorldFrame(), registry);
    }
 
    /**
@@ -71,7 +70,6 @@ public class LinearMPCTrajectoryHandler
    public void clearTrajectory()
    {
       comTrajectory.clear();
-      wrenchTrajectory.clear();
       vrpTrajectories.clear();
       fullContactSet.clear();
       hasTrajectory = false;
@@ -170,7 +168,6 @@ public class LinearMPCTrajectoryHandler
 
          fullContactSet.add().set(fullContactSequence.get(i));
          comTrajectory.appendSegment(timeInterval, omega, coefficientArray, startRow);
-         wrenchTrajectory.appendSegment(timeInterval, omega, contactPlaneHelpers.get(i));
 
          double duration = Math.min(timeInterval.getDuration(), sufficientlyLongTime);
          computeVRPBoundaryConditionsFromCoefficients(startRow,
@@ -207,7 +204,6 @@ public class LinearMPCTrajectoryHandler
             fullContactSet.remove(lastIndx);
             vrpTrajectories.remove(lastIndx);
             comTrajectory.removeSegment(lastIndx);
-            wrenchTrajectory.removeSegment(lastIndx);
          }
       }
    }
@@ -265,7 +261,6 @@ public class LinearMPCTrajectoryHandler
       }
 
       comTrajectory.initialize();
-      wrenchTrajectory.initialize();
    }
 
    private void overwriteContactsOutsidePreviewWindow(List<ContactPlaneProvider> contactsToUse)
@@ -315,7 +310,6 @@ public class LinearMPCTrajectoryHandler
    public void compute(double timeInPhase)
    {
       comTrajectory.compute(timeInPhase);
-      wrenchTrajectory.compute(timeInPhase);
    }
 
    public void computeOutsidePreview(double timeInPhase)
@@ -365,11 +359,6 @@ public class LinearMPCTrajectoryHandler
    public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()
    {
       return comTrajectory;
-   }
-
-   public MultipleWrenchSegmentTrajectoryGenerator getWrenchTrajectory()
-   {
-      return wrenchTrajectory;
    }
 
    public List<? extends Polynomial3DReadOnly> getVrpTrajectories()

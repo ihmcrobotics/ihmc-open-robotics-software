@@ -19,8 +19,13 @@ import java.util.List;
 
 public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<WrenchTrajectorySegment>, ReferenceFrameHolder
 {
-   private final WrenchBasics[] coefficients = new WrenchBasics[]{new Wrench(), new Wrench(), new Wrench(), new Wrench()};
-   private final WrenchBasics pointCoefficient = new Wrench();
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+
+   private final WrenchBasics[] coefficients = new WrenchBasics[]{new Wrench(worldFrame, worldFrame),
+                                                                  new Wrench(worldFrame, worldFrame),
+                                                                  new Wrench(worldFrame, worldFrame),
+                                                                  new Wrench(worldFrame, worldFrame)};
+   private final WrenchBasics pointCoefficient = new Wrench(worldFrame, worldFrame);
    private final FrameVector3D linearCoefficient = new FrameVector3D();
    private static final FrameVector3DReadOnly zero = new FrameVector3D();
 
@@ -28,7 +33,7 @@ public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<W
    private double omega = 3.0;
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
-   private final WrenchBasics desiredWrench = new Wrench();
+   private final WrenchBasics desiredWrench = new Wrench(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame());
 
    public void reset()
    {
@@ -83,7 +88,7 @@ public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<W
          {
             for (int element = 0; element < 3; element++)
             {
-               linearCoefficient.setElement(element, trajectoryCoeff.get(coefficientIdx, element));
+               linearCoefficient.setElement(element, trajectoryCoeff.get(element, coefficientIdx));
                pointCoefficient.set(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), linearCoefficient, zero, contactPoint.getBasisVectorOrigin());
                coefficients[coefficientIdx].add(pointCoefficient);
             }

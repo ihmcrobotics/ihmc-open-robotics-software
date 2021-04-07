@@ -14,6 +14,8 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -246,10 +248,14 @@ public class JumpingBalanceManager
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
 
-      FrameVector3DBasics linearMomentumRate = new FrameVector3D(comTrajectoryPlanner.getDesiredCoMAcceleration());
-      linearMomentumRate.scale(controllerToolbox.getFullRobotModel().getTotalMass());
+      WrenchBasics comWrench = new Wrench(comTrajectoryPlanner.getDesiredWrench());
+      comWrench.changeFrame(controllerToolbox.getCenterOfMassFrame());
+
+      FrameVector3DBasics linearMomentumRate = new FrameVector3D();
       FrameVector3DBasics angularMomentumRate = new FrameVector3D();
-      comTrajectoryPlanner.computeAngularMomentumRateOfChange(angularMomentumRate, timeInSupportSequence.getDoubleValue());
+      linearMomentumRate.setMatchingFrame(comWrench.getLinearPart());
+      linearMomentumRate.addZ(controllerToolbox.getFullRobotModel().getTotalMass() * -Math.abs(controllerToolbox.getGravityZ()));
+      angularMomentumRate.setMatchingFrame(comWrench.getAngularPart());
 
       jumpingMomentumRateControlModuleInput.setDesiredLinearMomentumRateOfChange(linearMomentumRate);
       jumpingMomentumRateControlModuleInput.setDesiredAngularMomentumRateOfChange(angularMomentumRate);
@@ -324,10 +330,14 @@ public class JumpingBalanceManager
       jumpingMomentumRateControlModuleInput.setVrpTrajectories(comTrajectoryPlanner.getVRPTrajectories());
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
-      FrameVector3DBasics linearMomentumRate = new FrameVector3D(comTrajectoryPlanner.getDesiredCoMAcceleration());
-      linearMomentumRate.scale(controllerToolbox.getFullRobotModel().getTotalMass());
+      WrenchBasics comWrench = new Wrench(comTrajectoryPlanner.getDesiredWrench());
+      comWrench.changeFrame(controllerToolbox.getCenterOfMassFrame());
+
+      FrameVector3DBasics linearMomentumRate = new FrameVector3D();
       FrameVector3DBasics angularMomentumRate = new FrameVector3D();
-      comTrajectoryPlanner.computeAngularMomentumRateOfChange(angularMomentumRate, timeInSupportSequence.getDoubleValue());
+      linearMomentumRate.setMatchingFrame(comWrench.getLinearPart());
+      linearMomentumRate.addZ(controllerToolbox.getFullRobotModel().getTotalMass() * -Math.abs(controllerToolbox.getGravityZ()));
+      angularMomentumRate.setMatchingFrame(comWrench.getAngularPart());
 
       jumpingMomentumRateControlModuleInput.setDesiredLinearMomentumRateOfChange(linearMomentumRate);
       jumpingMomentumRateControlModuleInput.setDesiredAngularMomentumRateOfChange(angularMomentumRate);
