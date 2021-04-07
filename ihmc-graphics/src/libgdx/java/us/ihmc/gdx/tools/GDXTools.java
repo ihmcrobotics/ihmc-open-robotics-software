@@ -2,6 +2,7 @@ package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -167,5 +168,24 @@ public class GDXTools
    public static void toGDX(Point3DBasics euclidPoint, Matrix4 gdxAffine)
    {
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
+   }
+
+   public static void toGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
+   {
+      gdxColor.set((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
+   }
+
+   public static Color toGDX(javafx.scene.paint.Color javaFXColor)
+   {
+      return new Color((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
+   }
+
+   /**
+    * JavaFX colors are immutable so we have to return a new one and there isn't a garbage free option
+    * unless we look em up.
+    */
+   public static javafx.scene.paint.Color toJavaFX(Color gdxColor)
+   {
+      return javafx.scene.paint.Color.color(gdxColor.r, gdxColor.g, gdxColor.b, gdxColor.a);
    }
 }
