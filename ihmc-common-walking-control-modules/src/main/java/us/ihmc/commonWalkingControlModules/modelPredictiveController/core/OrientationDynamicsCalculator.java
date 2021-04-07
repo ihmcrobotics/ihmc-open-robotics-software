@@ -7,12 +7,19 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Di
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrientationDynamicsCalculator
 {
@@ -69,20 +76,63 @@ public class OrientationDynamicsCalculator
       gravityVector.set(2, 0, -Math.abs(gravity));
    }
 
+   private final List<MPCContactPlane> contactPlanes = new ArrayList<>();
+
    public boolean compute(DiscreteAngularVelocityOrientationCommand command)
    {
-      reset(command);
-      getAllTheTermsFromTheCommandInput(command);
+      contactPlanes.clear();
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+         contactPlanes.add(command.getContactPlane(i));
 
-      calculateStateJacobians(command);
+      setMomentumOfInertiaInBodyFrame(command.getMomentOfInertiaInBodyFrame());
 
-      calculateAffineAxisAngleErrorTerms(command);
+      return compute(command.getSegmentNumber(),
+                     command.getDesiredCoMPosition(),
+                     command.getDesiredCoMAcceleration(),
+                     command.getDesiredBodyOrientation(),
+                     command.getDesiredBodyAngularVelocity(),
+                     command.getDesiredNetAngularMomentumRate(),
+                     command.getDesiredInternalAngularMomentumRate(),
+                     contactPlanes,
+                     command.getTimeOfConstraint(),
+                     command.getDurationOfHold(),
+                     command.getOmega());
+   }
 
-      computeAffineTimeInvariantTerms(command.getTimeOfConstraint());
-      if (!Double.isFinite(command.getDurationOfHold()))
+   public void setMomentumOfInertiaInBodyFrame(Matrix3DReadOnly inertiaMatrixInBody)
+   {
+      inertiaMatrixInBody.get(this.inertiaMatrixInBody);
+   }
+
+   public boolean compute(int segmentNumber,
+                          FramePoint3DReadOnly desiredComPosition,
+                          FrameVector3DReadOnly desiredCoMAcceleration,
+                          FrameOrientation3DReadOnly desiredBodyOrientation,
+                          Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
+                          Vector3DReadOnly desiredNetAngularMomentumRate,
+                          Vector3DReadOnly desiredInternalAngularMomentumRate,
+                          List<MPCContactPlane> contactPlanes,
+                          double timeOfConstraint,
+                          double durationOfHold,
+                          double omega)
+   {
+      reset(segmentNumber, contactPlanes);
+      getAllTheTermsFromTheCommandInput(desiredComPosition,
+                                        desiredCoMAcceleration,
+                                        desiredBodyOrientation,
+                                        desiredBodyAngularVelocityInBodyFrame,
+                                        desiredNetAngularMomentumRate,
+                                        desiredInternalAngularMomentumRate);
+
+      calculateStateJacobians(desiredComPosition, contactPlanes, timeOfConstraint, omega);
+
+      calculateAffineAxisAngleErrorTerms(desiredComPosition, contactPlanes);
+
+      computeAffineTimeInvariantTerms(timeOfConstraint);
+      if (!Double.isFinite(durationOfHold))
          throw new IllegalArgumentException("The duration of the hold is not finite.");
 
-      discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, command.getDurationOfHold());
+      discretizationCalculator.compute(A, B, C, Ad, Bd, Cd, durationOfHold);
 
       return true;
    }
@@ -147,13 +197,13 @@ public class OrientationDynamicsCalculator
       return b4;
    }
 
-   private void reset(DiscreteAngularVelocityOrientationCommand command)
+   private void reset(int segmentNumber, List<MPCContactPlane> contactPlanes)
    {
       int totalContactPoints = 0;
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
-         totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
+      for (int i = 0; i < contactPlanes.size(); i++)
+         totalContactPoints += contactPlanes.get(i).getNumberOfContactPoints();
 
-      int rhoCoefficientsInSegment = indexHandler.getRhoCoefficientsInSegment(command.getSegmentNumber());
+      int rhoCoefficientsInSegment = indexHandler.getRhoCoefficientsInSegment(segmentNumber);
       int coefficientsInSegment = LinearMPCIndexHandler.comCoefficientsPerSegment + rhoCoefficientsInSegment;
 
       comPositionJacobian.reshape(3, coefficientsInSegment);
@@ -183,42 +233,44 @@ public class OrientationDynamicsCalculator
       Cd.zero();
    }
 
-   private void getAllTheTermsFromTheCommandInput(DiscreteAngularVelocityOrientationCommand command)
+   private void getAllTheTermsFromTheCommandInput(FramePoint3DReadOnly desiredCoMPosition,
+                                                  FrameVector3DReadOnly desiredCoMAcceleration,
+                                                  FrameOrientation3DReadOnly desiredBodyOrientation,
+                                                  Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
+                                                  Vector3DReadOnly desiredNetAngularMomentumRate,
+                                                  Vector3DReadOnly desiredInternalAngularMomentumRate)
    {
-      desiredBodyAngularMomentumRate.sub(command.getDesiredNetAngularMomentumRate(), command.getDesiredInternalAngularMomentumRate());
+      desiredBodyAngularMomentumRate.sub(desiredNetAngularMomentumRate, desiredInternalAngularMomentumRate);
 
-      command.getDesiredBodyOrientation().get(desiredRotationMatrix);
+      desiredBodyOrientation.get(desiredRotationMatrix);
       desiredRotationMatrix.get(rotationMatrix);
 
-      command.getMomentOfInertiaInBodyFrame().get(inertiaMatrixInBody);
-      command.getDesiredCoMAcceleration().get(desiredCoMAcceleration);
-      command.getDesiredBodyAngularVelocity().get(desiredBodyAngularVelocity);
+      desiredCoMAcceleration.get(this.desiredCoMAcceleration);
+      desiredBodyAngularVelocityInBodyFrame.get(desiredBodyAngularVelocity);
 
-      desiredContactForce.set(desiredCoMAcceleration);
+      desiredContactForce.set(this.desiredCoMAcceleration);
       desiredContactForce.add(2, 0, -gravityVector.get(2, 0));
 
       MatrixMissingTools.toSkewSymmetricMatrix(desiredContactForce, skewDesiredContactForce);
-      MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredCoMPosition(), skewDesiredCoMPosition);
-      MatrixMissingTools.toSkewSymmetricMatrix(command.getDesiredBodyAngularVelocity(), skewDesiredBodyAngularVelocity);
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredCoMPosition, skewDesiredCoMPosition);
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocityInBodyFrame, skewDesiredBodyAngularVelocity);
 
       UnrolledInverseFromMinor_DDRM.inv3(inertiaMatrixInBody, inverseInertia, 1.0);
    }
 
-   private void calculateStateJacobians(DiscreteAngularVelocityOrientationCommand command)
+   private void calculateStateJacobians(FramePoint3DReadOnly desiredCoMPosition, List<MPCContactPlane> contactPlanes, double timeOfConstraint, double omega)
    {
-      double timeOfConstraint = command.getTimeOfConstraint();
-      double omega = command.getOmega();
       int rhoStartIndex = 0;
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, timeOfConstraint, comPositionJacobian, 0, 1.0);
 
       int contactRow = 0;
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      for (int i = 0; i < contactPlanes.size(); i++)
       {
-         MPCContactPlane contactPlane = command.getContactPlaneHelper(i);
+         MPCContactPlane contactPlane = contactPlanes.get(i);
          ContactPlaneJacobianCalculator.computeLinearJacobian(0, timeOfConstraint, omega, LinearMPCIndexHandler.comCoefficientsPerSegment + rhoStartIndex, contactPlane, comPositionJacobian);
          ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, contactRow, rhoStartIndex, contactPlane, contactForceJacobian);
-         computeTorqueAboutBodyJacobian(contactRow, command.getDesiredCoMPosition(), contactPlane, contactForceToOriginTorqueJacobian);
+         computeTorqueAboutBodyJacobian(contactRow, desiredCoMPosition, contactPlane, contactForceToOriginTorqueJacobian);
 
          contactRow += 3 * contactPlane.getNumberOfContactPoints();
          rhoStartIndex += contactPlane.getCoefficientSize();
@@ -238,7 +290,7 @@ public class OrientationDynamicsCalculator
       c.add(2, 0, (a.get(0) * b.getY() - a.get(1) * b.getX()));
    }
 
-   private void calculateAffineAxisAngleErrorTerms(DiscreteAngularVelocityOrientationCommand command)
+   private void calculateAffineAxisAngleErrorTerms(FramePoint3DReadOnly desiredCoMPosition, List<MPCContactPlane> contactPlanes)
    {
       CommonOps_DDRM.multTransB(inverseInertia, rotationMatrix, IR);
 
@@ -256,20 +308,20 @@ public class OrientationDynamicsCalculator
       CommonOps_DDRM.mult(inverseInertia, skewAngularMomentum, b4);
 
       int totalContactPoints = 0;
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
-         totalContactPoints += command.getContactPlaneHelper(i).getNumberOfContactPoints();
+      for (int i = 0; i < contactPlanes.size(); i++)
+         totalContactPoints += contactPlanes.get(i).getNumberOfContactPoints();
 
       CommonOps_DDRM.scale(mass / totalContactPoints, desiredContactForce);
 
       torqueAboutPoint.zero();
-      for (int contactPlaneIdx = 0; contactPlaneIdx < command.getNumberOfContacts(); contactPlaneIdx++)
+      for (int contactPlaneIdx = 0; contactPlaneIdx < contactPlanes.size(); contactPlaneIdx++)
       {
-         MPCContactPlane contactPlane = command.getContactPlaneHelper(contactPlaneIdx);
+         MPCContactPlane contactPlane = contactPlanes.get(contactPlaneIdx);
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
             FramePoint3DReadOnly contactOrigin = contactPlane.getContactPointHelper(contactPointIdx).getBasisVectorOrigin();
             contactOrigin.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            tempVector.scaleAdd(-2.0, command.getDesiredCoMPosition(), contactOrigin);
+            tempVector.scaleAdd(-2.0, desiredCoMPosition, contactOrigin);
             crossAdd(desiredContactForce, tempVector, torqueAboutPoint);
          }
       }
