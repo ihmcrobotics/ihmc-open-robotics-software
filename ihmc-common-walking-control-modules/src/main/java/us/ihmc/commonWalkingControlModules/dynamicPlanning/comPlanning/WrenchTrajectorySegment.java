@@ -30,6 +30,7 @@ public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<W
    private static final FrameVector3DReadOnly zero = new FrameVector3D();
 
    private double currentTime;
+   private double mass = 1.0;
    private double omega = 3.0;
    private final TimeIntervalBasics timeInterval = new TimeInterval();
 
@@ -63,6 +64,7 @@ public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<W
 
       currentTime = other.currentTime;
       omega = other.omega;
+      mass = other.mass;
       desiredWrench.setIncludingFrame(other.desiredWrench);
    }
 
@@ -89,9 +91,10 @@ public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<W
             for (int element = 0; element < 3; element++)
             {
                linearCoefficient.setElement(element, trajectoryCoeff.get(element, coefficientIdx));
-               pointCoefficient.set(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), linearCoefficient, zero, contactPoint.getBasisVectorOrigin());
-               coefficients[coefficientIdx].add(pointCoefficient);
             }
+            linearCoefficient.scale(mass);
+            pointCoefficient.set(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), zero, linearCoefficient, contactPoint.getBasisVectorOrigin());
+            coefficients[coefficientIdx].add(pointCoefficient);
          }
       }
    }
@@ -105,6 +108,11 @@ public class WrenchTrajectorySegment implements TimeIntervalProvider, Settable<W
    {
       for (int coefficientIdx = 0; coefficientIdx < coefficients.length; coefficientIdx++)
          this.coefficients[coefficientIdx].setIncludingFrame(coefficients[coefficientIdx]);
+   }
+
+   public void setMass(double mass)
+   {
+      this.mass = mass;
    }
 
    public void setOmega(double omega)

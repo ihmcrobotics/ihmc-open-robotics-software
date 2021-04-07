@@ -93,7 +93,7 @@ public class MultipleWrenchSegmentTrajectoryGenerator implements ReferenceFrameH
       numberOfSegments.increment();
    }
 
-   public void appendSegment(TimeIntervalReadOnly timeInterval, double omega, List<MPCContactPlane> contactPlanes)
+   public void appendSegment(TimeIntervalReadOnly timeInterval, double mass, double omega, List<MPCContactPlane> contactPlanes)
    {
       checkNumberOfSegments(numberOfSegments.getIntegerValue() + 1);
       WrenchTrajectorySegment segment = segments.add();
@@ -103,6 +103,7 @@ public class MultipleWrenchSegmentTrajectoryGenerator implements ReferenceFrameH
       checkNextSegmentIsContinuous(segment);
 
       segment.setOmega(omega);
+      segment.setMass(mass);
       segment.setCoefficients(contactPlanes);
 
       numberOfSegments.increment();

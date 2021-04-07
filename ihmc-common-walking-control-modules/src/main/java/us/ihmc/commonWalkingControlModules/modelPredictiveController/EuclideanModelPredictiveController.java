@@ -52,6 +52,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private final double mass;
    protected final DoubleProvider omega;
    protected final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
@@ -114,12 +115,14 @@ public abstract class EuclideanModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
 
    public EuclideanModelPredictiveController(LinearMPCIndexHandler indexHandler,
+                                             double mass,
                                              double gravityZ,
                                              double nominalCoMHeight,
                                              YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
+      this.mass = mass;
       this.omega = omega;
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
@@ -263,7 +266,7 @@ public abstract class EuclideanModelPredictiveController
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
       linearTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, previewWindowCalculator.getFullPlanningSequence(), omega.getValue());
-      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactPlaneHelperPool, omega.getValue());
+      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactPlaneHelperPool, mass, omega.getValue());
    }
 
    protected void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)

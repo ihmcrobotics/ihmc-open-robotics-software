@@ -92,7 +92,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                        double gravityZ, double nominalCoMHeight, double mass, double dt,
                                        YoRegistry parentRegistry)
    {
-      super(indexHandler, gravityZ, nominalCoMHeight, parentRegistry);
+      super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);

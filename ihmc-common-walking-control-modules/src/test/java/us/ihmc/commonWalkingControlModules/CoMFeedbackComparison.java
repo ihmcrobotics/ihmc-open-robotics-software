@@ -94,7 +94,7 @@ public class CoMFeedbackComparison
 
          icpController = new ICPProportionalController(icpGains, controlDt, registry);
          lqrController = new LQRMomentumController(basicTrajectoryPlanner.getOmega(), registry);
-         mpcController = new CoMTrajectoryModelPredictiveController(gravity, nominalHeight, controlDt, registry);
+         mpcController = new CoMTrajectoryModelPredictiveController(1.0, gravity, nominalHeight, controlDt, registry);
 
          restartTime.addListener(v ->
                                  {
