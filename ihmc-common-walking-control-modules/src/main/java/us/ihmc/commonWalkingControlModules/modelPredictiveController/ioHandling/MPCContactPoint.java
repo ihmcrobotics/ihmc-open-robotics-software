@@ -443,7 +443,7 @@ public class MPCContactPoint
     * where the rows match the corresponding Euclidean coordinate axis.
     * @return contact wrench matrix
     */
-   public DMatrixRMaj getContactWrenchCoefficientMatrix()
+   public DMatrixRMaj getContactForceCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
    }
