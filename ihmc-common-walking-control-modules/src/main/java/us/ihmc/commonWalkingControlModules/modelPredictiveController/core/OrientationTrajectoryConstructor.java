@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
@@ -30,6 +31,8 @@ public class OrientationTrajectoryConstructor
          6,
          1)));
 
+   private final RecyclingArrayList<OrientationTrajectoryCommand> commandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
+
    private final FrameVector3D desiredBodyAngularVelocityInBodyFrame = new FrameVector3D();
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
@@ -44,6 +47,7 @@ public class OrientationTrajectoryConstructor
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        OrientationMPCTrajectoryHandler orientationTrajectoryHandler,
                        List<? extends List<MPCContactPlane>> contactPlaneHelpers,
+                       DMatrixRMaj initialOrientationError,
                        double omega)
    {
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
@@ -52,16 +56,16 @@ public class OrientationTrajectoryConstructor
       BMatricesAllSegments.clear();
       CMatricesAllSegments.clear();
 
+      commandsForSegments.clear();
+
       double globalTime = 0.0;
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
-         RecyclingArrayList<DMatrixRMaj> AMatricesInSegment = AMatricesAllSegments.add();
-         RecyclingArrayList<DMatrixRMaj> BMatricesInSegment = BMatricesAllSegments.add();
-         RecyclingArrayList<DMatrixRMaj> CMatricesInSegment = CMatricesAllSegments.add();
-
-         AMatricesInSegment.clear();
-         BMatricesInSegment.clear();
-         CMatricesInSegment.clear();
+         OrientationTrajectoryCommand command = commandsForSegments.add();
+         command.reset();
+         command.setSegmentNumber(segmentNumber);
+         if (segmentNumber == 0)
+            command.setInitialOrientationError(initialOrientationError);
 
          double segmentDuration = previewWindowContactSequence.get(segmentNumber).getTimeInterval().getDuration();
          int ticksInSegment = computeTicksInSegment(segmentDuration);
@@ -105,19 +109,19 @@ public class OrientationTrajectoryConstructor
                                        tickDuration,
                                        omega);
 
-            DMatrixRMaj nextA = AMatricesInSegment.add();
-            DMatrixRMaj nextB = BMatricesInSegment.add();
-            DMatrixRMaj nextC = CMatricesInSegment.add();
+            DMatrixRMaj previousA = command.getLastAMatrix();
+            DMatrixRMaj previousB = command.getLastBMatrix();
+            DMatrixRMaj previousC = command.getLastCMatrix();
+
+            DMatrixRMaj nextA = command.addAMatrix();
+            DMatrixRMaj nextB = command.addBMatrix();
+            DMatrixRMaj nextC = command.addCMatrix();
 
             nextB.set(dynamicsCalculator.getDiscreteBMatrix());
             nextC.set(dynamicsCalculator.getDiscreteCMatrix());
 
             if (tick > 0)
             {
-               DMatrixRMaj previousA = AMatricesInSegment.getLast();
-               DMatrixRMaj previousB = BMatricesInSegment.getLast();
-               DMatrixRMaj previousC = CMatricesInSegment.getLast();
-
                CommonOps_DDRM.mult(dynamicsCalculator.getDiscreteAMatrix(), previousA, nextA);
                CommonOps_DDRM.multAdd(dynamicsCalculator.getDiscreteAMatrix(), previousB, nextB);
                CommonOps_DDRM.multAdd(dynamicsCalculator.getDiscreteAMatrix(), previousC, nextC);
