@@ -156,6 +156,51 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
       }
    }
 
+   public void updateMeshcolor(float alpha)
+   {
+      if (enabled)
+      {
+         pointsToRender.clear();
+         synchronized (pointsToRender)
+         {
+            RecyclingArrayList<Point3D32> pointsToRead = packingA ? pointsB : pointsA;
+            for (Point3D32 point : pointsToRead)
+            {
+               pointsToRender.add().set(point);
+            }
+         }
+
+         pointCloudRenderer.setPointsToRender(pointsToRender);
+         if (!pointsToRender.isEmpty())
+         {
+            //            pointCloudRenderer.setColor(color);
+            pointCloudRenderer.updateMesh(alpha);
+         }
+      }
+   }
+
+   public void updateMeshcolor()
+   {
+      if (enabled)
+      {
+         pointsToRender.clear();
+         synchronized (pointsToRender)
+         {
+            RecyclingArrayList<Point3D32> pointsToRead = packingA ? pointsB : pointsA;
+            for (Point3D32 point : pointsToRead)
+            {
+               pointsToRender.add().set(point);
+            }
+         }
+
+         pointCloudRenderer.setPointsToRender(pointsToRender);
+         if (!pointsToRender.isEmpty())
+         {
+            pointCloudRenderer.updateMesh();
+         }
+      }
+   }
+
    public void renderImGuiWidgets()
    {
       ImGui.text(ros1PointCloudTopic);
