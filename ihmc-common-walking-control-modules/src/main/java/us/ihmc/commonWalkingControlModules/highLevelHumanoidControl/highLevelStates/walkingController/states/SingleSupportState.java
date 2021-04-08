@@ -82,6 +82,7 @@ public abstract class SingleSupportState extends WalkingState
    {
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
+      balanceManager.setHoldSplitFractions(false);
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
    }
