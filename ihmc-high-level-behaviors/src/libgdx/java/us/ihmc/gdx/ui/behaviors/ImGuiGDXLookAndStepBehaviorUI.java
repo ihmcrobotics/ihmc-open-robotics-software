@@ -11,6 +11,7 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -256,6 +257,11 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          currentStatePlot.render(-1, "");
       }
 
+      if (ImGui.button("Select behavior"))
+      {
+         behaviorHelper.publish(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
+      }
+      ImGui.sameLine();
       if (ImGui.button("Reset"))
       {
          behaviorHelper.publish(RESET);
