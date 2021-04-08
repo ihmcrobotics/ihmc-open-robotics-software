@@ -1,42 +1,24 @@
 package us.ihmc.gdx.ui;
 
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.VertexAttributes;
-import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-import com.badlogic.gdx.graphics.g3d.model.Node;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
-import us.ihmc.gdx.ui.graphics.live.GDXROS1BoxVisualizer;
-import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
-import us.ihmc.utilities.ros.subscriber.BoxSubscriber;
-import us.ihmc.utilities.ros.subscriber.BoxesSubscriber;
-
-import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
-import com.badlogic.gdx.graphics.g3d.utils.shapebuilders.BoxShapeBuilder;
 
 import us.ihmc.utilities.ros.publisher.RosTunningParamPublisher;
-import lidar_obstacle_detection.TunningParam;
 
-
-public class AtlasGDXOusterPointCloudViewer
+public class GDXObstacleDetectionUI
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI();
+   public static final String APPLICATION_NAME = "Object Detection UI";
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(APPLICATION_NAME);
    ImFloat tunableParameter1 = new ImFloat(0.1f);
    ImFloat tunableParameter2 = new ImFloat(0.1f);
    ImFloat tunableParameter3 = new ImFloat(0.1f);
@@ -54,9 +36,9 @@ public class AtlasGDXOusterPointCloudViewer
 
 
 
-   public AtlasGDXOusterPointCloudViewer()
+   public GDXObstacleDetectionUI()
    {
-      RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "ouster_point_cloud_viewer");
+      RosMainNode ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "obstacle_detection_ui");
       rosTunningParamPublisher = new RosTunningParamPublisher();
       ros1Node.attachPublisher("/TunningParam", rosTunningParamPublisher);
 
@@ -179,13 +161,13 @@ public class AtlasGDXOusterPointCloudViewer
             baseUI.dispose();
          }
 
-      }, getClass().getSimpleName(), 1100, 800);
+      }, APPLICATION_NAME, 1100, 1000);
    }
 
 
    public static void main(String[] args)
    {
-      new AtlasGDXOusterPointCloudViewer();
+      new GDXObstacleDetectionUI();
    }
 }
 
