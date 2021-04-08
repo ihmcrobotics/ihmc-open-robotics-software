@@ -7,12 +7,13 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 
 public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI("Environment Builder");
+   public static final String APPLICATION_NAME = "Environment Builder";
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(APPLICATION_NAME);
    private final GDXEnvironmentBuilderPanel environmentBuilderUI = new GDXEnvironmentBuilderPanel();
 
    public GDXEnvironmentBuilderUI()
    {
-      GDXApplicationCreator.launchGDXApplication(this, GDXEnvironmentBuilderUI.class);
+      GDXApplicationCreator.launchGDXApplication(this, APPLICATION_NAME, 1750, 1000);
    }
 
    @Override
