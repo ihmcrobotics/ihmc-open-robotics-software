@@ -51,4 +51,6 @@ testDependencies {
 
    api("us.ihmc:ihmc-matrix-library-test:0.18.4")
    api("us.ihmc:ihmc-commons-testing:0.30.4")
+   api("us.ihmc:simulation-construction-set:0.21.7")
+
 }
