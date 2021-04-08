@@ -1,7 +1,7 @@
 package lidar_obstacle_detection;
 
 public interface GDXBoxMessage extends org.ros.internal.message.Message {
-   static final java.lang.String _TYPE = "lidar_obstacle_detection/GDXBoxMessage";
+   static final java.lang.String _TYPE = "lidar_obstacle_detection/TunningParam";
    static final java.lang.String _DEFINITION =
           "float64 xMin\n"
          +"float64 yMin\n"
