@@ -60,7 +60,8 @@ public class BoxDemoModel2 implements RenderableProvider
    private Model model;
    private Model lastModel;
 
-   private ResettableExceptionHandlingExecutorService threadQueue;
+   private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+
    private final HashSet<ModelInstance> placedModels = new HashSet<>();
 
    //   private GDXBoxRenderer boxRenderer = new GDXBoxRenderer();
@@ -99,8 +100,6 @@ public class BoxDemoModel2 implements RenderableProvider
       this.sensorBaseFrame = sensorBaseFrame;
       this.baseToSensorTransform = baseToSensorTransform;
 
-      threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
-
       ros1Node.attachSubscriber(ros1BoxTopic, new AbstractRosTopicSubscriber<GDXBoxesMessage>(GDXBoxesMessage._TYPE)
       {
          @Override
@@ -130,7 +129,7 @@ public class BoxDemoModel2 implements RenderableProvider
       ++receivedCount;
       if (enabled)
       {
-         threadQueue.clearQueueAndExecute(() ->
+         executorService.clearQueueAndExecute(() ->
          {
             try
             {
@@ -417,10 +416,11 @@ public class BoxDemoModel2 implements RenderableProvider
    }
 
 
-//   public void dispose()
-//   {
+   public void dispose()
+   {
 //      model.dispose();
-//   }
+      executorService.destroy();
+   }
 
 //   @Override
 //   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

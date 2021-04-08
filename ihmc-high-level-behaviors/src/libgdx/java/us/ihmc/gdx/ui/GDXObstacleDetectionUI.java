@@ -159,6 +159,7 @@ public class GDXObstacleDetectionUI
          @Override
          public void dispose()
          {
+            boxVisualizer.dispose();
             baseUI.dispose();
          }
 
