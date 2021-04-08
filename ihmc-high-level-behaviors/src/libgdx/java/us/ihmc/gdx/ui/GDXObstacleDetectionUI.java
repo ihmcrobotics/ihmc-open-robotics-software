@@ -7,6 +7,7 @@ import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
@@ -99,7 +100,7 @@ public class GDXObstacleDetectionUI
          {
             baseUI.renderBeforeOnScreenUI();
             boolean tunningParamsChanged = false;
-            ImGui.begin("Stats");
+            ImGui.begin(ImGuiTools.uniqueLabel(this, "Tuning"));
             ImGui.text("/downsampled_cloud_road");
 
             //            receivedPlot.render(receivedCount);
@@ -124,15 +125,15 @@ public class GDXObstacleDetectionUI
             ImGui.end();
 //            if (tunningParamsChanged)
 //            {
-            System.out.println("(double) tunableParameter1.getData()[0]"+(double) tunableParameter1.getData()[0]);
-            System.out.println("(double) tunableParameter2.getData()[0]"+(double) tunableParameter2.getData()[0]);
-            System.out.println("(double) tunableParameter3.getData()[0]"+(double) tunableParameter3.getData()[0]);
-            System.out.println("(double) tunableParameter4.getData()[0]"+(double) tunableParameter4.getData()[0]);
-            System.out.println("(double) tunableParameter5.getData()[0]"+(double) tunableParameter5.getData()[0]);
-            System.out.println("(double) tunableParameter6.getData()[0]"+(double) tunableParameter6.getData()[0]);
-            System.out.println("(double) tunableParameter7.getData()[0]"+(double) tunableParameter7.getData()[0]);
-            System.out.println("(double) tunableParameter8.getData()[0]"+(double) tunableParameter8.getData()[0]);
-            System.out.println("(double) tunableParameter9.getData()[0]"+(double) tunableParameter9.getData()[0]);
+//            System.out.println("(double) tunableParameter1.getData()[0]"+(double) tunableParameter1.getData()[0]);
+//            System.out.println("(double) tunableParameter2.getData()[0]"+(double) tunableParameter2.getData()[0]);
+//            System.out.println("(double) tunableParameter3.getData()[0]"+(double) tunableParameter3.getData()[0]);
+//            System.out.println("(double) tunableParameter4.getData()[0]"+(double) tunableParameter4.getData()[0]);
+//            System.out.println("(double) tunableParameter5.getData()[0]"+(double) tunableParameter5.getData()[0]);
+//            System.out.println("(double) tunableParameter6.getData()[0]"+(double) tunableParameter6.getData()[0]);
+//            System.out.println("(double) tunableParameter7.getData()[0]"+(double) tunableParameter7.getData()[0]);
+//            System.out.println("(double) tunableParameter8.getData()[0]"+(double) tunableParameter8.getData()[0]);
+//            System.out.println("(double) tunableParameter9.getData()[0]"+(double) tunableParameter9.getData()[0]);
 
 //            rosTunningParamPublisher.publish(0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1,0.1);
 
