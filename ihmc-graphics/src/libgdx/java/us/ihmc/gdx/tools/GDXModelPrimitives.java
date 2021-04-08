@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
-
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -75,7 +74,6 @@ public class GDXModelPrimitives
       return buildModelInstance(meshBuilder -> meshBuilder.addBox(lx, ly, lz, color), "box");
    }
 
-
    public static ModelInstance createArrow(double length, Color color)
    {
       return buildModelInstance(meshBuilder ->
@@ -102,5 +100,4 @@ public class GDXModelPrimitives
          meshBuilder.addSphere((float) radius, color);
       }, "arrow");
    }
-
 }
