@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
-import org.ejml.data.CMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
@@ -19,9 +18,9 @@ public class OrientationTrajectoryConstructor
    private final OrientationDynamicsCalculator dynamicsCalculator;
    private final SE3MPCIndexHandler indexHandler;
 
-   private final RecyclingArrayList<DMatrixRMaj> AMatrices = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
-   private final RecyclingArrayList<DMatrixRMaj> BMatrices = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 0));
-   private final RecyclingArrayList<DMatrixRMaj> CMatrices = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
+   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> AMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6)));
+   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> BMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 0)));
+   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> CMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
 
    private final FrameVector3D desiredBodyAngularVelocityInBodyFrame = new FrameVector3D();
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
@@ -41,19 +40,21 @@ public class OrientationTrajectoryConstructor
    {
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
 
-      AMatrices.clear();
-      BMatrices.clear();
-      CMatrices.clear();
-
-      CommonOps_DDRM.setIdentity(AMatrices.add());
-      DMatrixRMaj BStart = BMatrices.add();
-      BStart.reshape(6, indexHandler.getTotalProblemSize());
-      BStart.zero();
-      CMatrices.add().zero();
+      AMatricesAllSegments.clear();
+      BMatricesAllSegments.clear();
+      CMatricesAllSegments.clear();
 
       double globalTime = 0.0;
       for (int segmentNumber = 0; segmentNumber < indexHandler.getNumberOfSegments(); segmentNumber++)
       {
+         RecyclingArrayList<DMatrixRMaj> AMatricesInSegment = AMatricesAllSegments.add();
+         RecyclingArrayList<DMatrixRMaj> BMatricesInSegment = BMatricesAllSegments.add();
+         RecyclingArrayList<DMatrixRMaj> CMatricesInSegment = CMatricesAllSegments.add();
+
+         AMatricesInSegment.clear();
+         BMatricesInSegment.clear();
+         CMatricesInSegment.clear();
+
          for (int tick = 0; tick < indexHandler.getOrientationTicksInSegment(segmentNumber); tick++)
          {
             double tickDuration = indexHandler.getOrientationTickDuration(segmentNumber);
@@ -93,23 +94,27 @@ public class OrientationTrajectoryConstructor
                                        tickDuration,
                                        omega);
 
-            DMatrixRMaj previousA = AMatrices.getLast();
-            DMatrixRMaj previousB = BMatrices.getLast();
-            DMatrixRMaj previousC = CMatrices.getLast();
+            DMatrixRMaj nextA = AMatricesInSegment.add();
+            DMatrixRMaj nextB = BMatricesInSegment.add();
+            DMatrixRMaj nextC = CMatricesInSegment.add();
 
-            DMatrixRMaj nextA = AMatrices.add();
-            DMatrixRMaj nextB = BMatrices.add();
-            DMatrixRMaj nextC = CMatrices.add();
+            nextB.set(dynamicsCalculator.getDiscreteBMatrix());
+            nextC.set(dynamicsCalculator.getDiscreteCMatrix());
 
-            nextB.reshape(6, indexHandler.getTotalProblemSize());
+            if (tick > 0)
+            {
+               DMatrixRMaj previousA = AMatricesInSegment.getLast();
+               DMatrixRMaj previousB = BMatricesInSegment.getLast();
+               DMatrixRMaj previousC = CMatricesInSegment.getLast();
 
-            CommonOps_DDRM.mult(dynamicsCalculator.getDiscreteAMatrix(), previousA, nextA);
-
-            CommonOps_DDRM.mult(dynamicsCalculator.getDiscreteAMatrix(), previousB, nextB);
-            CommonOps_DDRM.addEquals(nextB, dynamicsCalculator.getDiscreteBMatrix()); // FIXME this is an inaccurate block matrix
-
-            CommonOps_DDRM.mult(dynamicsCalculator.getDiscreteAMatrix(), previousC, nextC);
-            CommonOps_DDRM.addEquals(nextC, dynamicsCalculator.getDiscreteCMatrix());
+               CommonOps_DDRM.mult(dynamicsCalculator.getDiscreteAMatrix(), previousA, nextA);
+               CommonOps_DDRM.multAdd(dynamicsCalculator.getDiscreteAMatrix(), previousB, nextB);
+               CommonOps_DDRM.multAdd(dynamicsCalculator.getDiscreteAMatrix(), previousC, nextC);
+            }
+            else
+            {
+               nextA.set(dynamicsCalculator.getDiscreteAMatrix());
+            }
          }
       }
    }
