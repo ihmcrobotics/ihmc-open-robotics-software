@@ -60,15 +60,15 @@ public class AtlasGDXOusterPointCloudViewer
       rosTunningParamPublisher = new RosTunningParamPublisher();
       ros1Node.attachPublisher("/TunningParam", rosTunningParamPublisher);
 
-      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer = new GDXROS1PointCloudVisualizer(ros1Node,
-                                                                                             "/downsampled_cloud_road",
+      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer = new GDXROS1PointCloudVisualizer("/downsampled_cloud_road",
                                                                                              ReferenceFrame.getWorldFrame(),
                                                                                              new RigidBodyTransform());
+      ros1PointCloudVisualizer.subscribe(ros1Node);
 
-      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer2 = new GDXROS1PointCloudVisualizer(ros1Node,
-                                                                                             "/downsampled_cloud_obstacle",
-                                                                                             ReferenceFrame.getWorldFrame(),
-                                                                                             new RigidBodyTransform());
+      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer2 = new GDXROS1PointCloudVisualizer("/downsampled_cloud_obstacle",
+                                                                                              ReferenceFrame.getWorldFrame(),
+                                                                                              new RigidBodyTransform());
+      ros1PointCloudVisualizer2.subscribe(ros1Node);
 
       BoxDemoModel2 boxVisualizer = new BoxDemoModel2(ros1Node, "/boxes",
                                         ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
