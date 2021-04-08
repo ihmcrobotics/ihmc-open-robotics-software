@@ -106,7 +106,7 @@ public class ThePeoplesGloriousNetworkProcessor
       this.controllerCommunicationBridge = rosAPI_communicator;
       this.scsSensorCommunicationBridge = sensorCommunicator;
       this.rosClockCalculator = rosClockCalculator;
-      this.rosClockCalculator.subscribeROS1(rosMainNode);
+      this.rosClockCalculator.subscribeToROS1Topics(rosMainNode);
       this.subscribers = new ArrayList<AbstractRosTopicSubscriber<?>>();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
 

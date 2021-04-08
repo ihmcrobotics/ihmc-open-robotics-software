@@ -11,10 +11,10 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -70,13 +70,13 @@ public class AtlasBehaviorUIDemo
       if (LAUNCH_PARAMETER_TUNER) ThreadTools.startAThread(this::parameterTuner, "ParameterTuner");
       if (LAUNCH_FOOTSTEP_PLANNER_UI) ThreadTools.startAThread(this::footstepPlannerUI, "FootstepPlannerUI");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.DEFAULT_BEHAVIORS;
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS;
 
       LogTools.info("Creating behavior module");
       BehaviorModule.createInterprocess(behaviorRegistry, createRobotModel());
 
       LogTools.info("Creating behavior user interface");
-      BehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
+      JavaFXBehaviorUI.createInterprocess(behaviorRegistry, createRobotModel(), "localhost");
    }
 
    private void simulation()

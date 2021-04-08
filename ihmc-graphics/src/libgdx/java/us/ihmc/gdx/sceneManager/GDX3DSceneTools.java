@@ -12,7 +12,6 @@ import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
 import org.lwjgl.opengl.GL32;
-import us.ihmc.log.LogTools;
 
 public class GDX3DSceneTools
 {

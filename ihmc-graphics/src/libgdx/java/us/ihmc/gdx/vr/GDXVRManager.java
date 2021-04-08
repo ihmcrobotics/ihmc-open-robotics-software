@@ -9,6 +9,8 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -19,6 +21,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.HashSet;
 
+import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Touchpad;
+
 public class GDXVRManager implements RenderableProvider
 {
    private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
@@ -28,6 +32,14 @@ public class GDXVRManager implements RenderableProvider
    private ModelInstance headsetModelInstance;
    private SideDependentList<GDXVRContext.VRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
+   private boolean holdingTouchpadToMove = false;
+   private Point3D initialVRSpacePosition = new Point3D();
+   private Point3D initialVRControllerPosition = new Point3D();
+   private Point3D currentVRControllerPosition = new Point3D();
+   private Vector3D deltaVRControllerPosition = new Vector3D();
+   private Point3D resultVRSpacePosition = new Point3D();
+   private Point3D lastVRSpacePosition = new Point3D();
+   private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
 
    public void create()
    {
@@ -108,7 +120,23 @@ public class GDXVRManager implements RenderableProvider
          @Override
          public void buttonPressed(GDXVRContext.VRDevice device, int button)
          {
-//            if (controllers.get(Robot))
+            if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
+            {
+               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
+               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
+               context.getToZUpXForward().transform(initialVRSpacePosition);
+               lastVRSpacePosition.set(initialVRSpacePosition);
+               holdingTouchpadToMove = true;
+            }
+         }
+
+         @Override
+         public void buttonReleased(GDXVRContext.VRDevice device, int button)
+         {
+            if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
+            {
+               holdingTouchpadToMove = false;
+            }
          }
       });
    }
@@ -120,6 +148,25 @@ public class GDXVRManager implements RenderableProvider
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      if (holdingTouchpadToMove)
+      {
+         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
+//         resultVRSpacePosition.set(initialVRSpacePosition);
+//         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
+//         resultVRSpacePosition.sub(deltaVRControllerPosition);
+//         resultVRSpacePosition.sub(lastVRSpacePosition);
+//         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//         lastVRSpacePosition.set(resultVRSpacePosition);
+         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
+         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
+      }
+      else
+      {
+         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
+
+      }
+
       context.begin();
       renderScene(GDXVRContext.Eye.Left, sceneManager);
       renderScene(GDXVRContext.Eye.Right, sceneManager);

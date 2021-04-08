@@ -8,7 +8,7 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 public class DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider extends AlwaysZeroOffsetPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
 {
    @Override
-   public void subscribeROS1(RosNodeInterface ros1Node)
+   public void subscribeToROS1Topics(RosNodeInterface ros1Node)
    {
    }
 }

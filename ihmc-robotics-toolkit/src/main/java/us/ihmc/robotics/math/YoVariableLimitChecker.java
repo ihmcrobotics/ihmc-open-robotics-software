@@ -1,49 +1,47 @@
 package us.ihmc.robotics.math;
 
+import us.ihmc.log.LogTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class YoVariableLimitChecker
 {
-   private final YoEnum<Status> status;
-   private final double lowerLimit;
-   private final double upperLimit;
+   private final YoEnum<LimitStatus> status;
+   private final DoubleProvider lowerLimit;
+   private final DoubleProvider upperLimit;
    private final YoDouble variableToCheck;
 
-   public YoVariableLimitChecker(YoDouble variableToCheck, String prefix, double lowerLimit, double upperLimit, YoRegistry registry)
+   public YoVariableLimitChecker(YoDouble variableToCheck, String prefix, DoubleProvider lowerLimit, DoubleProvider upperLimit, YoRegistry registry)
    {
-      status = new YoEnum<Status>(prefix + variableToCheck.getName() + "_Status", registry, Status.class);
+      status = new YoEnum<>(prefix + variableToCheck.getName() + "_Status", registry, LimitStatus.class);
 
-      if (upperLimit < lowerLimit)
-      {
-         System.out.println("YoVariableLimitChecker: Disabling limits. Upper limit needs to be greater than lower limit for variable: "
-               + variableToCheck.getName());
-         this.lowerLimit = Double.NEGATIVE_INFINITY;
-         this.upperLimit = Double.POSITIVE_INFINITY;
-      }
-      else
-      {
-         this.lowerLimit = lowerLimit;
-         this.upperLimit = upperLimit;
-      }
+      this.lowerLimit = lowerLimit;
+      this.upperLimit = upperLimit;
 
       this.variableToCheck = variableToCheck;
    }
 
-   public Status update()
+   public LimitStatus update()
    {
-      if (variableToCheck.getDoubleValue() > upperLimit)
-         status.set(Status.ABOVE_LIMIT);
-      else if (variableToCheck.getDoubleValue() < lowerLimit)
-         status.set(Status.BELOW_LIMIT);
+      if (upperLimit.getValue() < lowerLimit.getValue())
+      {
+         LogTools.warn("Not checking joint limits, since they aren't valid. Upper limit must be greater than lower limit.");
+         return null;
+      }
+
+      if (variableToCheck.getDoubleValue() > upperLimit.getValue())
+         status.set(LimitStatus.ABOVE_LIMIT);
+      else if (variableToCheck.getDoubleValue() < lowerLimit.getValue())
+         status.set(LimitStatus.BELOW_LIMIT);
       else
-         status.set(Status.IN_RANGE);
+         status.set(LimitStatus.IN_RANGE);
 
       return status.getEnumValue();
    }
 
-   public Status getStatus()
+   public LimitStatus getStatus()
    {
       return status.getEnumValue();
    }
@@ -58,7 +56,7 @@ public class YoVariableLimitChecker
       return variableToCheck.getName();
    }
 
-   public enum Status
+   public enum LimitStatus
    {
       IN_RANGE, BELOW_LIMIT, ABOVE_LIMIT
    }

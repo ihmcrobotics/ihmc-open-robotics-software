@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;

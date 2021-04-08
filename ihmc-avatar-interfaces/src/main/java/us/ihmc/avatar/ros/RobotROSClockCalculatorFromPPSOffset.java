@@ -15,15 +15,15 @@ public class RobotROSClockCalculatorFromPPSOffset implements RobotROSClockCalcul
    }
 
    @Override
-   public void subscribeROS1(RosNodeInterface ros1Node)
+   public void subscribeToROS1Topics(RosNodeInterface ros1Node)
    {
-      ppsTimestampOffsetProvider.subscribeROS1(ros1Node);
+      ppsTimestampOffsetProvider.subscribeToROS1Topics(ros1Node);
    }
 
    @Override
-   public void unsubscribeROS1(RosNodeInterface ros1Node)
+   public void unsubscribeFromROS1Topics(RosNodeInterface ros1Node)
    {
-      ppsTimestampOffsetProvider.unsubscribeROS1(ros1Node);
+      ppsTimestampOffsetProvider.unsubscribeFromROS1Topics(ros1Node);
    }
 
    @Override

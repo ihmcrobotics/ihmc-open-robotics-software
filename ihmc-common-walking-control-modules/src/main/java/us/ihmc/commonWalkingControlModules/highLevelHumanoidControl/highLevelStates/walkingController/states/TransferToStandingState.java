@@ -131,6 +131,9 @@ public class TransferToStandingState extends WalkingState
 
       WalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
 
+      if(previousStateEnum != null && previousStateEnum.isSingleSupport())
+         balanceManager.setHoldSplitFractions(true);
+
       // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
       // restore the full foot contact.
       // TODO don't restore the foot to full contact necessarily. need to figure out how to detect that it's ok
