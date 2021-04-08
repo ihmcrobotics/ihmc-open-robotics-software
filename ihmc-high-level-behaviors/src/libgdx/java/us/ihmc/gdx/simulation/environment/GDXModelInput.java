@@ -17,14 +17,21 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXLargeCinderBlockRoughed;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -45,8 +52,8 @@ public class GDXModelInput
    private float mouseVelX = 0;
    private float mouseVelY = 0;
 
-   private ArrayList<GDXModelInstance> instances = new ArrayList<>();
-   private HashSet<Integer> selections = new HashSet<>();
+   private ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
+   private HashSet<Integer> selectedObjectIndexes = new HashSet<>();
    private HashMap<Integer, Material> originalMaterials = new HashMap<>();
 
    public State state = NONE;
@@ -59,13 +66,13 @@ public class GDXModelInput
    private Vector3D cameraOrigin = new Vector3D();
    private Vector3D originToPosition = new Vector3D();
 
-   private HashMap<Character, ModelInstance> controlMap = new HashMap<Character, ModelInstance>();
+   private HashMap<Character, ModelInstance> controlMap = new HashMap<>();
    private HashSet<ModelInstance> controlAxes = new HashSet<>();
    private final Material selectionMaterial;
    private float modelYaw, modelPitch, modelRoll = 0;
    private boolean editMode = false;
-
    private GDXImGuiBasedUI baseUI;
+   private FramePose3D tempFramePose = new FramePose3D();
 
    public GDXModelInput()
    {
@@ -114,10 +121,10 @@ public class GDXModelInput
       double finalPerpDist = Double.MAX_VALUE;
       double finalDistFromOrigin = Double.MAX_VALUE;
 
-      for (int i = 0; i < instances.size(); i++)
+      for (int i = 0; i < environmentObjects.size(); i++)
       {
-         final GDXModelInstance instance = instances.get(i);
-         instance.transform.getTranslation(tempModelTranslation);
+         final GDXEnvironmentObject environmentObject = environmentObjects.get(i);
+         environmentObject.getModelInstance().transform.getTranslation(tempModelTranslation);
 
          GDXTools.toEuclid(tempModelTranslation, modelPosition);
          cameraOrigin.set(pickRayInWorld.getPointX(), pickRayInWorld.getPointY(), pickRayInWorld.getPointZ());
@@ -127,7 +134,7 @@ public class GDXModelInput
          double perpDist = pickRayInWorld.distance(modelPosition);
 
 
-         if (perpDist <= 0.8 * instance.radius)
+         if (perpDist <= 0.8 * environmentObject.getModelInstance().radius)
          {
             result = i;
             finalPerpDist = perpDist;
@@ -137,12 +144,12 @@ public class GDXModelInput
 
       if (ImGui.isMouseClicked(ImGuiMouseButton.Left) && editMode)
       {
-         if (result != -1 && !selections.contains(result))
+         if (result != -1 && !selectedObjectIndexes.contains(result))
          {
-            selections.add(result);
-            Material origMat = new Material(instances.get(result).materials.get(0));
+            selectedObjectIndexes.add(result);
+            Material origMat = new Material(environmentObjects.get(result).getModelInstance().materials.get(0));
             originalMaterials.put(result, origMat);
-            instances.get(result).materials.get(0).set(selectionMaterial);
+            environmentObjects.get(result).getModelInstance().materials.get(0).set(selectionMaterial);
          }
          else if (result == -1)
          {
@@ -160,28 +167,28 @@ public class GDXModelInput
 
    public void duplicateSelections()
    {
-      ArrayList<Integer> duplicates = new ArrayList<>(selections);
+      ArrayList<Integer> duplicates = new ArrayList<>(selectedObjectIndexes);
 
       clearSelections();
       for (int index : duplicates)
       {
-         GDXModelInstance model = new GDXModelInstance(instances.get(index));
-         instances.add(model);
-         selections.add(instances.size() - 1);
-         Material origMat = new Material(model.materials.get(0));
-         originalMaterials.put(instances.size() - 1, origMat);
-         model.materials.get(0).set(selectionMaterial);
+         GDXEnvironmentObject duplicate = environmentObjects.get(index).duplicate();
+         environmentObjects.add(duplicate);
+         selectedObjectIndexes.add(environmentObjects.size() - 1);
+         Material origMat = new Material(duplicate.getModelInstance().materials.get(0));
+         originalMaterials.put(environmentObjects.size() - 1, origMat);
+         duplicate.getModelInstance().materials.get(0).set(selectionMaterial);
       }
    }
 
    public void clearSelections()
    {
-      for (int i : selections)
+      for (int i : selectedObjectIndexes)
       {
          System.out.println("Clearing:" + i);
-         instances.get(i).materials.get(0).set(originalMaterials.get(i));
+         environmentObjects.get(i).getModelInstance().materials.get(0).set(originalMaterials.get(i));
       }
-      selections.clear();
+      selectedObjectIndexes.clear();
       originalMaterials.clear();
    }
 
@@ -226,7 +233,7 @@ public class GDXModelInput
    {
       if (input.isWindowHovered())
       {
-         LogTools.debug(state + "\t" + selections + "\tTotal Materials: " + originalMaterials.size() + "\tControls: " + controlAxes.size());
+         LogTools.debug(state + "\t" + selectedObjectIndexes + "\tTotal Materials: " + originalMaterials.size() + "\tControls: " + controlAxes.size());
 
          translation.setToZero();
          modelRoll = modelYaw = modelPitch = 0;
@@ -255,7 +262,7 @@ public class GDXModelInput
                   if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
                   {
                      state = NONE;
-                     selections.clear();
+                     selectedObjectIndexes.clear();
                      originalMaterials.clear();
                   }
                   break;
@@ -290,51 +297,68 @@ public class GDXModelInput
    }
 
    public void transformSelections(){
-      for (int selection : selections)
+      for (int selection : selectedObjectIndexes)
       {
-         GDXModelInstance selectedModel = instances.get(selection);
+         GDXEnvironmentObject selectedModel = environmentObjects.get(selection);
 
-         selectedModel.transform.getTranslation(tempModelTranslation);
+         selectedModel.getModelInstance().transform.getTranslation(tempModelTranslation);
 
 
          if (state == PLACING_XY)
          {
-            GDXTools.toGDX(tempRigidBodyTransform, selectedModel.transform);
+            GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getModelInstance().transform);
          }
          else
          {
-            GDXTools.toEuclid(selectedModel.transform, tempRigidBodyTransform);
+            GDXTools.toEuclid(selectedModel.getModelInstance().transform, tempRigidBodyTransform);
             tempRigidBodyTransform.prependTranslation(translation);
             tempRigidBodyTransform.prependPitchRotation(modelPitch);
             tempRigidBodyTransform.prependYawRotation(modelYaw);
             tempRigidBodyTransform.prependRollRotation(modelRoll);
             tempRigidBodyTransform.normalizeRotationPart();
-            GDXTools.toGDX(tempRigidBodyTransform, selectedModel.transform);
+            GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getModelInstance().transform);
          }
       }
    }
 
-   public void addAndSelectInstance(GDXModelInstance instance)
+   public void handleVREvents(GDXVRManager vrManager)
+   {
+      if (vrManager.isVREnabled() && !selectedObjectIndexes.isEmpty())
+      {
+         PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.RIGHT).getReferenceFrame();
+         tempFramePose.setToZero(controllerFrame);
+         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+         tempFramePose.get(tempRigidBodyTransform);
+         GDXTools.toGDX(tempRigidBodyTransform, environmentObjects.get(selectedObjectIndexes.stream().findFirst().get()).getModelInstance().transform);
+      }
+   }
+
+   public void addLargeCinderBlockRoughed()
+   {
+      addAndSelectInstance(new GDXLargeCinderBlockRoughed());
+   }
+
+   public void addAndSelectInstance(GDXEnvironmentObject environmentObject)
    {
       clearSelections();
-      instances.add(instance);
-      selections.add(instances.size() - 1);
+      environmentObjects.add(environmentObject);
+      selectedObjectIndexes.add(environmentObjects.size() - 1);
    }
 
-   public void addInstance(GDXModelInstance instance)
+   public void addInstance(GDXEnvironmentObject instance)
    {
-      instances.add(instance);
+      environmentObjects.add(instance);
    }
 
-   public ArrayList<GDXModelInstance> getInstances()
+   public ArrayList<GDXEnvironmentObject> getEnvironmentObjects()
    {
-      return instances;
+      return environmentObjects;
    }
 
    public void clear()
    {
-      instances.clear();
-      selections.clear();
+      environmentObjects.clear();
+      selectedObjectIndexes.clear();
       originalMaterials.clear();
    }
 

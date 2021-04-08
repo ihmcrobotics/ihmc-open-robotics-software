@@ -4,17 +4,17 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 
-public class GDXLargeCinderBlockRoughed extends GDXEnvironmentObject
+public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
 {
    @Override
    public Model getModel()
    {
-      return GDXModelLoader.loadG3DModel("LargeCinderBlockRough.g3dj");
+      return GDXModelLoader.loadG3DModel("MediumCinderBlockRough.g3dj");
    }
 
    @Override
-   public GDXLargeCinderBlockRoughed duplicate()
+   public GDXMediumCinderBlockRoughed duplicate()
    {
-      return new GDXLargeCinderBlockRoughed();
+      return new GDXMediumCinderBlockRoughed();
    }
 }
