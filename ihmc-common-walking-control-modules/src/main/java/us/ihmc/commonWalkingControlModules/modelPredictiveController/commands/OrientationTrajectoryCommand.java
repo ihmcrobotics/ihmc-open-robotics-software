@@ -25,6 +25,11 @@ public class OrientationTrajectoryCommand
       Arrays.fill(initialError.data, 0, 6, Double.NaN);
    }
 
+   public DMatrixRMaj getInitialError()
+   {
+      return initialError;
+   }
+
    public int getSegmentNumber()
    {
       return segmentNumber;
