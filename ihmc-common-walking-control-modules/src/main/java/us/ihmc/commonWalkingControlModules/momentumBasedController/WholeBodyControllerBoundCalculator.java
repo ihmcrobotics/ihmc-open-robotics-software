@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.momentumBasedController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -16,6 +18,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotics.kinematics.JointLimitData;
+import us.ihmc.robotics.math.DeadbandTools;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -29,16 +32,18 @@ public class WholeBodyControllerBoundCalculator
    private final DMatrixRMaj jointsRangeOfMotion;
    private final DMatrixRMaj jointLowerLimits;
    private final DMatrixRMaj jointUpperLimits;
-   private final HashMap<OneDoFJointBasics, JointLimitEnforcement> jointLimitTypes = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, JointLimitParameters> jointLimitParameters = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, JointLimitData> jointLimitData = new HashMap<>();
+   private final JointLimitEnforcement[] jointLimitTypes;
+   private final JointLimitParameters[] jointLimitParameters;
+   private final JointLimitData[] jointLimitData;
 
-   private final HashMap<OneDoFJointBasics, YoDouble> filterAlphas = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, YoDouble> velocityGains = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, AlphaFilteredYoVariable> filteredLowerLimits = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, AlphaFilteredYoVariable> filteredUpperLimits = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, YoDouble> lowerHardLimits = new HashMap<>();
-   private final HashMap<OneDoFJointBasics, YoDouble> upperHardLimits = new HashMap<>();
+   private final YoDouble[] filterAlphas;
+   private final YoDouble[] velocityDeadbandSizes;
+   private final YoDouble[] romMarginFractions;
+   private final YoDouble[] velocityGains;
+   private final AlphaFilteredYoVariable[] filteredLowerLimits;
+   private final AlphaFilteredYoVariable[] filteredUpperLimits;
+   private final YoDouble[] lowerHardLimits;
+   private final YoDouble[] upperHardLimits;
 
    private final YoBoolean areJointVelocityLimitsConsidered = new YoBoolean("areJointVelocityLimitsConsidered", registry);
 
@@ -59,11 +64,23 @@ public class WholeBodyControllerBoundCalculator
       jointLowerLimits = new DMatrixRMaj(numberOfDoFs, 1);
       jointUpperLimits = new DMatrixRMaj(numberOfDoFs, 1);
 
+      jointLimitTypes = new JointLimitEnforcement[numberOfDoFs];
+      jointLimitParameters = new JointLimitParameters[numberOfDoFs];
+      jointLimitData = new JointLimitData[numberOfDoFs];
+
+      filterAlphas = new YoDouble[numberOfDoFs];
+      velocityDeadbandSizes = new YoDouble[numberOfDoFs];
+      romMarginFractions = new YoDouble[numberOfDoFs];
+      velocityGains = new YoDouble[numberOfDoFs];
+      filteredLowerLimits = new AlphaFilteredYoVariable[numberOfDoFs];
+      filteredUpperLimits = new AlphaFilteredYoVariable[numberOfDoFs];
+      lowerHardLimits = new YoDouble[numberOfDoFs];
+      upperHardLimits = new YoDouble[numberOfDoFs];
+
       areJointVelocityLimitsConsidered.set(considerJointVelocityLimits);
 
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      for (OneDoFJointBasics joint : jointIndexHandler.getIndexedOneDoFJoints())
       {
-         OneDoFJointBasics joint = oneDoFJoints[i];
          int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
          double jointLimitLower = joint.getJointLimitLower();
          double jointLimitUpper = joint.getJointLimitUpper();
@@ -71,23 +88,28 @@ public class WholeBodyControllerBoundCalculator
          jointsRangeOfMotion.set(jointIndex, 0, jointLimitUpper - jointLimitLower);
          jointLowerLimits.set(jointIndex, 0, jointLimitLower);
          jointUpperLimits.set(jointIndex, 0, jointLimitUpper);
-         jointLimitTypes.put(joint, JointLimitEnforcement.DEFAULT);
-         jointLimitParameters.put(joint, new JointLimitParameters());
+         jointLimitTypes[jointIndex] = JointLimitEnforcement.DEFAULT;
+         jointLimitParameters[jointIndex] = new JointLimitParameters();
+         jointLimitData[jointIndex] = new JointLimitData();
 
          YoDouble filterAlpha = new YoDouble("joint_limit_filter_alpha_" + joint.getName(), parentRegistry);
+         YoDouble velocityDeadband = new YoDouble("joint_limit_velocity_deadband" + joint.getName(), parentRegistry);
+         YoDouble romMarginFraction = new YoDouble("joint_limit_rom_margin_fraction" + joint.getName(), parentRegistry);
          filterAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(Double.POSITIVE_INFINITY, controlDT));
          AlphaFilteredYoVariable filteredLowerLimit = new AlphaFilteredYoVariable("qdd_min_filter_" + joint.getName(), registry, filterAlpha);
          AlphaFilteredYoVariable filteredUpperLimit = new AlphaFilteredYoVariable("qdd_max_filter_" + joint.getName(), registry, filterAlpha);
          YoDouble hardLowerLimit = new YoDouble("qdd_min_hard_" + joint.getName(), registry);
          YoDouble hardUpperLimit = new YoDouble("qdd_max_hard_" + joint.getName(), registry);
-         filterAlphas.put(joint, filterAlpha);
-         filteredLowerLimits.put(joint, filteredLowerLimit);
-         filteredUpperLimits.put(joint, filteredUpperLimit);
-         lowerHardLimits.put(joint, hardLowerLimit);
-         upperHardLimits.put(joint, hardUpperLimit);
+         filterAlphas[jointIndex] = filterAlpha;
+         velocityDeadbandSizes[jointIndex] = velocityDeadband;
+         romMarginFractions[jointIndex] = romMarginFraction;
+         filteredLowerLimits[jointIndex] = filteredLowerLimit;
+         filteredUpperLimits[jointIndex] = filteredUpperLimit;
+         lowerHardLimits[jointIndex] = hardLowerLimit;
+         upperHardLimits[jointIndex] = hardUpperLimit;
 
          YoDouble velocityGain = new YoDouble("joint_limit_velocity_gain_" + joint.getName(), registry);
-         velocityGains.put(joint, velocityGain);
+         velocityGains[jointIndex] = velocityGain;
       }
 
       parentRegistry.addChild(registry);
@@ -109,13 +131,8 @@ public class WholeBodyControllerBoundCalculator
    {
       for (int commandJointIndex = 0; commandJointIndex < command.getNumberOfJoints(); commandJointIndex++)
       {
-         OneDoFJointBasics joint = command.getJoint(commandJointIndex);
-         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
-         double originalJointLimitLower = joint.getJointLimitLower();
-         double originalJointLimitUpper = joint.getJointLimitUpper();
-         double limitReduction = command.getJointLimitReductionFactor(commandJointIndex) * jointsRangeOfMotion.get(jointIndex, 0);
-         jointLowerLimits.set(jointIndex, 0, originalJointLimitLower + limitReduction);
-         jointUpperLimits.set(jointIndex, 0, originalJointLimitUpper - limitReduction);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(command.getJoint(commandJointIndex));
+         romMarginFractions[jointIndex].set(command.getJointLimitReductionFactor(commandJointIndex));
       }
    }
 
@@ -123,14 +140,16 @@ public class WholeBodyControllerBoundCalculator
    {
       for (int idx = 0; idx < command.getNumberOfJoints(); idx++)
       {
-         OneDoFJointBasics joint = command.getJoint(idx);
-         jointLimitTypes.put(joint, command.getJointLimitReductionFactor(idx));
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(command.getJoint(idx));
+         jointLimitTypes[jointIndex] = command.getJointLimitReductionFactor(idx);
          JointLimitParameters params = command.getJointLimitParameters(idx);
          if (params != null)
          {
-            jointLimitParameters.get(joint).set(params);
-            filterAlphas.get(joint).set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
-            velocityGains.get(joint).set(params.getVelocityControlGain());
+            jointLimitParameters[jointIndex].set(params);
+            filterAlphas[jointIndex].set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(params.getJointLimitFilterBreakFrequency(), controlDT));
+            velocityGains[jointIndex].set(params.getVelocityControlGain());
+            romMarginFractions[jointIndex].set(params.getRangeOfMotionMarginFraction());
+            velocityDeadbandSizes[jointIndex].set(params.getVelocityDeadbandSize());
          }
       }
    }
@@ -139,10 +158,10 @@ public class WholeBodyControllerBoundCalculator
    {
       for (int idx = 0; idx < command.getNumberOfJoints(); idx++)
       {
-         OneDoFJointBasics joint = command.getJoint(idx);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(command.getJoint(idx));
          JointLimitData data = command.getJointLimitData(idx);
          if (data != null)
-            jointLimitData.put(joint, data);
+            jointLimitData[jointIndex].set(data);
       }
    }
 
@@ -151,11 +170,11 @@ public class WholeBodyControllerBoundCalculator
       CommonOps_DDRM.fill(qDotMinToPack, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDotMaxToPack, Double.POSITIVE_INFINITY);
 
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      for (OneDoFJointBasics joint : oneDoFJoints)
       {
-         OneDoFJointBasics joint = oneDoFJoints[i];
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
 
-         switch (jointLimitTypes.get(joint))
+         switch (jointLimitTypes[jointIndex])
          {
             case DEFAULT:
                computeVelocityLimitDefault(joint, qDotMinToPack, qDotMaxToPack);
@@ -174,6 +193,10 @@ public class WholeBodyControllerBoundCalculator
 
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
+
+      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+      jointLimitUpper -= limitMargin;
+      jointLimitLower += limitMargin;
 
       double velocityLimitLower;
       double velocityLimitUpper;
@@ -211,11 +234,11 @@ public class WholeBodyControllerBoundCalculator
       CommonOps_DDRM.fill(qDDotMinToPack, Double.NEGATIVE_INFINITY);
       CommonOps_DDRM.fill(qDDotMaxToPack, Double.POSITIVE_INFINITY);
 
-      for (int i = 0; i < oneDoFJoints.length; i++)
+      for ( OneDoFJointBasics joint : oneDoFJoints)
       {
-         OneDoFJointBasics joint = oneDoFJoints[i];
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
 
-         switch (jointLimitTypes.get(joint))
+         switch (jointLimitTypes[jointIndex])
          {
             case DEFAULT:
                computeAccelerationLimitDefault(joint, absoluteMaximumJointAcceleration, qDDotMinToPack, qDDotMaxToPack);
@@ -238,6 +261,10 @@ public class WholeBodyControllerBoundCalculator
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
 
+      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+      jointLimitUpper -= limitMargin;
+      jointLimitLower += limitMargin;
+
       double qDDotMin = Double.NEGATIVE_INFINITY;
       double qDDotMax = Double.POSITIVE_INFINITY;
 
@@ -255,25 +282,26 @@ public class WholeBodyControllerBoundCalculator
          velocityLimitUpper = Double.POSITIVE_INFINITY;
       }
 
+      double brakeVelocity = DeadbandTools.applyDeadband(velocityDeadbandSizes[index].getDoubleValue(), joint.getQd());
       if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
       {
          double qDotMinFromFD = (jointLimitLower - joint.getQ()) / controlDT;
          double qDotMin = MathTools.clamp(qDotMinFromFD, velocityLimitLower, velocityLimitUpper);
 
-         qDDotMin = (qDotMin - joint.getQd()) / controlDT;
+         qDDotMin = 2.0 * (qDotMin - brakeVelocity) / controlDT;
          qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, 0.0);
          qDDotMinToPack.set(index, 0, qDDotMin);
-         lowerHardLimits.get(joint).set(qDDotMin);
+         lowerHardLimits[index].set(qDDotMin);
       }
       if (!Double.isInfinite(jointLimitUpper) || !Double.isInfinite(velocityLimitUpper))
       {
          double qDotMaxFromFD = (jointLimitUpper - joint.getQ()) / controlDT;
          double qDotMax = MathTools.clamp(qDotMaxFromFD, velocityLimitLower, velocityLimitUpper);
 
-         qDDotMax = (qDotMax - joint.getQd()) / controlDT;
+         qDDotMax = 2.0 * (qDotMax - brakeVelocity) / controlDT;
          qDDotMax = MathTools.clamp(qDDotMax, -0.0, absoluteMaximumJointAcceleration);
          qDDotMaxToPack.set(index, 0, qDDotMax);
-         upperHardLimits.get(joint).set(qDDotMax);
+         upperHardLimits[index].set(qDDotMax);
       }
    }
 
@@ -283,6 +311,10 @@ public class WholeBodyControllerBoundCalculator
       int index = jointIndexHandler.getOneDoFJointIndex(joint);
       double jointLimitLower = jointLowerLimits.get(index, 0);
       double jointLimitUpper = jointUpperLimits.get(index, 0);
+
+      double limitMargin = romMarginFractions[index].getDoubleValue() * (jointLimitUpper - jointLimitLower);
+      jointLimitUpper -= limitMargin;
+      jointLimitLower += limitMargin;
 
       double velocityLimitLower;
       double velocityLimitUpper;
@@ -301,11 +333,12 @@ public class WholeBodyControllerBoundCalculator
       double qDDotMin = -absoluteMaximumJointAcceleration;
       double qDDotMax = absoluteMaximumJointAcceleration;
 
-      JointLimitParameters params = jointLimitParameters.get(joint);
+      JointLimitParameters params = jointLimitParameters[index];
+      double brakeVelocity = DeadbandTools.applyDeadband(velocityDeadbandSizes[index].getDoubleValue(), joint.getQd());
       double slope = params.getMaxAbsJointVelocity() / Math.pow(params.getJointLimitDistanceForMaxVelocity(), 2.0);
 
       // --- do limiting here ---
-      double maxBreakAcceleration = 0.99 * absoluteMaximumJointAcceleration;
+      double maxBrakeAcceleration = 0.99 * absoluteMaximumJointAcceleration;
       if (!Double.isInfinite(jointLimitLower) || !Double.isInfinite(velocityLimitLower))
       {
          double distance = joint.getQ() - jointLimitLower;
@@ -313,8 +346,9 @@ public class WholeBodyControllerBoundCalculator
 
          double qDotMinFromFD = -Math.pow(distance, 2) * slope;
          double qDotMin = MathTools.clamp(qDotMinFromFD, velocityLimitLower, velocityLimitUpper);
-         qDDotMin = (qDotMin - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
-         qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, maxBreakAcceleration);
+
+         qDDotMin = (qDotMin - brakeVelocity) * velocityGains[index].getDoubleValue();
+         qDDotMin = MathTools.clamp(qDDotMin, -absoluteMaximumJointAcceleration, maxBrakeAcceleration);
       }
 
       if (!Double.isInfinite(jointLimitUpper) || !Double.isInfinite(velocityLimitUpper))
@@ -324,15 +358,16 @@ public class WholeBodyControllerBoundCalculator
 
          double qDotMaxFromFD = Math.pow(distance, 2) * slope;
          double qDotMax = MathTools.clamp(qDotMaxFromFD, velocityLimitLower, velocityLimitUpper);
-         qDDotMax = (qDotMax - joint.getQd()) * velocityGains.get(joint).getDoubleValue();
-         qDDotMax = MathTools.clamp(qDDotMax, -maxBreakAcceleration, absoluteMaximumJointAcceleration);
+
+         qDDotMax = (qDotMax - brakeVelocity) * velocityGains[index].getDoubleValue();
+         qDDotMax = MathTools.clamp(qDDotMax, -maxBrakeAcceleration, absoluteMaximumJointAcceleration);
       }
       // ---
 
-      filteredLowerLimits.get(joint).update(qDDotMin);
-      filteredUpperLimits.get(joint).update(qDDotMax);
-      qDDotMinToPack.set(index, 0, filteredLowerLimits.get(joint).getDoubleValue());
-      qDDotMaxToPack.set(index, 0, filteredUpperLimits.get(joint).getDoubleValue());
+      filteredLowerLimits[index].update(qDDotMin);
+      filteredUpperLimits[index].update(qDDotMax);
+      qDDotMinToPack.set(index, 0, filteredLowerLimits[index].getDoubleValue());
+      qDDotMaxToPack.set(index, 0, filteredUpperLimits[index].getDoubleValue());
    }
 
    public void enforceJointTorqueLimits(LowLevelOneDoFJointDesiredDataHolder jointDesiredOutputList)
@@ -340,10 +375,11 @@ public class WholeBodyControllerBoundCalculator
       for (OneDoFJointBasics joint : oneDoFJoints)
       {
          JointDesiredOutputBasics jointDesiredOutput = jointDesiredOutputList.getJointDesiredOutput(joint);
+         int jointIndex = jointIndexHandler.getOneDoFJointIndex(joint);
 
-         if (jointLimitData.containsKey(joint))
+         if (jointIndex < jointLimitData.length && jointLimitData[jointIndex] != null)
          {
-            JointLimitData jointLimitData = this.jointLimitData.get(joint);
+            JointLimitData jointLimitData = this.jointLimitData[jointIndex];
             enforceJointTorqueLimit(joint, jointDesiredOutput, jointLimitData);
          }
       }
