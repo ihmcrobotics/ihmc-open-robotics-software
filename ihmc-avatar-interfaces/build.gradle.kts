@@ -57,23 +57,7 @@ mainDependencies {
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 
-behaviorCleanRoomDependencies {
-   api(ihmc.sourceSetProject("main"))
-}
-
-behaviorFxUiDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api(ihmc.sourceSetProject("behavior-clean-room"))
-   api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
-   api("us.ihmc:ihmc-graphics-javafx:source")
-   api("us.ihmc:ihmc-graphics-jmonkeyengine:source")
-   api("us.ihmc:ihmc-path-planning-visualizers:source")
-   api("us.ihmc:robot-environment-awareness-visualizers:source")
-}
-
 testDependencies {
-   api(ihmc.sourceSetProject("behavior-clean-room"))
-   api(ihmc.sourceSetProject("behavior-fx-ui"))
    api(ihmc.sourceSetProject("visualizers"))
 
    api("us.ihmc:ihmc-robotics-toolkit-test:source")

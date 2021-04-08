@@ -34,7 +34,7 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements DRCROSPPSTi
    }
 
    @Override
-   public void subscribeROS1(RosNodeInterface ros1Node)
+   public void subscribeToROS1Topics(RosNodeInterface ros1Node)
    {
       ros1Node.attachPublisher("/clock", clockPubisher);
    }

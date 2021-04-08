@@ -552,7 +552,7 @@ public abstract class WalkingControllerParameters
 
    /**
     * Returns a list of joint that should use the more restrictive joint limit enforcement
-    * in the QP. If the list is not empty the method {@link #getJointLimitParametersForJointsWithRestictiveLimits()}
+    * in the QP. If the list is not empty the method {@link #getJointLimitParametersForJointsWithRestrictiveLimits(String)}
     * must be overwritten to define the limit parameters.
     */
    public String[] getJointsWithRestrictiveLimits()
@@ -564,7 +564,7 @@ public abstract class WalkingControllerParameters
     * Returns parameters for joint limits that will be used with the joints defined in
     * {@link #getJointsWithRestrictiveLimits()}.
     */
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
       return null;
    }

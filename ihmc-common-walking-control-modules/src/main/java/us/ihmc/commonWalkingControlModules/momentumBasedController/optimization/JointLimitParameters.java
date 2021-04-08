@@ -7,12 +7,17 @@ public class JointLimitParameters
    private double jointLimitFilterBreakFrequency;    // 1/s
    private double velocityControlGain;
 
+   private double rangeOfMotionMarginFraction;
+   private double velocityDeadbandSize;
+
    public JointLimitParameters()
    {
       maxAbsJointVelocity = Double.POSITIVE_INFINITY;
       jointLimitDistanceForMaxVelocity = 0.0;
       jointLimitFilterBreakFrequency = Double.POSITIVE_INFINITY;
       velocityControlGain = 0.0;
+      rangeOfMotionMarginFraction = 0.0;
+      velocityDeadbandSize = 0.0;
    }
 
    public double getMaxAbsJointVelocity()
@@ -55,12 +60,35 @@ public class JointLimitParameters
       this.velocityControlGain = velocityControlGain;
    }
 
+   public double getRangeOfMotionMarginFraction()
+   {
+      return rangeOfMotionMarginFraction;
+   }
+
+   public void setRangeOfMotionMarginFraction(double rangeOfMotionMarginFraction)
+   {
+      this.rangeOfMotionMarginFraction = rangeOfMotionMarginFraction;
+   }
+
+   public double getVelocityDeadbandSize()
+   {
+      return velocityDeadbandSize;
+   }
+
+   public void setVelocityDeadbandSize(double velocityDeadbandSize)
+   {
+      this.velocityDeadbandSize = velocityDeadbandSize;
+   }
+
+
    public void set(JointLimitParameters other)
    {
       maxAbsJointVelocity = other.maxAbsJointVelocity;
       jointLimitDistanceForMaxVelocity = other.jointLimitDistanceForMaxVelocity;
       jointLimitFilterBreakFrequency = other.jointLimitFilterBreakFrequency;
       velocityControlGain = other.velocityControlGain;
+      setRangeOfMotionMarginFraction(other.getRangeOfMotionMarginFraction());
+      setVelocityDeadbandSize(other.getVelocityDeadbandSize());
    }
 
    @Override
@@ -82,6 +110,10 @@ public class JointLimitParameters
             return false;
          if (velocityControlGain != other.velocityControlGain)
             return false;
+         if (rangeOfMotionMarginFraction != other.rangeOfMotionMarginFraction)
+            return false;
+         if (velocityDeadbandSize != other.velocityDeadbandSize)
+            return false;
          return true;
       }
       else
@@ -94,6 +126,7 @@ public class JointLimitParameters
    public String toString()
    {
       return getClass().getSimpleName() + ": qd max: " + maxAbsJointVelocity + ", joint limit distance for qd max: " + jointLimitDistanceForMaxVelocity
-            + ", joint limit filter break frequency: " + jointLimitFilterBreakFrequency + ", velocity control gain: " + velocityControlGain;
+            + ", joint limit filter break frequency: " + jointLimitFilterBreakFrequency + ", velocity control gain: " + velocityControlGain
+            + ", range of motion margin fraction: " + rangeOfMotionMarginFraction +  ", velocity deadband size: " + velocityDeadbandSize;
    }
 }

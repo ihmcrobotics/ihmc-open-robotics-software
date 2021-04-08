@@ -11,13 +11,8 @@ import com.badlogic.gdx.graphics.g3d.particles.ParticleShader;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
-import us.ihmc.log.LogTools;
-
-import com.badlogic.gdx.graphics.g3d.utils.MeshBuilder;
-
 
 public class GDXPointCloudRenderer implements RenderableProvider
 {
@@ -25,9 +20,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private static boolean POINT_SPRITES_ENABLED = false;
    private Renderable renderable;
    private float[] vertices;
-//   private MeshBuilder newMesh;
-   private short[] indices;
-//   private ShaderProgram shader_obj = new ShaderProgram("","");
 
    private final VertexAttributes vertexAttributes = new VertexAttributes(
          new VertexAttribute(VertexAttributes.Usage.Position, 3, ShaderProgram.POSITION_ATTRIBUTE),
@@ -40,7 +32,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
    private final int vertexSizeAndPositionOffset = (short) (vertexAttributes.findByUsage(SIZE_AND_ROTATION_USAGE).offset / 4);
 
    private RecyclingArrayList<Point3D32> pointsToRender;
-   private RecyclingArrayList<RecyclingArrayList<Point3D32>> Clusters;
    private Color color = Color.RED;
 
    public void create(int size)
@@ -51,17 +42,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
       renderable = new Renderable();
       renderable.meshPart.primitiveType = GL20.GL_POINTS;
       renderable.meshPart.offset = 0;
-      renderable.material = new Material(ColorAttribute.createDiffuse(color));
+      renderable.material = new Material(ColorAttribute.createDiffuse(Color.WHITE));
 
       vertices = new float[size * vertexSize];
-      indices = new short[size * vertexSize];
-//      newMesh = new MeshBuilder();
-//      newMesh.begin(vertexAttributes, GL20.GL_POINTS);
-
       if (renderable.meshPart.mesh != null)
          renderable.meshPart.mesh.dispose();
-      renderable.meshPart.mesh = new Mesh(true, size, 0, vertexAttributes);
-
+      renderable.meshPart.mesh = new Mesh(false, size, 0, vertexAttributes);
       ParticleShader.Config config = new ParticleShader.Config(ParticleShader.ParticleType.Point);
       renderable.shader = new ParticleShader(renderable, config);
 //      ((ParticleShader) renderable.shader).set(ShaderProgram.COLOR_ATTRIBUTE., Color.RED);
@@ -72,13 +58,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
    {
       this.color = color;
    }
-
-//   @Override
-//   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-//   {
-//      if (enabled)
-//         renderables.add(renderable);
-//   }
 
    public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
    {
@@ -98,80 +77,22 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 1] = point.getY32();
             vertices[offset + 2] = point.getZ32();
 
-            float c1 = Color.toFloatBits(255, 0, 0, 255);
-            LogTools.info(c1);
-            // color [0.0f - 1.0f]
-            vertices[offset + 3] = 0.5f; // red (not working yet)
-            vertices[offset + 4] = 0.6f; // blue
-            vertices[offset + 5] = 0.7f; // green
-            vertices[offset + 6] = 0.0f; // alpha
-
-
-            vertices[offset + 7] = 0.11f; // size
-            vertices[offset + 8] = 1.0f; // cosine [0-1]
-            vertices[offset + 9] = 0.0f; // sine [0-1]
-
-//            indices[i] = (short)i;
-         }
-
-         renderable.meshPart.size = pointsToRender.size();
-         renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
-         updateCluster();
-         updateClusterMesh(Clusters);
-
-         renderable.meshPart.update();
-//         newMesh.addMesh(vertices, indices);
-      }
-   }
-
-   public void updateCluster(){
-//      kdtree
-   }
-
-   public void updateClusterMesh(RecyclingArrayList<RecyclingArrayList<Point3D32>> clusters){
-
-   }
-
-   public void updateMesh(float alpha)
-   {
-      if (pointsToRender != null && !pointsToRender.isEmpty())
-      {
-         for (int i = 0; i < pointsToRender.size(); i++)
-         {
-            int offset = i * vertexSize;
-
-            Point3D32 point = pointsToRender.get(i);
-            vertices[offset] = point.getX32();
-            vertices[offset + 1] = point.getY32();
-            vertices[offset + 2] = point.getZ32();
-
             // color [0.0f - 1.0f]
             vertices[offset + 3] = 0.5f; // red (not working yet)
             vertices[offset + 4] = 0.7f; // blue
             vertices[offset + 5] = 0.5f; // green
-            vertices[offset + 6] = alpha; // alpha
+            vertices[offset + 6] = 0.0f; // alpha
 
-            vertices[offset + 7] = 0.11f; // size
+            vertices[offset + 7] = 0.01f; // size
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
-
          }
+
          renderable.meshPart.size = pointsToRender.size();
          renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
-//         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-//         renderable.meshPart.mesh.render(new ShaderProgram("",""),GL20.GL_TRIANGLE_STRIP, 0, 4);
-
          renderable.meshPart.update();
-
-//         MeshBuilder newMesh = new MeshBuilder();
-//         newMesh.addMesh(vertices, indices);
       }
    }
-
-//   public void render(){
-//      Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-//      renderable.meshPart.mesh.render(new ShaderProgram("",""),GL20.GL_TRIANGLE_STRIP, 0, 4);
-//   }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)

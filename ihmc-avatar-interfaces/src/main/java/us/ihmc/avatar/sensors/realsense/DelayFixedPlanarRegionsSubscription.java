@@ -86,14 +86,14 @@ public class DelayFixedPlanarRegionsSubscription
    public void subscribe(RosNodeInterface ros1Node)
    {
       this.ros1Node = ros1Node;
-      rosClockCalculator.subscribeROS1(ros1Node);
+      rosClockCalculator.subscribeToROS1Topics(ros1Node);
       subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
    }
 
    public void unsubscribe(RosNodeInterface ros1Node)
    {
       ros1Node.removeSubscriber(subscriber);
-      rosClockCalculator.unsubscribeROS1(ros1Node);
+      rosClockCalculator.unsubscribeFromROS1Topics(ros1Node);
    }
 
    private void acceptRobotConfigurationData(RobotConfigurationData robotConfigurationData)

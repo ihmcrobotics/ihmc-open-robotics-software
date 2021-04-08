@@ -10,11 +10,11 @@ public interface RobotROSClockCalculator
     *
     * @param rosMainNode
     */
-   default void subscribeROS1(RosNodeInterface rosMainNode)
+   default void subscribeToROS1Topics(RosNodeInterface rosMainNode)
    {
    }
 
-   default void unsubscribeROS1(RosNodeInterface ros1Node)
+   default void unsubscribeFromROS1Topics(RosNodeInterface ros1Node)
    {
    }
 
