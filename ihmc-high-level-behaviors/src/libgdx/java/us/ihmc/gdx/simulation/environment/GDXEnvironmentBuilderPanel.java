@@ -60,6 +60,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
    private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
    private final ArrayList<Path> reaDataSetPaths = new ArrayList<>();
+   private boolean loadedDatasetsOnce = false;
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -175,8 +176,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
        *
        */
 
-      if (ImGui.button(ImGuiTools.uniqueLabel(this, "Reload Paths")))
+      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex datasets"));
+      if (!loadedDatasetsOnce || reindexClicked)
       {
+         loadedDatasetsOnce = true;
          Path openRoboticsSoftwarePath = PathTools.findDirectoryInline("ihmc-open-robotics-software");
          pathPlanningDataSetPaths.clear();
          Path pathPlanningDataSetsPath = openRoboticsSoftwarePath.resolve("ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets");
