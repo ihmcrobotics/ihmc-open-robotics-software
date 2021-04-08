@@ -1,6 +1,5 @@
 package us.ihmc.gdx.simulation.environment;
 
-import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -18,7 +17,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.tools.GDXModelLoader;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXLargeCinderBlockRoughed;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -40,29 +41,21 @@ import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
 
 public class GDXEnvironmentBuilderPanel implements RenderableProvider
 {
-   private static String WINDOW_NAME = "Environment Builder";
-   private ImString loadString = new ImString("terrain.yml", 100);
-   private ImString saveString = new ImString("terrain.yml", 100);
+   private final static String WINDOW_NAME = "Environment Builder";
+   private final ImString loadString = new ImString("terrain.yml", 100);
+   private final ImString saveString = new ImString("terrain.yml", 100);
 
-   private GDXImGuiBasedUI baseUI;
    private GDXVRManager vrManager;
 
-   private Model labFloorModel;
-   private Model smallCinderBlockModel;
-   private Model mediumCinderBlockModel;
-   private Model largeCinderBlockModel;
-   private Model sensorL515Model;
-   private Model doorModel;
-   private Model doorFrameModel;
+   private final FramePose3D tempFramePose = new FramePose3D();
+   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
-   private FramePose3D tempFramePose = new FramePose3D();
-   private RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
+   private GDXEnvironmentObject sensorModelInstance;
 
-   private GDXModelInstance sensorModelInstance;
-
-   private GDXModelInstance modelBeingPlaced;
+   private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ImBoolean editModeChecked = new ImBoolean(false);
+   private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
 
    private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
    private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
@@ -70,25 +63,16 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      this.baseUI = baseUI;
       vrManager = baseUI.getVRManager();
 
       modelInput.setBaseUI(baseUI);
 
-      labFloorModel = GDXModelLoader.loadG3DModel("labFloor.g3dj");
-      smallCinderBlockModel = GDXModelLoader.loadG3DModel("SmallCinderBlockRough.g3dj");
-      mediumCinderBlockModel = GDXModelLoader.loadG3DModel("MediumCinderBlockRough.g3dj");
-      largeCinderBlockModel = GDXModelLoader.loadG3DModel("LargeCinderBlockRough.g3dj");
-      doorModel = GDXModelLoader.loadG3DModel("DoorOnly.g3dj");
-      doorFrameModel = GDXModelLoader.loadG3DModel("DoorFrame.g3dj");
-      sensorL515Model = GDXModelLoader.loadG3DModel("sensor_l515.g3dj");
-
       modelInput.create();
 
-      sensorModelInstance = new GDXModelInstance(sensorL515Model);
+      sensorModelInstance = new GDXL515SensorObject();
       modelInput.addInstance(sensorModelInstance);
 
-      if (vrManager.isVREnabled())
+      if (GDXVRManager.isVREnabled())
       {
          vrManager.getContext().addListener(new VRDeviceAdapter()
          {
@@ -98,7 +82,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
                LogTools.info("Pressed: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)
                {
-                  modelBeingPlaced = new GDXModelInstance(largeCinderBlockModel);
+                  modelBeingPlaced = new GDXLargeCinderBlockRoughed();
                   modelInput.addAndSelectInstance(modelBeingPlaced);
                }
                if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
@@ -122,7 +106,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
 
-   public void processImGui3DViewInput(ImGui3DViewInput input)
+   private void processImGui3DViewInput(ImGui3DViewInput input)
    {
       modelInput.updateSelections(input);
       modelInput.updateState(input);
@@ -131,13 +115,13 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void handleVREvents()
    {
-      if (vrManager.isVREnabled() && modelBeingPlaced != null)
+      if (GDXVRManager.isVREnabled() && modelBeingPlaced != null)
       {
          PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.RIGHT).getReferenceFrame();
          tempFramePose.setToZero(controllerFrame);
          tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.transform);
+         GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.getModelInstance().transform);
       }
    }
 
@@ -170,7 +154,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       if (ImGui.button("Place Cinder Block"))
       {
          modelInput.setState(GDXModelInput.State.PLACING_XY);
-         modelBeingPlaced = new GDXModelInstance(largeCinderBlockModel);
+         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
          modelInput.addAndSelectInstance(modelBeingPlaced);
       }
       if (pushed)
@@ -267,7 +251,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       return WINDOW_NAME;
    }
 
-   public GDXModelInstance getSensorModelInstance()
+   public GDXEnvironmentObject getSensorObject()
    {
       return sensorModelInstance;
    }
@@ -283,9 +267,9 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          }
       }
 
-      for (GDXModelInstance placedModel : modelInput.getInstances())
+      for (GDXEnvironmentObject placedModel : modelInput.getEnvironmentObjects())
       {
-         placedModel.getRenderables(renderables, pool);
+         placedModel.getModelInstance().getRenderables(renderables, pool);
       }
 
       for(ModelInstance controlAxis : modelInput.getControlAxes())
