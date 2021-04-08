@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
@@ -15,12 +16,19 @@ import java.util.List;
 
 public class OrientationTrajectoryConstructor
 {
-   private final OrientationDynamicsCalculator dynamicsCalculator;
-   private final SE3MPCIndexHandler indexHandler;
+   private static final double intermediateDt = 0.01;
 
-   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> AMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6)));
-   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> BMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 0)));
-   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> CMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1)));
+   private final OrientationDynamicsCalculator dynamicsCalculator;
+
+   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> AMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(
+         6,
+         6)));
+   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> BMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(
+         6,
+         0)));
+   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> CMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(
+         6,
+         1)));
 
    private final FrameVector3D desiredBodyAngularVelocityInBodyFrame = new FrameVector3D();
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
@@ -28,11 +36,11 @@ public class OrientationTrajectoryConstructor
 
    public OrientationTrajectoryConstructor(SE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
-      this.indexHandler = indexHandler;
       dynamicsCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravity);
    }
 
-   public void compute(Matrix3DReadOnly momentOfInertia,
+   public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
+                       Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        OrientationMPCTrajectoryHandler orientationTrajectoryHandler,
                        List<? extends List<MPCContactPlane>> contactPlaneHelpers,
@@ -45,7 +53,7 @@ public class OrientationTrajectoryConstructor
       CMatricesAllSegments.clear();
 
       double globalTime = 0.0;
-      for (int segmentNumber = 0; segmentNumber < indexHandler.getNumberOfSegments(); segmentNumber++)
+      for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
          RecyclingArrayList<DMatrixRMaj> AMatricesInSegment = AMatricesAllSegments.add();
          RecyclingArrayList<DMatrixRMaj> BMatricesInSegment = BMatricesAllSegments.add();
@@ -55,9 +63,12 @@ public class OrientationTrajectoryConstructor
          BMatricesInSegment.clear();
          CMatricesInSegment.clear();
 
-         for (int tick = 0; tick < indexHandler.getOrientationTicksInSegment(segmentNumber); tick++)
+         double segmentDuration = previewWindowContactSequence.get(segmentNumber).getTimeInterval().getDuration();
+         int ticksInSegment = computeTicksInSegment(segmentDuration);
+         double tickDuration = segmentDuration / ticksInSegment;
+
+         for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            double tickDuration = indexHandler.getOrientationTickDuration(segmentNumber);
             globalTime += tickDuration;
 
             linearTrajectoryHandler.compute(globalTime);
@@ -117,5 +128,13 @@ public class OrientationTrajectoryConstructor
             }
          }
       }
+   }
+
+   private static int computeTicksInSegment(double segmentDuration)
+   {
+      if (segmentDuration > 0.0 && segmentDuration < intermediateDt)
+         return 1;
+      else
+         return (int) Math.floor(segmentDuration / intermediateDt);
    }
 }
