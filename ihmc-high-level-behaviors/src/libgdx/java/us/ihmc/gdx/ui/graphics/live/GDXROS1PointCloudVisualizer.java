@@ -174,7 +174,8 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
          if (!pointsToRender.isEmpty())
          {
             //            pointCloudRenderer.setColor(color);
-            pointCloudRenderer.updateMesh(alpha);
+//            pointCloudRenderer.updateMesh(alpha);
+            pointCloudRenderer.updateMesh();
          }
       }
    }
