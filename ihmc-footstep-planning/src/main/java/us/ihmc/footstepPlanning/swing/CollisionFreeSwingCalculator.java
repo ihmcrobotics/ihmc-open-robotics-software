@@ -387,7 +387,7 @@ public class CollisionFreeSwingCalculator
             break;
       }
 
-      for (int i = 2; i < swingKnotPoints.size(); i++)
+      for (int i = 0; i < swingKnotPoints.size(); i++)
       {
          double waypointPercentage = positionTrajectoryGenerator.getWaypointTime(i);
          positionTrajectoryGenerator.compute(waypointPercentage);
