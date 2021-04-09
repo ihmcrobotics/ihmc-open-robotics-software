@@ -96,11 +96,11 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
             lastPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
 
          planarRegionPublisher.publish(lastPlanarRegionsListMessage);
-         if (isUsingLidar.get())
+         if (isUsingLidar != null && isUsingLidar.get())
             lidarRegionPublisher.publish(lastPlanarRegionsListMessage);
-         if (isUsingStereoVision.get())
+         if (isUsingStereoVision != null && isUsingStereoVision.get())
             stereoRegionPublisher.publish(lastPlanarRegionsListMessage);
-         if (isUsingDepthCloud.get())
+         if (isUsingDepthCloud != null && isUsingDepthCloud.get())
             depthRegionPublisher.publish(lastPlanarRegionsListMessage);
       }
 
