@@ -37,7 +37,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame-shape:0.16.2")
    api("us.ihmc:mecano:0.8.2")
    api("us.ihmc:mecano-yovariables:0.8.2")
-   api("us.ihmc:ihmc-yovariables:0.9.8")
+   api("us.ihmc:ihmc-yovariables:0.9.9")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
    api("us.ihmc:simulation-construction-set:0.21.7")
    api("us.ihmc:ihmc-graphics-description:0.19.3")

@@ -21,7 +21,7 @@ basicsDependencies {
    api("us.ihmc:euclid-frame:0.16.2")
    api("us.ihmc:euclid-frame-shape:0.16.2")
    api("us.ihmc:euclid-shape:0.16.2")
-   api("us.ihmc:ihmc-yovariables:0.9.8")
+   api("us.ihmc:ihmc-yovariables:0.9.9")
    api("us.ihmc:ihmc-robot-description:0.21.2")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
