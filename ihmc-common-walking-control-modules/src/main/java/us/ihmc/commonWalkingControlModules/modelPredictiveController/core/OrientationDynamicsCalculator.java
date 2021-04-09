@@ -64,12 +64,12 @@ public class OrientationDynamicsCalculator
    private final DMatrixRMaj Bd = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj Cd = new DMatrixRMaj(6, 1);
 
-   private final SE3MPCIndexHandler indexHandler;
+   private final LinearMPCIndexHandler indexHandler;
    private final double mass;
 
    private static final DMatrixRMaj identity3 = CommonOps_DDRM.identity(3);
 
-   public OrientationDynamicsCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationDynamicsCalculator(LinearMPCIndexHandler indexHandler, double mass, double gravity)
    {
       this.indexHandler = indexHandler;
       this.mass = mass;
