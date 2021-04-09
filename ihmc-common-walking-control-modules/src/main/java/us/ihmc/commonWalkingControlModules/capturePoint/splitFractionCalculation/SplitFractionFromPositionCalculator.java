@@ -113,15 +113,18 @@ public class SplitFractionFromPositionCalculator
          nextFootPose.set(stepPoseGetter.apply(stepNumber));
 
          // This step is a big step down.
-         double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
+         double stepHeight = nextFootPose.getZ() - stanceFootPose.getZ();
 
-         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
+         if (Math.abs(stepHeight) > splitFractionParameters.getStepHeightForLargeStepDown())
          {
             double alpha = Math.min(1.0,
-                                    (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
+                                    (Math.abs(stepHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
                                           splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
+
+            double splitFractionAtFullDepth = stepHeight < 0.0 ?
+                    splitFractionParameters.getTransferSplitFractionAtFullDepth() : 1.0-splitFractionParameters.getTransferSplitFractionAtFullDepth();
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
-                                                                                splitFractionParameters.getTransferSplitFractionAtFullDepth(),
+                                                                                splitFractionAtFullDepth,
                                                                                 alpha);
 
             if (stepNumber == numberOfStepsProvider.getAsInt() - 1)
@@ -129,8 +132,10 @@ public class SplitFractionFromPositionCalculator
                double currentSplitFraction = finalTransferSplitFractionProvider.getAsDouble();
                double currentWeightDistribution = finalTransferWeightDistributionProvider.getAsDouble();
 
+               double transferFinalWeightDistribution = stepHeight < 0.0 ?
+                       splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth() : 1.0-splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth();
                double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth(),
+                                                                                        transferFinalWeightDistribution,
                                                                                         alpha);
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
@@ -146,8 +151,10 @@ public class SplitFractionFromPositionCalculator
                double currentSplitFraction = transferSplitFractionProvider.applyAsDouble(stepNumber + 1);
                double currentWeightDistribution = transferWeightDistributionProvider.applyAsDouble(stepNumber + 1);
 
+               double splitFractionWeightDistributionAtFullDepth = stepHeight < 0.0 ?
+                     splitFractionParameters.getTransferWeightDistributionAtFullDepth() : 1.0-splitFractionParameters.getTransferWeightDistributionAtFullDepth();
                double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferWeightDistributionAtFullDepth(),
+                                                                                        splitFractionWeightDistributionAtFullDepth,
                                                                                         alpha);
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
