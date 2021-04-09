@@ -40,21 +40,13 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private boolean useExperimentalPhysicsEngine = false;
 
-   private boolean checkAnkleLimits = false;
-   private boolean isAnkleAtJointLimit = false;
-   private double anklePitchLowerLimit;
-   private double anklePitchUpperLimit;
    private double swingTime = 0.6;
-   private double transferTime = 0.35;
+   private double transferTime = 0.25;
 
    private int numberOfSteps = 1;
-   private boolean squareUp = true;
+   private boolean squareUpOnLastStep = true;
 
    public abstract double getStepLength();
-
-   public abstract double getMaxStepLength();
-
-   public abstract int getNumberOfSteps();
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -81,9 +73,10 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " after test.");
    }
 
-   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   public void changeWalkingParameters(double transferTime, double swingTime)
    {
-      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+      this.transferTime = transferTime;
+      this.swingTime = swingTime;
    }
 
    public void setNumberOfSteps(int numberOfSteps)
@@ -93,61 +86,25 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
 
    public void setTakeSquareUpStep(boolean squareUp)
    {
-      this.squareUp = squareUp;
+      this.squareUpOnLastStep = squareUp;
    }
 
-   public void setCheckAnkleLimits(boolean checkAnkleLimits)
+   public void testTakingStep(TestInfo testInfo, double stepHeight) throws SimulationExceededMaximumTimeException
    {
-      this.checkAnkleLimits = checkAnkleLimits;
+      testTakingStep(testInfo, stepHeight, 0.0);
    }
 
-   @Test
-   public void testShortSteps(TestInfo testInfo) throws SimulationExceededMaximumTimeException
-   {
-      FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
-      setupTest(testInfo, flatGround);
-
-      walkForward(getStepLength(), getNumberOfSteps(), 0.0);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
-   }
-
-   @Test
-   public void testToeOffWithDifferentStepLengths(TestInfo testInfo) throws SimulationExceededMaximumTimeException
-   {
-      int numberOfSteps = 3;
-      setupTest(testInfo, new FlatGroundEnvironment());
-
-      double initialXPosition = 0.0;
-      for(double stepLength = getStepLength(); stepLength <= getMaxStepLength(); stepLength += 0.25)
-      {
-
-         transferTime += 0.02;
-
-         // take steps
-         walkForward(stepLength, numberOfSteps, initialXPosition);
-         initialXPosition += numberOfSteps*stepLength;
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps*(transferTime+swingTime) + 3.0));
-      }
-   }
-
-   public void testToeOffTakingStep(TestInfo testInfo, double stepHeight) throws SimulationExceededMaximumTimeException
-   {
-      testToeOffTakingStep(testInfo, stepHeight, 0.0);
-   }
-
-   public void testToeOffTakingStep(TestInfo testInfo, double stepHeight, double offset) throws SimulationExceededMaximumTimeException
+   public void testTakingStep(TestInfo testInfo, double stepHeight, double initialStepYoffset) throws SimulationExceededMaximumTimeException
    {
       StepsEnvironment steps = new StepsEnvironment();
       double startYPosition = 0.0;
-      double width = 0.25;
+      double width = 0.6;
       double depth = 0.15;
 
-      createStepsEnvironment(steps, getStepLength(), startYPosition, width, depth, stepHeight, offset);
+      createStepsEnvironment(steps, getStepLength(), startYPosition, width, depth, stepHeight, initialStepYoffset);
       setupTest(testInfo, steps);
-      anklePitchLowerLimit = drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getJointLimitLower();
-      anklePitchUpperLimit = drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getJointLimitUpper();
 
-      walkForward(getStepLength(), numberOfSteps, 0.0, stepHeight);
+      walkForward(getStepLength(), numberOfSteps, stepHeight, initialStepYoffset);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
@@ -162,25 +119,20 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
-   private void createStepsEnvironment(StepsEnvironment stepsEnvironment, double stepLength, double startYPosition, double width, double depth, double stepHeight)
+   private void createStepsEnvironment(StepsEnvironment stepsEnvironment, double stepLength, double startYPosition, double width, double depth, double stepHeight, double firstStepYOffset)
    {
-      createStepsEnvironment(stepsEnvironment, stepLength, startYPosition, width, depth, stepHeight, 0.0);
-   }
+      if(firstStepYOffset != 0.0)
+      {
+         stepsEnvironment.addStep(0.0, firstStepYOffset - width, width, depth, stepHeight);
+      }
 
-   private void createStepsEnvironment(StepsEnvironment stepsEnvironment, double stepLength, double startYPosition, double width, double depth, double stepHeight, double stepYOffset)
-   {
       for(int i = 0; i < numberOfSteps; i++)
       {
-         stepsEnvironment.addStep((i+1)*stepLength, startYPosition + stepYOffset, width, depth, (i+1)*stepHeight);
+         stepsEnvironment.addStep((i+1)*stepLength, startYPosition, width, depth, (i+1)*stepHeight);
       }
    }
 
-   private void walkForward(double stepLength, int steps, double initialXPosition) throws SimulationExceededMaximumTimeException
-   {
-      walkForward(stepLength, steps, initialXPosition, 0.0);
-   }
-
-   private void walkForward(double stepLength, int steps, double initialXPosition, double stepHeight) throws SimulationExceededMaximumTimeException
+   private void walkForward(double stepLength, int steps, double stepHeight, double firstStepYOffset) throws SimulationExceededMaximumTimeException
    {
       double stepWidth = 0.14;
 
@@ -191,61 +143,43 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
       double footstepX, footstepY;
       for (int i = 1; i <= steps; i++)
       {
-         if(!squareUp && i == steps)
+         if(firstStepYOffset != 0.0)
+         {
+            robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+            footstepY = robotSide == RobotSide.LEFT ? (stepWidth+firstStepYOffset) : -stepWidth+firstStepYOffset;
+            FramePoint3D location = new FramePoint3D(pelvisFrame, 0.0, footstepY, stepHeight);
+            location.changeFrame(ReferenceFrame.getWorldFrame());
+            Quaternion orientation = new Quaternion();
+            FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
+            footsteps.getFootstepDataList().add().set(footstepData);
+         }
+
+         if(!squareUpOnLastStep && i == steps)
             break;
 
-         robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
-         footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
-         footstepX = stepLength * i + initialXPosition;
+         robotSide = robotSide.getOppositeSide();
+         footstepY = robotSide == RobotSide.LEFT ? stepWidth+firstStepYOffset : -stepWidth+firstStepYOffset;
+         footstepX = stepLength * i;
          FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
          location.changeFrame(ReferenceFrame.getWorldFrame());
          location.setZ(i*stepHeight);
-         Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+         Quaternion orientation = new Quaternion();
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
          footsteps.getFootstepDataList().add().set(footstepData);
       }
       // closing step
       robotSide = robotSide.getOppositeSide();
-      footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
-      footstepX = stepLength * steps + initialXPosition;
+      footstepY = robotSide == RobotSide.LEFT ? stepWidth+firstStepYOffset : -stepWidth+firstStepYOffset;
+      footstepX = stepLength * steps;
       FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
       location.changeFrame(ReferenceFrame.getWorldFrame());
       location.setZ(steps*stepHeight);
-      Quaternion orientation = new Quaternion(0.0, 0.0, 0.0, 1.0);
+      Quaternion orientation = new Quaternion();
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, location, orientation);
       footsteps.getFootstepDataList().add().set(footstepData);
 
       drcSimulationTestHelper.publishToController(footsteps);
-
-      // check ankle limits after each step at the time of touchdown
-      if(checkAnkleLimits)
-      {
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.9));
-         for(int numberOfSteps=0; numberOfSteps < steps; numberOfSteps++)
-         {
-            assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(transferTime + swingTime));
-            for (int smallStepSimulate = 0; smallStepSimulate < 4; smallStepSimulate++)
-            {
-               updateAnkleLimitStatus();
-               assertTrue((!isAnkleAtJointLimit) && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
-            }
-            assertTrue(!isAnkleAtJointLimit);
-         }
-      }
-      else
-      {
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps*1.5));
-      }
-   }
-
-   private void updateAnkleLimitStatus()
-   {
-      double leftAnklePitch =  drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.LEFT, LegJointName.ANKLE_PITCH).getQ();
-      double rightAnklePitch =  drcSimulationTestHelper.getControllerFullRobotModel().getLegJoint(RobotSide.RIGHT, LegJointName.ANKLE_PITCH).getQ();
-      isAnkleAtJointLimit |= MathTools.epsilonCompare(leftAnklePitch, anklePitchLowerLimit, Math.toRadians(1.0));
-      isAnkleAtJointLimit |= MathTools.epsilonCompare(leftAnklePitch, anklePitchUpperLimit, Math.toRadians(1.0));
-      isAnkleAtJointLimit |= MathTools.epsilonCompare(rightAnklePitch, anklePitchLowerLimit, Math.toRadians(1.0));
-      isAnkleAtJointLimit |= MathTools.epsilonCompare(rightAnklePitch, anklePitchUpperLimit, Math.toRadians(1.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(numberOfSteps*1.5));
    }
 
    private static class StepsEnvironment implements CommonAvatarEnvironmentInterface
@@ -268,6 +202,5 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
          return terrainObject;
       }
    }
-
 
 }
