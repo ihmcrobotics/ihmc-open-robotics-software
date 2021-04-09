@@ -46,7 +46,7 @@ public class OrientationTrajectoryInputCalculator
 
       if (segmentNumber == 0)
       {
-         CommonOps_DDRM.multAdd(command.getLastAMatrix(), command.getInitialError(), inputToPack.getTaskObjective());
+         CommonOps_DDRM.multAdd(command.getLastAMatrix(), command.getInitialOrientationError(), inputToPack.getTaskObjective());
       }
       else
       {
@@ -82,7 +82,7 @@ public class OrientationTrajectoryInputCalculator
 
       if (segmentNumber == 0)
       {
-         CommonOps_DDRM.multAdd(-1.0, command.getAMatrix(tick), command.getInitialError(), inputToPack.getTaskObjective());
+         CommonOps_DDRM.multAdd(-1.0, command.getAMatrix(tick), command.getInitialOrientationError(), inputToPack.getTaskObjective());
       }
       else
       {
