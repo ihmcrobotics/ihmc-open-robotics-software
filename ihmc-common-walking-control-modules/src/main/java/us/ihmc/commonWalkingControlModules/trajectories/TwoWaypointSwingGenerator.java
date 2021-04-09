@@ -49,6 +49,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble minSwingHeight;
    private final YoDouble maxSwingHeight;
    private final YoDouble defaultSwingHeight;
+   private final YoDouble customWaypointHeightThreshold;
 
    private final double[] waypointProportions = new double[2];
 
@@ -87,14 +88,14 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private boolean visualize = true;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight,
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double minimumHeightToKeepCustomWaypoint,
                                     YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, worldFrame, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, minimumHeightToKeepCustomWaypoint, worldFrame, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, ReferenceFrame trajectoryFrame,
-                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double minimumHeightToKeepCustomWaypoint,
+                                    ReferenceFrame trajectoryFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
@@ -120,6 +121,9 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
       this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
+
+      this.customWaypointHeightThreshold = new YoDouble(namePrefix + "CustomWaypointHeightThreshold", registry);
+      this.customWaypointHeightThreshold.set(minimumHeightToKeepCustomWaypoint);
 
       for (int i = 0; i < defaultNumberOfWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
@@ -205,12 +209,20 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       if (this.trajectoryType != TrajectoryType.CUSTOM)
          return;
 
+      initialPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      double initialPositionZ = initialPosition.getZ();
+      double firstWaypointMinHeight = initialPositionZ + customWaypointHeightThreshold.getDoubleValue();
+
       waypointPositions.clear();
       for (int i = 0; i < waypoints.size(); i++)
       {
-         FramePoint3D waypoint = waypointPositions.add();
-         waypoint.setIncludingFrame(waypoints.get(i));
-         waypoint.changeFrame(trajectoryFrame);
+         FramePoint3D waypoint = waypoints.get(i);
+         if (waypointPositions.isEmpty() && waypoint.getZ() < firstWaypointMinHeight)
+            continue;
+
+         FramePoint3D waypointToSet = waypointPositions.add();
+         waypointToSet.setIncludingFrame(waypoint);
+         waypointToSet.changeFrame(trajectoryFrame);
       }
    }
 

@@ -273,11 +273,12 @@ public class SimpleSwingState extends SimpleFootControlState
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double minimumHeightToKeepCustomWaypoint = walkingControllerParameters.getSteppingParameters().getMinimumHeightToKeepCustomWaypoint();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
       swingTrajectoryOptimizer = new TwoWaypointSwingGenerator(namePrefix, minSwingHeightFromStanceFoot, maxSwingHeightFromStanceFoot,
-                                                               defaultSwingHeightFromStanceFoot, registry, yoGraphicsListRegistry);
+                                                               defaultSwingHeightFromStanceFoot, minimumHeightToKeepCustomWaypoint, registry, yoGraphicsListRegistry);
 
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();
       swingTrajectoryOptimizer.enableStanceCollisionAvoidance(robotSide, oppositeSoleZUpFrame, minDistanceToStance);
