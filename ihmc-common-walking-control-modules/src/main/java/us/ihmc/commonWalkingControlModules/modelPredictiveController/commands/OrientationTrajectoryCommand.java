@@ -6,8 +6,10 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 import java.util.Arrays;
 
-public class OrientationTrajectoryCommand
+public class OrientationTrajectoryCommand implements MPCCommand<OrientationTrajectoryCommand>
 {
+   private int commandId = -1;
+
    private int segmentNumber = -1;
 
    private final RecyclingArrayList<DMatrixRMaj> AMatricesInSegment = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
@@ -15,6 +17,23 @@ public class OrientationTrajectoryCommand
    private final RecyclingArrayList<DMatrixRMaj> CMatricesInSegment = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
 
    private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
+
+   public MPCCommandType getCommandType()
+   {
+      return MPCCommandType.ORIENTATION_TRAJECTORY;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      this.commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
 
    public void reset()
    {
@@ -25,7 +44,7 @@ public class OrientationTrajectoryCommand
       Arrays.fill(initialError.data, 0, 6, Double.NaN);
    }
 
-   public DMatrixRMaj getInitialError()
+   public DMatrixRMaj getInitialOrientationError()
    {
       return initialError;
    }
@@ -103,5 +122,20 @@ public class OrientationTrajectoryCommand
    public DMatrixRMaj getLastCMatrix()
    {
       return CMatricesInSegment.getLast();
+   }
+
+   @Override
+   public void set(OrientationTrajectoryCommand other)
+   {
+      reset();
+      setCommandId(other.getCommandId());
+      setSegmentNumber(other.getSegmentNumber());
+      setInitialOrientationError(other.getInitialOrientationError());
+      for (int tick = 0; tick < other.getNumberOfTicksInSegment(); tick++)
+      {
+         addAMatrix().set(other.getAMatrix(tick));
+         addBMatrix().set(other.getBMatrix(tick));
+         addCMatrix().set(other.getCMatrix(tick));
+      }
    }
 }
