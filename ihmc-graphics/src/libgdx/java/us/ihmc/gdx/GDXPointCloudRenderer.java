@@ -94,6 +94,36 @@ public class GDXPointCloudRenderer implements RenderableProvider
       }
    }
 
+   public void updateMesh(float alpha)
+   {
+      if (pointsToRender != null && !pointsToRender.isEmpty())
+      {
+         for (int i = 0; i < pointsToRender.size(); i++)
+         {
+            int offset = i * vertexSize;
+
+            Point3D32 point = pointsToRender.get(i);
+            vertices[offset] = point.getX32();
+            vertices[offset + 1] = point.getY32();
+            vertices[offset + 2] = point.getZ32();
+
+            // color [0.0f - 1.0f]
+            vertices[offset + 3] = 0.5f; // red (not working yet)
+            vertices[offset + 4] = 0.7f; // blue
+            vertices[offset + 5] = 0.5f; // green
+            vertices[offset + 6] = alpha; // alpha
+
+            vertices[offset + 7] = 0.11f; // size
+            vertices[offset + 8] = 1.0f; // cosine [0-1]
+            vertices[offset + 9] = 0.0f; // sine [0-1]
+         }
+
+         renderable.meshPart.size = pointsToRender.size();
+         renderable.meshPart.mesh.setVertices(vertices, 0, pointsToRender.size() * vertexSize);
+         renderable.meshPart.update();
+      }
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
