@@ -46,7 +46,7 @@ public class SwingTrajectoryCalculator
 
    private final YoEnum<TrajectoryType> activeTrajectoryType;
 
-   private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole = new RecyclingArrayList<>(2, FramePoint3D.class);
+   private final RecyclingArrayList<FramePoint3D> positionWaypointsForSole = new RecyclingArrayList<>(Footstep.maxNumberOfSwingWaypoints, FramePoint3D.class);
    private final RecyclingArrayList<FrameSE3TrajectoryPoint> swingWaypoints = new RecyclingArrayList<>(Footstep.maxNumberOfSwingWaypoints,
                                                                                                        FrameSE3TrajectoryPoint.class);
 
