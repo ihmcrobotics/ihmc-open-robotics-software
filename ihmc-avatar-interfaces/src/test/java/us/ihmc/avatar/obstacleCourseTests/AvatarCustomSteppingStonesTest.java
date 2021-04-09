@@ -33,7 +33,6 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    static
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setRunMultiThreaded(false);
    }
 
