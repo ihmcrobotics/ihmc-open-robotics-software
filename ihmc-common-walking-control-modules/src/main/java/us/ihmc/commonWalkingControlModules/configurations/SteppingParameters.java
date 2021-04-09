@@ -53,6 +53,15 @@ public interface SteppingParameters extends FootstepParameters
    }
 
    /**
+    * Custom waypoint positions are precomputed externally. During execution the initial foot pose might be different than expected,
+    * so waypoints too close to the initial foot height will be discarded.
+    */
+   public default double getMinimumHeightToKeepCustomWaypoint()
+   {
+      return 0.04;
+   }
+
+   /**
     * Returns the maximum angle the foot can turn outwards in a step.
     */
    public abstract double getMaxAngleTurnOutwards();

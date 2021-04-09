@@ -139,7 +139,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                 steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(), this.registry,
+                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getMinimumHeightToKeepCustomWaypoint(),
+                                                                this.registry,
                                                                 graphicsListRegistry);
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
       maximumSwingHeight = steppingParameters.getMaxSwingHeightFromStanceFoot();
