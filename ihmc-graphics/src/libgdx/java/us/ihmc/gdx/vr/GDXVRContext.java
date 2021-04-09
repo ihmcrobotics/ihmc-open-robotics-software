@@ -314,8 +314,10 @@ public class GDXVRContext implements Disposable {
 	// offsets for translation and rotation from tracker to world space
 	private final Vector3 trackerSpaceOriginToWorldSpaceTranslationOffset = new Vector3();
 	private final Matrix4 trackerSpaceToWorldspaceRotationOffset = new Matrix4();
-	private final RigidBodyTransformReadOnly toZUpXForward = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(0.0)),
-	                                                                        new Point3D());
+	private final RigidBodyTransformReadOnly toZUpXForward = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0),
+	                                                                                                 Math.toRadians(90.0),
+	                                                                                                 Math.toRadians(0.0)),
+	                                                                                new Point3D());
 	private final RigidBodyTransformReadOnly toZForwardYUp;
 	{
 		RigidBodyTransform toXForwardZUpTemp = new RigidBodyTransform(toZUpXForward);

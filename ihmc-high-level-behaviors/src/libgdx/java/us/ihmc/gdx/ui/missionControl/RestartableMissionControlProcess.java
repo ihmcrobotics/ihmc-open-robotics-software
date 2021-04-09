@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.missionControl;
 import imgui.internal.ImGui;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -33,13 +34,13 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       ImGui.sameLine();
       if (started)
       {
-         if (ImGui.button("Restart###Restart" + getName()))
+         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Restart")))
          {
             stop();
             start();
          }
          ImGui.sameLine();
-         if (ImGui.button("Stop###Stop" + getName()))
+         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Stop")))
          {
             stop();
          }
@@ -54,7 +55,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
       }
       else
       {
-         if (ImGui.button("Start###Start" + getName()))
+         if (ImGui.button(ImGuiTools.uniqueLabel(getName(), "Start")))
          {
             start();
          }
