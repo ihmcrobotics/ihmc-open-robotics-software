@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.gdx.ui.graphics.live;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
@@ -37,7 +37,7 @@ import us.ihmc.gdx.ui.graphics.GDXBoxRenderer;
 
 import java.util.HashSet;
 
-public class BoxDemoModel2 implements RenderableProvider
+public class GDXROS1BoxVisualizer2 implements RenderableProvider
 {
    private final float boxSize = 1.0f;
 //   private final float distance = 5.0f;
@@ -91,9 +91,9 @@ public class BoxDemoModel2 implements RenderableProvider
    Color color = new Color(1, 1, 0, 1);
 
 
-   public BoxDemoModel2(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame,
-                        RigidBodyTransformReadOnly baseToSensorTransform)
-//   public BoxDemoModel2()
+   public GDXROS1BoxVisualizer2(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame,
+                                RigidBodyTransformReadOnly baseToSensorTransform)
+//   public GDXROS1BoxVisualizer2()
    {
       this.ros1Node = ros1Node;
       this.ros1BoxTopic = ros1BoxTopic;
