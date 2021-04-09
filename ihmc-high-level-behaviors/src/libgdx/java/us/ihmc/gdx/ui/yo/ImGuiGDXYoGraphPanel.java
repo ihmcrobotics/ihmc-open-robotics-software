@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.gdx.ui.yo;
 
 import imgui.internal.ImGui;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -22,6 +22,8 @@ public class ImGuiGDXYoGraphPanel
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private volatile boolean handshakeComplete = false;
    private YoVariableClient yoVariableClient;
+
+   private ArrayList<GDXYoGraphGroup> graphGroups = new ArrayList<>();
 
    public ImGuiGDXYoGraphPanel(String title, int bufferSize)
    {
