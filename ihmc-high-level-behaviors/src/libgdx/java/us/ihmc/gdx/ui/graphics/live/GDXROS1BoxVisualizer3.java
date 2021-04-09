@@ -81,6 +81,7 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
       for (GDXBoxMessage message : boxes.getBoxes())
       {
          boundingBox.setToZero(sensorFrame);
+
          // Be robust to incorrect incoming data
          double xMin = Math.min(message.getXMin(), message.getXMax());
          double yMin = Math.min(message.getYMin(), message.getYMax());
@@ -88,7 +89,8 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
          double xMax = Math.max(message.getXMin(), message.getXMax());
          double yMax = Math.max(message.getYMin(), message.getYMax());
          double zMax = Math.max(message.getZMin(), message.getZMax());
-         boundingBox.set(xMin, yMin, zMin, xMax, yMax, zMax);
+
+         boundingBox.set(-yMax, -xMax, zMin, -yMin, -xMin, zMax); // Flip to up + change orientation
          boundingBox.getCenterPoint(center);
          box.setIncludingFrame(sensorFrame,
                                center,
