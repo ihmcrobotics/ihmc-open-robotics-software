@@ -6,14 +6,14 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlan
 
 import java.util.List;
 
-public class OtherSE3MPCIndexHandler extends LinearMPCIndexHandler
+public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
 {
    public static final int variablesPerOrientationTick = 6;
 
    private int totalNumberOfOrientationTicks = 0;
    private final TIntArrayList orientationStartIndices = new TIntArrayList();
 
-   public OtherSE3MPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
+   public ImplicitSE3MPCIndexHandler(int numberOfBasisVectorsPerContactPoint)
    {
       super(numberOfBasisVectorsPerContactPoint);
    }

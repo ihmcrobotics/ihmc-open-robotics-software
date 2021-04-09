@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
@@ -37,15 +38,21 @@ public class OrientationTrajectoryConstructor
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
 
-   public OrientationTrajectoryConstructor(SE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationTrajectoryConstructor(LinearMPCIndexHandler indexHandler, double mass, double gravity)
    {
       dynamicsCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravity);
    }
 
+   public List<OrientationTrajectoryCommand> getOrientationTrajectoryCommands()
+   {
+      return commandsForSegments;
+   }
+
+   // FIXME need to start from the current time in state
    public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
-                       OrientationMPCTrajectoryHandler orientationTrajectoryHandler,
+                       ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler,
                        List<? extends List<MPCContactPlane>> contactPlaneHelpers,
                        DMatrixRMaj initialOrientationError,
                        double omega)
