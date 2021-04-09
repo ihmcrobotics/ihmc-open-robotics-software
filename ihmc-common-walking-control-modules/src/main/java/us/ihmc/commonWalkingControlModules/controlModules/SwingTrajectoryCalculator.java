@@ -253,11 +253,11 @@ public class SwingTrajectoryCalculator
 
    /**
     * Computes the trajectory waypoints. If the foot is executing a custom waypoint trajectory provided
-    * in the footstep (see {@link Footstep#swingTrajectory}, those are what are used. Otherwise, it
+    * in the footstep (see Footstep#trajectoryType}, those are what are used. Otherwise, it
     * uses the {@link TwoWaypointSwingGenerator} to optimize the waypoint times and velocities. If
     * these waypoint positions have been provided using the custom waypoints interface in the
-    * {@link Footstep} class ({@link Footstep#customPositionWaypoints}), these are used, otherwise they
-    * are computed using the default waypoint proportions or {@link Footstep#customWaypointProportions}
+    * {@link Footstep} class ({see Footstep#customPositionWaypoints}), these are used, otherwise they
+    * are computed using the default waypoint proportions or {see Footstep#customWaypointProportions}
     * if provided.
     *
     * @param initializeOptimizer set to true on the first initialization in the state, as it sets the
