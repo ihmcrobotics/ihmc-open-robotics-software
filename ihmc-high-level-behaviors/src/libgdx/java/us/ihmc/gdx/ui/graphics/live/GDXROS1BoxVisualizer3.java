@@ -83,14 +83,26 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
          boundingBox.setToZero(sensorFrame);
 
          // Be robust to incorrect incoming data
-         double xMin = Math.min(message.getXMin(), message.getXMax());
-         double yMin = Math.min(message.getYMin(), message.getYMax());
-         double zMin = Math.min(message.getZMin(), message.getZMax());
-         double xMax = Math.max(message.getXMin(), message.getXMax());
-         double yMax = Math.max(message.getYMin(), message.getYMax());
-         double zMax = Math.max(message.getZMin(), message.getZMax());
+//         double xMin = Math.min(message.getXMin(), message.getXMax());
+//         double yMin = Math.min(message.getYMin(), message.getYMax());
+//         double zMin = Math.min(message.getZMin(), message.getZMax());
+//         double xMax = Math.max(message.getXMin(), message.getXMax());
+//         double yMax = Math.max(message.getYMin(), message.getYMax());
+//         double zMax = Math.max(message.getZMin(), message.getZMax());
 
-         boundingBox.set(-yMax, -xMax, zMin, -yMin, -xMin, zMax); // Flip to up + change orientation
+         double xMin = message.getXMin();
+         double yMin = message.getYMin();
+         double zMin = message.getZMin();
+         double xMax = message.getXMax();
+         double yMax = message.getYMax();
+         double zMax = message.getZMax();
+
+         assert(xMin<xMax);
+         assert(yMin<yMax);
+         assert(zMin<zMax);
+
+//         boundingBox.set(-yMax, -xMax, zMin, -yMin, -xMin, zMax); // x and y Flip to up + xy plane mirrors
+         boundingBox.set(zMin,-xMax, -yMax, zMax, -xMin, -yMin); // from X: right Z: inward to x:inward Z: upward
          boundingBox.getCenterPoint(center);
          box.setIncludingFrame(sensorFrame,
                                center,
