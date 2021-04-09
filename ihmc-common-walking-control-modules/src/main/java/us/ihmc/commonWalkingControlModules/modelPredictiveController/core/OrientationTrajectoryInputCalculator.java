@@ -3,18 +3,17 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class OrientationTrajectoryInputCalculator
 {
-   private final OtherSE3MPCIndexHandler indexHandler;
+   private final ImplicitSE3MPCIndexHandler indexHandler;
 
    private static final DMatrixRMaj identity6 = CommonOps_DDRM.identity(6);
 
-   public OrientationTrajectoryInputCalculator(OtherSE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationTrajectoryInputCalculator(ImplicitSE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
       this.indexHandler = indexHandler;
    }
@@ -70,7 +69,7 @@ public class OrientationTrajectoryInputCalculator
       int segmentNumber = command.getSegmentNumber();
 
       int linearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
-      int orientationVariables = segmentNumber > 0 ? OtherSE3MPCIndexHandler.variablesPerOrientationTick : 0;
+      int orientationVariables = segmentNumber > 0 ? ImplicitSE3MPCIndexHandler.variablesPerOrientationTick : 0;
       inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       inputToPack.setNumberOfVariables(linearVariables + orientationVariables);
       inputToPack.reshape(6);
