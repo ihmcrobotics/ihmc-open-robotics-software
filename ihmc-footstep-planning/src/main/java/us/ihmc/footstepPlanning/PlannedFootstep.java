@@ -222,11 +222,11 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       for (int i = 0; i < swingTrajectory.size(); i++)
       {
          SE3TrajectoryPointMessage swingTrajectoryPointToSet = footstepDataMessage.getSwingTrajectory().add();
+         swingTrajectoryPointToSet.setTime(swingTrajectory.get(i).getTime());
          swingTrajectoryPointToSet.getPosition().set(swingTrajectory.get(i).getPosition());
          swingTrajectoryPointToSet.getOrientation().set(swingTrajectory.get(i).getOrientation());
          swingTrajectoryPointToSet.getLinearVelocity().set(swingTrajectory.get(i).getLinearVelocity());
          swingTrajectoryPointToSet.getAngularVelocity().set(swingTrajectory.get(i).getAngularVelocity());
-         swingTrajectoryPointToSet.setTime(swingTrajectory.get(i).getTime());
       }
 
       footstepDataMessage.setSwingDuration(swingDuration);
