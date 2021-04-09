@@ -11,6 +11,7 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
@@ -35,11 +36,15 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -60,12 +65,15 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
+   private boolean reviewingBodyPath = true;
+   private PlanarRegionsList latestRegions;
    private final Pose3D goalPose = new Pose3D();
    private final Point3D32 spherePosition = new Point3D32();
    private final Vector3D32 rotationVector = new Vector3D32();
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
 
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+   private final GDXBodyPathPlanGraphic bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic commandedFootstepsGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic startAndGoalFootstepsGraphic = new GDXFootstepPlanGraphic();
@@ -76,8 +84,6 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Footstep Planner Parameters (for Look and Step)"));
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Swing Planner Parameters (for Look and Step)"));
-
-   private boolean reviewingBodyPath = true;
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper behaviorHelper)
    {
@@ -92,9 +98,15 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       behaviorHelper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
       behaviorHelper.subscribeViaCallback(PlanarRegionsForUI, regions ->
       {
+         this.latestRegions = regions;
          ++numberOfSteppingRegionsReceived;
          if (regions != null)
             planarRegionsGraphic.generateMeshesAsync(regions);
+      });
+      behaviorHelper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
+      {
+         if (bodyPath != null)
+            bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
       });
       footstepPlanGraphic.setTransparency(0.2);
       behaviorHelper.subscribeViaCallback(FootstepPlanForUI, footsteps ->
@@ -162,14 +174,41 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       if (placingGoal && input.isWindowHovered())
       {
          Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
-         Point3D pickPointGround = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
-                                                                                           Axis3D.Z,
-                                                                                           pickRayInWorld.getPoint(),
-                                                                                           pickRayInWorld.getDirection());
+         PlanarRegionsList latestRegions = this.latestRegions;
+         Point3D pickPoint = null;
+         if (latestRegions != null)
+         {
+            for (PlanarRegion planarRegion : latestRegions.getPlanarRegionsAsList())
+            {
+               Point3D intersection = PlanarRegionTools.intersectRegionWithRay(planarRegion, pickRayInWorld.getPoint(), pickRayInWorld.getDirection());
+               if (intersection != null)
+               {
+                  if (pickPoint == null)
+                  {
+                     pickPoint = intersection;
+                  }
+                  else
+                  {
+                     if (intersection.distance(pickRayInWorld.getPoint()) < pickPoint.distance(pickRayInWorld.getPoint()))
+                     {
+                        pickPoint = intersection;
+                     }
+                  }
+               }
+            }
+         }
+
+         if (pickPoint == null)
+         {
+            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
+                                                                                              Axis3D.Z,
+                                                                                              pickRayInWorld.getPoint(),
+                                                                                              pickRayInWorld.getDirection());
+         }
 
          if (placingPosition)
          {
-            sphere.transform.setTranslation(pickPointGround.getX32(), pickPointGround.getY32(), pickPointGround.getZ32());
+            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), pickPoint.getZ32());
 
             if (ImGui.isMouseReleased(ImGuiMouseButton.Left))
             {
@@ -181,7 +220,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
             GDXTools.toEuclid(sphere.transform, spherePosition);
             GDXTools.toGDX(spherePosition, arrow.transform);
 
-            rotationVector.set(pickPointGround);
+            rotationVector.set(pickPoint);
             rotationVector.sub(spherePosition);
 
             double yaw = Math.atan2(rotationVector.getY(), rotationVector.getX());
@@ -218,6 +257,11 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          currentStatePlot.render(-1, "");
       }
 
+      if (ImGui.button("Select behavior"))
+      {
+         behaviorHelper.publish(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
+      }
+      ImGui.sameLine();
       if (ImGui.button("Reset"))
       {
          behaviorHelper.publish(RESET);
@@ -267,6 +311,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          commandedFootstepsGraphic.render();
          startAndGoalFootstepsGraphic.render();
          planarRegionsGraphic.render();
+         bodyPathPlanGraphic.render();
       }
    }
 
@@ -284,6 +329,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          commandedFootstepsGraphic.getRenderables(renderables, pool);
          startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
          planarRegionsGraphic.getRenderables(renderables, pool);
+         bodyPathPlanGraphic.getRenderables(renderables, pool);
       }
    }
 
@@ -293,6 +339,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       commandedFootstepsGraphic.destroy();
       startAndGoalFootstepsGraphic.destroy();
       planarRegionsGraphic.destroy();
+      bodyPathPlanGraphic.destroy();
    }
 
    public String getWindowName()
