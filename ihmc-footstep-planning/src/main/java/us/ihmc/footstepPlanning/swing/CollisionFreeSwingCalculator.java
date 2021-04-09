@@ -185,7 +185,7 @@ public class CollisionFreeSwingCalculator
             continue;
          }
 
-         footstep.setTrajectoryType(TrajectoryType.WAYPOINTS);
+         footstep.setTrajectoryType(TrajectoryType.CUSTOM);
          recomputeTrajectory(footstep);
       }
    }
@@ -387,25 +387,11 @@ public class CollisionFreeSwingCalculator
             break;
       }
 
-      for (int i = 0; i < swingKnotPoints.size(); i++)
+      for (int i = 2; i < swingKnotPoints.size(); i++)
       {
          double waypointPercentage = positionTrajectoryGenerator.getWaypointTime(i);
          positionTrajectoryGenerator.compute(waypointPercentage);
-         double waypointTime = footstep.getSwingDuration() * waypointPercentage;
-         FrameVector3D linearVelocity = new FrameVector3D(positionTrajectoryGenerator.getVelocity());
-         linearVelocity.scale(footstep.getSwingDuration());
-
-         FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint();
-         trajectoryPoint.setTime(waypointTime);
-         trajectoryPoint.setPosition(swingKnotPoints.get(i).getOptimizedWaypoint().getPosition());
-         trajectoryPoint.setLinearVelocity(linearVelocity);
-
-         // currently orientation isn't optimized, so compute via the normal interpolation
-         FrameQuaternion orientation = new FrameQuaternion();
-         orientation.interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), waypointPercentage);
-         trajectoryPoint.setOrientation(orientation);
-
-         footstep.getSwingTrajectory().add(trajectoryPoint);
+         footstep.getCustomWaypointPositions().add(new Point3D(swingKnotPoints.get(i).getOptimizedWaypoint().getPosition()));
       }
 
       if (visualize)
