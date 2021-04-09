@@ -50,6 +50,5 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey maxDisplacementLow = keys.addDoubleKey("Max displacement low", 0.007);
    public static final DoubleStoredPropertyKey maxDisplacementHigh = keys.addDoubleKey("Max displacement high", 0.1);
 
-   public static final IntegerStoredPropertyKey numberOfKnotPoints = keys.addIntegerKey("Number of knot points", 12);
    public static final DoubleStoredPropertyKey motionCorrelationAlpha = keys.addDoubleKey("Motion correlation alpha", 0.65);
 }
