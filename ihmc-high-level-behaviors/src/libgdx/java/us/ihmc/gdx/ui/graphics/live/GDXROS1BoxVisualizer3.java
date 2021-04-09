@@ -18,15 +18,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
-
-import java.util.ArrayList;
 
 public class GDXROS1BoxVisualizer3 implements RenderableProvider
 {
@@ -42,7 +39,6 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
    private final Point3D center = new Point3D();
    private final Quaternion zeroOrientation = new Quaternion();
    private final Point3D[] vertices = new Point3D[8];
-   private final ArrayList<Point3DReadOnly> orderedVerticesForDrawing;
 
    public GDXROS1BoxVisualizer3(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame, RigidBodyTransformReadOnly baseToSensorTransform)
    {
@@ -53,23 +49,6 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
       {
          vertices[i] = new Point3D();
       }
-      orderedVerticesForDrawing = new ArrayList<>();
-      orderedVerticesForDrawing.add(vertices[0]); // x+y+z+  draw top
-      orderedVerticesForDrawing.add(vertices[1]); // x-y-z+
-      orderedVerticesForDrawing.add(vertices[3]); // x-y+z+
-      orderedVerticesForDrawing.add(vertices[2]); // x+y-z+
-      orderedVerticesForDrawing.add(vertices[0]); // x+y+z+
-      orderedVerticesForDrawing.add(vertices[4]); // x+y+z-  go down
-      orderedVerticesForDrawing.add(vertices[5]); // x-y-z-  leg 1
-      orderedVerticesForDrawing.add(vertices[1]); // x-y-z+
-      orderedVerticesForDrawing.add(vertices[5]); // x-y-z-
-      orderedVerticesForDrawing.add(vertices[7]); // x-y+z-  leg 2
-      orderedVerticesForDrawing.add(vertices[3]); // x-y+z+
-      orderedVerticesForDrawing.add(vertices[7]); // x-y+z-
-      orderedVerticesForDrawing.add(vertices[6]); // x+y-z-  leg 3
-      orderedVerticesForDrawing.add(vertices[2]); // x+y-z+
-      orderedVerticesForDrawing.add(vertices[6]); // x+y-z-
-      orderedVerticesForDrawing.add(vertices[4]); // x+y+z-  leg 4
 
       ros1Node.attachSubscriber(ros1BoxTopic, new AbstractRosTopicSubscriber<GDXBoxesMessage>(GDXBoxesMessage._TYPE)
       {
@@ -120,7 +99,7 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
          box.changeFrame(ReferenceFrame.getWorldFrame());
          box.getVertices(vertices);
 
-         meshBuilder.addMultiLine(orderedVerticesForDrawing, lineWidth, Color.RED, false);
+         meshBuilder.addMultiLineBox(vertices, lineWidth, Color.RED);
       }
 
       toRender = () ->
