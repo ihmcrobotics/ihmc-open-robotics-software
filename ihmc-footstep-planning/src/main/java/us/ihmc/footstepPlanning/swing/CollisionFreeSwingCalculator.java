@@ -8,8 +8,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -25,8 +25,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -180,16 +182,25 @@ public class CollisionFreeSwingCalculator
          positionTrajectoryGenerator.reset();
          defaultWaypoints.clear();
 
+         /* keep the swing time a simple function of start/end */
+         double swingDuration = calculateSwingTime(startOfSwingPose.getPosition(), endOfSwingPose.getPosition());
+         footstep.setSwingDuration(swingDuration);
+
          initializeKnotPoints();
          optimizeKnotPoints();
-         recomputeTrajectory();
+
+         if (iterations.getIntegerValue() == 0)
+         {
+            continue;
+         }
+
+         footstep.setTrajectoryType(TrajectoryType.WAYPOINTS);
+         recomputeTrajectory(swingDuration);
 
          for (int j = 0; j < swingKnotPoints.size(); j++)
          {
-            footstep.getCustomWaypointPositions().add(new Point3D(swingKnotPoints.get(j).getCurrentWaypoint().getPosition()));
+            footstep.getCustomWaypointPositions().add(new Point3D(swingKnotPoints.get(j).getOptimizedWaypoint().getPosition()));
          }
-
-         footstep.setSwingDuration(calculateSwingTime(startOfSwingPose.getPosition(), endOfSwingPose.getPosition()));
       }
    }
 
@@ -368,17 +379,12 @@ public class CollisionFreeSwingCalculator
       return EuclidCoreTools.interpolate(valueLow, valueHigh, alpha);
    }
 
-   private void recomputeTrajectory()
+   private void recomputeTrajectory(double swingDuration)
    {
-      if (!visualize)
-      {
-         return;
-      }
-
       modifiedWaypoints.clear();
       for (int i = 0; i < swingKnotPoints.size(); i++)
       {
-         modifiedWaypoints.add(new FramePoint3D(swingKnotPoints.get(i).getCurrentWaypoint().getPosition()));
+         modifiedWaypoints.add(new FramePoint3D(swingKnotPoints.get(i).getOptimizedWaypoint().getPosition()));
       }
 
       positionTrajectoryGenerator.reset();
@@ -395,17 +401,38 @@ public class CollisionFreeSwingCalculator
             break;
       }
 
-      for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
+      for (int i = 0; i < swingKnotPoints.size(); i++)
       {
-         swingKnotPoints.get(i).updateGraphics(false);
+         double waypointPercentage = positionTrajectoryGenerator.getWaypointTime(i);
+         double waypointTime = swingDuration * waypointPercentage;
+         FrameVector3D linearVelocity = new FrameVector3D(positionTrajectoryGenerator.getVelocity());
+         linearVelocity.scale(swingDuration);
+
+         FrameSE3TrajectoryPoint trajectoryPoint = new FrameSE3TrajectoryPoint();
+         trajectoryPoint.setTime(waypointTime);
+         trajectoryPoint.setPosition(swingKnotPoints.get(i).getOptimizedWaypoint().getPosition());
+         trajectoryPoint.setLinearVelocity(linearVelocity);
+
+         // currently orientation isn't optimized, so compute via the normal interpolation
+         FrameQuaternion orientation = new FrameQuaternion();
+         orientation.interpolate(startOfSwingPose.getOrientation(), endOfSwingPose.getOrientation(), waypointPercentage);
+         trajectoryPoint.setOrientation(orientation);
       }
 
-      soleFrameGraphicPose.setToNaN();
-      footPolygonGraphic.update();
-
-      for (int i = 0; i < 10; i++)
+      if (visualize)
       {
-         tickAndUpdatable.tickAndUpdate();
+         for (int i = 0; i < swingPlannerParameters.getNumberOfKnotPoints(); i++)
+         {
+            swingKnotPoints.get(i).updateGraphics(false);
+         }
+
+         soleFrameGraphicPose.setToNaN();
+         footPolygonGraphic.update();
+
+         for (int i = 0; i < 10; i++)
+         {
+            tickAndUpdatable.tickAndUpdate();
+         }
       }
    }
 
@@ -445,7 +472,7 @@ public class CollisionFreeSwingCalculator
       tickAndUpdatable.tickAndUpdate();
    }
 
-   public double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
+   private double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
    {
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
 
