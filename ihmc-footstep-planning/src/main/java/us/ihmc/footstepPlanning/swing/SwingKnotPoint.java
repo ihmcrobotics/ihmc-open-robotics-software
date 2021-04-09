@@ -1,22 +1,16 @@
 package us.ihmc.footstepPlanning.swing;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -28,9 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
-import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
-import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
@@ -49,7 +40,7 @@ public class SwingKnotPoint
    private final double percentage;
 
    private final YoFramePose3D startingWaypoint;
-   private final YoFramePose3D currentWaypoint;
+   private final YoFramePose3D optimizedWaypoint;
    private final YoDouble waypointDisplacement;
    private final YoFramePoseUsingYawPitchRoll collisionBoxPose;
    private final YoDouble maxDisplacement;
@@ -78,8 +69,8 @@ public class SwingKnotPoint
       this.walkingControllerParameters = walkingControllerParameters;
       this.percentage = percentage;
 
-      startingWaypoint = new YoFramePose3D("waypoint_s" + index, ReferenceFrame.getWorldFrame(), registry);
-      currentWaypoint = new YoFramePose3D("waypoint_c" + index, ReferenceFrame.getWorldFrame(), registry);
+      startingWaypoint = new YoFramePose3D("waypoint_init" + index, ReferenceFrame.getWorldFrame(), registry);
+      optimizedWaypoint = new YoFramePose3D("waypoint_opt" + index, ReferenceFrame.getWorldFrame(), registry);
       waypointDisplacement = new YoDouble("waypoint_disp_" + index, registry);
 
       maxDisplacement = new YoDouble("maxDisplacement" + index, registry);
@@ -115,7 +106,7 @@ public class SwingKnotPoint
          adjustmentGraphic = new YoGraphicCoordinateSystem("waypointAdjGraphic" + index, waypointAdjustmentPose, 0.1);
          graphicsListRegistry.registerYoGraphic(waypointFrameListName, adjustmentGraphic);
 
-         YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index, currentWaypoint.getPosition(), 0.01, YoAppearance.Black());
+         YoGraphicPosition waypointPositionGraphic = new YoGraphicPosition("waypointGraphic" + index, optimizedWaypoint.getPosition(), 0.01, YoAppearance.Black());
          graphicsListRegistry.registerYoGraphic(waypointListName, waypointPositionGraphic);
       }
    }
@@ -186,7 +177,7 @@ public class SwingKnotPoint
    {
       this.startingWaypoint.set(startingWaypoint);
       waypointDisplacement.set(0.0);
-      currentWaypoint.set(startingWaypoint);
+      optimizedWaypoint.set(startingWaypoint);
       updateCollisionBox();
    }
 
@@ -196,9 +187,9 @@ public class SwingKnotPoint
       this.maxDisplacementSquared.set(maxDisplacement * maxDisplacement);
    }
 
-   public YoFramePose3D getCurrentWaypoint()
+   public YoFramePose3D getOptimizedWaypoint()
    {
-      return currentWaypoint;
+      return optimizedWaypoint;
    }
 
    private final FramePose3D tempPose = new FramePose3D();
@@ -212,8 +203,8 @@ public class SwingKnotPoint
          return;
       }
 
-      currentWaypoint.getPosition().set(tempPose.getPosition());
-      waypointDisplacement.set(startingWaypoint.getPosition().distance(currentWaypoint.getPosition()));
+      optimizedWaypoint.getPosition().set(tempPose.getPosition());
+      waypointDisplacement.set(startingWaypoint.getPosition().distance(optimizedWaypoint.getPosition()));
       updateCollisionBox();
    }
 
@@ -225,7 +216,7 @@ public class SwingKnotPoint
       int maxAttempts = 5;
       for (int i = 0; i < maxAttempts; i++)
       {
-         tempPose.set(currentWaypoint);
+         tempPose.set(optimizedWaypoint);
          tempVector.set(displacement);
          tempVector.scale(adjustmentScale);
          tempPose.getPosition().add(tempVector);
@@ -244,7 +235,7 @@ public class SwingKnotPoint
 
    private void updateCollisionBox()
    {
-      waypointPoseFrame.setPoseAndUpdate(currentWaypoint);
+      waypointPoseFrame.setPoseAndUpdate(optimizedWaypoint);
       boxCenterPose.setToZero(waypointPoseFrame);
       boxCenterPose.getPosition().set(boxCenterInSoleFrame);
       boxCenterPose.changeFrame(ReferenceFrame.getWorldFrame());
