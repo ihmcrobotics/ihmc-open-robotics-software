@@ -19,7 +19,7 @@ mainDependencies {
    api("commons-collections:commons-collections:3.2.1")
 
    api("us.ihmc:ihmc-yovariables:0.9.9")
-   api("us.ihmc:simulation-construction-set:0.21.7")
+   api("us.ihmc:simulation-construction-set:0.21.8")
    api("us.ihmc:ihmc-graphics-description:0.19.3")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
