@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
+import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
@@ -22,21 +24,14 @@ public class OrientationTrajectoryConstructor
 
    private final OrientationDynamicsCalculator dynamicsCalculator;
 
-   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> AMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(
-         6,
-         6)));
-   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> BMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(
-         6,
-         0)));
-   private final RecyclingArrayList<RecyclingArrayList<DMatrixRMaj>> CMatricesAllSegments = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(() -> new DMatrixRMaj(
-         6,
-         1)));
-
    private final RecyclingArrayList<OrientationTrajectoryCommand> commandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
 
    private final FrameVector3D desiredBodyAngularVelocityInBodyFrame = new FrameVector3D();
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
+
+   private final TIntArrayList ticksInSegment = new TIntArrayList();
+   private final TDoubleArrayList tickDurations = new TDoubleArrayList();
 
    public OrientationTrajectoryConstructor(LinearMPCIndexHandler indexHandler, double mass, double gravity)
    {
@@ -46,6 +41,16 @@ public class OrientationTrajectoryConstructor
    public List<OrientationTrajectoryCommand> getOrientationTrajectoryCommands()
    {
       return commandsForSegments;
+   }
+
+   public int getTicksInSegment(int segment)
+   {
+      return ticksInSegment.get(segment);
+   }
+
+   public double getTickDuration(int segment)
+   {
+      return tickDurations.get(segment);
    }
 
    // FIXME need to start from the current time in state
@@ -59,11 +64,9 @@ public class OrientationTrajectoryConstructor
    {
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
 
-      AMatricesAllSegments.clear();
-      BMatricesAllSegments.clear();
-      CMatricesAllSegments.clear();
-
       commandsForSegments.clear();
+      tickDurations.reset();
+      ticksInSegment.reset();
 
       double globalTime = 0.0;
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
@@ -77,6 +80,9 @@ public class OrientationTrajectoryConstructor
          double segmentDuration = previewWindowContactSequence.get(segmentNumber).getTimeInterval().getDuration();
          int ticksInSegment = computeTicksInSegment(segmentDuration);
          double tickDuration = segmentDuration / ticksInSegment;
+
+         this.ticksInSegment.add(ticksInSegment);
+         this.tickDurations.add(tickDuration);
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {

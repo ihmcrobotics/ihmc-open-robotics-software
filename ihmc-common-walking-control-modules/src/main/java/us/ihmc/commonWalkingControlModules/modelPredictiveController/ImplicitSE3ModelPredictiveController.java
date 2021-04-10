@@ -145,7 +145,11 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    {
       super.extractSolution(solutionCoefficients);
 
-      orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, currentTimeInState.getDoubleValue(), orientationPreviewWindowDuration.getDoubleValue());
+      orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients,
+                                                                   currentTimeInState.getDoubleValue(),
+                                                                   previewWindowCalculator.getPreviewWindowDuration(),
+                                                                   currentBodyAxisAngleError,
+                                                                   currentBodyAngularVelocityError);
    }
 
    @Override
@@ -162,7 +166,6 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    {
       linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
       FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
-
 
       angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
       currentBodyAxisAngleError.get(initialError);
