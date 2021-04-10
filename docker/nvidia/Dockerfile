@@ -1,7 +1,9 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia
+# Current version: 0.2
 # Refer to the NVIDIA/CUDA base image here: (https://hub.docker.com/r/nvidia/cuda/)
-FROM nvidia/cuda:11.2.0-base
+# This is currently based on Ubuntu 20.04 Focal Fossa.
+FROM nvidia/cuda:11.2.2-base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -19,11 +21,13 @@ RUN apt-get --quiet 2 --yes update  \
     curl \
     software-properties-common \
     python3-opencv \
-    > /dev/null
+    > /dev/null \
+ && rm -rf /var/lib/apt/lists/*
 
 # Install OpenGL libraries on nvidia-docker2
 # Reference: (https://medium.com/@benjamin.botto/opengl-and-cuda-applications-in-docker-af0eece000f1)
-RUN apt-get install --quiet 2 --yes \
+RUN apt-get --quiet 2 --yes update \
+ && apt-get --quiet 2 --yes install \
     opencl-headers \
     ocl-icd-opencl-dev \
     libgflags-dev \
@@ -35,10 +39,13 @@ RUN apt-get install --quiet 2 --yes \
     libx11-6 \
     freeglut3-dev \
     mesa-utils \
-    > /dev/null
+    > /dev/null \
+ && rm -rf /var/lib/apt/lists/*
 
 # Configure OpenCL (https://stackoverflow.com/questions/54243119/how-to-run-opencl-opengl-inside-a-docker-container)
-RUN apt-get install --quiet 2 --yes clinfo > /dev/null \
+RUN apt-get --quiet 2 --yes update \
+ && apt-get --quiet 2 --yes install clinfo > /dev/null \
+ && rm -rf /var/lib/apt/lists/* \
  && mkdir -p /etc/OpenCL/vendors \
  && echo "libnvidia-opencl.so.1" > /etc/OpenCL/vendors/nvidia.icd
 

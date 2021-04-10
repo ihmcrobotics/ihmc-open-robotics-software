@@ -5,7 +5,7 @@ Our images are hosted here: https://hub.docker.com/u/ihmcrobotics
 To build an image:
 
 ```
-docker/nvidia # docker build -t ihmcrobotics/nvidia:0.1 .
+docker/nvidia # docker build --tag ihmcrobotics/nvidia:0.1 .
 ```
 
 To push an image:
