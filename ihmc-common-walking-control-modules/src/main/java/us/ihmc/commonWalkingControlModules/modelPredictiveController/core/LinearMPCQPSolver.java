@@ -416,9 +416,13 @@ public class LinearMPCQPSolver
 
       // Compute: H += J^T W J
       MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
+      if (debug && MatrixTools.containsNaN(solverInput_H))
+         throw new RuntimeException("error");
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlock(-1.0, tempJtW, taskObjective, solverInput_f, offset, 0);
+      if (debug && MatrixTools.containsNaN(solverInput_f))
+         throw new RuntimeException("error");
    }
 
    public void addEqualityConstraint(DMatrix taskJacobian, DMatrix taskObjective)

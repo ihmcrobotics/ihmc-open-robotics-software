@@ -22,7 +22,7 @@ public class OrientationTrajectoryConstructor
 
    private final RecyclingArrayList<OrientationTrajectoryCommand> commandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
 
-   private final FrameVector3D desiredBodyAngularVelocityInBodyFrame = new FrameVector3D();
+   private final FrameVector3D referenceBodyAngularVelocityInBodyFrame = new FrameVector3D();
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
 
@@ -59,7 +59,7 @@ public class OrientationTrajectoryConstructor
 
       commandsForSegments.clear();
 
-      double globalTime = 0.0;
+      double segmentGlobalStartTime = 0.0;
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
          OrientationTrajectoryCommand command = commandsForSegments.add();
@@ -70,21 +70,24 @@ public class OrientationTrajectoryConstructor
 
          int ticksInSegment = indexHandler.getTicksInSegment(segmentNumber);
          double tickDuration = indexHandler.getTickDuration(segmentNumber);
+         double timeInSegment = 0;
 
          command.setAngleErrorMinimizationWeight(tickDuration * orientationAngleTrackingWeight.getValue());
          command.setVelocityErrorMinimizationWeight(tickDuration * orientationVelocityTrackingWeight.getValue());
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            globalTime += tickDuration;
+            segmentGlobalStartTime += tickDuration;
+            timeInSegment += tickDuration;
 
-            linearTrajectoryHandler.compute(globalTime);
-            orientationTrajectoryHandler.compute(globalTime);
+            linearTrajectoryHandler.compute(segmentGlobalStartTime);
+            // TODO make this work in the correct time frame
+            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(segmentGlobalStartTime);
 
-            FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview();
+            FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
             // angular velocity in body frame
-            desiredBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
-            desiredOrientation.transform(desiredBodyAngularVelocityInBodyFrame);
+            referenceBodyAngularVelocityInBodyFrame.set(orientationTrajectoryHandler.getReferenceBodyVelocity());
+            referenceOrientation.transform(referenceBodyAngularVelocityInBodyFrame);
 
             if (orientationTrajectoryHandler.hasInternalAngularMomentum())
             {
@@ -103,12 +106,12 @@ public class OrientationTrajectoryConstructor
             dynamicsCalculator.compute(segmentNumber,
                                        linearTrajectoryHandler.getDesiredCoMPosition(),
                                        linearTrajectoryHandler.getDesiredCoMAcceleration(),
-                                       desiredOrientation,
-                                       desiredBodyAngularVelocityInBodyFrame,
+                                       referenceOrientation,
+                                       referenceBodyAngularVelocityInBodyFrame,
                                        desiredNetAngularMomentumRate,
                                        desiredInternalAngularMomentumRate,
                                        contactPlaneHelpers.get(segmentNumber),
-                                       globalTime,
+                                       timeInSegment,
                                        tickDuration,
                                        omega);
 

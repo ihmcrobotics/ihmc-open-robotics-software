@@ -1,12 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
@@ -42,10 +38,10 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    protected final ImplicitSE3MPCIndexHandler indexHandler;
 
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
-   private final FrameOrientation3DBasics desiredBodyOrientationFeedForward = new FrameQuaternion(worldFrame);
+   private final FrameOrientation3DBasics referenceBodyOrientation = new FrameQuaternion(worldFrame);
 
    private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
-   private final FrameVector3DBasics desiredBodyAngularVelocityFeedForward = new FrameVector3D(worldFrame);
+   private final FrameVector3DBasics referenceBodyAngularVelocity = new FrameVector3D(worldFrame);
 
    private final FrameVector3DBasics desiredBodyAngularAcceleration = new FrameVector3D(worldFrame);
 
@@ -137,7 +133,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       super.solveForTrajectoryOutsidePreviewWindow(contactSequence);
 
       orientationTrajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
-      orientationTrajectoryHandler.computeDesiredTrajectory(currentTimeInState.getDoubleValue());
+      orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(currentTimeInState.getDoubleValue());
       orientationTrajectoryHandler.computeOutsidePreview(orientationPreviewWindowDuration.getDoubleValue() + currentTimeInState.getDoubleValue());
    }
 
@@ -159,6 +155,8 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients,
                                                                    currentTimeInState.getDoubleValue(),
                                                                    previewWindowCalculator.getPreviewWindowDuration(),
+                                                                   currentBodyOrientation,
+                                                                   currentBodyAngularVelocity,
                                                                    currentBodyAxisAngleError,
                                                                    currentBodyAngularVelocityError);
    }
@@ -201,7 +199,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    @Override
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+//      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
    }
 
    protected void updateCoMTrajectoryViewer()
@@ -254,12 +252,11 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       vrpPositionToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredVRPPosition());
       vrpVelocityToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredVRPVelocity());
 
+      referenceBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getReferenceBodyOrientation());
+      referenceBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getReferenceBodyVelocity());
+
       desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
-      desiredBodyOrientationFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview());
-
       desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
-      desiredBodyAngularVelocityFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
-
       desiredBodyAngularAcceleration.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularAcceleration());
 
       desiredWrench.setMatchingFrame(wrenchTrajectoryHandler.getDesiredWrench());
@@ -296,24 +293,24 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       return desiredBodyOrientation;
    }
 
-   public FrameOrientation3DReadOnly getDesiredFeedForwardBodyOrientation()
-   {
-      return desiredBodyOrientationFeedForward;
-   }
-
    public FrameVector3DReadOnly getDesiredBodyAngularVelocitySolution()
    {
       return desiredBodyAngularVelocity;
    }
 
-   public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
-   {
-      return desiredBodyAngularVelocityFeedForward;
-   }
-
    public FrameVector3DReadOnly getDesiredBodyAngularAccelerationSolution()
    {
       return desiredBodyAngularAcceleration;
+   }
+
+   public FrameOrientation3DReadOnly getReferenceBodyOrientation()
+   {
+      return referenceBodyOrientation;
+   }
+
+   public FrameVector3DReadOnly getReferenceBodyAngularVelocity()
+   {
+      return referenceBodyAngularVelocity;
    }
 
    public WrenchReadOnly getDesiredWrench()
