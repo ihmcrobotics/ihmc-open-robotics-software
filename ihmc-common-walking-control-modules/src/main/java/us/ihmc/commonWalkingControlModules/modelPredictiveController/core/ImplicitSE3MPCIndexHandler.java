@@ -69,7 +69,7 @@ public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
       return totalNumberOfOrientationTicks;
    }
 
-   public int getOrientationStartIndices(int segment)
+   public int getOrientationStartIndex(int segment)
    {
       return orientationStartIndices.get(segment);
    }

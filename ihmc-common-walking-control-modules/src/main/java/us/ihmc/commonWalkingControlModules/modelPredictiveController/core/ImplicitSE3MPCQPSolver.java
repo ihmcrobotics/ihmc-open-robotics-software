@@ -84,7 +84,7 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
 
       for (int segmentId = 1; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
-         int startVar = indexHandler.getOrientationStartIndices(segmentId);
+         int startVar = indexHandler.getOrientationStartIndex(segmentId);
 
 
          for (int var = startVar; var < startVar + 3; var++)
@@ -104,7 +104,7 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
 
       for (int segmentId = 1; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
-         int startVar = indexHandler.getOrientationStartIndices(segmentId);
+         int startVar = indexHandler.getOrientationStartIndex(segmentId);
 
          for (int var = startVar; var < startVar + 3; var++)
          {
