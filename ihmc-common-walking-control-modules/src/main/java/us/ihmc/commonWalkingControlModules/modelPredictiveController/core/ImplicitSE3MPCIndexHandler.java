@@ -25,7 +25,7 @@ public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
    /**
     * Computes all the index values from the contact sequence directly.
     */
-   public void initialize(List<ContactPlaneProvider> previewWindowContactSequence)
+   public void initialize(List<ContactPlaneProvider> previewWindowContactSequence, double currentTimeInState)
    {
       super.initialize(previewWindowContactSequence);
 
@@ -39,6 +39,8 @@ public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
          double segmentDuration = previewWindowContactSequence.get(segmentNumber).getTimeInterval().getDuration();
+         if (segmentNumber == 0)
+            segmentDuration -= (currentTimeInState - previewWindowContactSequence.get(segmentNumber).getTimeInterval().getStartTime());
          int ticksInSegment = computeTicksInSegment(segmentDuration);
          double tickDuration = segmentDuration / ticksInSegment;
 

@@ -258,7 +258,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
          internalAngularMomentumTrajectory.compute(timeInPhase);
    }
 
-   public void computeOutsidePreview(double timeInPhase)
+   public void computeReferenceValue(double timeInPhase)
    {
       referenceOrientationCalculator.compute(timeInPhase);
    }

@@ -29,7 +29,7 @@ import java.util.List;
 public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
+   private static final double defaultOrientationAngleTrackingWeight = 1.0;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private final double gravityZ;
@@ -124,7 +124,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    protected void initializeIndexHandler()
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
-      indexHandler.initialize(planningWindow);
+      indexHandler.initialize(planningWindow, currentTimeInState.getDoubleValue());
    }
 
    @Override
@@ -134,7 +134,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
       orientationTrajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
       orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(currentTimeInState.getDoubleValue());
-      orientationTrajectoryHandler.computeOutsidePreview(orientationPreviewWindowDuration.getDoubleValue() + currentTimeInState.getDoubleValue());
+      orientationTrajectoryHandler.computeReferenceValue(orientationPreviewWindowDuration.getDoubleValue() + currentTimeInState.getDoubleValue());
    }
 
 
@@ -143,8 +143,8 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    {
       super.setTerminalConditions();
 
-      orientationAtEndOfWindow.set(orientationTrajectoryHandler.getDesiredBodyOrientation());
-      angularVelocityAtEndOfWindow.set(orientationTrajectoryHandler.getDesiredAngularVelocity());
+      orientationAtEndOfWindow.set(orientationTrajectoryHandler.getReferenceBodyOrientation());
+      angularVelocityAtEndOfWindow.set(orientationTrajectoryHandler.getReferenceBodyVelocity());
    }
 
    @Override
@@ -174,17 +174,18 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private void computeOrientationObjectives()
    {
       linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
-      FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
+      orientationTrajectoryHandler.computeReferenceValue(currentTimeInState.getDoubleValue());
+      FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
 
-      angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
+      angleTools.computeRotationError(referenceOrientation, currentBodyOrientation, currentBodyAxisAngleError);
       currentBodyAxisAngleError.get(initialError);
 
-      currentBodyAngularVelocityError.sub(currentBodyAngularVelocity, orientationTrajectoryHandler.getDesiredAngularVelocity());
-      desiredOrientation.inverseTransform(currentBodyAngularVelocityError);
+      currentBodyAngularVelocityError.sub(currentBodyAngularVelocity, orientationTrajectoryHandler.getReferenceBodyVelocity());
+      referenceOrientation.inverseTransform(currentBodyAngularVelocityError);
       currentBodyAngularVelocityError.get(3, initialError);
 
-
-      orientationTrajectoryConstructor.compute(previewWindowCalculator.getPlanningWindow(),
+      orientationTrajectoryConstructor.compute(currentTimeInState.getDoubleValue(),
+                                               previewWindowCalculator.getPlanningWindow(),
                                                momentOfInertia,
                                                linearTrajectoryHandler,
                                                orientationTrajectoryHandler,
