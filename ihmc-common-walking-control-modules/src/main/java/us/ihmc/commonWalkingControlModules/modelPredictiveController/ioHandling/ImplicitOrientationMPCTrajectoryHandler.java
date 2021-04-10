@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ImplicitSE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ImplicitSE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
@@ -41,7 +42,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
    private final RecyclingArrayList<FrameVector3DBasics> desiredAngularVelocity = new RecyclingArrayList<>(FrameVector3D::new);
 
    private final RecyclingArrayList<FrameQuaternionBasics> orientationSolution = new RecyclingArrayList<>(FrameQuaternion::new);
-   private final RecyclingArrayList<FrameVector3DBasics> angularVelocitySolution = new RecyclingArrayList<>(FrameVector3D::new);
+   private final RecyclingArrayList<FrameVector3DBasics> angularVelocityInBodyFrameErrorSolution = new RecyclingArrayList<>(FrameVector3D::new);
 
    private final MultipleWaypointsOrientationTrajectoryGenerator bodyOrientationTrajectory;
 
@@ -100,7 +101,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
       clearTrajectory();
 
       orientationSolution.clear();
-      angularVelocitySolution.clear();
+      angularVelocityInBodyFrameErrorSolution.clear();
 
       int globalTick = 0;
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
@@ -117,11 +118,10 @@ public class ImplicitOrientationMPCTrajectoryHandler
             orientation.set(desiredOrientation.get(globalTick));
             orientation.append(axisAngleErrorSolutions.get(globalTick));
 
-            FrameVector3DBasics angularVelocity = angularVelocitySolution.add();
+            FrameVector3DBasics angularVelocity = angularVelocityInBodyFrameErrorSolution.add();
             angularVelocity.set(angularVelocityErrorSolutions.get(globalTick));
 
-            // TODO is this the right direction?
-            orientation.transform(angularVelocity);
+            orientation.inverseTransform(angularVelocity);
             angularVelocity.add(desiredAngularVelocity.get(globalTick));
 
             bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
@@ -160,9 +160,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
                                     1,
                                     1.0);
 
-         int tickStart = segment > 0 ? 1 : 0;
-
-         for (int tick = tickStart; tick < command.getNumberOfTicksInSegment(); tick++)
+         for (int tick = 0; tick < command.getNumberOfTicksInSegment(); tick++)
          {
             valueAtTick.set(command.getCMatrix(tick));
             CommonOps_DDRM.multAdd(command.getAMatrix(tick), errorAtStartOfState, valueAtTick);

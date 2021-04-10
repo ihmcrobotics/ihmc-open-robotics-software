@@ -13,7 +13,7 @@ public class OrientationTrajectoryInputCalculator
 
    private static final DMatrixRMaj identity6 = CommonOps_DDRM.identity(6);
 
-   public OrientationTrajectoryInputCalculator(ImplicitSE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationTrajectoryInputCalculator(ImplicitSE3MPCIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
    }
@@ -64,6 +64,7 @@ public class OrientationTrajectoryInputCalculator
       return true;
    }
 
+   private final DMatrixRMaj orientationWeight = new DMatrixRMaj(6, 6);
    public boolean computeErrorMinimizationCommand(int tick, QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
    {
       int segmentNumber = command.getSegmentNumber();
@@ -76,6 +77,13 @@ public class OrientationTrajectoryInputCalculator
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
+      inputToPack.setUseWeightScalar(false);
+      for (int i = 0; i < 3; i++)
+      {
+         orientationWeight.set(i, i, command.getAngleErrorMinimizationWeight());
+         orientationWeight.set(i + 3, i + 3, command.getVelocityErrorMinimizationWeight());
+      }
+      inputToPack.setTaskWeightMatrix(orientationWeight);
 
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, 0, command.getBMatrix(tick), 0, 0, 6, linearVariables, 1.0);
       CommonOps_DDRM.scale(-1.0, command.getCMatrix(tick), inputToPack.getTaskObjective());

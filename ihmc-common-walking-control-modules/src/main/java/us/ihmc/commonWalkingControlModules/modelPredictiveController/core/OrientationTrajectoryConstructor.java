@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
-import gnu.trove.list.array.TDoubleArrayList;
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
@@ -9,19 +7,17 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.List;
 
 public class OrientationTrajectoryConstructor
 {
-   private static final double intermediateDt = 0.01;
-
    private final OrientationDynamicsCalculator dynamicsCalculator;
 
    private final RecyclingArrayList<OrientationTrajectoryCommand> commandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
@@ -31,10 +27,17 @@ public class OrientationTrajectoryConstructor
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
 
    private final ImplicitSE3MPCIndexHandler indexHandler;
+   private final DoubleProvider orientationAngleTrackingWeight;
+   private final DoubleProvider orientationVelocityTrackingWeight;
 
-   public OrientationTrajectoryConstructor(ImplicitSE3MPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationTrajectoryConstructor(ImplicitSE3MPCIndexHandler indexHandler,
+                                           DoubleProvider orientationAngleTrackingWeight,
+                                           DoubleProvider orientationVelocityTrackingWeight,
+                                           double mass, double gravity)
    {
       this.indexHandler = indexHandler;
+      this.orientationAngleTrackingWeight = orientationAngleTrackingWeight;
+      this.orientationVelocityTrackingWeight = orientationVelocityTrackingWeight;
       dynamicsCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravity);
    }
 
@@ -67,6 +70,9 @@ public class OrientationTrajectoryConstructor
 
          int ticksInSegment = indexHandler.getTicksInSegment(segmentNumber);
          double tickDuration = indexHandler.getTickDuration(segmentNumber);
+
+         command.setAngleErrorMinimizationWeight(tickDuration * orientationAngleTrackingWeight.getValue());
+         command.setVelocityErrorMinimizationWeight(tickDuration * orientationVelocityTrackingWeight.getValue());
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
@@ -129,13 +135,5 @@ public class OrientationTrajectoryConstructor
             }
          }
       }
-   }
-
-   private static int computeTicksInSegment(double segmentDuration)
-   {
-      if (segmentDuration > 0.0 && segmentDuration < intermediateDt)
-         return 1;
-      else
-         return (int) Math.floor(segmentDuration / intermediateDt);
    }
 }
