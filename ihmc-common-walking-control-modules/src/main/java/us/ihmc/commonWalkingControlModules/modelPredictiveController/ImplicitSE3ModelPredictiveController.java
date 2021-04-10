@@ -33,6 +33,8 @@ import java.util.List;
 public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
+   private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private final double gravityZ;
    protected final double mass;
@@ -71,6 +73,9 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 
+   private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
+   private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
+
    public ImplicitSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
                                                double gravityZ, double nominalCoMHeight, double mass, double dt,
                                                YoRegistry parentRegistry)
@@ -94,7 +99,13 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
-      orientationTrajectoryConstructor = new OrientationTrajectoryConstructor(indexHandler, mass, gravityZ);
+      orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
+      orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
+      orientationTrajectoryConstructor = new OrientationTrajectoryConstructor(indexHandler,
+                                                                              orientationAngleTrackingWeight,
+                                                                              orientationVelocityTrackingWeight,
+                                                                              mass,
+                                                                              gravityZ);
       this.orientationTrajectoryHandler = new ImplicitOrientationMPCTrajectoryHandler(indexHandler, orientationTrajectoryConstructor);
 
       registry.addChild(orientationTrajectoryHandler.getRegistry());
@@ -103,11 +114,11 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
       orientationPreviewWindowDuration.set(0.25);
 
-      qpSolver = new ImplicitSE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
+      qpSolver = new ImplicitSE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
       qpSolver.setMaxNumberOfIterations(1000);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e-2);
-      qpSolver.setSecondOrientationVariableRegularization(1e-2);
+      qpSolver.setFirstOrientationVariableRegularization(1e-10);
+      qpSolver.setSecondOrientationVariableRegularization(1e-10);
 
       parentRegistry.addChild(registry);
    }

@@ -59,6 +59,7 @@ public class JumpingBalanceManager
    private final YoFrameQuaternion yoDesiredBodyOrientation = new YoFrameQuaternion("desiredBodyOrientation", worldFrame, registry);
    private final YoFrameYawPitchRoll yoDesiredBodyYawPitchRoll = new YoFrameYawPitchRoll("desiredBodyOrientation", worldFrame, registry);
    private final YoFrameVector3D yoDesiredBodyAngularVelocity = new YoFrameVector3D("desiredBodyAngularVelocity", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredBodyAngularAcceleration = new YoFrameVector3D("desiredBodyAngularAcceleration", worldFrame, registry);
    private final YoFramePoint3D touchdownCoMPosition = new YoFramePoint3D("touchdownCoMPosition", worldFrame, registry);
    private final YoFramePoint3D touchdownDCMPosition = new YoFramePoint3D("touchdownDCMPosition", worldFrame, registry);
    private final YoFramePoint3D yoPerfectVRP = new YoFramePoint3D("perfectVRP", worldFrame, registry);
@@ -200,6 +201,7 @@ public class JumpingBalanceManager
       yoDesiredBodyOrientation.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
       yoDesiredBodyYawPitchRoll.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
       yoDesiredBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocitySolution());
+      yoDesiredBodyAngularAcceleration.set(comTrajectoryPlanner.getDesiredBodyAngularAccelerationSolution());
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))

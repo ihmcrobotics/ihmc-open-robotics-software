@@ -24,12 +24,11 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
 
    private final OrientationTrajectoryInputCalculator orientationInputCalculator;
 
-   public ImplicitSE3MPCQPSolver(ImplicitSE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, YoRegistry parentRegistry)
+   public ImplicitSE3MPCQPSolver(ImplicitSE3MPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
       this(indexHandler,
            dt,
            gravityZ,
-           mass,
            new BlockInverseCalculator(indexHandler,
                                       i ->
                                       {
@@ -41,13 +40,13 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
            parentRegistry);
    }
 
-   public ImplicitSE3MPCQPSolver(ImplicitSE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
+   public ImplicitSE3MPCQPSolver(ImplicitSE3MPCIndexHandler indexHandler, double dt, double gravityZ, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
    {
       super(indexHandler, dt, gravityZ, inverseCalculator, parentRegistry);
 
       this.indexHandler = indexHandler;
 
-      orientationInputCalculator = new OrientationTrajectoryInputCalculator(indexHandler, mass, gravityZ);
+      orientationInputCalculator = new OrientationTrajectoryInputCalculator(indexHandler);
 
       firstOrientationVariableRegularization.set(1e-8);
       secondOrientationVariableRegularization.set(1e-8);

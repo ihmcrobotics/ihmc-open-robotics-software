@@ -18,6 +18,9 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
 
    private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
 
+   private double angleErrorMinimizationWeight;
+   private double velocityErrorMinimizationWeight;
+
    public MPCCommandType getCommandType()
    {
       return MPCCommandType.ORIENTATION_TRAJECTORY;
@@ -37,6 +40,8 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
 
    public void reset()
    {
+      angleErrorMinimizationWeight = 0.0;
+      velocityErrorMinimizationWeight = 0.0;
       segmentNumber = -1;
       AMatricesInSegment.clear();
       BMatricesInSegment.clear();
@@ -77,6 +82,26 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
    public void setInitialOrientationVelocityErrorInBodyFrame(FrameVector3DReadOnly initialOrientationVelocityErrorInBodyFrame)
    {
       initialOrientationVelocityErrorInBodyFrame.get(3, initialError);
+   }
+
+   public void setAngleErrorMinimizationWeight(double angleErrorMinimizationWeight)
+   {
+      this.angleErrorMinimizationWeight = angleErrorMinimizationWeight;
+   }
+
+   public void setVelocityErrorMinimizationWeight(double velocityErrorMinimizationWeight)
+   {
+      this.velocityErrorMinimizationWeight = velocityErrorMinimizationWeight;
+   }
+
+   public double getAngleErrorMinimizationWeight()
+   {
+      return angleErrorMinimizationWeight;
+   }
+
+   public double getVelocityErrorMinimizationWeight()
+   {
+      return velocityErrorMinimizationWeight;
    }
 
    public DMatrixRMaj addAMatrix()
@@ -131,6 +156,8 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
       setCommandId(other.getCommandId());
       setSegmentNumber(other.getSegmentNumber());
       setInitialOrientationError(other.getInitialOrientationError());
+      setAngleErrorMinimizationWeight(other.getAngleErrorMinimizationWeight());
+      setVelocityErrorMinimizationWeight(other.getVelocityErrorMinimizationWeight());
       for (int tick = 0; tick < other.getNumberOfTicksInSegment(); tick++)
       {
          addAMatrix().set(other.getAMatrix(tick));
