@@ -47,7 +47,8 @@ public class OrientationTrajectoryConstructor
    }
 
    // FIXME need to start from the current time in state
-   public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
+   public void compute(double currentTimeInState,
+                       List<ContactPlaneProvider> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler,
@@ -59,7 +60,8 @@ public class OrientationTrajectoryConstructor
 
       commandsForSegments.clear();
 
-      double segmentGlobalStartTime = 0.0;
+      // FIXME this time still may be wrong
+      double segmentGlobalStartTime = currentTimeInState - previewWindowContactSequence.get(0).getTimeInterval().getStartTime();
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
          OrientationTrajectoryCommand command = commandsForSegments.add();
@@ -77,9 +79,6 @@ public class OrientationTrajectoryConstructor
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            segmentGlobalStartTime += tickDuration;
-            timeInSegment += tickDuration;
-
             linearTrajectoryHandler.compute(segmentGlobalStartTime);
             // TODO make this work in the correct time frame
             orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(segmentGlobalStartTime);
@@ -136,6 +135,9 @@ public class OrientationTrajectoryConstructor
             {
                nextA.set(dynamicsCalculator.getDiscreteAMatrix());
             }
+
+            segmentGlobalStartTime += tickDuration;
+            timeInSegment += tickDuration;
          }
       }
    }

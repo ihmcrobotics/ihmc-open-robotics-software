@@ -96,7 +96,7 @@ public class JumpingMomentumRateControlModule
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight1", new Vector3D(10, 10, 10), registry);
-      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight1", new Vector3D(1e-3, 1e-3, 0.0), registry);
+      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight1", new Vector3D(1e-1, 1e-1, 0.0), registry);
 
       minimizeAngularMomentumRate.set(true);
 
