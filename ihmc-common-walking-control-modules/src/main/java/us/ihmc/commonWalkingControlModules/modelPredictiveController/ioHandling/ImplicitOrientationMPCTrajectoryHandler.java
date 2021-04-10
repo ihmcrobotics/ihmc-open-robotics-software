@@ -24,8 +24,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 /**
  * This class is meant to handle the trajectory from the MPC module. It includes the trajectory for the full planning window, which is overwritten with the
  * solution for the planning window at the beginning.
@@ -34,6 +32,7 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
  */
 public class ImplicitOrientationMPCTrajectoryHandler
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final OrientationTrajectoryCalculator orientationInitializationCalculator;
 
    private final ImplicitSE3MPCIndexHandler indexHandler;
@@ -107,7 +106,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
          OrientationTrajectoryCommand command = trajectoryConstructor.getOrientationTrajectoryCommands().get(segment);
-         double tickDuration = trajectoryConstructor.getTickDuration(segment);
+         double tickDuration = indexHandler.getTickDuration(segment);
 
          int end = globalTick + command.getNumberOfTicksInSegment();
          for (;globalTick < end; globalTick++)
@@ -200,8 +199,8 @@ public class ImplicitOrientationMPCTrajectoryHandler
 
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
-         double tickDuration = trajectoryConstructor.getTickDuration(segment);
-         for (int i = 0; i < trajectoryConstructor.getTicksInSegment(segment); i++)
+         double tickDuration = indexHandler.getTickDuration(segment);
+         for (int i = 0; i < indexHandler.getTicksInSegment(segment); i++)
          {
             currentTimeInState += tickDuration;
 

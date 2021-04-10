@@ -30,27 +30,17 @@ public class OrientationTrajectoryConstructor
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
 
-   private final TIntArrayList ticksInSegment = new TIntArrayList();
-   private final TDoubleArrayList tickDurations = new TDoubleArrayList();
+   private final ImplicitSE3MPCIndexHandler indexHandler;
 
-   public OrientationTrajectoryConstructor(LinearMPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationTrajectoryConstructor(ImplicitSE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
+      this.indexHandler = indexHandler;
       dynamicsCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravity);
    }
 
    public List<OrientationTrajectoryCommand> getOrientationTrajectoryCommands()
    {
       return commandsForSegments;
-   }
-
-   public int getTicksInSegment(int segment)
-   {
-      return ticksInSegment.get(segment);
-   }
-
-   public double getTickDuration(int segment)
-   {
-      return tickDurations.get(segment);
    }
 
    // FIXME need to start from the current time in state
@@ -65,8 +55,6 @@ public class OrientationTrajectoryConstructor
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
 
       commandsForSegments.clear();
-      tickDurations.reset();
-      ticksInSegment.reset();
 
       double globalTime = 0.0;
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
@@ -77,12 +65,8 @@ public class OrientationTrajectoryConstructor
          if (segmentNumber == 0)
             command.setInitialOrientationError(initialOrientationError);
 
-         double segmentDuration = previewWindowContactSequence.get(segmentNumber).getTimeInterval().getDuration();
-         int ticksInSegment = computeTicksInSegment(segmentDuration);
-         double tickDuration = segmentDuration / ticksInSegment;
-
-         this.ticksInSegment.add(ticksInSegment);
-         this.tickDurations.add(tickDuration);
+         int ticksInSegment = indexHandler.getTicksInSegment(segmentNumber);
+         double tickDuration = indexHandler.getTickDuration(segmentNumber);
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
