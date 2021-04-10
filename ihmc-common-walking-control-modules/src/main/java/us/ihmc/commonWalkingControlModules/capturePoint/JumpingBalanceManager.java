@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ImplicitSE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
@@ -88,7 +89,7 @@ public class JumpingBalanceManager
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
    private final AngularMomentumHandler<ContactPlaneProvider> angularMomentumHandler;
-   private final SE3ModelPredictiveController comTrajectoryPlanner;
+   private final ImplicitSE3ModelPredictiveController comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -118,12 +119,12 @@ public class JumpingBalanceManager
                                                             registry,
                                                             yoGraphicsListRegistry);
 
-      comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
-                                                              gravityZ,
-                                                              nominalHeight,
-                                                              totalMass,
-                                                              controllerToolbox.getControlDT(),
-                                                              registry);
+      comTrajectoryPlanner = new ImplicitSE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
+                                                                      gravityZ,
+                                                                      nominalHeight,
+                                                                      totalMass,
+                                                                      controllerToolbox.getControlDT(),
+                                                                      registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
