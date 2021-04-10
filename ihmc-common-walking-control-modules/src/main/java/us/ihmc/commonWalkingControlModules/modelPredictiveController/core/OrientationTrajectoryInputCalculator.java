@@ -40,7 +40,7 @@ public class OrientationTrajectoryInputCalculator
                                  6,
                                  LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber),
                                  -1.0);
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationStartIndices(segmentNumber + 1), identity6, 0, 0, 6, 6, 1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationStartIndex(segmentNumber + 1), identity6, 0, 0, 6, 6, 1.0);
 
       inputToPack.getTaskObjective().set(command.getLastCMatrix());
 
@@ -52,7 +52,7 @@ public class OrientationTrajectoryInputCalculator
       {
          MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
                                     0,
-                                    indexHandler.getOrientationStartIndices(segmentNumber),
+                                    indexHandler.getOrientationStartIndex(segmentNumber),
                                     command.getLastAMatrix(),
                                     0,
                                     0,
@@ -88,7 +88,7 @@ public class OrientationTrajectoryInputCalculator
       {
          MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
                                     0,
-                                    indexHandler.getOrientationStartIndices(segmentNumber),
+                                    indexHandler.getOrientationStartIndex(segmentNumber),
                                     command.getAMatrix(tick),
                                     0,
                                     0,
