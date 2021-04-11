@@ -14,8 +14,6 @@ public class OrientationContinuityCommand implements MPCCommand<OrientationConti
    private final DMatrixRMaj BMatrix = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj CMatrix = new DMatrixRMaj(6, 1);
 
-   private final DMatrixRMaj objectiveValue = new DMatrixRMaj(6, 1);
-
    private double objectiveWeight;
 
    public void setCommandId(int commandId)
@@ -38,7 +36,6 @@ public class OrientationContinuityCommand implements MPCCommand<OrientationConti
       getAMatrix().zero();
       getBMatrix().zero();
       getCMatrix().zero();
-      getObjectiveValue().zero();
    }
 
    public int getSegmentNumber()
@@ -91,16 +88,6 @@ public class OrientationContinuityCommand implements MPCCommand<OrientationConti
       this.CMatrix.set(CMatrix);
    }
 
-   public DMatrixRMaj getObjectiveValue()
-   {
-      return objectiveValue;
-   }
-
-   public void setObjectiveValue(DMatrixRMaj objectiveValue)
-   {
-      this.objectiveValue.set(objectiveValue);
-   }
-
    public void setObjectiveWeight(double objectiveWeight)
    {
       this.objectiveWeight = objectiveWeight;
@@ -118,6 +105,5 @@ public class OrientationContinuityCommand implements MPCCommand<OrientationConti
       setAMatrix(other.getAMatrix());
       setBMatrix(other.getBMatrix());
       setCMatrix(other.getCMatrix());
-      setObjectiveValue(other.getObjectiveValue());
    }
 }

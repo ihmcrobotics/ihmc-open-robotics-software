@@ -1,6 +1,12 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationContinuityCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
@@ -31,6 +37,9 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
+
+   private static final double initialOrientationWeight = 1e3;
+   private static final double finalOrientationWeight = 1e1;
 
    private final double gravityZ;
    protected final double mass;
@@ -174,7 +183,28 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
    private void computeOrientationObjectives()
    {
-      linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
+      computeInitialError();
+
+      orientationTrajectoryConstructor.compute(previewWindowCalculator.getPlanningWindow(),
+                                               momentOfInertia,
+                                               linearTrajectoryHandler,
+                                               orientationTrajectoryHandler,
+                                               contactPlaneHelperPool);
+
+      int numberOfSegments = indexHandler.getNumberOfSegments();
+      for (int i = 0; i < numberOfSegments; i++)
+      {
+         mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
+         if (i < numberOfSegments - 1)
+            mpcCommands.addCommand(computeOrientationContinuityCommand(commandProvider.getNextOrientationContinuityCommand()));
+      }
+
+      mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextOrientationValueCommand()));
+      mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
+   }
+
+   private void computeInitialError()
+   {
       orientationTrajectoryHandler.computeReferenceValue(currentTimeInState.getDoubleValue());
       FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
 
@@ -184,17 +214,57 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       currentBodyAngularVelocityError.sub(currentBodyAngularVelocity, orientationTrajectoryHandler.getReferenceBodyVelocity());
       referenceOrientation.inverseTransform(currentBodyAngularVelocityError);
       currentBodyAngularVelocityError.get(3, initialError);
-
-      orientationTrajectoryConstructor.compute(previewWindowCalculator.getPlanningWindow(),
-                                               momentOfInertia,
-                                               linearTrajectoryHandler,
-                                               orientationTrajectoryHandler,
-                                               contactPlaneHelperPool,
-                                               initialError);
-      for (int i = 0; i < orientationTrajectoryConstructor.getOrientationTrajectoryCommands().size(); i++)
-         mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
    }
 
+   private MPCCommand<?> computeInitialOrientationErrorCommand(OrientationValueCommand commandToPack)
+   {
+      commandToPack.reset();
+      CommonOps_DDRM.setIdentity(commandToPack.getAMatrix());
+      commandToPack.getBMatrix().zero();
+      commandToPack.getCMatrix().zero();
+      commandToPack.setSegmentNumber(0);
+      commandToPack.setObjectiveValue(initialError);
+      commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      commandToPack.setObjectiveWeight(initialOrientationWeight);
+
+      return commandToPack;
+   }
+
+   private MPCCommand<?>  computeFinalOrientationMinimizationCommand(OrientationValueCommand commandToPack)
+   {
+      commandToPack.reset();
+
+      int segmentNumber = indexHandler.getNumberOfSegments();
+      commandToPack.setSegmentNumber(segmentNumber);
+
+      OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
+      commandToPack.setAMatrix(trajectoryCommand.getLastAMatrix());
+      commandToPack.setBMatrix(trajectoryCommand.getLastBMatrix());
+      commandToPack.setCMatrix(trajectoryCommand.getLastCMatrix());
+
+      commandToPack.getObjectiveValue().zero();
+      commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      commandToPack.setObjectiveWeight(finalOrientationWeight);
+
+      return commandToPack;
+   }
+
+   private MPCCommand<?>  computeOrientationContinuityCommand(OrientationContinuityCommand commandToPack)
+   {
+      commandToPack.reset();
+
+      int segmentNumber = indexHandler.getNumberOfSegments();
+      commandToPack.setSegmentNumber(segmentNumber);
+
+      OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
+      commandToPack.setAMatrix(trajectoryCommand.getLastAMatrix());
+      commandToPack.setBMatrix(trajectoryCommand.getLastBMatrix());
+      commandToPack.setCMatrix(trajectoryCommand.getLastCMatrix());
+
+      commandToPack.setConstraintType(ConstraintType.EQUALITY);
+
+      return commandToPack;
+   }
 
    @Override
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)

@@ -20,7 +20,7 @@ public class OrientationTrajectoryConstructor
 {
    private final OrientationDynamicsCalculator dynamicsCalculator;
 
-   private final RecyclingArrayList<OrientationTrajectoryCommand> commandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
+   private final RecyclingArrayList<OrientationTrajectoryCommand> trajectoryCommandsForSegments = new RecyclingArrayList<>(OrientationTrajectoryCommand::new);
 
    private final FrameVector3D referenceBodyAngularVelocityInBodyFrame = new FrameVector3D();
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
@@ -49,29 +49,26 @@ public class OrientationTrajectoryConstructor
 
    public List<OrientationTrajectoryCommand> getOrientationTrajectoryCommands()
    {
-      return commandsForSegments;
+      return trajectoryCommandsForSegments;
    }
 
    public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler,
-                       List<? extends List<MPCContactPlane>> contactPlaneHelpers,
-                       DMatrixRMaj initialOrientationError)
+                       List<? extends List<MPCContactPlane>> contactPlaneHelpers)
    {
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
 
-      commandsForSegments.clear();
+      trajectoryCommandsForSegments.clear();
 
       double trajectoryStartTime = previewWindowContactSequence.get(0).getTimeInterval().getStartTime();
 
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
-         OrientationTrajectoryCommand command = commandsForSegments.add();
+         OrientationTrajectoryCommand command = trajectoryCommandsForSegments.add();
          command.reset();
          command.setSegmentNumber(segmentNumber);
-         if (segmentNumber == 0)
-            command.setInitialOrientationError(initialOrientationError);
 
          int ticksInSegment = indexHandler.getTicksInSegment(segmentNumber);
          double tickDuration = indexHandler.getTickDuration(segmentNumber);
