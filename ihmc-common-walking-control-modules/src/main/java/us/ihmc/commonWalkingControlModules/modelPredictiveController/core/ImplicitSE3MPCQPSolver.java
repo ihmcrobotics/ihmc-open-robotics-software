@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -118,24 +116,41 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
 
    public void submitMPCCommand(MPCCommand<?> command)
    {
-       if (command.getCommandType() == MPCCommandType.ORIENTATION_TRAJECTORY)
+      switch (command.getCommandType())
       {
-         submitOrientationTrajectoryCommand((OrientationTrajectoryCommand) command);
-         return;
+         case ORIENTATION_TRAJECTORY:
+            submitOrientationTrajectoryCommand((OrientationTrajectoryCommand) command);
+            return;
+         case ORIENTATION_CONTINUITY:
+            submitOrientationContinuityCommand((OrientationContinuityCommand) command);
+            return;
+         case ORIENTATION_VALUE:
+            submitOrientationValueCommand((OrientationValueCommand) command);
+            return;
       }
 
       super.submitMPCCommand(command);
    }
 
+   public void submitOrientationValueCommand(OrientationValueCommand command)
+   {
+      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
+      if (success)
+         addInput(qpInputTypeA);
+   }
+
+   public void submitOrientationContinuityCommand(OrientationContinuityCommand command)
+   {
+      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
+      if (success)
+         addInput(qpInputTypeA);
+   }
 
    public void submitOrientationTrajectoryCommand(OrientationTrajectoryCommand command)
    {
-      boolean success = orientationInputCalculator.computeConstraintForNextSegmentStart(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
       for (int tick = 0; tick < command.getNumberOfTicksInSegment(); tick++)
       {
-         success = orientationInputCalculator.computeErrorMinimizationCommand(tick, qpInputTypeA, command);
+         boolean success = orientationInputCalculator.compute(tick, qpInputTypeA, command);
          if (success)
             addInput(qpInputTypeA);
       }
