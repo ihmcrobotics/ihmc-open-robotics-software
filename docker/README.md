@@ -41,3 +41,7 @@ if (( EUID == 0 )); then
     exit 1
 fi
 ```
+
+To run these on Windows, install WSL 2 and follow the NVIDIA guide.
+1. https://docs.microsoft.com/en-us/windows/wsl/install-win10
+2. https://docs.nvidia.com/cuda/wsl-user-guide/index.html
