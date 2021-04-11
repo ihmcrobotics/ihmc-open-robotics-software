@@ -33,15 +33,7 @@ public class OrientationTrajectoryInputCalculator
 
       int segmentNumber = command.getSegmentNumber();
 
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 indexHandler.getOrientationStartIndex(segmentNumber),
-                                 command.getAMatrix(),
-                                 0,
-                                 0,
-                                 6,
-                                 LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber),
-                                 1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationStartIndex(segmentNumber), command.getAMatrix(), 0, 0, 6, 6, 1.0);
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
                                  0,
                                  indexHandler.getComCoefficientStartIndex(segmentNumber),

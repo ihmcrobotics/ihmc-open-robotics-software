@@ -27,7 +27,7 @@ public class OrientationContinuityCommand implements MPCCommand<OrientationConti
 
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.ORIENTATION_VALUE;
+      return MPCCommandType.ORIENTATION_CONTINUITY;
    }
 
    public void reset()
