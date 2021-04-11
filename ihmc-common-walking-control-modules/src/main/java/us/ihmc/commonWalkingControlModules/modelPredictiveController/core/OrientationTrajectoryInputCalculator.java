@@ -124,22 +124,15 @@ public class OrientationTrajectoryInputCalculator
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, 0, command.getBMatrix(tick), 0, 0, 6, linearVariables, 1.0);
       CommonOps_DDRM.scale(-1.0, command.getCMatrix(tick), inputToPack.getTaskObjective());
 
-      if (segmentNumber == 0)
-      {
-         CommonOps_DDRM.multAdd(-1.0, command.getAMatrix(tick), command.getInitialOrientationError(), inputToPack.getTaskObjective());
-      }
-      else
-      {
-         MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
-                                    0,
-                                    indexHandler.getOrientationStartIndex(segmentNumber),
-                                    command.getAMatrix(tick),
-                                    0,
-                                    0,
-                                    6,
-                                    6,
-                                    1.0);
-      }
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
+                                 0,
+                                 indexHandler.getOrientationStartIndex(segmentNumber),
+                                 command.getAMatrix(tick),
+                                 0,
+                                 0,
+                                 6,
+                                 6,
+                                 1.0);
 
       return true;
    }

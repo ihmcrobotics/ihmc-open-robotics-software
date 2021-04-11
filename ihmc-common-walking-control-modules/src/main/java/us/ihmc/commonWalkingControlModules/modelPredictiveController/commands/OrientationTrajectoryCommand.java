@@ -16,8 +16,6 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
    private final RecyclingArrayList<DMatrixRMaj> BMatricesInSegment = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 0));
    private final RecyclingArrayList<DMatrixRMaj> CMatricesInSegment = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 1));
 
-   private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
-
    private double angleErrorMinimizationWeight;
    private double velocityErrorMinimizationWeight;
 
@@ -46,12 +44,6 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
       AMatricesInSegment.clear();
       BMatricesInSegment.clear();
       CMatricesInSegment.clear();
-      Arrays.fill(initialError.data, 0, 6, Double.NaN);
-   }
-
-   public DMatrixRMaj getInitialOrientationError()
-   {
-      return initialError;
    }
 
    public int getSegmentNumber()
@@ -67,21 +59,6 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
    public int getNumberOfTicksInSegment()
    {
       return AMatricesInSegment.size();
-   }
-
-   public void setInitialOrientationError(DMatrixRMaj initialError)
-   {
-      this.initialError.set(initialError);
-   }
-
-   public void setInitialOrientationError(FrameVector3DReadOnly initialOrientationError)
-   {
-      initialOrientationError.get(initialError);
-   }
-
-   public void setInitialOrientationVelocityErrorInBodyFrame(FrameVector3DReadOnly initialOrientationVelocityErrorInBodyFrame)
-   {
-      initialOrientationVelocityErrorInBodyFrame.get(3, initialError);
    }
 
    public void setAngleErrorMinimizationWeight(double angleErrorMinimizationWeight)
@@ -155,7 +132,6 @@ public class OrientationTrajectoryCommand implements MPCCommand<OrientationTraje
       reset();
       setCommandId(other.getCommandId());
       setSegmentNumber(other.getSegmentNumber());
-      setInitialOrientationError(other.getInitialOrientationError());
       setAngleErrorMinimizationWeight(other.getAngleErrorMinimizationWeight());
       setVelocityErrorMinimizationWeight(other.getVelocityErrorMinimizationWeight());
       for (int tick = 0; tick < other.getNumberOfTicksInSegment(); tick++)
