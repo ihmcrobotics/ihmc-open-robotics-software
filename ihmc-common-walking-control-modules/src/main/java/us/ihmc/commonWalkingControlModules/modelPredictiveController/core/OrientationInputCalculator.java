@@ -17,8 +17,8 @@ public class OrientationInputCalculator
 
    public OrientationInputCalculator(SE3MPCIndexHandler indexHandler, double mass, double gravity)
    {
-      dynamicsCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravity);
       this.indexHandler = indexHandler;
+      dynamicsCalculator = new OrientationDynamicsCalculator(mass, gravity);
    }
 
    public boolean compute(QPInputTypeA inputToPack, DiscreteAngularVelocityOrientationCommand command)

@@ -64,14 +64,12 @@ public class OrientationDynamicsCalculator
    private final DMatrixRMaj Bd = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj Cd = new DMatrixRMaj(6, 1);
 
-   private final LinearMPCIndexHandler indexHandler;
    private final double mass;
 
    private static final DMatrixRMaj identity3 = CommonOps_DDRM.identity(3);
 
-   public OrientationDynamicsCalculator(LinearMPCIndexHandler indexHandler, double mass, double gravity)
+   public OrientationDynamicsCalculator(double mass, double gravity)
    {
-      this.indexHandler = indexHandler;
       this.mass = mass;
 
       gravityVector.set(2, 0, -Math.abs(gravity));
@@ -87,8 +85,7 @@ public class OrientationDynamicsCalculator
 
       setMomentumOfInertiaInBodyFrame(command.getMomentOfInertiaInBodyFrame());
 
-      return compute(command.getSegmentNumber(),
-                     command.getDesiredCoMPosition(),
+      return compute(command.getDesiredCoMPosition(),
                      command.getDesiredCoMAcceleration(),
                      command.getDesiredBodyOrientation(),
                      command.getDesiredBodyAngularVelocity(),
@@ -105,8 +102,7 @@ public class OrientationDynamicsCalculator
       inertiaMatrixInBody.get(this.inertiaMatrixInBody);
    }
 
-   public boolean compute(int segmentNumber,
-                          FramePoint3DReadOnly desiredComPosition,
+   public boolean compute(FramePoint3DReadOnly desiredComPosition,
                           FrameVector3DReadOnly desiredCoMAcceleration,
                           FrameOrientation3DReadOnly desiredBodyOrientation,
                           Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
@@ -117,7 +113,7 @@ public class OrientationDynamicsCalculator
                           double durationOfHold,
                           double omega)
    {
-      reset(segmentNumber, contactPlanes);
+      reset(contactPlanes);
       getAllTheTermsFromTheCommandInput(desiredComPosition,
                                         desiredCoMAcceleration,
                                         desiredBodyOrientation,
@@ -198,13 +194,16 @@ public class OrientationDynamicsCalculator
       return b4;
    }
 
-   private void reset(int segmentNumber, List<MPCContactPlane> contactPlanes)
+   private void reset(List<MPCContactPlane> contactPlanes)
    {
       int totalContactPoints = 0;
+      int rhoCoefficientsInSegment = 0;
       for (int i = 0; i < contactPlanes.size(); i++)
+      {
          totalContactPoints += contactPlanes.get(i).getNumberOfContactPoints();
+         rhoCoefficientsInSegment += contactPlanes.get(i).getCoefficientSize();
+      }
 
-      int rhoCoefficientsInSegment = indexHandler.getRhoCoefficientsInSegment(segmentNumber);
       int coefficientsInSegment = LinearMPCIndexHandler.comCoefficientsPerSegment + rhoCoefficientsInSegment;
 
       comPositionJacobian.reshape(3, coefficientsInSegment);
