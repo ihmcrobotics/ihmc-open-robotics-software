@@ -39,7 +39,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private static final double initialOrientationWeight = 1e3;
-   private static final double finalOrientationWeight = 1e1;
+   private static final double finalOrientationWeight = 1e-2;
 
    private final double gravityZ;
    protected final double mass;
@@ -196,7 +196,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       {
          mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
          if (i < numberOfSegments - 1)
-            mpcCommands.addCommand(computeOrientationContinuityCommand(commandProvider.getNextOrientationContinuityCommand()));
+            mpcCommands.addCommand(computeOrientationContinuityCommand(i, commandProvider.getNextOrientationContinuityCommand()));
       }
 
       mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextOrientationValueCommand()));
@@ -220,8 +220,11 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    {
       commandToPack.reset();
       CommonOps_DDRM.setIdentity(commandToPack.getAMatrix());
+      commandToPack.getBMatrix().reshape(6, LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(0));
       commandToPack.getBMatrix().zero();
+
       commandToPack.getCMatrix().zero();
+
       commandToPack.setSegmentNumber(0);
       commandToPack.setObjectiveValue(initialError);
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
@@ -234,7 +237,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    {
       commandToPack.reset();
 
-      int segmentNumber = indexHandler.getNumberOfSegments();
+      int segmentNumber = indexHandler.getNumberOfSegments() - 1;
       commandToPack.setSegmentNumber(segmentNumber);
 
       OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
@@ -249,11 +252,10 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       return commandToPack;
    }
 
-   private MPCCommand<?>  computeOrientationContinuityCommand(OrientationContinuityCommand commandToPack)
+   private MPCCommand<?> computeOrientationContinuityCommand(int segmentNumber, OrientationContinuityCommand commandToPack)
    {
       commandToPack.reset();
 
-      int segmentNumber = indexHandler.getNumberOfSegments();
       commandToPack.setSegmentNumber(segmentNumber);
 
       OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
