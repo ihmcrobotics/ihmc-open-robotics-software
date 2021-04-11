@@ -30,8 +30,6 @@ public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
       super.initialize(previewWindowContactSequence);
 
       orientationStartIndices.reset();
-      orientationStartIndices.add(-1);
-
       tickDurations.reset();
       ticksInSegment.reset();
 
@@ -47,22 +45,19 @@ public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
          this.ticksInSegment.add(ticksInSegment);
          this.tickDurations.add(tickDuration);
 
-         if (segmentNumber > 0)
+         totalNumberOfOrientationTicks += variablesPerOrientationTick;
+
+         int orientationIndex = rhoStartIndices.get(segmentNumber) + rhoCoefficientsInSegment.get(segmentNumber);
+         orientationStartIndices.add(orientationIndex);
+
+         // shift the remaining segments
+         for (int j = segmentNumber + 1; j < previewWindowContactSequence.size(); j++)
          {
-            totalNumberOfOrientationTicks += variablesPerOrientationTick;
-
-            int orientationIndex = rhoStartIndices.get(segmentNumber) + rhoCoefficientsInSegment.get(segmentNumber);
-            orientationStartIndices.add(orientationIndex);
-
-            // shift the remaining segments
-            for (int j = segmentNumber + 1; j < previewWindowContactSequence.size(); j++)
-            {
-               comStartIndices.set(j, comStartIndices.get(j) + variablesPerOrientationTick);
-               rhoStartIndices.set(j, rhoStartIndices.get(j) + variablesPerOrientationTick);
-            }
-
-            totalProblemSize += variablesPerOrientationTick;
+            comStartIndices.set(j, comStartIndices.get(j) + variablesPerOrientationTick);
+            rhoStartIndices.set(j, rhoStartIndices.get(j) + variablesPerOrientationTick);
          }
+
+         totalProblemSize += variablesPerOrientationTick;
       }
    }
 
