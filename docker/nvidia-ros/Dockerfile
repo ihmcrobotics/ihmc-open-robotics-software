@@ -38,5 +38,11 @@ RUN chmod a+x /home/robotlab/ros_entrypoint.sh
 USER robotlab
 WORKDIR /home/robotlab
 
+# Commands passed to i.e. 'docker run nvidia-ros [...]' will go through this entrypoint.
+# Therefore, if you pass i.e. 'docker run nvidia-ros rviz', then it will have passed
+# 'rviz' to this script as an argument, and, in this case, the result will be that rviz
+# will be run with the ROS environment already sourced/setup.
 ENTRYPOINT ["/home/robotlab/ros_entrypoint.sh"]
+# Default command to run, i.e. 'docker run nvidia-ros' will be as if you ran 'docker run nvidia-ros bash'.
+# If you specify a command, i.e. 'docker run nvidia-ros roscore', this won't be run.
 CMD ["bash"]
