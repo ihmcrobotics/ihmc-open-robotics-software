@@ -29,7 +29,7 @@ import java.util.List;
 public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final double defaultOrientationAngleTrackingWeight = 1.0;
+   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
    private final double gravityZ;
@@ -100,6 +100,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       orientationTrajectoryConstructor = new OrientationTrajectoryConstructor(indexHandler,
                                                                               orientationAngleTrackingWeight,
                                                                               orientationVelocityTrackingWeight,
+                                                                              omega,
                                                                               mass,
                                                                               gravityZ);
       this.orientationTrajectoryHandler = new ImplicitOrientationMPCTrajectoryHandler(indexHandler, orientationTrajectoryConstructor);
@@ -184,14 +185,12 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       referenceOrientation.inverseTransform(currentBodyAngularVelocityError);
       currentBodyAngularVelocityError.get(3, initialError);
 
-      orientationTrajectoryConstructor.compute(currentTimeInState.getDoubleValue(),
-                                               previewWindowCalculator.getPlanningWindow(),
+      orientationTrajectoryConstructor.compute(previewWindowCalculator.getPlanningWindow(),
                                                momentOfInertia,
                                                linearTrajectoryHandler,
                                                orientationTrajectoryHandler,
                                                contactPlaneHelperPool,
-                                               initialError,
-                                               omega.getValue());
+                                               initialError);
       for (int i = 0; i < orientationTrajectoryConstructor.getOrientationTrajectoryCommands().size(); i++)
          mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
    }
@@ -200,7 +199,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    @Override
    public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-//      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
    }
 
    protected void updateCoMTrajectoryViewer()

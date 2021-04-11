@@ -72,7 +72,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -160,7 +160,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -248,7 +248,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -358,7 +358,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -466,7 +466,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -579,7 +579,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -685,7 +685,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -795,7 +795,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -907,7 +907,7 @@ public class OrientationDynamicCalculatorTest
       contactProviders.add(contact);
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
-      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravityZ);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 

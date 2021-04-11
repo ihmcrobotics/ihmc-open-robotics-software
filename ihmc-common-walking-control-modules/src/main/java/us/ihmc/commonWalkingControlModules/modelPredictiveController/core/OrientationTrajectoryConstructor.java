@@ -30,15 +30,21 @@ public class OrientationTrajectoryConstructor
    private final DoubleProvider orientationAngleTrackingWeight;
    private final DoubleProvider orientationVelocityTrackingWeight;
 
+   private final DoubleProvider omega;
+
    public OrientationTrajectoryConstructor(ImplicitSE3MPCIndexHandler indexHandler,
                                            DoubleProvider orientationAngleTrackingWeight,
                                            DoubleProvider orientationVelocityTrackingWeight,
-                                           double mass, double gravity)
+                                           DoubleProvider omega,
+                                           double mass,
+                                           double gravity)
    {
       this.indexHandler = indexHandler;
       this.orientationAngleTrackingWeight = orientationAngleTrackingWeight;
       this.orientationVelocityTrackingWeight = orientationVelocityTrackingWeight;
-      dynamicsCalculator = new OrientationDynamicsCalculator(indexHandler, mass, gravity);
+      this.omega = omega;
+
+      dynamicsCalculator = new OrientationDynamicsCalculator(mass, gravity);
    }
 
    public List<OrientationTrajectoryCommand> getOrientationTrajectoryCommands()
@@ -46,22 +52,19 @@ public class OrientationTrajectoryConstructor
       return commandsForSegments;
    }
 
-   // FIXME need to start from the current time in state
-   public void compute(double currentTimeInState,
-                       List<ContactPlaneProvider> previewWindowContactSequence,
+   public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
                        ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler,
                        List<? extends List<MPCContactPlane>> contactPlaneHelpers,
-                       DMatrixRMaj initialOrientationError,
-                       double omega)
+                       DMatrixRMaj initialOrientationError)
    {
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
 
       commandsForSegments.clear();
 
-      // FIXME this time still may be wrong
-      double segmentGlobalStartTime = currentTimeInState - previewWindowContactSequence.get(0).getTimeInterval().getStartTime();
+      double trajectoryStartTime = previewWindowContactSequence.get(0).getTimeInterval().getStartTime();
+
       for (int segmentNumber = 0; segmentNumber < previewWindowContactSequence.size(); segmentNumber++)
       {
          OrientationTrajectoryCommand command = commandsForSegments.add();
@@ -72,16 +75,15 @@ public class OrientationTrajectoryConstructor
 
          int ticksInSegment = indexHandler.getTicksInSegment(segmentNumber);
          double tickDuration = indexHandler.getTickDuration(segmentNumber);
-         double timeInSegment = 0;
+         double timeInSegment = 0.0;
 
          command.setAngleErrorMinimizationWeight(tickDuration * orientationAngleTrackingWeight.getValue());
          command.setVelocityErrorMinimizationWeight(tickDuration * orientationVelocityTrackingWeight.getValue());
 
          for (int tick = 0; tick < ticksInSegment; tick++)
          {
-            linearTrajectoryHandler.compute(segmentGlobalStartTime);
-            // TODO make this work in the correct time frame
-            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(segmentGlobalStartTime);
+            linearTrajectoryHandler.compute(trajectoryStartTime);
+            orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(trajectoryStartTime);
 
             FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
             // angular velocity in body frame
@@ -102,8 +104,7 @@ public class OrientationTrajectoryConstructor
                desiredInternalAngularMomentumRate.setToZero();
             }
 
-            dynamicsCalculator.compute(segmentNumber,
-                                       linearTrajectoryHandler.getDesiredCoMPosition(),
+            dynamicsCalculator.compute(linearTrajectoryHandler.getDesiredCoMPosition(),
                                        linearTrajectoryHandler.getDesiredCoMAcceleration(),
                                        referenceOrientation,
                                        referenceBodyAngularVelocityInBodyFrame,
@@ -112,7 +113,7 @@ public class OrientationTrajectoryConstructor
                                        contactPlaneHelpers.get(segmentNumber),
                                        timeInSegment,
                                        tickDuration,
-                                       omega);
+                                       omega.getValue());
 
             DMatrixRMaj previousA = command.getLastAMatrix();
             DMatrixRMaj previousB = command.getLastBMatrix();
@@ -136,7 +137,7 @@ public class OrientationTrajectoryConstructor
                nextA.set(dynamicsCalculator.getDiscreteAMatrix());
             }
 
-            segmentGlobalStartTime += tickDuration;
+            trajectoryStartTime += tickDuration;
             timeInSegment += tickDuration;
          }
       }
