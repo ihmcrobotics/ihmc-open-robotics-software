@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
@@ -22,6 +23,8 @@ public class OrientationTrajectoryInputCalculator
    public boolean compute(QPInputTypeA inputToPack, OrientationValueCommand command)
    {
       inputToPack.setConstraintType(command.getConstraintType());
+      inputToPack.setWeight(command.getObjectiveWeight());
+      inputToPack.setUseWeightScalar(true);
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape(6);
 
@@ -54,13 +57,16 @@ public class OrientationTrajectoryInputCalculator
       return true;
    }
 
-   public boolean computeConstraintForNextSegmentStart(QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
+   public boolean compute(QPInputTypeA inputToPack, OrientationContinuityCommand command)
    {
       int segmentNumber = command.getSegmentNumber();
       if (segmentNumber == indexHandler.getNumberOfSegments() - 1)
          return false;
 
-      inputToPack.setConstraintType(ConstraintType.EQUALITY);
+      inputToPack.setConstraintType(command.getConstraintType());
+      inputToPack.setWeight(command.getObjectiveWeight());
+      inputToPack.setUseWeightScalar(true);
+
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape(6);
 
@@ -70,7 +76,7 @@ public class OrientationTrajectoryInputCalculator
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
                                  0,
                                  indexHandler.getComCoefficientStartIndex(segmentNumber),
-                                 command.getLastBMatrix(),
+                                 command.getBMatrix(),
                                  0,
                                  0,
                                  6,
@@ -78,12 +84,12 @@ public class OrientationTrajectoryInputCalculator
                                  -1.0);
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationStartIndex(segmentNumber + 1), identity6, 0, 0, 6, 6, 1.0);
 
-      inputToPack.getTaskObjective().set(command.getLastCMatrix());
+      inputToPack.getTaskObjective().set(command.getCMatrix());
 
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
                                  0,
                                  indexHandler.getOrientationStartIndex(segmentNumber),
-                                 command.getLastAMatrix(),
+                                 command.getAMatrix(),
                                  0,
                                  0,
                                  6,
@@ -95,7 +101,7 @@ public class OrientationTrajectoryInputCalculator
 
    private final DMatrixRMaj orientationWeight = new DMatrixRMaj(6, 6);
 
-   public boolean computeErrorMinimizationCommand(int tick, QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
+   public boolean compute(int tick, QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
    {
       int segmentNumber = command.getSegmentNumber();
 
