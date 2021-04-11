@@ -8,6 +8,8 @@ FROM nvidia/cuda:11.2.2-base
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install commonly required libraries and packages
+# Note: Removing /var/lib/apt/lists/* at the end can reduce the
+# compressed image size by about 25 MB.
 RUN apt-get --quiet 2 --yes update  \
  && apt-get --quiet 2 --yes install \
     nano \

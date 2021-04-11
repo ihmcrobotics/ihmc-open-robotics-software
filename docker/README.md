@@ -27,6 +27,7 @@ To add GPU acceleration, add the following and test with `clinfo`.
 ```
 
 If you want to display a GUI, add the following and test with `glxinfo` and `glxgears`.
+To show a GUI on an X server, you must first allow it with `xhost +local:docker`.
 ```
 --env DISPLAY
 --volume /tmp/.X11-unix:/tmp/.X11-unix:rw
