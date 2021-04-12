@@ -61,3 +61,6 @@ RUN addgroup robotlab \
  && chown -R robotlab /home/robotlab
 USER robotlab
 WORKDIR /home/robotlab
+
+RUN mkdir -p /home/robotlab/.config
+RUN chown -R robotlab:robotlab /home/robotlab/.config
