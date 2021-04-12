@@ -31,7 +31,6 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
                                       i ->
                                       {
                                          int variables = indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment;
-                                         if (i > 0)
                                             variables += ImplicitSE3MPCIndexHandler.variablesPerOrientationTick;
                                          return variables;
                                       }),
@@ -79,10 +78,9 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
       double firstOrientationCoefficientFactor = firstOrientationVariableRegularization.getDoubleValue();
       double secondOrientationCoefficientFactor = secondOrientationVariableRegularization.getDoubleValue();
 
-      for (int segmentId = 1; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int startVar = indexHandler.getOrientationStartIndex(segmentId);
-
 
          for (int var = startVar; var < startVar + 3; var++)
          {
@@ -99,7 +97,7 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
       double firstOrientationCoefficientFactor = dt * dt / firstOrientationRateVariableRegularization.getDoubleValue();
       double secondOrientationCoefficientFactor = dt * dt / secondOrientationRateVariableRegularization.getDoubleValue();
 
-      for (int segmentId = 1; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int startVar = indexHandler.getOrientationStartIndex(segmentId);
 
