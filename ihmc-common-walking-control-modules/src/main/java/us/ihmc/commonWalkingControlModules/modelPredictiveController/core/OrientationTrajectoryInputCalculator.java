@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.matrixlib.MatrixTools;
 
+// TODO none of the methods in this class use the compressed block formulation
 public class OrientationTrajectoryInputCalculator
 {
    private final ImplicitSE3MPCIndexHandler indexHandler;
@@ -33,16 +34,13 @@ public class OrientationTrajectoryInputCalculator
 
       int segmentNumber = command.getSegmentNumber();
 
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationStartIndex(segmentNumber), command.getAMatrix(), 0, 0, 6, 6, 1.0);
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 indexHandler.getComCoefficientStartIndex(segmentNumber),
-                                 command.getBMatrix(),
-                                 0,
-                                 0,
-                                 6,
-                                 LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber),
-                                 1.0);
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+
+      // V = A This + B c + C -> A This + B c = V - C
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, command.getAMatrix(), 0, 0, 6, 6, 1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, comIndex, command.getBMatrix(), 0, 0, 6, numberOfLinearVariables, 1.0);
 
       CommonOps_DDRM.subtract(command.getObjectiveValue(), command.getCMatrix(), inputToPack.getTaskObjective());
 
@@ -65,28 +63,18 @@ public class OrientationTrajectoryInputCalculator
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 indexHandler.getComCoefficientStartIndex(segmentNumber),
-                                 command.getBMatrix(),
-                                 0,
-                                 0,
-                                 6,
-                                 LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber),
-                                 -1.0);
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationStartIndex(segmentNumber + 1), identity6, 0, 0, 6, 6, 1.0);
+      int nextOrientationIndex = indexHandler.getOrientationStartIndex(segmentNumber + 1);
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+
+      // Next = A This + B c + C -> Next - A This - B c = C
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, command.getAMatrix(), 0, 0, 6, 6, -1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, comIndex, command.getBMatrix(), 0, 0, 6, numberOfLinearVariables, -1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, nextOrientationIndex, identity6, 0, 0, 6, 6, 1.0);
 
       inputToPack.getTaskObjective().set(command.getCMatrix());
 
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 indexHandler.getOrientationStartIndex(segmentNumber),
-                                 command.getAMatrix(),
-                                 0,
-                                 0,
-                                 6,
-                                 6,
-                                 -1.0);
 
       return true;
    }
@@ -97,10 +85,11 @@ public class OrientationTrajectoryInputCalculator
    {
       int segmentNumber = command.getSegmentNumber();
 
-      int linearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
-      int orientationVariables = segmentNumber > 0 ? ImplicitSE3MPCIndexHandler.variablesPerOrientationTick : 0;
+      int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+      int variablesInSegment = numberOfLinearVariables + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick;
+
       inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      inputToPack.setNumberOfVariables(linearVariables + orientationVariables);
+      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape(6);
 
       inputToPack.getTaskJacobian().zero();
@@ -113,18 +102,13 @@ public class OrientationTrajectoryInputCalculator
       }
       inputToPack.setTaskWeightMatrix(orientationWeight);
 
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, 0, command.getBMatrix(tick), 0, 0, 6, linearVariables, 1.0);
-      CommonOps_DDRM.scale(-1.0, command.getCMatrix(tick), inputToPack.getTaskObjective());
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
 
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(),
-                                 0,
-                                 indexHandler.getOrientationStartIndex(segmentNumber),
-                                 command.getAMatrix(tick),
-                                 0,
-                                 0,
-                                 6,
-                                 6,
-                                 1.0);
+      // A This + B c + C = 0 -> A This + B c = -C
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, command.getAMatrix(tick), 0, 0, 6, 6, 1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, comIndex, command.getBMatrix(tick), 0, 0, 6, numberOfLinearVariables, 1.0);
+      CommonOps_DDRM.scale(-1.0, command.getCMatrix(tick), inputToPack.getTaskObjective());
 
       return true;
    }
