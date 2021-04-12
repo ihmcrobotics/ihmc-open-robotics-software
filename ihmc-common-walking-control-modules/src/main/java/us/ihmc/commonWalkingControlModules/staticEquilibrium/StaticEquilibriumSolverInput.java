@@ -15,7 +15,7 @@ import java.util.List;
 public class StaticEquilibriumSolverInput
 {
    private static final double defaultGravityMagnitude = 9.80665;
-   private static final double defaultCoefficientOfFriction = 0.8;
+   private static final double defaultCoefficientOfFriction = 1.0;
 
    /**
     * The vector r in the paper above

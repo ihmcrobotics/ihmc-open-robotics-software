@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -23,9 +25,10 @@ public class StaticEquilibriumSolver
    private static final double rhoMin = 1.0e-4;
    private static final double rhoMax = 1.0e4;
    private static final double convergenceThreshold = 1.0e-9;
-   private static final int maximumNumberOfIterations = 300;
+   private static final int maximumNumberOfIterations = 500;
 
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+//   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
 
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
 
@@ -69,9 +72,12 @@ public class StaticEquilibriumSolver
       int numberOfDecisionVariables = 12 * numberOfContactPoints + 2;
 
       quadraticCost.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
-      linearCost.reshape(numberOfContactPoints, 1);
+      linearCost.reshape(numberOfDecisionVariables, 1);
 
-      Aeq.reshape(6, numberOfContactPoints);
+      CommonOps_DDRM.setIdentity(quadraticCost);
+      CommonOps_DDRM.scale(1e-5, quadraticCost);
+
+      Aeq.reshape(6, numberOfDecisionVariables);
       beq.reshape(6, 1);
 
       for (int i = 0; i < numberOfContactPoints; i++)
@@ -80,11 +86,12 @@ public class StaticEquilibriumSolver
          contactPoints.add(contactPoint);
          FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);
 
+         int contactPointStart = 12 * i;
+
          for (int j = 0; j < 4; j++)
          {
             FrameVector3D basisVector = contactPoint.getBasisVector(j);
-
-            int columnStart = 12 * i;
+            int columnStart = contactPointStart + 3 * j;
 
             Aeq.set(0, columnStart + 0, basisVector.getX());
             Aeq.set(1, columnStart + 1, basisVector.getY());
@@ -104,17 +111,24 @@ public class StaticEquilibriumSolver
          }
       }
 
-      Aeq.set(3, 12 * numberOfContactPoints + 1, - input.getRobotMass() * input.getGravityMagnitude());
-      Aeq.set(4, 12 * numberOfContactPoints + 0, input.getRobotMass() * input.getGravityMagnitude());
+      Aeq.set(3, numberOfDecisionVariables - 1, - input.getRobotMass() * input.getGravityMagnitude());
+      Aeq.set(4, numberOfDecisionVariables - 2, input.getRobotMass() * input.getGravityMagnitude());
       beq.set(2, 0, input.getRobotMass() * input.getGravityMagnitude());
+
+//      double rho = Math.sqrt(2.0) / 12.0;
+//      DMatrixRMaj x = new DMatrixRMaj(numberOfDecisionVariables, 1);
+//      for (int i = 0; i < numberOfDecisionVariables - 2; i++)
+//      {
+//         x.set(i, 0, rho);
+//      }
 
       lowerBounds.reshape(numberOfDecisionVariables, 1);
       upperBounds.reshape(numberOfDecisionVariables, 1);
 
       double comMinMax = 1.0e3;
-      for (int i = 0; i < numberOfContactPoints; i++)
+      for (int i = 0; i < numberOfDecisionVariables; i++)
       {
-         boolean isRhoConstraint = i < numberOfContactPoints - 2;
+         boolean isRhoConstraint = i < numberOfDecisionVariables - 2;
          lowerBounds.set(i, 0, isRhoConstraint ? rhoMin : - comMinMax);
          upperBounds.set(i, 0, isRhoConstraint ? rhoMax : comMinMax);
       }
@@ -128,6 +142,9 @@ public class StaticEquilibriumSolver
          linearCost.set(numberOfDecisionVariables - 1, 0, - directionToOptimize.getY());
 
          qpSolver.clear();
+         qpSolver.resetActiveSet();
+         qpSolver.setUseWarmStart(false);
+
          qpSolver.setQuadraticCostFunction(quadraticCost, linearCost);
          qpSolver.setLinearEqualityConstraints(Aeq, beq);
          qpSolver.setVariableBounds(lowerBounds, upperBounds);
