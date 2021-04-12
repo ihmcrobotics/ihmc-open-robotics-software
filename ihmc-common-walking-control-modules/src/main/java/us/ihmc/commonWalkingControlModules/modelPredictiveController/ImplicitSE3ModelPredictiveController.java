@@ -62,8 +62,6 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private final YoFrameQuaternion orientationAtEndOfWindow = new YoFrameQuaternion("orientationAtEndOfWindow", worldFrame, registry);
    private final YoFrameVector3D angularVelocityAtEndOfWindow = new YoFrameVector3D("angularVelocityAtEndOfWindow", worldFrame, registry);
 
-   private final YoDouble orientationPreviewWindowDuration = new YoDouble("orientationPreviewWindowDuration", registry);
-
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
    private final OrientationTrajectoryConstructor orientationTrajectoryConstructor;
@@ -118,8 +116,6 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
       this.momentOfInertia = momentOfInertia;
 
-      orientationPreviewWindowDuration.set(0.25);
-
       qpSolver = new ImplicitSE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
       qpSolver.setMaxNumberOfIterations(1000);
 
@@ -144,7 +140,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
       orientationTrajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
       orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(currentTimeInState.getDoubleValue());
-      orientationTrajectoryHandler.computeReferenceValue(orientationPreviewWindowDuration.getDoubleValue() + currentTimeInState.getDoubleValue());
+      orientationTrajectoryHandler.computeReferenceValue(previewWindowCalculator.getPreviewWindowDuration() + currentTimeInState.getDoubleValue());
    }
 
 
