@@ -38,16 +38,16 @@ mainDependencies {
    api("us.ihmc:ihmc-humanoid-robotics:source")
 }
 
-testDependencies {
+visualizersDependencies {
+   api(ihmc.sourceSetProject("main"))
+   api("us.ihmc:simulation-construction-set:0.21.7")
+}
 
+testDependencies {
+   api(ihmc.sourceSetProject("visualizers"))
    api("us.ihmc:ihmc-commons-testing:0.30.4")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-convex-optimization-test:0.17.4")
-}
-
-visualizersDependencies {
-   api(ihmc.sourceSetProject("main"))
-   api("us.ihmc:simulation-construction-set:0.21.7")
 }
