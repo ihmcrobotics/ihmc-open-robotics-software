@@ -19,6 +19,7 @@ import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -55,6 +56,9 @@ public class ImplicitOrientationMPCTrajectoryHandler
 
    private final OrientationTrajectoryConstructor trajectoryConstructor;
 
+   private final YoFrameVector3D optimizedCurrentAngleError = new YoFrameVector3D("optimizedCurrentAngleError", worldFrame, registry);
+   private final YoFrameVector3D optimizedCurrentAngleVelocityError = new YoFrameVector3D("optimizedCurrentAngleVelocityError", worldFrame, registry);
+
    public ImplicitOrientationMPCTrajectoryHandler(ImplicitSE3MPCIndexHandler indexHandler, OrientationTrajectoryConstructor trajectoryConstructor)
    {
       this.indexHandler = indexHandler;
@@ -90,12 +94,10 @@ public class ImplicitOrientationMPCTrajectoryHandler
                                                double currentTimeInState,
                                                double previewWindowDuration,
                                                FrameQuaternionReadOnly currentDesiredOrientation,
-                                               FrameVector3DReadOnly currentDesiredAngularVelocity,
-                                               Vector3DReadOnly axisAngleError,
-                                               Vector3DReadOnly angularVelocityError)
+                                               FrameVector3DReadOnly currentDesiredAngularVelocity)
    {
       previewWindowEndTime.set(currentTimeInState + previewWindowDuration);
-      extractSolutionVectors(solutionCoefficients, axisAngleError, angularVelocityError);
+      extractSolutionVectors(solutionCoefficients);
 
       clearTrajectory();
 
@@ -136,16 +138,20 @@ public class ImplicitOrientationMPCTrajectoryHandler
    private final DMatrixRMaj valueAtTick = new DMatrixRMaj(6, 1);
    private final DMatrixRMaj segmentCoefficients = new DMatrixRMaj(10, 1);
 
-   private void extractSolutionVectors(DMatrixRMaj solutionCoefficients, Vector3DReadOnly axisAngleError, Vector3DReadOnly angularVelocityError)
+   private void extractSolutionVectors(DMatrixRMaj solutionCoefficients)
    {
       axisAngleErrorSolutions.clear();
       angularVelocityInBodyErrorSolutions.clear();
 
-      axisAngleError.get(errorAtStartOfState);
-      angularVelocityError.get(3, errorAtStartOfState);
-
       for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
       {
+         MatrixTools.setMatrixBlock(errorAtStartOfState, 0, 0, solutionCoefficients, indexHandler.getOrientationStartIndex(segment), 0, 6, 1, 1.0);
+         if (segment == 0)
+         {
+            optimizedCurrentAngleError.set(errorAtStartOfState);
+            optimizedCurrentAngleVelocityError.set(3, errorAtStartOfState);
+         }
+
          OrientationTrajectoryCommand command = trajectoryConstructor.getOrientationTrajectoryCommands().get(segment);
          int coefficientsInSegment = indexHandler.getRhoCoefficientsInSegment(segment) + LinearMPCIndexHandler.comCoefficientsPerSegment;
          segmentCoefficients.reshape(coefficientsInSegment, 1);
@@ -171,8 +177,6 @@ public class ImplicitOrientationMPCTrajectoryHandler
             axisAngleErrorSolution.setRotationVector(valueAtTick.get(0, 0), valueAtTick.get(1, 0), valueAtTick.get(2, 0));
             angularVelocityErrorSolution.set(3, valueAtTick);
          }
-
-         errorAtStartOfState.set(valueAtTick);
       }
    }
 
