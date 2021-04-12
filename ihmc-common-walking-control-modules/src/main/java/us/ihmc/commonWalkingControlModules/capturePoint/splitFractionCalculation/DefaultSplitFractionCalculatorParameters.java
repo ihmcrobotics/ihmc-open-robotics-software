@@ -7,7 +7,9 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
 
    private double defaultTransferSplitFraction = 0.5;
    private double stepHeightForLargeStepDown = 0.15;
+   private double stepHeightForLargeStepUp = 0.15;
    private double largestStepDownHeight = 0.25;
+   private double largestStepUpHeight = 0.25;
 
    private double transferSplitFractionAtFullDepth = 0.3;
    private double transferWeightDistributionAtFullDepth = 0.75;
@@ -61,6 +63,12 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
       return stepHeightForLargeStepDown;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public double getStepHeightForLargeStepUp() {
+      return stepHeightForLargeStepUp;
+   }
+
    @Override
    public void setStepHeightForLargeStepDown(double height)
    {
@@ -72,6 +80,12 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
    public double getLargestStepDownHeight()
    {
       return largestStepDownHeight;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getLargestStepUpHeight() {
+      return largestStepUpHeight;
    }
 
    @Override
@@ -88,6 +102,13 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
       return transferSplitFractionAtFullDepth;
    }
 
+   /** {@inheritDoc} */
+   @Override
+   public double getTransferSplitFractionForStepUpAtFullDepth()
+   {
+      return 1.0 - transferSplitFractionAtFullDepth;
+   }
+
    @Override
    public void setTransferSplitFractionAtFullDepth(double splitFraction)
    {
@@ -99,6 +120,13 @@ public class DefaultSplitFractionCalculatorParameters implements SplitFractionCa
    public double getTransferWeightDistributionAtFullDepth()
    {
       return transferWeightDistributionAtFullDepth;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public double getTransferWeightDistributionForStepUpAtFullDepth()
+   {
+      return 1.0 - transferWeightDistributionAtFullDepth;
    }
 
    @Override
