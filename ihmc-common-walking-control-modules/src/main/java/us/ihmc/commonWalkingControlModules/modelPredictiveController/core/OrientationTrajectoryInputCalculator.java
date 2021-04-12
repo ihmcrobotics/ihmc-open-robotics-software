@@ -75,7 +75,6 @@ public class OrientationTrajectoryInputCalculator
 
       inputToPack.getTaskObjective().set(command.getCMatrix());
 
-
       return true;
    }
 
