@@ -117,28 +117,30 @@ public class OrientationInputCalculator
       command.getCurrentAxisAngleError().get(initialStateVector);
       command.getCurrentBodyAngularVelocityError().get(3, initialStateVector);
 
+      // Next = A Start + B c + C -> Next - B c = A Start + C
       CommonOps_DDRM.mult(dynamicsCalculator.getDiscreteAMatrix(), initialStateVector, inputToPack.getTaskObjective());
       CommonOps_DDRM.addEquals(inputToPack.getTaskObjective(), dynamicsCalculator.getDiscreteCMatrix());
 
       int startCoMIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, startCoMIndex, dynamicsCalculator.getDiscreteBMatrix(), 0, 0, 6, coefficientsInSegment, -1.0);
 
-      // FIXME could likely do a "set" instead of "add"
       int orientationIndex = indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId());
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, identity6, 0, 0, 6, 6, 1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, identity6, 0, 0, 6, 6, 1.0);
    }
 
    private void setUpConstraintForRegularTick(QPInputTypeA inputToPack,
                                               DiscreteAngularVelocityOrientationCommand command,
                                               int coefficientsInSegment)
    {
+      // Next = A This + B c + C -> Next - A This - B c = C
       inputToPack.getTaskObjective().set(dynamicsCalculator.getDiscreteCMatrix());
 
       int startCoMIndex = indexHandler.getComCoefficientStartIndex(command.getSegmentNumber());
+      int thisOrientationIndex = indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId() - 1);
+      int nextOrientationIndex = indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId());
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, startCoMIndex, dynamicsCalculator.getDiscreteBMatrix(), 0, 0, 6, coefficientsInSegment, -1.0);
 
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId()),
-                                 identity6, 0, 0, 6, 6, 1.0);
-      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, indexHandler.getOrientationTickStartIndex(command.getEndDiscreteTickId() - 1), dynamicsCalculator.getDiscreteAMatrix(), 0, 0, 6, 6, -1.0);
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, nextOrientationIndex, identity6, 0, 0, 6, 6, 1.0);
+      MatrixTools.addMatrixBlock(inputToPack.getTaskJacobian(), 0, thisOrientationIndex, dynamicsCalculator.getDiscreteAMatrix(), 0, 0, 6, 6, -1.0);
    }
 }
