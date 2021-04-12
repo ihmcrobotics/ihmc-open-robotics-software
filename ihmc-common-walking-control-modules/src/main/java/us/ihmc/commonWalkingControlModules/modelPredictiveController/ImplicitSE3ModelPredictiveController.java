@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
@@ -30,6 +31,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
 import java.util.List;
 
 public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredictiveController
@@ -38,8 +40,8 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
-   private static final double initialOrientationWeight = 1e3;
-   private static final double finalOrientationWeight = 1e-2;
+   private static final double initialOrientationWeight = 1e6;
+   private static final double finalOrientationWeight = 1e-6;
 
    private final double gravityZ;
    protected final double mass;
@@ -162,9 +164,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
                                                                    currentTimeInState.getDoubleValue(),
                                                                    previewWindowCalculator.getPreviewWindowDuration(),
                                                                    currentBodyOrientation,
-                                                                   currentBodyAngularVelocity,
-                                                                   currentBodyAxisAngleError,
-                                                                   currentBodyAngularVelocityError);
+                                                                   currentBodyAngularVelocity);
    }
 
    @Override
@@ -384,5 +384,32 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    public WrenchReadOnly getDesiredWrench()
    {
       return desiredWrench;
+   }
+
+   private final FrameVector3D desiredMomentArm = new FrameVector3D();
+   private final FrameVector3D desiredPointTorque = new FrameVector3D();
+
+   public void computeTorque(double time, FixedFrameVector3DBasics torqueToPack)
+   {
+      List<MPCContactPlane> contactPlanes = contactPlaneHelperPool.get(0);
+      linearTrajectoryHandler.compute(time);
+
+      torqueToPack.setToZero();
+
+      time -= currentTimeInState.getDoubleValue();
+
+      for (int planeIdx = 0; planeIdx < contactPlanes.size(); planeIdx++)
+      {
+         MPCContactPlane contactPlane = contactPlanes.get(planeIdx);
+         contactPlane.computeContactForce(omega.getValue(), time);
+         for (int pointIdx = 0; pointIdx < contactPlane.getNumberOfContactPoints(); pointIdx++)
+         {
+            desiredMomentArm.sub(contactPlane.getContactPointHelper(pointIdx).getBasisVectorOrigin(), linearTrajectoryHandler.getDesiredCoMPosition());
+            desiredPointTorque.cross(desiredMomentArm, contactPlane.getContactPointHelper(pointIdx).getContactAcceleration());
+            desiredPointTorque.scale(mass);
+
+            torqueToPack.add(desiredPointTorque);
+         }
+      }
    }
 }
