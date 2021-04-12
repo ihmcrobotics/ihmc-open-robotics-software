@@ -1,6 +1,11 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 public class StaticEquilibriumSolverTest
 {
@@ -10,6 +15,8 @@ public class StaticEquilibriumSolverTest
    public void testTriangleFlat()
    {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      double angle = Math.toRadians(10.0);
+      double[] angles = new double[] {angle, angle, angle};
 
       double distance = 1.0;
       for (int i = 0; i < 3; i++)
