@@ -19,6 +19,7 @@ import java.util.List;
  */
 public class StaticEquilibriumSolver
 {
+   private static final int numberOfDirectionsToOptimize = 16;
    private static final double rhoMin = 1.0e-4;
    private static final double rhoMax = 1.0e4;
    private static final double convergenceThreshold = 1.0e-9;
@@ -44,9 +45,10 @@ public class StaticEquilibriumSolver
 
    static
    {
-      for (int i = 0; i < 8; i++)
+      double dTheta = 2.0 * Math.PI / numberOfDirectionsToOptimize;
+      for (int i = 0; i < numberOfDirectionsToOptimize; i++)
       {
-         directionsToOptimize.add(new Vector2D(Math.cos(i * 2.0 * Math.PI / 8.0), Math.sin(i * 2.0 * Math.PI / 8.0)));
+         directionsToOptimize.add(new Vector2D(Math.cos(i * dTheta), Math.sin(i * dTheta)));
       }
    }
 
