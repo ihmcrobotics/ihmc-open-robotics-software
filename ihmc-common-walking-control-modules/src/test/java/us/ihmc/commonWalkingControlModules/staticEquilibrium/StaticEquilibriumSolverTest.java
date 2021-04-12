@@ -15,7 +15,20 @@ public class StaticEquilibriumSolverTest
    public void testTriangleFlat()
    {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      double angle = Math.toRadians(0.0);
+      testTriangle(input, angle);
+   }
+
+   @Test
+   public void testTriangleLowAngle()
+   {
+      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
       double angle = Math.toRadians(10.0);
+      testTriangle(input, angle);
+   }
+
+   private void testTriangle(StaticEquilibriumSolverInput input, double angle)
+   {
       double[] angles = new double[] {angle, angle, angle};
 
       double distance = 1.0;
