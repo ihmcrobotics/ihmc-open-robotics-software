@@ -11,10 +11,15 @@ public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState i
    private final BooleanParameter computeSplitFractionsFromArea;
    private final DoubleParameter defaultTransferSplitFraction;
    private final DoubleParameter stepHeightForLargeStepDown;
+   private final DoubleParameter stepHeightForLargeStepUp;
    private final DoubleParameter largestStepDownHeight;
+   private final DoubleParameter largestStepUpHeight;
    private final DoubleParameter transferSplitFractionAtFullDepth;
+   private final DoubleParameter transferSplitFractionForStepUpAtFullDepth;
    private final DoubleParameter transferWeightDistributionAtFullDepth;
-   private final DoubleParameter transferFinalWeightDistributionatFullDepth;
+   private final DoubleParameter transferWeightDistributionForStepUpAtFullDepth;
+   private final DoubleParameter transferFinalWeightDistributionAtFullDepth;
+   private final DoubleParameter transferFinalWeightDistributionForStepUpAtFullDepth;
    private final DoubleParameter fractionLoadIfFootHasFullSupport;
    private final DoubleParameter fractionTimeOnFootIfFootHasFullSupport;
    private final DoubleParameter fractionLoadIfOtherFootHasNoWidth;
@@ -28,16 +33,27 @@ public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState i
       computeSplitFractionsFromArea = new BooleanParameter("computeSplitFractionsFromArea", registry, defaultParameters.calculateSplitFractionsFromArea());
       defaultTransferSplitFraction = new DoubleParameter("defaultTransferSplitFraction", registry, defaultParameters.getDefaultTransferSplitFraction());
       stepHeightForLargeStepDown = new DoubleParameter("stepHeightForLargeStepDown", registry, defaultParameters.getStepHeightForLargeStepDown());
+      stepHeightForLargeStepUp = new DoubleParameter("stepHeightForLargeStepUp", registry, defaultParameters.getStepHeightForLargeStepUp());
       largestStepDownHeight = new DoubleParameter("largestStepDownHeight", registry, defaultParameters.getLargestStepDownHeight());
+      largestStepUpHeight = new DoubleParameter("largestStepUpHeight", registry, defaultParameters.getLargestStepUpHeight());
       transferSplitFractionAtFullDepth = new DoubleParameter("transferSplitFractionAtFullDepth",
                                                              registry,
                                                              defaultParameters.getTransferSplitFractionAtFullDepth());
+      transferSplitFractionForStepUpAtFullDepth = new DoubleParameter("transferSplitFractionForStepUpAtFullDepth",
+                                                              registry,
+                                                              defaultParameters.getTransferSplitFractionForStepUpAtFullDepth());
       transferWeightDistributionAtFullDepth = new DoubleParameter("transferWeightDistributionAtFullDepth",
                                                                   registry,
                                                                   defaultParameters.getTransferWeightDistributionAtFullDepth());
-      transferFinalWeightDistributionatFullDepth = new DoubleParameter("transferFinalWeightDistributionAtFullDepth",
+      transferWeightDistributionForStepUpAtFullDepth = new DoubleParameter("transferWeightDistributionForStepUpAtFullDepth",
+                                                              registry,
+                                                              defaultParameters.getTransferWeightDistributionForStepUpAtFullDepth());
+      transferFinalWeightDistributionAtFullDepth = new DoubleParameter("transferFinalWeightDistributionAtFullDepth",
                                                                        registry,
                                                                        defaultParameters.getTransferFinalWeightDistributionAtFullDepth());
+      transferFinalWeightDistributionForStepUpAtFullDepth = new DoubleParameter("transferFinalWeightDistributionForStepUpAtFullDepth",
+                                                              registry,
+                                                              defaultParameters.getTransferFinalWeightDistributionForStepUpAtFullDepth());
       fractionLoadIfFootHasFullSupport = new DoubleParameter("fractionLoadIfFootHasFullSupport",
                                                              registry,
                                                              defaultParameters.getFractionLoadIfFootHasFullSupport());
@@ -55,10 +71,15 @@ public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState i
       registerVariableToSave(computeSplitFractionsFromPositions);
       registerVariableToSave(defaultTransferSplitFraction);
       registerVariableToSave(stepHeightForLargeStepDown);
+      registerVariableToSave(stepHeightForLargeStepUp);
       registerVariableToSave(largestStepDownHeight);
+      registerVariableToSave(largestStepUpHeight);
       registerVariableToSave(transferSplitFractionAtFullDepth);
+      registerVariableToSave(transferSplitFractionForStepUpAtFullDepth);
       registerVariableToSave(transferWeightDistributionAtFullDepth);
-      registerVariableToSave(transferFinalWeightDistributionatFullDepth);
+      registerVariableToSave(transferWeightDistributionForStepUpAtFullDepth);
+      registerVariableToSave(transferFinalWeightDistributionAtFullDepth);
+      registerVariableToSave(transferFinalWeightDistributionForStepUpAtFullDepth);
       registerVariableToSave(fractionLoadIfFootHasFullSupport);
       registerVariableToSave(fractionTimeOnFootIfFootHasFullSupport);
       registerVariableToSave(fractionLoadIfOtherFootHasNoWidth);
@@ -88,10 +109,22 @@ public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState i
       return stepHeightForLargeStepDown.getValue();
    }
 
+   @Override
+   public double getStepHeightForLargeStepUp()
+   {
+      return stepHeightForLargeStepUp.getValue();
+   }
+
    /** {@inheritDoc} */
    public double getLargestStepDownHeight()
    {
       return largestStepDownHeight.getValue();
+   }
+
+   @Override
+   public double getLargestStepUpHeight()
+   {
+      return largestStepUpHeight.getValue();
    }
 
    /** {@inheritDoc} */
@@ -100,16 +133,34 @@ public class YoSplitFractionCalculatorParameters extends YoSaveableModuleState i
       return transferSplitFractionAtFullDepth.getValue();
    }
 
+   @Override
+   public double getTransferSplitFractionForStepUpAtFullDepth()
+   {
+      return transferSplitFractionForStepUpAtFullDepth.getValue();
+   }
+
    /** {@inheritDoc} */
    public double getTransferWeightDistributionAtFullDepth()
    {
       return transferWeightDistributionAtFullDepth.getValue();
    }
 
+   @Override
+   public double getTransferWeightDistributionForStepUpAtFullDepth()
+   {
+      return transferWeightDistributionForStepUpAtFullDepth.getValue();
+   }
+
    /** {@inheritDoc} */
    public double getTransferFinalWeightDistributionAtFullDepth()
    {
-      return transferFinalWeightDistributionatFullDepth.getValue();
+      return transferFinalWeightDistributionAtFullDepth.getValue();
+   }
+
+   /** {@inheritDoc} */
+   public double getTransferFinalWeightDistributionForStepUpAtFullDepth()
+   {
+      return transferFinalWeightDistributionForStepUpAtFullDepth.getValue();
    }
 
    /** {@inheritDoc} */
