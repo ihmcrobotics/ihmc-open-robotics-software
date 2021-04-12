@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.EfficientMatrixExponentialCalculator;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -58,7 +59,7 @@ public class OrientationDynamicsCalculator
    private final DMatrixRMaj B = new DMatrixRMaj(6, 0);
    private final DMatrixRMaj C = new DMatrixRMaj(6, 1);
 
-   private final DiscretizationCalculator discretizationCalculator = new DiscreteDiscretizationCalculator();
+   private final DiscretizationCalculator discretizationCalculator = new EfficientFirstOrderHoldDiscretizationCalculator();
 
    private final DMatrixRMaj Ad = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj Bd = new DMatrixRMaj(6, 0);
