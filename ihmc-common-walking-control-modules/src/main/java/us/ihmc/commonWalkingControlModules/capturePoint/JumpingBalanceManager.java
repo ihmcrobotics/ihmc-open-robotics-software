@@ -65,6 +65,7 @@ public class JumpingBalanceManager
    private final YoFramePoint3D yoPerfectVRP = new YoFramePoint3D("perfectVRP", worldFrame, registry);
 
    private final YoFixedFrameWrench desiredWrench;
+   private final YoFrameVector3D desiredTorque = new YoFrameVector3D("desiredCoMTorque", worldFrame, registry);
    private final FrameVector3D desiredLinearMomentumRate = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
@@ -259,6 +260,8 @@ public class JumpingBalanceManager
 
       desiredWrench.setMatchingFrame(comTrajectoryPlanner.getDesiredWrench());
 
+      comTrajectoryPlanner.computeTorque(timeInSupportSequence.getDoubleValue(), desiredTorque);
+
       desiredLinearMomentumRate.setMatchingFrame(desiredWrench.getLinearPart());
       desiredLinearMomentumRate.addZ(controllerToolbox.getFullRobotModel().getTotalMass() * -Math.abs(controllerToolbox.getGravityZ()));
       desiredAngularMomentumRate.setMatchingFrame(desiredWrench.getAngularPart());
@@ -336,6 +339,9 @@ public class JumpingBalanceManager
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       desiredWrench.setMatchingFrame(comTrajectoryPlanner.getDesiredWrench());
+
+      comTrajectoryPlanner.computeTorque(timeInSupportSequence.getDoubleValue(), desiredTorque);
+
 
       desiredLinearMomentumRate.setMatchingFrame(desiredWrench.getLinearPart());
       desiredLinearMomentumRate.addZ(controllerToolbox.getFullRobotModel().getTotalMass() * -Math.abs(controllerToolbox.getGravityZ()));
