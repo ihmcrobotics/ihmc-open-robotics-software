@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.convexOptimization.qpOASES.Matrix;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -1143,6 +1144,111 @@ public class OrientationDynamicCalculatorTest
    }
 
 
+   @Test
+   public void testContactJacobians()
+   {
+      double orientationPreviewWindowLength = 0.75;
+      double tickDuration = 0.1;
+
+      MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+
+      List<ContactPlaneProvider> contactProviders = new ArrayList<>();
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      FrameVector3D gravityVector = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
+
+      FramePose3D leftContactPose = new FramePose3D();
+      FramePose3D rightContactPose = new FramePose3D();
+      leftContactPose.getPosition().setY(0.25);
+      rightContactPose.getPosition().setY(-0.25);
+
+      leftContactPlane.computeBasisVectors(contactPolygon, leftContactPose, mu);
+      rightContactPlane.computeBasisVectors(contactPolygon, rightContactPose, mu);
+
+      ContactPlaneProvider contact = new ContactPlaneProvider();
+      contact.getTimeInterval().setInterval(0.0, 1.0);
+      contact.addContact(leftContactPose, contactPolygon);
+      contact.addContact(rightContactPose, contactPolygon);
+      contact.setStartECMPPosition(new FramePoint3D());
+      contact.setEndECMPPosition(new FramePoint3D());
+
+      contactProviders.add(contact);
+
+      SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
+      OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
+
+      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+
+      int rhoSize = 16;
+      int rhoCoefficients = 8 * rhoSize;
+      int comCoefficients = 6;
+
+      Random random = new Random(1738L);
+
+      for (double time = 0.0; time < orientationPreviewWindowLength; time += 0.01)
+      {
+         int numberOfTrajectoryCoefficients = rhoCoefficients + comCoefficients;
+         DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
+         trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
+
+         leftContactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0));
+         rightContactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) + leftContactPlane.getCoefficientSize());
+         leftContactPlane.computeContactForce(omega, time);
+         rightContactPlane.computeContactForce(omega, time);
+
+         FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, leftContactPlane, rightContactPlane);
+         DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
+         comPosition.get(comPositionVector);
+
+         int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
+
+         FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredInternalAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
+         desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
+         FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+
+         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
+         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
+         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
+         command.setDesiredCoMPosition(desiredCoMPosition);
+         command.setDesiredBodyOrientation(desiredBodyOrientation);
+         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
+         command.setTimeOfConstraint(time);
+         command.setSegmentNumber(0);
+         command.setEndingDiscreteTickId(nextTickId);
+         command.setDurationOfHold(tickDuration);
+         command.setOmega(omega);
+         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
+         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
+         command.addContactPlaneHelper(leftContactPlane);
+         command.addContactPlaneHelper(rightContactPlane);
+         //
+         inputCalculator.compute(command);
+
+
+         FrameVector3DReadOnly expectedNetTorque = getNetCoMTorque(desiredCoMPosition, leftContactPlane, rightContactPlane);
+
+         DMatrixRMaj contactCoefficients = new DMatrixRMaj(rhoCoefficients, 1);
+         MatrixTools.setMatrixBlock(contactCoefficients, 0, 0, trajectoryCoefficients, LinearMPCIndexHandler.comCoefficientsPerSegment, 0, rhoCoefficients, 1, 1.0);
+
+         DMatrixRMaj contactForces = new DMatrixRMaj(2 * leftContactPlane.getNumberOfContactPoints() * 3, 1);
+         CommonOps_DDRM.mult(inputCalculator.contactForceJacobian, contactCoefficients, contactForces);
+         DMatrixRMaj torque = new DMatrixRMaj(3, 1);
+         CommonOps_DDRM.mult(inputCalculator.contactForceToOriginTorqueJacobian, contactForces, torque);
+         FrameVector3D netTorque = new FrameVector3D();
+         netTorque.set(torque);
+
+         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(expectedNetTorque, netTorque, 1e-5);
+
+
+      }
+   }
+
    private static FrameVector3DReadOnly computeExpectedAngularVelocityErrorRate(double mass,
                                                                                 FramePoint3DReadOnly comPosition,
                                                                                 FrameVector3DReadOnly angularErrorAtCurrentTick,
@@ -1261,7 +1367,6 @@ public class OrientationDynamicCalculatorTest
 
       return angularVelocityErrorRateFromContact;
    }
-
 
 
    private static FrameVector3DReadOnly computeExpectedAngularErrorRate(FrameVector3DReadOnly angularErrorAtCurrentTick,
