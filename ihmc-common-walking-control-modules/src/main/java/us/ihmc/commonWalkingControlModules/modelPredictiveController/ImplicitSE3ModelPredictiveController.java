@@ -134,7 +134,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    protected void initializeIndexHandler()
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
-      indexHandler.initialize(planningWindow, currentTimeInState.getDoubleValue());
+      indexHandler.initialize(planningWindow);
    }
 
    @Override
