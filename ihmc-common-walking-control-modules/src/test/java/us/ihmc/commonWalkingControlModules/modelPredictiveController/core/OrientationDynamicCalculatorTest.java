@@ -627,7 +627,8 @@ public class OrientationDynamicCalculatorTest
 
          FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
-         FrameVector3D desiredInternalAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
+         FrameVector3D desiredInternalAngularMomentumRate = new FrameVector3D(desiredBodyAngularMomentumRate);
+         desiredInternalAngularMomentumRate.scale(-1.0);
          FrameVector3D desiredNetAngularMomentumRate = new FrameVector3D();
          desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
          FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -1098,40 +1099,13 @@ public class OrientationDynamicCalculatorTest
          inputCalculator.compute(command);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
-         FrameVector3D angularVelocityErrorRateFromContact2 = new FrameVector3D();
 
          FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
          desiredContactPointForce.sub(gravityVector);
-         desiredContactPointForce.scale(mass / contactPlane.getNumberOfContactPoints());
+         desiredContactPointForce.scale(mass);
 
-         for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
-         {
-            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(contactPointIdx);
-
-            FrameVector3D desiredTorqueFromContact = new FrameVector3D();
-            FrameVector3D desiredCoriolisForce = new FrameVector3D();
-            FrameVector3D fullTorqueFromPoint = new FrameVector3D();
-
-            FrameVector3D desiredTorqueAboutPoint = new FrameVector3D();
-
-            FrameVector3D desiredMomentArm = new FrameVector3D();
-            desiredMomentArm.sub(contactPoint.getBasisVectorOrigin(), desiredCoMPosition);
-
-            desiredTorqueFromContact.cross(desiredMomentArm, desiredContactPointForce);
-            desiredCoriolisForce.cross(desiredCoMPosition, desiredContactPointForce);
-
-            fullTorqueFromPoint.sub(desiredCoriolisForce, desiredTorqueFromContact);
-            angularVelocityErrorRateFromContact.add(fullTorqueFromPoint);
-
-            FrameVector3D other = new FrameVector3D(contactPoint.getBasisVectorOrigin());
-            other.scaleAdd(-2.0, desiredCoMPosition, contactPoint.getBasisVectorOrigin());
-            desiredTorqueAboutPoint.cross(desiredContactPointForce, other);
-            angularVelocityErrorRateFromContact2.add(desiredTorqueAboutPoint);
-
-            EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(fullTorqueFromPoint, desiredTorqueAboutPoint, 1e-6);
-         }
-
-         EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(angularVelocityErrorRateFromContact, angularVelocityErrorRateFromContact2, 1e-6);
+         angularVelocityErrorRateFromContact.cross(desiredCoMPosition, desiredContactPointForce);
+         angularVelocityErrorRateFromContact.sub(desiredNetAngularMomentumRate);
 
          desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
