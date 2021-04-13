@@ -11,7 +11,10 @@ import us.ihmc.tools.string.StringTools;
 
 public class GDXImGuiBasedUIDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI();
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
+                                                              "ihmc-open-robotics-software",
+                                                              "ihmc-high-level-behaviors/src/test/resources",
+                                                              "Demo");
 
    private final Stopwatch stopwatch = new Stopwatch().start();
 

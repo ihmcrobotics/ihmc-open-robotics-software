@@ -18,6 +18,7 @@ import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -33,7 +34,7 @@ public class GDXImGuiBasedUI
    private final GDXVRManager vrManager = new GDXVRManager();
 
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
-   private final ImGuiDockingSetup imGuiDockingSetup = new ImGuiDockingSetup();
+   private final ImGuiDockingSetup imGuiDockingSetup;
 
 //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -50,14 +51,17 @@ public class GDXImGuiBasedUI
    private float sizeX;
    private float sizeY;
 
-   public GDXImGuiBasedUI()
+   public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
-      this("");
+      this(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder, "");
    }
 
-   public GDXImGuiBasedUI(String windowTitle)
+   public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
    {
       this.windowTitle = windowTitle;
+
+      imGuiDockingSetup = new ImGuiDockingSetup(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder);
+
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
 //      Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop, "GUIRecorderStop"));
@@ -135,7 +139,9 @@ public class GDXImGuiBasedUI
                ImGui.menuItem(window.getWindowName(), "", window.getEnabled());
             }
          }
-         if (ImGui.button("Save Layout"))
+         ImGui.separator();
+         // Implement toggle for auto saving layout?
+         if (ImGui.menuItem("Save Layout"))
          {
             saveImGuiSettings();
          }
@@ -204,10 +210,14 @@ public class GDXImGuiBasedUI
       ImGui.end();
       ImGui.popStyleVar();
 
-      if (imGuiWindowAndDockSystem.isFirstRenderCall() && !Files.exists(imGuiWindowAndDockSystem.getImGuiSettingsPath()))
+      if (imGuiWindowAndDockSystem.isFirstRenderCall())
       {
-         imGuiDockingSetup.build(imGuiWindowAndDockSystem.getCentralDockspaceId());
-         saveImGuiSettings();
+         if (!Files.exists(imGuiWindowAndDockSystem.getImGuiSettingsPath()))
+         {
+            // TODO: Load default settings file from resources
+         }
+
+         imGuiDockingSetup.loadConfiguration(imGuiWindowAndDockSystem.getImGuiSettingsPath());
       }
 
       imGuiWindowAndDockSystem.afterWindowManagement();
@@ -218,9 +228,12 @@ public class GDXImGuiBasedUI
 
    private void saveImGuiSettings()
    {
-      String settingsPath = imGuiWindowAndDockSystem.getImGuiSettingsPath().toString();
-      LogTools.info("Saving ImGui settings to {}", settingsPath);
-      ImGui.saveIniSettingsToDisk(settingsPath);
+      Path settingsPath = imGuiWindowAndDockSystem.getImGuiSettingsPath();
+      String settingsPathString = settingsPath.toString();
+      LogTools.info("Saving ImGui settings to {}", settingsPathString);
+      ImGui.saveIniSettingsToDisk(settingsPathString);
+
+      imGuiDockingSetup.saveConfiguration(settingsPath);
    }
 
    public void dispose()
