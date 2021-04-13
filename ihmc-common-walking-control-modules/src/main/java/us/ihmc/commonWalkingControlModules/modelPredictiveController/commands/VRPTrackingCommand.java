@@ -43,7 +43,7 @@ public class VRPTrackingCommand implements MPCCommand<VRPTrackingCommand>
    /**
     *  weight to scale the cost of the VRP tracking objective.
     */
-   private double weight = CoMTrajectoryModelPredictiveController.vrpTrackingWeight;
+   private double weight = CoMTrajectoryModelPredictiveController.defaultVrpTrackingWeight;
 
    /**
     * Desired VRP value at the beginning of the segment.

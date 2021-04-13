@@ -40,8 +40,8 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private static final double defaultOrientationAngleTrackingWeight = 1e-2;
    private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
 
-   private static final double initialOrientationWeight = 1e6;
-   private static final double finalOrientationWeight = 1e-6;
+   private static final double defaultInitialOrientationWeight = 1e6;
+   private static final double defaultFinalOrientationWeight = 1e-6;
 
    private final double gravityZ;
    protected final double mass;
@@ -80,6 +80,8 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
    private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
    private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
+   private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
+   private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
 
    public ImplicitSE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
                                                double gravityZ, double nominalCoMHeight, double mass, double dt,
@@ -104,8 +106,12 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
+
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
       orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
+      initialOrientationWeight.set(defaultInitialOrientationWeight);
+      finalOrientationWeight.set(defaultFinalOrientationWeight);
+
       orientationTrajectoryConstructor = new OrientationTrajectoryConstructor(indexHandler,
                                                                               orientationAngleTrackingWeight,
                                                                               orientationVelocityTrackingWeight,
@@ -224,7 +230,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       commandToPack.setSegmentNumber(0);
       commandToPack.setObjectiveValue(initialError);
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      commandToPack.setObjectiveWeight(initialOrientationWeight);
+      commandToPack.setObjectiveWeight(initialOrientationWeight.getDoubleValue());
 
       return commandToPack;
    }
@@ -243,7 +249,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
       commandToPack.getObjectiveValue().zero();
       commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      commandToPack.setObjectiveWeight(finalOrientationWeight);
+      commandToPack.setObjectiveWeight(finalOrientationWeight.getDoubleValue());
 
       return commandToPack;
    }
