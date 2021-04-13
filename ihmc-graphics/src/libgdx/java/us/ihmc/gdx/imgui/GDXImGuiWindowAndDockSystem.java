@@ -11,6 +11,7 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,7 +21,7 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiWindowAndDockSystem
 {
-   private Path imGuiSettingsPath;
+   private Path imGuiUserSettingsPath;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
@@ -30,10 +31,27 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
+   private Class<?> classForLoading;
+   private String directoryNameToAssumePresent;
+   private String subsequentPathToResourceFolder;
+   private boolean loadSaveEnabled = false;
+
+   public GDXImGuiWindowAndDockSystem()
+   {
+   }
+
+   public GDXImGuiWindowAndDockSystem(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   {
+      this.classForLoading = classForLoading;
+      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
+      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+      loadSaveEnabled = true;
+   }
+
    public void create(long windowHandle, String windowTitle)
    {
       this.windowHandle = windowHandle;
-      imGuiSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + windowTitle.replaceAll(" ", "") + "ImGuiSettings.ini").toAbsolutePath().normalize();
+      imGuiUserSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + windowTitle.replaceAll(" ", "") + "ImGuiSettings.ini").toAbsolutePath().normalize();
 
       GLFWErrorCallback.createPrint(System.err).set();
 
@@ -84,11 +102,21 @@ public class GDXImGuiWindowAndDockSystem
 
    public void beforeWindowManagement()
    {
-      if (isFirstRenderCall && Files.exists(imGuiSettingsPath))
+      if (isFirstRenderCall)
       {
-         String settingsPath = imGuiSettingsPath.toString();
-         LogTools.info("Loading ImGui settings from {}", settingsPath);
-         ImGui.loadIniSettingsFromDisk(settingsPath);
+         Path pathToFile;
+         if (Files.exists(imGuiUserSettingsPath))
+         {
+            pathToFile = imGuiUserSettingsPath;
+            LogTools.info("Loading ImGui settings from {}", pathToFile.toString());
+         }
+         else // see if there are defaults
+         {
+            pathToFile = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui")
+                                           .resolve(imGuiUserSettingsPath.getFileName());
+            LogTools.info("{} not found. Loading default ImGui settings from {}", imGuiUserSettingsPath.toString(), pathToFile.toString());
+         }
+         ImGui.loadIniSettingsFromDisk(pathToFile.toString());
       }
 
       imGuiGlfw.newFrame();
@@ -148,6 +176,6 @@ public class GDXImGuiWindowAndDockSystem
 
    public Path getImGuiSettingsPath()
    {
-      return imGuiSettingsPath;
+      return imGuiUserSettingsPath;
    }
 }
