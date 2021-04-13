@@ -87,7 +87,9 @@ public class LinearMPCQPSolver
       this(indexHandler,
            dt,
            gravityZ,
-           new BlockInverseCalculator(indexHandler, i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
+           new BlockInverseCalculator(indexHandler,
+                                      indexHandler::getComCoefficientStartIndex,
+                                      i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
            parentRegistry);
    }
 

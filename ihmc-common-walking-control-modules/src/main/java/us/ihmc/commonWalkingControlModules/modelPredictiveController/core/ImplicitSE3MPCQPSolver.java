@@ -28,11 +28,10 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
            dt,
            gravityZ,
            new BlockInverseCalculator(indexHandler,
+                                      indexHandler::getOrientationStartIndex,
                                       i ->
                                       {
-                                         int variables = indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment;
-                                            variables += ImplicitSE3MPCIndexHandler.variablesPerOrientationTick;
-                                         return variables;
+                                         return indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick;
                                       }),
            parentRegistry);
    }

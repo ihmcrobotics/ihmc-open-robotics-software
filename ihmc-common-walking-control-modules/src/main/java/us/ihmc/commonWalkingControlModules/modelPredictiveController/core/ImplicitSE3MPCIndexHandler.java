@@ -45,11 +45,11 @@ public class ImplicitSE3MPCIndexHandler extends LinearMPCIndexHandler
 
          totalNumberOfOrientationTicks += variablesPerOrientationTick;
 
-         int orientationIndex = rhoStartIndices.get(segmentNumber) + rhoCoefficientsInSegment.get(segmentNumber);
+         int orientationIndex = comStartIndices.get(segmentNumber);
          orientationStartIndices.add(orientationIndex);
 
          // shift the remaining segments
-         for (int j = segmentNumber + 1; j < previewWindowContactSequence.size(); j++)
+         for (int j = segmentNumber; j < previewWindowContactSequence.size(); j++)
          {
             comStartIndices.set(j, comStartIndices.get(j) + variablesPerOrientationTick);
             rhoStartIndices.set(j, rhoStartIndices.get(j) + variablesPerOrientationTick);
