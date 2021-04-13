@@ -19,7 +19,6 @@ import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -34,7 +33,7 @@ public class GDXImGuiBasedUI
    private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
    private final GDXVRManager vrManager = new GDXVRManager();
 
-   private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem();
+   private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
    private final ImGuiDockingSetup imGuiDockingSetup;
 
 //   private final GDXLinuxGUIRecorder guiRecorder;
@@ -67,6 +66,7 @@ public class GDXImGuiBasedUI
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.windowTitle = windowTitle;
 
+      imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder);
       imGuiDockingSetup = new ImGuiDockingSetup(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder);
 
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
@@ -247,12 +247,8 @@ public class GDXImGuiBasedUI
 
    private void saveImGuiSettings(boolean saveDefault)
    {
-      Path settingsPath = imGuiWindowAndDockSystem.getImGuiSettingsPath();
-      String settingsPathString = settingsPath.toString();
-      LogTools.info("Saving ImGui settings to {}", settingsPathString);
-      ImGui.saveIniSettingsToDisk(settingsPathString);
-
-      imGuiDockingSetup.saveConfiguration(settingsPath, saveDefault);
+      imGuiWindowAndDockSystem.saveImGuiLayout(saveDefault);
+      imGuiDockingSetup.saveConfiguration(imGuiWindowAndDockSystem.getImGuiSettingsPath(), saveDefault);
    }
 
    public void dispose()
