@@ -8,6 +8,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +25,12 @@ import java.util.List;
 public class StaticEquilibriumSolver
 {
    private static final int numberOfDirectionsToOptimize = 16;
-   private static final double rhoMin = 1.0e-4;
    private static final double rhoMax = 1.0e4;
    private static final double convergenceThreshold = 1.0e-9;
    private static final int maximumNumberOfIterations = 500;
+
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
 //   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
    private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
@@ -40,6 +45,7 @@ public class StaticEquilibriumSolver
 
    private final DMatrixRMaj lowerBounds = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj upperBounds = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj inequalityMatrix = new DMatrixRMaj(0, 0);
 
    private final DMatrixRMaj solution = new DMatrixRMaj(0, 0);
    private final List<Point2D> supportRegion = new ArrayList<>();
@@ -59,6 +65,11 @@ public class StaticEquilibriumSolver
    {
       qpSolver.setConvergenceThreshold(convergenceThreshold);
       qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations);
+
+      for (int i = 0; i < StaticEquilibriumSolverInput.maxContactPoints; i++)
+      {
+         contactPoints.add(new StaticEquilibriumContactPoint(i, registry, graphicsListRegistry));
+      }
    }
 
    public void solve(StaticEquilibriumSolverInput input)
@@ -80,17 +91,22 @@ public class StaticEquilibriumSolver
       Aeq.reshape(6, numberOfDecisionVariables);
       beq.reshape(6, 1);
 
+      for (int i = 0; i < contactPoints.size(); i++)
+      {
+         contactPoints.get(i).clear();
+      }
+
       for (int i = 0; i < numberOfContactPoints; i++)
       {
-         StaticEquilibriumContactPoint contactPoint = new StaticEquilibriumContactPoint(i, input);
-         contactPoints.add(contactPoint);
-         FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);
+         StaticEquilibriumContactPoint contactPoint = contactPoints.get(i);
+         contactPoint.initialize(input);
 
+         FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);
          int contactPointStart = 12 * i;
 
          for (int j = 0; j < 4; j++)
          {
-            FrameVector3D basisVector = contactPoint.getBasisVector(j);
+            YoFrameVector3D basisVector = contactPoint.getBasisVector(j);
             int columnStart = contactPointStart + 3 * j;
 
             Aeq.set(0, columnStart + 0, basisVector.getX());
@@ -115,13 +131,6 @@ public class StaticEquilibriumSolver
       Aeq.set(4, numberOfDecisionVariables - 2, input.getRobotMass() * input.getGravityMagnitude());
       beq.set(2, 0, input.getRobotMass() * input.getGravityMagnitude());
 
-//      double rho = Math.sqrt(2.0) / 12.0;
-//      DMatrixRMaj x = new DMatrixRMaj(numberOfDecisionVariables, 1);
-//      for (int i = 0; i < numberOfDecisionVariables - 2; i++)
-//      {
-//         x.set(i, 0, rho);
-//      }
-
       lowerBounds.reshape(numberOfDecisionVariables, 1);
       upperBounds.reshape(numberOfDecisionVariables, 1);
 
@@ -129,8 +138,14 @@ public class StaticEquilibriumSolver
       for (int i = 0; i < numberOfDecisionVariables; i++)
       {
          boolean isRhoConstraint = i < numberOfDecisionVariables - 2;
-         lowerBounds.set(i, 0, isRhoConstraint ? rhoMin : - comMinMax);
+         lowerBounds.set(i, 0, isRhoConstraint ? 0.0 : - comMinMax);
          upperBounds.set(i, 0, isRhoConstraint ? rhoMax : comMinMax);
+      }
+
+      inequalityMatrix.reshape(numberOfDecisionVariables - 2, numberOfDecisionVariables);
+      for (int i = 0; i < numberOfDecisionVariables - 2; i++)
+      {
+         inequalityMatrix.set(i, i, -1.0);
       }
 
       solution.reshape(numberOfDecisionVariables, 1);
@@ -150,6 +165,13 @@ public class StaticEquilibriumSolver
          qpSolver.setVariableBounds(lowerBounds, upperBounds);
          qpSolver.solve(solution);
 
+         System.out.println("-------------------------");
+         for (int j = 0; j < numberOfDecisionVariables; j++)
+         {
+            System.out.println(solution.get(j, 0));
+         }
+         System.out.println("-------------------------");
+
          double comExtremumX = solution.get(numberOfDecisionVariables - 2, 0);
          double comExtremumY = solution.get(numberOfDecisionVariables - 1, 0);
          supportRegion.add(new Point2D(comExtremumX, comExtremumY));
@@ -159,5 +181,15 @@ public class StaticEquilibriumSolver
    public List<Point2D> getSupportRegion()
    {
       return supportRegion;
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
+
+   public YoGraphicsListRegistry getGraphicsListRegistry()
+   {
+      return graphicsListRegistry;
    }
 }
