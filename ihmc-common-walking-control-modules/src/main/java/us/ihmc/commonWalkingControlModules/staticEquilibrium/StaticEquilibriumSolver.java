@@ -6,9 +6,15 @@ import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -31,6 +37,7 @@ public class StaticEquilibriumSolver
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+   private TickAndUpdatable tickAndUpdatable = null;
 
 //   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
    private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
@@ -49,6 +56,12 @@ public class StaticEquilibriumSolver
 
    private final DMatrixRMaj solution = new DMatrixRMaj(0, 0);
    private final List<Point2D> supportRegion = new ArrayList<>();
+
+   private final YoFramePoint3D directionToOptimizeBase = new YoFramePoint3D("directionToOptimizeBase", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
+
+   private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D nanCoM = new YoFramePoint3D("nanCoM", ReferenceFrame.getWorldFrame(), registry);
 
    private static final List<Vector2D> directionsToOptimize = new ArrayList<>();
 
@@ -70,6 +83,16 @@ public class StaticEquilibriumSolver
       {
          contactPoints.add(new StaticEquilibriumContactPoint(i, registry, graphicsListRegistry));
       }
+
+      YoGraphicVector directionToOptimizeGraphic = new YoGraphicVector("directionToOptimizeGraphic", directionToOptimizeBase, directionToOptimize, 0.5);
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
+      directionToOptimizeBase.set(0.0, 0.0, 0.4);
+
+      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.05, YoAppearance.Blue());
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
+
+      YoGraphicPosition naNCoMGraphic = new YoGraphicPosition("naNCoMGraphic", nanCoM, 0.05, YoAppearance.Red());
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), naNCoMGraphic);
    }
 
    public void solve(StaticEquilibriumSolverInput input)
@@ -80,13 +103,14 @@ public class StaticEquilibriumSolver
       }
 
       int numberOfContactPoints = input.getNumberOfContacts();
-      int numberOfDecisionVariables = 12 * numberOfContactPoints + 2;
+      int numberOfDecisionVariables = 4 * numberOfContactPoints + 2;
 
       quadraticCost.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
       linearCost.reshape(numberOfDecisionVariables, 1);
 
       CommonOps_DDRM.setIdentity(quadraticCost);
-      CommonOps_DDRM.scale(1e-5, quadraticCost);
+      CommonOps_DDRM.scale(1e-2, quadraticCost);
+      CommonOps_DDRM.scale(10.0, linearCost);
 
       Aeq.reshape(6, numberOfDecisionVariables);
       beq.reshape(6, 1);
@@ -102,28 +126,27 @@ public class StaticEquilibriumSolver
          contactPoint.initialize(input);
 
          FramePoint3D contactPointPosition = input.getContactPointPositions().get(i);
-         int contactPointStart = 12 * i;
 
          for (int j = 0; j < 4; j++)
          {
             YoFrameVector3D basisVector = contactPoint.getBasisVector(j);
-            int columnStart = contactPointStart + 3 * j;
+            int column = 4 * i + j;
 
-            Aeq.set(0, columnStart + 0, basisVector.getX());
-            Aeq.set(1, columnStart + 1, basisVector.getY());
-            Aeq.set(2, columnStart + 2, basisVector.getZ());
+            Aeq.set(0, column, basisVector.getX());
+            Aeq.set(1, column, basisVector.getY());
+            Aeq.set(2, column, basisVector.getZ());
 
             // x-component of cross product
-            Aeq.set(3, columnStart + 1, - contactPointPosition.getZ() * basisVector.getY());
-            Aeq.set(3, columnStart + 2, contactPointPosition.getY() * basisVector.getZ());
+            double xMomentScale = contactPointPosition.getY() * basisVector.getZ() - contactPointPosition.getZ() * basisVector.getY();
+            Aeq.set(3, column, xMomentScale);
 
             // y-component of cross product
-            Aeq.set(4, columnStart + 0, contactPointPosition.getZ() * basisVector.getX());
-            Aeq.set(4, columnStart + 2, - contactPointPosition.getX() * basisVector.getZ());
+            double yMomentScale = contactPointPosition.getZ() * basisVector.getX() - contactPointPosition.getX() * basisVector.getZ();
+            Aeq.set(4, column, yMomentScale);
 
             // z-component of cross product
-            Aeq.set(5, columnStart + 0, - contactPointPosition.getY() * basisVector.getX());
-            Aeq.set(5, columnStart + 1, contactPointPosition.getX() * basisVector.getY());
+            double zMomentScale = contactPointPosition.getX() * basisVector.getY() - contactPointPosition.getY() * basisVector.getX();
+            Aeq.set(5, column, zMomentScale);
          }
       }
 
@@ -165,17 +188,48 @@ public class StaticEquilibriumSolver
          qpSolver.setVariableBounds(lowerBounds, upperBounds);
          qpSolver.solve(solution);
 
-         System.out.println("-------------------------");
-         for (int j = 0; j < numberOfDecisionVariables; j++)
-         {
-            System.out.println(solution.get(j, 0));
-         }
-         System.out.println("-------------------------");
-
          double comExtremumX = solution.get(numberOfDecisionVariables - 2, 0);
          double comExtremumY = solution.get(numberOfDecisionVariables - 1, 0);
          supportRegion.add(new Point2D(comExtremumX, comExtremumY));
+
+         for (int j = 0; j < numberOfContactPoints; j++)
+         {
+            contactPoints.get(j).setResolvedForce(solution);
+         }
+
+         this.directionToOptimize.set(directionToOptimize);
+
+         boolean containsNaN = containsNaN(solution);
+
+         if (containsNaN)
+         {
+            this.optimizedCoM.setToNaN();
+            this.nanCoM.set(0.0, 0.0, 0.1);
+         }
+         else
+         {
+            this.optimizedCoM.setX(solution.get(numberOfDecisionVariables - 2));
+            this.optimizedCoM.setY(solution.get(numberOfDecisionVariables - 1));
+            this.optimizedCoM.setZ(0.1);
+            this.nanCoM.setToNaN();
+         }
+
+         if (tickAndUpdatable != null)
+         {
+            tickAndUpdatable.tickAndUpdate();
+         }
       }
+   }
+
+   private static boolean containsNaN(DMatrixRMaj matrix)
+   {
+      for (int i = 0; i < matrix.getNumElements(); i++)
+      {
+         if (Double.isNaN(matrix.get(i)))
+            return true;
+      }
+
+      return false;
    }
 
    public List<Point2D> getSupportRegion()
@@ -191,5 +245,10 @@ public class StaticEquilibriumSolver
    public YoGraphicsListRegistry getGraphicsListRegistry()
    {
       return graphicsListRegistry;
+   }
+
+   public void setTickAndUpdatable(TickAndUpdatable tickAndUpdatable)
+   {
+      this.tickAndUpdatable = tickAndUpdatable;
    }
 }
