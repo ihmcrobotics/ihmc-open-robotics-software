@@ -823,6 +823,7 @@ public class ToeOffManager
          checkAnkleLimitForToeOff(trailingLeg);
          checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
          checkRearKneeLowerLimitForToeOff(trailingLeg);
+         legInspector.updateSwitchToToeOffDueToJointLimits();
 
          if (forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit() && !icpIsInsideSupportFoot.getBooleanValue())
          {
@@ -913,7 +914,7 @@ public class ToeOffManager
          checkAnkleLimitForToeOff(trailingLeg);
          checkLeadingKneeUpperLimitForToeOff(trailingLeg.getOppositeSide());
          checkRearKneeLowerLimitForToeOff(trailingLeg);
-
+         legInspector.updateSwitchToToeOffDueToJointLimits();
 
          if (forceToeOffAtJointLimit.getValue() && legInspector.needToSwitchToToeOffDueToJointLimit())
          {
