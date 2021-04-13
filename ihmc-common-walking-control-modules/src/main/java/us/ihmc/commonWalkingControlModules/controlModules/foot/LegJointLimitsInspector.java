@@ -77,10 +77,6 @@ public class LegJointLimitsInspector
             needToSwitchToToeOffForAnkleLimit.set(false);
         else
             needToSwitchToToeOffForAnkleLimit.set(isRearAnklePitchHittingLimitFilt.getBooleanValue());
-
-        // update if ankle limit was reached
-        if(isRearAnklePitchHittingLimitFilt.getBooleanValue())
-            needToSwitchToToeOffForJointLimit.set(true);
     }
 
     public void updateLeadingKneeUpperLimitsStatus(OneDoFJointBasics kneePitch)
@@ -94,10 +90,6 @@ public class LegJointLimitsInspector
             needToSwitchToToeOffForLeadingKneeAtLimit.set(false);
         else
             needToSwitchToToeOffForLeadingKneeAtLimit.set(isLeadingKneePitchHittingUpperLimitFilt.getBooleanValue());
-
-        // update if leading knee limit was reached
-        if(isLeadingKneePitchHittingUpperLimitFilt.getBooleanValue())
-            needToSwitchToToeOffForJointLimit.set(true);
     }
 
     public void updateTrailingKneeLowerLimitsStatus(OneDoFJointBasics kneePitch)
@@ -111,10 +103,13 @@ public class LegJointLimitsInspector
             needToSwitchToToeOffForTrailingKneeAtLimit.set(false);
         else
             needToSwitchToToeOffForTrailingKneeAtLimit.set(isRearKneePitchHittingLowerLimitFilt.getBooleanValue());
+    }
 
-        // update if trailing knee limit was reached
-        if(isRearKneePitchHittingLowerLimitFilt.getBooleanValue())
-            needToSwitchToToeOffForJointLimit.set(true);
+    public void updateSwitchToToeOffDueToJointLimits()
+    {
+        needToSwitchToToeOffForJointLimit.set(needToSwitchToToeOffForAnkleLimit.getBooleanValue() ||
+                needToSwitchToToeOffForLeadingKneeAtLimit.getBooleanValue() ||
+                needToSwitchToToeOffForTrailingKneeAtLimit.getBooleanValue());
     }
 
     public boolean needToSwitchToToeOffDueToJointLimit()
