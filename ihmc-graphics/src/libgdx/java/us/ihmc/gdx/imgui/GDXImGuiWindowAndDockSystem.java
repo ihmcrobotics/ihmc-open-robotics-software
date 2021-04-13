@@ -15,13 +15,11 @@ import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiWindowAndDockSystem
 {
-   private Path imGuiUserSettingsPath;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
@@ -31,6 +29,7 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
+   private Path imGuiUserSettingsPath;
    private Class<?> classForLoading;
    private String directoryNameToAssumePresent;
    private String subsequentPathToResourceFolder;
@@ -40,18 +39,21 @@ public class GDXImGuiWindowAndDockSystem
    {
    }
 
-   public GDXImGuiWindowAndDockSystem(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public GDXImGuiWindowAndDockSystem(Class<?> classForLoading,
+                                      String directoryNameToAssumePresent,
+                                      String subsequentPathToResourceFolder,
+                                      Path imGuiUserSettingsPath)
    {
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+      this.imGuiUserSettingsPath = imGuiUserSettingsPath;
       loadSaveEnabled = true;
    }
 
-   public void create(long windowHandle, String windowTitle)
+   public void create(long windowHandle)
    {
       this.windowHandle = windowHandle;
-      imGuiUserSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + windowTitle.replaceAll(" ", "") + "ImGuiSettings.ini").toAbsolutePath().normalize();
 
       GLFWErrorCallback.createPrint(System.err).set();
 
@@ -194,10 +196,5 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiImplGl3 getImGuiGl3()
    {
       return imGuiGl3;
-   }
-
-   public Path getImGuiSettingsPath()
-   {
-      return imGuiUserSettingsPath;
    }
 }
