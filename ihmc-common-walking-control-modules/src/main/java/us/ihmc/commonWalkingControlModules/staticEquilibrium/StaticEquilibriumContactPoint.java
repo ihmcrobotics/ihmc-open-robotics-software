@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -18,10 +20,14 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 /* package-private */ class StaticEquilibriumContactPoint
 {
+   private static final double basisVectorScale = 0.1;
+   private static final double forceVectorScale = 0.1;
+
    private final int contactPointIndex;
 
    private final YoFrameVector3D[] polyhedraFrameBasisVectors = new YoFrameVector3D[4];
    private final YoFramePose3D surfacePose;
+   private final YoFrameVector3D force;
    private final PoseReferenceFrame contactPointFrame;
 
    public StaticEquilibriumContactPoint(int contactPointIndex, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
@@ -29,13 +35,17 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       this.contactPointIndex = contactPointIndex;
       this.contactPointFrame = new PoseReferenceFrame("cpFrame" + contactPointIndex, ReferenceFrame.getWorldFrame());
       this.surfacePose = new YoFramePose3D("cpPose" + contactPointIndex, ReferenceFrame.getWorldFrame(), registry);
+      this.force = new YoFrameVector3D("cpForce" + contactPointIndex, ReferenceFrame.getWorldFrame(), registry);
 
       for (int i = 0; i < polyhedraFrameBasisVectors.length; i++)
       {
          polyhedraFrameBasisVectors[i] = new YoFrameVector3D("beta" + contactPointIndex + "_" + i, ReferenceFrame.getWorldFrame(), registry);
-         YoGraphicVector graphicVector = new YoGraphicVector("betaGraphic" + contactPointIndex + "_" + i, surfacePose.getPosition(), polyhedraFrameBasisVectors[i], 1.0);
-         graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), graphicVector);
+         YoGraphicVector basisVector = new YoGraphicVector("betaGraphic" + contactPointIndex + "_" + i, surfacePose.getPosition(), polyhedraFrameBasisVectors[i], basisVectorScale);
+         graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), basisVector);
       }
+
+      YoGraphicVector forceVector = new YoGraphicVector("forceGraphic" + contactPointIndex, surfacePose.getPosition(), force, forceVectorScale, YoAppearance.Red());
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), forceVector);
    }
 
    public void initialize(StaticEquilibriumSolverInput input)
@@ -77,6 +87,19 @@ import us.ihmc.yoVariables.registry.YoRegistry;
       for (int i = 0; i < polyhedraFrameBasisVectors.length; i++)
       {
          polyhedraFrameBasisVectors[i].setToNaN();
+      }
+   }
+
+   public void setResolvedForce(DMatrixRMaj solution)
+   {
+      force.setToZero();
+
+      for (int i = 0; i < 4; i++)
+      {
+         Vector3D scaledBasisVector = new Vector3D(polyhedraFrameBasisVectors[i]);
+         double rho = solution.get(4 * contactPointIndex + i);
+         scaledBasisVector.scale(rho);
+         force.add(scaledBasisVector);
       }
    }
 }
