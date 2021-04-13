@@ -29,6 +29,7 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
            gravityZ,
            mass,
            new BlockInverseCalculator(indexHandler,
+                                      indexHandler::getComCoefficientStartIndex,
                                       i -> indexHandler.getOrientationTicksInSegment(i) * SE3MPCIndexHandler.variablesPerOrientationTick
                                            + indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
            parentRegistry);
