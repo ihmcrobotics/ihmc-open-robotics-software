@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
+import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
@@ -39,6 +40,9 @@ public class GDXImGuiBasedUI
 //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
+   private final Class<?> classForLoading;
+   private final String directoryNameToAssumePresent;
+   private final String subsequentPathToResourceFolder;
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = "";
 
@@ -58,6 +62,9 @@ public class GDXImGuiBasedUI
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String windowTitle)
    {
+      this.classForLoading = classForLoading;
+      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
+      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.windowTitle = windowTitle;
 
       imGuiDockingSetup = new ImGuiDockingSetup(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder);
@@ -71,6 +78,8 @@ public class GDXImGuiBasedUI
          //         ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
 //         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
       }
+
+
 
       imGuiDockingSetup.addFirst(VIEW_3D_WINDOW_NAME);
    }
@@ -140,10 +149,19 @@ public class GDXImGuiBasedUI
             }
          }
          ImGui.separator();
-         // Implement toggle for auto saving layout?
-         if (ImGui.menuItem("Save Layout"))
+         if (ImGui.getIO().getKeyCtrl())
          {
-            saveImGuiSettings();
+            if (ImGui.menuItem("Save Default Layout"))
+            {
+               saveImGuiSettings(true);
+            }
+         }
+         else
+         {
+            if (ImGui.menuItem("Save Layout"))
+            {
+               saveImGuiSettings(false);
+            }
          }
          ImGui.endMenu();
       }
@@ -151,6 +169,7 @@ public class GDXImGuiBasedUI
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
       ImGui.endMainMenuBar();
 
+      ImGui.setNextWindowSize(800.0f, 600.0f, ImGuiCond.FirstUseEver);
       ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
       int flags = ImGuiWindowFlags.None;
 //      flags |= ImGuiWindowFlags.NoDecoration;
@@ -226,14 +245,14 @@ public class GDXImGuiBasedUI
          vrManager.render(sceneManager);
    }
 
-   private void saveImGuiSettings()
+   private void saveImGuiSettings(boolean saveDefault)
    {
       Path settingsPath = imGuiWindowAndDockSystem.getImGuiSettingsPath();
       String settingsPathString = settingsPath.toString();
       LogTools.info("Saving ImGui settings to {}", settingsPathString);
       ImGui.saveIniSettingsToDisk(settingsPathString);
 
-      imGuiDockingSetup.saveConfiguration(settingsPath);
+      imGuiDockingSetup.saveConfiguration(settingsPath, saveDefault);
    }
 
    public void dispose()
