@@ -22,16 +22,20 @@ public class StaticEquilibriumSolverVisualizer
 {
    public StaticEquilibriumSolverVisualizer(StaticEquilibriumSolverInput input)
    {
-      StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
-      solver.solve(input);
-
-      List<Point2D> supportRegion0 = solver.getSupportRegion();
-      for (int i = 0; i < supportRegion0.size(); i++)
-      {
-         System.out.println(supportRegion0.get(i));
-      }
-
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
+
+      StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
+      scs.getRootRegistry().addChild(solver.getRegistry());
+      scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
+      solver.solve(input);
+      scs.tickAndUpdate();
+
+//      List<Point2D> supportRegion0 = solver.getSupportRegion();
+//      for (int i = 0; i < supportRegion0.size(); i++)
+//      {
+//         System.out.println(supportRegion0.get(i));
+//      }
+
       Graphics3DObject supportRegionGraphics = new Graphics3DObject();
 
       for (int i = 0; i < input.getNumberOfContacts(); i++)
@@ -53,10 +57,13 @@ public class StaticEquilibriumSolverVisualizer
       solver.getSupportRegion().forEach(supportRegion::addVertex);
       supportRegion.update();
 
-      double renderedHeight = 0.5;
+      double renderedHeight = 0.1;
       supportRegionGraphics.identity();
       supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
-      supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Black());
+      supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
+
+      supportRegionGraphics.identity();
+      supportRegionGraphics.addCoordinateSystem(0.2);
 
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(supportRegionGraphics);
@@ -93,11 +100,27 @@ public class StaticEquilibriumSolverVisualizer
 
    public static void main(String[] args)
    {
-      double flat = Math.toRadians(10.0);
-      StaticEquilibriumSolverInput input = createInput(flat, flat, flat);
+//      // flat ground
+//      double theta0 = 0.0;
+//      double theta1 = 0.0;
+//      double theta2 = 0.0;
 
-//      double tiltOutAngle = Math.toRadians(60.0);
-//      StaticEquilibriumSolverInput input = createInput(tiltOutAngle, tiltOutAngle, tiltOutAngle);
+//      // tilted out
+//      double theta0 = Math.toRadians(60.0);
+//      double theta1 = Math.toRadians(60.0);
+//      double theta2 = Math.toRadians(60.0);
+
+//      // 2 flat one perpendicular out
+//      double theta0 = Math.toRadians(90.0);
+//      double theta1 = 0.0;
+//      double theta2 = 0.0;
+
+      // 2 flat one perpendicular in
+      double theta0 = Math.toRadians(-90.0);
+      double theta2 = 0.0;
+      double theta1 = 0.0;
+
+      StaticEquilibriumSolverInput input = createInput(theta0, theta1, theta2);
 
       new StaticEquilibriumSolverVisualizer(input);
    }
