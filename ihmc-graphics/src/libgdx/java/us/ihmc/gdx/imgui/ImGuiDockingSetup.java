@@ -113,7 +113,7 @@ public class ImGuiDockingSetup
    {
       if (loadSaveEnabled)
       {
-         Path windowsSettingsPath = settingsPath.getParent().resolve(settingsPath.getFileName().toString().replace("Settings.ini", "Windows.json"));
+         Path windowsSettingsPath = settingsPath.getParent().resolve(settingsPath.getFileName().toString().replace("Settings.ini", "Panels.json"));
          JSONFileTools.loadWithClasspathDefault(windowsSettingsPath,
                                                 classForLoading,
                                                 directoryNameToAssumePresent,
@@ -153,7 +153,7 @@ public class ImGuiDockingSetup
                }
             }
          };
-         String saveFileNameString = settingsPath.getFileName().toString().replace("Settings.ini", "Windows.json");
+         String saveFileNameString = settingsPath.getFileName().toString().replace("Settings.ini", "Panels.json");
          if (saveDefault)
          {
             JSONFileTools.saveToClasspath(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui/" + saveFileNameString, rootConsumer);

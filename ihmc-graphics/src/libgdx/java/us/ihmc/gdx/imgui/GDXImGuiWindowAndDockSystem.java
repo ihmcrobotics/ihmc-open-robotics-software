@@ -104,19 +104,7 @@ public class GDXImGuiWindowAndDockSystem
    {
       if (isFirstRenderCall)
       {
-         Path pathToFile;
-         if (Files.exists(imGuiUserSettingsPath))
-         {
-            pathToFile = imGuiUserSettingsPath;
-            LogTools.info("Loading ImGui settings from {}", pathToFile.toString());
-         }
-         else // see if there are defaults
-         {
-            pathToFile = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui")
-                                           .resolve(imGuiUserSettingsPath.getFileName());
-            LogTools.info("{} not found. Loading default ImGui settings from {}", imGuiUserSettingsPath.toString(), pathToFile.toString());
-         }
-         ImGui.loadIniSettingsFromDisk(pathToFile.toString());
+         loadImGuiLayout();
       }
 
       imGuiGlfw.newFrame();
@@ -129,6 +117,40 @@ public class GDXImGuiWindowAndDockSystem
 //      flags += ImGuiDockNodeFlags.AutoHideTabBar;
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
+   }
+
+   private void loadImGuiLayout()
+   {
+      Path pathToFile;
+      if (Files.exists(imGuiUserSettingsPath))
+      {
+         pathToFile = imGuiUserSettingsPath;
+         LogTools.info("Loading ImGui settings from {}", pathToFile.toString());
+      }
+      else // see if there are defaults
+      {
+         pathToFile = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui")
+                                        .resolve(imGuiUserSettingsPath.getFileName());
+         LogTools.info("{} not found. Loading default ImGui settings from {}", imGuiUserSettingsPath.toString(), pathToFile.toString());
+      }
+      ImGui.loadIniSettingsFromDisk(pathToFile.toString());
+   }
+
+   public void saveImGuiLayout(boolean saveDefault)
+   {
+      Path settingsPath;
+      if (loadSaveEnabled && saveDefault)
+      {
+         String resourcePathString = "imgui/" + imGuiUserSettingsPath.getFileName().toString();
+         settingsPath = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString);
+      }
+      else
+      {
+         settingsPath = imGuiUserSettingsPath;
+      }
+      String settingsPathString = settingsPath.toString();
+      LogTools.info("Saving ImGui settings to {}", settingsPathString);
+      ImGui.saveIniSettingsToDisk(settingsPathString);
    }
 
    public void afterWindowManagement()
