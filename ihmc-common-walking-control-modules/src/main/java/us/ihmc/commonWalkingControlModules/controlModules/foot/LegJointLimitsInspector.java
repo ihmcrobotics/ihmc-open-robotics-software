@@ -105,6 +105,11 @@ public class LegJointLimitsInspector
             needToSwitchToToeOffForTrailingKneeAtLimit.set(isRearKneePitchHittingLowerLimitFilt.getBooleanValue());
     }
 
+    public void updateSwitchToToeOffDueToJointLimits()
+    {
+        needToSwitchToToeOffForJointLimit.set(needToSwitchToToeOffForAnkleLimit.getBooleanValue() ||
+                needToSwitchToToeOffForLeadingKneeAtLimit.getBooleanValue() ||
+                needToSwitchToToeOffForTrailingKneeAtLimit.getBooleanValue());
     }
 
     public boolean needToSwitchToToeOffDueToJointLimit()
