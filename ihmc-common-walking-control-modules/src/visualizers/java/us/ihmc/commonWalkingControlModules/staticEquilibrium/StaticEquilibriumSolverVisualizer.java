@@ -27,8 +27,8 @@ public class StaticEquilibriumSolverVisualizer
       StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
       scs.getRootRegistry().addChild(solver.getRegistry());
       scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
+      solver.setTickAndUpdatable(scs);
       solver.solve(input);
-      scs.tickAndUpdate();
 
 //      List<Point2D> supportRegion0 = solver.getSupportRegion();
 //      for (int i = 0; i < supportRegion0.size(); i++)
@@ -62,12 +62,10 @@ public class StaticEquilibriumSolverVisualizer
       supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
       supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
 
-      supportRegionGraphics.identity();
-      supportRegionGraphics.addCoordinateSystem(0.2);
-
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(supportRegionGraphics);
       scs.startOnAThread();
+      scs.cropBuffer();
 
       ThreadTools.sleepForever();
    }
@@ -105,7 +103,12 @@ public class StaticEquilibriumSolverVisualizer
 //      double theta1 = 0.0;
 //      double theta2 = 0.0;
 
-//      // tilted out
+      // tilted out a little
+      double theta0 = Math.toRadians(30.0);
+      double theta1 = Math.toRadians(30.0);
+      double theta2 = Math.toRadians(30.0);
+
+      //      // tilted out a lot
 //      double theta0 = Math.toRadians(60.0);
 //      double theta1 = Math.toRadians(60.0);
 //      double theta2 = Math.toRadians(60.0);
@@ -115,10 +118,10 @@ public class StaticEquilibriumSolverVisualizer
 //      double theta1 = 0.0;
 //      double theta2 = 0.0;
 
-      // 2 flat one perpendicular in
-      double theta0 = Math.toRadians(-90.0);
-      double theta2 = 0.0;
-      double theta1 = 0.0;
+//      // 2 flat one perpendicular in
+//      double theta0 = Math.toRadians(-90.0);
+//      double theta2 = 0.0;
+//      double theta1 = 0.0;
 
       StaticEquilibriumSolverInput input = createInput(theta0, theta1, theta2);
 
