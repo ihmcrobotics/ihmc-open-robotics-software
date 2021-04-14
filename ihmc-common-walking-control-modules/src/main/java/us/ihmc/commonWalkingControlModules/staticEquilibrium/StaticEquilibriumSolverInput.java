@@ -16,7 +16,7 @@ public class StaticEquilibriumSolverInput
 {
    public static final int maxContactPoints = 50;
    private static final double defaultGravityMagnitude = 9.80665;
-   private static final double defaultCoefficientOfFriction = 0.9;
+   private static final double defaultCoefficientOfFriction = 0.5;
 
    /**
     * The vector r in the paper above
