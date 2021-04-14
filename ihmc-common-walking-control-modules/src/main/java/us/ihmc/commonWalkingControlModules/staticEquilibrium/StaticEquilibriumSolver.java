@@ -112,6 +112,7 @@ public class StaticEquilibriumSolver
    {
       if (!input.checkInput())
       {
+         System.out.println("Invalid input");
          return;
       }
 

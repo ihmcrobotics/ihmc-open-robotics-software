@@ -6,7 +6,6 @@ import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -24,7 +23,6 @@ public class StaticEquilibriumForceOptimizer
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-   private TickAndUpdatable tickAndUpdatable = null;
 
    private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
