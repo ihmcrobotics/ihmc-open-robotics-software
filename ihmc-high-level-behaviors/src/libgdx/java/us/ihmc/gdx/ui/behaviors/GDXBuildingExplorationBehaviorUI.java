@@ -30,16 +30,11 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
    private static final String WINDOW_NAME = "Building Exploration";
 
    private final FramePose3D goalPose = new FramePose3D();
-   private final Messager messager;
+   private Messager messager;
    private FramePose3D tempFramePose = new FramePose3D();
    private RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
    private ModelInstance goalSphere;
    private boolean goalIsBeingPlaced;
-
-   public GDXBuildingExplorationBehaviorUI(Messager messager)
-   {
-      this.messager = messager;
-   }
 
    public void create(GDXVRManager vrManager)
    {
@@ -108,6 +103,11 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
 //      ImGui.dragFlo
 
       ImGui.end();
+   }
+
+   public void setMessager(Messager messager)
+   {
+      this.messager = messager;
    }
 
    public String getWindowName()

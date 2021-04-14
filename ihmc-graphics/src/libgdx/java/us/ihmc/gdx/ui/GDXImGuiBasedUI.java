@@ -288,7 +288,7 @@ public class GDXImGuiBasedUI
       }
       else
       {
-         LogTools.info("Saving ImGui windows settings to {}", gdxUserSettingsPath.toString());
+         LogTools.info("Saving libGDX settings to {}", gdxUserSettingsPath.toString());
          JSONFileTools.save(gdxUserSettingsPath, rootConsumer);
       }
    }
