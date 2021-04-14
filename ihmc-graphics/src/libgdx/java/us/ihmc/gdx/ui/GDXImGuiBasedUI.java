@@ -20,6 +20,7 @@ import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
