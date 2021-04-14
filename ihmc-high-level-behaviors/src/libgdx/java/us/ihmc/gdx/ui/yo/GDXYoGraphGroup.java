@@ -1,8 +1,19 @@
 package us.ihmc.gdx.ui.yo;
 
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.TreeSet;
 
 public class GDXYoGraphGroup
 {
-   private ArrayList<String> variableNames = new ArrayList<>();
+   private TreeSet<String> variableNames = new TreeSet<>();
+
+   public void addVariable(String variableName)
+   {
+      variableNames.add(variableName);
+   }
+
+   public Set<String> getVariableNames()
+   {
+      return variableNames;
+   }
 }

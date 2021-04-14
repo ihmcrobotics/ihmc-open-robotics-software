@@ -81,6 +81,11 @@ public class ManagedROS2Node implements ROS2NodeInterface
       return new ManagedROS2Listener<T>(newMessageListener, enabled::get);
    }
 
+   public boolean isEnabled()
+   {
+      return enabled.get();
+   }
+
    @Override
    public String getName()
    {

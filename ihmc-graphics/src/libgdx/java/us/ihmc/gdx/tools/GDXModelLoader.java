@@ -1,6 +1,7 @@
 package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.loader.G3dModelLoader;
 import com.badlogic.gdx.utils.*;
@@ -22,9 +23,18 @@ public class GDXModelLoader
       Model model = loadedModels.get(modelFileName);
       if (model == null)
       {
-         Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(Gdx.files.internal(modelFileName));
+         FileHandle fileHandle = Gdx.files.internal(modelFileName);
+         try
+         {
+
+         Model loadedModel = new G3dModelLoader(new JsonReader()).loadModel(fileHandle);
          loadedModels.put(modelFileName, loadedModel);
          return loadedModel;
+         }
+         catch (NullPointerException e)
+         {
+            return null;
+         }
       }
       return model;
    }

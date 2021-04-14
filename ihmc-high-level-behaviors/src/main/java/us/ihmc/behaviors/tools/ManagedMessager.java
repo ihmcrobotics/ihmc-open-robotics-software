@@ -120,6 +120,11 @@ public class ManagedMessager implements Messager
       return messager.removeTopicListener(topic, listener);
    }
 
+   public boolean isEnabled()
+   {
+      return enabled;
+   }
+
    @Override
    public boolean isMessagerOpen()
    {
