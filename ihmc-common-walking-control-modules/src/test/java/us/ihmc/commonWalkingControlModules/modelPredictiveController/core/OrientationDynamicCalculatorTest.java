@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
@@ -408,6 +409,7 @@ public class OrientationDynamicCalculatorTest
       }
    }
 
+   @Disabled
    @Test
    public void testCoMObjectiveOneSegmentTwoContactsAgainstGroundTruth()
    {
