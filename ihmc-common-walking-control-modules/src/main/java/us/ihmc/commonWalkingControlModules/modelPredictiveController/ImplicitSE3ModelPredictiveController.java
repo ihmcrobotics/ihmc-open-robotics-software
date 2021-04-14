@@ -3,10 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationContinuityCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
@@ -201,7 +198,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
             mpcCommands.addCommand(computeOrientationContinuityCommand(i, commandProvider.getNextOrientationContinuityCommand()));
       }
 
-      mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextOrientationValueCommand()));
+      mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextDirectOrientationValueCommand()));
       mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
    }
 
@@ -218,14 +215,9 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
       currentBodyAngularVelocityError.get(3, initialError);
    }
 
-   private MPCCommand<?> computeInitialOrientationErrorCommand(OrientationValueCommand commandToPack)
+   private MPCCommand<?> computeInitialOrientationErrorCommand(DirectOrientationValueCommand commandToPack)
    {
       commandToPack.reset();
-      CommonOps_DDRM.setIdentity(commandToPack.getAMatrix());
-      commandToPack.getBMatrix().reshape(6, LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(0));
-      commandToPack.getBMatrix().zero();
-
-      commandToPack.getCMatrix().zero();
 
       commandToPack.setSegmentNumber(0);
       commandToPack.setObjectiveValue(initialError);

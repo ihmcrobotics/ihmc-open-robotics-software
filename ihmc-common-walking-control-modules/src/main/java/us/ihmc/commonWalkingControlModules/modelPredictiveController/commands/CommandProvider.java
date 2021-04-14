@@ -21,6 +21,7 @@ public class CommandProvider
    private final RecyclingArrayList<DiscreteAngularVelocityOrientationCommand> discreteOrientationCommandPool = new RecyclingArrayList<>(
          DiscreteAngularVelocityOrientationCommand::new);
    private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
+   private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
    private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
 
 
@@ -42,6 +43,7 @@ public class CommandProvider
       rhoAccelerationObjectiveCommandPool.clear();
       discreteOrientationCommandPool.clear();
       orientationValueCommandPool.clear();
+      directOrientationValueCommandPool.clear();
       orientationContinuityCommandPool.clear();
    }
 
@@ -103,6 +105,11 @@ public class CommandProvider
    public DiscreteAngularVelocityOrientationCommand getNextDiscreteAngularVelocityOrientationCommand()
    {
       return discreteOrientationCommandPool.add();
+   }
+
+   public DirectOrientationValueCommand getNextDirectOrientationValueCommand()
+   {
+      return directOrientationValueCommandPool.add();
    }
 
    public OrientationValueCommand getNextOrientationValueCommand()

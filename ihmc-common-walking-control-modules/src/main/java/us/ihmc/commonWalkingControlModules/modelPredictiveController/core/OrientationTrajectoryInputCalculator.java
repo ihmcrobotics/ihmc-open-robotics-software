@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DirectOrientationValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationContinuityCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
@@ -19,6 +20,29 @@ public class OrientationTrajectoryInputCalculator
    public OrientationTrajectoryInputCalculator(ImplicitSE3MPCIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
+   }
+
+
+   public boolean compute(QPInputTypeA inputToPack, DirectOrientationValueCommand command)
+   {
+      inputToPack.setConstraintType(command.getConstraintType());
+      inputToPack.setWeight(command.getObjectiveWeight());
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
+      inputToPack.reshape(6);
+
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+
+      int segmentNumber = command.getSegmentNumber();
+
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+
+      // V = This
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, identity6, 0, 0, 6, 6, 1.0);
+      inputToPack.getTaskObjective().set(command.getObjectiveValue());
+
+      return true;
    }
 
    public boolean compute(QPInputTypeA inputToPack, OrientationValueCommand command)

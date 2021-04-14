@@ -124,12 +124,22 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
          case ORIENTATION_VALUE:
             submitOrientationValueCommand((OrientationValueCommand) command);
             return;
+         case DIRECT_ORIENTATION_VALUE:
+            submitDirectOrientationValueCommand((DirectOrientationValueCommand) command);
+            return;
       }
 
       super.submitMPCCommand(command);
    }
 
    public void submitOrientationValueCommand(OrientationValueCommand command)
+   {
+      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
+      if (success)
+         addInput(qpInputTypeA);
+   }
+
+   public void submitDirectOrientationValueCommand(DirectOrientationValueCommand command)
    {
       boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
       if (success)
