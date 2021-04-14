@@ -23,7 +23,6 @@ public class StaticEquilibriumSolverTest
    public void testTriangleFlat()
    {
       StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
-      input.setRobotMass(1.0);
       if (VISUALIZE)
       {
          new StaticEquilibriumSolverVisualizer(input);
@@ -34,7 +33,6 @@ public class StaticEquilibriumSolverTest
    public void testTriangleLowAngle()
    {
       StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
-      input.setRobotMass(1.0);
       if (VISUALIZE)
       {
          new StaticEquilibriumSolverVisualizer(input);
@@ -45,7 +43,6 @@ public class StaticEquilibriumSolverTest
    public void testTriangleHighAngle()
    {
       StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
-      input.setRobotMass(1.0);
       if (VISUALIZE)
       {
          new StaticEquilibriumSolverVisualizer(input);
@@ -56,7 +53,6 @@ public class StaticEquilibriumSolverTest
    public void testBipedFeet()
    {
       StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
-      input.setRobotMass(30.0);
       if (VISUALIZE)
       {
          new StaticEquilibriumSolverVisualizer(input);
@@ -67,7 +63,6 @@ public class StaticEquilibriumSolverTest
    public void testBipedFeetWithHandhold()
    {
       StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold();
-      input.setRobotMass(30.0);
       if (VISUALIZE)
       {
          new StaticEquilibriumSolverVisualizer(input);
