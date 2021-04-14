@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.io.IOException;
 import java.io.InputStream;
