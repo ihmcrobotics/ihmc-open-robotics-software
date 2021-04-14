@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -27,7 +28,6 @@ public class StaticEquilibriumForceOptimizer
    private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
 
-   private StaticEquilibriumSolverInput input;
    private int numberOfDecisionVariables;
 
    private final DMatrixRMaj Aeq = new DMatrixRMaj(0, 0);
@@ -51,14 +51,13 @@ public class StaticEquilibriumForceOptimizer
       }
    }
 
-   public boolean solve(StaticEquilibriumSolverInput input, Point2D centerOfMassXY)
+   public boolean solve(StaticEquilibriumSolverInput input, Point2DReadOnly centerOfMassXY)
    {
       if (!input.checkInput())
       {
          return false;
       }
 
-      this.input = input;
       numberOfDecisionVariables = 4 * input.getNumberOfContacts();
 
       Aeq.reshape(6, numberOfDecisionVariables);
@@ -131,8 +130,15 @@ public class StaticEquilibriumForceOptimizer
       qpSolver.setVariableBounds(lowerBounds, upperBounds);
       qpSolver.setLinearInequalityConstraints(Ain, bin);
 
-      int iterations = qpSolver.solve(solution);
-      System.out.println("iterations: " + iterations);
+      try
+      {
+         qpSolver.solve(solution);
+      }
+      catch (Exception e)
+      {
+         feasibleSolutionFound = false;
+         return false;
+      }
 
       feasibleSolutionFound = true;
       for (int i = 0; i < numberOfDecisionVariables; i++)

@@ -108,7 +108,7 @@ public class StaticEquilibriumSolverInputExamples
          }
       }
 
-      input.setRobotMass(2.0);
+      input.setRobotMass(1.0);
       return input;
    }
 
@@ -150,7 +150,7 @@ public class StaticEquilibriumSolverInputExamples
       handPose.getOrientation().setToPitchOrientation(Math.toRadians(-90.0));
       addContactPoint(contactPointFrame, handPose, input, null);
 
-      input.setRobotMass(2.0);
+      input.setRobotMass(1.0);
       return input;
    }
 
