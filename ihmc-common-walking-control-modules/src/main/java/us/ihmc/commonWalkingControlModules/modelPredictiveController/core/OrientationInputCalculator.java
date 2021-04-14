@@ -21,6 +21,11 @@ public class OrientationInputCalculator
       dynamicsCalculator = new OrientationDynamicsCalculator(mass, gravity);
    }
 
+   public OrientationDynamicsCalculator getDynamicsCalculator()
+   {
+      return dynamicsCalculator;
+   }
+
    public boolean compute(QPInputTypeA inputToPack, DiscreteAngularVelocityOrientationCommand command)
    {
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
