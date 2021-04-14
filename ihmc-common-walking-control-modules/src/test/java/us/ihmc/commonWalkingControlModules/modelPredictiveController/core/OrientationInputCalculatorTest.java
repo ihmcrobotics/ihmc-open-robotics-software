@@ -89,6 +89,7 @@ public class OrientationInputCalculatorTest
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      inputCalculator.getDynamicsCalculator().setDiscretizationCalculator(new DiscreteDiscretizationCalculator());
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -663,6 +664,7 @@ public class OrientationInputCalculatorTest
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      inputCalculator.getDynamicsCalculator().setDiscretizationCalculator(new DiscreteDiscretizationCalculator());
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -729,12 +731,20 @@ public class OrientationInputCalculatorTest
                              inputCalculator,
                              command,
                              qpInput);
-         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass, comPosition, angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, trajectoryCoefficients, inputCalculator.dynamicsCalculator, command);
+         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass,
+                                                            comPosition,
+                                                            angularErrorAtCurrentTick,
+                                                            angularVelocityErrorAtCurrentTick,
+                                                            trajectoryCoefficients,
+                                                            inputCalculator.dynamicsCalculator,
+                                                            command);
 
          MatrixTools.setMatrixBlock(Aeq, 6 * tick, 0, qpInput.getTaskJacobian(), 0, 0, 6, indexHandler.getTotalProblemSize(), 1.0);
          MatrixTools.setMatrixBlock(beq, 6 * tick, 0, qpInput.getTaskObjective(), 0, 0, 6, 1, 1.0);
 
-         FrameVector3DReadOnly expectedAngularErrorRate = OrientationDynamicsHelper.computeExpectedAngularErrorRate(angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, command);
+         FrameVector3DReadOnly expectedAngularErrorRate = OrientationDynamicsHelper.computeExpectedAngularErrorRate(angularErrorAtCurrentTick,
+                                                                                                                    angularVelocityErrorAtCurrentTick,
+                                                                                                                    command);
          FrameVector3DReadOnly expectedAngularVelocityErrorRate = OrientationDynamicsHelper.computeExpectedAngularVelocityErrorRate(mass,
                                                                                                                                     comPosition,
                                                                                                                                     angularErrorAtCurrentTick,
@@ -798,6 +808,7 @@ public class OrientationInputCalculatorTest
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      inputCalculator.getDynamicsCalculator().setDiscretizationCalculator(new DiscreteDiscretizationCalculator());
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
@@ -953,6 +964,7 @@ public class OrientationInputCalculatorTest
 
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationInputCalculator inputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      inputCalculator.getDynamicsCalculator().setDiscretizationCalculator(new DiscreteDiscretizationCalculator());
 
       indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
 
