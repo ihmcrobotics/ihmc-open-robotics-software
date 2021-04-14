@@ -294,7 +294,17 @@ public class OrientationDynamicsHelper
 
       FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
       desiredContactPointForce.addZ(Math.abs(gravityZ));
-      desiredContactPointForce.scale(mass / allContactPoints.size());
+      desiredContactPointForce.scale(mass);
+
+      angularVelocityErrorRateFromContact.sub(command.getDesiredNetAngularMomentumRate());
+
+      FrameVector3D desiredTorqueFromContact = new FrameVector3D();
+      FrameVector3D comError = new FrameVector3D();
+
+      comError.sub(comPosition, desiredCoMPosition);
+      desiredTorqueFromContact.cross(desiredContactPointForce, comError);
+      angularVelocityErrorRateFromContact.add(desiredTorqueFromContact);
+
 
       for (int contactIdx = 0; contactIdx < allContactPoints.size(); contactIdx++)
       {
@@ -303,19 +313,9 @@ public class OrientationDynamicsHelper
          FrameVector3D desiredMomentArm = new FrameVector3D();
          desiredMomentArm.sub(contactPoint.getBasisVectorOrigin(), desiredCoMPosition);
 
-         FrameVector3D contactForceError = new FrameVector3D(contactPoint.getContactAcceleration());
-         contactForceError.scale(mass);
-         contactForceError.sub(desiredContactPointForce);
-
-         FrameVector3D comError = new FrameVector3D();
-         comError.sub(comPosition, desiredCoMPosition);
-
          FrameVector3D torqueFromContact = new FrameVector3D();
-         torqueFromContact.cross(desiredMomentArm, contactForceError);
-
-         FrameVector3D coriolisForce = new FrameVector3D();
-         coriolisForce.cross(desiredContactPointForce, comError);
-         torqueFromContact.add(coriolisForce);
+         torqueFromContact.cross(desiredMomentArm, contactPoint.getContactAcceleration());
+         torqueFromContact.scale(mass);
 
          angularVelocityErrorRateFromContact.add(torqueFromContact);
       }
