@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -21,7 +22,7 @@ import java.util.List;
  * This class both implements and extends the {@link ContactStateProvider} to also provide contact planes, the vertices of which are needed to compute the
  * admissible contact forces for the model predictive controller.
  */
-public class ContactPlaneProvider implements ContactStateProvider
+public class ContactPlaneProvider implements ContactStateBasics<ContactPlaneProvider>
 {
    private int planeProviderId = -1;
    private ContactState contactState = ContactState.IN_CONTACT;
@@ -62,12 +63,9 @@ public class ContactPlaneProvider implements ContactStateProvider
     */
    public void set(ContactPlaneProvider other)
    {
-      reset();
+      this.set((ContactStateProvider<?>) other);
+
       setPlaneProviderId(other.getPlaneProviderId());
-      setStartECMPPosition(other.getECMPStartPosition());
-      setEndECMPPosition(other.getECMPEndPosition());
-      setTimeInterval(other.getTimeInterval());
-      setContactState(other.getContactState());
       for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
          addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
    }

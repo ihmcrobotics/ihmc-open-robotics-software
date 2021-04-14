@@ -19,8 +19,6 @@ import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-
 public class LQRJumpMomentumControllerNoFlightTest
 {
    private static final double omega = 3.0;
@@ -1485,7 +1483,6 @@ public class LQRJumpMomentumControllerNoFlightTest
 
       for (double time = finalTime1; time <= finalTime2; time += 0.01)
       {
-         int j = 1;
          double localTime = time - finalTime1;
          controller.computeS1AndK1(time);
          controller.computeS2AndK2(time);

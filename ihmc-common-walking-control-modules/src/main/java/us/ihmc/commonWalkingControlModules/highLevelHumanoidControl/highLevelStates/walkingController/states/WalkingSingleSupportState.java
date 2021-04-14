@@ -113,7 +113,7 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.setSwingFootTrajectory(feetManager.getSwingTrajectory(swingSide));
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
       super.doAction(timeInState);
@@ -252,7 +252,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
       }
 
-      balanceManager.setSwingFootTrajectory(feetManager.getSwingTrajectory(swingSide));
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          balanceManager.computeICPPlan();
