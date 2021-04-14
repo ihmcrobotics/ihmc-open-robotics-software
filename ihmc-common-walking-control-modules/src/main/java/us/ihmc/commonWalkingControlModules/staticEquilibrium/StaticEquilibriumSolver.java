@@ -2,11 +2,10 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -17,8 +16,11 @@ import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -30,38 +32,43 @@ import java.util.List;
  */
 public class StaticEquilibriumSolver
 {
-   private static final int numberOfDirectionsToOptimize = 16;
-   private static final double rhoMax = 1.0e4;
-   private static final double convergenceThreshold = 1.0e-9;
-   private static final int maximumNumberOfIterations = 500;
+   private static final boolean updateGraphicsEachIteration = false;
+   private static final int numberOfDirectionsToOptimize = 64;
+   private static final int maximumNumberOfIterations = 2000;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private TickAndUpdatable tickAndUpdatable = null;
 
-//   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
-   private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
-
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
 
-   private final DMatrixRMaj quadraticCost = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj linearCost = new DMatrixRMaj(0, 0);
+   private StaticEquilibriumSolverInput input;
+   private int numberOfDecisionVariables;
 
    private final DMatrixRMaj Aeq = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj beq = new DMatrixRMaj(0, 0);
 
-   private final DMatrixRMaj lowerBounds = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj upperBounds = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj inequalityMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj AeqActive = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj activeDiagonal = new DMatrixRMaj(0, 0);
 
-   private final DMatrixRMaj solution = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj x = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj xBestFeasible = new DMatrixRMaj(0, 0);
+
    private final List<Point2D> supportRegion = new ArrayList<>();
 
    private final YoFramePoint3D directionToOptimizeBase = new YoFramePoint3D("directionToOptimizeBase", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D bestFeasibleCoM = new YoFramePoint3D("bestFeasibleCoM", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D nanCoM = new YoFramePoint3D("nanCoM", ReferenceFrame.getWorldFrame(), registry);
+   private final YoInteger iterations = new YoInteger("iterations", registry);
+   private final YoInteger activeBetaSize = new YoInteger("activeBetaSize", registry);
+
+   // projection of z onto Aeq x = beq   >>>>   p0*z + p1
+   private final DMatrixRMaj p0 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj p1 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj xProjected = new DMatrixRMaj(0, 0);
 
    private static final List<Vector2D> directionsToOptimize = new ArrayList<>();
 
@@ -72,13 +79,13 @@ public class StaticEquilibriumSolver
       {
          directionsToOptimize.add(new Vector2D(Math.cos(i * dTheta), Math.sin(i * dTheta)));
       }
+
+//      double theta = Math.toRadians(200.0);
+//      directionsToOptimize.add(new Vector2D(Math.cos(theta), Math.sin(theta)));
    }
 
    public StaticEquilibriumSolver()
    {
-      qpSolver.setConvergenceThreshold(convergenceThreshold);
-      qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations);
-
       for (int i = 0; i < StaticEquilibriumSolverInput.maxContactPoints; i++)
       {
          contactPoints.add(new StaticEquilibriumContactPoint(i, registry, graphicsListRegistry));
@@ -88,8 +95,11 @@ public class StaticEquilibriumSolver
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
       directionToOptimizeBase.set(0.0, 0.0, 0.4);
 
-      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.05, YoAppearance.Blue());
+      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.03, YoAppearance.Blue());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
+
+      YoGraphicPosition bestFeasibleCoMGraphic = new YoGraphicPosition("bestFeasibleCoMGraphic", bestFeasibleCoM, 0.03, YoAppearance.DarkRed());
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), bestFeasibleCoMGraphic);
 
       YoGraphicPosition naNCoMGraphic = new YoGraphicPosition("naNCoMGraphic", nanCoM, 0.05, YoAppearance.Red());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), naNCoMGraphic);
@@ -102,15 +112,9 @@ public class StaticEquilibriumSolver
          return;
       }
 
+      this.input = input;
       int numberOfContactPoints = input.getNumberOfContacts();
-      int numberOfDecisionVariables = 4 * numberOfContactPoints + 2;
-
-      quadraticCost.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
-      linearCost.reshape(numberOfDecisionVariables, 1);
-
-      CommonOps_DDRM.setIdentity(quadraticCost);
-      CommonOps_DDRM.scale(1e-2, quadraticCost);
-      CommonOps_DDRM.scale(10.0, linearCost);
+      numberOfDecisionVariables = 4 * numberOfContactPoints + 2;
 
       Aeq.reshape(6, numberOfDecisionVariables);
       beq.reshape(6, 1);
@@ -154,65 +158,24 @@ public class StaticEquilibriumSolver
       Aeq.set(4, numberOfDecisionVariables - 2, input.getRobotMass() * input.getGravityMagnitude());
       beq.set(2, 0, input.getRobotMass() * input.getGravityMagnitude());
 
-      lowerBounds.reshape(numberOfDecisionVariables, 1);
-      upperBounds.reshape(numberOfDecisionVariables, 1);
+      x.reshape(numberOfDecisionVariables, 1);
+      xBestFeasible.reshape(numberOfDecisionVariables, 1);
 
-      double comMinMax = 1.0e3;
-      for (int i = 0; i < numberOfDecisionVariables; i++)
-      {
-         boolean isRhoConstraint = i < numberOfDecisionVariables - 2;
-         lowerBounds.set(i, 0, isRhoConstraint ? 0.0 : - comMinMax);
-         upperBounds.set(i, 0, isRhoConstraint ? rhoMax : comMinMax);
-      }
-
-      inequalityMatrix.reshape(numberOfDecisionVariables - 2, numberOfDecisionVariables);
-      for (int i = 0; i < numberOfDecisionVariables - 2; i++)
-      {
-         inequalityMatrix.set(i, i, -1.0);
-      }
-
-      solution.reshape(numberOfDecisionVariables, 1);
+      AeqActive.reshape(6, numberOfDecisionVariables);
+      activeDiagonal.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
+      CommonOps_DDRM.setIdentity(activeDiagonal);
 
       for (int i = 0; i < directionsToOptimize.size(); i++)
       {
          Vector2D directionToOptimize = directionsToOptimize.get(i);
-         linearCost.set(numberOfDecisionVariables - 2, 0, - directionToOptimize.getX());
-         linearCost.set(numberOfDecisionVariables - 1, 0, - directionToOptimize.getY());
-
-         qpSolver.clear();
-         qpSolver.resetActiveSet();
-         qpSolver.setUseWarmStart(false);
-
-         qpSolver.setQuadraticCostFunction(quadraticCost, linearCost);
-         qpSolver.setLinearEqualityConstraints(Aeq, beq);
-         qpSolver.setVariableBounds(lowerBounds, upperBounds);
-         qpSolver.solve(solution);
-
-         double comExtremumX = solution.get(numberOfDecisionVariables - 2, 0);
-         double comExtremumY = solution.get(numberOfDecisionVariables - 1, 0);
-         supportRegion.add(new Point2D(comExtremumX, comExtremumY));
-
-         for (int j = 0; j < numberOfContactPoints; j++)
-         {
-            contactPoints.get(j).setResolvedForce(solution);
-         }
-
          this.directionToOptimize.set(directionToOptimize);
 
-         boolean containsNaN = containsNaN(solution);
+         computeExtremeFeasibleCoM(directionToOptimize);
 
-         if (containsNaN)
-         {
-            this.optimizedCoM.setToNaN();
-            this.nanCoM.set(0.0, 0.0, 0.1);
-         }
-         else
-         {
-            this.optimizedCoM.setX(solution.get(numberOfDecisionVariables - 2));
-            this.optimizedCoM.setY(solution.get(numberOfDecisionVariables - 1));
-            this.optimizedCoM.setZ(0.1);
-            this.nanCoM.setToNaN();
-         }
+         setFinalGraphics();
+         double comExtremumX = x.get(numberOfDecisionVariables - 2, 0);
+         double comExtremumY = x.get(numberOfDecisionVariables - 1, 0);
+         supportRegion.add(new Point2D(comExtremumX, comExtremumY));
 
          if (tickAndUpdatable != null)
          {
@@ -221,15 +184,164 @@ public class StaticEquilibriumSolver
       }
    }
 
-   private static boolean containsNaN(DMatrixRMaj matrix)
+   private void setIntermediateGraphics()
    {
-      for (int i = 0; i < matrix.getNumElements(); i++)
+      for (int j = 0; j < input.getNumberOfContacts(); j++)
       {
-         if (Double.isNaN(matrix.get(i)))
-            return true;
+         contactPoints.get(j).setResolvedForce(x);
       }
 
-      return false;
+      this.optimizedCoM.setX(x.get(numberOfDecisionVariables - 2));
+      this.optimizedCoM.setY(x.get(numberOfDecisionVariables - 1));
+      this.optimizedCoM.setZ(0.1);
+
+      this.bestFeasibleCoM.setX(xBestFeasible.get(numberOfDecisionVariables - 2));
+      this.bestFeasibleCoM.setY(xBestFeasible.get(numberOfDecisionVariables - 1));
+      this.bestFeasibleCoM.setZ(0.1);
+
+      tickAndUpdatable.tickAndUpdate();
+   }
+
+   private void setFinalGraphics()
+   {
+      for (int j = 0; j < input.getNumberOfContacts(); j++)
+      {
+         contactPoints.get(j).setResolvedForce(x);
+      }
+
+      this.optimizedCoM.setToNaN();
+      this.bestFeasibleCoM.setX(xBestFeasible.get(numberOfDecisionVariables - 2));
+      this.bestFeasibleCoM.setY(xBestFeasible.get(numberOfDecisionVariables - 1));
+      this.bestFeasibleCoM.setZ(0.1);
+
+      tickAndUpdatable.tickAndUpdate();
+   }
+
+   private void computeProjectionMatrices()
+   {
+      CommonOps_DDRM.mult(Aeq, activeDiagonal, AeqActive);
+
+      DMatrixRMaj AATinv = new DMatrixRMaj(0, 0);
+      CommonOps_DDRM.multOuter(AeqActive, AATinv);
+      CommonOps_DDRM.invert(AATinv);
+
+      DMatrixRMaj ATAATinv = new DMatrixRMaj(0, 0);
+      CommonOps_DDRM.multTransA(AeqActive, AATinv, ATAATinv);
+      CommonOps_DDRM.mult(ATAATinv, beq, p1);
+
+      CommonOps_DDRM.mult(ATAATinv, AeqActive, p0);
+      CommonOps_DDRM.scale(-1.0, p0);
+      CommonOps_DDRM.addEquals(p0, CommonOps_DDRM.identity(numberOfDecisionVariables));
+   }
+
+   private void computeExtremeFeasibleCoM(Vector2D directionToOptimize)
+   {
+      iterations.set(0);
+      computeProjectionMatrices();
+      computeInitialInteriorPoint();
+      CommonOps_DDRM.setIdentity(activeDiagonal);
+      xBestFeasible.set(x);
+
+      boolean[] activeBetas = new boolean[numberOfDecisionVariables - 2];
+      Arrays.fill(activeBetas, true);
+
+      while (iterations.getValue() < maximumNumberOfIterations)
+      {
+         iterations.increment();
+
+         if (iterations.getIntegerValue() > 1 && terminate())
+            break;
+
+         // check friction constraints
+         boolean foundInvalidFrictionConstraint = false;
+         for (int i = 0; i < numberOfDecisionVariables - 2; i++)
+         {
+            if (x.get(i) < 0.0)
+            {
+               foundInvalidFrictionConstraint = true;
+               x.set(i, 1.0e-5);
+               activeDiagonal.set(i, i, 0.0);
+               activeBetas[i] = false;
+            }
+         }
+
+         if (foundInvalidFrictionConstraint)
+         {
+            computeProjectionMatrices();
+         }
+
+         activeBetaSize.set(0);
+         for (int i = 0; i < activeBetas.length; i++)
+         {
+            if (activeBetas[i])
+               activeBetaSize.increment();
+         }
+
+         if (!foundInvalidFrictionConstraint)
+         {
+            if (terminate())
+               break;
+            else
+               xBestFeasible.set(x);
+
+            x.add(numberOfDecisionVariables - 2, 0, 0.5 * directionToOptimize.getX());
+            x.add(numberOfDecisionVariables - 1, 0, 0.5 * directionToOptimize.getY());
+         }
+
+         // enforce static equilibrium
+         projectToEqualityConstraints(x);
+
+         if (tickAndUpdatable != null && updateGraphicsEachIteration)
+         {
+            setIntermediateGraphics();
+         }
+      }
+
+      System.out.println("iterations " + iterations);
+   }
+
+   private boolean terminate()
+   {
+      if (iterations.getIntegerValue() <= 1)
+         return false;
+
+      if (activeBetaSize.getValue() <= 4)
+         return true;
+
+      double pX = x.get(numberOfDecisionVariables - 2);
+      double pY = x.get(numberOfDecisionVariables - 1);
+      double bestX = xBestFeasible.get(numberOfDecisionVariables - 2);
+      double bestY = xBestFeasible.get(numberOfDecisionVariables - 1);
+      double distance = EuclidCoreTools.norm(pX - bestX, pY - bestY);
+      return distance < 1e-5;
+   }
+
+   private void computeInitialInteriorPoint()
+   {
+      Point2D averageContactPointXY = new Point2D();
+      for (int i = 0; i < input.getNumberOfContacts(); i++)
+      {
+         averageContactPointXY.add(input.getContactPointPositions().get(i).getX(), input.getContactPointPositions().get(i).getY());
+      }
+      averageContactPointXY.scale(1.0 / input.getNumberOfContacts());
+
+      // guess for flat ground
+      double flatGroundBetaZ = 1.0 / Math.sqrt(1.0 + MathTools.square(input.getCoefficientOfFriction()));
+      double rhoGuess = input.getRobotMass() * input.getGravityMagnitude() / (4.0 * input.getNumberOfContacts() * flatGroundBetaZ);
+      CommonOps_DDRM.fill(x, rhoGuess);
+
+      // set com to center of contacts
+      x.set(numberOfDecisionVariables - 2, averageContactPointXY.getX());
+      x.set(numberOfDecisionVariables - 1, averageContactPointXY.getY());
+
+      projectToEqualityConstraints(x);
+   }
+
+   private void projectToEqualityConstraints(DMatrixRMaj x)
+   {
+      CommonOps_DDRM.mult(p0, x, xProjected);
+      CommonOps_DDRM.addEquals(xProjected, p1);
+      x.set(xProjected);
    }
 
    public List<Point2D> getSupportRegion()

@@ -20,6 +20,8 @@ import java.util.List;
 
 public class StaticEquilibriumSolverVisualizer
 {
+   private static final boolean showSupportRegion = true;
+
    public StaticEquilibriumSolverVisualizer(StaticEquilibriumSolverInput input)
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
@@ -53,14 +55,17 @@ public class StaticEquilibriumSolverVisualizer
          supportRegionGraphics.addCylinder(0.02, 0.3, YoAppearance.Beige());
       }
 
-      ConvexPolygon2D supportRegion = new ConvexPolygon2D();
-      solver.getSupportRegion().forEach(supportRegion::addVertex);
-      supportRegion.update();
+      if (showSupportRegion)
+      {
+         ConvexPolygon2D supportRegion = new ConvexPolygon2D();
+         solver.getSupportRegion().forEach(supportRegion::addVertex);
+         supportRegion.update();
 
-      double renderedHeight = 0.1;
-      supportRegionGraphics.identity();
-      supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
-      supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
+         double renderedHeight = 0.1;
+         supportRegionGraphics.identity();
+         supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
+         supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
+      }
 
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(supportRegionGraphics);
@@ -103,7 +108,7 @@ public class StaticEquilibriumSolverVisualizer
 //      double theta1 = 0.0;
 //      double theta2 = 0.0;
 
-      // tilted out a little
+//       tilted out a little
       double theta0 = Math.toRadians(30.0);
       double theta1 = Math.toRadians(30.0);
       double theta2 = Math.toRadians(30.0);
@@ -114,7 +119,7 @@ public class StaticEquilibriumSolverVisualizer
 //      double theta2 = Math.toRadians(60.0);
 
 //      // 2 flat one perpendicular out
-//      double theta0 = Math.toRadians(90.0);
+//      double theta0 = Math.toRadians(-90.0);
 //      double theta1 = 0.0;
 //      double theta2 = 0.0;
 
@@ -123,7 +128,15 @@ public class StaticEquilibriumSolverVisualizer
 //      double theta2 = 0.0;
 //      double theta1 = 0.0;
 
+      double height0 = 0.0;
+      double height1 = 0.0;
+      double height2 = 0.0;
+
       StaticEquilibriumSolverInput input = createInput(theta0, theta1, theta2);
+
+      input.getContactPointPositions().get(0).setZ(height0);
+      input.getContactPointPositions().get(1).setZ(height1);
+      input.getContactPointPositions().get(2).setZ(height2);
 
       new StaticEquilibriumSolverVisualizer(input);
    }
