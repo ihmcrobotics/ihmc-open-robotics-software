@@ -17,6 +17,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /* package-private */ class StaticEquilibriumContactPoint
 {
@@ -29,6 +30,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
    private final YoFramePose3D surfacePose;
    private final YoFrameVector3D force;
    private final PoseReferenceFrame contactPointFrame;
+   private final YoDouble[] rhoValues = new YoDouble[4];
 
    public StaticEquilibriumContactPoint(int contactPointIndex, YoRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -46,6 +48,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
       YoGraphicVector forceVector = new YoGraphicVector("forceGraphic" + contactPointIndex, surfacePose.getPosition(), force, forceVectorScale, YoAppearance.Red());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), forceVector);
+
+      for (int i = 0; i < rhoValues.length; i++)
+      {
+         rhoValues[i] = new YoDouble("rho_cp" + contactPointIndex + "_" + i, registry);
+      }
    }
 
    public void initialize(StaticEquilibriumSolverInput input)
@@ -100,6 +107,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
          double rho = solution.get(4 * contactPointIndex + i);
          scaledBasisVector.scale(rho);
          force.add(scaledBasisVector);
+         rhoValues[i].set(rho);
+
+         if (Double.isNaN(rho))
+         {
+            force.setToNaN();
+            return;
+         }
       }
    }
 }
