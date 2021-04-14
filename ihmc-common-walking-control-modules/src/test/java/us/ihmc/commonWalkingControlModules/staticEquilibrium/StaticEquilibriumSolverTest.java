@@ -1,71 +1,77 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 
 public class StaticEquilibriumSolverTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize", "true"));
+   private static final double marginToTest = 0.09;
 
    @Test
    public void testTriangleFlat()
    {
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
-      if (VISUALIZE)
-      {
-         new StaticEquilibriumSolverVisualizer(input);
-      }
+      runTest(StaticEquilibriumSolverInputExamples.createTriangleFlatGround());
    }
 
    @Test
    public void testTriangleLowAngle()
    {
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
-      if (VISUALIZE)
-      {
-         new StaticEquilibriumSolverVisualizer(input);
-      }
+      runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly());
    }
 
    @Test
    public void testTriangleHighAngle()
    {
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
-      if (VISUALIZE)
-      {
-         new StaticEquilibriumSolverVisualizer(input);
-      }
+      runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot());
    }
 
    @Test
    public void testBipedFeet()
    {
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
-      if (VISUALIZE)
-      {
-         new StaticEquilibriumSolverVisualizer(input);
-      }
+      runTest(StaticEquilibriumSolverInputExamples.createBipedFeet());
    }
 
    @Test
    public void testBipedFeetWithHandhold()
    {
-      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold();
-      if (VISUALIZE)
+      runTest(StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold());
+   }
+
+   private void runTest(StaticEquilibriumSolverInput input)
+   {
+      StaticEquilibriumSolver solver = new StaticEquilibriumSolver();
+      solver.solve(input);
+
+      ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
+      solver.getSupportRegion().forEach(supportPolygon::addVertex);
+      supportPolygon.update();
+
+      StaticEquilibriumForceOptimizer forceOptimizer = new StaticEquilibriumForceOptimizer();
+
+      // test the vertices are valid
+      for (int i = 0; i < supportPolygon.getNumberOfVertices(); i++)
       {
-         new StaticEquilibriumSolverVisualizer(input);
+         Point2DReadOnly vertex = supportPolygon.getVertex(i);
+         boolean succeeded = forceOptimizer.solve(input, vertex);
+//         Assertions.assertTrue(succeeded);
+         System.out.println(succeeded ? "pass" : "fail");
+      }
+
+      System.out.println();
+      ConvexPolygonScaler scaler = new ConvexPolygonScaler();
+      ConvexPolygon2D scaledPolygon = new ConvexPolygon2D();
+      scaler.scaleConvexPolygon(supportPolygon, -marginToTest, scaledPolygon);
+
+      // test outside the vertices by a margin aren't valid
+      for (int i = 0; i < scaledPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = scaledPolygon.getVertex(i);
+         boolean succeeded = forceOptimizer.solve(input, vertex);
+//         Assertions.assertFalse(succeeded);
+         System.out.println(!succeeded ? "pass" : "fail");
       }
    }
 }

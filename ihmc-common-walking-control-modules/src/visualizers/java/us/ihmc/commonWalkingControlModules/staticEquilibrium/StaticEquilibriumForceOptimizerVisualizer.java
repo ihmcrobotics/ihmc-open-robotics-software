@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,43 +21,57 @@ public class StaticEquilibriumForceOptimizerVisualizer
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
-      StaticEquilibriumForceOptimizer solver = new StaticEquilibriumForceOptimizer();
+      StaticEquilibriumSolver regionSolver = new StaticEquilibriumSolver();
+      regionSolver.solve(input);
+      ConvexPolygon2D supportRegion = new ConvexPolygon2D();
+      regionSolver.getSupportRegion().forEach(supportRegion::addVertex);
+      supportRegion.update();
+
+      double renderedHeight = 0.1;
+      Graphics3DObject supportRegionGraphics = new Graphics3DObject();
+      supportRegionGraphics.identity();
+      supportRegionGraphics.translate(0.0, 0.0, renderedHeight);
+      supportRegionGraphics.addExtrudedPolygon(supportRegion, 0.01, YoAppearance.Glass());
+      scs.addStaticLinkGraphics(supportRegionGraphics);
+
+      StaticEquilibriumForceOptimizer pointVerifier = new StaticEquilibriumForceOptimizer();
 
       YoFramePoint3D comPosition = new YoFramePoint3D("comPosition", ReferenceFrame.getWorldFrame(), scs.getRootRegistry());
+      comPosition.setZ(renderedHeight);
       YoGraphicPosition comGraphic = new YoGraphicPosition("comPositionGraphic", comPosition, 0.03, YoAppearance.Red());
-      solver.getGraphicsListRegistry().registerYoGraphic("comGraphic", comGraphic);
+      pointVerifier.getGraphicsListRegistry().registerYoGraphic("comGraphic", comGraphic);
 
-      scs.getRootRegistry().addChild(solver.getRegistry());
-      scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
+      scs.getRootRegistry().addChild(pointVerifier.getRegistry());
+      scs.addYoGraphicsListRegistry(pointVerifier.getGraphicsListRegistry());
 
       Runnable solverRunnable = () ->
       {
-         solver.solve(input, new Point2D(comPosition.getX(), comPosition.getY()));
-         System.out.println("succeeded: " + solver.feasibleSolutionFound());
+         pointVerifier.solve(input, new Point2D(comPosition.getX(), comPosition.getY()));
+         System.out.println("succeeded: " + pointVerifier.feasibleSolutionFound());
          scs.tickAndUpdate();
       };
 
       comPosition.getYoX().addListener(v -> solverRunnable.run());
       comPosition.getYoY().addListener(v -> solverRunnable.run());
 
-      Graphics3DObject supportRegionGraphics = new Graphics3DObject();
+      Graphics3DObject groundGraphics = new Graphics3DObject();
 
       for (int i = 0; i < input.getNumberOfContacts(); i++)
       {
          FramePoint3D contactPoint = input.getContactPointPositions().get(i);
 
-         supportRegionGraphics.identity();
-         supportRegionGraphics.translate(contactPoint);
-         supportRegionGraphics.addSphere(0.03, YoAppearance.Black());
+         groundGraphics.identity();
+         groundGraphics.translate(contactPoint);
+         groundGraphics.addSphere(0.03, YoAppearance.Black());
 
          Quaternion surfaceOrientation = new Quaternion();
          EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(Axis3D.Z, input.getSurfaceNormals().get(i), surfaceOrientation);
-         supportRegionGraphics.rotate(surfaceOrientation);
-         supportRegionGraphics.translate(0.0, 0.0, -0.01);
-         supportRegionGraphics.addCylinder(0.02, 0.15, YoAppearance.Beige());
+         groundGraphics.rotate(surfaceOrientation);
+         groundGraphics.translate(0.0, 0.0, -0.01);
+         groundGraphics.addCylinder(0.02, 0.15, YoAppearance.Beige());
       }
 
-      scs.addStaticLinkGraphics(supportRegionGraphics);
+      scs.addStaticLinkGraphics(groundGraphics);
       scs.setGroundVisible(false);
       scs.startOnAThread();
       scs.cropBuffer();
