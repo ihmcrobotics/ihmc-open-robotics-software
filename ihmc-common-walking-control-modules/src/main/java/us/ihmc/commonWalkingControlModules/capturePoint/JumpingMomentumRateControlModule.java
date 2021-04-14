@@ -14,6 +14,8 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.commonWalkingControlModules.orientationControl.VariationalLQRController;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -60,6 +62,9 @@ public class JumpingMomentumRateControlModule
    private List<? extends Polynomial3DReadOnly> vrpTrajectories;
    private List<? extends ContactStateProvider> contactStateProviders;
 
+   private FrameVector3DReadOnly mpcLinearMomentumRateOfChange;
+   private FrameVector3DReadOnly mpcAngularMomentumRateOfChange;
+
    private final ReferenceFrame centerOfMassFrame;
    private final FramePoint2D centerOfMass2d = new FramePoint2D();
 
@@ -91,7 +96,7 @@ public class JumpingMomentumRateControlModule
 
       MomentumOptimizationSettings momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       linearMomentumRateWeight = new ParameterVector3D("LinearMomentumRateWeight1", new Vector3D(10, 10, 10), registry);
-      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
+      angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight1", new Vector3D(1e-3, 1e-3, 0.0), registry);
 
       minimizeAngularMomentumRate.set(true);
 
@@ -134,6 +139,8 @@ public class JumpingMomentumRateControlModule
       this.timeInContactPhase = input.getTimeInState();
       this.vrpTrajectories = input.getVrpTrajectories();
       this.contactStateProviders = input.getContactStateProviders();
+      mpcLinearMomentumRateOfChange = input.getDesiredLinearMomentumRateOfChange();
+      mpcAngularMomentumRateOfChange = input.getDesiredAngularMomentumRateOfChange();
 //      this.minimizeAngularMomentumRate.set(input.getMinimizeAngularMomentumRate());
    }
 
@@ -168,7 +175,9 @@ public class JumpingMomentumRateControlModule
       if (!minimizeAngularMomentumRate.getBooleanValue())
          selectionMatrix.clearAngularSelection();
 
-      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
+//      momentumRateCommand.setLinearMomentumRate(linearMomentumRateOfChange);
+//      momentumRateCommand.setAngularMomentumRate(angularMomentumRateOfChange);
+      momentumRateCommand.setMomentumRate(angularMomentumRateOfChange, linearMomentumRateOfChange);
       momentumRateCommand.setSelectionMatrix(selectionMatrix);
       momentumRateCommand.setWeights(angularMomentumRateWeight, linearMomentumRateWeight);
 
@@ -236,7 +245,8 @@ public class JumpingMomentumRateControlModule
 
 //      orientationController.getDesiredTorque(angularMomentumRateOfChange);
 
-      angularMomentumRateOfChange.changeFrame(worldFrame);
+//      angularMomentumRateOfChange.changeFrame(worldFrame);
+      angularMomentumRateOfChange.set(mpcAngularMomentumRateOfChange);
    }
 
 }

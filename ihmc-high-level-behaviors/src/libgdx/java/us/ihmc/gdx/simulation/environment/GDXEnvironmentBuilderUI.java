@@ -8,7 +8,10 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
    public static final String APPLICATION_NAME = "Environment Builder";
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(APPLICATION_NAME);
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
+                                                              "ihmc-open-robotics-software",
+                                                              "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                              APPLICATION_NAME);
    private final GDXEnvironmentBuilderPanel environmentBuilderUI = new GDXEnvironmentBuilderPanel();
 
    public GDXEnvironmentBuilderUI()

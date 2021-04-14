@@ -42,6 +42,7 @@ import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -94,31 +95,10 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    {
       this.baseUI = baseUI;
 
-      behaviorHelper.subscribeViaCallback(CurrentState, state -> currentState = state);
-      behaviorHelper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
-      behaviorHelper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+      if (behaviorHelper.getMessager() != null)
       {
-         this.latestRegions = regions;
-         ++numberOfSteppingRegionsReceived;
-         if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions);
-      });
-      behaviorHelper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
-      {
-         if (bodyPath != null)
-            bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
-      });
-      footstepPlanGraphic.setTransparency(0.2);
-      behaviorHelper.subscribeViaCallback(FootstepPlanForUI, footsteps ->
-      {
-         reviewingBodyPath = false;
-         footstepPlanGraphic.generateMeshesAsync(footsteps);
-      });
-      behaviorHelper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
-      startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
-      startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
-      startAndGoalFootstepsGraphic.setTransparency(0.4);
-      behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+         setupSubscribers();
+      }
 
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
@@ -167,6 +147,35 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       });
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+   }
+
+   public void setupSubscribers()
+   {
+      behaviorHelper.subscribeViaCallback(CurrentState, state -> currentState = state);
+      behaviorHelper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
+      behaviorHelper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+      {
+         this.latestRegions = regions;
+         ++numberOfSteppingRegionsReceived;
+         if (regions != null)
+            planarRegionsGraphic.generateMeshesAsync(regions);
+      });
+      behaviorHelper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
+      {
+         if (bodyPath != null)
+            bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
+      });
+      footstepPlanGraphic.setTransparency(0.2);
+      behaviorHelper.subscribeViaCallback(FootstepPlanForUI, footsteps ->
+      {
+         reviewingBodyPath = false;
+         footstepPlanGraphic.generateMeshesAsync(footsteps);
+      });
+      behaviorHelper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
+      startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
+      startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
+      startAndGoalFootstepsGraphic.setTransparency(0.4);
+      behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -331,6 +340,12 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          planarRegionsGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
       }
+   }
+
+   public void setMessager(Messager messager)
+   {
+      behaviorHelper.setNewMessager(messager);
+      setupSubscribers();
    }
 
    public void destroy()

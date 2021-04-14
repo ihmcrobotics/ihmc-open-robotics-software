@@ -12,13 +12,17 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLargeCinderBlockRoughed;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -257,6 +261,17 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    public GDXEnvironmentObject getSensorObject()
    {
       return sensorModelInstance;
+   }
+
+   public ModelInstance placeFloor()
+   {
+      GDXLabFloorObject floor = new GDXLabFloorObject();
+      Pose3D pose = new Pose3D();
+      RigidBodyTransform transform = new RigidBodyTransform();
+      pose.set(new Point3D(0.0f, 0.0f, 0.0f), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
+      pose.get(transform);
+      GDXTools.toGDX(transform, floor.getModelInstance().transform);
+      return floor.getModelInstance();
    }
 
    @Override

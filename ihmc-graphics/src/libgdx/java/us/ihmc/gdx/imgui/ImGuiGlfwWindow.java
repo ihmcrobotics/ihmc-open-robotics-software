@@ -26,7 +26,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiDockSystem.create(windowHandle, windowTitle);
+      imGuiDockSystem.create(windowHandle);
 
       while (!glfwWindowShouldClose(windowHandle))
       {
