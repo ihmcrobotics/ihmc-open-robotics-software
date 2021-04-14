@@ -237,16 +237,14 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerToolbox.setHighCoPDampingParameters(enableHighCoPDamping, highCoPDampingDuration, coPErrorThreshold);
 
       String[] jointNamesRestrictiveLimits = walkingControllerParameters.getJointsWithRestrictiveLimits();
-      JointLimitParameters limitParameters = walkingControllerParameters.getJointLimitParametersForJointsWithRestictiveLimits();
       OneDoFJointBasics[] jointsWithRestrictiveLimit = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
                                                                                                                         jointNamesRestrictiveLimits),
                                                                                          OneDoFJointBasics.class);
       for (OneDoFJointBasics joint : jointsWithRestrictiveLimit)
       {
+         JointLimitParameters limitParameters = walkingControllerParameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
          if (limitParameters == null)
-         {
-            throw new RuntimeException("Must define joint limit parameters if using joints with restrictive limits.");
-         }
+            throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
 

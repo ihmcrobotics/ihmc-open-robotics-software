@@ -1149,7 +1149,7 @@ public class PlanarRegionTools
       return closestIntersection;
    }
 
-   public static Point3D intersectRegionWithRay(PlanarRegion region, Point3DReadOnly rayStart, Vector3D rayDirection)
+   public static Point3D intersectRegionWithRay(PlanarRegion region, Point3DReadOnly rayStart, Vector3DReadOnly rayDirection)
    {
       RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
       RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();

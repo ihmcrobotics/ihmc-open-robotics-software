@@ -90,7 +90,7 @@ public abstract class AvatarStandingLongJumpTests
       success &= blockingSimulationRunner.simulateAndBlockAndCatchExceptions(2.0);
       assertTrue(success);
 
-      assertEquals(jumpLength, comX.getDoubleValue(), goalEpsilon);
+      assertEquals(jumpLength, comX.getDoubleValue(), 0.2);
       assertEquals(0.0, comY.getDoubleValue(), goalEpsilon);
    }
 

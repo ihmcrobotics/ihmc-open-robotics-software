@@ -1,9 +1,12 @@
 package us.ihmc.robotics;
 
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 
@@ -61,6 +64,34 @@ public class MatrixMissingToolsTest
          MatrixMissingTools.fast2x2Inverse(matrix, matrixInverse);
 
          MatrixTestTools.assertMatrixEquals(matrixInverseExpected, matrixInverse, epsilon);
+      }
+   }
+
+   @Test
+   public void testToSkewSymmetric()
+   {
+      int iters = 500;
+      double epsilon = 1e-8;
+      Random random = new Random(1738L);
+      for (int i = 0; i < iters; i++)
+      {
+         Vector3D vectorA = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D vectorB = EuclidCoreRandomTools.nextVector3D(random);
+         Vector3D vectorC = new Vector3D();
+
+         vectorC.cross(vectorA, vectorB);
+
+         DMatrixRMaj vectorBVector = new DMatrixRMaj(3, 1);
+         DMatrixRMaj vectorCVector = new DMatrixRMaj(3, 1);
+         DMatrixRMaj vectorCActual = new DMatrixRMaj(3, 1);
+         DMatrixRMaj skewVectorA = new DMatrixRMaj(3, 3);
+         vectorB.get(vectorBVector);
+         MatrixMissingTools.toSkewSymmetricMatrix(vectorA, skewVectorA);
+
+         CommonOps_DDRM.mult(skewVectorA, vectorBVector, vectorCVector);
+         vectorC.get(vectorCActual);
+
+         MatrixTestTools.assertMatrixEquals(vectorCActual, vectorCVector, epsilon);
       }
    }
 

@@ -216,6 +216,7 @@ public abstract class TransferState extends WalkingState
    {
       balanceManager.clearICPPlan();
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
+      balanceManager.setHoldSplitFractions(false);
 
       if (walkingMessageHandler.hasUpcomingFootsteps())
       {

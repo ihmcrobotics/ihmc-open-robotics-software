@@ -39,7 +39,7 @@ public class CoMPositionContinuityCommandTest
       MPCContactPlane contactPlaneHelper2 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
 
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
-      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, false, new YoRegistry("test"));
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, null, new YoRegistry("test"));
 
       FramePose3D contactPose1 = new FramePose3D();
       FramePose3D contactPose2 = new FramePose3D();

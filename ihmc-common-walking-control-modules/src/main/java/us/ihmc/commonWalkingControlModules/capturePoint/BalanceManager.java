@@ -544,6 +544,11 @@ public class BalanceManager
       copTrajectoryState.getFootstep(0).set(footstep);
    }
 
+   public void setHoldSplitFractions(boolean hold)
+   {
+      copTrajectory.setHoldSplitFractions(hold);
+   }
+
    public void computeICPPlan()
    {
       computeICPPlanInternal(copTrajectory);
@@ -565,6 +570,7 @@ public class BalanceManager
          if (controllerToolbox.getFootContactState(robotSide).inContact())
             copTrajectoryState.initializeStance(robotSide, bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide), soleFrames.get(robotSide));
       }
+
       copTrajectory.compute(copTrajectoryState);
 
       List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();

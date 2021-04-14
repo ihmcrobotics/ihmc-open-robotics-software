@@ -363,7 +363,7 @@ public class WalkingSingleSupportState extends SingleSupportState
          else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
             feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
 
-         updateHeightManager();
+//         updateHeightManager();
       }
    }
 

@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.util.ArrayList;
 import java.util.function.Function;
 
 public class GDXPlanarRegionsGraphic implements RenderableProvider
@@ -64,21 +65,27 @@ public class GDXPlanarRegionsGraphic implements RenderableProvider
 
    public synchronized void generateMeshes(PlanarRegionsList planarRegionsList)
    {
-      GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+      ArrayList<GDXMultiColorMeshBuilder> meshBuilders = new ArrayList<>();
       for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
       {
+         GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
+         meshBuilders.add(meshBuilder);
          singleRegionMeshBuilder(planarRegion, meshBuilder); // should do in parallel somehow?
       }
       toRender = () ->
       {
          modelBuilder.begin();
-         Mesh mesh = meshBuilder.generateMesh();
-         MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
          Material material = new Material();
          Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
          material.set(TextureAttribute.createDiffuse(paletteTexture));
          material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
-         modelBuilder.part(meshPart, material);
+
+         for (GDXMultiColorMeshBuilder meshBuilder : meshBuilders)
+         {
+            Mesh mesh = meshBuilder.generateMesh();
+            MeshPart meshPart = new MeshPart("xyz", mesh, 0, mesh.getNumIndices(), GL32.GL_TRIANGLES);
+            modelBuilder.part(meshPart, material);
+         }
 
          if (lastModel != null)
             lastModel.dispose();
