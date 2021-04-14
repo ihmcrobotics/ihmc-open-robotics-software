@@ -133,14 +133,15 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
-      feetManager.updateSwingTrajectoryPreview(transferToSide.getOppositeSide());
-      balanceManager.setSwingFootTrajectory(feetManager.getSwingTrajectory(transferToSide.getOppositeSide()));
+      RobotSide swingSide = transferToSide.getOppositeSide();
+      feetManager.updateSwingTrajectoryPreview(swingSide);
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
       if (!doManualLiftOff())
       {
          if (switchToToeOffIfPossible())
-            feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+            feetManager.initializeSwingTrajectoryPreview(swingSide, footsteps[0], footstepTimings[0].getSwingTime());
       }
 
       super.doAction(timeInState);

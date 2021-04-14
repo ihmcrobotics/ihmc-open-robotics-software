@@ -82,7 +82,7 @@ public class LQRMomentumControllerSimulation
          SimpleCoMTrajectoryPlanner dcmPlan = new SimpleCoMTrajectoryPlanner(sphereRobot2.getOmega0Provider());
          dcmPlan.setNominalCoMHeight(sphereRobot2.getDesiredHeight());
          dcmPlan.setCornerPointViewer(new CornerPointViewer(registry, yoGraphicsListRegistry2));
-         controller2 = new LQRSphereController(sphereRobot2, dcmPlan, yoGraphicsListRegistry2);
+         controller2 = new LQRSphereController(sphereRobot2, dcmPlan);
 
          pushController2 = createPusher(sphereRobot2, yoGraphicsListRegistry2);
          setupGroundContactModel(sphereRobot2.getScsRobot());
@@ -110,7 +110,7 @@ public class LQRMomentumControllerSimulation
          dcmPlan.setCornerPointViewer(new CornerPointViewer(sphereRobot3.getScsRobot().getRobotsYoRegistry(),
                                                             yoGraphicsListRegistry3));
 
-         controller3 = new LQRJumpSphereController(sphereRobot3, dcmPlan, yoGraphicsListRegistry3);
+         controller3 = new LQRJumpSphereController(sphereRobot3, dcmPlan);
 
          pushController3 = createPusher(sphereRobot3, yoGraphicsListRegistry3);
          setupGroundContactModel(sphereRobot3.getScsRobot());
@@ -192,7 +192,7 @@ public class LQRMomentumControllerSimulation
       robot.setGroundContactModel(groundContactModel);
    }
 
-   public void setTrajectories(List<? extends ContactStateProvider> contacts)
+   public void setTrajectories(List<SettableContactStateProvider> contacts)
    {
       if (controller1 != null)
       {
@@ -208,11 +208,11 @@ public class LQRMomentumControllerSimulation
       }
    }
 
-   private static List<? extends ContactStateProvider> copyContactsWithShift(List<? extends ContactStateProvider> contacts, Vector3DReadOnly shift)
+   private static List<SettableContactStateProvider> copyContactsWithShift(List<SettableContactStateProvider> contacts, Vector3DReadOnly shift)
    {
       List<SettableContactStateProvider> newContacts = new ArrayList<>();
 
-      for (ContactStateProvider contact : contacts)
+      for (SettableContactStateProvider contact : contacts)
       {
          SettableContactStateProvider newContact = new SettableContactStateProvider();
          newContact.getTimeInterval().set(contact.getTimeInterval());
@@ -234,7 +234,6 @@ public class LQRMomentumControllerSimulation
 
    private static final double initialTransferDuration = 1.0;
    private static final double finalTransferDuration = 1.0;
-   private static final double settlingTime = 1.0;
    private static final double stepDuration = 0.7;
    private static final double stepLength = 0.5;
    private static final double stepWidth = 0.15;
@@ -242,9 +241,9 @@ public class LQRMomentumControllerSimulation
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static List<ContactStateProvider> createContacts()
+   private static List<SettableContactStateProvider> createContacts()
    {
-      List<ContactStateProvider> contacts = new ArrayList<>();
+      List<SettableContactStateProvider> contacts = new ArrayList<>();
 
       double contactPosition = 0.0;
 
@@ -303,7 +302,7 @@ public class LQRMomentumControllerSimulation
       fakeState.setStartECMPPosition(new FramePoint3D());
       fakeState.setEndECMPPosition(new FramePoint3D());
       fakeState.setLinearECMPVelocity();
-      List<ContactStateProvider> fakeProvider = new ArrayList<>();
+      List<SettableContactStateProvider> fakeProvider = new ArrayList<>();
       fakeProvider.add(fakeState);
 
             simulation.setTrajectories(createContacts());
