@@ -17,6 +17,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -34,7 +35,10 @@ public class StaticEquilibriumSolver
 {
    private static final boolean updateGraphicsEachIteration = false;
    private static final int numberOfDirectionsToOptimize = 64;
-   private static final int maximumNumberOfIterations = 2000;
+   private static final int maximumNumberOfIterations = 3000;
+   private static final double convergenceThreshold = 1e-4;
+   private static final double convergenceThresholdSq = MathTools.square(convergenceThreshold);
+   private static final double rhoMaxForUnitMass = 10.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -58,12 +62,14 @@ public class StaticEquilibriumSolver
 
    private final YoFramePoint3D directionToOptimizeBase = new YoFramePoint3D("directionToOptimizeBase", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint3D bestFeasibleCoM = new YoFramePoint3D("bestFeasibleCoM", ReferenceFrame.getWorldFrame(), registry);
 
+   private final YoFramePoint3D candidateCoM = new YoFramePoint3D("candidateCoM", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint3D nanCoM = new YoFramePoint3D("nanCoM", ReferenceFrame.getWorldFrame(), registry);
+
    private final YoInteger iterations = new YoInteger("iterations", registry);
    private final YoInteger activeBetaSize = new YoInteger("activeBetaSize", registry);
+   private final YoDouble rhoMax = new YoDouble("rhoMax", registry);
+   private final YoDouble deltaCoM = new YoDouble("deltaCoM", registry);
 
    // projection of z onto Aeq x = beq   >>>>   p0*z + p1
    private final DMatrixRMaj p0 = new DMatrixRMaj(0, 0);
@@ -95,14 +101,11 @@ public class StaticEquilibriumSolver
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), directionToOptimizeGraphic);
       directionToOptimizeBase.set(0.0, 0.0, 0.4);
 
-      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.03, YoAppearance.Blue());
+      YoGraphicPosition optimizedCoMGraphic = new YoGraphicPosition("optimizedCoMGraphic", optimizedCoM, 0.03, YoAppearance.DarkRed());
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), optimizedCoMGraphic);
 
-      YoGraphicPosition bestFeasibleCoMGraphic = new YoGraphicPosition("bestFeasibleCoMGraphic", bestFeasibleCoM, 0.03, YoAppearance.DarkRed());
-      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), bestFeasibleCoMGraphic);
-
-      YoGraphicPosition naNCoMGraphic = new YoGraphicPosition("naNCoMGraphic", nanCoM, 0.05, YoAppearance.Red());
-      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), naNCoMGraphic);
+      YoGraphicPosition candidateCoMGraphic = new YoGraphicPosition("candidateCoM", candidateCoM, 0.03, YoAppearance.Blue());
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), candidateCoMGraphic);
    }
 
    public void solve(StaticEquilibriumSolverInput input)
@@ -115,6 +118,7 @@ public class StaticEquilibriumSolver
       this.input = input;
       int numberOfContactPoints = input.getNumberOfContacts();
       numberOfDecisionVariables = 4 * numberOfContactPoints + 2;
+      rhoMax.set(input.getRobotMass() * rhoMaxForUnitMass);
 
       Aeq.reshape(6, numberOfDecisionVariables);
       beq.reshape(6, 1);
@@ -173,46 +177,47 @@ public class StaticEquilibriumSolver
          computeExtremeFeasibleCoM(directionToOptimize);
 
          setFinalGraphics();
-         double comExtremumX = x.get(numberOfDecisionVariables - 2, 0);
-         double comExtremumY = x.get(numberOfDecisionVariables - 1, 0);
+         double comExtremumX = xBestFeasible.get(numberOfDecisionVariables - 2, 0);
+         double comExtremumY = xBestFeasible.get(numberOfDecisionVariables - 1, 0);
          supportRegion.add(new Point2D(comExtremumX, comExtremumY));
-
-         if (tickAndUpdatable != null)
-         {
-            tickAndUpdatable.tickAndUpdate();
-         }
       }
    }
 
    private void setIntermediateGraphics()
    {
+      if (tickAndUpdatable == null)
+         return;
+
       for (int j = 0; j < input.getNumberOfContacts(); j++)
       {
          contactPoints.get(j).setResolvedForce(x);
       }
 
-      this.optimizedCoM.setX(x.get(numberOfDecisionVariables - 2));
-      this.optimizedCoM.setY(x.get(numberOfDecisionVariables - 1));
+      this.optimizedCoM.setX(xBestFeasible.get(numberOfDecisionVariables - 2));
+      this.optimizedCoM.setY(xBestFeasible.get(numberOfDecisionVariables - 1));
       this.optimizedCoM.setZ(0.1);
 
-      this.bestFeasibleCoM.setX(xBestFeasible.get(numberOfDecisionVariables - 2));
-      this.bestFeasibleCoM.setY(xBestFeasible.get(numberOfDecisionVariables - 1));
-      this.bestFeasibleCoM.setZ(0.1);
+      this.candidateCoM.setX(x.get(numberOfDecisionVariables - 2));
+      this.candidateCoM.setY(x.get(numberOfDecisionVariables - 1));
+      this.candidateCoM.setZ(0.1);
 
       tickAndUpdatable.tickAndUpdate();
    }
 
    private void setFinalGraphics()
    {
+      if (tickAndUpdatable == null)
+         return;
+
       for (int j = 0; j < input.getNumberOfContacts(); j++)
       {
-         contactPoints.get(j).setResolvedForce(x);
+         contactPoints.get(j).setResolvedForce(xBestFeasible);
       }
 
-      this.optimizedCoM.setToNaN();
-      this.bestFeasibleCoM.setX(xBestFeasible.get(numberOfDecisionVariables - 2));
-      this.bestFeasibleCoM.setY(xBestFeasible.get(numberOfDecisionVariables - 1));
-      this.bestFeasibleCoM.setZ(0.1);
+      this.candidateCoM.setToNaN();
+      this.optimizedCoM.setX(xBestFeasible.get(numberOfDecisionVariables - 2));
+      this.optimizedCoM.setY(xBestFeasible.get(numberOfDecisionVariables - 1));
+      this.optimizedCoM.setZ(0.1);
 
       tickAndUpdatable.tickAndUpdate();
    }
@@ -237,9 +242,9 @@ public class StaticEquilibriumSolver
    private void computeExtremeFeasibleCoM(Vector2D directionToOptimize)
    {
       iterations.set(0);
+      CommonOps_DDRM.setIdentity(activeDiagonal);
       computeProjectionMatrices();
       computeInitialInteriorPoint();
-      CommonOps_DDRM.setIdentity(activeDiagonal);
       xBestFeasible.set(x);
 
       boolean[] activeBetas = new boolean[numberOfDecisionVariables - 2];
@@ -263,6 +268,12 @@ public class StaticEquilibriumSolver
                activeDiagonal.set(i, i, 0.0);
                activeBetas[i] = false;
             }
+            else if (x.get(i) > rhoMax.getValue())
+            {
+               foundInvalidFrictionConstraint = true;
+               // scale down slightly
+               x.set(i, rhoMax.getValue() * 0.95);
+            }
          }
 
          if (foundInvalidFrictionConstraint)
@@ -284,17 +295,16 @@ public class StaticEquilibriumSolver
             else
                xBestFeasible.set(x);
 
-            x.add(numberOfDecisionVariables - 2, 0, 0.5 * directionToOptimize.getX());
-            x.add(numberOfDecisionVariables - 1, 0, 0.5 * directionToOptimize.getY());
+            double shiftAmount = 20.0 * input.getRobotMass();
+            x.add(numberOfDecisionVariables - 2, 0, shiftAmount * directionToOptimize.getX());
+            x.add(numberOfDecisionVariables - 1, 0, shiftAmount * directionToOptimize.getY());
          }
 
          // enforce static equilibrium
          projectToEqualityConstraints(x);
 
-         if (tickAndUpdatable != null && updateGraphicsEachIteration)
-         {
+         if (updateGraphicsEachIteration)
             setIntermediateGraphics();
-         }
       }
 
       System.out.println("iterations " + iterations);
@@ -312,8 +322,10 @@ public class StaticEquilibriumSolver
       double pY = x.get(numberOfDecisionVariables - 1);
       double bestX = xBestFeasible.get(numberOfDecisionVariables - 2);
       double bestY = xBestFeasible.get(numberOfDecisionVariables - 1);
-      double distance = EuclidCoreTools.norm(pX - bestX, pY - bestY);
-      return distance < 1e-5;
+      double distanceSq = EuclidCoreTools.normSquared(pX - bestX, pY - bestY);
+      deltaCoM.set(Math.sqrt(distanceSq));
+
+      return distanceSq < convergenceThresholdSq;
    }
 
    private void computeInitialInteriorPoint()
