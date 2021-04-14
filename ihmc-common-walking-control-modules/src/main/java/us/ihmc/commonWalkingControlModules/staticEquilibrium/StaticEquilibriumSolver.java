@@ -34,10 +34,9 @@ import java.util.List;
 public class StaticEquilibriumSolver
 {
    private static final boolean updateGraphicsEachIteration = false;
-   private static final int numberOfDirectionsToOptimize = 64;
-   private static final int maximumNumberOfIterations = 3000;
-   private static final double convergenceThreshold = 1e-4;
-   private static final double convergenceThresholdSq = MathTools.square(convergenceThreshold);
+   private static final int numberOfDirectionsToOptimize = 16;
+   private static final int maximumNumberOfIterations = 30000;
+   private static final double convergenceThreshold = 1e-6;
    private static final double rhoMaxForUnitMass = 10.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -307,8 +306,6 @@ public class StaticEquilibriumSolver
          if (updateGraphicsEachIteration)
             setIntermediateGraphics();
       }
-
-      System.out.println("iterations " + iterations);
    }
 
    private boolean terminate()
@@ -323,10 +320,10 @@ public class StaticEquilibriumSolver
       double pY = x.get(numberOfDecisionVariables - 1);
       double bestX = xBestFeasible.get(numberOfDecisionVariables - 2);
       double bestY = xBestFeasible.get(numberOfDecisionVariables - 1);
-      double distanceSq = EuclidCoreTools.normSquared(pX - bestX, pY - bestY);
-      deltaCoM.set(Math.sqrt(distanceSq));
+      double distance = EuclidCoreTools.norm(pX - bestX, pY - bestY);
+      deltaCoM.set(Math.sqrt(distance));
 
-      return distanceSq < convergenceThresholdSq;
+      return distance < convergenceThreshold;
    }
 
    private void computeInitialInteriorPoint()
