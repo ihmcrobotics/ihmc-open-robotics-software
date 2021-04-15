@@ -29,7 +29,7 @@ public class StaticEquilibriumSolverInputExamples
 
    public static StaticEquilibriumSolverInput createTriangleTiltedOutALot()
    {
-      double angle = Math.toRadians(60.0);
+      double angle = Math.toRadians(40.0);
       return createTriangleInput(angle, angle, angle);
    }
 
