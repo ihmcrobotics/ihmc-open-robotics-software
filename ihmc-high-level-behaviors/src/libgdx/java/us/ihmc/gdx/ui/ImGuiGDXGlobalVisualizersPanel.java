@@ -34,7 +34,7 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
    private final GDXROS1PlanarRegionsVisualizer mapSensePlanarRegionsVisualizer;
    private final ImBoolean mapSensePlanarRegionsChecked = new ImBoolean(false);
 
-//   private final GDXROS1VideoVisualizer realsenseL515ColorVideo;
+   private final GDXROS1VideoVisualizer realsenseL515ColorVideo;
    private final ImBoolean realsenseL515ColorVideoChecked = new ImBoolean(false);
    private final GDXROS1VideoVisualizer realsenseL515DepthVideo;
    private final ImBoolean realsenseL515DepthVideoChecked = new ImBoolean(false);
@@ -55,7 +55,7 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 
       mapSensePlanarRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer(ros2Node, robotModel, RosTools.MAPSENSE_REGIONS);
 
-//      realsenseL515ColorVideo = new GDXROS1VideoVisualizer(ros1Node, RosTools.L515_VIDEO);
+      realsenseL515ColorVideo = new GDXROS1VideoVisualizer(RosTools.L515_VIDEO);
       realsenseL515DepthVideo = new GDXROS1VideoVisualizer(RosTools.L515_DEPTH);
    }
 
@@ -87,6 +87,10 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       if (realsenseL515DepthVideoChecked.get())
       {
          realsenseL515DepthVideo.subscribe(ros1Node);
+      }
+      if (realsenseL515ColorVideoChecked.get())
+      {
+         realsenseL515ColorVideo.subscribe(ros1Node);
       }
 
       ros1Node.execute();
@@ -143,8 +147,6 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       }
       ImGui.separator();
 
-//      ros1Changed |= ImGui.checkbox("Show L515 Color Video", realsenseL515ColorVideoChecked);
-//      realsenseL515ColorVideo.renderWidgets();
       changed = ImGui.checkbox("Show L515 Depth Video (ROS 1)", realsenseL515DepthVideoChecked);
       anyROS1Changed |= changed;
       anyNewROS1Enabled |= changed && realsenseL515DepthVideoChecked.get();
@@ -153,6 +155,16 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       if (changed && !realsenseL515DepthVideoChecked.get())
       {
          realsenseL515DepthVideo.unsubscribe(ros1Node);
+      }
+
+      changed = ImGui.checkbox("Show L515 Color Video (ROS 1)", realsenseL515ColorVideoChecked);
+      anyROS1Changed |= changed;
+      anyNewROS1Enabled |= changed && realsenseL515ColorVideoChecked.get();
+      realsenseL515ColorVideo.renderWidgets();
+      realsenseL515ColorVideo.setEnabled(realsenseL515ColorVideoChecked.get());
+      if (changed && !realsenseL515ColorVideoChecked.get())
+      {
+         realsenseL515ColorVideo.unsubscribe(ros1Node);
       }
 
       ImGui.end();
@@ -165,8 +177,8 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       realsenseROS1PointCloudVisualizer.updateMesh();
 
 //      if (realsenseL515ColorVideoChecked.get())
-//         realsenseL515ColorVideo.renderVideo();
 
+      realsenseL515ColorVideo.renderVideo();
       realsenseL515DepthVideo.renderVideo();
    }
 

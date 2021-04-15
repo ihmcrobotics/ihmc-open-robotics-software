@@ -86,31 +86,43 @@ public class GDXROS1VideoVisualizer
                window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic), texture, false);
             }
 
-            if (image.getEncoding().equals("16UC1"))
+            boolean is16BitDepth = image.getEncoding().equals("16UC1");
+            boolean is8BitRGB = image.getEncoding().equals("rgb8");
+            if (is16BitDepth || is8BitRGB)
             {
                ChannelBuffer data = image.getData();
                byte[] array = data.array();
                int dataIndex = data.arrayOffset();
+               int zeroedIndex = 0;
                for (int y = 0; y < image.getHeight(); y++)
                {
                   for (int x = 0; x < image.getWidth(); x++)
                   {
-                     int bigByte = array[dataIndex];
-                     dataIndex++;
-                     int smallByte = array[dataIndex];
-                     dataIndex++;
+                     if (is16BitDepth)
+                     {
+                        int bigByte = array[dataIndex];
+                        dataIndex++;
+                        int smallByte = array[dataIndex];
+                        dataIndex++;
 
-                     float value = (float) (bigByte & 0xFF | smallByte << 8);
+                        float value = (float) (bigByte & 0xFF | smallByte << 8);
 
-                     if (highestValueSeen < 0 || value > highestValueSeen)
-                        highestValueSeen = value;
-                     if (lowestValueSeen < 0 || value < lowestValueSeen)
-                        lowestValueSeen = value;
+                        if (highestValueSeen < 0 || value > highestValueSeen)
+                           highestValueSeen = value;
+                        if (lowestValueSeen < 0 || value < lowestValueSeen)
+                           lowestValueSeen = value;
 
-                     float colorRange = highestValueSeen - lowestValueSeen;
-                     float grayscale = (value - lowestValueSeen) / colorRange;
+                        float colorRange = highestValueSeen - lowestValueSeen;
+                        float grayscale = (value - lowestValueSeen) / colorRange;
 
-                     pixmap.drawPixel(x, y, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+                        pixmap.drawPixel(x, y, Color.rgba8888(grayscale, grayscale, grayscale, 1.0f));
+                     }
+                     else
+                     {
+                        int unsignedMedium = data.getUnsignedMedium(zeroedIndex);
+                        zeroedIndex += 3;
+                        pixmap.drawPixel(x, y, (unsignedMedium << 8) | 255);
+                     }
                   }
                }
                texture.draw(pixmap, 0, 0);
