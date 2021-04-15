@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -8,7 +9,7 @@ import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 public class StaticEquilibriumSolverTest
 {
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize", "true"));
-   private static final double marginToTest = 0.09;
+   private static final double marginToTest = 0.02;
 
    @Test
    public void testTriangleFlat()
@@ -26,6 +27,12 @@ public class StaticEquilibriumSolverTest
    public void testTriangleHighAngle()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot());
+   }
+
+   @Test
+   public void testFlatSquare()
+   {
+      runTest(StaticEquilibriumSolverInputExamples.createFlatSquare());
    }
 
    @Test
@@ -56,8 +63,8 @@ public class StaticEquilibriumSolverTest
       {
          Point2DReadOnly vertex = supportPolygon.getVertex(i);
          boolean succeeded = forceOptimizer.solve(input, vertex);
-//         Assertions.assertTrue(succeeded);
-         System.out.println(succeeded ? "pass" : "fail");
+         Assertions.assertTrue(succeeded);
+//         System.out.println(succeeded ? "pass" : "fail");
       }
 
       System.out.println();
@@ -70,8 +77,8 @@ public class StaticEquilibriumSolverTest
       {
          Point2DReadOnly vertex = scaledPolygon.getVertex(i);
          boolean succeeded = forceOptimizer.solve(input, vertex);
-//         Assertions.assertFalse(succeeded);
-         System.out.println(!succeeded ? "pass" : "fail");
+         Assertions.assertFalse(succeeded);
+//         System.out.println(!succeeded ? "pass" : "fail");
       }
    }
 }

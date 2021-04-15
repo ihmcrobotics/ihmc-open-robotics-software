@@ -49,6 +49,16 @@ public class StaticEquilibriumSolverInputExamples
       return createTriangleInput(theta0, theta1, theta2);
    }
 
+   public static StaticEquilibriumSolverInput createFlatSquare()
+   {
+      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, -0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.5, 0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(),  0.5, -0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(),  0.5, 0.5, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      return input;
+   }
+
    private static StaticEquilibriumSolverInput createTriangleInput(double... angles)
    {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
@@ -69,8 +79,6 @@ public class StaticEquilibriumSolverInputExamples
 
          input.addContactPoint(contactPoint, normal);
       }
-
-      input.setRobotMass(1.0);
 
       return input;
    }
@@ -108,7 +116,6 @@ public class StaticEquilibriumSolverInputExamples
          }
       }
 
-      input.setRobotMass(1.0);
       return input;
    }
 
@@ -150,7 +157,6 @@ public class StaticEquilibriumSolverInputExamples
       handPose.getOrientation().setToPitchOrientation(Math.toRadians(-90.0));
       addContactPoint(contactPointFrame, handPose, input, null);
 
-      input.setRobotMass(1.0);
       return input;
    }
 

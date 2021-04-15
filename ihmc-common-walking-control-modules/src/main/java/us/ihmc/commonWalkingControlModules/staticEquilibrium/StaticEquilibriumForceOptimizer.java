@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -12,6 +11,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquilibriumSolver.mass;
 
 /**
  * This class solves for forces given a set of contact points, surface normals, and CoM xy position
@@ -25,7 +26,7 @@ public class StaticEquilibriumForceOptimizer
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
+   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
 
    private int numberOfDecisionVariables;
@@ -98,9 +99,9 @@ public class StaticEquilibriumForceOptimizer
          }
       }
 
-      beq.set(2, 0, input.getRobotMass() * input.getGravityMagnitude());
-      beq.set(3, 0, input.getRobotMass() * input.getGravityMagnitude() * centerOfMassXY.getY());
-      beq.set(4, 0, - input.getRobotMass() * input.getGravityMagnitude() * centerOfMassXY.getX());
+      beq.set(2, 0, mass * input.getGravityMagnitude());
+      beq.set(3, 0, mass * input.getGravityMagnitude() * centerOfMassXY.getY());
+      beq.set(4, 0, - mass * input.getGravityMagnitude() * centerOfMassXY.getX());
 
       quadraticCost.reshape(numberOfDecisionVariables, numberOfDecisionVariables);
       CommonOps_DDRM.setIdentity(quadraticCost);
@@ -114,8 +115,9 @@ public class StaticEquilibriumForceOptimizer
       CommonOps_DDRM.scale(-1.0, Ain);
 
       bin.reshape(numberOfDecisionVariables, 1);
+      CommonOps_DDRM.fill(bin, -1e-5);
 
-      CommonOps_DDRM.fill(lowerBounds, 0.0);
+      CommonOps_DDRM.fill(lowerBounds, 1e-5);
       CommonOps_DDRM.fill(upperBounds, 1000.0);
 
       qpSolver.clear();

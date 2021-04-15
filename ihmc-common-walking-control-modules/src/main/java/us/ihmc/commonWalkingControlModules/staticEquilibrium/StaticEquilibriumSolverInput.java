@@ -28,8 +28,6 @@ public class StaticEquilibriumSolverInput
     */
    private final List<FrameVector3D> surfaceNormals = new ArrayList<>();
 
-   private double robotMass = Double.NaN;
-
    private double gravityMagnitude = defaultGravityMagnitude;
 
    private double coefficientOfFriction = defaultCoefficientOfFriction;
@@ -38,7 +36,6 @@ public class StaticEquilibriumSolverInput
    {
       contactPointPositions.clear();
       surfaceNormals.clear();
-      robotMass = Double.NaN;
       gravityMagnitude = defaultGravityMagnitude;
       coefficientOfFriction = defaultCoefficientOfFriction;
    }
@@ -47,11 +44,6 @@ public class StaticEquilibriumSolverInput
    {
       this.contactPointPositions.add(contactPointPosition);
       this.surfaceNormals.add(surfaceNormal);
-   }
-
-   public void setRobotMass(double robotMass)
-   {
-      this.robotMass = robotMass;
    }
 
    public void setGravityMagnitude(double gravityMagnitude)
@@ -79,11 +71,6 @@ public class StaticEquilibriumSolverInput
       return surfaceNormals;
    }
 
-   public double getRobotMass()
-   {
-      return robotMass;
-   }
-
    public double getGravityMagnitude()
    {
       return gravityMagnitude;
@@ -96,12 +83,6 @@ public class StaticEquilibriumSolverInput
 
    public boolean checkInput()
    {
-      if (Double.isNaN(robotMass))
-      {
-         LogTools.error("Robot mass has not been set");
-         return false;
-      }
-
       if (contactPointPositions.size() < 3)
       {
          LogTools.error("Number of contact points: " + contactPointPositions.size() + ", should be 3 or greater.");
