@@ -49,7 +49,10 @@ public abstract class MessageSyncedRobotModel
    {
       robotConfigurationData = getLatestRobotConfigurationData();
 
-      updateInternal();
+      if (robotConfigurationData != null)
+      {
+         updateInternal();
+      }
    }
 
    protected void updateInternal()

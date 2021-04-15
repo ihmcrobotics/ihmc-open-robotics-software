@@ -17,8 +17,7 @@ public class MessagerSyncedRobotModel extends MessageSyncedRobotModel
 
    private List<Consumer<RobotConfigurationData>> userCallbacks = new ArrayList<>();
 
-   public MessagerSyncedRobotModel(DRCRobotModel robotModel,
-                                   Messager messager,
+   public MessagerSyncedRobotModel(Messager messager,
                                    MessagerAPIFactory.Topic<RobotConfigurationData> topic,
                                    FullHumanoidRobotModel fullRobotModel)
    {
