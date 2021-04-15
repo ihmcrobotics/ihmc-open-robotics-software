@@ -128,6 +128,8 @@ public class GDXBehaviorsPanel implements RenderableProvider
          }
       }
       ImGui.end();
+
+      lookAndStepUI.render();
    }
 
    public void connectViaKryo(String hostname)
