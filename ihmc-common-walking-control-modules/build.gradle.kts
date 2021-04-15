@@ -21,6 +21,7 @@ mainDependencies {
    api("org.ejml:ejml-core:0.39")
    api("net.java.dev.jna:jna:4.1.0")
    api("net.sf.trove4j:trove4j:3.0.3")
+   api("com.google.ortools:ortools-java:8.2.8710")
 
    api("us.ihmc:ihmc-realtime:1.3.1")
    api("us.ihmc:ihmc-native-library-loader:1.3.1")

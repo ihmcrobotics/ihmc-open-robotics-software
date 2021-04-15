@@ -1,11 +1,15 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
+import com.google.ortools.Loader;
+import com.google.ortools.linearsolver.MPConstraint;
+import com.google.ortools.linearsolver.MPObjective;
+import com.google.ortools.linearsolver.MPSolver;
+import com.google.ortools.linearsolver.MPVariable;
+import org.apache.commons.math3.analysis.function.Asin;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleActiveSetQPSolver;
-import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -15,6 +19,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -43,7 +48,9 @@ public class StaticEquilibriumSolver
    private static final double alphaQuadraticCost = 4.0e-2;
    static final double mass = 1.0;
 
-   private static final boolean useQP = true;
+   private enum Mode {CUSTOM, QP, ORTOOLS}
+   private static final Mode mode = Mode.ORTOOLS;
+   private MPSolver orToolsSolver;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -57,7 +64,9 @@ public class StaticEquilibriumSolver
    private final DMatrixRMaj Aeq = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj beq = new DMatrixRMaj(0, 0);
 
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+//   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final JavaQuadProgSolver qpSolver = new JavaQuadProgSolver();
+
    private final DMatrixRMaj quadraticCost = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj linearCost = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj lowerBound = new DMatrixRMaj(0, 0);
@@ -80,13 +89,6 @@ public class StaticEquilibriumSolver
    private final YoFramePoint3D optimizedCoM = new YoFramePoint3D("optimizedCoM", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoInteger iterations = new YoInteger("iterations", registry);
-   private final YoInteger activeBetaSize = new YoInteger("activeBetaSize", registry);
-   private final YoDouble deltaCoM = new YoDouble("deltaCoM", registry);
-
-   // projection of z onto Aeq x = beq   >>>>   p0*z + p1
-   private final DMatrixRMaj p0 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj p1 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj xProjected = new DMatrixRMaj(0, 0);
 
    private static final List<Vector2D> directionsToOptimize = new ArrayList<>();
 
@@ -97,6 +99,9 @@ public class StaticEquilibriumSolver
       {
          directionsToOptimize.add(new Vector2D(Math.cos(i * dTheta), Math.sin(i * dTheta)));
       }
+
+//      double theta = 0.3;
+//      directionsToOptimize.add(new Vector2D(Math.cos(theta), Math.sin(theta)));
    }
 
    public StaticEquilibriumSolver()
@@ -197,33 +202,46 @@ public class StaticEquilibriumSolver
       CommonOps_DDRM.setIdentity(quadraticCost);
       CommonOps_DDRM.scale(alphaQuadraticCost, quadraticCost);
 
+      if (mode == Mode.ORTOOLS)
+      {
+         Loader.loadNativeLibraries();
+         orToolsSolver = MPSolver.createSolver("GLOP");
+         if (orToolsSolver == null)
+            throw new RuntimeException("Could not create solver GLOP");
+      }
+
       for (int i = 0; i < directionsToOptimize.size(); i++)
       {
          Vector2D directionToOptimize = directionsToOptimize.get(i);
          this.directionToOptimize.set(directionToOptimize);
 
-         if (useQP)
+         switch (mode)
          {
-            linearCost.set(numberOfDecisionVariables - 2, - directionToOptimize.getX());
-            linearCost.set(numberOfDecisionVariables - 1, - directionToOptimize.getY());
+            case QP:
+               linearCost.set(numberOfDecisionVariables - 2, -directionToOptimize.getX());
+               linearCost.set(numberOfDecisionVariables - 1, -directionToOptimize.getY());
 
-            qpSolver.clear();
-            qpSolver.resetActiveSet();
-            qpSolver.setUseWarmStart(false);
+               qpSolver.clear();
+               qpSolver.resetActiveSet();
+               qpSolver.setUseWarmStart(false);
 
-            qpSolver.setConvergenceThreshold(1e-8);
-            qpSolver.setMaxNumberOfIterations(400);
+               qpSolver.setConvergenceThreshold(1e-8);
+               qpSolver.setMaxNumberOfIterations(400);
 
-            qpSolver.setQuadraticCostFunction(quadraticCost, linearCost);
-            qpSolver.setLinearEqualityConstraints(Aeq, beq);
-            qpSolver.setVariableBounds(lowerBound, upperBound);
-            qpSolver.setLinearInequalityConstraints(Ain, bin);
-            int iterations = qpSolver.solve(xSolution);
-            System.out.println(iterations);
-         }
-         else
-         {
-            computeExtremeFeasibleCoM(directionToOptimize);
+               qpSolver.setQuadraticCostFunction(quadraticCost, linearCost);
+               qpSolver.setLinearEqualityConstraints(Aeq, beq);
+               qpSolver.setVariableBounds(lowerBound, upperBound);
+               qpSolver.setLinearInequalityConstraints(Ain, bin);
+               qpSolver.solve(xSolution);
+               break;
+            case ORTOOLS:
+               boolean success = solveWithORTools();
+               if (!success)
+                  continue;
+               break;
+            case CUSTOM:
+            default:
+               computeExtremeFeasibleCoM(directionToOptimize);
          }
 
          setFinalGraphics();
@@ -233,48 +251,121 @@ public class StaticEquilibriumSolver
       }
    }
 
-   private void setIntermediateGraphics()
-   {
-      if (tickAndUpdatable == null)
-         return;
+   //////////////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////////////////////  ORTOOLS ////////////////////////////////////////
+   //////////////////////////////////////////////////////////////////////////////////////////
 
-      for (int j = 0; j < input.getNumberOfContacts(); j++)
+   private final DMatrixRMaj AeqPerm = new DMatrixRMaj(0);
+   private final DMatrixRMaj As = new DMatrixRMaj(0);
+   private final DMatrixRMaj Abar = new DMatrixRMaj(0);
+
+   private final DMatrixRMaj AsInv = new DMatrixRMaj(0);
+   private final DMatrixRMaj AsInvAbar = new DMatrixRMaj(0);
+   private final DMatrixRMaj AsInvB = new DMatrixRMaj(0);
+
+   private boolean solveWithORTools()
+   {
+      AeqPerm.reshape(6, numberOfDecisionVariables);
+      As.reshape(6, 6);
+      AsInv.reshape(6, 6);
+      Abar.reshape(6, numberOfDecisionVariables - 6);
+      AsInvB.reshape(6, 1);
+
+//      0, 1, 4, 5, 8, 10
+//      0, 1, 2, 3, 4, 5
+
+      MatrixTools.swapColumns(2, 4, Aeq);
+      MatrixTools.swapColumns(3, 5, Aeq);
+      MatrixTools.swapColumns(4, 8, Aeq);
+      MatrixTools.swapColumns(5, 10, Aeq);
+
+      for (int row = 0; row < 6; row++)
       {
-         contactPoints.get(j).setResolvedForce(xTrial);
+         for (int col = 0; col < 6; col++)
+         {
+            As.set(row, col, Aeq.get(row, col));
+         }
       }
 
-      this.optimizedCoM.setX(xSolution.get(numberOfDecisionVariables - 2));
-      this.optimizedCoM.setY(xSolution.get(numberOfDecisionVariables - 1));
-      this.optimizedCoM.setZ(0.1);
-
-      this.candidateCoM.setX(xTrial.get(numberOfDecisionVariables - 2));
-      this.candidateCoM.setY(xTrial.get(numberOfDecisionVariables - 1));
-      this.candidateCoM.setZ(0.1);
-
-      tickAndUpdatable.tickAndUpdate();
-   }
-
-   private void setFinalGraphics()
-   {
-      if (tickAndUpdatable == null)
-         return;
-
-      for (int j = 0; j < input.getNumberOfContacts(); j++)
+      CommonOps_DDRM.invert(As, AsInv);
+      if (Double.isNaN(AsInv.get(0)))
       {
-         contactPoints.get(j).setResolvedForce(xSolution);
+         System.out.println("Could not compute inverse...");
+         return false;
       }
 
-      this.candidateCoM.setToNaN();
-      this.optimizedCoM.setX(xSolution.get(numberOfDecisionVariables - 2));
-      this.optimizedCoM.setY(xSolution.get(numberOfDecisionVariables - 1));
-      this.optimizedCoM.setZ(0.1);
+      for (int i = 0; i < 6; i++)
+      {
+         for (int j = 0; j < numberOfDecisionVariables - 6; j++)
+         {
+            Abar.set(i, j, Aeq.get(i, 6 + j));
+         }
+      }
 
-      tickAndUpdatable.tickAndUpdate();
+      CommonOps_DDRM.mult(AsInv, Abar, AsInvAbar);
+      CommonOps_DDRM.mult(AsInv, beq, AsInvB);
+
+      orToolsSolver.clear();
+      List<MPVariable> variables = new ArrayList<>();
+
+      for (int i = 6; i < numberOfDecisionVariables; i++)
+      {
+         boolean isCoM = i >= numberOfDecisionVariables - 2;
+         if (isCoM)
+         {
+            variables.add(orToolsSolver.makeNumVar(-100.0, 100.0, "com" + (i == numberOfDecisionVariables - 2 ? "X" : "Y")));
+         }
+         else
+         {
+            MPVariable rhoVariable = orToolsSolver.makeNumVar(0.0, 100.0, "rho" + i);
+            variables.add(rhoVariable);
+
+            double lowerBound = 0.0;
+            double upperBound = 1000.0;
+            MPConstraint rhoConstraint = orToolsSolver.makeConstraint(lowerBound, upperBound, "constraint" + i);
+            rhoConstraint.setCoefficient(rhoVariable, 1.0);
+         }
+      }
+
+      for (int i = 0; i < 6; i++)
+      {
+         double lowerBound = - AsInvB.get(i);
+         double upperBound = 1000.0;
+         MPConstraint rhoConstraint = orToolsSolver.makeConstraint(lowerBound, upperBound, "constraint" + i);
+
+         for (int j = 0; j < numberOfDecisionVariables - 6; j++)
+         {
+            double coeff = - AsInvAbar.get(i, j);
+            if (Math.abs(coeff) < 1e-10)
+               continue;
+            rhoConstraint.setCoefficient(variables.get(j), coeff);
+         }
+      }
+
+      MPObjective objective = orToolsSolver.objective();
+      objective.maximization();
+      objective.setCoefficient(variables.get(variables.size() - 2), directionToOptimize.getX());
+      objective.setCoefficient(variables.get(variables.size() - 1), directionToOptimize.getY());
+
+      MPSolver.ResultStatus result = orToolsSolver.solve();
+      System.out.println("OR Tools result: " + result);
+      xSolution.set(numberOfDecisionVariables - 2, variables.get(variables.size() - 2).solutionValue());
+      xSolution.set(numberOfDecisionVariables - 1, variables.get(variables.size() - 1).solutionValue());
+
+      return true;
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////
    /////////////////////////////////////  CUSTOM SOLVER /////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////
+
+   private final YoDouble deltaCoM = new YoDouble("deltaCoM", registry);
+   private final YoInteger activeBetaSize = new YoInteger("activeBetaSize", registry);
+
+   // projection of z onto Aeq x = beq   >>>>   p0*z + p1
+   private final DMatrixRMaj p0 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj p1 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj xProjected = new DMatrixRMaj(0, 0);
 
    private void computeExtremeFeasibleCoM(Vector2D directionToOptimize)
    {
@@ -345,6 +436,44 @@ public class StaticEquilibriumSolver
       }
    }
 
+   private void setIntermediateGraphics()
+   {
+      if (tickAndUpdatable == null)
+         return;
+
+      for (int j = 0; j < input.getNumberOfContacts(); j++)
+      {
+         contactPoints.get(j).setResolvedForce(xTrial);
+      }
+
+      this.optimizedCoM.setX(xSolution.get(numberOfDecisionVariables - 2));
+      this.optimizedCoM.setY(xSolution.get(numberOfDecisionVariables - 1));
+      this.optimizedCoM.setZ(0.1);
+
+      this.candidateCoM.setX(xTrial.get(numberOfDecisionVariables - 2));
+      this.candidateCoM.setY(xTrial.get(numberOfDecisionVariables - 1));
+      this.candidateCoM.setZ(0.1);
+
+      tickAndUpdatable.tickAndUpdate();
+   }
+
+   private void setFinalGraphics()
+   {
+      if (tickAndUpdatable == null)
+         return;
+
+      for (int j = 0; j < input.getNumberOfContacts(); j++)
+      {
+         contactPoints.get(j).setResolvedForce(xSolution);
+      }
+
+      this.candidateCoM.setToNaN();
+      this.optimizedCoM.setX(xSolution.get(numberOfDecisionVariables - 2));
+      this.optimizedCoM.setY(xSolution.get(numberOfDecisionVariables - 1));
+      this.optimizedCoM.setZ(0.1);
+
+      tickAndUpdatable.tickAndUpdate();
+   }
    private void computeProjectionMatrices()
    {
       CommonOps_DDRM.mult(Aeq, activeDiagonal, AeqActive);
