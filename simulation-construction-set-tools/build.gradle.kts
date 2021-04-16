@@ -17,8 +17,8 @@ mainDependencies {
    api("us.ihmc:euclid-frame:0.16.2")
    api("us.ihmc:euclid-frame-shape:0.16.2")
    api("us.ihmc:euclid-shape:0.16.2")
-   api("us.ihmc:ihmc-yovariables:0.9.8")
-   api("us.ihmc:simulation-construction-set:0.21.7")
+   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:simulation-construction-set:0.21.8")
    api("us.ihmc:ihmc-parameter-optimization:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
@@ -26,5 +26,5 @@ mainDependencies {
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 
-   api("us.ihmc:simulation-construction-set-test:0.21.7")
+   api("us.ihmc:simulation-construction-set-test:0.21.8")
 }

@@ -14,7 +14,10 @@ import java.util.ArrayList;
 
 public class GDXFootstepGraphicDemo
 {
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI();
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
+                                                              "ihmc-open-robotics-software",
+                                                              "ihmc-high-level-behaviors/src/test/resources",
+                                                              "Footstep Graphic Demo");
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
 
    public GDXFootstepGraphicDemo()

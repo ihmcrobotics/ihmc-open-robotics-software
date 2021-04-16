@@ -6,15 +6,23 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -49,6 +57,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
    final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
+   private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
    final SE3MPCQPSolver qpSolver;
 
@@ -90,9 +99,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       orientationPreviewWindowDuration.set(0.25);
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
+      qpSolver.setMaxNumberOfIterations(1000);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e1);
-      qpSolver.setSecondOrientationVariableRegularization(1e-1);
+      qpSolver.setFirstOrientationVariableRegularization(1e-2);
+      qpSolver.setSecondOrientationVariableRegularization(1e-2);
 
       parentRegistry.addChild(registry);
    }
@@ -158,6 +168,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setTimeOfConstraint(0.0);
       objectiveToPack.setEndingDiscreteTickId(0);
 
+      linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
       orientationTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
 
       FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
@@ -168,14 +179,24 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
       tempVector.setToZero();
-      objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
-      tempVector.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentum());
-      objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+      if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+      {
+         objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+         if (contactPlaneHelperPool.get(0).size() > 0)
+            objectiveToPack.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+         else
+            objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
+      }
+      else
+      {
+         objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
+         objectiveToPack.setDesiredInternalAngularMomentumRate(tempVector);
+      }
 
       objectiveToPack.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
       objectiveToPack.setDesiredCoMPosition(currentCoMPosition);
-      objectiveToPack.setDesiredCoMAcceleration(tempVector); // FIXME
+      objectiveToPack.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
 
       angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
 
@@ -232,8 +253,19 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
             objective.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
             tempVector.setToZero();
-            objective.setDesiredNetAngularMomentumRate(tempVector);
-            objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+            if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+            {
+               objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               if (contactPlaneHelperPool.get(0).size() > 0)
+                  objective.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               else
+                  objective.setDesiredNetAngularMomentumRate(tempVector);
+            }
+            else
+            {
+               objective.setDesiredNetAngularMomentumRate(tempVector);
+               objective.setDesiredInternalAngularMomentumRate(tempVector);
+            }
 
             objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
@@ -250,6 +282,18 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       }
 
       return commandList;
+   }
+
+   @Override
+   public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+   }
+
+   protected void updateCoMTrajectoryViewer()
+   {
+      if (trajectoryViewer != null)
+         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
    }
 
    @Override
@@ -323,7 +367,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.currentBodyAngularVelocity.setMatchingFrame(bodyAngularVelocity);
    }
 
-
+   public void setInternalAngularMomentumTrajectory(MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> internalAngularMomentumTrajectory)
+   {
+      this.orientationTrajectoryHandler.setInternalAngularMomentumTrajectory(internalAngularMomentumTrajectory);
+   }
 
    public FrameOrientation3DReadOnly getDesiredBodyOrientationSolution()
    {
@@ -343,5 +390,32 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
    {
       return desiredBodyAngularVelocityFeedForward;
+   }
+
+   private final FrameVector3D momentArm = new FrameVector3D();
+   private final FrameVector3D pointTorque = new FrameVector3D();
+   private final FrameVector3D netTorque = new FrameVector3D();
+
+   public void computeAngularMomentumRateOfChange(FrameVector3DBasics angularMomentumRateOfChange, double time)
+   {
+      int segment = getCurrentSegmentIndex();
+      FramePoint3DReadOnly comPosition = linearTrajectoryHandler.getDesiredCoMPosition();
+
+      netTorque.setToZero();
+      for (int contactIdx = 0; contactIdx < contactPlaneHelperPool.get(segment).size(); contactIdx++)
+      {
+         MPCContactPlane contactPlane = contactPlaneHelperPool.get(segment).get(contactIdx);
+         contactPlane.computeContactForce(omega.getValue(), time);
+         for (int pointIdx = 0; pointIdx < contactPlane.getNumberOfContactPoints(); pointIdx++)
+         {
+            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(pointIdx);
+            momentArm.sub(contactPoint.getBasisVectorOrigin(), comPosition);
+            pointTorque.cross(momentArm, contactPoint.getContactAcceleration());
+
+            netTorque.add(pointTorque);
+         }
+      }
+
+      angularMomentumRateOfChange.setMatchingFrame(netTorque);
    }
 }

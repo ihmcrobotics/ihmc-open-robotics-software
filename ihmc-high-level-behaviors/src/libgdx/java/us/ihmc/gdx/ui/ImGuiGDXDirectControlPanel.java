@@ -5,6 +5,7 @@ import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.MessageTools;
@@ -12,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -34,7 +34,7 @@ public class ImGuiGDXDirectControlPanel
    private static final double CHEST_PITCH_RANGE = MAX_CHEST_PITCH - MIN_CHEST_PITCH;
    private static final double SLIDER_RANGE = 100.0;
    private static final double ROBOT_DATA_EXPIRATION = 1.0;
-   private final BehaviorHelper behaviorHelper;
+   private final CommunicationHelper communicationHelper;
    private final double neckJointJointLimitLower;
    private final double neckJointRange;
 
@@ -50,18 +50,18 @@ public class ImGuiGDXDirectControlPanel
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
 
-   public ImGuiGDXDirectControlPanel(BehaviorHelper behaviorHelper)
+   public ImGuiGDXDirectControlPanel(CommunicationHelper communicationHelper)
    {
-      this.behaviorHelper = behaviorHelper;
-      String robotName = behaviorHelper.getRobotModel().getSimpleRobotName();
-      ROS2NodeInterface ros2Node = behaviorHelper.getROS2Node();
-      DRCRobotModel robotModel = behaviorHelper.getRobotModel();
+      this.communicationHelper = communicationHelper;
+      String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
+      ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
+      DRCRobotModel robotModel = communicationHelper.getRobotModel();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      syncedRobotForHeightSlider = behaviorHelper.newSyncedRobot();
-      syncedRobotForChestSlider = behaviorHelper.newSyncedRobot();
+      syncedRobotForHeightSlider = communicationHelper.newSyncedRobot();
+      syncedRobotForChestSlider = communicationHelper.newSyncedRobot();
 
-      robotLowLevelMessenger = behaviorHelper.newRobotLowLevelMessenger();
+      robotLowLevelMessenger = communicationHelper.newRobotLowLevelMessenger();
 
       if (robotLowLevelMessenger == null)
       {
@@ -110,23 +110,23 @@ public class ImGuiGDXDirectControlPanel
          homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
          homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
          homeLeftArm.setTrajectoryTime(trajectoryTime);
-         behaviorHelper.publishToController(homeLeftArm);
+         communicationHelper.publishToController(homeLeftArm);
 
          GoHomeMessage homeRightArm = new GoHomeMessage();
          homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
          homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
          homeRightArm.setTrajectoryTime(trajectoryTime);
-         behaviorHelper.publishToController(homeRightArm);
+         communicationHelper.publishToController(homeRightArm);
 
          GoHomeMessage homePelvis = new GoHomeMessage();
          homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
          homePelvis.setTrajectoryTime(trajectoryTime);
-         behaviorHelper.publishToController(homePelvis);
+         communicationHelper.publishToController(homePelvis);
 
          GoHomeMessage homeChest = new GoHomeMessage();
          homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
          homeChest.setTrajectoryTime(trajectoryTime);
-         behaviorHelper.publishToController(homeChest);
+         communicationHelper.publishToController(homeChest);
       }
       ImGui.sameLine();
       if (ImGui.button("Stand prep"))
@@ -177,7 +177,7 @@ public class ImGuiGDXDirectControlPanel
             message.getEuclideanTrajectory().getSelectionMatrix().setXSelected(false);
             message.getEuclideanTrajectory().getSelectionMatrix().setYSelected(false);
             message.getEuclideanTrajectory().getSelectionMatrix().setZSelected(true);
-            behaviorHelper.publishToController(message);
+            communicationHelper.publishToController(message);
          }
       }
       if (imGuiSlider("Lean Forward", leanForwardSliderValue))
@@ -204,7 +204,7 @@ public class ImGuiGDXDirectControlPanel
             long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
             message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 
-            behaviorHelper.publishToController(message);
+            communicationHelper.publishToController(message);
          }
       }
       if (imGuiSlider("Neck Pitch", neckPitchSliderValue))
@@ -214,7 +214,7 @@ public class ImGuiGDXDirectControlPanel
          MathTools.checkIntervalContains(percent, 0.0, 1.0);
          double jointAngle = neckJointJointLimitLower + percent * neckJointRange;
          LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
-         behaviorHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
+         communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
       }
 
       ImGui.end();

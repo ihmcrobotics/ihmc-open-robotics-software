@@ -15,6 +15,13 @@ public class ImGuiWindow
       this.enabled = new ImBoolean(enabled);
    }
 
+   public ImGuiWindow(String windowName, Runnable render)
+   {
+      this.windowName = windowName;
+      this.render = render;
+      this.enabled = new ImBoolean(false);
+   }
+
    public ImGuiWindow(String windowName)
    {
       this.windowName = windowName;

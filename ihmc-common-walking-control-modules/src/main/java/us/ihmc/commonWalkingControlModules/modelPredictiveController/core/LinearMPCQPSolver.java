@@ -383,6 +383,8 @@ public class LinearMPCQPSolver
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+      if (debug && MatrixTools.containsNaN(solverInput_f))
+         throw new RuntimeException("error");
    }
 
    public void addEqualityConstraint(DMatrix taskJacobian, DMatrix taskObjective)
@@ -432,6 +434,11 @@ public class LinearMPCQPSolver
 
       CommonOps_DDRM.extract(taskJacobian, 0, taskJacobian.getNumRows(), 0, variables, solverInput_Aeq, previousSize, colOffset);
       CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
+
+      if (debug && MatrixTools.containsNaN(solverInput_Aeq))
+         throw new RuntimeException("error");
+      if (debug && MatrixTools.containsNaN(solverInput_beq))
+         throw new RuntimeException("error");
    }
 
 
@@ -523,6 +530,8 @@ public class LinearMPCQPSolver
       if (debug && MatrixTools.containsNaN(solverInput_H))
          throw new RuntimeException("error");
       MatrixTools.addMatrixBlock(solverInput_f, offset, 0, input.directCostGradient, 0, 0, size, 1, input.getWeightScalar());
+      if (debug && MatrixTools.containsNaN(input.getDirectCostGradient()))
+         throw new RuntimeException("Error");
    }
 
    public boolean solve()
