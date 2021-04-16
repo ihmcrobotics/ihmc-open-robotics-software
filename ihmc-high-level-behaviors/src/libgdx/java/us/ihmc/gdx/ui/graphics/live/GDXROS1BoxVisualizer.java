@@ -25,7 +25,7 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class GDXROS1BoxVisualizer3 implements RenderableProvider
+public class GDXROS1BoxVisualizer implements RenderableProvider
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ModelBuilder modelBuilder = new ModelBuilder();
@@ -41,7 +41,7 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
    private final Point3D[] vertices = new Point3D[8];
    private Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
-   public GDXROS1BoxVisualizer3(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame, RigidBodyTransformReadOnly baseToSensorTransform)
+   public GDXROS1BoxVisualizer(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame, RigidBodyTransformReadOnly baseToSensorTransform)
    {
       sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("baseFrame",
                                                                                         ReferenceFrame.getWorldFrame(),
