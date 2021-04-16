@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -47,7 +48,13 @@ public class AngularMomentumHandlerTest
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
       copTrajectoryGenerator.registerState(state);
 
-      AngularMomentumHandler angularMomentumHandler = new AngularMomentumHandler(1.0, gravityZ, null, null, registry, null);
+      AngularMomentumHandler<SettableContactStateProvider> angularMomentumHandler = new AngularMomentumHandler<>(1.0,
+                                                                                                                 gravityZ,
+                                                                                                                 null,
+                                                                                                                 null,
+                                                                                                                 SettableContactStateProvider::new,
+                                                                                                                 registry,
+                                                                                                                 null);
 
       DefaultParameterReader parameterReader = new DefaultParameterReader();
       parameterReader.readParametersInRegistry(registry);
@@ -103,11 +110,7 @@ public class AngularMomentumHandlerTest
                              rightFootFrame);
 
       copTrajectoryGenerator.compute(state);
-      List<? extends ContactStateProvider> copTrajectories = copTrajectoryGenerator.getContactStateProviders();
-
-      Random random = new Random(1738L);
-
-
+      List<SettableContactStateProvider> copTrajectories = copTrajectoryGenerator.getContactStateProviders();
 
       MultipleSegmentPositionTrajectoryGenerator<FramePolynomial3DBasics> desiredCoMTrajectories = new MultipleSegmentPositionTrajectoryGenerator<>(
             "",
@@ -148,8 +151,6 @@ public class AngularMomentumHandlerTest
 
       angularMomentumHandler.solveForAngularMomentumTrajectory(state, copTrajectories, desiredCoMTrajectories);
 
-      List<FramePoint3DReadOnly> startAMValue = new ArrayList<>();
-      List<FramePoint3DReadOnly> endAMValue = new ArrayList<>();
       List<FrameVector3DReadOnly> startAMRate = new ArrayList<>();
       List<FrameVector3DReadOnly> endAMRate = new ArrayList<>();
 
@@ -159,16 +160,14 @@ public class AngularMomentumHandlerTest
 
          angularMomentumHandler.computeAngularMomentum(timeInterval.getStartTime() + 1e-8);
 
-         startAMValue.add(new FramePoint3D(angularMomentumHandler.getDesiredAngularMomentum()));
          startAMRate.add(new FrameVector3D(angularMomentumHandler.getDesiredAngularMomentumRate()));
 
          angularMomentumHandler.computeAngularMomentum(timeInterval.getEndTime() - 1e-8);
 
-         endAMValue.add(new FramePoint3D(angularMomentumHandler.getDesiredAngularMomentum()));
          endAMRate.add(new FrameVector3D(angularMomentumHandler.getDesiredAngularMomentumRate()));
       }
 
-      List<? extends ContactStateProvider> cmpTrajectories = angularMomentumHandler.computeECMPTrajectory(copTrajectories);
+      List<SettableContactStateProvider> cmpTrajectories = angularMomentumHandler.computeECMPTrajectory(copTrajectories);
 
 
       gravityZ = Math.abs(gravityZ);
@@ -195,18 +194,18 @@ public class AngularMomentumHandlerTest
          FrameVector3D startCMPRateExpected = new FrameVector3D();
          FrameVector3D endCMPRateExpected = new FrameVector3D();
 
-         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(0.0);
+         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(0.0);
 
          startCMPRateExpected.set(copTrajectories.get(i).getECMPStartVelocity());
          endCMPRateExpected.set(copTrajectories.get(i).getECMPEndVelocity());
 
-         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
-         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
+         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
 
-         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
@@ -224,8 +223,8 @@ public class AngularMomentumHandlerTest
          FramePolynomial3D ecmpTrajectory = new FramePolynomial3D(6, worldFrame);
          FramePolynomial3D copTrajectory = new FramePolynomial3D(6, worldFrame);
 
-         ContactStateProvider copProvider = copTrajectories.get(i);
-         ContactStateProvider cmpProvider = cmpTrajectories.get(i);
+         SettableContactStateProvider copProvider = copTrajectories.get(i);
+         SettableContactStateProvider cmpProvider = cmpTrajectories.get(i);
 
          copTrajectory.setLinear(0.0, copProvider.getTimeInterval().getDuration(), copProvider.getECMPStartPosition(), copProvider.getECMPEndPosition());
          ecmpTrajectory.setCubic(0.0, cmpProvider.getTimeInterval().getDuration(), cmpProvider.getECMPStartPosition(), cmpProvider.getECMPStartVelocity(),
@@ -273,7 +272,13 @@ public class AngularMomentumHandlerTest
       CoPTrajectoryGeneratorState state = new CoPTrajectoryGeneratorState(registry);
       copTrajectoryGenerator.registerState(state);
 
-      AngularMomentumHandler angularMomentumHandler = new AngularMomentumHandler(1.0, gravityZ, null, null, registry, null);
+      AngularMomentumHandler<SettableContactStateProvider> angularMomentumHandler = new AngularMomentumHandler<>(1.0,
+                                                                                                                 gravityZ,
+                                                                                                                 null,
+                                                                                                                 null,
+                                                                                                                 SettableContactStateProvider::new,
+                                                                                                                 registry,
+                                                                                                                 null);
 
       CoMTrajectoryPlanner comTrajectoryPlanner = new CoMTrajectoryPlanner(gravityZ, 1.0, registry);
 
@@ -331,7 +336,7 @@ public class AngularMomentumHandlerTest
                              rightFootFrame);
 
       copTrajectoryGenerator.compute(state);
-      List<? extends ContactStateProvider> copTrajectories = copTrajectoryGenerator.getContactStateProviders();
+      List<SettableContactStateProvider> copTrajectories = copTrajectoryGenerator.getContactStateProviders();
 
       FramePoint3D initialCoM = new FramePoint3D(worldFrame, 0.0, 0.0, 1.0);
       comTrajectoryPlanner.setInitialCenterOfMassState(initialCoM, new FrameVector3D());
@@ -341,8 +346,6 @@ public class AngularMomentumHandlerTest
 
       angularMomentumHandler.solveForAngularMomentumTrajectory(state, copTrajectories, comTrajectoryPlanner.getCoMTrajectory());
 
-      List<FramePoint3DReadOnly> startAMValue = new ArrayList<>();
-      List<FramePoint3DReadOnly> endAMValue = new ArrayList<>();
       List<FrameVector3DReadOnly> startAMRate = new ArrayList<>();
       List<FrameVector3DReadOnly> endAMRate = new ArrayList<>();
 
@@ -352,16 +355,14 @@ public class AngularMomentumHandlerTest
 
          angularMomentumHandler.computeAngularMomentum(timeInterval.getStartTime() + 1e-8);
 
-         startAMValue.add(new FramePoint3D(angularMomentumHandler.getDesiredAngularMomentum()));
          startAMRate.add(new FrameVector3D(angularMomentumHandler.getDesiredAngularMomentumRate()));
 
          angularMomentumHandler.computeAngularMomentum(timeInterval.getEndTime() - 1e-8);
 
-         endAMValue.add(new FramePoint3D(angularMomentumHandler.getDesiredAngularMomentum()));
          endAMRate.add(new FrameVector3D(angularMomentumHandler.getDesiredAngularMomentumRate()));
       }
 
-      List<? extends ContactStateProvider> cmpTrajectories = angularMomentumHandler.computeECMPTrajectory(copTrajectories);
+      List<SettableContactStateProvider> cmpTrajectories = angularMomentumHandler.computeECMPTrajectory(copTrajectories);
 
 
       gravityZ = Math.abs(gravityZ);
@@ -388,18 +389,18 @@ public class AngularMomentumHandlerTest
          FrameVector3D startCMPRateExpected = new FrameVector3D();
          FrameVector3D endCMPRateExpected = new FrameVector3D();
 
-         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(0.0);
+         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(0.0);
 
          startCMPRateExpected.set(copTrajectories.get(i).getECMPStartVelocity());
          endCMPRateExpected.set(copTrajectories.get(i).getECMPEndVelocity());
 
-         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         startCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         startCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
-         angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
+         angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).compute(copTrajectories.get(i).getTimeInterval().getDuration());
 
-         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
-         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
+         endCMPRateExpected.addX(1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getY());
+         endCMPRateExpected.addY(-1.0 / gravityZ * angularMomentumHandler.getHeightScaledAngularMomentumTrajectories().getSegment(i).getAcceleration().getX());
 
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, startCMPRateExpected, cmpTrajectories.get(i).getECMPStartVelocity(), epsilon);
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(errorMessage, endCMPRateExpected, cmpTrajectories.get(i).getECMPEndVelocity(), epsilon);
@@ -420,8 +421,8 @@ public class AngularMomentumHandlerTest
          FramePolynomial3D ecmpTrajectory = new FramePolynomial3D(6, worldFrame);
          FramePolynomial3D copTrajectory = new FramePolynomial3D(6, worldFrame);
 
-         ContactStateProvider copProvider = copTrajectories.get(i);
-         ContactStateProvider cmpProvider = cmpTrajectories.get(i);
+         SettableContactStateProvider copProvider = copTrajectories.get(i);
+         SettableContactStateProvider cmpProvider = cmpTrajectories.get(i);
 
          copTrajectory.setLinear(0.0, copProvider.getTimeInterval().getDuration(), copProvider.getECMPStartPosition(), copProvider.getECMPEndPosition());
          ecmpTrajectory.setCubic(0.0, cmpProvider.getTimeInterval().getDuration(), cmpProvider.getECMPStartPosition(), cmpProvider.getECMPStartVelocity(),

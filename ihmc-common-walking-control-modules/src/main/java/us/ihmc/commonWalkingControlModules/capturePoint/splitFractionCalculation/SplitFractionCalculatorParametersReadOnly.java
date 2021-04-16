@@ -20,11 +20,25 @@ public interface SplitFractionCalculatorParametersReadOnly
    double getStepHeightForLargeStepDown();
 
    /**
+    * Sets the step up height for determining whether or not the transfer split fractions should be adjusted.
+    * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
+    * will be adjusted so that the CoM is in a more favorable position, kind of "hanging" in the stance foot.
+    */
+   double getStepHeightForLargeStepUp();
+
+   /**
     * Sets the step down height for the maximum amount of split fraction and weight distribution adjustment.
     * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
     * will be adjusted fully, as returned by {@link #getTransferSplitFractionAtFullDepth()} and {@link #getTransferWeightDistributionAtFullDepth()}.
     */
    double getLargestStepDownHeight();
+
+   /**
+    * Sets the step up height for the maximum amount of split fraction and weight distribution adjustment.
+    * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
+    * will be adjusted fully, as returned by {@link #getTransferSplitFractionForStepUpAtFullDepth()} and {@link #getTransferWeightDistributionForStepUpAtFullDepth()}.
+    */
+   double getLargestStepUpHeight();
 
    /**
     * Sets the desired transfer split fraction if the robot is stepping down by {@link #getLargestStepDownHeight()}.
@@ -34,11 +48,25 @@ public interface SplitFractionCalculatorParametersReadOnly
    double getTransferSplitFractionAtFullDepth();
 
    /**
+    * Sets the desired transfer split fraction if the robot is stepping up by {@link #getLargestStepUpHeight()}.
+    * If the step up height is between {@link #getStepHeightForLargeStepUp()} and {@link #getLargestStepUpHeight()}, the
+    * desired split fraction is linearly interpolated between the default value and the value returned by this function.
+    */
+   double getTransferSplitFractionForStepUpAtFullDepth();
+
+   /**
     * Sets the desired transfer weight distribution if the robot is stepping down by {@link #getLargestStepDownHeight()}.
     * If the step down height is between {@link #getStepHeightForLargeStepDown()} and {@link #getLargestStepDownHeight()}, the
     * desired weight distribution is linearly interpolated between the default value and the value returned by this function.
     */
    double getTransferWeightDistributionAtFullDepth();
+
+   /**
+    * Sets the desired transfer weight distribution if the robot is stepping up by {@link #getLargestStepUpHeight()}.
+    * If the step down height is between {@link #getStepHeightForLargeStepUp()} and {@link #getLargestStepUpHeight()}, the
+    * desired weight distribution is linearly interpolated between the default value and the value returned by this function.
+    */
+   double getTransferWeightDistributionForStepUpAtFullDepth();
 
    /**
     * Sets the desired transfer weight distribution if the robot is stepping down by {@link #getLargestStepDownHeight()}.
@@ -48,6 +76,16 @@ public interface SplitFractionCalculatorParametersReadOnly
    default double getTransferFinalWeightDistributionAtFullDepth()
    {
       return getTransferWeightDistributionAtFullDepth();
+   }
+
+   /**
+    * Sets the desired transfer weight distribution if the robot is stepping up by {@link #getLargestStepUpHeight()}.
+    * If the step up height is between {@link #getStepHeightForLargeStepUp()} and {@link #getLargestStepUpHeight()}, the
+    * desired weight distribution is linearly interpolated between the default value and the value returned by this function.
+    */
+   default double getTransferFinalWeightDistributionForStepUpAtFullDepth()
+   {
+      return getTransferWeightDistributionForStepUpAtFullDepth();
    }
 
    /**

@@ -30,10 +30,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.FlamingoCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
@@ -221,7 +218,7 @@ public class BalanceManager
    private final WalkingCoPTrajectoryGenerator copTrajectory;
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
-   private final AngularMomentumHandler angularMomentumHandler;
+   private final AngularMomentumHandler<SettableContactStateProvider> angularMomentumHandler;
    private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
@@ -244,8 +241,12 @@ public class BalanceManager
       this.controllerToolbox = controllerToolbox;
       yoTime = controllerToolbox.getYoTime();
 
-      angularMomentumHandler = new AngularMomentumHandler(totalMass, gravityZ, controllerToolbox.getCenterOfMassJacobian(),
-                                                          controllerToolbox.getReferenceFrames().getSoleFrames(), registry, yoGraphicsListRegistry);
+      angularMomentumHandler = new AngularMomentumHandler<>(totalMass,
+                                                            gravityZ,
+                                                            controllerToolbox.getCenterOfMassJacobian(),
+                                                            controllerToolbox.getReferenceFrames().getSoleFrames(),
+                                                            SettableContactStateProvider::new,
+                                                            registry, yoGraphicsListRegistry);
 
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
@@ -417,9 +418,9 @@ public class BalanceManager
       footstepTimings.clear();
    }
 
-   public void setSwingFootTrajectory(MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
+   public void setSwingFootTrajectory(RobotSide swingSide, MultipleWaypointsPoseTrajectoryGenerator swingTrajectory)
    {
-      angularMomentumHandler.setSwingFootTrajectory(swingTrajectory);
+      angularMomentumHandler.setSwingFootTrajectory(swingSide, swingTrajectory);
    }
 
    public void clearSwingFootTrajectory()
@@ -573,7 +574,7 @@ public class BalanceManager
 
       copTrajectory.compute(copTrajectoryState);
 
-      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       if (computeAngularMomentumOffset.getValue())
       {
          if (comTrajectoryPlanner.hasTrajectories())

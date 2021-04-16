@@ -1,7 +1,5 @@
 package us.ihmc.atlas;
 
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.initialSetup.AtlasSimInitialSetup;
 import us.ihmc.atlas.parameters.AtlasMomentumOptimizationSettings;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
@@ -11,8 +9,12 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.JumpingGoal;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
-import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
+import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -21,8 +23,6 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AtlasJumpingSimulation
 {
@@ -58,6 +58,7 @@ public class AtlasJumpingSimulation
       addButton("ShouldBeSquatting", 1.0, scs);
       addButton("triggerJump", 1.0, scs);
 
+
       triggerJump.addListener(v ->
                               {
                                  if (triggerJump.getBooleanValue())
@@ -75,6 +76,9 @@ public class AtlasJumpingSimulation
       scs.startOnAThread();
       scs.simulate();
    }
+
+
+
 
    private static MomentumOptimizationSettings getTestMomentumOptimizationSettings(HumanoidJointNameMap jointMap, int numberOfContactableBodies)
    {

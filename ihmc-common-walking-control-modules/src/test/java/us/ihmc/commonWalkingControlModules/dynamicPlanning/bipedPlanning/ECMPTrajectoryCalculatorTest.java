@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -101,7 +102,7 @@ public class ECMPTrajectoryCalculatorTest
                              rightFootFrame);
 
       copTrajectoryGenerator.compute(state);
-      List<? extends ContactStateProvider> copTrajectories = copTrajectoryGenerator.getContactStateProviders();
+      List<SettableContactStateProvider> copTrajectories = copTrajectoryGenerator.getContactStateProviders();
 
       MultipleSegmentPositionTrajectoryGenerator<FramePolynomial3DBasics> desiredAngularMomentumTrajectories = new MultipleSegmentPositionTrajectoryGenerator<>(
             "",
@@ -138,8 +139,8 @@ public class ECMPTrajectoryCalculatorTest
          amSegment.add(amTrajectory);
       }
 
-      ECMPTrajectoryCalculator ecmpTrajectoryCalculator = new ECMPTrajectoryCalculator(1.0, gravityZ, registry);
-      List<? extends ContactStateProvider> cmpTrajectories = ecmpTrajectoryCalculator.computeECMPTrajectory(copTrajectories, desiredAngularMomentumTrajectories);
+      ECMPTrajectoryCalculator<SettableContactStateProvider> ecmpTrajectoryCalculator = new ECMPTrajectoryCalculator<>(1.0, gravityZ, SettableContactStateProvider::new, registry);
+      List<SettableContactStateProvider> cmpTrajectories = ecmpTrajectoryCalculator.computeECMPTrajectory(copTrajectories, desiredAngularMomentumTrajectories);
 
       gravityZ = Math.abs(gravityZ);
 

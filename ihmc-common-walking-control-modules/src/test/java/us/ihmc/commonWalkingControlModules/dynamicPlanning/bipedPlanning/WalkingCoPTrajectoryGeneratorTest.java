@@ -9,7 +9,6 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableC
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -104,7 +103,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       copTrajectory.compute(state);
 
-      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
@@ -181,7 +180,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       copTrajectory.compute(state);
 
-      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
@@ -274,7 +273,7 @@ public class WalkingCoPTrajectoryGeneratorTest
 
       copTrajectory.compute(state);
 
-      List<? extends ContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
+      List<SettableContactStateProvider> contactStateProviders = copTrajectory.getContactStateProviders();
       for (int i = 0; i < contactStateProviders.size() - 1; i++)
       {
          EuclidFrameTestTools.assertFramePoint3DGeometricallyEquals(contactStateProviders.get(i).getECMPEndPosition(), contactStateProviders.get(i + 1).getECMPStartPosition(), epsilon);
