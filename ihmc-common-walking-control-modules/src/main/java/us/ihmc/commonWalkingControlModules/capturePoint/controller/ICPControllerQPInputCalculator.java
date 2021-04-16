@@ -22,6 +22,8 @@ public class ICPControllerQPInputCalculator
    private final DMatrixRMaj feedbackObjective = new DMatrixRMaj(2, 1);
    private final DMatrixRMaj feedbackJtW = new DMatrixRMaj(6, 2);
 
+   private final DMatrixRMaj directionJacobian = new DMatrixRMaj(1, 6);
+
    private final DMatrixRMaj invertedFeedbackGain = new DMatrixRMaj(2, 2);
 
    /**
@@ -135,6 +137,30 @@ public class ICPControllerQPInputCalculator
       CommonOps_DDRM.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
       CommonOps_DDRM.multAdd(feedbackJtW, feedbackObjective, icpQPInput.linearTerm);
       multAddInner(0.5, feedbackObjective, weight, icpQPInput.residualCost);
+   }
+
+   public void computeFeedbackDirectionTask(ICPQPInput icpQPInput,
+                                            DMatrixRMaj desiredFeedbackDirection,
+                                            double weight,
+                                            boolean useAngularMomentum)
+   {
+      int size = 2;
+      if (useAngularMomentum)
+         size += 2;
+
+      directionJacobian.reshape(1, size);
+      directionJacobian.zero();
+
+      directionJacobian.set(0, copFeedbackIndex, desiredFeedbackDirection.get(0));
+      directionJacobian.set(0, copFeedbackIndex + 1, -desiredFeedbackDirection.get(1));
+
+      if (useAngularMomentum)
+      {
+         directionJacobian.set(0, cmpFeedbackIndex, desiredFeedbackDirection.get(0));
+         directionJacobian.set(0, cmpFeedbackIndex + 1, -desiredFeedbackDirection.get(1));
+      }
+
+      MatrixTools.multAddInner(weight, directionJacobian, icpQPInput.quadraticTerm);
    }
 
    public void computeResidualDynamicsError(DMatrixRMaj solution, DMatrixRMaj errorToPack)
