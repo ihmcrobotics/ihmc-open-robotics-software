@@ -30,7 +30,8 @@ public class StaticEquilibriumSolverVisualizer
       scs.getRootRegistry().addChild(solver.getRegistry());
       scs.addYoGraphicsListRegistry(solver.getGraphicsListRegistry());
       solver.setTickAndUpdatable(scs);
-      solver.solve(input);
+      solver.initialize(input);
+      solver.solve();
 
       System.out.println("----- support region ----");
       List<Point2D> supportRegion0 = solver.getSupportRegion();
@@ -78,16 +79,16 @@ public class StaticEquilibriumSolverVisualizer
 
    public static void main(String[] args)
    {
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
-//            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
-            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
-      //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyOut();
-      //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
+      //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
+      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
+      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
+      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyOut();
+      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
 
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
+      //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
 
-      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
-      //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
+//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
+            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold();
 
       new StaticEquilibriumSolverVisualizer(input);
    }
