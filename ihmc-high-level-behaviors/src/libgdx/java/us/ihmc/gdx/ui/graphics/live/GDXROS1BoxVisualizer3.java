@@ -39,6 +39,7 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
    private final Point3D center = new Point3D();
    private final Quaternion zeroOrientation = new Quaternion();
    private final Point3D[] vertices = new Point3D[8];
+   private Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
    public GDXROS1BoxVisualizer3(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame, RigidBodyTransformReadOnly baseToSensorTransform)
    {
@@ -67,6 +68,11 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
          toRender.run();
          toRender = null;
       }
+   }
+
+   public void setColor(Color color)
+   {
+      this.color.set(color);
    }
 
    private void queueRenderBoxesAsync(GDXBoxesMessage boxes)
@@ -124,7 +130,7 @@ public class GDXROS1BoxVisualizer3 implements RenderableProvider
          Material material = new Material();
          Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
          material.set(TextureAttribute.createDiffuse(paletteTexture));
-         material.set(ColorAttribute.createDiffuse(new Color(0.7f, 0.7f, 0.7f, 1.0f)));
+         material.set(ColorAttribute.createDiffuse(color));
          modelBuilder.part(meshPart, material);
 
          if (lastModel != null)
