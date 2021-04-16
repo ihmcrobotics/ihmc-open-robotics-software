@@ -136,6 +136,11 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 
    public void updateMesh()
    {
+      updateMesh(0.0f);
+   }
+
+   public void updateMesh(float alpha)
+   {
       if (enabled)
       {
          pointsToRender.clear();
@@ -151,7 +156,7 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
          pointCloudRenderer.setPointsToRender(pointsToRender);
          if (!pointsToRender.isEmpty())
          {
-            pointCloudRenderer.updateMesh();
+            pointCloudRenderer.updateMesh(alpha);
          }
       }
    }
