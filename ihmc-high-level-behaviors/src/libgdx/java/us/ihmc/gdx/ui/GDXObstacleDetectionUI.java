@@ -10,7 +10,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.ui.graphics.live.GDXROS1BoxVisualizer3;
+import us.ihmc.gdx.ui.graphics.live.GDXROS1BoxVisualizer;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
@@ -20,7 +20,10 @@ import us.ihmc.utilities.ros.publisher.RosTunningParamPublisher;
 public class GDXObstacleDetectionUI
 {
    public static final String APPLICATION_NAME = "Object Detection UI";
-   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(APPLICATION_NAME);
+   private final GDXImGuiBasedUI baseUI = new GDXImGuiBasedUI(getClass(),
+                                                              "ihmc-open-robotics-software",
+                                                              "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                              APPLICATION_NAME);
    ImFloat tunableParameter1 = new ImFloat(0.1f);
    ImFloat tunableParameter2 = new ImFloat(0.1f);
    ImFloat tunableParameter3 = new ImFloat(0.1f);
@@ -48,8 +51,8 @@ public class GDXObstacleDetectionUI
                                                                                               new RigidBodyTransform());
       ros1PointCloudVisualizer2.subscribe(ros1Node);
 
-      GDXROS1BoxVisualizer3 boxVisualizer = new GDXROS1BoxVisualizer3(ros1Node, "/boxes",
-                                                                      ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
+      GDXROS1BoxVisualizer boxVisualizer = new GDXROS1BoxVisualizer(ros1Node, "/boxes",
+                                                                    ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
 
 
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
