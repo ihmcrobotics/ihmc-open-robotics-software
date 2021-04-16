@@ -136,27 +136,10 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
 
    public void updateMesh()
    {
-      if (enabled)
-      {
-         pointsToRender.clear();
-         synchronized (pointsToRender)
-         {
-            RecyclingArrayList<Point3D32> pointsToRead = packingA ? pointsB : pointsA;
-            for (Point3D32 point : pointsToRead)
-            {
-               pointsToRender.add().set(point);
-            }
-         }
-
-         pointCloudRenderer.setPointsToRender(pointsToRender);
-         if (!pointsToRender.isEmpty())
-         {
-            pointCloudRenderer.updateMesh();
-         }
-      }
+      updateMesh(0.0f);
    }
 
-   public void updateMeshcolor(float alpha)
+   public void updateMesh(float alpha)
    {
       if (enabled)
       {
@@ -173,31 +156,7 @@ public class GDXROS1PointCloudVisualizer implements RenderableProvider
          pointCloudRenderer.setPointsToRender(pointsToRender);
          if (!pointsToRender.isEmpty())
          {
-            //            pointCloudRenderer.setColor(color);
-//            pointCloudRenderer.updateMesh(alpha);
             pointCloudRenderer.updateMesh(alpha);
-         }
-      }
-   }
-
-   public void updateMeshcolor()
-   {
-      if (enabled)
-      {
-         pointsToRender.clear();
-         synchronized (pointsToRender)
-         {
-            RecyclingArrayList<Point3D32> pointsToRead = packingA ? pointsB : pointsA;
-            for (Point3D32 point : pointsToRead)
-            {
-               pointsToRender.add().set(point);
-            }
-         }
-
-         pointCloudRenderer.setPointsToRender(pointsToRender);
-         if (!pointsToRender.isEmpty())
-         {
-            pointCloudRenderer.updateMesh();
          }
       }
    }
