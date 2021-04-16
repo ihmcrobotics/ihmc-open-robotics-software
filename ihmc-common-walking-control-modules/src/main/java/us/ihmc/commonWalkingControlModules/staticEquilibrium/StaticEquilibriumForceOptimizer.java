@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -20,13 +21,13 @@ import static us.ihmc.commonWalkingControlModules.staticEquilibrium.StaticEquili
  */
 public class StaticEquilibriumForceOptimizer
 {
-   private static final int maximumNumberOfIterations = 300;
-   private static final double convergenceThreshold = 1e-6;
+   private static final int maximumNumberOfIterations = 600;
+   private static final double convergenceThreshold = 1e-7;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
-   private final SimpleEfficientActiveSetQPSolver qpSolver = new SimpleEfficientActiveSetQPSolver();
+   private final SimpleEfficientActiveSetQPSolverWithInactiveVariables qpSolver = new SimpleEfficientActiveSetQPSolverWithInactiveVariables();
    private final List<StaticEquilibriumContactPoint> contactPoints = new ArrayList<>();
 
    private int numberOfDecisionVariables;
@@ -54,11 +55,6 @@ public class StaticEquilibriumForceOptimizer
 
    public boolean solve(StaticEquilibriumSolverInput input, Point2DReadOnly centerOfMassXY)
    {
-      if (!input.checkInput())
-      {
-         return false;
-      }
-
       numberOfDecisionVariables = 4 * input.getNumberOfContacts();
 
       Aeq.reshape(6, numberOfDecisionVariables);

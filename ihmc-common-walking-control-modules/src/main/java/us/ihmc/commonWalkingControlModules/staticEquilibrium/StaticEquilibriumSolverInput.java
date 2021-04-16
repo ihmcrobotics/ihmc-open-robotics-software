@@ -16,7 +16,7 @@ public class StaticEquilibriumSolverInput
 {
    public static final int maxContactPoints = 50;
    private static final double defaultGravityMagnitude = 9.80665;
-   private static final double defaultCoefficientOfFriction = 0.5;
+   private static final double defaultCoefficientOfFriction = 0.8;
 
    /**
     * The vector r in the paper above
@@ -79,16 +79,5 @@ public class StaticEquilibriumSolverInput
    public double getCoefficientOfFriction()
    {
       return coefficientOfFriction;
-   }
-
-   public boolean checkInput()
-   {
-      if (contactPointPositions.size() < 3)
-      {
-         LogTools.error("Number of contact points: " + contactPointPositions.size() + ", should be 3 or greater.");
-         return false;
-      }
-
-      return true;
    }
 }

@@ -59,6 +59,13 @@ public class StaticEquilibriumSolverInputExamples
       return input;
    }
 
+   public static StaticEquilibriumSolverInput createSingleFlatContactPoint(double x, double y)
+   {
+      StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();
+      input.addContactPoint(new FramePoint3D(ReferenceFrame.getWorldFrame(), x, y, 0.0), new FrameVector3D(ReferenceFrame.getWorldFrame(), Axis3D.Z));
+      return input;
+   }
+
    private static StaticEquilibriumSolverInput createTriangleInput(double... angles)
    {
       StaticEquilibriumSolverInput input = new StaticEquilibriumSolverInput();

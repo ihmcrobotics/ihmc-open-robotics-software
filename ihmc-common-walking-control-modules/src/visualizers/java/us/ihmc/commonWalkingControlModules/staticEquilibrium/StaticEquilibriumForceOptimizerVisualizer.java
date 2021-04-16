@@ -22,7 +22,8 @@ public class StaticEquilibriumForceOptimizerVisualizer
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("dummy"));
 
       StaticEquilibriumSolver regionSolver = new StaticEquilibriumSolver();
-      regionSolver.solve(input);
+      regionSolver.initialize(input);
+      regionSolver.solve();
       ConvexPolygon2D supportRegion = new ConvexPolygon2D();
       regionSolver.getSupportRegion().forEach(supportRegion::addVertex);
       supportRegion.update();
