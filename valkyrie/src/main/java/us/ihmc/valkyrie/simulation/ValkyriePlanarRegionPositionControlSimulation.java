@@ -20,6 +20,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionJointLimitRemover;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
@@ -45,7 +46,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
 {
    public static void main(String[] args)
    {
-      new ValkyriePlanarRegionPositionControlSimulation();
+      new ValkyriePlanarRegionPositionControlSimulation(args.length > 0 && args[0].equals("headless"));
    }
 
    private static final boolean REMOVE_JOINT_LIMITS = true;
@@ -67,7 +68,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
    private static final Environment environment = Environment.GROUND_AND_WALLS;
 
-   public ValkyriePlanarRegionPositionControlSimulation()
+   public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
       PlanarRegionsList planarRegionsList = createPlanarRegions();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.01, false);
@@ -97,7 +98,11 @@ public class ValkyriePlanarRegionPositionControlSimulation
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setUsePerfectSensors(true);
       ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
-
+      if (headless)
+      {
+         simulationStarter.getGuiInitialSetup().setGraphics3DAdapter(new NullGraphics3DAdapter());
+         simulationStarter.getGuiInitialSetup().setShowWindow(false);
+      }
       simulationStarter.setRobotInitialSetup(initialSetup);
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       simulationStarter.getSCSInitialSetup().setRecordFrequency(10);
