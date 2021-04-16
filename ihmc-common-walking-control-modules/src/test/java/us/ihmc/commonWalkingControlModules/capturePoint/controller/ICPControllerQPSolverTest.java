@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
+import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -12,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.robotics.Assert;
 
 public class ICPControllerQPSolverTest
 {
@@ -76,7 +77,7 @@ public class ICPControllerQPSolverTest
       copFeedbackExpected.scale(3.0);
 
       Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      assertTrue("The CMP Feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
    }
 
    @Test
@@ -298,5 +299,82 @@ public class ICPControllerQPSolverTest
 
       assertTrue(solver.compute(icpError, perfectCMP));
    }
+
+
+   @Test
+   public void testStandingConstrainedWithDesiredFeedbackDirection()
+   {
+      ICPControllerQPSolver solver = new ICPControllerQPSolver(10);
+      solver.setMaxNumberOfIterations(10);
+
+      // create support polygon constraint
+      double footLength = 0.2;
+      double toeWidth = 0.08;
+      double heelWidth = 0.1;
+      FrameConvexPolygon2D supportPolygon = createWeirdSupportPolygon(footLength, toeWidth, heelWidth);
+
+      solver.setFeedbackConditions(10.0, 3.0, 1000.0);
+      solver.addSupportPolygon(supportPolygon);
+
+      // push it out the side. Likely would result in some weird offset
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.0, 0.08);
+      FramePoint2D perfectCMP = new FramePoint2D(supportPolygon.getCentroid());
+
+//      solver.setDesiredFeedbackDirection(icpError, 1e5);
+
+      assertTrue(solver.compute(icpError, perfectCMP));
+
+      FrameVector2D cmpCoPDifference = new FrameVector2D();
+      FrameVector2D copFeedback = new FrameVector2D();
+
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
+      FrameVector2D copFeedbackExpected = new FrameVector2D();
+
+      // unconstrained CMP location
+      copFeedbackExpected.set(icpError);
+      copFeedbackExpected.scale(3.0);
+      copFeedbackExpected.add(perfectCMP);
+
+      double midY = 0.25 * (toeWidth + heelWidth);
+
+      // clip to support polygon
+      copFeedbackExpected.setX(Math.min(copFeedbackExpected.getX(), 0.0));
+      copFeedbackExpected.setY(Math.min(copFeedbackExpected.getY(), midY));
+      copFeedbackExpected.sub(perfectCMP);
+
+      assertFalse("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+
+      solver.setDesiredFeedbackDirection(icpError, 1e5);
+      assertTrue(solver.compute(icpError, perfectCMP));
+
+      solver.getCMPFeedbackDifference(cmpCoPDifference);
+      solver.getCoPFeedbackDifference(copFeedback);
+
+      assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
+      assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+
+   }
+
+   private FrameConvexPolygon2D createWeirdSupportPolygon(double footLength, double toeWidth, double heelWidth)
+   {
+      FrameConvexPolygon2D supportPolygon = new FrameConvexPolygon2D();
+      FramePoint2D backLeft = new FramePoint2D(worldFrame, -0.5 * footLength, 0.5 * heelWidth);
+      FramePoint2D frontLeft = new FramePoint2D(worldFrame, 0.5 * footLength, 0.5 * toeWidth);
+      FramePoint2D frontRight = new FramePoint2D(worldFrame, 0.5 * footLength, -0.5 * toeWidth);
+      FramePoint2D backRight = new FramePoint2D(worldFrame, -0.5 * footLength, -0.5 * heelWidth);
+
+      supportPolygon.addVertex(backLeft);
+      supportPolygon.addVertex(frontLeft);
+      supportPolygon.addVertex(frontRight);
+      supportPolygon.addVertex(backRight);
+
+      supportPolygon.update();
+
+      return supportPolygon;
+   }
+
 }
 
