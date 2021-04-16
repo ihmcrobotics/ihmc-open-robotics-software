@@ -111,6 +111,25 @@ public class TransferToStandingState extends WalkingState
       return sideOnToes;
    }
 
+   private RobotSide getSideCarryingMostWeight(Footstep leftFootstep, Footstep rightFootstep)
+   {
+      WalkingStateEnum previousWalkingState = getPreviousWalkingStateEnum();
+      if (previousWalkingState == null)
+         return null;
+
+      RobotSide mostSupportingSide = null;
+      boolean leftStepLower = leftFootstep.getZ() <= rightFootstep.getZ();
+      boolean rightStepLower = leftFootstep.getZ() > rightFootstep.getZ();
+      if(previousWalkingState.isSingleSupport() && leftStepLower)
+         mostSupportingSide = RobotSide.LEFT;
+      else if(previousWalkingState.isSingleSupport() && rightStepLower)
+         mostSupportingSide = RobotSide.RIGHT;
+      else if (previousWalkingState.getTransferToSide() != null)
+         mostSupportingSide = previousWalkingState.getTransferToSide().getOppositeSide();
+
+      return mostSupportingSide;
+   }
+
 
    @Override
    public boolean isDone(double timeInState)
@@ -161,22 +180,21 @@ public class TransferToStandingState extends WalkingState
 
       failureDetectionControlModule.setNextFootstep(null);
 
-      RobotSide transferFromSide = getSideThatCouldBeOnToes();
-      transferFromSide = transferFromSide == null ? RobotSide.RIGHT : transferFromSide;
-      RobotSide transferToSide = transferFromSide.getOppositeSide();
+      Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
+      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
+      RobotSide supportingSide = getSideCarryingMostWeight(footstepLeft, footstepRight);
+      supportingSide = supportingSide == null ? RobotSide.RIGHT : supportingSide;
 
       double extraToeOffHeight = 0.0;
-      if (feetManager.getCurrentConstraintType(transferFromSide) == FootControlModule.ConstraintType.TOES)
+      if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
       TransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
-            .createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
-      comHeightManager.setSupportLeg(transferToSide);
+            .createTransferToAndNextFootstepDataForDoubleSupport(supportingSide);
+      comHeightManager.setSupportLeg(supportingSide);
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
-      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
       midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
 
       // Just standing in double support, do nothing
