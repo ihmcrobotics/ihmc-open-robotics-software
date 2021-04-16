@@ -6,6 +6,7 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
@@ -20,8 +21,6 @@ public class ICPControllerQPInputCalculator
    private final DMatrixRMaj feedbackJacobian = new DMatrixRMaj(2, 6);
    private final DMatrixRMaj feedbackObjective = new DMatrixRMaj(2, 1);
    private final DMatrixRMaj feedbackJtW = new DMatrixRMaj(6, 2);
-
-   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(2);
 
    private final DMatrixRMaj invertedFeedbackGain = new DMatrixRMaj(2, 2);
 
@@ -112,9 +111,7 @@ public class ICPControllerQPInputCalculator
                                    DMatrixRMaj weight,
                                    boolean useAngularMomentum)
    {
-      invertedFeedbackGain.zero();
-      solver.setA(feedbackGain);
-      solver.invert(invertedFeedbackGain);
+      UnrolledInverseFromMinor_DDRM.inv(feedbackGain, invertedFeedbackGain);
 
       int size = 2;
       if (useAngularMomentum)
