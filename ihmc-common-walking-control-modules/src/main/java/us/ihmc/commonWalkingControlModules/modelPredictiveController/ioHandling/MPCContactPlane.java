@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
@@ -333,7 +332,7 @@ public class MPCContactPlane
       {
          MPCContactPoint contactPointHelper = contactPoints[contactPointIdx];
          contactPointHelper.computeContactForceCoefficientMatrix(solutionVector, startIdx);
-         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactWrenchCoefficientMatrix());
+         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactForceCoefficientMatrix());
          startIdx += contactPointHelper.getCoefficientsSize();
       }
    }

@@ -2,15 +2,13 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProviderTools;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.WrenchMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
@@ -54,6 +52,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private final double mass;
    protected final DoubleProvider omega;
    protected final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
@@ -96,6 +95,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler linearTrajectoryHandler;
+   protected final WrenchMPCTrajectoryHandler wrenchTrajectoryHandler;
 
    protected final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
@@ -115,16 +115,19 @@ public abstract class EuclideanModelPredictiveController
    private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
 
    public EuclideanModelPredictiveController(LinearMPCIndexHandler indexHandler,
+                                             double mass,
                                              double gravityZ,
                                              double nominalCoMHeight,
                                              YoRegistry parentRegistry)
    {
       this.gravityZ = Math.abs(gravityZ);
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
+      this.mass = mass;
       this.omega = omega;
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       linearTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
+      wrenchTrajectoryHandler = new WrenchMPCTrajectoryHandler(registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
@@ -263,6 +266,7 @@ public abstract class EuclideanModelPredictiveController
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
       linearTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, previewWindowCalculator.getFullPlanningSequence(), omega.getValue());
+      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactPlaneHelperPool, mass, omega.getValue());
    }
 
    protected void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
@@ -618,6 +622,7 @@ public abstract class EuclideanModelPredictiveController
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
       linearTrajectoryHandler.compute(timeInPhase);
+      wrenchTrajectoryHandler.compute(timeInPhase);
 
       comPositionToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredCoMPosition());
       comVelocityToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredCoMVelocity());
@@ -725,12 +730,13 @@ public abstract class EuclideanModelPredictiveController
 
    public boolean hasTrajectories()
    {
-      return linearTrajectoryHandler.hasTrajectory();
+      return linearTrajectoryHandler.hasTrajectory() && wrenchTrajectoryHandler.hasTrajectory();
    }
 
    public void reset()
    {
       linearTrajectoryHandler.clearTrajectory();
+      wrenchTrajectoryHandler.clearTrajectory();
    }
 
    public MultipleCoMSegmentTrajectoryGenerator getCoMTrajectory()
