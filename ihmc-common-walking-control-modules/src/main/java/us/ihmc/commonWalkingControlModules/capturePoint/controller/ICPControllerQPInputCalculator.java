@@ -139,6 +139,10 @@ public class ICPControllerQPInputCalculator
       multAddInner(0.5, feedbackObjective, weight, icpQPInput.residualCost);
    }
 
+   /**
+    * Computes a task that minimizes the different from the resulting CMP feedback direction from the desired one. This computes the task input as trying to
+    * drive the cross product between the desired feedback and the actual feedback to zero.
+    */
    public void computeFeedbackDirectionTask(ICPQPInput icpQPInput,
                                             DMatrixRMaj desiredFeedbackDirection,
                                             double weight,
