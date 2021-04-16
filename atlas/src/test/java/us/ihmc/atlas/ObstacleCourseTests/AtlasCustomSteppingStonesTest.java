@@ -31,6 +31,14 @@ public class AtlasCustomSteppingStonesTest extends AvatarCustomSteppingStonesTes
     }
 
     @Test
+    public void testTakingBigStepUpAndStoppingThenSquaringUp(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+    {   // NOTE this passes but violates knee joint limits
+        changeWalkingParameters(0.3, 0.95);
+        setNumberOfSteps(4);
+        super.testTakingStepOneFootAtATime(testInfo, 0.22);
+    }
+
+    @Test
     public void testTakingBigStepUpAndSquaringUp(TestInfo testInfo) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
     {   // NOTE this passes but the shins collide with stair step
         super.testTakingStep(testInfo, 0.4);
