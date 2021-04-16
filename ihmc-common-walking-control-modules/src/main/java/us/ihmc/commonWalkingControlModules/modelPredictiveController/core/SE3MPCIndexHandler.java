@@ -13,7 +13,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 {
    public static final int variablesPerOrientationTick = 6;
 
-   private static final double nominalOrientationDt = 0.05;
+   private static final double nominalOrientationDt = 0.025;
 
    private int totalNumberOfOrientationTicks = 0;
    private final TIntArrayList orientationStartIndices = new TIntArrayList();

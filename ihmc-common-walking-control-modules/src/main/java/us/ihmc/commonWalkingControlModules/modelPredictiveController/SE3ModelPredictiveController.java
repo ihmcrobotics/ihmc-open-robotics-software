@@ -6,15 +6,26 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MP
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
+import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -38,6 +49,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3DBasics desiredBodyAngularVelocityFeedForward = new FrameVector3D(worldFrame);
 
+   private final FrameVector3DBasics desiredBodyAngularAcceleration = new FrameVector3D(worldFrame);
+
+   private final WrenchBasics desiredWrench = new Wrench(worldFrame, worldFrame);
+
    protected final YoFrameQuaternion currentBodyOrientation = new YoFrameQuaternion("currentBodyOrientation", worldFrame, registry);
    protected final YoFrameVector3D currentBodyAngularVelocity = new YoFrameVector3D("currentBodyAngularVelocity", worldFrame, registry);
 
@@ -49,6 +64,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
    final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
+   private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
    final SE3MPCQPSolver qpSolver;
 
@@ -76,7 +92,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                        double gravityZ, double nominalCoMHeight, double mass, double dt,
                                        YoRegistry parentRegistry)
    {
-      super(indexHandler, gravityZ, nominalCoMHeight, parentRegistry);
+      super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
@@ -90,9 +106,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       orientationPreviewWindowDuration.set(0.25);
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
+      qpSolver.setMaxNumberOfIterations(1000);
 
-      qpSolver.setFirstOrientationVariableRegularization(1e1);
-      qpSolver.setSecondOrientationVariableRegularization(1e-1);
+      qpSolver.setFirstOrientationVariableRegularization(1e-2);
+      qpSolver.setSecondOrientationVariableRegularization(1e-2);
 
       parentRegistry.addChild(registry);
    }
@@ -158,6 +175,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setTimeOfConstraint(0.0);
       objectiveToPack.setEndingDiscreteTickId(0);
 
+      linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
       orientationTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
 
       FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
@@ -168,14 +186,24 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       objectiveToPack.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
       tempVector.setToZero();
-      objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
-      tempVector.set(orientationTrajectoryHandler.getDesiredInternalAngularMomentum());
-      objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+      if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+      {
+         objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+         if (contactPlaneHelperPool.get(0).size() > 0)
+            objectiveToPack.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+         else
+            objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
+      }
+      else
+      {
+         objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
+         objectiveToPack.setDesiredInternalAngularMomentumRate(tempVector);
+      }
 
       objectiveToPack.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
       objectiveToPack.setDesiredCoMPosition(currentCoMPosition);
-      objectiveToPack.setDesiredCoMAcceleration(tempVector); // FIXME
+      objectiveToPack.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
 
       angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
 
@@ -232,8 +260,19 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
             objective.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
 
             tempVector.setToZero();
-            objective.setDesiredNetAngularMomentumRate(tempVector);
-            objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+            if (orientationTrajectoryHandler.hasInternalAngularMomentum())
+            {
+               objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               if (contactPlaneHelperPool.get(0).size() > 0)
+                  objective.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
+               else
+                  objective.setDesiredNetAngularMomentumRate(tempVector);
+            }
+            else
+            {
+               objective.setDesiredNetAngularMomentumRate(tempVector);
+               objective.setDesiredInternalAngularMomentumRate(tempVector);
+            }
 
             objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
 
@@ -250,6 +289,18 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       }
 
       return commandList;
+   }
+
+   @Override
+   public void setupCoMTrajectoryViewer(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      trajectoryViewer = new SE3MPCTrajectoryViewer(registry, yoGraphicsListRegistry);
+   }
+
+   protected void updateCoMTrajectoryViewer()
+   {
+      if (trajectoryViewer != null)
+         trajectoryViewer.compute(this, currentTimeInState.getDoubleValue());
    }
 
    @Override
@@ -285,6 +336,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
       linearTrajectoryHandler.compute(timeInPhase);
+      wrenchTrajectoryHandler.compute(timeInPhase);
       orientationTrajectoryHandler.compute(timeInPhase);
 
       comPositionToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredCoMPosition());
@@ -300,6 +352,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
       desiredBodyAngularVelocityFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
+
+      desiredBodyAngularAcceleration.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularAcceleration());
+
+      desiredWrench.setMatchingFrame(wrenchTrajectoryHandler.getDesiredWrench());
 
       ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
       double nominalHeight = gravityZ / MathTools.square(omega.getValue());
@@ -323,7 +379,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.currentBodyAngularVelocity.setMatchingFrame(bodyAngularVelocity);
    }
 
-
+   public void setInternalAngularMomentumTrajectory(MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> internalAngularMomentumTrajectory)
+   {
+      this.orientationTrajectoryHandler.setInternalAngularMomentumTrajectory(internalAngularMomentumTrajectory);
+   }
 
    public FrameOrientation3DReadOnly getDesiredBodyOrientationSolution()
    {
@@ -343,5 +402,15 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
    {
       return desiredBodyAngularVelocityFeedForward;
+   }
+
+   public FrameVector3DReadOnly getDesiredBodyAngularAccelerationSolution()
+   {
+      return desiredBodyAngularAcceleration;
+   }
+
+   public WrenchReadOnly getDesiredWrench()
+   {
+      return desiredWrench;
    }
 }

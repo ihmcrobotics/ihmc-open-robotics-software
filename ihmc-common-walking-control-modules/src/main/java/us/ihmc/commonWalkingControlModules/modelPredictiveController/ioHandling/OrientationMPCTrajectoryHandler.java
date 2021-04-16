@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -12,12 +11,19 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.core.FramePolynomial3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsOrientationTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FramePolynomial3DBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.awt.*;
 import java.util.List;
+
+import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 /**
  * This class is meant to handle the trajectory from the MPC module. It includes the trajectory for the full planning window, which is overwritten with the
@@ -37,9 +43,9 @@ public class OrientationMPCTrajectoryHandler
    private final RecyclingArrayList<FrameQuaternionBasics> orientationSolution = new RecyclingArrayList<>(FrameQuaternion::new);
    private final RecyclingArrayList<FrameVector3DBasics> angularVelocitySolution = new RecyclingArrayList<>(FrameVector3D::new);
 
-   private final MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectory;
+   private final MultipleWaypointsOrientationTrajectoryGenerator bodyOrientationTrajectory;
 
-   private final FramePolynomial3D internalAngularMomentumTrajectory = new FramePolynomial3D(3, ReferenceFrame.getWorldFrame());
+   private final MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> internalAngularMomentumTrajectory;
    private final YoDouble previewWindowEndTime;
 
    private final RecyclingArrayList<AxisAngleBasics> axisAngleErrorSolution = new RecyclingArrayList<>(AxisAngle::new);
@@ -52,10 +58,15 @@ public class OrientationMPCTrajectoryHandler
       this.indexHandler = indexHandler;
 
       previewWindowEndTime = new YoDouble("orientationPreviewWindowEndTime", registry);
-      internalAngularMomentumTrajectory.setConstant(new Point3D());
+
+      internalAngularMomentumTrajectory = new MultipleSegmentPositionTrajectoryGenerator<>("internalAngularMomentumTrajectory",
+                                                                                   50,
+                                                                                   worldFrame,
+                                                                                   () -> new FixedFramePolynomialEstimator3D(worldFrame),
+                                                                                   registry);
 
       orientationInitializationCalculator = new OrientationTrajectoryCalculator(registry);
-      orientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("desiredCoMTrajectory", 100, ReferenceFrame.getWorldFrame(), registry);
+      bodyOrientationTrajectory = new MultipleWaypointsOrientationTrajectoryGenerator("desiredCoMTrajectory", 100, ReferenceFrame.getWorldFrame(), registry);
    }
 
    public YoRegistry getRegistry()
@@ -69,7 +80,7 @@ public class OrientationMPCTrajectoryHandler
    public void clearTrajectory()
    {
       previewWindowEndTime.set(Double.NEGATIVE_INFINITY);
-      orientationTrajectory.clear();
+      bodyOrientationTrajectory.clear();
    }
 
 
@@ -103,7 +114,7 @@ public class OrientationMPCTrajectoryHandler
             orientation.transform(angularVelocity);
             angularVelocity.add(desiredAngularVelocity.get(globalTick));
 
-            orientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
+            bodyOrientationTrajectory.appendWaypoint(currentTimeInState, orientation, angularVelocity);
          }
       }
 
@@ -156,19 +167,19 @@ public class OrientationMPCTrajectoryHandler
          {
             currentTimeInState += indexHandler.getOrientationTickDuration(segment);
 
-            orientationTrajectory.compute(currentTimeInState);
+            bodyOrientationTrajectory.compute(currentTimeInState);
 
-            desiredOrientation.add().set(orientationTrajectory.getOrientation());
-            desiredAngularVelocity.add().set(orientationTrajectory.getAngularVelocity());
+            desiredOrientation.add().set(bodyOrientationTrajectory.getOrientation());
+            desiredAngularVelocity.add().set(bodyOrientationTrajectory.getAngularVelocity());
          }
       }
    }
 
    private void removeInfoOutsidePreviewWindow()
    {
-      while (orientationTrajectory.getCurrentNumberOfWaypoints() > 0 && orientationTrajectory.getLastWaypointTime() > previewWindowEndTime.getValue())
+      while (bodyOrientationTrajectory.getCurrentNumberOfWaypoints() > 0 && bodyOrientationTrajectory.getLastWaypointTime() > previewWindowEndTime.getValue())
       {
-         orientationTrajectory.removeLastWaypoint();
+         bodyOrientationTrajectory.removeLastWaypoint();
       }
    }
 
@@ -176,8 +187,8 @@ public class OrientationMPCTrajectoryHandler
    {
       MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectoryOutsideWindow = orientationInitializationCalculator.getOrientationTrajectory();
 
-      boolean hasTrajectoryAlready = orientationTrajectory.getCurrentNumberOfWaypoints() > 0;
-      double existingEndTime = hasTrajectoryAlready ? orientationTrajectory.getLastWaypointTime() : 0.0;
+      boolean hasTrajectoryAlready = bodyOrientationTrajectory.getCurrentNumberOfWaypoints() > 0;
+      double existingEndTime = hasTrajectoryAlready ? bodyOrientationTrajectory.getLastWaypointTime() : 0.0;
       if (existingEndTime >= orientationTrajectoryOutsideWindow.getLastWaypointTime())
          return;
 
@@ -187,10 +198,10 @@ public class OrientationMPCTrajectoryHandler
 
       for (; waypointIndexToAdd < orientationTrajectoryOutsideWindow.getCurrentNumberOfWaypoints(); waypointIndexToAdd++)
       {
-         orientationTrajectory.appendWaypoint(orientationTrajectoryOutsideWindow.getWaypoint(waypointIndexToAdd));
+         bodyOrientationTrajectory.appendWaypoint(orientationTrajectoryOutsideWindow.getWaypoint(waypointIndexToAdd));
       }
 
-      orientationTrajectory.initialize();
+      bodyOrientationTrajectory.initialize();
    }
 
    private static int getWaypointIndexAfterTime(double time, MultipleWaypointsOrientationTrajectoryGenerator trajectory)
@@ -206,14 +217,23 @@ public class OrientationMPCTrajectoryHandler
 
    public void compute(double timeInPhase)
    {
-      orientationTrajectory.compute(timeInPhase);
+      bodyOrientationTrajectory.compute(timeInPhase);
       orientationInitializationCalculator.compute(timeInPhase);
-      internalAngularMomentumTrajectory.compute(timeInPhase);
+      if (!internalAngularMomentumTrajectory.isEmpty())
+         internalAngularMomentumTrajectory.compute(timeInPhase);
    }
 
    public void computeOutsidePreview(double timeInPhase)
    {
       orientationInitializationCalculator.compute(timeInPhase);
+   }
+
+   public void setInternalAngularMomentumTrajectory(MultipleSegmentPositionTrajectoryGenerator<FixedFramePolynomialEstimator3D> trajectory)
+   {
+      internalAngularMomentumTrajectory.clear();
+      for (int i = 0; i < trajectory.getCurrentNumberOfSegments(); i++)
+         internalAngularMomentumTrajectory.appendSegment(trajectory.getSegment(i));
+      internalAngularMomentumTrajectory.initialize();
    }
 
    public FrameOrientation3DReadOnly getDesiredBodyOrientationOutsidePreview()
@@ -228,17 +248,22 @@ public class OrientationMPCTrajectoryHandler
 
    public FrameOrientation3DReadOnly getDesiredBodyOrientation()
    {
-      return orientationTrajectory.getOrientation();
+      return bodyOrientationTrajectory.getOrientation();
    }
 
    public FrameVector3DReadOnly getDesiredAngularVelocity()
    {
-      return orientationTrajectory.getAngularVelocity();
+      return bodyOrientationTrajectory.getAngularVelocity();
    }
 
    public FrameVector3DReadOnly getDesiredAngularAcceleration()
    {
-      return orientationTrajectory.getAngularAcceleration();
+      return bodyOrientationTrajectory.getAngularAcceleration();
+   }
+
+   public boolean hasInternalAngularMomentum()
+   {
+      return internalAngularMomentumTrajectory.isEmpty();
    }
 
    public FramePoint3DReadOnly getDesiredInternalAngularMomentum()

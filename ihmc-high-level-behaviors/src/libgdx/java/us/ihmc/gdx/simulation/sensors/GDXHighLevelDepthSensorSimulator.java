@@ -84,7 +84,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    private RigidBodyTransform sensorFrameToWorldTransform;
 
    private boolean tuning = false;
-   private final ImBoolean sensorEnabled = new ImBoolean(true);
+   private final ImBoolean sensorEnabled = new ImBoolean(false);
    private final ImBoolean renderPointCloudDirectly = new ImBoolean(false);
    private final ImBoolean renderDepthVideoDirectly = new ImBoolean(false);
    private final ImBoolean renderColorVideoDirectly = new ImBoolean(false);
@@ -341,6 +341,11 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          pointCloudRenderer.getRenderables(renderables, pool);
       if (debugCoordinateFrame)
          coordinateFrame.getRenderables(renderables, pool);
+   }
+
+   public void setSensorEnabled(boolean sensorEnabled)
+   {
+      this.sensorEnabled.set(sensorEnabled);
    }
 
    public void setRenderPointCloudDirectly(boolean renderPointCloudDirectly)

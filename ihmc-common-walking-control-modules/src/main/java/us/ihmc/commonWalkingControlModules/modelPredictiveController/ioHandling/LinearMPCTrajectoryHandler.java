@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectorySegment;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
@@ -55,6 +53,8 @@ public class LinearMPCTrajectoryHandler
    private final CoMTrajectorySegment comSegmentToAppend = new CoMTrajectorySegment();
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
 
+   private boolean hasTrajectory = false;
+
    public LinearMPCTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
    {
       this.indexHandler = indexHandler;
@@ -72,6 +72,12 @@ public class LinearMPCTrajectoryHandler
       comTrajectory.clear();
       vrpTrajectories.clear();
       fullContactSet.clear();
+      hasTrajectory = false;
+   }
+
+   public boolean hasTrajectory()
+   {
+      return hasTrajectory;
    }
 
    /**
@@ -107,6 +113,14 @@ public class LinearMPCTrajectoryHandler
       removeInfoOutsidePreviewWindow();
       overwriteTrajectoryOutsidePreviewWindow(positionInitializationCalculator.getOmega());
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
+   }
+
+   public void initializeTrajectory(FramePoint3DReadOnly end, double omega, double duration)
+   {
+      positionInitializationCalculator.initializeTrajectory(end, duration);
+      overwriteTrajectoryOutsidePreviewWindow(omega);
+
+      hasTrajectory = true;
    }
 
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
@@ -173,6 +187,8 @@ public class LinearMPCTrajectoryHandler
 
       overwriteTrajectoryOutsidePreviewWindow(omega);
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
+
+      hasTrajectory = true;
 
       if (vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
@@ -319,6 +335,25 @@ public class LinearMPCTrajectoryHandler
    public FramePoint3DReadOnly getDesiredVRPPositionOutsidePreview()
    {
       return positionInitializationCalculator.getDesiredVRPPosition();
+   }
+
+   public void removeCompletedSegments(double timeToCrop)
+   {
+      throw new NotImplementedException();
+      /*
+      while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
+         comTrajectory.removeSegment(0);
+
+      if (comTrajectory.getCurrentNumberOfSegments() < 1)
+      {
+         hasTrajectory = false;
+         return;
+      }
+
+      for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments(); i++)
+         comTrajectory.getSegment(i).getTimeInterval().shiftInterval(-timeToCrop);
+
+       */
    }
 
    public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()

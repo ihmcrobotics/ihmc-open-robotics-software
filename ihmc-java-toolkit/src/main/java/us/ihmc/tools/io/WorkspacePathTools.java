@@ -1,5 +1,6 @@
 package us.ihmc.tools.io;
 
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
 
 import java.nio.file.Files;
@@ -8,6 +9,26 @@ import java.nio.file.Paths;
 
 public class WorkspacePathTools
 {
+   /**
+    * Use this method when applications are being run from source and need to access a project file.
+    *
+    * This method will find the directoryNameToAssumePresent and then traverse that path to find
+    * the file system path to a resource.
+    *
+    * @param directoryNameToAssumePresent i.e. ihmc-open-robotics-software
+    * @param subsequentPathToResourceFolder i.e. src/main/resources, or ihmc-java-toolkit/src/main/resources
+    * @param resourcePathString i.e. us/ihmc/someResource.txt
+    * @return absolute, normalized path to that directory, or null if fails
+    */
+   public static Path findPathToResource(String directoryNameToAssumePresent, String subsequentPathToResourceFolder, String resourcePathString)
+   {
+      return PathTools.findDirectoryInline(directoryNameToAssumePresent)
+                      .resolve(subsequentPathToResourceFolder)
+                      .resolve(resourcePathString)
+                      .toAbsolutePath()
+                      .normalize();
+   }
+
    /**
     * Use this method when applications are being run from source and need to access a project file.
     *
