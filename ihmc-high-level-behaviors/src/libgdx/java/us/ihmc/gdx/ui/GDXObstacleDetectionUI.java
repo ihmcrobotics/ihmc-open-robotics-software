@@ -134,8 +134,8 @@ public class GDXObstacleDetectionUI
 //                                             (double) tunableParameter4.getData()[0], (double) tunableParameter5.getData()[0], (double) tunableParameter6.getData()[6],
 //                                             (double) tunableParameter7.getData()[0], (double) tunableParameter8.getData()[0], (double) tunableParameter9.getData()[0]);
 
-            ros1PointCloudVisualizer.updateMeshcolor(0.0f);
-            ros1PointCloudVisualizer2.updateMeshcolor(1.0f);
+            ros1PointCloudVisualizer.updateMesh(0.0f);
+            ros1PointCloudVisualizer2.updateMesh(1.0f);
             boxVisualizer.render();
 
             //            ros1BoxVisualizer.updateMesh();
