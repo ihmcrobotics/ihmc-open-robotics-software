@@ -1,12 +1,8 @@
 package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 
-import com.google.ortools.Loader;
-import com.google.ortools.linearsolver.*;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.decomposition.eig.SymmetricQRAlgorithmDecomposition_DDRM;
 import us.ihmc.commons.MathTools;
-import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,7 +13,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
@@ -28,7 +23,6 @@ import us.ihmc.yoVariables.variable.YoInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 /**
  * This is an implementation of "Testing Static Equilibrium for Legged Robots", Bretl et al, 2008
@@ -41,17 +35,14 @@ public class StaticEquilibriumSolver
 {
    private static final boolean updateGraphicsEachIteration = false;
    private static final int numberOfDirectionsToOptimize = 16;
-   private static final int maximumNumberOfIterations = 50000;
+   private static final int maximumNumberOfIterations = 8000;
    private static final double convergenceThreshold = 1e-7;
    private static final double rhoMax = 20.0;
    private static final double alphaQuadraticCost = 10.0e-2;
    static final double mass = 1.0;
 
-   private enum Mode {CUSTOM, QP, ORTOOLS}
+   private enum Mode {CUSTOM, QP}
    private static final Mode mode = Mode.CUSTOM;
-   private MPSolver orToolsSolver;
-   private final List<MPVariable> variables = new ArrayList<>();
-   private MPObjective objective;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
@@ -203,14 +194,6 @@ public class StaticEquilibriumSolver
          CommonOps_DDRM.setIdentity(quadraticCost);
          CommonOps_DDRM.scale(alphaQuadraticCost, quadraticCost);
       }
-      else if (mode == Mode.ORTOOLS)
-      {
-         Loader.loadNativeLibraries();
-         orToolsSolver = MPSolver.createSolver("GLOP");
-         if (orToolsSolver == null)
-            throw new RuntimeException("Could not create solver GLOP");
-         initializeORTools();
-      }
    }
 
    public void solve()
@@ -239,9 +222,6 @@ public class StaticEquilibriumSolver
                qpSolver.setLinearInequalityConstraints(Ain, bin);
                qpSolver.solve(xSolution);
                break;
-            case ORTOOLS:
-               solveWithORTools();
-               break;
             case CUSTOM:
             default:
                computeExtremeFeasibleCoM(directionToOptimize);
@@ -252,149 +232,6 @@ public class StaticEquilibriumSolver
          double comExtremumY = xSolution.get(numberOfDecisionVariables - 1, 0);
          supportRegion.add(new Point2D(comExtremumX, comExtremumY));
       }
-   }
-
-   //////////////////////////////////////////////////////////////////////////////////////////
-   ////////////////////////////////////////  ORTOOLS ////////////////////////////////////////
-   //////////////////////////////////////////////////////////////////////////////////////////
-
-   private final DMatrixRMaj AeqPerm = new DMatrixRMaj(0);
-   private final DMatrixRMaj As = new DMatrixRMaj(0);
-   private final DMatrixRMaj Abar = new DMatrixRMaj(0);
-
-   private final DMatrixRMaj AsInv = new DMatrixRMaj(0);
-   private final DMatrixRMaj AsInvAbar = new DMatrixRMaj(0);
-   private final DMatrixRMaj AsInvB = new DMatrixRMaj(0);
-
-   private final SymmetricQRAlgorithmDecomposition_DDRM decomposition = new SymmetricQRAlgorithmDecomposition_DDRM(false);
-
-   private final Random random = new Random(3902);
-
-   private void initializeORTools()
-   {
-      AeqPerm.reshape(6, numberOfDecisionVariables);
-      As.reshape(6, 6);
-      AsInv.reshape(6, 6);
-      Abar.reshape(6, numberOfDecisionVariables - 6);
-      AsInvB.reshape(6, 1);
-
-      int maxAttemptsToInvert = 3000;
-      boolean foundInvertibleConfiguration = false;
-      int iterations = 0;
-      AeqPerm.set(Aeq);
-
-      while (!foundInvertibleConfiguration && iterations++ < maxAttemptsToInvert)
-      {
-         int col0 = random.nextInt(6);
-         int col1 = 6 + random.nextInt(numberOfDecisionVariables - 8);
-         MatrixTools.swapColumns(col0, col1, AeqPerm);
-
-         for (int row = 0; row < 6; row++)
-         {
-            for (int col = 0; col < 6; col++)
-            {
-               As.set(row, col, AeqPerm.get(row, col));
-            }
-         }
-
-         CommonOps_DDRM.invert(As, AsInv);
-         decomposition.decompose(AsInv);
-
-         foundInvertibleConfiguration = !Double.isNaN(AsInv.get(0));
-         if (!foundInvertibleConfiguration)
-            continue;
-
-         double minEigenValueMag = Double.POSITIVE_INFINITY;
-         double maxEigenValueMag = 0.0;
-         for (int i = 0; i < 6; i++)
-         {
-            double eigenValueMag = decomposition.getEigenvalue(i).getMagnitude();
-            if (eigenValueMag < minEigenValueMag)
-               minEigenValueMag = eigenValueMag;
-            if (eigenValueMag > maxEigenValueMag)
-               maxEigenValueMag = eigenValueMag;
-         }
-
-         CommonOps_DDRM.invert(As, AsInv);
-         System.out.println("min/max: " + minEigenValueMag + "\t " + maxEigenValueMag);
-
-//         if (maxEigenValueMag > 3.0)
-//            foundInvertibleConfiguration = false;
-         if (minEigenValueMag < 0.6 || maxEigenValueMag > 5.0)
-            foundInvertibleConfiguration = false;
-      }
-
-      System.out.println("found invertible config in " + iterations + " iterations");
-
-      for (int i = 0; i < 6; i++)
-      {
-         for (int j = 0; j < numberOfDecisionVariables - 6; j++)
-         {
-            Abar.set(i, j, Aeq.get(i, 6 + j));
-         }
-      }
-
-      CommonOps_DDRM.mult(AsInv, Abar, AsInvAbar);
-      CommonOps_DDRM.mult(AsInv, beq, AsInvB);
-
-      orToolsSolver.clear();
-      variables.clear();
-
-      for (int i = 6; i < numberOfDecisionVariables; i++)
-      {
-         boolean isRho = i < numberOfDecisionVariables - 2;
-         if (isRho)
-         {
-            MPVariable rhoVariable = orToolsSolver.makeNumVar(0.0, 100.0, "rho" + i);
-            variables.add(rhoVariable);
-
-            double lowerBound = 0.0;
-            double upperBound = 100.0;
-            MPConstraint rhoConstraint = orToolsSolver.makeConstraint(lowerBound, upperBound, "constraint" + i);
-            rhoConstraint.setCoefficient(rhoVariable, 1.0);
-         }
-         else
-         {
-            variables.add(orToolsSolver.makeNumVar(-100.0, 100.0, "com" + (i == numberOfDecisionVariables - 2 ? "X" : "Y")));
-         }
-      }
-
-      for (int i = 0; i < 6; i++)
-      {
-         double lowerBound = - AsInvB.get(i);
-         double upperBound = 100000.0;
-         MPConstraint rhoConstraint = orToolsSolver.makeConstraint(lowerBound, upperBound, "constraint" + i);
-
-         for (int j = 0; j < numberOfDecisionVariables - 6; j++)
-         {
-            double coeff = - AsInvAbar.get(i, j);
-            if (Math.abs(coeff) < 1e-12)
-               continue;
-            rhoConstraint.setCoefficient(variables.get(j), coeff);
-         }
-      }
-
-      objective = orToolsSolver.objective();
-      objective.maximization();
-   }
-
-   private void solveWithORTools()
-   {
-      objective.setCoefficient(variables.get(variables.size() - 2), - directionToOptimize.getX());
-      objective.setCoefficient(variables.get(variables.size() - 1), - directionToOptimize.getY());
-
-      orToolsSolver.reset();
-      MPSolverParameters parameters = new MPSolverParameters();
-      parameters.setDoubleParam(MPSolverParameters.DoubleParam.PRIMAL_TOLERANCE, 1e-10);
-      parameters.setDoubleParam(MPSolverParameters.DoubleParam.DUAL_TOLERANCE, 1e-10);
-
-      MPSolver.ResultStatus result = orToolsSolver.solve(parameters);
-
-      orToolsSolver.setTimeLimit(2000);
-
-      System.out.println("OR Tools result: " + result);
-      xSolution.set(numberOfDecisionVariables - 2, variables.get(variables.size() - 2).solutionValue());
-      xSolution.set(numberOfDecisionVariables - 1, variables.get(variables.size() - 1).solutionValue());
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////
@@ -465,7 +302,8 @@ public class StaticEquilibriumSolver
             else
                xSolution.set(xTrial);
 
-            double shiftAmount = 0.05;
+            // TODO figure out on-the-fly scaling
+            double shiftAmount = 0.3;
             xTrial.add(numberOfDecisionVariables - 2, 0, shiftAmount * directionToOptimize.getX());
             xTrial.add(numberOfDecisionVariables - 1, 0, shiftAmount * directionToOptimize.getY());
          }
