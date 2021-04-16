@@ -728,6 +728,17 @@ public class ICPControllerQPSolver
       ICPControllerQPInputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
+   /**
+    * Computes a task that minimizes the different from the resulting CMP feedback direction from the desired one. This computes the task input as trying to
+    * drive the cross product between the desired feedback and the actual feedback to zero.
+    *
+    * <p>
+    *    0 = &delta;<sub>d</sub> &times; &delta;<sub>p</sub>
+    * </p>
+    * where
+    * <li>&delta;<sub>d</sub> is the actual feedback computed by the output of this solver and </li>
+    * <li>&delta;<sub>p</sub> is the perfect desired feedback direction that the solver is trying to achieve</li>
+    */
    private void addFeedbackDirectionTask()
    {
       if (feedbackDirectionWeight == 0.0)
