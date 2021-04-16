@@ -21,6 +21,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.YoVector3D;
@@ -45,6 +48,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
    private final FrameVector3DBasics desiredBodyAngularVelocityFeedForward = new FrameVector3D(worldFrame);
+
+   private final FrameVector3DBasics desiredBodyAngularAcceleration = new FrameVector3D(worldFrame);
+
+   private final WrenchBasics desiredWrench = new Wrench(worldFrame, worldFrame);
 
    protected final YoFrameQuaternion currentBodyOrientation = new YoFrameQuaternion("currentBodyOrientation", worldFrame, registry);
    protected final YoFrameVector3D currentBodyAngularVelocity = new YoFrameVector3D("currentBodyAngularVelocity", worldFrame, registry);
@@ -85,7 +92,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                        double gravityZ, double nominalCoMHeight, double mass, double dt,
                                        YoRegistry parentRegistry)
    {
-      super(indexHandler, gravityZ, nominalCoMHeight, parentRegistry);
+      super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
@@ -329,6 +336,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                        FixedFramePoint3DBasics ecmpPositionToPack)
    {
       linearTrajectoryHandler.compute(timeInPhase);
+      wrenchTrajectoryHandler.compute(timeInPhase);
       orientationTrajectoryHandler.compute(timeInPhase);
 
       comPositionToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredCoMPosition());
@@ -344,6 +352,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
       desiredBodyAngularVelocityFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
+
+      desiredBodyAngularAcceleration.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularAcceleration());
+
+      desiredWrench.setMatchingFrame(wrenchTrajectoryHandler.getDesiredWrench());
 
       ecmpPositionToPack.setMatchingFrame(vrpPositionToPack);
       double nominalHeight = gravityZ / MathTools.square(omega.getValue());
@@ -392,30 +404,13 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       return desiredBodyAngularVelocityFeedForward;
    }
 
-   private final FrameVector3D momentArm = new FrameVector3D();
-   private final FrameVector3D pointTorque = new FrameVector3D();
-   private final FrameVector3D netTorque = new FrameVector3D();
-
-   public void computeAngularMomentumRateOfChange(FrameVector3DBasics angularMomentumRateOfChange, double time)
+   public FrameVector3DReadOnly getDesiredBodyAngularAccelerationSolution()
    {
-      int segment = getCurrentSegmentIndex();
-      FramePoint3DReadOnly comPosition = linearTrajectoryHandler.getDesiredCoMPosition();
+      return desiredBodyAngularAcceleration;
+   }
 
-      netTorque.setToZero();
-      for (int contactIdx = 0; contactIdx < contactPlaneHelperPool.get(segment).size(); contactIdx++)
-      {
-         MPCContactPlane contactPlane = contactPlaneHelperPool.get(segment).get(contactIdx);
-         contactPlane.computeContactForce(omega.getValue(), time);
-         for (int pointIdx = 0; pointIdx < contactPlane.getNumberOfContactPoints(); pointIdx++)
-         {
-            MPCContactPoint contactPoint = contactPlane.getContactPointHelper(pointIdx);
-            momentArm.sub(contactPoint.getBasisVectorOrigin(), comPosition);
-            pointTorque.cross(momentArm, contactPoint.getContactAcceleration());
-
-            netTorque.add(pointTorque);
-         }
-      }
-
-      angularMomentumRateOfChange.setMatchingFrame(netTorque);
+   public WrenchReadOnly getDesiredWrench()
+   {
+      return desiredWrench;
    }
 }
