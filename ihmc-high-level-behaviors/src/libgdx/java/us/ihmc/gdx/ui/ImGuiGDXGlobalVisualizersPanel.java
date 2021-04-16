@@ -23,18 +23,18 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 
    private final GDXROS2PointCloudVisualizer multisenseLidarScanVisualizer;
    private final ImBoolean multisenseLidarScanChecked = new ImBoolean(false);
-   //   private final GDXROS2PointCloudVisualizer realsenseROS2PointCloudVisualizer;
-   //   private final ImBoolean realsenseROS2PointCloudChecked = new ImBoolean(false);
+//   private final GDXROS2PointCloudVisualizer realsenseROS2PointCloudVisualizer;
+//   private final ImBoolean realsenseROS2PointCloudChecked = new ImBoolean(false);
    private final GDXROS1PointCloudVisualizer realsenseROS1PointCloudVisualizer;
    private final ImBoolean realsenseROS1PointCloudChecked = new ImBoolean(false);
-   //   private final GDXROS2PlanarRegionsVisualizer mapSensePlanarRegionsROS2Visualizer;
-   //   private final ImBoolean realsenseSLAMPlanarRegionsChecked = new ImBoolean(false);
+//   private final GDXROS2PlanarRegionsVisualizer mapSensePlanarRegionsROS2Visualizer;
+//   private final ImBoolean realsenseSLAMPlanarRegionsChecked = new ImBoolean(false);
    private final GDXROS2PlanarRegionsVisualizer lidarREAPlanarRegionsVisualizer;
    private final ImBoolean lidarREAPlanarRegionsChecked = new ImBoolean(false);
    private final GDXROS1PlanarRegionsVisualizer mapSensePlanarRegionsVisualizer;
    private final ImBoolean mapSensePlanarRegionsChecked = new ImBoolean(false);
 
-   //   private final GDXROS1VideoVisualizer realsenseL515ColorVideo;
+//   private final GDXROS1VideoVisualizer realsenseL515ColorVideo;
    private final ImBoolean realsenseL515ColorVideoChecked = new ImBoolean(false);
    private final GDXROS1VideoVisualizer realsenseL515DepthVideo;
    private final ImBoolean realsenseL515DepthVideoChecked = new ImBoolean(false);
@@ -46,23 +46,23 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
 
       multisenseLidarScanVisualizer = new GDXROS2PointCloudVisualizer(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
-      //      realsenseROS2PointCloudVisualizer = new GDXROS2PointCloudVisualizer(ros2Node, ROS2Tools.L515_POINT_CLOUD);
+//      realsenseROS2PointCloudVisualizer = new GDXROS2PointCloudVisualizer(ros2Node, ROS2Tools.L515_POINT_CLOUD);
       realsenseROS1PointCloudVisualizer = new GDXROS1PointCloudVisualizer(RosTools.L515_POINT_CLOUD,
                                                                           robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames()),
                                                                           robotModel.getSensorInformation().getSteppingCameraTransform());
-      //      mapSensePlanarRegionsROS2Visualizer = new GDXROS2PlanarRegionsVisualizer(ros2Node, ROS2Tools.MAPSENSE_REGIONS);
+//      mapSensePlanarRegionsROS2Visualizer = new GDXROS2PlanarRegionsVisualizer(ros2Node, ROS2Tools.MAPSENSE_REGIONS);
       lidarREAPlanarRegionsVisualizer = new GDXROS2PlanarRegionsVisualizer(ros2Node, ROS2Tools.LIDAR_REA_REGIONS);
 
       mapSensePlanarRegionsVisualizer = new GDXROS1PlanarRegionsVisualizer(ros2Node, robotModel, RosTools.MAPSENSE_REGIONS);
 
-      //      realsenseL515ColorVideo = new GDXROS1VideoVisualizer(ros1Node, RosTools.L515_VIDEO);
+//      realsenseL515ColorVideo = new GDXROS1VideoVisualizer(ros1Node, RosTools.L515_VIDEO);
       realsenseL515DepthVideo = new GDXROS1VideoVisualizer(RosTools.L515_DEPTH);
    }
 
    public void create()
    {
       multisenseLidarScanVisualizer.create();
-      //      realsenseROS2PointCloudVisualizer.create();
+//      realsenseROS2PointCloudVisualizer.create();
       realsenseROS1PointCloudVisualizer.create();
 
       recreateRos1Node();
@@ -113,9 +113,9 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       lidarREAPlanarRegionsVisualizer.render();
       ImGui.separator();
 
-      //      ImGui.checkbox("Realsense point cloud (ROS 2)", realsenseROS2PointCloudChecked);
-      //      realsenseROS2PointCloudVisualizer.setEnabled(realsenseROS2PointCloudChecked.get());
-      //      realsenseROS2PointCloudVisualizer.renderImGuiWidgets();
+//      ImGui.checkbox("Realsense point cloud (ROS 2)", realsenseROS2PointCloudChecked);
+//      realsenseROS2PointCloudVisualizer.setEnabled(realsenseROS2PointCloudChecked.get());
+//      realsenseROS2PointCloudVisualizer.renderImGuiWidgets();
 
       changed = ImGui.checkbox("Realsense L515 point cloud (ROS 1)", realsenseROS1PointCloudChecked);
       anyROS1Changed |= changed;
@@ -128,9 +128,9 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       }
       ImGui.separator();
 
-      //      ImGui.checkbox("Realsense SLAM planar regions", realsenseSLAMPlanarRegionsChecked);
-      //      mapSensePlanarRegionsROS2Visualizer.setEnabled(realsenseSLAMPlanarRegionsChecked.get());
-      //      mapSensePlanarRegionsROS2Visualizer.render();
+//      ImGui.checkbox("Realsense SLAM planar regions", realsenseSLAMPlanarRegionsChecked);
+//      mapSensePlanarRegionsROS2Visualizer.setEnabled(realsenseSLAMPlanarRegionsChecked.get());
+//      mapSensePlanarRegionsROS2Visualizer.render();
 
       changed = ImGui.checkbox("MapSense planar regions (ROS 1)", mapSensePlanarRegionsChecked);
       anyROS1Changed |= changed;
@@ -143,8 +143,8 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       }
       ImGui.separator();
 
-      //      ros1Changed |= ImGui.checkbox("Show L515 Color Video", realsenseL515ColorVideoChecked);
-      //      realsenseL515ColorVideo.renderWidgets();
+//      ros1Changed |= ImGui.checkbox("Show L515 Color Video", realsenseL515ColorVideoChecked);
+//      realsenseL515ColorVideo.renderWidgets();
       changed = ImGui.checkbox("Show L515 Depth Video (ROS 1)", realsenseL515DepthVideoChecked);
       anyROS1Changed |= changed;
       anyNewROS1Enabled |= changed && realsenseL515DepthVideoChecked.get();
@@ -161,11 +161,11 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
          recreateRos1Node();
 
       multisenseLidarScanVisualizer.updateMesh();
-      //      realsenseROS2PointCloudVisualizer.updateMesh();
+//      realsenseROS2PointCloudVisualizer.updateMesh();
       realsenseROS1PointCloudVisualizer.updateMesh();
 
-      //      if (realsenseL515ColorVideoChecked.get())
-      //         realsenseL515ColorVideo.renderVideo();
+//      if (realsenseL515ColorVideoChecked.get())
+//         realsenseL515ColorVideo.renderVideo();
 
       realsenseL515DepthVideo.renderVideo();
    }
@@ -174,16 +174,16 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       multisenseLidarScanVisualizer.getRenderables(renderables, pool);
-      //      realsenseROS2PointCloudVisualizer.getRenderables(renderables, pool);
+//      realsenseROS2PointCloudVisualizer.getRenderables(renderables, pool);
       realsenseROS1PointCloudVisualizer.getRenderables(renderables, pool);
-      //      mapSensePlanarRegionsROS2Visualizer.getRenderables(renderables, pool);
+//      mapSensePlanarRegionsROS2Visualizer.getRenderables(renderables, pool);
       lidarREAPlanarRegionsVisualizer.getRenderables(renderables, pool);
       mapSensePlanarRegionsVisualizer.getRenderables(renderables, pool);
    }
 
    public void destroy()
    {
-      //      mapSensePlanarRegionsROS2Visualizer.destroy();
+//      mapSensePlanarRegionsROS2Visualizer.destroy();
       lidarREAPlanarRegionsVisualizer.destroy();
       mapSensePlanarRegionsVisualizer.destroy();
    }
