@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.gdx.ui.obstacleDetection;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
@@ -10,6 +10,7 @@ import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1BoxVisualizer;
 import us.ihmc.gdx.ui.graphics.live.GDXROS1PointCloudVisualizer;
 import us.ihmc.utilities.ros.RosMainNode;
