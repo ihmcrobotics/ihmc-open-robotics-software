@@ -115,7 +115,7 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 
 //      ImGui.checkbox("Realsense point cloud (ROS 2)", realsenseROS2PointCloudChecked);
 //      realsenseROS2PointCloudVisualizer.setEnabled(realsenseROS2PointCloudChecked.get());
-//      realsenseROS2PointCloudVisualizer.renderImGuiWidgets();
+      //      realsenseROS2PointCloudVisualizer.renderImGuiWidgets();
 
       changed = ImGui.checkbox("Realsense L515 point cloud (ROS 1)", realsenseROS1PointCloudChecked);
       anyROS1Changed |= changed;
