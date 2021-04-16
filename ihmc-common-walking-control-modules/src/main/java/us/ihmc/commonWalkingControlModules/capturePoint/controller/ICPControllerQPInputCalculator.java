@@ -151,8 +151,8 @@ public class ICPControllerQPInputCalculator
       directionJacobian.reshape(1, size);
       directionJacobian.zero();
 
-      directionJacobian.set(0, copFeedbackIndex, desiredFeedbackDirection.get(0));
-      directionJacobian.set(0, copFeedbackIndex + 1, -desiredFeedbackDirection.get(1));
+      directionJacobian.set(0, copFeedbackIndex, desiredFeedbackDirection.get(1));
+      directionJacobian.set(0, copFeedbackIndex + 1, -desiredFeedbackDirection.get(0));
 
       if (useAngularMomentum)
       {
