@@ -166,20 +166,6 @@ public class ValkyrieICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumFootstepWeight()
-   {
-      return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumFeedbackWeight()
-   {
-      return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getMinimumTimeRemaining()
    {
       return 0.0001;
