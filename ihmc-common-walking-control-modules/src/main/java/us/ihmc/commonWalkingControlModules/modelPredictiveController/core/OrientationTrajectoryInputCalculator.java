@@ -13,11 +13,11 @@ import us.ihmc.matrixlib.MatrixTools;
 // TODO none of the methods in this class use the compressed block formulation
 public class OrientationTrajectoryInputCalculator
 {
-   private final ImplicitSE3MPCIndexHandler indexHandler;
+   private final SE3MPCIndexHandler indexHandler;
 
    private static final DMatrixRMaj identity6 = CommonOps_DDRM.identity(6);
 
-   public OrientationTrajectoryInputCalculator(ImplicitSE3MPCIndexHandler indexHandler)
+   public OrientationTrajectoryInputCalculator(SE3MPCIndexHandler indexHandler)
    {
       this.indexHandler = indexHandler;
    }
@@ -109,7 +109,6 @@ public class OrientationTrajectoryInputCalculator
       int segmentNumber = command.getSegmentNumber();
 
       int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
-      int variablesInSegment = numberOfLinearVariables + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick;
 
       inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
