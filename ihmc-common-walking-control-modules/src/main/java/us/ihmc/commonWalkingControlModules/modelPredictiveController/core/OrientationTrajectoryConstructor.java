@@ -4,9 +4,9 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -55,7 +55,7 @@ public class OrientationTrajectoryConstructor
    public void compute(List<ContactPlaneProvider> previewWindowContactSequence,
                        Matrix3DReadOnly momentOfInertia,
                        LinearMPCTrajectoryHandler linearTrajectoryHandler,
-                       ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler,
+                       OrientationMPCTrajectoryHandler orientationTrajectoryHandler,
                        List<? extends List<MPCContactPlane>> contactPlaneHelpers)
    {
       dynamicsCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);

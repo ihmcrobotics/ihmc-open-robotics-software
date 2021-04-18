@@ -6,16 +6,12 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.ImplicitOrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -68,7 +64,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
    private final OrientationTrajectoryConstructor orientationTrajectoryConstructor;
-   final ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler;
+   final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
    private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
    final SE3MPCQPSolver qpSolver;
@@ -125,7 +121,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                                                               omega,
                                                                               mass,
                                                                               gravityZ);
-      this.orientationTrajectoryHandler = new ImplicitOrientationMPCTrajectoryHandler(indexHandler, orientationTrajectoryConstructor);
+      this.orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler, orientationTrajectoryConstructor);
 
       registry.addChild(orientationTrajectoryHandler.getRegistry());
 
