@@ -70,7 +70,7 @@ public class OrientationTrajectoryInputCalculatorTest
       indexHandler.initialize(contactProviders);
 
       OrientationTrajectoryInputCalculator inputCalculator = new OrientationTrajectoryInputCalculator(indexHandler);
-      ImplicitSE3MPCQPSolver qpSolver = new ImplicitSE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
+      SE3MPCQPSolver qpSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
       qpSolver.setFirstOrientationVariableRegularization(1.0);
       qpSolver.setSecondOrientationVariableRegularization(1.0);
 
@@ -187,7 +187,7 @@ public class OrientationTrajectoryInputCalculatorTest
       indexHandler.initialize(contactProviders);
 
       OrientationTrajectoryInputCalculator inputCalculator = new OrientationTrajectoryInputCalculator(indexHandler);
-      ImplicitSE3MPCQPSolver qpSolver = new ImplicitSE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
+      SE3MPCQPSolver qpSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
       qpSolver.setFirstOrientationVariableRegularization(1.0);
       qpSolver.setSecondOrientationVariableRegularization(1.0);
 
