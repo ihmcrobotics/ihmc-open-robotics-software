@@ -2,10 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ImplicitSE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
 import us.ihmc.euclid.referenceFrame.*;
@@ -15,10 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -91,7 +86,7 @@ public class JumpingBalanceManager
    private final YoBoolean computeAngularMomentumOffset = new YoBoolean("computeAngularMomentumOffset", registry);
 
    private final AngularMomentumHandler<ContactPlaneProvider> angularMomentumHandler;
-   private final ImplicitSE3ModelPredictiveController comTrajectoryPlanner;
+   private final SE3ModelPredictiveController comTrajectoryPlanner;
 
    public JumpingBalanceManager(JumpingControllerToolbox controllerToolbox,
                                 CoPTrajectoryParameters copTrajectoryParameters,
@@ -121,7 +116,7 @@ public class JumpingBalanceManager
                                                             registry,
                                                             yoGraphicsListRegistry);
 
-      comTrajectoryPlanner = new ImplicitSE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
+      comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
                                                                       gravityZ,
                                                                       nominalHeight,
                                                                       totalMass,
