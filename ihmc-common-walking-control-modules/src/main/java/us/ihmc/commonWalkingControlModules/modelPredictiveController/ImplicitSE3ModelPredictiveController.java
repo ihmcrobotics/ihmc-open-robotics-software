@@ -67,7 +67,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    final ImplicitOrientationMPCTrajectoryHandler orientationTrajectoryHandler;
    private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
-   final ImplicitSE3MPCQPSolver qpSolver;
+   final SE3MPCQPSolver qpSolver;
 
    protected final Matrix3DReadOnly momentOfInertia;
 
@@ -121,7 +121,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
 
       this.momentOfInertia = momentOfInertia;
 
-      qpSolver = new ImplicitSE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
+      qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
       qpSolver.setMaxNumberOfIterations(1000);
 
       qpSolver.setFirstOrientationVariableRegularization(1e-10);
