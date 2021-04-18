@@ -4,9 +4,9 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ImplicitSE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.axisAngle.interfaces.AxisAngleBasics;
@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FixedFramePolynomialEstimator3D;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
@@ -36,7 +35,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final OrientationTrajectoryCalculator referenceOrientationCalculator;
 
-   private final ImplicitSE3MPCIndexHandler indexHandler;
+   private final SE3MPCIndexHandler indexHandler;
 
    private final RecyclingArrayList<FrameOrientation3DBasics> discretizedReferenceOrientation = new RecyclingArrayList<>(FrameQuaternion::new);
    private final RecyclingArrayList<FrameVector3DBasics> discretizedReferenceAngularVelocity = new RecyclingArrayList<>(FrameVector3D::new);
@@ -59,7 +58,7 @@ public class ImplicitOrientationMPCTrajectoryHandler
    private final YoFrameVector3D optimizedCurrentAngleError = new YoFrameVector3D("optimizedCurrentAngleError", worldFrame, registry);
    private final YoFrameVector3D optimizedCurrentAngleVelocityError = new YoFrameVector3D("optimizedCurrentAngleVelocityError", worldFrame, registry);
 
-   public ImplicitOrientationMPCTrajectoryHandler(ImplicitSE3MPCIndexHandler indexHandler, OrientationTrajectoryConstructor trajectoryConstructor)
+   public ImplicitOrientationMPCTrajectoryHandler(SE3MPCIndexHandler indexHandler, OrientationTrajectoryConstructor trajectoryConstructor)
    {
       this.indexHandler = indexHandler;
       this.trajectoryConstructor = trajectoryConstructor;

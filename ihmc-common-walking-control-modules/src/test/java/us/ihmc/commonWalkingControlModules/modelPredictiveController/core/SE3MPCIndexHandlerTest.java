@@ -11,12 +11,12 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class ImplicitSE3MPCIndexHandlerTest
+public class SE3MPCIndexHandlerTest
 {
    @Test
    public void testIndices()
    {
-      ImplicitSE3MPCIndexHandler indexHandler = new ImplicitSE3MPCIndexHandler(4);
+      SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
 
       List<ContactPlaneProvider> contactProviders = new ArrayList<>();
 
@@ -45,19 +45,19 @@ public class ImplicitSE3MPCIndexHandlerTest
       indexHandler.initialize(contactProviders);
 
       int comCoefficients = contactPolygon.getNumberOfVertices() * LinearMPCIndexHandler.coefficientsPerRho * 4;
-      int totalSize = 3 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick);
+      int totalSize = 3 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + SE3MPCIndexHandler.variablesPerOrientationTick);
 
 
       assertEquals(totalSize, indexHandler.getTotalProblemSize());
       assertEquals(0, indexHandler.getOrientationStartIndex(0));
       assertEquals(6, indexHandler.getComCoefficientStartIndex(0));
       assertEquals(12, indexHandler.getRhoCoefficientStartIndex(0));
-      assertEquals(LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick, indexHandler.getOrientationStartIndex(1));
-      assertEquals(LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + 2 * ImplicitSE3MPCIndexHandler.variablesPerOrientationTick, indexHandler.getComCoefficientStartIndex(1));
-      assertEquals(2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick) + comCoefficients , indexHandler.getRhoCoefficientStartIndex(1));
-      assertEquals(2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick), indexHandler.getOrientationStartIndex(2));
-      assertEquals(2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients) + 3 * ImplicitSE3MPCIndexHandler.variablesPerOrientationTick, indexHandler.getComCoefficientStartIndex(2));
-      assertEquals(3 * (LinearMPCIndexHandler.comCoefficientsPerSegment + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick) + 2 * (comCoefficients), indexHandler.getRhoCoefficientStartIndex(2));
+      assertEquals(LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + SE3MPCIndexHandler.variablesPerOrientationTick, indexHandler.getOrientationStartIndex(1));
+      assertEquals(LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + 2 * SE3MPCIndexHandler.variablesPerOrientationTick, indexHandler.getComCoefficientStartIndex(1));
+      assertEquals(2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + SE3MPCIndexHandler.variablesPerOrientationTick) + comCoefficients , indexHandler.getRhoCoefficientStartIndex(1));
+      assertEquals(2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients + SE3MPCIndexHandler.variablesPerOrientationTick), indexHandler.getOrientationStartIndex(2));
+      assertEquals(2 * (LinearMPCIndexHandler.comCoefficientsPerSegment + comCoefficients) + 3 * SE3MPCIndexHandler.variablesPerOrientationTick, indexHandler.getComCoefficientStartIndex(2));
+      assertEquals(3 * (LinearMPCIndexHandler.comCoefficientsPerSegment + SE3MPCIndexHandler.variablesPerOrientationTick) + 2 * (comCoefficients), indexHandler.getRhoCoefficientStartIndex(2));
 
       double timeAtStartOfSecondSegment = 0.0;
       for (int tick = 0; tick < indexHandler.getTicksInSegment(0); tick++)

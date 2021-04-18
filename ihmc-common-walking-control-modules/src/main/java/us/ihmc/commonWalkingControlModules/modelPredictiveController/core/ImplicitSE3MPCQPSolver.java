@@ -13,7 +13,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
 {
-   private final ImplicitSE3MPCIndexHandler indexHandler;
+   private final SE3MPCIndexHandler indexHandler;
 
    private final YoDouble firstOrientationVariableRegularization = new YoDouble("firstOrientationVariableRegularization", registry);
    private final YoDouble secondOrientationVariableRegularization = new YoDouble("secondOrientationVariableRegularization", registry);
@@ -22,7 +22,7 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
 
    private final OrientationTrajectoryInputCalculator orientationInputCalculator;
 
-   public ImplicitSE3MPCQPSolver(ImplicitSE3MPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
+   public ImplicitSE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
       this(indexHandler,
            dt,
@@ -31,12 +31,12 @@ public class ImplicitSE3MPCQPSolver extends LinearMPCQPSolver
                                       indexHandler::getOrientationStartIndex,
                                       i ->
                                       {
-                                         return indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment + ImplicitSE3MPCIndexHandler.variablesPerOrientationTick;
+                                         return indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment + SE3MPCIndexHandler.variablesPerOrientationTick;
                                       }),
            parentRegistry);
    }
 
-   public ImplicitSE3MPCQPSolver(ImplicitSE3MPCIndexHandler indexHandler, double dt, double gravityZ, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
+   public ImplicitSE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
    {
       super(indexHandler, dt, gravityZ, inverseCalculator, parentRegistry);
 

@@ -26,13 +26,13 @@ public class OrientationTrajectoryConstructor
    private final Vector3D desiredInternalAngularMomentumRate = new Vector3D();
    private final Vector3D desiredNetAngularMomentumRate = new Vector3D();
 
-   private final ImplicitSE3MPCIndexHandler indexHandler;
+   private final SE3MPCIndexHandler indexHandler;
    private final DoubleProvider orientationAngleTrackingWeight;
    private final DoubleProvider orientationVelocityTrackingWeight;
 
    private final DoubleProvider omega;
 
-   public OrientationTrajectoryConstructor(ImplicitSE3MPCIndexHandler indexHandler,
+   public OrientationTrajectoryConstructor(SE3MPCIndexHandler indexHandler,
                                            DoubleProvider orientationAngleTrackingWeight,
                                            DoubleProvider orientationVelocityTrackingWeight,
                                            DoubleProvider omega,

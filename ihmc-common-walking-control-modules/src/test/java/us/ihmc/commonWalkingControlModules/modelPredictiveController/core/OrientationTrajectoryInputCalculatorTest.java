@@ -33,7 +33,7 @@ public class OrientationTrajectoryInputCalculatorTest
    @Test
    public void testEasyContinuityAndInitialValue()
    {
-      ImplicitSE3MPCIndexHandler indexHandler = new ImplicitSE3MPCIndexHandler(4);
+      SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
 
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
@@ -150,7 +150,7 @@ public class OrientationTrajectoryInputCalculatorTest
    @Test
    public void testEasyContinuityInitialValueAndFinalValue()
    {
-      ImplicitSE3MPCIndexHandler indexHandler = new ImplicitSE3MPCIndexHandler(4);
+      SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
 
       MPCContactPlane leftContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
       MPCContactPlane rightContactPlane = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());

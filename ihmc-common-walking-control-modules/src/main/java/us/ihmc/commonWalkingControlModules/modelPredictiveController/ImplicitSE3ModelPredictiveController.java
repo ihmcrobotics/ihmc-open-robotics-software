@@ -43,7 +43,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
    private final double gravityZ;
    protected final double mass;
 
-   protected final ImplicitSE3MPCIndexHandler indexHandler;
+   protected final SE3MPCIndexHandler indexHandler;
 
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
    private final FrameOrientation3DBasics referenceBodyOrientation = new FrameQuaternion(worldFrame);
@@ -84,7 +84,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
                                                double gravityZ, double nominalCoMHeight, double mass, double dt,
                                                YoRegistry parentRegistry)
    {
-      this(new ImplicitSE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint),
+      this(new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint),
            momentOfInertia,
            gravityZ,
            nominalCoMHeight,
@@ -93,7 +93,7 @@ public class ImplicitSE3ModelPredictiveController extends EuclideanModelPredicti
            parentRegistry);
    }
 
-   public ImplicitSE3ModelPredictiveController(ImplicitSE3MPCIndexHandler indexHandler,
+   public ImplicitSE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
                                                Matrix3DReadOnly momentOfInertia,
                                                double gravityZ, double nominalCoMHeight, double mass, double dt,
                                                YoRegistry parentRegistry)
