@@ -86,6 +86,8 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Swing Planner Parameters (for Look and Step)"));
 
+   private final ImGuiBehaviorTreePanel treePanel = new ImGuiBehaviorTreePanel("Look and step");
+
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper behaviorHelper)
    {
       this.behaviorHelper = behaviorHelper;
@@ -309,6 +311,8 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
 
       ImGui.end();
+
+      treePanel.render();
 
       lookAndStepParameterTuner.render();
       footstepPlannerParameterTuner.render();
