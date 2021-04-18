@@ -66,7 +66,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       TILTED_TILES,
    }
 
-   private static final Environment environment = Environment.GROUND_AND_WALLS;
+   private static Environment environment = Environment.GROUND_AND_WALLS;
 
    public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
