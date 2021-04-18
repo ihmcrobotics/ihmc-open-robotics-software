@@ -74,7 +74,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -162,7 +162,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(0);
       int comCoefficients = LinearMPCIndexHandler.comCoefficientsPerSegment;
@@ -250,7 +250,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -360,7 +360,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoCoefficients = 0;
       int comCoefficients = 6;
@@ -442,7 +442,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(0);
       int comCoefficients = LinearMPCIndexHandler.comCoefficientsPerSegment;
@@ -606,7 +606,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoCoefficients = indexHandler.getRhoCoefficientsInSegment(0);
       int comCoefficients = LinearMPCIndexHandler.comCoefficientsPerSegment;
@@ -720,7 +720,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -826,7 +826,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -936,7 +936,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -1048,7 +1048,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 4 * rhoSize;
@@ -1151,7 +1151,7 @@ public class OrientationDynamicCalculatorTest
       SE3MPCIndexHandler indexHandler = new SE3MPCIndexHandler(4);
       OrientationDynamicsCalculator inputCalculator = new OrientationDynamicsCalculator(mass, gravityZ);
 
-      indexHandler.initialize(contactProviders, orientationPreviewWindowLength);
+      indexHandler.initialize(contactProviders);
 
       int rhoSize = 16;
       int rhoCoefficients = 8 * rhoSize;
