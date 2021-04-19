@@ -4,6 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.MathTools;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -72,7 +73,7 @@ public class StaticEquilibriumSolver
    private final DMatrixRMaj xTrial = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj xSolution = new DMatrixRMaj(0, 0);
 
-   private final List<Point2D> supportRegion = new ArrayList<>();
+   private final ConvexPolygon2D supportRegion = new ConvexPolygon2D();
 
    private final YoFramePoint3D directionToOptimizeBase = new YoFramePoint3D("directionToOptimizeBase", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D directionToOptimize = new YoFrameVector3D("directionToOptimize", ReferenceFrame.getWorldFrame(), registry);
@@ -198,6 +199,7 @@ public class StaticEquilibriumSolver
 
    public void solve()
    {
+      supportRegion.clear();
       for (int i = 0; i < directionsToOptimize.size(); i++)
       {
          Vector2D directionToOptimize = directionsToOptimize.get(i);
@@ -230,7 +232,7 @@ public class StaticEquilibriumSolver
          setFinalGraphics();
          double comExtremumX = xSolution.get(numberOfDecisionVariables - 2, 0);
          double comExtremumY = xSolution.get(numberOfDecisionVariables - 1, 0);
-         supportRegion.add(new Point2D(comExtremumX, comExtremumY));
+         supportRegion.addVertex(comExtremumX, comExtremumY);
       }
    }
 
@@ -431,7 +433,7 @@ public class StaticEquilibriumSolver
    ////////////////////////////////////////  GETTERS ////////////////////////////////////////
    //////////////////////////////////////////////////////////////////////////////////////////
 
-   public List<Point2D> getSupportRegion()
+   public ConvexPolygon2D getSupportRegion()
    {
       return supportRegion;
    }

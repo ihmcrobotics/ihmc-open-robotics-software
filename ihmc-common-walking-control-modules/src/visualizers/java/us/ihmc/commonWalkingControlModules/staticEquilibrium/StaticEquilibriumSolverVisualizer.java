@@ -34,10 +34,10 @@ public class StaticEquilibriumSolverVisualizer
       solver.solve();
 
       System.out.println("----- support region ----");
-      List<Point2D> supportRegion0 = solver.getSupportRegion();
-      for (int i = 0; i < supportRegion0.size(); i++)
+      ConvexPolygon2D supportRegion0 = solver.getSupportRegion();
+      for (int i = 0; i < supportRegion0.getNumberOfVertices(); i++)
       {
-         System.out.println(supportRegion0.get(i));
+         System.out.println(supportRegion0.getVertex(i));
       }
 
       Graphics3DObject supportRegionGraphics = new Graphics3DObject();
@@ -59,9 +59,7 @@ public class StaticEquilibriumSolverVisualizer
 
       if (showSupportRegion)
       {
-         ConvexPolygon2D supportRegion = new ConvexPolygon2D();
-         solver.getSupportRegion().forEach(supportRegion::addVertex);
-         supportRegion.update();
+         ConvexPolygon2D supportRegion = solver.getSupportRegion();
 
          double renderedHeight = 0.1;
          supportRegionGraphics.identity();
