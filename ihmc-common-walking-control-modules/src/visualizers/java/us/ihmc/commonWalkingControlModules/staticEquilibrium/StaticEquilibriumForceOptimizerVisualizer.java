@@ -24,9 +24,7 @@ public class StaticEquilibriumForceOptimizerVisualizer
       StaticEquilibriumSolver regionSolver = new StaticEquilibriumSolver();
       regionSolver.initialize(input);
       regionSolver.solve();
-      ConvexPolygon2D supportRegion = new ConvexPolygon2D();
-      regionSolver.getSupportRegion().forEach(supportRegion::addVertex);
-      supportRegion.update();
+      ConvexPolygon2D supportRegion = regionSolver.getSupportRegion();
 
       double renderedHeight = 0.1;
       Graphics3DObject supportRegionGraphics = new Graphics3DObject();
