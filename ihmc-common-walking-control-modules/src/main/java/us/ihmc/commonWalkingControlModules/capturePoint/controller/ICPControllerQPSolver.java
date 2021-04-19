@@ -39,7 +39,7 @@ public class ICPControllerQPSolver
    private boolean previousTickFailed = false;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   private final ICPControllerQPInputCalculator inputCalculator;
+   final ICPControllerQPInputCalculator inputCalculator;
 
    /**
     * Has the form 0.5 x<sup>T</sup> H x + h x
@@ -108,7 +108,7 @@ public class ICPControllerQPSolver
    private final AbstractSimpleActiveSetQPSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
-   private final DMatrixRMaj solution;
+   final DMatrixRMaj solution;
    /** CoP Feedback action solution to the quadratic program. */
    private final DMatrixRMaj copDeltaSolution;
    /** CMP different from the CoP solution to the quadratic program. */

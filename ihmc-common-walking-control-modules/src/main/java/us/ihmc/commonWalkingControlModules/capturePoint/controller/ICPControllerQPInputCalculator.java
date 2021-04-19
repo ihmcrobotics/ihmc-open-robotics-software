@@ -22,7 +22,7 @@ public class ICPControllerQPInputCalculator
    private final DMatrixRMaj feedbackObjective = new DMatrixRMaj(2, 1);
    private final DMatrixRMaj feedbackJtW = new DMatrixRMaj(6, 2);
 
-   private final DMatrixRMaj directionJacobian = new DMatrixRMaj(1, 6);
+   final DMatrixRMaj directionJacobian = new DMatrixRMaj(1, 6);
 
    private final DMatrixRMaj invertedFeedbackGain = new DMatrixRMaj(2, 2);
 
@@ -160,8 +160,8 @@ public class ICPControllerQPInputCalculator
 
       if (useAngularMomentum)
       {
-         directionJacobian.set(0, cmpFeedbackIndex, desiredFeedbackDirection.get(0));
-         directionJacobian.set(0, cmpFeedbackIndex + 1, -desiredFeedbackDirection.get(1));
+         directionJacobian.set(0, cmpFeedbackIndex, desiredFeedbackDirection.get(1));
+         directionJacobian.set(0, cmpFeedbackIndex + 1, -desiredFeedbackDirection.get(0));
       }
 
       MatrixTools.multAddInner(weight, directionJacobian, icpQPInput.quadraticTerm);
