@@ -36,6 +36,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
    private volatile boolean connecting = false;
    private Messager messager = null;
 
+
    private final GDXBuildingExplorationBehaviorUI buildingExplorationUI;
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
 
@@ -125,11 +126,11 @@ public class GDXBehaviorsPanel implements RenderableProvider
                   disconnect();
                }
             }
+
+            lookAndStepUI.renderWidgetsOnly();
          }
       }
       ImGui.end();
-
-      lookAndStepUI.render();
    }
 
    public void connectViaKryo(String hostname)
