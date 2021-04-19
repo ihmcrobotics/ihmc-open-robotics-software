@@ -59,14 +59,14 @@ public class ValkyriePlanarRegionPositionControlSimulation
                                                                                                         ROS2Tools.IHMC_ROOT.withTypeName(GroundPlaneMessage.class));
    private final GroundPlaneMessage groundPlaneMessage = new GroundPlaneMessage();
 
-   private enum Environment
+   public enum Environment
    {
       FLAT_GROUND,
       GROUND_AND_WALLS,
       TILTED_TILES,
    }
 
-   private static Environment environment = Environment.GROUND_AND_WALLS;
+   public static Environment environment = Environment.GROUND_AND_WALLS;
 
    public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
