@@ -21,9 +21,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXLargeCinderBlockRoughed;
+import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -150,16 +148,42 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       }
 
+      ImGui.checkbox("Edit Mode", editModeChecked);
+
       boolean pushed = false;
       if (!modelInput.isDone())
       {
          pushed = true;
          ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
       }
-      if (ImGui.button("Place Cinder Block"))
+      boolean placeNewObject;
+      if (placeNewObject = ImGui.button("Place Large Cinder Block"))
+      {
+         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
+      }
+      else if (placeNewObject = ImGui.button("Place Medium Cinder Block"))
+      {
+         modelBeingPlaced = new GDXMediumCinderBlockRoughed();
+      }
+      else if (placeNewObject = ImGui.button("Place Small Cinder Block"))
+      {
+         modelBeingPlaced = new GDXSmallCinderBlockRoughed();
+      }
+      else if (placeNewObject = ImGui.button("Place Door Frame"))
+      {
+         modelBeingPlaced = new GDXDoorFrameObject();
+      }
+      else if (placeNewObject = ImGui.button("Place Door Only"))
+      {
+         modelBeingPlaced = new GDXDoorOnlyObject();
+      }
+      else if (placeNewObject = ImGui.button("Place Floor"))
+      {
+         modelBeingPlaced = new GDXLabFloorObject();
+      }
+      if (placeNewObject)
       {
          modelInput.setState(GDXModelInput.State.PLACING_XY);
-         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
          modelInput.addAndSelectInstance(modelBeingPlaced);
       }
       if (pushed)
@@ -167,7 +191,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          ImGui.popItemFlag();
       }
 
-      ImGui.checkbox("Edit Mode", editModeChecked);
       modelInput.setEditMode(editModeChecked.get());
 
       ImGui.end();

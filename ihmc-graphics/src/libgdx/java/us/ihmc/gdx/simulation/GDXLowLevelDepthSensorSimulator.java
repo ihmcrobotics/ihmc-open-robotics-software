@@ -24,6 +24,7 @@ import us.ihmc.tools.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -65,6 +66,8 @@ public class GDXLowLevelDepthSensorSimulator
    private ByteBuffer rawDepthByteBuffer;
    private FloatBuffer rawDepthFloatBuffer;
    private FloatBuffer eyeDepthMetersBuffer;
+   private ByteBuffer rawColorByteBuffer;
+   private IntBuffer rawColorIntBuffer;
 
    private boolean depthWindowEnabledOptimization = true;
    private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
@@ -97,6 +100,9 @@ public class GDXLowLevelDepthSensorSimulator
 
       rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
+
+      rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
       eyeDepthMetersBuffer = BufferUtils.newFloatBuffer(imageWidth * imageHeight);
 
@@ -135,6 +141,8 @@ public class GDXLowLevelDepthSensorSimulator
       Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
       rawDepthByteBuffer.rewind();
       Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, rawDepthByteBuffer);
+      rawColorByteBuffer.rewind();
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_INT, rawColorByteBuffer);
 
       frameBuffer.end();
 
@@ -191,7 +199,7 @@ public class GDXLowLevelDepthSensorSimulator
                point.add(noiseVector);
 
                if (colorsAreBeingUsed)
-                  colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
+                  colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y)); // this is not working
             }
          }
       }
@@ -242,6 +250,21 @@ public class GDXLowLevelDepthSensorSimulator
    public FloatBuffer getEyeDepthMetersBuffer()
    {
       return eyeDepthMetersBuffer;
+   }
+
+   public IntBuffer getColorRGB8Buffer()
+   {
+      return rawColorIntBuffer;
+   }
+
+   public ByteBuffer getRawColorByteBuffer()
+   {
+      return rawColorByteBuffer;
+   }
+
+   public Pixmap getColorPixmap()
+   {
+      return frameBuffer.getColorPixmap();
    }
 
    public float getMaxRange()
