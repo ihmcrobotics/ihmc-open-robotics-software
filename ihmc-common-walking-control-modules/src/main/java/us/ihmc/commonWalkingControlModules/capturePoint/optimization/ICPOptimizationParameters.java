@@ -164,17 +164,11 @@ public abstract class ICPOptimizationParameters
     */
    public abstract boolean useFootstepRate();
 
-   /**
-    * The minimum value to allow the footstep weight {@link #getForwardFootstepWeight()} and {@link #getLateralFootstepWeight()} to be set to.
-    * Ensures that the costs remain positive-definite, and improves the solution numerics.
-    */
-   public abstract double getMinimumFootstepWeight();
 
-   /**
-    * The minimum value to allow the feedback weight {@link #getFeedbackForwardWeight()} and {@link #getFeedbackLateralWeight()} to be set to.
-    * Ensures that the costs remain positive-definite, and improves the solution numerics.
-    */
-   public abstract double getMinimumFeedbackWeight();
+   public double getFeedbackDirectionWeight()
+   {
+      return 0.0;
+   }
 
    /**
     * The minimum value to use for the time remaining when computing the recursion multipliers.
