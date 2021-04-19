@@ -99,9 +99,7 @@ public class StaticEquilibriumSolverTest
       solver.initialize(input);
       solver.solve();
 
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
-      solver.getSupportRegion().forEach(supportPolygon::addVertex);
-      supportPolygon.update();
+      ConvexPolygon2D supportPolygon = solver.getSupportRegion();
 
       StaticEquilibriumForceOptimizer forceOptimizer = new StaticEquilibriumForceOptimizer();
 
