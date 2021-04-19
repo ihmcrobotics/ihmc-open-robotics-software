@@ -18,11 +18,7 @@ public class PlanarRegionsListNode extends Node
    {
       this.assetManager = assetManager;
 
-      List<PlanarRegionNode> regionNodes = createNewPlanarRegions(planarRegionsList);
-      for (PlanarRegionNode regionNode : regionNodes)
-      {
-         attachChild(regionNode);
-      }
+      updateRegions(planarRegionsList);
    }
 
    private List<PlanarRegionNode> createNewPlanarRegions(PlanarRegionsList planarRegionsList)
@@ -42,5 +38,15 @@ public class PlanarRegionsListNode extends Node
       }
 
       return planarRegionNodes;
+   }
+
+   public void updateRegions(PlanarRegionsList planarRegionsList)
+   {
+      getChildren().clear();
+      List<PlanarRegionNode> regionNodes = createNewPlanarRegions(planarRegionsList);
+      for (PlanarRegionNode regionNode : regionNodes)
+      {
+         attachChild(regionNode);
+      }
    }
 }

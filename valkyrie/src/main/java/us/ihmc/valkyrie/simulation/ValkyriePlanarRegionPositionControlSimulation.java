@@ -200,7 +200,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
          case FLAT_GROUND:
          default:
-            generator.translate(0.0, 0.0, 1.0);
+            generator.translate(0.0, 0.0, 0.0);
             generator.addRectangle(5.0, 5.0);
             return generator.getPlanarRegionsList();
       }
