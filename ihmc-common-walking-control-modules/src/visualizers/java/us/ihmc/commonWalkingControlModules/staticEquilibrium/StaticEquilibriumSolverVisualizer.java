@@ -77,16 +77,14 @@ public class StaticEquilibriumSolverVisualizer
 
    public static void main(String[] args)
    {
-//      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
-//                  StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
-      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
-      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyOut();
-      //            StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
-
-//                  StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
-
-      //      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
-                  StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleFlatGround();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyOut();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createTriangleOneTiltedFullyIn();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createFlatSquare();
+      // StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeet();
+      StaticEquilibriumSolverInput input = StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold();
 
       new StaticEquilibriumSolverVisualizer(input);
    }

@@ -234,6 +234,7 @@ public class StaticEquilibriumSolver
          double comExtremumY = xSolution.get(numberOfDecisionVariables - 1, 0);
          supportRegion.addVertex(comExtremumX, comExtremumY);
       }
+      supportRegion.update();
    }
 
    //////////////////////////////////////////////////////////////////////////////////////////
@@ -435,7 +436,8 @@ public class StaticEquilibriumSolver
 
    public ConvexPolygon2D getSupportRegion()
    {
-      return supportRegion;
+      supportRegion.update();
+      return new ConvexPolygon2D(supportRegion);
    }
 
    public YoRegistry getRegistry()
