@@ -163,7 +163,9 @@ public class ValkyriePlanarRegionPositionControlSimulation
       simulationStarter.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(null);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setFastSimulate(true, 10);
       simulationStarter.getSimulationConstructionSet().skipLoadingDefaultConfiguration();
-      simulationStarter.getSimulationConstructionSet().setupGraph("t");
+
+      // adds a new row each time. the method above looks like it's supposed to prevent that but it doesn't seem to work, at least on windows.
+//      simulationStarter.getSimulationConstructionSet().setupGraph("t");
 
       KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 10, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());
