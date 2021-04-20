@@ -375,21 +375,29 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
             return true;
 
          double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
-         normalPart.setAndScale(normalPartMagnitude, aRef);
-         tangentialPart.sub(integralTerm, normalPart);
-         double yawRateError = -angularVelocity.dot(aRef);
-         double ajustedNormalMagnitude = EuclidCoreTools.interpolate(normalPartMagnitude, yawRateError, yawRateBiasGain.getValue());
-         normalPart.scale(ajustedNormalMagnitude / normalPartMagnitude);
-         integralTerm.add(normalPart, tangentialPart);
+
+         if (Double.isFinite(normalPartMagnitude) && Math.abs(normalPartMagnitude) >= MIN_MAGNITUDE)
+         {
+            normalPart.setAndScale(normalPartMagnitude, aRef);
+            tangentialPart.sub(integralTerm, normalPart);
+            double yawRateError = -angularVelocity.dot(aRef);
+            double ajustedNormalMagnitude = EuclidCoreTools.interpolate(normalPartMagnitude, yawRateError, yawRateBiasGain.getValue());
+            normalPart.scale(ajustedNormalMagnitude / normalPartMagnitude);
+            integralTerm.add(normalPart, tangentialPart);
+         }
       }
       else
       {
          // If we don't have a magnetic vector, the error around the gravity vector cannot be estimated. So we slowly decay it.
          double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
-         normalPart.setAndScale(normalPartMagnitude, aRef);
-         tangentialPart.sub(integralTerm, normalPart);
-         normalPart.scale(1.0 - integralGain.getValue());
-         integralTerm.add(normalPart, tangentialPart);
+
+         if (Double.isFinite(normalPartMagnitude) && Math.abs(normalPartMagnitude) >= MIN_MAGNITUDE)
+         {
+            normalPart.setAndScale(normalPartMagnitude, aRef);
+            tangentialPart.sub(integralTerm, normalPart);
+            normalPart.scale(1.0 - integralGain.getValue());
+            integralTerm.add(normalPart, tangentialPart);
+         }
       }
 
       return true;
