@@ -47,18 +47,19 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
    private final LinearMPCIndexHandler indexHandler;
    private final LinearMPCSolutionInspection solutionInspection;
 
-   public CoMTrajectoryModelPredictiveController(double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
+   public CoMTrajectoryModelPredictiveController(double mass, double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
-      this(new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint), gravityZ, nominalCoMHeight, dt, parentRegistry);
+      this(new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint), mass, gravityZ, nominalCoMHeight, dt, parentRegistry);
    }
 
    public CoMTrajectoryModelPredictiveController(LinearMPCIndexHandler indexHandler,
+                                                 double mass,
                                                  double gravityZ,
                                                  double nominalCoMHeight,
                                                  double dt,
                                                  YoRegistry parentRegistry)
    {
-      super(indexHandler, gravityZ, nominalCoMHeight, parentRegistry);
+      super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
 
