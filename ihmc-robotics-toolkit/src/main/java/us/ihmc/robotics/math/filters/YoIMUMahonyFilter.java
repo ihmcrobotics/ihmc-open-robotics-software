@@ -245,9 +245,10 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
    {
       Vector3DReadOnly inputAngularVelocity = rawAngularVelocity;
       Vector3DReadOnly inputLinearAcceleration = rawLinearAcceleration;
+      Vector3DReadOnly inputMagneticVector = rawMagneticVector;
 
-      if (rawMagneticVector != null)
-         update(inputAngularVelocity, inputLinearAcceleration, rawMagneticVector);
+      if (inputMagneticVector != null)
+         update(inputAngularVelocity, inputLinearAcceleration, inputMagneticVector);
       else
          update(inputAngularVelocity, inputLinearAcceleration);
    }
