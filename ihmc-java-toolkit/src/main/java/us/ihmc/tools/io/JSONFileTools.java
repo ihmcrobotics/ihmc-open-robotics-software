@@ -107,6 +107,7 @@ public class JSONFileTools
 
    public static boolean save(Path settingsPath, Consumer<ObjectNode> rootConsumer)
    {
+      FileTools.ensureDirectoryExists(settingsPath.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       try (PrintStream printStream = new PrintStream(settingsPath.toFile()))
       {
          JsonFactory jsonFactory = new JsonFactory();
