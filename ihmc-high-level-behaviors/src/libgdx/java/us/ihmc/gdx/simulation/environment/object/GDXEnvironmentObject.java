@@ -1,32 +1,44 @@
 package us.ihmc.gdx.simulation.environment.object;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 
 public class GDXEnvironmentObject
 {
-   private final Model model;
+   protected final Model model;
    private final Pose3D pose = new Pose3D();
 
    private final GDXModelInstance modelInstance;
-
-   protected GDXEnvironmentObject()
-   {
-      this.model = getModel();
-      modelInstance = new GDXModelInstance(model);
-   }
+   private final Material originalMaterial;
+   private Material highlightedMaterial;
 
    public GDXEnvironmentObject(Model model)
    {
       this.model = model;
       modelInstance = new GDXModelInstance(model);
+      originalMaterial = modelInstance.materials.get(0);
    }
 
-   // For subclasses to implement
-   protected Model getModel()
+   public void setHighlighted(boolean highlighted)
    {
-      return model;
+      if (highlighted)
+      {
+         if (highlightedMaterial == null)
+         {
+            highlightedMaterial = new Material();
+            highlightedMaterial.set(ColorAttribute.createDiffuse(Color.ORANGE));
+         }
+
+         modelInstance.materials.get(0).set(highlightedMaterial);
+      }
+      else
+      {
+         modelInstance.materials.get(0).set(originalMaterial);
+      }
    }
 
    public GDXModelInstance getModelInstance()

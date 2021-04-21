@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.VertexAttributes;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Vector3;
@@ -54,7 +53,6 @@ public class GDXModelInput
 
    private ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
    private HashSet<Integer> selectedObjectIndexes = new HashSet<>();
-   private HashMap<Integer, Material> originalMaterials = new HashMap<>();
 
    public State state = NONE;
 
@@ -68,17 +66,10 @@ public class GDXModelInput
 
    private HashMap<Character, ModelInstance> controlMap = new HashMap<>();
    private HashSet<ModelInstance> controlAxes = new HashSet<>();
-   private final Material selectionMaterial;
    private float modelYaw, modelPitch, modelRoll = 0;
    private boolean editMode = false;
    private GDXImGuiBasedUI baseUI;
    private FramePose3D tempFramePose = new FramePose3D();
-
-   public GDXModelInput()
-   {
-      selectionMaterial = new Material();
-      selectionMaterial.set(ColorAttribute.createDiffuse(Color.ORANGE));
-   }
 
    public void create()
    {
@@ -147,9 +138,7 @@ public class GDXModelInput
          if (result != -1 && !selectedObjectIndexes.contains(result))
          {
             selectedObjectIndexes.add(result);
-            Material origMat = new Material(environmentObjects.get(result).getModelInstance().materials.get(0));
-            originalMaterials.put(result, origMat);
-            environmentObjects.get(result).getModelInstance().materials.get(0).set(selectionMaterial);
+            environmentObjects.get(result).setHighlighted(true);
          }
          else if (result == -1)
          {
@@ -175,9 +164,7 @@ public class GDXModelInput
          GDXEnvironmentObject duplicate = environmentObjects.get(index).duplicate();
          environmentObjects.add(duplicate);
          selectedObjectIndexes.add(environmentObjects.size() - 1);
-         Material origMat = new Material(duplicate.getModelInstance().materials.get(0));
-         originalMaterials.put(environmentObjects.size() - 1, origMat);
-         duplicate.getModelInstance().materials.get(0).set(selectionMaterial);
+         duplicate.setHighlighted(true);
       }
    }
 
@@ -186,10 +173,9 @@ public class GDXModelInput
       for (int i : selectedObjectIndexes)
       {
          System.out.println("Clearing:" + i);
-         environmentObjects.get(i).getModelInstance().materials.get(0).set(originalMaterials.get(i));
+         environmentObjects.get(i).setHighlighted(false);
       }
       selectedObjectIndexes.clear();
-      originalMaterials.clear();
    }
 
    public void updateState(ImGui3DViewInput input)
@@ -233,7 +219,7 @@ public class GDXModelInput
    {
       if (input.isWindowHovered())
       {
-         LogTools.debug(state + "\t" + selectedObjectIndexes + "\tTotal Materials: " + originalMaterials.size() + "\tControls: " + controlAxes.size());
+         LogTools.debug(state + "\t" + selectedObjectIndexes + "\tControls: " + controlAxes.size());
 
          translation.setToZero();
          modelRoll = modelYaw = modelPitch = 0;
@@ -263,7 +249,6 @@ public class GDXModelInput
                   {
                      state = NONE;
                      selectedObjectIndexes.clear();
-                     originalMaterials.clear();
                   }
                   break;
 
@@ -359,7 +344,6 @@ public class GDXModelInput
    {
       environmentObjects.clear();
       selectedObjectIndexes.clear();
-      originalMaterials.clear();
    }
 
    public boolean isDone()
