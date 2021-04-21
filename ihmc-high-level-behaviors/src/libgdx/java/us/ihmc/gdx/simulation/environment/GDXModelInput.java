@@ -40,8 +40,7 @@ import static us.ihmc.gdx.simulation.environment.GDXModelInput.State.*;
 
 public class GDXModelInput
 {
-
-   public static enum State
+   public enum State
    {
       PLACING_XY, PLACING_X, PLACING_Y, PLACING_Z, ROTATING_YAW, ROTATING_PITCH, ROTATING_ROLL, NONE
    }
@@ -316,6 +315,14 @@ public class GDXModelInput
          tempFramePose.get(tempRigidBodyTransform);
          GDXTools.toGDX(tempRigidBodyTransform, environmentObjects.get(selectedObjectIndexes.stream().findFirst().get()).getModelInstance().transform);
       }
+   }
+
+   public void renderImGuiPanel()
+   {
+      ImGui.text("Controls: C -> X, V -> Y, B -> Z");
+      ImGui.text("C + Space -> Roll, V + Space -> Pitch, B + Space -> Yaw");
+      ImGui.text("Right click hold and move vertically to move.");
+      ImGui.text("State: " + state.name());
    }
 
    public void addLargeCinderBlockRoughed()
