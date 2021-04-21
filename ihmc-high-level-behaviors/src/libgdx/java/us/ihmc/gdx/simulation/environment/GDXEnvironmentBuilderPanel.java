@@ -52,8 +52,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
-   private GDXEnvironmentObject sensorModelInstance;
-
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ImBoolean editModeChecked = new ImBoolean(false);
@@ -69,11 +67,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       vrManager = baseUI.getVRManager();
 
       modelInput.setBaseUI(baseUI);
-
       modelInput.create();
-
-      sensorModelInstance = new GDXL515SensorObject();
-      modelInput.addInstance(sensorModelInstance);
 
       if (GDXVRManager.isVREnabled())
       {
@@ -281,11 +275,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       return WINDOW_NAME;
    }
 
-   public GDXEnvironmentObject getSensorObject()
-   {
-      return sensorModelInstance;
-   }
-
    public ModelInstance placeFloor()
    {
       GDXLabFloorObject floor = new GDXLabFloorObject();
@@ -317,5 +306,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       {
          controlAxis.getRenderables(renderables, pool);
       }
+   }
+
+   public GDXModelInput getModelInput()
+   {
+      return modelInput;
    }
 }
