@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
@@ -322,7 +323,7 @@ public class ICPController
 
       computeUnconstrainedFeedbackCMPGain();
 
-      fastStaticInverse(transformedGains, inverseTransformedGains);
+      UnrolledInverseFromMinor_DDRM.inv(transformedGains, inverseTransformedGains);
 
       solver.resetCoPFeedbackConditions();
       solver.resetFeedbackDirection();
@@ -338,15 +339,6 @@ public class ICPController
 
       if (useCMPFeedback.getValue())
          solver.setCMPFeedbackConditions(cmpFeedbackWeight.getValue(), useAngularMomentum.getValue());
-   }
-
-   private static void fastStaticInverse(DMatrixRMaj matrixToInvert, DMatrixRMaj invertedMatrixToPack)
-   {
-      double determinate = CommonOps_DDRM.det(matrixToInvert);
-      invertedMatrixToPack.set(0, 0,  matrixToInvert.get(1, 1) / determinate);
-      invertedMatrixToPack.set(1, 1, matrixToInvert.get(0, 0) / determinate);
-      invertedMatrixToPack.set(0, 1, -matrixToInvert.get(0, 1) / determinate);
-      invertedMatrixToPack.set(1, 0, -matrixToInvert.get(1, 0) / determinate);
    }
 
    private boolean solveQP()
