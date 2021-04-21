@@ -186,8 +186,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       }
 
       modelInput.setEditMode(editModeChecked.get());
+      modelInput.renderImGuiPanel();
 
       ImGui.end();
+
 
       ImGui.begin(ImGuiTools.uniqueLabel(this, "Planar Region Data Sets"));
 
