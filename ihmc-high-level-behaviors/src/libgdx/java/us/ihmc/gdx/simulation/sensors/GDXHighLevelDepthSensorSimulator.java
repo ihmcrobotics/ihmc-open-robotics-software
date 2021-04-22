@@ -445,6 +445,21 @@ catch (IndexOutOfBoundsException e)
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
    }
 
+   public void setPublishDepthImageROS1(boolean publish)
+   {
+      publishDepthImageROS1.set(publish);
+   }
+
+   public void setPublishColorImageROS1(boolean publish)
+   {
+      publishColorImageROS1.set(publish);
+   }
+
+   public void setPublishPointCloudROS2(boolean publish)
+   {
+      publishPointCloudROS2.set(publish);
+   }
+
    public void setDebugCoordinateFrame(boolean debugCoordinateFrame)
    {
       this.debugCoordinateFrame = debugCoordinateFrame;
