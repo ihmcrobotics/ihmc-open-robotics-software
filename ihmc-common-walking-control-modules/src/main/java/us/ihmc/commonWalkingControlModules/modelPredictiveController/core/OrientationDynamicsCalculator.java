@@ -3,23 +3,18 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.EfficientMatrixExponentialCalculator;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
-import java.util.ArrayList;
 import java.util.List;
 
 // TODO this needs to be cleaned up
@@ -77,31 +72,9 @@ public class OrientationDynamicsCalculator
       gravityVector.set(2, 0, -Math.abs(gravity));
    }
 
-   private final List<MPCContactPlane> contactPlanes = new ArrayList<>();
-
    public void setDiscretizationCalculator(DiscretizationCalculator discretizationCalculator)
    {
       this.discretizationCalculator = discretizationCalculator;
-   }
-
-   public boolean compute(DiscreteAngularVelocityOrientationCommand command)
-   {
-      contactPlanes.clear();
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
-         contactPlanes.add(command.getContactPlane(i));
-
-      setMomentumOfInertiaInBodyFrame(command.getMomentOfInertiaInBodyFrame());
-
-      return compute(command.getDesiredCoMPosition(),
-                     command.getDesiredCoMAcceleration(),
-                     command.getDesiredBodyOrientation(),
-                     command.getDesiredBodyAngularVelocity(),
-                     command.getDesiredNetAngularMomentumRate(),
-                     command.getDesiredInternalAngularMomentumRate(),
-                     contactPlanes,
-                     command.getTimeOfConstraint(),
-                     command.getDurationOfHold(),
-                     command.getOmega());
    }
 
    public void setMomentumOfInertiaInBodyFrame(Matrix3DReadOnly inertiaMatrixInBody)

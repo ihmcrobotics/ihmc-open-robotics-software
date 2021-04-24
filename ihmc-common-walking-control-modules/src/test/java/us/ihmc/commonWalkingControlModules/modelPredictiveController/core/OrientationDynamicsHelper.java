@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
@@ -25,13 +25,32 @@ public class OrientationDynamicsHelper
                                                                                FramePoint3DReadOnly comPosition,
                                                                                FrameVector3DReadOnly angularErrorAtCurrentTick,
                                                                                FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                               DiscreteAngularVelocityOrientationCommand command)
+                                                                               Matrix3DReadOnly momentOfInertia,
+                                                                               FramePoint3DReadOnly desiredCoMPosition,
+                                                                               FrameVector3DReadOnly desiredCoMAcceleration,
+                                                                               FrameOrientation3DReadOnly desiredBodyOrientation,
+                                                                               Vector3DReadOnly desiredBodyAngularVelocity,
+                                                                               Vector3DReadOnly desiredNetAngularMomentumRate,
+                                                                               Vector3DReadOnly desiredInternalAngularMomentumRate,
+                                                                               List<MPCContactPlane> contactPlanes)
    {
       FrameVector3D angularVelocityErrorRate = new FrameVector3D();
-      FrameVector3DReadOnly angularVelocityErrorRateFromAngularError = computeExpectedAngularVelocityErrorRateFromAngularError(angularErrorAtCurrentTick, command);
+      FrameVector3DReadOnly angularVelocityErrorRateFromAngularError = computeExpectedAngularVelocityErrorRateFromAngularError(angularErrorAtCurrentTick,
+                                                                                                                               momentOfInertia,
+                                                                                                                               desiredBodyOrientation,
+                                                                                                                               desiredNetAngularMomentumRate,
+                                                                                                                               desiredInternalAngularMomentumRate);
       FrameVector3DReadOnly angularVelocityErrorRateFromAngularVelocityError = computeExpectedAngularVelocityErrorRateFromAngularVelocityError(angularVelocityErrorAtCurrentTick,
-                                                                                                                                                                                command);
-      FrameVector3DReadOnly angularVelocityErrorRateFromContact = computeExpectedAngularVelocityErrorRateFromContact(mass, comPosition, command);
+                                                                                                                                               momentOfInertia,
+                                                                                                                                               desiredBodyAngularVelocity);
+      FrameVector3DReadOnly angularVelocityErrorRateFromContact = computeExpectedAngularVelocityErrorRateFromContact(mass,
+                                                                                                                     comPosition,
+                                                                                                                     momentOfInertia,
+                                                                                                                     desiredCoMPosition,
+                                                                                                                     desiredCoMAcceleration,
+                                                                                                                     desiredBodyOrientation,
+                                                                                                                     desiredNetAngularMomentumRate,
+                                                                                                                     contactPlanes);
 
       angularVelocityErrorRate.set(angularVelocityErrorRateFromAngularError);
       angularVelocityErrorRate.add(angularVelocityErrorRateFromAngularVelocityError);
@@ -42,14 +61,15 @@ public class OrientationDynamicsHelper
    }
 
    public static FrameVector3DReadOnly computeExpectedAngularVelocityErrorRateFromAngularError(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                                                                DiscreteAngularVelocityOrientationCommand command)
+                                                                                               Matrix3DReadOnly momentOfInertia,
+                                                                                               FrameOrientation3DReadOnly desiredBodyOrientation,
+                                                                                               Vector3DReadOnly desiredNetAngularMomentumRate,
+                                                                                               Vector3DReadOnly desiredInternalAngularMomentumRate)
    {
-      FrameOrientation3DReadOnly desiredBodyOrientation = command.getDesiredBodyOrientation();
       FrameVector3D angularVelocityErrorRateFromAngularError = new FrameVector3D();
 
       FrameVector3D desiredBodyAngularMomentumRate = new FrameVector3D();
-      desiredBodyAngularMomentumRate.sub(command.getDesiredNetAngularMomentumRate(), command.getDesiredInternalAngularMomentumRate());
-      Matrix3DReadOnly momentOfInertia = command.getMomentOfInertiaInBodyFrame();
+      desiredBodyAngularMomentumRate.sub(desiredNetAngularMomentumRate, desiredInternalAngularMomentumRate);
 
       FrameVector3D tempVector = new FrameVector3D(desiredBodyAngularMomentumRate);
       desiredBodyOrientation.inverseTransform(tempVector);
@@ -60,11 +80,9 @@ public class OrientationDynamicsHelper
    }
 
    public static FrameVector3DReadOnly computeExpectedAngularVelocityErrorRateFromAngularVelocityError(FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                                                        DiscreteAngularVelocityOrientationCommand command)
+                                                                                                       Matrix3DReadOnly momentOfInertia,
+                                                                                                       Vector3DReadOnly desiredBodyAngularVelocity)
    {
-      Vector3DReadOnly desiredBodyAngularVelocity = command.getDesiredBodyAngularVelocity();
-      Matrix3DReadOnly momentOfInertia = command.getMomentOfInertiaInBodyFrame();
-
       FrameVector3D angularVelocityErrorRateFromAngularVelocityError = new FrameVector3D();
 
       FrameVector3D tempVector = new FrameVector3D();
@@ -88,11 +106,11 @@ public class OrientationDynamicsHelper
    }
 
    public static FrameVector3DReadOnly computeExpectedAngularErrorRate(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                                        FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
-                                                                        DiscreteAngularVelocityOrientationCommand command)
+                                                                       FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
+                                                                       Vector3DReadOnly desiredBodyAngularVelocity)
    {
       FrameVector3D angularErrorRate = new FrameVector3D();
-      FrameVector3D angularErrorRateFromAngularError = new FrameVector3D(computeExpectedAngularErrorRateFromAngularError(angularErrorAtCurrentTick, command));
+      FrameVector3D angularErrorRateFromAngularError = new FrameVector3D(computeExpectedAngularErrorRateFromAngularError(angularErrorAtCurrentTick, desiredBodyAngularVelocity));
       FrameVector3D angularErrorRateFromAngularVelocityError = new FrameVector3D(computeExpectedAngularErrorRateFromAngularVelocityError(angularVelocityErrorAtCurrentTick));
 
       angularErrorRate.add(angularErrorRateFromAngularError, angularErrorRateFromAngularVelocityError);
@@ -101,11 +119,10 @@ public class OrientationDynamicsHelper
    }
 
    public static FrameVector3DReadOnly computeExpectedAngularErrorRateFromAngularError(FrameVector3DReadOnly angularErrorAtCurrentTick,
-                                                                                        DiscreteAngularVelocityOrientationCommand command)
+                                                                                       Vector3DReadOnly desiredBodyAngularVelocity)
    {
       FrameVector3D angularErrorRateFromAngularError = new FrameVector3D();
 
-      Vector3DReadOnly desiredBodyAngularVelocity = command.getDesiredBodyAngularVelocity();
       angularErrorRateFromAngularError.cross(desiredBodyAngularVelocity, angularErrorAtCurrentTick);
       angularErrorRateFromAngularError.scale(-1.0);
 
@@ -253,50 +270,56 @@ public class OrientationDynamicsHelper
 
    static void assertRateFromAngularErrorIsCorrect(FrameVector3DReadOnly angularErrorAtCurrentTick,
                                                    OrientationDynamicsCalculator inputCalculator,
-                                                   DiscreteAngularVelocityOrientationCommand command)
+                                                   Matrix3DReadOnly momentOfInertia,
+                                                   FrameOrientation3DReadOnly desiredBodyOrientation,
+                                                   Vector3DReadOnly desiredBodyAngularVelocity,
+                                                   Vector3DReadOnly desiredNetAngularMomentumRate,
+                                                   Vector3DReadOnly desiredInternalAngularMomentumRate)
    {
-      FrameVector3DReadOnly expectedAngularVelocityErrorRateFromAngularError = computeExpectedAngularVelocityErrorRateFromAngularError(
-            angularErrorAtCurrentTick,
-            command);
-      FrameVector3DReadOnly expectedAngularErrorRateFromAngularError = computeExpectedAngularErrorRateFromAngularError(angularErrorAtCurrentTick, command);
+      FrameVector3DReadOnly expectedAngularVelocityErrorRateFromAngularError = computeExpectedAngularVelocityErrorRateFromAngularError(angularErrorAtCurrentTick,
+                                                                                                                                       momentOfInertia,
+                                                                                                                                       desiredBodyOrientation,
+                                                                                                                                       desiredNetAngularMomentumRate,
+                                                                                                                                       desiredInternalAngularMomentumRate);
+      FrameVector3DReadOnly expectedAngularErrorRateFromAngularError = computeExpectedAngularErrorRateFromAngularError(angularErrorAtCurrentTick, desiredBodyAngularVelocity);
       FrameVector3DReadOnly actualAngularErrorRateFromAngularError = computeActualAngularErrorRateFromAngularError(angularErrorAtCurrentTick, inputCalculator);
       FrameVector3DReadOnly actualAngularVelocityErrorRateFromAngularError = computeActualAngularVelocityErrorRateFromAngularError(angularErrorAtCurrentTick,
                                                                                                                                    inputCalculator);
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate from angular error is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate from angular error is incorrect",
                                                                   expectedAngularErrorRateFromAngularError,
                                                                   actualAngularErrorRateFromAngularError,
                                                                   1e-6);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate from angular error is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate from angular error is incorrect",
                                                                   expectedAngularVelocityErrorRateFromAngularError,
                                                                   actualAngularVelocityErrorRateFromAngularError,
                                                                   1e-6);
    }
 
    public static FrameVector3DReadOnly computeExpectedAngularVelocityErrorRateFromContact(double mass,
-                                                                                           FramePoint3DReadOnly comPosition,
-                                                                                           DiscreteAngularVelocityOrientationCommand command)
+                                                                                          FramePoint3DReadOnly comPosition,
+                                                                                          Matrix3DReadOnly momentOfInertia,
+                                                                                          FramePoint3DReadOnly desiredCoMPosition,
+                                                                                          FrameVector3DReadOnly desiredCoMAcceleration,
+                                                                                          FrameOrientation3DReadOnly desiredBodyOrientation,
+                                                                                          Vector3DReadOnly desiredNetAngularMomentumRate,
+                                                                                          List<MPCContactPlane> contactPlanes)
    {
       FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
 
-      Matrix3DReadOnly momentOfInertia = command.getMomentOfInertiaInBodyFrame();
-      FramePoint3DReadOnly desiredCoMPosition = command.getDesiredCoMPosition();
-      FrameVector3DReadOnly desiredCoMAcceleration = command.getDesiredCoMAcceleration();
-      FrameOrientation3DReadOnly desiredBodyOrientation = command.getDesiredBodyOrientation();
-
       List<MPCContactPoint> allContactPoints = new ArrayList<>();
 
-      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      for (int i = 0; i < contactPlanes.size(); i++)
       {
-         for (int j = 0; j < command.getContactPlane(i).getNumberOfContactPoints(); j++)
-            allContactPoints.add(command.getContactPlane(i).getContactPointHelper(j));
+         for (int j = 0; j < contactPlanes.get(i).getNumberOfContactPoints(); j++)
+            allContactPoints.add(contactPlanes.get(i).getContactPointHelper(j));
       }
 
       FrameVector3D desiredContactPointForce = new FrameVector3D(desiredCoMAcceleration);
       desiredContactPointForce.addZ(Math.abs(gravityZ));
       desiredContactPointForce.scale(mass);
 
-      angularVelocityErrorRateFromContact.sub(command.getDesiredNetAngularMomentumRate());
+      angularVelocityErrorRateFromContact.sub(desiredNetAngularMomentumRate);
 
       FrameVector3D desiredTorqueFromContact = new FrameVector3D();
       FrameVector3D comError = new FrameVector3D();
@@ -328,18 +351,20 @@ public class OrientationDynamicsHelper
 
    static void assertRateFromAngularVelocityErrorIsCorrect(FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                                            OrientationDynamicsCalculator inputCalculator,
-                                                           DiscreteAngularVelocityOrientationCommand command)
+                                                           Matrix3DReadOnly momentOfInertia,
+                                                           Vector3DReadOnly desiredBodyAngularVelocity)
    {
       FrameVector3DReadOnly angularErrorRateFromAngularVelocityError = computeExpectedAngularErrorRateFromAngularVelocityError(angularVelocityErrorAtCurrentTick);
 
       FrameVector3DReadOnly expectedAngularVelocityErrorRateFromAngularVelocityError = computeExpectedAngularVelocityErrorRateFromAngularVelocityError(
             angularVelocityErrorAtCurrentTick,
-            command);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate from angular velocity error is incorrect at tick " + command.getEndDiscreteTickId(),
+            momentOfInertia,
+            desiredBodyAngularVelocity);
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate from angular velocity error is incorrect",
                                                                   angularErrorRateFromAngularVelocityError,
                                                                   computeActualAngularErrorRateFromAngularVelocityError(angularVelocityErrorAtCurrentTick, inputCalculator),
                                                                   1e-6);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate from angular velocity error is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate from angular velocity error is incorrect",
                                                                   expectedAngularVelocityErrorRateFromAngularVelocityError,
                                                                   computeActualAngularVelocityErrorRateFromAngularVelocityError(angularVelocityErrorAtCurrentTick, inputCalculator),
                                                                   1e-6);
@@ -349,20 +374,32 @@ public class OrientationDynamicsHelper
                                               FramePoint3DReadOnly comPosition,
                                               DMatrixRMaj trajectoryCoefficients,
                                               OrientationDynamicsCalculator inputCalculator,
-                                              DiscreteAngularVelocityOrientationCommand command)
+                                              Matrix3DReadOnly momentOfInertia,
+                                              FramePoint3DReadOnly desiredCoMPosition,
+                                              FrameVector3DReadOnly desiredCoMAcceleration,
+                                              FrameOrientation3DReadOnly desiredBodyOrientation,
+                                              Vector3DReadOnly desiredNetAngularMomentumRate,
+                                              List<MPCContactPlane> contactPlanes)
    {
 
       FrameVector3DReadOnly expectedAngularErrorRateFromContact = computeExpectedAngularErrorRateFromContact();
-      FrameVector3DReadOnly expectedAngularVelocityErrorRateFromContact = computeExpectedAngularVelocityErrorRateFromContact(mass, comPosition, command);
+      FrameVector3DReadOnly expectedAngularVelocityErrorRateFromContact = computeExpectedAngularVelocityErrorRateFromContact(mass,
+                                                                                                                             comPosition,
+                                                                                                                             momentOfInertia,
+                                                                                                                             desiredCoMPosition,
+                                                                                                                             desiredCoMAcceleration,
+                                                                                                                             desiredBodyOrientation,
+                                                                                                                             desiredNetAngularMomentumRate,
+                                                                                                                             contactPlanes);
       FrameVector3DReadOnly actualAngularErrorRateFromContact = computeActualAngularErrorRateFromContact(trajectoryCoefficients, inputCalculator);
       FrameVector3DReadOnly actualAngularVelocityErrorRateFromContact = computeActualAngularVelocityErrorRateFromContact(trajectoryCoefficients,
                                                                                                                          inputCalculator);
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate from contact is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate from contact is incorrect",
                                                                   expectedAngularErrorRateFromContact,
                                                                   actualAngularErrorRateFromContact,
                                                                   1e-6);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate from contact is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate from contact is incorrect",
                                                                   expectedAngularVelocityErrorRateFromContact,
                                                                   actualAngularVelocityErrorRateFromContact,
                                                                   1e-6);
@@ -374,11 +411,18 @@ public class OrientationDynamicsHelper
                                    FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                    DMatrixRMaj trajectoryCoefficients,
                                    OrientationDynamicsCalculator inputCalculator,
-                                   DiscreteAngularVelocityOrientationCommand command)
+                                   Matrix3DReadOnly momentOfInertia,
+                                   FramePoint3DReadOnly desiredCoMPosition,
+                                   FrameVector3DReadOnly desiredCoMAcceleration,
+                                   FrameOrientation3DReadOnly desiredBodyOrientation,
+                                   Vector3DReadOnly desiredBodyAngularVelocity,
+                                   Vector3DReadOnly desiredNetAngularMomentumRate,
+                                   Vector3DReadOnly desiredInternalAngularMomentumRate,
+                                   List<MPCContactPlane> contactPlanes)
    {
       FrameVector3DReadOnly expectedAngularErrorRate = computeExpectedAngularErrorRate(angularErrorAtCurrentTick,
                                                                                        angularVelocityErrorAtCurrentTick,
-                                                                                       command);
+                                                                                       desiredBodyAngularVelocity);
       FrameVector3DReadOnly actualAngularErrorRate = computeActualAngularErrorRate(angularErrorAtCurrentTick,
                                                                                    angularVelocityErrorAtCurrentTick,
                                                                                    trajectoryCoefficients,
@@ -387,17 +431,24 @@ public class OrientationDynamicsHelper
                                                                                                        comPosition,
                                                                                                        angularErrorAtCurrentTick,
                                                                                                        angularVelocityErrorAtCurrentTick,
-                                                                                                       command);
+                                                                                                       momentOfInertia,
+                                                                                                       desiredCoMPosition,
+                                                                                                       desiredCoMAcceleration,
+                                                                                                       desiredBodyOrientation,
+                                                                                                       desiredBodyAngularVelocity,
+                                                                                                       desiredNetAngularMomentumRate,
+                                                                                                       desiredInternalAngularMomentumRate,
+                                                                                                       contactPlanes);
       FrameVector3DReadOnly actualAngularVelocityErrorRate = computeActualAngularVelocityErrorRate(angularErrorAtCurrentTick,
                                                                                                    angularVelocityErrorAtCurrentTick,
                                                                                                    trajectoryCoefficients,
                                                                                                    inputCalculator);
 
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular error rate is incorrect",
                                                                   expectedAngularErrorRate,
                                                                   actualAngularErrorRate,
                                                                   1e-6);
-      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate is incorrect at tick " + command.getEndDiscreteTickId(),
+      EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals("Angular velocity error rate is incorrect",
                                                                   expectedAngularVelocityErrorRate,
                                                                   actualAngularVelocityErrorRate,
                                                                   1e-6);
@@ -409,11 +460,46 @@ public class OrientationDynamicsHelper
                                                FrameVector3DReadOnly angularVelocityErrorAtCurrentTick,
                                                DMatrixRMaj trajectoryCoefficients,
                                                OrientationDynamicsCalculator inputCalculator,
-                                               DiscreteAngularVelocityOrientationCommand command)
+                                               Matrix3DReadOnly momentOfInertia,
+                                               FramePoint3DReadOnly desiredCoMPosition,
+                                               FrameVector3DReadOnly desiredCoMAcceleration,
+                                               FrameOrientation3DReadOnly desiredBodyOrientation,
+                                               Vector3DReadOnly desiredBodyAngularVelocity,
+                                               Vector3DReadOnly desiredNetAngularMomentumRate,
+                                               Vector3DReadOnly desiredInternalAngularMomentumRate,
+                                               List<MPCContactPlane> contactPlanes)
    {
-      assertRateFromAngularErrorIsCorrect(angularErrorAtCurrentTick, inputCalculator, command);
-      assertRateFromAngularVelocityErrorIsCorrect(angularVelocityErrorAtCurrentTick, inputCalculator, command);
-      assertRateFromContactIsCorrect(mass, comPosition, trajectoryCoefficients, inputCalculator, command);
-      assertRateIsCorrect(mass, comPosition, angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, trajectoryCoefficients, inputCalculator, command);
+      assertRateFromAngularErrorIsCorrect(angularErrorAtCurrentTick,
+                                          inputCalculator,
+                                          momentOfInertia,
+                                          desiredBodyOrientation,
+                                          desiredBodyAngularVelocity,
+                                          desiredNetAngularMomentumRate,
+                                          desiredInternalAngularMomentumRate);
+      assertRateFromAngularVelocityErrorIsCorrect(angularVelocityErrorAtCurrentTick, inputCalculator, momentOfInertia, desiredBodyAngularVelocity);
+      assertRateFromContactIsCorrect(mass,
+                                     comPosition,
+                                     trajectoryCoefficients,
+                                     inputCalculator,
+                                     momentOfInertia,
+                                     desiredCoMPosition,
+                                     desiredCoMAcceleration,
+                                     desiredBodyOrientation,
+                                     desiredNetAngularMomentumRate,
+                                     contactPlanes);
+      assertRateIsCorrect(mass,
+                          comPosition,
+                          angularErrorAtCurrentTick,
+                          angularVelocityErrorAtCurrentTick,
+                          trajectoryCoefficients,
+                          inputCalculator,
+                          momentOfInertia,
+                          desiredCoMPosition,
+                          desiredCoMAcceleration,
+                          desiredBodyOrientation,
+                          desiredBodyAngularVelocity,
+                          desiredNetAngularMomentumRate,
+                          desiredInternalAngularMomentumRate,
+                          contactPlanes);
    }
 }
