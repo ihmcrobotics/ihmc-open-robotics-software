@@ -65,7 +65,7 @@ public class MPCTestHelperTest
          DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
          trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
 
-         contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0));
+         contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
 
          DMatrixRMaj expectedForce = new DMatrixRMaj(3 * contactPlane.getNumberOfContactPoints(), 1);
