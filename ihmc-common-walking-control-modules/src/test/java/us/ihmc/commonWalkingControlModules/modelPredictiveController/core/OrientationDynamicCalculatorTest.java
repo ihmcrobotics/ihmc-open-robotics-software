@@ -5,7 +5,6 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -23,6 +22,7 @@ import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -106,27 +106,30 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
-
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D angularVelocityErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass, comPosition, angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, trajectoryCoefficients, inputCalculator, command);
+         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass, comPosition, angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, trajectoryCoefficients, inputCalculator,
+                                                            momentOfInertia,
+                                                            desiredCoMPosition,
+                                                            desiredCoMAcceleration,
+                                                            desiredBodyOrientation,
+                                                            desiredBodyAngularVelocity,
+                                                            desiredNetAngularMomentumRate,
+                                                            desiredInternalAngularMomentumRate,
+                                                            toList(contactPlane));
       }
    }
 
@@ -195,28 +198,35 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(leftContactPlane);
-         command.addContactPlaneHelper(rightContactPlane);
-         //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(leftContactPlane, rightContactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D angularVelocityErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass, comPosition, angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, trajectoryCoefficients, inputCalculator, command);
+         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass,
+                                                            comPosition,
+                                                            angularErrorAtCurrentTick,
+                                                            angularVelocityErrorAtCurrentTick,
+                                                            trajectoryCoefficients,
+                                                            inputCalculator,
+                                                            momentOfInertia,
+                                                            desiredCoMPosition,
+                                                            desiredCoMAcceleration,
+                                                            desiredBodyOrientation,
+                                                            desiredBodyAngularVelocity,
+                                                            desiredNetAngularMomentumRate,
+                                                            desiredInternalAngularMomentumRate,
+                                                            toList(leftContactPlane, rightContactPlane));
       }
    }
 
@@ -282,22 +292,17 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
-         //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          DMatrixRMaj gravityMatrix = new DMatrixRMaj(3, 1);
          gravityVector.get(gravityMatrix);
@@ -386,26 +391,36 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
          //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 new ArrayList<>(),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D angularVelocityErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass, comPosition, angularErrorAtCurrentTick, angularVelocityErrorAtCurrentTick, trajectoryCoefficients, inputCalculator, command);
+         OrientationDynamicsHelper.assertAllRatesAreCorrect(mass,
+                                                            comPosition,
+                                                            angularErrorAtCurrentTick,
+                                                            angularVelocityErrorAtCurrentTick,
+                                                            trajectoryCoefficients,
+                                                            inputCalculator,
+                                                            momentOfInertia,
+                                                            desiredCoMPosition,
+                                                            desiredCoMAcceleration,
+                                                            desiredBodyOrientation,
+                                                            desiredBodyAngularVelocity,
+                                                            desiredNetAngularMomentumRate,
+                                                            desiredInternalAngularMomentumRate,
+                                                            new ArrayList<>());
       }
    }
 
@@ -476,23 +491,18 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(leftContactPlane);
-         command.addContactPlaneHelper(rightContactPlane);
          //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(leftContactPlane, rightContactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D angularVelocityErrorAtCurrentTick = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -632,22 +642,18 @@ public class OrientationDynamicCalculatorTest
          desiredNetAngularMomentumRate.add(desiredBodyAngularMomentumRate, desiredInternalAngularMomentumRate);
          FrameVector3D desiredBodyAngularVelocity = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
          //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D desiredContactForce = new FrameVector3D(desiredCoMAcceleration);
          desiredContactForce.subZ(gravityZ);
@@ -752,22 +758,18 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
          //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
 
@@ -854,22 +856,17 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, gravityZ);
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
-
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
          DMatrixRMaj contactForces = new DMatrixRMaj(12, 1);
@@ -968,22 +965,18 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
          //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
          DMatrixRMaj contactForceVector = new DMatrixRMaj(contactPlane.getNumberOfContactPoints() * 3, 1);
@@ -1080,22 +1073,17 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(contactPlane);
-         //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(contactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
 
@@ -1185,23 +1173,18 @@ public class OrientationDynamicCalculatorTest
          FramePoint3D desiredCoMPosition = EuclidFrameRandomTools.nextFramePoint3D(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredCoMAcceleration = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
 
-         DiscreteAngularVelocityOrientationCommand command = new DiscreteAngularVelocityOrientationCommand();
-         command.setMomentOfInertiaInBodyFrame(momentOfInertia);
-         command.setDesiredCoMAcceleration(desiredCoMAcceleration);
-         command.setDesiredCoMPosition(desiredCoMPosition);
-         command.setDesiredBodyOrientation(desiredBodyOrientation);
-         command.setDesiredBodyAngularVelocityInBodyFrame(desiredBodyAngularVelocity);
-         command.setTimeOfConstraint(time);
-         command.setSegmentNumber(0);
-         command.setEndingDiscreteTickId(nextTickId);
-         command.setDurationOfHold(tickDuration);
-         command.setOmega(omega);
-         command.setDesiredNetAngularMomentumRate(desiredNetAngularMomentumRate);
-         command.setDesiredInternalAngularMomentumRate(desiredInternalAngularMomentumRate);
-         command.addContactPlaneHelper(leftContactPlane);
-         command.addContactPlaneHelper(rightContactPlane);
          //
-         inputCalculator.compute(command);
+         inputCalculator.setMomentumOfInertiaInBodyFrame(momentOfInertia);
+         inputCalculator.compute(desiredCoMPosition,
+                                 desiredCoMAcceleration,
+                                 desiredBodyOrientation,
+                                 desiredBodyAngularVelocity,
+                                 desiredNetAngularMomentumRate,
+                                 desiredInternalAngularMomentumRate,
+                                 toList(leftContactPlane, rightContactPlane),
+                                 time,
+                                 tickDuration,
+                                 omega);
 
 
          FrameVector3DReadOnly expectedNetTorque = getNetCoMTorque(desiredCoMPosition, leftContactPlane, rightContactPlane);
@@ -1220,5 +1203,10 @@ public class OrientationDynamicCalculatorTest
 
 
       }
+   }
+
+   private static <T> List<T> toList(T... items)
+   {
+      return Arrays.asList(items);
    }
 }
