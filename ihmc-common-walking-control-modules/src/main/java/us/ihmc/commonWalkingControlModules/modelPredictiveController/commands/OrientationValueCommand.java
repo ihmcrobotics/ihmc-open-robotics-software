@@ -3,6 +3,26 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
+/**
+ * <p>
+ * This command is designed to allow setting a transformation of the orientation value
+ * at the beginning of the segment indicated by {@link #segmentNumber}.
+ * </p>
+ *
+ * <p>
+ * Specifically, the command is designed to set up
+ * </p>
+ * <p> value = A &Theta; + B c + C </p>
+ * <p>
+ *    where
+ *    <ul>
+ *    <li> value is specified by {@link #objectiveValue}</li>
+ *    <li> &Theta; is the variable for the orientation variables at the beginning of the segment</li>
+ *    <li> c are the continuous coefficient variables</li>
+ *    <li> A, B, and C are the matrices set by {@link #AMatrix}, {@link #BMatrix}, and {@link #CMatrix}, respectively. </li>
+ *    </ul>
+ * </p>
+ */
 public class OrientationValueCommand implements MPCCommand<OrientationValueCommand>
 {
    private int commandId = -1;

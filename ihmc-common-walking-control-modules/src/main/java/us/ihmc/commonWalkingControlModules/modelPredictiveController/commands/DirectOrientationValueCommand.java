@@ -3,6 +3,10 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
+/**
+ * This command is designed to be a really efficient command setter to allow directly setting the orientation value
+ * at the beginning of the segment indicated by {@link #segmentNumber}.
+ */
 public class DirectOrientationValueCommand implements MPCCommand<DirectOrientationValueCommand>
 {
    private int commandId = -1;
