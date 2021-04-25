@@ -19,7 +19,6 @@ import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.List;
 
-// TODO this needs to be cleaned up
 public class OrientationDynamicsCalculator
 {
    private final DMatrixRMaj gravityVector = new DMatrixRMaj(3, 1);
@@ -102,9 +101,11 @@ public class OrientationDynamicsCalculator
 
       calculateStateJacobians(desiredComPosition, contactPlanes, timeOfConstraint, omega);
 
-      calculateAffineAxisAngleErrorTerms(desiredComPosition, desiredNetAngularMomentumRate);
+      calculateAffineAxisAngleErrorTerms(desiredComPosition,
+                                         desiredBodyAngularVelocityInBodyFrame,
+                                         desiredNetAngularMomentumRate);
 
-      computeAffineTimeInvariantTerms(timeOfConstraint);
+      computeAffineTimeInvariantTerms(timeOfConstraint, desiredBodyAngularVelocityInBodyFrame);
       if (!Double.isFinite(durationOfHold))
          throw new IllegalArgumentException("The duration of the hold is not finite.");
 
@@ -242,12 +243,14 @@ public class OrientationDynamicsCalculator
 
       CoMCoefficientJacobianCalculator.calculateCoMJacobian(0, timeOfConstraint, comPositionJacobian, 0, 1.0);
 
+      // TODO one of these Jacobians is highly sparse
       int contactRow = 0;
       for (int i = 0; i < contactPlanes.size(); i++)
       {
          MPCContactPlane contactPlane = contactPlanes.get(i);
          ContactPlaneJacobianCalculator.computeLinearJacobian(0, timeOfConstraint, omega, LinearMPCIndexHandler.comCoefficientsPerSegment + rhoStartIndex, contactPlane, comPositionJacobian);
          ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, contactRow, rhoStartIndex, contactPlane, contactForceJacobian);
+
          computeTorqueAboutBodyJacobian(contactRow, desiredCoMPosition, contactPlane, contactForceToOriginTorqueJacobian);
 
          contactRow += 3 * contactPlane.getNumberOfContactPoints();
@@ -263,7 +266,9 @@ public class OrientationDynamicsCalculator
    private final Vector3D torqueAboutPoint = new Vector3D();
    private final DMatrixRMaj torqueAboutPointVector = new DMatrixRMaj(3, 1);
 
-   private void calculateAffineAxisAngleErrorTerms(FramePoint3DReadOnly desiredCoMPosition, Vector3DReadOnly desiredNetAngularMomentumRate)
+   private void calculateAffineAxisAngleErrorTerms(FramePoint3DReadOnly desiredCoMPosition,
+                                                   Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
+                                                   Vector3DReadOnly desiredNetAngularMomentumRate)
    {
       CommonOps_DDRM.multTransB(inverseInertia, rotationMatrix, IR);
 
@@ -275,11 +280,9 @@ public class OrientationDynamicsCalculator
       MatrixMissingTools.toSkewSymmetricMatrix(rotatedBodyAngularMomentumRate, skewRotatedBodyAngularMomentumRate);
       CommonOps_DDRM.mult(inverseInertia, skewRotatedBodyAngularMomentumRate, b3);
 
-      // multiplying by skew - can make more efficient
-      skewAngularMomentum.zero();
       CommonOps_DDRM.mult(inertiaMatrixInBody, desiredBodyAngularVelocity, angularMomentum);
       MatrixMissingTools.toSkewSymmetricMatrix(angularMomentum, skewAngularMomentum);
-      CommonOps_DDRM.multAdd(-1.0, skewDesiredBodyAngularVelocity, inertiaMatrixInBody, skewAngularMomentum);
+      crossSub(skewAngularMomentum, desiredBodyAngularVelocityInBodyFrame, inertiaMatrixInBody);
       CommonOps_DDRM.mult(inverseInertia, skewAngularMomentum, b4);
 
       torqueAboutPoint.cross(desiredContactForce, desiredCoMPosition);
@@ -291,22 +294,20 @@ public class OrientationDynamicsCalculator
    }
 
    private final FrameVector3D momentArm = new FrameVector3D();
-   private final DMatrixRMaj skewMomentArm = new DMatrixRMaj(3, 3);
 
    private void computeTorqueAboutBodyJacobian(int colStart, FramePoint3DReadOnly desiredCoMPosition, MPCContactPlane contactPlane, DMatrixRMaj jacobianToPack)
    {
       for (int i = 0; i < contactPlane.getNumberOfContactPoints(); i++)
       {
          momentArm.sub(contactPlane.getContactPointHelper(i).getBasisVectorOrigin(), desiredCoMPosition);
-         MatrixMissingTools.toSkewSymmetricMatrix(momentArm, skewMomentArm);
-
-         MatrixMissingTools.setMatrixBlock(jacobianToPack, 0, colStart, skewMomentArm, 0, 0, 3, 3, 1.0);
+         MatrixMissingTools.toSkewSymmetricMatrix(momentArm, jacobianToPack, 0, colStart);
          colStart += 3;
       }
    }
 
-   private void computeAffineTimeInvariantTerms(double timeOfConstraint)
+   private void computeAffineTimeInvariantTerms(double timeOfConstraint, Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame)
    {
+      MatrixMissingTools.toSkewSymmetricMatrix(-1.0, desiredBodyAngularVelocityInBodyFrame, A, 0, 0);
       MatrixTools.setMatrixBlock(A, 0, 0, skewDesiredBodyAngularVelocity, 0, 0, 3, 3, -1.0);
       MatrixTools.setMatrixBlock(A, 0, 3, identity3, 0, 0, 3, 3, 1.0);
       MatrixTools.setMatrixBlock(A, 3, 0, b3, 0, 0, 3, 3, 1.0);
@@ -317,5 +318,23 @@ public class OrientationDynamicsCalculator
 
       MatrixTools.setMatrixBlock(C, 3, 0, b0, 0, 0, 3, 1, 1.0);
       MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 3, 0);
+   }
+
+   private static void crossSub(DMatrixRMaj result, Vector3DReadOnly vector, DMatrixRMaj matrix)
+   {
+      if (result.getNumCols() != 3 || result.getNumRows() != 3)
+         throw new IllegalArgumentException("Improperly sized results matrix!");
+
+      result.add(0, 0, (vector.getZ() * matrix.get(1, 0) - vector.getY() * matrix.get(2, 0)));
+      result.add(0, 1, (vector.getZ() * matrix.get(1, 1) - vector.getY() * matrix.get(2, 1)));
+      result.add(0, 2, (vector.getZ() * matrix.get(1, 2) - vector.getY() * matrix.get(2, 2)));
+
+      result.add(1, 0, (vector.getX() * matrix.get(2, 0) - vector.getZ() * matrix.get(0, 0)));
+      result.add(1, 1, (vector.getX() * matrix.get(2, 1) - vector.getZ() * matrix.get(0, 1)));
+      result.add(1, 2, (vector.getX() * matrix.get(2, 2) - vector.getZ() * matrix.get(0, 2)));
+
+      result.add(2, 0, (vector.getY() * matrix.get(0, 0) - vector.getX() * matrix.get(1, 0)));
+      result.add(2, 1, (vector.getY() * matrix.get(0, 1) - vector.getX() * matrix.get(1, 1)));
+      result.add(2, 2, (vector.getY() * matrix.get(0, 2) - vector.getX() * matrix.get(1, 2)));
    }
 }
