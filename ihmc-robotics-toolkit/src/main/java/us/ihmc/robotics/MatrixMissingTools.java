@@ -200,27 +200,65 @@ public class MatrixMissingTools
 
    public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, DMatrixRMaj skewSymmetricToPack)
    {
-      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack);
+      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack, 0, 0);
+   }
+
+   public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack, rowStart, colStart);
+   }
+
+   public static void toSkewSymmetricMatrix(double scalar, Tuple3DReadOnly vector, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      toSkewSymmetricMatrix(scalar, vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack, rowStart, colStart);
    }
 
    public static void toSkewSymmetricMatrix(DMatrix1Row vector, DMatrixRMaj skewSymmetricToPack)
    {
-      toSkewSymmetricMatrix(vector.get(0), vector.get(1), vector.get(2), skewSymmetricToPack);
+      toSkewSymmetricMatrix(vector, skewSymmetricToPack, 0, 0);
    }
 
-   public static void toSkewSymmetricMatrix(double x, double y, double z, DMatrixRMaj skewSymmetricToPack)
+   public static void toSkewSymmetricMatrix(DMatrix1Row vector, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
    {
-      skewSymmetricToPack.set(0, 0, 0.0);
-      skewSymmetricToPack.set(0, 1, -z);
-      skewSymmetricToPack.set(0, 2, y);
+      toSkewSymmetricMatrix(vector.get(0), vector.get(1), vector.get(2), skewSymmetricToPack, rowStart, colStart);
+   }
 
-      skewSymmetricToPack.set(1, 0, z);
-      skewSymmetricToPack.set(1, 1, 0.0);
-      skewSymmetricToPack.set(1, 2, -x);
+   public static void toSkewSymmetricMatrix(double x, double y, double z, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      int row1 = rowStart + 1;
+      int row2 = rowStart + 2;
+      int col1 = colStart + 1;
+      int col2 = colStart + 2;
+      skewSymmetricToPack.set(rowStart, colStart, 0.0);
+      skewSymmetricToPack.set(rowStart, col1, -z);
+      skewSymmetricToPack.set(rowStart, col2, y);
 
-      skewSymmetricToPack.set(2, 0, -y);
-      skewSymmetricToPack.set(2, 1, x);
-      skewSymmetricToPack.set(2, 2, 0.0);
+      skewSymmetricToPack.set(row1, colStart, z);
+      skewSymmetricToPack.set(row1, col1, 0.0);
+      skewSymmetricToPack.set(row1, col2, -x);
+
+      skewSymmetricToPack.set(row2, colStart, -y);
+      skewSymmetricToPack.set(row2, col1, x);
+      skewSymmetricToPack.set(row2, col2, 0.0);
+   }
+
+   public static void toSkewSymmetricMatrix(double scalar, double x, double y, double z, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      int row1 = rowStart + 1;
+      int row2 = rowStart + 2;
+      int col1 = colStart + 1;
+      int col2 = colStart + 2;
+      skewSymmetricToPack.set(rowStart, colStart, 0.0);
+      skewSymmetricToPack.set(rowStart, col1, -scalar * z);
+      skewSymmetricToPack.set(rowStart, col2, scalar * y);
+
+      skewSymmetricToPack.set(row1, colStart, scalar * z);
+      skewSymmetricToPack.set(row1, col1, 0.0);
+      skewSymmetricToPack.set(row1, col2, -scalar * x);
+
+      skewSymmetricToPack.set(row2, colStart, -scalar * y);
+      skewSymmetricToPack.set(row2, col1, scalar * x);
+      skewSymmetricToPack.set(row2, col2, 0.0);
    }
 
    public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, Matrix3DBasics skewSymmetricToPack)
