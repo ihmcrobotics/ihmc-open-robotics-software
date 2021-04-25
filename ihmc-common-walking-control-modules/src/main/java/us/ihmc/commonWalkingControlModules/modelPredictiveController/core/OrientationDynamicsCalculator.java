@@ -4,10 +4,11 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -41,8 +42,10 @@ public class OrientationDynamicsCalculator
    private final DMatrixRMaj skewDesiredContactForce = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj comPositionJacobian = new DMatrixRMaj(3, 0);
-   final DMatrixRMaj contactForceJacobian = new DMatrixRMaj(3, 0);
-   final DMatrixRMaj contactForceToOriginTorqueJacobian = new DMatrixRMaj(3, 0);
+
+   private final DMatrixRMaj contactPointForceJacobian = new DMatrixRMaj(3, 0);
+   final DMatrixRMaj contactOriginTorqueJacobian = new DMatrixRMaj(3, 0);
+
 
    private final DMatrixRMaj b0 = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj b1 = new DMatrixRMaj(3, 3);
@@ -176,27 +179,22 @@ public class OrientationDynamicsCalculator
 
    private void reset(List<MPCContactPlane> contactPlanes)
    {
-      int totalContactPoints = 0;
       int rhoCoefficientsInSegment = 0;
       for (int i = 0; i < contactPlanes.size(); i++)
       {
-         totalContactPoints += contactPlanes.get(i).getNumberOfContactPoints();
          rhoCoefficientsInSegment += contactPlanes.get(i).getCoefficientSize();
       }
 
       int coefficientsInSegment = LinearMPCIndexHandler.comCoefficientsPerSegment + rhoCoefficientsInSegment;
 
       comPositionJacobian.reshape(3, coefficientsInSegment);
-      int contactForceVectorSize = 3 * totalContactPoints;
-      contactForceJacobian.reshape(contactForceVectorSize, rhoCoefficientsInSegment);
-      contactForceToOriginTorqueJacobian.reshape(3, contactForceVectorSize);
+      contactOriginTorqueJacobian.reshape(3, rhoCoefficientsInSegment);
 
       B.reshape(6, coefficientsInSegment);
       Bd.reshape(6, coefficientsInSegment);
 
       comPositionJacobian.zero();
-      contactForceJacobian.zero();
-      contactForceToOriginTorqueJacobian.zero();
+      contactOriginTorqueJacobian.zero();
 
       b0.zero();
       b1.zero();
@@ -249,9 +247,8 @@ public class OrientationDynamicsCalculator
       {
          MPCContactPlane contactPlane = contactPlanes.get(i);
          ContactPlaneJacobianCalculator.computeLinearJacobian(0, timeOfConstraint, omega, LinearMPCIndexHandler.comCoefficientsPerSegment + rhoStartIndex, contactPlane, comPositionJacobian);
-         ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, contactRow, rhoStartIndex, contactPlane, contactForceJacobian);
 
-         computeTorqueAboutBodyJacobian(contactRow, desiredCoMPosition, contactPlane, contactForceToOriginTorqueJacobian);
+         computeTorqueJacobian(rhoStartIndex, timeOfConstraint, omega, desiredCoMPosition, contactPlane, contactOriginTorqueJacobian);
 
          contactRow += 3 * contactPlane.getNumberOfContactPoints();
          rhoStartIndex += contactPlane.getCoefficientSize();
@@ -273,7 +270,7 @@ public class OrientationDynamicsCalculator
       CommonOps_DDRM.multTransB(inverseInertia, rotationMatrix, IR);
 
       CommonOps_DDRM.mult(IR, skewDesiredContactForce, b1);
-      CommonOps_DDRM.mult(IR, contactForceToOriginTorqueJacobian, b2);
+      CommonOps_DDRM.mult(IR, contactOriginTorqueJacobian, b2);
 
       // multiplying by skew - can make more efficient
       desiredRotationMatrix.inverseTransform(desiredBodyAngularMomentumRate, rotatedBodyAngularMomentumRate);
@@ -294,6 +291,7 @@ public class OrientationDynamicsCalculator
    }
 
    private final FrameVector3D momentArm = new FrameVector3D();
+   private final DMatrixRMaj momentArmSkew = new DMatrixRMaj(3, 3);
 
    private void computeTorqueAboutBodyJacobian(int colStart, FramePoint3DReadOnly desiredCoMPosition, MPCContactPlane contactPlane, DMatrixRMaj jacobianToPack)
    {
@@ -302,6 +300,30 @@ public class OrientationDynamicsCalculator
          momentArm.sub(contactPlane.getContactPointHelper(i).getBasisVectorOrigin(), desiredCoMPosition);
          MatrixMissingTools.toSkewSymmetricMatrix(momentArm, jacobianToPack, 0, colStart);
          colStart += 3;
+      }
+   }
+
+   private void computeTorqueJacobian(int colStart,
+                                      double timeOfConstraint,
+                                      double omega,
+                                      FramePoint3DReadOnly desiredCoMPosition,
+                                      MPCContactPlane contactPlane,
+                                      DMatrixRMaj jacobianToPack)
+   {
+      for (int i = 0; i < contactPlane.getNumberOfContactPoints(); i++)
+      {
+         MPCContactPoint contactPoint = contactPlane.getContactPointHelper(i);
+         momentArm.sub(contactPoint.getBasisVectorOrigin(), desiredCoMPosition);
+         MatrixMissingTools.toSkewSymmetricMatrix(momentArm, momentArmSkew);
+
+         contactPointForceJacobian.reshape(3, contactPoint.getCoefficientsSize());
+         ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, timeOfConstraint, omega, 0, 0, contactPoint, contactPointForceJacobian);
+
+         // TODO this could be a set instead of an add
+         MatrixTools.multAddBlock(momentArmSkew, contactPointForceJacobian, jacobianToPack, 0, colStart);
+
+         colStart += contactPoint.getCoefficientsSize();
+
       }
    }
 
@@ -314,7 +336,7 @@ public class OrientationDynamicsCalculator
       MatrixTools.setMatrixBlock(A, 3, 3, b4, 0, 0, 3, 3, 1.0);
 
       MatrixTools.multAddBlock(b1, comPositionJacobian, B, 3, 0);
-      MatrixTools.multAddBlock(b2, contactForceJacobian, B, 3, LinearMPCIndexHandler.comCoefficientsPerSegment);
+      MatrixTools.addMatrixBlock(B, 3, LinearMPCIndexHandler.comCoefficientsPerSegment, b2, 0, 0, 3, b2.getNumCols(), 1.0);
 
       MatrixTools.setMatrixBlock(C, 3, 0, b0, 0, 0, 3, 1, 1.0);
       MatrixTools.multAddBlock(0.5 * timeOfConstraint * timeOfConstraint, b1, gravityVector, C, 3, 0);

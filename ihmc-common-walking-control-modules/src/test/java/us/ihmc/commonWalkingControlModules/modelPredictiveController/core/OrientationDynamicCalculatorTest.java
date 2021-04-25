@@ -323,22 +323,10 @@ public class OrientationDynamicCalculatorTest
 
 
          MatrixTools.multAddBlock(inputCalculator.getB1(), MPCTestHelper.getCoMPositionJacobian(time, omega, contactPlane), expectedB, 3, 0);
-         MatrixTools.multAddBlock(mass, inputCalculator.getB2(), MPCTestHelper.getContactPointAccelerationJacobian(time, omega, contactPlane), expectedB, 3, 0);
+         MatrixTools.addMatrixBlock(expectedB, 3, 6, inputCalculator.getB2(), 0, 0, 3, rhoCoefficients, 1.0 );
 
          MatrixTools.setMatrixBlock(expectedC, 3, 0, inputCalculator.getB0(), 0, 0, 3, 1, 1.0);
          MatrixTools.multAddBlock(0.5 * time * time, inputCalculator.getB1(), gravityMatrix, expectedC, 3, 0);
-
-         DMatrixRMaj contactForceJacobian = new DMatrixRMaj(3 * contactPlane.getNumberOfContactPoints(), contactPlane.getCoefficientSize());
-         MatrixTools.setMatrixBlock(contactForceJacobian,
-                                    0,
-                                    0,
-                                    MPCTestHelper.getContactPointAccelerationJacobian(time, omega, contactPlane),
-                                    0,
-                                    LinearMPCIndexHandler.comCoefficientsPerSegment,
-                                    3 * contactPlane.getNumberOfContactPoints(),
-                                    contactPlane.getCoefficientSize(),
-                                    mass);
-         MatrixTestTools.assertMatrixEquals(contactForceJacobian, inputCalculator.contactForceJacobian, 1e-6);
 
          MatrixTestTools.assertMatrixEquals(expectedA, inputCalculator.getContinuousAMatrix(), 1e-6);
          MatrixTestTools.assertMatrixEquals(expectedC, inputCalculator.getContinuousCMatrix(), 1e-6);
@@ -690,7 +678,7 @@ public class OrientationDynamicCalculatorTest
          angularVelocityErrorRateFromContact.get(expectedVelocityErrorRateFromContact);
 
          MatrixTestTools.assertMatrixEquals(new DMatrixRMaj(3, 1), inputCalculator.getB0(), 1e-5);
-         MatrixTestTools.assertMatrixEquals(new DMatrixRMaj(3, 3 * contactPolygon.getNumberOfVertices()), inputCalculator.getB2(), 1e-5);
+         MatrixTestTools.assertMatrixEquals(new DMatrixRMaj(3,  LinearMPCIndexHandler.coefficientsPerRho * 4 * contactPolygon.getNumberOfVertices() ), inputCalculator.getB2(), 1e-5);
 
          MatrixTestTools.assertMatrixEquals(expectedBMatrix, inputCalculator.getContinuousBMatrix(), 1e-5);
          MatrixTestTools.assertMatrixEquals(expectedCMatrix, inputCalculator.getContinuousCMatrix(), 1e-5);
@@ -840,12 +828,12 @@ public class OrientationDynamicCalculatorTest
       {
          int numberOfTrajectoryCoefficients = rhoCoefficients + comCoefficients;
          DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
+         DMatrixRMaj contactCoefficients = new DMatrixRMaj(rhoCoefficients, 1);
          trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
+         MatrixTools.setMatrixBlock(contactCoefficients, 0, 0, trajectoryCoefficients, LinearMPCIndexHandler.comCoefficientsPerSegment, 0, rhoCoefficients, 1, 1.0);
 
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
-
-         int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
 
          FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -869,7 +857,6 @@ public class OrientationDynamicCalculatorTest
                                  omega);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
-         DMatrixRMaj contactForces = new DMatrixRMaj(12, 1);
 
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
@@ -882,10 +869,7 @@ public class OrientationDynamicCalculatorTest
             torqueFromContact.scale(mass);
 
             angularVelocityErrorRateFromContact.add(torqueFromContact);
-
-            contactPoint.getContactAcceleration().get(3 * contactPointIdx, contactForces);
          }
-         CommonOps_DDRM.scale(mass, contactForces);
 
          desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
@@ -900,7 +884,7 @@ public class OrientationDynamicCalculatorTest
          MatrixTools.setMatrixBlock(angularRateErrorRateFromContact, 0, 0, rate, 3, 0, 3, 1, 1.0);
 
          DMatrixRMaj easyExpectedAngularAcceleration = new DMatrixRMaj(3, 1);
-         CommonOps_DDRM.mult(inputCalculator.getB2(), contactForces, easyExpectedAngularAcceleration);
+         CommonOps_DDRM.mult(inputCalculator.getB2(), contactCoefficients, easyExpectedAngularAcceleration);
          MatrixTestTools.assertMatrixEquals(easyExpectedAngularAcceleration, angularRateErrorRateFromContact, 1e-6);
 
          MatrixTestTools.assertMatrixEquals(expectedAngularRateErrorRateFromContact, angularRateErrorRateFromContact, 1e-6);
@@ -945,7 +929,9 @@ public class OrientationDynamicCalculatorTest
       {
          int numberOfTrajectoryCoefficients = rhoCoefficients + comCoefficients;
          DMatrixRMaj trajectoryCoefficients = new DMatrixRMaj(numberOfTrajectoryCoefficients, 1);
+         DMatrixRMaj contactCoefficients = new DMatrixRMaj(rhoCoefficients, 1);
          trajectoryCoefficients.setData(RandomNumbers.nextDoubleArray(random, numberOfTrajectoryCoefficients, 10.0));
+         MatrixTools.setMatrixBlock(contactCoefficients, 0, 0, trajectoryCoefficients, LinearMPCIndexHandler.comCoefficientsPerSegment, 0, rhoCoefficients, 1, 1.0);
 
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients, indexHandler.getRhoCoefficientStartIndex(0) - SE3MPCIndexHandler.variablesPerOrientationTick);
          contactPlane.computeContactForce(omega, time);
@@ -953,8 +939,6 @@ public class OrientationDynamicCalculatorTest
          FramePoint3DReadOnly comPosition = MPCTestHelper.computeCoMPosition(time, omega, gravityZ, trajectoryCoefficients, contactPlane);
          DMatrixRMaj comPositionVector = new DMatrixRMaj(3, 1);
          comPosition.get(comPositionVector);
-
-         int nextTickId = RandomNumbers.nextInt(random, 1, indexHandler.getTotalNumberOfOrientationTicks() - 1);
 
          FrameQuaternion desiredBodyOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, ReferenceFrame.getWorldFrame());
          FrameVector3D desiredBodyAngularMomentumRate = EuclidFrameRandomTools.nextFrameVector3D(random, ReferenceFrame.getWorldFrame());
@@ -979,8 +963,6 @@ public class OrientationDynamicCalculatorTest
                                  omega);
 
          FrameVector3D angularVelocityErrorRateFromContact = new FrameVector3D();
-         DMatrixRMaj contactForceVector = new DMatrixRMaj(contactPlane.getNumberOfContactPoints() * 3, 1);
-
 
          for (int contactPointIdx = 0; contactPointIdx < contactPlane.getNumberOfContactPoints(); contactPointIdx++)
          {
@@ -995,16 +977,13 @@ public class OrientationDynamicCalculatorTest
             torqueFromContact.scale(mass);
 
             angularVelocityErrorRateFromContact.add(torqueFromContact);
-
-            contactPoint.getContactAcceleration().get(3 * contactPointIdx, contactForceVector);
          }
-         CommonOps_DDRM.scale(mass, contactForceVector);
 
          desiredBodyOrientation.inverseTransform(angularVelocityErrorRateFromContact);
          momentOfInertia.inverseTransform(angularVelocityErrorRateFromContact);
 
          DMatrixRMaj rateFromContact = new DMatrixRMaj(3, 1);
-         CommonOps_DDRM.mult(inputCalculator.getB2(), contactForceVector, rateFromContact);
+         CommonOps_DDRM.mult(inputCalculator.getB2(), contactCoefficients, rateFromContact);
 
          DMatrixRMaj expectedRateFromContact = new DMatrixRMaj(3, 1);
          angularVelocityErrorRateFromContact.get(expectedRateFromContact);
@@ -1192,16 +1171,12 @@ public class OrientationDynamicCalculatorTest
          DMatrixRMaj contactCoefficients = new DMatrixRMaj(rhoCoefficients, 1);
          MatrixTools.setMatrixBlock(contactCoefficients, 0, 0, trajectoryCoefficients, LinearMPCIndexHandler.comCoefficientsPerSegment, 0, rhoCoefficients, 1, 1.0);
 
-         DMatrixRMaj contactForces = new DMatrixRMaj(2 * leftContactPlane.getNumberOfContactPoints() * 3, 1);
-         CommonOps_DDRM.mult(inputCalculator.contactForceJacobian, contactCoefficients, contactForces);
          DMatrixRMaj torque = new DMatrixRMaj(3, 1);
-         CommonOps_DDRM.mult(inputCalculator.contactForceToOriginTorqueJacobian, contactForces, torque);
+         CommonOps_DDRM.mult(inputCalculator.contactOriginTorqueJacobian, contactCoefficients, torque);
          FrameVector3D netTorque = new FrameVector3D();
          netTorque.set(torque);
 
          EuclidFrameTestTools.assertFrameVector3DGeometricallyEquals(expectedNetTorque, netTorque, 1e-5);
-
-
       }
    }
 
