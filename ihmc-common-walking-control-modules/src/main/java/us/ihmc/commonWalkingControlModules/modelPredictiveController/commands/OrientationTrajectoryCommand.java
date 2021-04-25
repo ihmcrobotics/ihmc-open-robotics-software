@@ -2,10 +2,26 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
-import java.util.Arrays;
-
+/**
+ * <p>
+ * This command is designed to allow minimizing the tracking error along the trajectory segment indicated by {@link #segmentNumber}. 
+ * </p>
+ *
+ * <p>
+ * Specifically, the command is designed to set up
+ * </p>
+ * <p> 0 = A &Theta; + B c + C </p>
+ * <p>
+ * where
+ *    <ul>
+ *    <li> &Theta; is the variable for the orientation variables at the beginning of the segment</li>
+ *    <li> c are the continuous coefficient variables</li>
+ *    <li> A, B, and C are the matrices at the i<sup>th</sup>  index of by {@link #AMatricesInSegment}, {@link #BMatricesInSegment},
+ *    and {@link #CMatricesInSegment}, respectively. </li>
+ *    </ul>
+ * </p>
+ */
 public class OrientationTrajectoryCommand implements MPCCommand<OrientationTrajectoryCommand>
 {
    private int commandId = -1;

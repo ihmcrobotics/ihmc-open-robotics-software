@@ -3,6 +3,27 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.commands;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 
+/**
+ * <p>
+ * This command is designed to allow setting the transformation of the orientation value
+ * at the beginning of the segment indicated by {@link #segmentNumber} to be equal to the value at beginning
+ * of the next segment
+ * </p>
+ *
+ * <p>
+ * Specifically, the command is designed to set up
+ * </p>
+ * <p> &Theta;<sub>next</sub> = A &Theta;<sub>this</sub> + B c + C </p>
+ * <p>
+ *    where
+ *    <ul>
+ *    <li> &Theta;<sub>this</sub> is the variable for the orientation variables at the beginning of the specified segment</li>
+ *    <li> &Theta;<sub>next</sub> is the variable for the orientation variables at the beginning of the next segment</li>
+ *    <li> c are the continuous coefficient variables</li>
+ *    <li> A, B, and C are the matrices set by {@link #AMatrix}, {@link #BMatrix}, and {@link #CMatrix}, respectively. </li>
+ *    </ul>
+ * </p>
+ */
 public class OrientationContinuityCommand implements MPCCommand<OrientationContinuityCommand>
 {
    private int commandId = -1;
