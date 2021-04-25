@@ -5,7 +5,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 
 /**
  * <p>
- * This command is designed to allow minimizing the tracking error along the trajectory segment indicated by {@link #segmentNumber}. 
+ * This command is designed to allow minimizing the tracking error along the trajectory segment indicated by {@link #segmentNumber}.
  * </p>
  *
  * <p>
