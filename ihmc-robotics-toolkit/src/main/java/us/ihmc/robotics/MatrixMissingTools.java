@@ -1,5 +1,6 @@
 package us.ihmc.robotics;
 
+import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
@@ -299,5 +300,50 @@ public class MatrixMissingTools
    public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src, double scale)
    {
       MatrixTools.addMatrixBlock(dest, destStartRow, destStartColumn, src, 0, 0, src.getNumRows(), src.getNumCols(), scale);
+   }
+
+   /**
+    * <p>
+    * Performs the following operation:<br>
+    * <br>
+    * c = a * b </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    *
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multSetBlock(DMatrix1Row a, DMatrix1Row b, DMatrix1Row c, int rowStart, int colStart)
+   {
+      if (a == c || b == c)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numCols != b.numRows)
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      int aIndexStart = 0;
+
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < b.numCols; j++)
+         {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int end = indexA + b.numRows;
+            while (indexA < end)
+            {
+               total += a.data[indexA++] * b.data[indexB];
+               indexB += b.numCols;
+            }
+
+            int cIndex = (i + rowStart) * c.numCols + j + colStart;
+            c.data[cIndex] = total;
+         }
+         aIndexStart += a.numCols;
+      }
    }
 }
