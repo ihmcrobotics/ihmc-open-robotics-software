@@ -65,8 +65,14 @@ public class ValkyriePlanarRegionPositionControlSimulation
       GROUND_AND_WALLS,
       TILTED_TILES,
    }
-
    public static Environment environment = Environment.GROUND_AND_WALLS;
+
+   public enum InitialPose
+   {
+      STANDING,
+      DOWN_ON_ALL_FOURS
+   }
+   public static InitialPose initialPose = InitialPose.DOWN_ON_ALL_FOURS;
 
    public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
@@ -97,13 +103,16 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setUsePerfectSensors(true);
-      ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
       if (headless)
       {
          simulationStarter.getGuiInitialSetup().setGraphics3DAdapter(new NullGraphics3DAdapter());
          simulationStarter.getGuiInitialSetup().setShowWindow(false);
       }
-      simulationStarter.setRobotInitialSetup(initialSetup);
+      if (initialPose == InitialPose.DOWN_ON_ALL_FOURS)
+      {
+         ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
+         simulationStarter.setRobotInitialSetup(initialSetup);
+      }
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
       simulationStarter.getSCSInitialSetup().setRecordFrequency(10);
       simulationStarter.registerHighLevelControllerState(new HighLevelControllerStateFactory()
