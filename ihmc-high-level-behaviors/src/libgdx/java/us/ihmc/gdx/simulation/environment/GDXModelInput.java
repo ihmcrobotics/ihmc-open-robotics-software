@@ -336,6 +336,16 @@ public class GDXModelInput
       ImGui.sameLine();
       if (ImGui.button("Duplicate selections"))
          duplicateSelections();
+      ImGui.sameLine();
+      if (ImGui.button("Remove selected"))
+      {
+         int i = 0;
+         for (Integer selectedObjectIndex : selectedObjectIndexes)
+         {
+            environmentObjects.remove(selectedObjectIndex - i++);
+         }
+         selectedObjectIndexes.clear();
+      }
 
       ImGui.pushItemWidth(100.0f);
       x.set(0.0f);
