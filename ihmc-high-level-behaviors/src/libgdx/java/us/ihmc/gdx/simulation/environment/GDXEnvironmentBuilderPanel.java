@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -24,6 +23,7 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.graphics.GDXPose3DWidget;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.gdx.vr.GDXVRContext;
 import us.ihmc.gdx.vr.GDXVRManager;
@@ -60,6 +60,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
    private final ArrayList<Path> reaDataSetPaths = new ArrayList<>();
    private boolean loadedDatasetsOnce = false;
+   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -67,6 +68,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       modelInput.setBaseUI(baseUI);
       modelInput.create();
+
+      pose3DWidget.create(baseUI);
+      baseUI.addImGui3DViewInputProcessor(pose3DWidget::process3DViewInput);
+      baseUI.getSceneManager().addRenderableProvider(pose3DWidget);
 
       if (GDXVRManager.isVREnabled())
       {
@@ -230,6 +235,8 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       //      ImGui.list
 
       ImGui.end();
+
+      pose3DWidget.render();
 
       for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
       {
