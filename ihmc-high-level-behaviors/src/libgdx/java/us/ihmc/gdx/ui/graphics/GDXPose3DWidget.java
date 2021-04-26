@@ -2,12 +2,10 @@ package us.ihmc.gdx.ui.graphics;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
-import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.Axis3D;
@@ -25,21 +23,22 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 
 public class GDXPose3DWidget implements RenderableProvider
 {
-   private static final Color xAxisDefaultColor = new Color(0.9f, 0.4f, 0.4f, 0.4f);
-   private static final Color yAxisDefaultColor = new Color(0.4f, 0.9f, 0.4f, 0.4f);
-   private static final Color zAxisDefaultColor = new Color(0.4f, 0.4f, 0.9f, 0.4f);
-   private static final Color centerDefaultColor = new Color(0.7f, 0.7f, 0.7f, 0.4f);
+   private static final Color X_AXIS_DEFAULT_COLOR = new Color(0.9f, 0.4f, 0.4f, 0.4f);
+   private static final Color Y_AXIS_DEFAULT_COLOR = new Color(0.4f, 0.9f, 0.4f, 0.4f);
+   private static final Color Z_AXIS_DEFAULT_COLOR = new Color(0.4f, 0.4f, 0.9f, 0.4f);
+   private static final Color CENTER_DEFAULT_COLOR = new Color(0.7f, 0.7f, 0.7f, 0.4f);
 
-   private static final Color xAxisSelectedDefaultColor = new Color(0.9f, 0.3f, 0.3f, 0.9f);
-   private static final Color yAxisSelectedDefaultColor = new Color(0.3f, 0.9f, 0.3f, 0.9f);
-   private static final Color zAxisSelectedDefaultColor = new Color(0.3f, 0.3f, 0.9f, 0.9f);
-   private static final Color centerSelectedDefaultColor = new Color(0.5f, 0.5f, 0.5f, 0.9f);
+   private static final Color X_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.9f, 0.3f, 0.3f, 0.9f);
+   private static final Color Y_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.3f, 0.9f, 0.3f, 0.9f);
+   private static final Color Z_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.3f, 0.3f, 0.9f, 0.9f);
+   private static final Color CENTER_SELECTED_DEFAULT_COLOR = new Color(0.5f, 0.5f, 0.5f, 0.9f);
 
-   private final Color[] axisColors = {xAxisDefaultColor, yAxisDefaultColor, zAxisDefaultColor};
-   private final Color[] axisSelectedColors = {xAxisSelectedDefaultColor, yAxisSelectedDefaultColor, zAxisSelectedDefaultColor};
+   private final Color[] axisColors = {X_AXIS_DEFAULT_COLOR, Y_AXIS_DEFAULT_COLOR, Z_AXIS_DEFAULT_COLOR};
+   private final Color[] axisSelectedColors = {X_AXIS_SELECTED_DEFAULT_COLOR, Y_AXIS_SELECTED_DEFAULT_COLOR, Z_AXIS_SELECTED_DEFAULT_COLOR};
 
    private final RotationMatrix[] axisRotations = new RotationMatrix[3];
    private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
+   private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
 
    public void create()
    {
@@ -49,20 +48,45 @@ public class GDXPose3DWidget implements RenderableProvider
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
       axisRotations[2] = new RotationMatrix();
 
+      double radius = 0.075f;
+      double thickness = 0.01f;
       for (Axis3D axis : Axis3D.values)
       {
          String axisName = axis.name().toLowerCase();
 
-         double radius = 0.075f;
-         double thickness = 0.01f;
+         double arrowLengthRatio = 0.7;
+         double arrowHeadBodyLengthRatio = 0.55;
+         double arrowHeadBodyRadiusRatio = 2.0;
+         double animationSpeed = 0.25 * Math.PI;
+         double bodyRadius = (float) thickness;
+         double arrowLength = arrowLengthRatio * radius;
+         double bodyLength = (1.0 - arrowHeadBodyLengthRatio) * arrowLength;
+         double headRadius = arrowHeadBodyRadiusRatio * bodyRadius;
+         double headLength = arrowHeadBodyLengthRatio * arrowLength;
+         double spacing = 2.2 * (radius + thickness);
+         Color color = axisColors[axis.ordinal()];
+         ModelInstance arrow = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+         {
+            meshBuilder.addCylinder(bodyLength, bodyRadius, new Point3D(0.0, 0.0, 0.5 * spacing), color);
+            meshBuilder.addCone(headLength, headRadius, new Point3D(0.0, 0.0, 0.5 * spacing + bodyLength), color);
+            meshBuilder.addCylinder(bodyLength, bodyRadius, new Point3D(0.0, 0.0, -0.5 * spacing), new YawPitchRoll(0.0, Math.PI, 0.0), color);
+            meshBuilder.addCone(headLength, headRadius, new Point3D(0.0, 0.0, -0.5 * spacing - bodyLength), new YawPitchRoll(0.0, Math.PI, 0.0), color);
+         }, axisName);
+         arrow.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
+         GDXTools.toGDX(axisRotations[axis.ordinal()], arrow.transform);
+         linearControlModelInstances[axis.ordinal()] = arrow;
+      }
+      for (Axis3D axis : Axis3D.values)
+      {
+         String axisName = axis.name().toLowerCase();
+
          int resolution = 25;
          ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder ->
             meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, radius, thickness, resolution, axisColors[axis.ordinal()]), axisName);
-         ring.materials.get(0).set(new BlendingAttribute(true, 0.5f));
+         ring.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
          GDXTools.toGDX(axisRotations[axis.ordinal()], ring.transform);
          angularControlModelInstances[axis.ordinal()] = ring;
       }
-
    }
 
    public SixDoFSelection intersect(Line3D pickRay)
@@ -76,6 +100,7 @@ public class GDXPose3DWidget implements RenderableProvider
    {
       for (Axis3D axis : Axis3D.values)
       {
+         linearControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
          angularControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
       }
    }
