@@ -13,9 +13,12 @@ import com.badlogic.gdx.math.Vector3;
 import imgui.flag.ImGuiKey;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -50,25 +53,33 @@ public class GDXModelInput
    private float mouseVelX = 0;
    private float mouseVelY = 0;
 
-   private ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
-   private HashSet<Integer> selectedObjectIndexes = new HashSet<>();
+   private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
+   private final HashSet<Integer> selectedObjectIndexes = new HashSet<>();
 
    public State state = NONE;
 
-   private RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
-   private Vector3 tempModelTranslation = new Vector3();
-   private Point3D translation = new Point3D();
+   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
+   private final Vector3 tempModelTranslation = new Vector3();
+   private final Point3D translation = new Point3D();
 
-   private Point3D modelPosition = new Point3D();
-   private Vector3D cameraOrigin = new Vector3D();
-   private Vector3D originToPosition = new Vector3D();
+   private final Point3D modelPosition = new Point3D();
+   private final Vector3D cameraOrigin = new Vector3D();
+   private final Vector3D originToPosition = new Vector3D();
 
-   private HashMap<Character, ModelInstance> controlMap = new HashMap<>();
-   private HashSet<ModelInstance> controlAxes = new HashSet<>();
+   private final HashMap<Character, ModelInstance> controlMap = new HashMap<>();
+   private final HashSet<ModelInstance> controlAxes = new HashSet<>();
    private float modelYaw, modelPitch, modelRoll = 0;
-   private boolean editMode = false;
    private GDXImGuiBasedUI baseUI;
-   private FramePose3D tempFramePose = new FramePose3D();
+   private final FramePose3D tempFramePose = new FramePose3D();
+   private final RotationMatrix tempRotationMatrix = new RotationMatrix();
+   private final ImBoolean editMode = new ImBoolean(false);
+
+   private final ImFloat x = new ImFloat();
+   private final ImFloat y = new ImFloat();
+   private final ImFloat z = new ImFloat();
+   private final ImFloat yaw = new ImFloat();
+   private final ImFloat pitch = new ImFloat();
+   private final ImFloat roll = new ImFloat();
 
    public void create()
    {
@@ -132,24 +143,27 @@ public class GDXModelInput
          }
       }
 
-      if (ImGui.isMouseClicked(ImGuiMouseButton.Left) && editMode)
+      if (input.isWindowHovered())
       {
-         if (result != -1 && !selectedObjectIndexes.contains(result))
+         if (ImGui.isMouseClicked(ImGuiMouseButton.Left) && editMode.get())
          {
-            selectedObjectIndexes.add(result);
-            environmentObjects.get(result).setHighlighted(true);
-         }
-         else if (result == -1)
-         {
-            if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
+            if (result != -1 && !selectedObjectIndexes.contains(result))
             {
-               clearSelections();
+               selectedObjectIndexes.add(result);
+               environmentObjects.get(result).setHighlighted(true);
+            }
+            else if (result == -1)
+            {
+               if (ImGui.isMouseClicked(ImGuiMouseButton.Left))
+               {
+                  clearSelections();
+               }
             }
          }
-      }
-      if (ImGui.isMouseClicked(ImGuiMouseButton.Middle))
-      {
-         duplicateSelections();
+         if (ImGui.isMouseClicked(ImGuiMouseButton.Middle))
+         {
+            duplicateSelections();
+         }
       }
    }
 
@@ -171,7 +185,7 @@ public class GDXModelInput
    {
       for (int i : selectedObjectIndexes)
       {
-         System.out.println("Clearing:" + i);
+         LogTools.info("Clearing {}", i);
          environmentObjects.get(i).setHighlighted(false);
       }
       selectedObjectIndexes.clear();
@@ -179,7 +193,7 @@ public class GDXModelInput
 
    public void updateState(ImGui3DViewInput input)
    {
-      if (editMode)
+      if (editMode.get())
       {
          if (ImGui.isKeyDown('B'))
          {
@@ -280,19 +294,14 @@ public class GDXModelInput
       }
    }
 
-   public void transformSelections(){
+   public void transformSelections()
+   {
       for (int selection : selectedObjectIndexes)
       {
          GDXEnvironmentObject selectedModel = environmentObjects.get(selection);
-
          selectedModel.getModelInstance().transform.getTranslation(tempModelTranslation);
 
-
-         if (state == PLACING_XY)
-         {
-            GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getModelInstance().transform);
-         }
-         else
+         if (state != PLACING_XY)
          {
             GDXTools.toEuclid(selectedModel.getModelInstance().transform, tempRigidBodyTransform);
             tempRigidBodyTransform.prependTranslation(translation);
@@ -300,8 +309,9 @@ public class GDXModelInput
             tempRigidBodyTransform.prependYawRotation(modelYaw);
             tempRigidBodyTransform.prependRollRotation(modelRoll);
             tempRigidBodyTransform.normalizeRotationPart();
-            GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getModelInstance().transform);
          }
+
+         GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getModelInstance().transform);
       }
    }
 
@@ -319,6 +329,48 @@ public class GDXModelInput
 
    public void renderImGuiPanel()
    {
+      ImGui.checkbox("Edit Mode", editMode);
+      ImGui.sameLine();
+      if (ImGui.button("Clear selections"))
+         clearSelections();
+      ImGui.sameLine();
+      if (ImGui.button("Duplicate selections"))
+         duplicateSelections();
+
+      ImGui.pushItemWidth(100.0f);
+      x.set(0.0f);
+      y.set(0.0f);
+      z.set(0.0f);
+      yaw.set(0.0f);
+      pitch.set(0.0f);
+      roll.set(0.0f);
+
+      boolean movedAtAll = false;
+      movedAtAll |= ImGui.dragFloat("X", x.getData(), 0.01f);
+      ImGui.sameLine();
+      movedAtAll |= ImGui.dragFloat("Y", y.getData(), 0.01f);
+      ImGui.sameLine();
+      movedAtAll |= ImGui.dragFloat("Z", z.getData(), 0.01f);
+      movedAtAll |= ImGui.dragFloat("Yaw", yaw.getData(), 0.01f);
+      ImGui.sameLine();
+      movedAtAll |= ImGui.dragFloat("Pitch", pitch.getData(), 0.01f);
+      ImGui.sameLine();
+      movedAtAll |= ImGui.dragFloat("Roll", roll.getData(), 0.01f);
+      ImGui.popItemWidth();
+
+      if (movedAtAll)
+      {
+         for (Integer selectedObjectIndex : selectedObjectIndexes)
+         {
+            environmentObjects.get(selectedObjectIndex).getModelInstance().transform.translate(x.get(), y.get(), z.get());
+            GDXTools.toEuclid(environmentObjects.get(selectedObjectIndex).getModelInstance().transform, tempRotationMatrix);
+            tempRotationMatrix.appendYawRotation(yaw.get());
+            tempRotationMatrix.appendPitchRotation(pitch.get());
+            tempRotationMatrix.appendRollRotation(roll.get());
+            GDXTools.toGDX(tempRotationMatrix, environmentObjects.get(selectedObjectIndex).getModelInstance().transform);
+         }
+      }
+
       ImGui.text("Controls: C -> X, V -> Y, B -> Z");
       ImGui.text("C + Space -> Roll, V + Space -> Pitch, B + Space -> Yaw");
       ImGui.text("Right click hold and move vertically to move.");
@@ -355,7 +407,7 @@ public class GDXModelInput
 
    public boolean isDone()
    {
-      return state == NONE && !editMode;
+      return state == NONE && !editMode.get();
    }
 
    public void setState(State state)
@@ -366,11 +418,6 @@ public class GDXModelInput
    public void setBaseUI(GDXImGuiBasedUI baseUI)
    {
       this.baseUI = baseUI;
-   }
-
-   public void setEditMode(boolean editMode)
-   {
-      this.editMode = editMode;
    }
 
    public HashSet<ModelInstance> getControlAxes()
