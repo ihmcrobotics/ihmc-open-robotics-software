@@ -872,4 +872,16 @@ public class ValkyrieInitialSetupFactories
       initialSetup.setRootJointPose(-0.13, -0.006, 0.57, 0.0, 0.6181, 0.0, 0.7861);
       return initialSetup;
    }
+
+   public static ValkyrieMutableInitialSetup newAllFoursPelvisLevel(HumanoidJointNameMap jointMap)
+   {
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(RobotSide.LEFT, 0.065160476, 0.3997581, -1.6374844, 1.8006114, -0.8154475, 0.016774062);
+      initialSetup.setLegJointQs(RobotSide.RIGHT, 0.10306259, 0.25142053, -1.9145228, 1.6526313, -1.1029923, -0.013788947);
+      initialSetup.setArmJointQs(RobotSide.LEFT, -1.5840142, -1.5527437, 1.3523333, -0.56639177);
+      initialSetup.setArmJointQs(RobotSide.RIGHT, -1.5347092, 1.1301415, 1.3192228, 0.55924076);
+      initialSetup.setSpineJointQs(0.11051914, 0.03585892, 0.06934927);
+      initialSetup.setRootJointPose(-0.16067322295514036, 0.092, 0.664, -0.19280733812854542, 0.6214101134020131, 0.1106679724037626, 0.7512838353175995);
+      return initialSetup;
+   }
 }
