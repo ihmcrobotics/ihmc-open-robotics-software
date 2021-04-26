@@ -20,7 +20,7 @@ public class GDXEnvironmentObject
    {
       this.model = model;
       modelInstance = new GDXModelInstance(model);
-      originalMaterial = modelInstance.materials.get(0);
+      originalMaterial = new Material(modelInstance.materials.get(0));
    }
 
    public void setHighlighted(boolean highlighted)
