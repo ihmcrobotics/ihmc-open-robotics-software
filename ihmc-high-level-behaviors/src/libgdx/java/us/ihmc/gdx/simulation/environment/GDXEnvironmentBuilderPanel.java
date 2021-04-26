@@ -54,7 +54,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
-   private final ImBoolean editModeChecked = new ImBoolean(false);
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
 
    private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
@@ -142,8 +141,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       }
 
-      ImGui.checkbox("Edit Mode", editModeChecked);
-
       boolean pushed = false;
       if (!modelInput.isDone())
       {
@@ -185,7 +182,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          ImGui.popItemFlag();
       }
 
-      modelInput.setEditMode(editModeChecked.get());
       modelInput.renderImGuiPanel();
 
       ImGui.end();
