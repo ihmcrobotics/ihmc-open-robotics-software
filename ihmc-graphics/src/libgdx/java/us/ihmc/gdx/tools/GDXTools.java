@@ -70,6 +70,7 @@ public class GDXTools
       euclidAffine.getLinearTransform().setM20(gdxAffine.val[Matrix4.M20]);
       euclidAffine.getLinearTransform().setM21(gdxAffine.val[Matrix4.M21]);
       euclidAffine.getLinearTransform().setM22(gdxAffine.val[Matrix4.M22]);
+      euclidAffine.getLinearTransform().normalize();
       euclidAffine.getTranslation().setX(gdxAffine.val[Matrix4.M03]);
       euclidAffine.getTranslation().setY(gdxAffine.val[Matrix4.M13]);
       euclidAffine.getTranslation().setZ(gdxAffine.val[Matrix4.M23]);
@@ -77,15 +78,15 @@ public class GDXTools
 
    public static void toEuclid(Matrix4 gdxAffine, RotationMatrix euclidRotationMatrix)
    {
-      euclidRotationMatrix.set(gdxAffine.val[Matrix4.M00],
-                               gdxAffine.val[Matrix4.M01],
-                               gdxAffine.val[Matrix4.M02],
-                               gdxAffine.val[Matrix4.M10],
-                               gdxAffine.val[Matrix4.M11],
-                               gdxAffine.val[Matrix4.M12],
-                               gdxAffine.val[Matrix4.M20],
-                               gdxAffine.val[Matrix4.M21],
-                               gdxAffine.val[Matrix4.M22]);
+      euclidRotationMatrix.setAndNormalize(gdxAffine.val[Matrix4.M00],
+                                           gdxAffine.val[Matrix4.M01],
+                                           gdxAffine.val[Matrix4.M02],
+                                           gdxAffine.val[Matrix4.M10],
+                                           gdxAffine.val[Matrix4.M11],
+                                           gdxAffine.val[Matrix4.M12],
+                                           gdxAffine.val[Matrix4.M20],
+                                           gdxAffine.val[Matrix4.M21],
+                                           gdxAffine.val[Matrix4.M22]);
    }
 
    public static void toGDX(RigidBodyTransform rigidBodyTransform, Matrix4 gdxAffineToPack)
@@ -106,15 +107,15 @@ public class GDXTools
 
    public static void toEuclid(Matrix4 gdxAffine, RigidBodyTransform rigidBodyTransform)
    {
-      rigidBodyTransform.getRotation().set(gdxAffine.val[Matrix4.M00],
-                                           gdxAffine.val[Matrix4.M01],
-                                           gdxAffine.val[Matrix4.M02],
-                                           gdxAffine.val[Matrix4.M10],
-                                           gdxAffine.val[Matrix4.M11],
-                                           gdxAffine.val[Matrix4.M12],
-                                           gdxAffine.val[Matrix4.M20],
-                                           gdxAffine.val[Matrix4.M21],
-                                           gdxAffine.val[Matrix4.M22]);
+      rigidBodyTransform.getRotation().setAndNormalize(gdxAffine.val[Matrix4.M00],
+                                                       gdxAffine.val[Matrix4.M01],
+                                                       gdxAffine.val[Matrix4.M02],
+                                                       gdxAffine.val[Matrix4.M10],
+                                                       gdxAffine.val[Matrix4.M11],
+                                                       gdxAffine.val[Matrix4.M12],
+                                                       gdxAffine.val[Matrix4.M20],
+                                                       gdxAffine.val[Matrix4.M21],
+                                                       gdxAffine.val[Matrix4.M22]);
       rigidBodyTransform.getTranslation().setX(gdxAffine.val[Matrix4.M03]);
       rigidBodyTransform.getTranslation().setY(gdxAffine.val[Matrix4.M13]);
       rigidBodyTransform.getTranslation().setZ(gdxAffine.val[Matrix4.M23]);
