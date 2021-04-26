@@ -11,15 +11,18 @@ import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 
@@ -44,10 +47,12 @@ public class GDXPose3DWidget implements RenderableProvider
 
    private final Pose3D pose = new Pose3D(1.0, 0.5, 0.25, 0.0, 0.0, 0.0);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private GDXImGuiBasedUI baseUI;
 
-   public void create()
+   public void create(GDXImGuiBasedUI baseUI)
    {
-//      Mesh angularControlHighlightMesh = angularHighlightMesh(radius, thickness);
+      this.baseUI = baseUI;
+      //      Mesh angularControlHighlightMesh = angularHighlightMesh(radius, thickness);
 
       axisRotations[0] = new RotationMatrix(0.0, Math.PI / 2.0, 0.0);
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
@@ -97,6 +102,14 @@ public class GDXPose3DWidget implements RenderableProvider
    public SixDoFSelection intersect(Line3D pickRay)
    {
       return SixDoFSelection.LINEAR_X;
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      if (input.isWindowHovered())
+      {
+         Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
+      }
    }
 
    public void render()
