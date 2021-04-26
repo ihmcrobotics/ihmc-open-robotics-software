@@ -16,7 +16,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
  */
 public class ImGui3DViewInput
 {
-   private boolean dragging = false;
+   private boolean draggingLeft = false;
    private float dragBucketX;
    private float dragBucketY;
 
@@ -46,21 +46,21 @@ public class ImGui3DViewInput
 
       if (!leftMouseDown)
       {
-         dragging = false;
+         draggingLeft = false;
       }
-      else if (isWindowHovered && (mouseDragDeltaX != 0.0f || mouseDragDeltaY != 0.0f) && !dragging)
+      else if (isWindowHovered && (mouseDragDeltaX != 0.0f || mouseDragDeltaY != 0.0f) && !draggingLeft)
       {
-         dragging = true;
+         draggingLeft = true;
          dragBucketX = 0.0f;
          dragBucketY = 0.0f;
       }
-      if (dragging)
+      if (draggingLeft)
       {
          mouseDraggedX = mouseDragDeltaX - dragBucketX;
          mouseDraggedY = mouseDragDeltaY - dragBucketY;
 
-         dragBucketX += mouseDragDeltaX - dragBucketX;
-         dragBucketY += mouseDragDeltaY - dragBucketY;
+         dragBucketX += mouseDraggedX;
+         dragBucketY += mouseDraggedY;
       }
    }
 
@@ -97,9 +97,9 @@ public class ImGui3DViewInput
       return isWindowHovered;
    }
 
-   public boolean isDragging()
+   public boolean isDraggingLeft()
    {
-      return dragging;
+      return draggingLeft;
    }
 
    public float getMouseDraggedX()
