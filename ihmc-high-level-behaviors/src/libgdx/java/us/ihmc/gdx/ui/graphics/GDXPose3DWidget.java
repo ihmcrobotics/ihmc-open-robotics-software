@@ -10,7 +10,9 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -39,6 +41,9 @@ public class GDXPose3DWidget implements RenderableProvider
    private final RotationMatrix[] axisRotations = new RotationMatrix[3];
    private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
    private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
+
+   private final Pose3D pose = new Pose3D(1.0, 0.5, 0.25, 0.0, 0.0, 0.0);
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public void create()
    {
@@ -94,6 +99,16 @@ public class GDXPose3DWidget implements RenderableProvider
       return SixDoFSelection.LINEAR_X;
    }
 
+   public void render()
+   {
+      for (Axis3D axis : Axis3D.values)
+      {
+         tempTransform.set(pose.getOrientation(), pose.getPosition());
+         tempTransform.appendOrientation(axisRotations[axis.ordinal()]);
+         GDXTools.toGDX(tempTransform, linearControlModelInstances[axis.ordinal()].transform);
+         GDXTools.toGDX(tempTransform, angularControlModelInstances[axis.ordinal()].transform);
+      }
+   }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
