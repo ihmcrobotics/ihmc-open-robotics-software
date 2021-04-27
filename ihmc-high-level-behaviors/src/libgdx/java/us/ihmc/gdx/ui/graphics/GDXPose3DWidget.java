@@ -9,7 +9,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -140,11 +139,13 @@ public class GDXPose3DWidget implements RenderableProvider
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
 
-//         baseUI.getSceneManager().getCamera3D().frustum.
+         // could do one large sphere collision to avoid completely far off picks
+
+         Axis3D closestCollisionAxis = null;
+         double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
          for (Axis3D axis : Axis3D.values)
          {
-//            GDXTools.toGDX(tempTransform, angularControlModelInstances[axis.ordinal()].transform);
             GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
             angularCollisionTorus.setToZero();
             angularCollisionTorus.setRadii(radius, thickness);
@@ -154,10 +155,6 @@ public class GDXPose3DWidget implements RenderableProvider
             angularCollisionSphere.setRadius(radius + thickness);
             angularCollisionSphere.applyTransform(tempTransform);
 
-//            angularCollisionSphere.intersectionWith()
-
-
-//            EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D()
             adjustedRayOrigin.setX(pickRay.getPoint().getX() - angularCollisionSphere.getPosition().getX());
             adjustedRayOrigin.setY(pickRay.getPoint().getY() - angularCollisionSphere.getPosition().getY());
             adjustedRayOrigin.setZ(pickRay.getPoint().getZ() - angularCollisionSphere.getPosition().getZ());
@@ -168,39 +165,35 @@ public class GDXPose3DWidget implements RenderableProvider
                                                                                                    pickRay.getDirection(),
                                                                                                    firstIntersectionToPack,
                                                                                                    secondIntersectionToPack);
-            if (numberOfIntersections >= 1)
-               firstIntersectionToPack.add(angularCollisionSphere.getPosition());
-            if (numberOfIntersections == 2)
-               secondIntersectionToPack.add(angularCollisionSphere.getPosition());
-
             boolean colliding = false;
-            if (numberOfIntersections == 1)
+            if (numberOfIntersections == 2)
             {
-               colliding = angularCollisionTorus.isPointInside(firstIntersectionToPack);
-            }
-            else if (numberOfIntersections == 2)
-            {
+               firstIntersectionToPack.add(angularCollisionSphere.getPosition());
+               secondIntersectionToPack.add(angularCollisionSphere.getPosition());
                for (int i = 0; i < 100; i++)
                {
                   interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
                   if (angularCollisionTorus.isPointInside(interpolatedPoint))
                   {
                      colliding = true;
+                     double distance = interpolatedPoint.distance(pickRay.getPoint());
+                     if (distance < closestCollisionDistance)
+                     {
+                        closestCollisionDistance = distance;
+                        closestCollisionAxis = axis;
+                     }
                      break;
                   }
                }
             }
+         }
 
-//            angularCollisionTorus.distance()
-
-//            pickCylinder.set(pickRay.getPoint(), pickRay.getDirection(), 20.0, 0.001);
-
-//            gjkCollider.evaluateCollision(angularCollisionTorus, pickCylinder, collisionResult);
-//            expandingPolytopeAlgorithm.evaluateCollision(angularCollisionTorus, pickCylinder, collisionResult);
-
-            if (colliding)
+         // could only do this when selection changed
+         for (Axis3D axis : Axis3D.values)
+         {
+            if (closestCollisionAxis == axis)
             {
-               angularControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[axis.ordinal()]);
+               angularControlModelInstances[closestCollisionAxis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[closestCollisionAxis.ordinal()]);
             }
             else
             {
