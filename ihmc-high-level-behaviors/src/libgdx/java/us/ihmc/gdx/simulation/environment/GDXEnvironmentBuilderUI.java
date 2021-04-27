@@ -2,6 +2,7 @@ package us.ihmc.gdx.simulation.environment;
 
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.ImGui3DViewInputDebugger;
 
 public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 {
@@ -10,6 +11,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "Environment Builder");
    private final GDXEnvironmentBuilderPanel environmentBuilderUI = new GDXEnvironmentBuilderPanel();
+   private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXEnvironmentBuilderUI()
    {
@@ -21,6 +23,9 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    public void create()
    {
       baseUI.create();
+
+      inputDebugger.create(baseUI);
+      baseUI.getImGuiDockingSetup().addWindow(inputDebugger.getWindowName(), inputDebugger::render);
 
       environmentBuilderUI.create(baseUI);
       baseUI.getSceneManager().addRenderableProvider(environmentBuilderUI);
