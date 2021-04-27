@@ -17,14 +17,8 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
-import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
-import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.shape.convexPolytope.tools.EuclidPolytopeFactories;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.Torus3D;
@@ -41,11 +35,7 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class GDXPose3DWidget implements RenderableProvider
 {
@@ -71,7 +61,6 @@ public class GDXPose3DWidget implements RenderableProvider
    private final double arrowHeadRadius = arrowHeadBodyRadiusRatio * arrowBodyRadius;
    private final double arrowHeadLength = arrowHeadBodyLengthRatio * arrowLength;
    private final double arrowSpacing = 2.2 * (torusRadius + torusTubeRadius);
-   private final int arrowCollisionResolution = 24;
    private final Color[] axisColors = {X_AXIS_DEFAULT_COLOR, Y_AXIS_DEFAULT_COLOR, Z_AXIS_DEFAULT_COLOR};
    private final Color[] axisSelectedColors = {X_AXIS_SELECTED_DEFAULT_COLOR, Y_AXIS_SELECTED_DEFAULT_COLOR, Z_AXIS_SELECTED_DEFAULT_COLOR};
    private final Material[] normalMaterials = new Material[3];
@@ -87,32 +76,22 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Plane3D arrowHeadCollisionTipFacingBase = new Plane3D();
    private final Line3D arrowHeadCollisionAxis = new Line3D();
    private final Point3D arrowHeadCollisionAxisPoint = new Point3D();
-   private final ConvexPolytope3D arrowHeadCollisionCone = EuclidPolytopeFactories.newCone(arrowHeadLength, arrowHeadRadius, arrowCollisionResolution);
-   private ConvexPolytope3D pickRayPolytope;
    private final Pose3D pose = new Pose3D(1.0, 0.5, 0.25, 0.0, 0.0, 0.0);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform tempPolytopeTransform = new RigidBodyTransform();
    private GDXImGuiBasedUI baseUI;
-   private final GilbertJohnsonKeerthiCollisionDetector gjkCollider = new GilbertJohnsonKeerthiCollisionDetector();
-   private final ExpandingPolytopeAlgorithm expandingPolytopeAlgorithm = new ExpandingPolytopeAlgorithm();
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
    private final Point3D interpolatedPoint = new Point3D();
    private final Point3D adjustedRayOrigin = new Point3D();
    private final Point3D closestCollision = new Point3D();
-   private EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
    private ModelInstance pickPointSphere;
-   private ModelInstance arrowDebugSphere;
-   private ModelInstance arrowDebugSphere2;
-   private ModelInstance arrowHeadDebug;
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
-   private double distanceToCone;
 
    public void create(GDXImGuiBasedUI baseUI)
    {
       this.baseUI = baseUI;
-      //      Mesh angularControlHighlightMesh = angularHighlightMesh(radius, thickness);
 
       axisRotations[0] = new RotationMatrix(0.0, Math.PI / 2.0, 0.0);
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
@@ -136,7 +115,6 @@ public class GDXPose3DWidget implements RenderableProvider
          highlightedMaterials[axis.ordinal()] = new Material();
          Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
          highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(paletteTexture));
-//         highlightedMaterials[axis.ordinal()].set(ColorAttribute.createDiffuse(Color.ORANGE));
          highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, axisSelectedColors[axis.ordinal()].a));
          GDXTools.toGDX(axisRotations[axis.ordinal()], arrow.transform);
          linearControlModelInstances[axis.ordinal()] = arrow;
@@ -154,30 +132,6 @@ public class GDXPose3DWidget implements RenderableProvider
       }
 
       pickPointSphere = GDXModelPrimitives.createSphere(0.005f, Color.CORAL, "pickPoint");
-      double arrowSurroundingSphereRadius = arrowHeadRadius > (0.5 * arrowHeadLength) ?
-            arrowHeadRadius / Math.sin(Math.atan(2.0 * arrowHeadRadius / arrowHeadLength))
-            : 0.5 * arrowHeadLength;
-      arrowDebugSphere2 = GDXModelPrimitives.createSphere((float) arrowSurroundingSphereRadius, Color.SLATE, "pickPointArrow");
-//      arrowDebugSphere2 = GDXModelPrimitives.createSphere(0.1f, Color.SLATE, "pickPointArrow");
-      arrowDebugSphere = GDXModelPrimitives.createSphere(0.001f, Color.SLATE, "pickPointArrow");
-      arrowDebugSphere.materials.get(0).set(new BlendingAttribute(true, 0.2f));
-      arrowDebugSphere2.materials.get(0).set(new BlendingAttribute(true, 0.2f));
-
-      arrowHeadDebug = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.0), Color.ORANGE);
-      }, "arrowHeadDebug");
-      arrowHeadDebug.materials.get(0).set(new BlendingAttribute(true, 0.2f));
-
-      List<Point3D> vertices = new ArrayList<>();
-      vertices.add(new Point3D(0.0, 0.0, 0.0));
-      vertices.add(new Point3D(20.0, 0.0, 0.0));
-      pickRayPolytope = new ConvexPolytope3D(Vertex3DSupplier.asVertex3DSupplier(vertices));
-   }
-
-   public SixDoFSelection intersect(Line3D pickRay)
-   {
-      return SixDoFSelection.LINEAR_X;
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -217,13 +171,9 @@ public class GDXPose3DWidget implements RenderableProvider
             {
                firstIntersectionToPack.add(angularCollisionSphere.getPosition());
                secondIntersectionToPack.add(angularCollisionSphere.getPosition());
-//               boolean firstCloser = firstIntersectionToPack.distance(pickRay.getPoint()) < secondIntersectionToPack.distance(pickRay.getPoint());
                for (int i = 0; i < 100; i++)
                {
-//                  if (firstCloser)
-                     interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
-//                  else
-//                     interpolatedPoint.interpolate(secondIntersectionToPack, firstIntersectionToPack, i / 100.0);
+                  interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
                   if (angularCollisionTorus.isPointInside(interpolatedPoint))
                   {
                      double distance = interpolatedPoint.distance(pickRay.getPoint());
@@ -281,15 +231,6 @@ public class GDXPose3DWidget implements RenderableProvider
                {
                   // update cone
                   tempPolytopeTransform.setToZero();
-                  arrowHeadCollisionCone.getNumberOfVertices();
-                  arrowHeadCollisionCone.getVertex(0).set(0.0, 0.0, arrowHeadLength);
-                  for (int i = 0; i < arrowCollisionResolution; i++)
-                  {
-                     double theta = i * 2.0 * Math.PI / arrowCollisionResolution;
-                     double x = arrowHeadRadius * EuclidCoreTools.cos(theta);
-                     double y = arrowHeadRadius * EuclidCoreTools.sin(theta);
-                     arrowHeadCollisionCone.getVertex(i + 1).set(x, y, 0.0);
-                  }
                   if (side == RobotSide.LEFT)
                   {
                      tempPolytopeTransform.getTranslation().addZ(0.5 * arrowSpacing + arrowBodyLength);
@@ -301,8 +242,6 @@ public class GDXPose3DWidget implements RenderableProvider
 
                   }
                   tempTransform.transform(tempPolytopeTransform);
-                  arrowHeadCollisionCone.applyTransform(tempPolytopeTransform);
-                  GDXTools.toGDX(tempPolytopeTransform, arrowHeadDebug.transform);
 
                   arrowHeadCollisionSphere.setToZero();
                   double arrowSurroundingSphereRadius;
@@ -311,14 +250,11 @@ public class GDXPose3DWidget implements RenderableProvider
                   else
                      arrowSurroundingSphereRadius = 0.5 * arrowHeadLength;
                   arrowHeadCollisionSphere.setRadius(arrowSurroundingSphereRadius);
-//                  arrowHeadCollisionSphere.setRadius(0.1); // TODO: REMOVE
                   if (side == RobotSide.LEFT)
                      arrowHeadCollisionSphere.getPosition().addZ(0.5 * arrowSpacing + arrowBodyLength + 0.5 * arrowHeadLength);
                   else
                      arrowHeadCollisionSphere.getPosition().subZ(0.5 * arrowSpacing + arrowBodyLength + 0.5 * arrowHeadLength);
                   arrowHeadCollisionSphere.applyTransform(tempTransform);
-                  GDXTools.toGDX(arrowHeadCollisionSphere.getPosition(), arrowDebugSphere2.transform);
-//                  GDXTools.toGDX(arrowHeadCollisionCone.getVertex(0), arrowDebugSphere2.transform);
 
                   adjustedRayOrigin.setX(pickRay.getPoint().getX() - arrowHeadCollisionSphere.getPosition().getX());
                   adjustedRayOrigin.setY(pickRay.getPoint().getY() - arrowHeadCollisionSphere.getPosition().getY());
@@ -345,13 +281,9 @@ public class GDXPose3DWidget implements RenderableProvider
 
                      arrowHeadCollisionAxis.set(arrowHeadCollisionBaseFacingTip.getPoint(), arrowHeadCollisionBaseFacingTip.getNormal());
 
-                     boolean firstCloser = firstIntersectionToPack.distance(pickRay.getPoint()) < secondIntersectionToPack.distance(pickRay.getPoint());
                      for (int i = 0; i < 100; i++)
                      {
-                        if (firstCloser)
-                           interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
-                        else
-                           interpolatedPoint.interpolate(secondIntersectionToPack, firstIntersectionToPack, i / 100.0);
+                        interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
 
                         if (arrowHeadCollisionBaseFacingTip.isOnOrAbove(interpolatedPoint) && arrowHeadCollisionTipFacingBase.isOnOrAbove(interpolatedPoint))
                         {
@@ -370,42 +302,9 @@ public class GDXPose3DWidget implements RenderableProvider
                               break;
                            }
                         }
-
-
-                        GDXTools.toGDX(interpolatedPoint, arrowDebugSphere.transform);
-//                        distanceToCone = arrowHeadCollisionCone.signedDistance(interpolatedPoint);
-////                        if (arrowHeadCollisionCone.isPointInside(interpolatedPoint))
-//                        if (distanceToCone < 0.005)
-//                        {
-//                           double distance = interpolatedPoint.distance(pickRay.getPoint());
-//                           if (distance < closestCollisionDistance)
-//                           {
-//                              closestCollisionDistance = distance;
-//                              closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
-//                              closestCollision.set(interpolatedPoint);
-//                           }
-//                           break;
-//                        }
                      }
                   }
                }
-//               pickRayPolytope.getVertex(0).set(pickRay.getPoint());
-//               pickRayPolytope.getVertex(1).set(pickRay.getDirection());
-//               pickRayPolytope.getVertex(1).scale(20.0);
-//               pickRayPolytope.getVertex(1).add(pickRay.getPoint());
-//
-//
-//               expandingPolytopeAlgorithm.evaluateCollision(pickRayPolytope, arrowHeadCollisionCone, collisionResult);
-//
-//               GDXTools.toGDX(collisionResult.getPointOnA(), arrowDebugSphere.transform);
-//               GDXTools.toGDX(collisionResult.getPointOnA(), arrowDebugSphere2.transform);
-//
-//               if (collisionResult.areShapesColliding())
-//               {
-////                  collisionResult.getPointOnA()
-//                  LogTools.info("Colliding");
-//
-//               }
             }
          }
 
@@ -457,10 +356,6 @@ public class GDXPose3DWidget implements RenderableProvider
 
       if (closestCollisionSelection != null)
          pickPointSphere.getRenderables(renderables, pool);
-
-//      arrowDebugSphere.getRenderables(renderables, pool);
-//      arrowDebugSphere2.getRenderables(renderables, pool);
-//      arrowHeadDebug.getRenderables(renderables, pool);
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
