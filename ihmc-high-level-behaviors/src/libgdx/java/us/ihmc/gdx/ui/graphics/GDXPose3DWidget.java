@@ -363,16 +363,6 @@ public class GDXPose3DWidget implements RenderableProvider
       return tetrahedronRingMesh(1.75 * minorRadius, 1.25 * minorRadius, 5);
    }
 
-   public static Mesh linearControlMesh(double bodyRadius, double bodyLength, double headRadius, double headLength, double spacing)
-   {
-      GDXMeshBuilder meshBuilder = new GDXMeshBuilder();
-      meshBuilder.addCylinder(bodyLength, bodyRadius, new Point3D(0.0, 0.0, 0.5 * spacing));
-      meshBuilder.addCone(headLength, headRadius, new Point3D(0.0, 0.0, 0.5 * spacing + bodyLength));
-      meshBuilder.addCylinder(bodyLength, bodyRadius, new Point3D(0.0, 0.0, -0.5 * spacing), new YawPitchRoll(0.0, Math.PI, 0.0));
-      meshBuilder.addCone(headLength, headRadius, new Point3D(0.0, 0.0, -0.5 * spacing - bodyLength), new YawPitchRoll(0.0, Math.PI, 0.0));
-      return meshBuilder.generateMesh();
-   }
-
    public static Mesh linearControlHighlightMesh(double bodyRadius, double bodyLength, double spacing)
    {
       GDXMeshBuilder meshBuilder = new GDXMeshBuilder();
