@@ -66,7 +66,12 @@ public class GDXModelPrimitives
 
    public static ModelInstance createSphere(float radius, Color color)
    {
-      return buildModelInstance(meshBuilder -> meshBuilder.addSphere(radius, color), "sphere");
+      return createSphere(radius, color, "sphere");
+   }
+
+   public static ModelInstance createSphere(float radius, Color color, String nodeName)
+   {
+      return buildModelInstance(meshBuilder -> meshBuilder.addSphere(radius, color), nodeName);
    }
 
    public static ModelInstance createBox(float lx, float ly, float lz, Color color)
