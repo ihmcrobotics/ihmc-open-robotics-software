@@ -16,14 +16,18 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.convexPolytope.tools.EuclidPolytopeFactories;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.Torus3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -36,6 +40,11 @@ import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
+import us.ihmc.log.LogTools;
+import us.ihmc.robotics.robotSide.RobotSide;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class GDXPose3DWidget implements RenderableProvider
 {
@@ -49,18 +58,19 @@ public class GDXPose3DWidget implements RenderableProvider
    private static final Color Z_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.3f, 0.3f, 0.9f, 0.9f);
    private static final Color CENTER_SELECTED_DEFAULT_COLOR = new Color(0.5f, 0.5f, 0.5f, 0.9f);
 
-   private final double radius = 0.075f;
-   private final double thickness = 0.01f;
+   private final double torusRadius = 0.075f;
+   private final double torusTubeRadius = 0.01f;
    private final double arrowLengthRatio = 0.7;
    private final double arrowHeadBodyLengthRatio = 0.55;
    private final double arrowHeadBodyRadiusRatio = 2.0;
    private final double animationSpeed = 0.25 * Math.PI;
-   private final double bodyRadius = (float) thickness;
-   private final double arrowLength = arrowLengthRatio * radius;
-   private final double bodyLength = (1.0 - arrowHeadBodyLengthRatio) * arrowLength;
-   private final double headRadius = arrowHeadBodyRadiusRatio * bodyRadius;
-   private final double headLength = arrowHeadBodyLengthRatio * arrowLength;
-   private final double spacing = 2.2 * (radius + thickness);
+   private final double arrowBodyRadius = (float) torusTubeRadius;
+   private final double arrowLength = arrowLengthRatio * torusRadius;
+   private final double arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio) * arrowLength;
+   private final double arrowHeadRadius = arrowHeadBodyRadiusRatio * arrowBodyRadius;
+   private final double arrowHeadLength = arrowHeadBodyLengthRatio * arrowLength;
+   private final double arrowSpacing = 2.2 * (torusRadius + torusTubeRadius);
+   private final int arrowCollisionResolution = 24;
    private final Color[] axisColors = {X_AXIS_DEFAULT_COLOR, Y_AXIS_DEFAULT_COLOR, Z_AXIS_DEFAULT_COLOR};
    private final Color[] axisSelectedColors = {X_AXIS_SELECTED_DEFAULT_COLOR, Y_AXIS_SELECTED_DEFAULT_COLOR, Z_AXIS_SELECTED_DEFAULT_COLOR};
    private final Material[] normalMaterials = new Material[3];
@@ -70,11 +80,13 @@ public class GDXPose3DWidget implements RenderableProvider
    private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
    private final Torus3D angularCollisionTorus = new Torus3D();
    private final Sphere3D angularCollisionSphere = new Sphere3D();
-   private final Cylinder3D pickCylinder = new Cylinder3D();
-
-
+   private final Cylinder3D arrowBaseCollisionCylinder = new Cylinder3D();
+   private final Sphere3D arrowHeadCollisionSphere = new Sphere3D();
+   private final ConvexPolytope3D arrowHeadCollisionCone = EuclidPolytopeFactories.newCone(arrowHeadLength, arrowHeadRadius, arrowCollisionResolution);
+   private ConvexPolytope3D pickRayPolytope;
    private final Pose3D pose = new Pose3D(1.0, 0.5, 0.25, 0.0, 0.0, 0.0);
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform tempPolytopeTransform = new RigidBodyTransform();
    private GDXImGuiBasedUI baseUI;
    private final GilbertJohnsonKeerthiCollisionDetector gjkCollider = new GilbertJohnsonKeerthiCollisionDetector();
    private final ExpandingPolytopeAlgorithm expandingPolytopeAlgorithm = new ExpandingPolytopeAlgorithm();
@@ -82,7 +94,13 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Point3D secondIntersectionToPack = new Point3D();
    private final Point3D interpolatedPoint = new Point3D();
    private final Point3D adjustedRayOrigin = new Point3D();
+   private final Point3D closestCollision = new Point3D();
    private EuclidShape3DCollisionResult collisionResult = new EuclidShape3DCollisionResult();
+   private ModelInstance pickPointSphere;
+   private ModelInstance arrowDebugSphere;
+   private ModelInstance arrowDebugSphere2;
+   private SixDoFSelection closestCollisionSelection;
+   private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -100,10 +118,11 @@ public class GDXPose3DWidget implements RenderableProvider
          Color color = axisColors[axis.ordinal()];
          ModelInstance arrow = GDXModelPrimitives.buildModelInstance(meshBuilder ->
          {
-            meshBuilder.addCylinder(bodyLength, bodyRadius, new Point3D(0.0, 0.0, 0.5 * spacing), color);
-            meshBuilder.addCone(headLength, headRadius, new Point3D(0.0, 0.0, 0.5 * spacing + bodyLength), color);
-            meshBuilder.addCylinder(bodyLength, bodyRadius, new Point3D(0.0, 0.0, -0.5 * spacing), new YawPitchRoll(0.0, Math.PI, 0.0), color);
-            meshBuilder.addCone(headLength, headRadius, new Point3D(0.0, 0.0, -0.5 * spacing - bodyLength), new YawPitchRoll(0.0, Math.PI, 0.0), color);
+            // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
+            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
+            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
+            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
+            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing - arrowBodyLength), FLIP_180, color);
          }, axisName);
          arrow.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
          normalMaterials[axis.ordinal()] = new Material(arrow.materials.get(0));
@@ -121,11 +140,23 @@ public class GDXPose3DWidget implements RenderableProvider
 
          int resolution = 25;
          ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-            meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, radius, thickness, resolution, axisColors[axis.ordinal()]), axisName);
+            meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius, torusTubeRadius, resolution, axisColors[axis.ordinal()]), axisName);
          ring.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
          GDXTools.toGDX(axisRotations[axis.ordinal()], ring.transform);
          angularControlModelInstances[axis.ordinal()] = ring;
       }
+
+      pickPointSphere = GDXModelPrimitives.createSphere(0.005f, Color.CORAL, "pickPoint");
+      double arrowSurroundingSphereRadius = arrowHeadRadius > (0.5 * arrowHeadLength) ?
+            arrowHeadRadius / Math.sin(Math.atan(2.0 * arrowHeadRadius / arrowHeadLength))
+            : 0.5 * arrowHeadLength;
+      arrowDebugSphere2 = GDXModelPrimitives.createSphere((float) arrowSurroundingSphereRadius, Color.SLATE, "pickPointArrow");
+      arrowDebugSphere = GDXModelPrimitives.createSphere(0.001, Color.SLATE, "pickPointArrow");
+
+      List<Point3D> vertices = new ArrayList<>();
+      vertices.add(new Point3D(0.0, 0.0, 0.0));
+      vertices.add(new Point3D(20.0, 0.0, 0.0));
+      pickRayPolytope = new ConvexPolytope3D(Vertex3DSupplier.asVertex3DSupplier(vertices));
    }
 
    public SixDoFSelection intersect(Line3D pickRay)
@@ -141,18 +172,19 @@ public class GDXPose3DWidget implements RenderableProvider
 
          // could do one large sphere collision to avoid completely far off picks
 
-         Axis3D closestCollisionAxis = null;
+         closestCollisionSelection = null;
          double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
+         // collide tori
          for (Axis3D axis : Axis3D.values)
          {
             GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
             angularCollisionTorus.setToZero();
-            angularCollisionTorus.setRadii(radius, thickness);
+            angularCollisionTorus.setRadii(torusRadius, torusTubeRadius);
             angularCollisionTorus.applyTransform(tempTransform);
 
             angularCollisionSphere.setToZero();
-            angularCollisionSphere.setRadius(radius + thickness);
+            angularCollisionSphere.setRadius(torusRadius + torusTubeRadius);
             angularCollisionSphere.applyTransform(tempTransform);
 
             adjustedRayOrigin.setX(pickRay.getPoint().getX() - angularCollisionSphere.getPosition().getX());
@@ -165,22 +197,25 @@ public class GDXPose3DWidget implements RenderableProvider
                                                                                                    pickRay.getDirection(),
                                                                                                    firstIntersectionToPack,
                                                                                                    secondIntersectionToPack);
-            boolean colliding = false;
             if (numberOfIntersections == 2)
             {
                firstIntersectionToPack.add(angularCollisionSphere.getPosition());
                secondIntersectionToPack.add(angularCollisionSphere.getPosition());
+//               boolean firstCloser = firstIntersectionToPack.distance(pickRay.getPoint()) < secondIntersectionToPack.distance(pickRay.getPoint());
                for (int i = 0; i < 100; i++)
                {
-                  interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
+//                  if (firstCloser)
+                     interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
+//                  else
+//                     interpolatedPoint.interpolate(secondIntersectionToPack, firstIntersectionToPack, i / 100.0);
                   if (angularCollisionTorus.isPointInside(interpolatedPoint))
                   {
-                     colliding = true;
                      double distance = interpolatedPoint.distance(pickRay.getPoint());
                      if (distance < closestCollisionDistance)
                      {
                         closestCollisionDistance = distance;
-                        closestCollisionAxis = axis;
+                        closestCollisionSelection = SixDoFSelection.toAngularSelection(axis);
+                        closestCollision.set(interpolatedPoint);
                      }
                      break;
                   }
@@ -188,18 +223,118 @@ public class GDXPose3DWidget implements RenderableProvider
             }
          }
 
+         // collide arrows
+         for (Axis3D axis : Axis3D.values)
+         {
+            GDXTools.toEuclid(linearControlModelInstances[axis.ordinal()].transform, tempTransform);
+            for (RobotSide side : RobotSide.values)
+            {
+               arrowBaseCollisionCylinder.setToZero();
+//               double aLittleMoreToAvoidArrow
+               arrowBaseCollisionCylinder.setSize(arrowBodyLength, arrowBodyRadius);
+               if (side == RobotSide.LEFT)
+                  arrowBaseCollisionCylinder.getPosition().addZ(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+               else
+                  arrowBaseCollisionCylinder.getPosition().subZ(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+               arrowBaseCollisionCylinder.applyTransform(tempTransform);
+
+               int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndCylinder3D(arrowBaseCollisionCylinder.getLength(),
+                                                                                                     arrowBaseCollisionCylinder.getRadius(),
+                                                                                                     arrowBaseCollisionCylinder.getPosition(),
+                                                                                                     arrowBaseCollisionCylinder.getAxis(),
+                                                                                                     pickRay.getPoint(),
+                                                                                                     pickRay.getDirection(),
+                                                                                                     firstIntersectionToPack,
+                                                                                                     secondIntersectionToPack);
+
+               if (numberOfIntersections == 2)
+               {
+                  double distance = firstIntersectionToPack.distance(pickRay.getPoint());
+                  if (distance < closestCollisionDistance)
+                  {
+                     closestCollisionDistance = distance;
+                     closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
+                     closestCollision.set(firstIntersectionToPack);
+                  }
+               }
+
+//               pickRayPolytope.getPose().setToZero();
+
+               pickRayPolytope.getVertex(0).set(pickRay.getPoint());
+               pickRayPolytope.getVertex(1).set(pickRay.getDirection());
+               pickRayPolytope.getVertex(1).scale(20.0);
+               pickRayPolytope.getVertex(1).add(pickRay.getPoint());
+
+               tempPolytopeTransform.setToZero();
+               // update cone
+               arrowHeadCollisionCone.getNumberOfVertices();
+               arrowHeadCollisionCone.getVertex(0).set(0.0, 0.0, arrowHeadLength);
+               for (int i = 0; i < arrowCollisionResolution; i++)
+               {
+                  double theta = i * 2.0 * Math.PI / arrowCollisionResolution;
+                  double x = arrowHeadRadius * EuclidCoreTools.cos(theta);
+                  double y = arrowHeadRadius * EuclidCoreTools.sin(theta);
+                  arrowHeadCollisionCone.getVertex(i + 1).set(x, y, 0.0);
+               }
+               if (side == RobotSide.LEFT)
+               {
+                  tempPolytopeTransform.getTranslation().addZ(0.5 * arrowSpacing + arrowBodyLength);
+               }
+               else
+               {
+                  tempPolytopeTransform.getTranslation().subZ(0.5 * arrowSpacing + arrowBodyLength);
+                  tempPolytopeTransform.getRotation().append(FLIP_180);
+
+               }
+               tempTransform.transform(tempPolytopeTransform);
+               arrowHeadCollisionCone.applyTransform(tempPolytopeTransform);
+
+               expandingPolytopeAlgorithm.evaluateCollision(pickRayPolytope, arrowHeadCollisionCone, collisionResult);
+
+               GDXTools.toGDX(collisionResult.getPointOnA(), arrowDebugSphere.transform);
+               GDXTools.toGDX(collisionResult.getPointOnA(), arrowDebugSphere2.transform);
+
+               if (collisionResult.areShapesColliding())
+               {
+//                  collisionResult.getPointOnA()
+                  LogTools.info("Colliding");
+
+               }
+            }
+
+
+//            new
+
+
+//            arrowBaseCollisionCylinder.getPosition().setToZero();
+//            arrowBaseCollisionCylinder.getAxis().set(Axis3D.Z);
+//            arrowBaseCollisionCylinder.getPosition().subZ(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+//            arrowBaseCollisionCylinder.applyTransform(tempTransform);
+         }
+
          // could only do this when selection changed
          for (Axis3D axis : Axis3D.values)
          {
-            if (closestCollisionAxis == axis)
+            if (closestCollisionSelection != null && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
             {
-               angularControlModelInstances[closestCollisionAxis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[closestCollisionAxis.ordinal()]);
+               angularControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[axis.ordinal()]);
             }
             else
             {
                angularControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(normalMaterials[axis.ordinal()]);
             }
+
+            if (closestCollisionSelection != null && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
+            {
+               linearControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[axis.ordinal()]);
+            }
+            else
+            {
+               linearControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(normalMaterials[axis.ordinal()]);
+            }
          }
+
+         GDXTools.toGDX(closestCollision, pickPointSphere.transform);
       }
    }
 
@@ -222,6 +357,12 @@ public class GDXPose3DWidget implements RenderableProvider
          linearControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
          angularControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
       }
+
+      if (closestCollisionSelection != null)
+         pickPointSphere.getRenderables(renderables, pool);
+
+      arrowDebugSphere.getRenderables(renderables, pool);
+      arrowDebugSphere2.getRenderables(renderables, pool);
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
