@@ -48,7 +48,7 @@ public class ImGui3DViewInput
       {
          draggingLeft = false;
       }
-      else if (isWindowHovered && (mouseDragDeltaX != 0.0f || mouseDragDeltaY != 0.0f) && !draggingLeft)
+      else if (isWindowHovered && !draggingLeft)
       {
          draggingLeft = true;
          dragBucketX = 0.0f;
