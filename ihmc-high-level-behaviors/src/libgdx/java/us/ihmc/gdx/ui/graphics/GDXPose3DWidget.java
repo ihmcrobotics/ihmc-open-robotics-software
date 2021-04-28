@@ -203,20 +203,14 @@ public class GDXPose3DWidget implements RenderableProvider
          dragBucketY += mouseDraggedY;
 
          Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
-         tempTransform.setToZero();
-         tempTransform.set(pose.getOrientation(), pose.getPosition());
-         tempTransform.appendOrientation(axisRotations[closestCollisionSelection.toAxis3D().ordinal()]);
-//         tempTransform.appendTranslation(pose.getPosition());
-//         tempTransform.appendOrientation(pose.getOrientation());
-//         GDXTools.toGDX(pose.getPosition(), angularDragCenter.transform);
 
          axisDragLine.getPoint().set(pose.getPosition());
          axisDragLine.getDirection().set(0.0, 0.0, 1.0);
          axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
          pose.getOrientation().transform(axisDragLine.getDirection());
-//         axisDragLine.applyTransform(tempTransform);
          GDXTools.toGDX(axisDragLine.getPoint(), angularDragCenter.transform);
 
+         tempTransform.setToZero();
          tempTransform.getTranslation().set(axisDragLine.getPoint());
          EuclidGeometryTools.orientation3DFromZUpToVector3D(axisDragLine.getDirection(), tempTransform.getRotation());
 
@@ -237,8 +231,6 @@ public class GDXPose3DWidget implements RenderableProvider
             transformToAppend.appendTranslation(axisMoveVector);
 
             pose.getPosition().add(axisMoveVector);
-//            pose.appendTransform(transformToAppend);
-//            closestCollision.applyTransform(transformToAppend);
             closestCollision.add(axisMoveVector);
 
          }
@@ -249,7 +241,6 @@ public class GDXPose3DWidget implements RenderableProvider
                axisDragPlane.set(closestCollision, axisDragLine.getDirection());
                axisDragPlane.intersectionWith(axisDragLine, axisCollisionWithAngularPickPlane);
                axisDragPlane.getPoint().set(axisCollisionWithAngularPickPlane);
-//               GDXTools.toGDX(axisDragPlane.getPoint(), angularDragCenter.transform);
 
                angularDragPlaneIntersectionPrevious.set(closestCollision);
                GDXTools.toGDX(angularDragPlaneIntersectionPrevious, angularDragPrevious.transform);
@@ -279,22 +270,13 @@ public class GDXPose3DWidget implements RenderableProvider
                   crossProduct.cross(previousClockHandVector, clockHandVector);
                   if (crossProduct.dot(axisDragPlane.getNormal()) < 0.0)
                      deltaAngle = -deltaAngle;
-//                  if (!axisDragPlane.isOnOrAbove(pickRay.getPoint()))
-//                     deltaAngle = -deltaAngle;
 
                   axisAngleToRotateBy.set(axisDragPlane.getNormal(), deltaAngle);
                   axisAngleToRotateBy.transform(pose.getOrientation());
-//                  transformToAppend.appendOrientation(axisAngleToRotateBy);
-//                  pose.appendTransform(transformToAppend);
                }
 
                angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
             }
-         }
-
-         if (pose.getPosition().distance(EuclidCoreTools.origin3D) > 20.0)
-         {
-            pose.setToZero();
          }
       }
    }
