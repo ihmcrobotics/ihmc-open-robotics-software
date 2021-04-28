@@ -67,7 +67,8 @@ public class ValkyriePlanarRegionPositionControlSimulation
       FLAT_ON_SIDE,
       _30DEG_SLOPE_ON_SIDE,
       GROUND_AND_WALLS,
-      TILTED_TILES
+      TILTED_TILES,
+      BOXES_FOR_HELP_GETTING_DOWN
    }
 
    public static Environment environment = Environment.FLAT_ON_SIDE;
@@ -256,6 +257,30 @@ public class ValkyriePlanarRegionPositionControlSimulation
                generator.identity();
                generator.translate(offsetX, robotSide.negateIfRightSide(offsetY + 0.5 * boxWidth), 0.0);
                generator.addCubeReferencedAtBottomMiddle(boxLength, boxWidth, boxHeight);
+            }
+
+            return generator.getPlanarRegionsList();
+         }
+         case BOXES_FOR_HELP_GETTING_DOWN:
+         {
+            generator.addRectangle(5.0, 5.0);
+
+            double offsetX = 0.3;
+            double offsetY = 0.35;
+            double boxLength = 0.3;
+            double boxWidth = 0.5;
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               generator.identity();
+               generator.translate(offsetX, robotSide.negateIfRightSide(offsetY + 0.5 * boxWidth), 0.0);
+               generator.addCubeReferencedAtBottomMiddle(boxLength, boxWidth, 0.35);
+
+               generator.translate(boxLength, 0.0, 0.0);
+               generator.addCubeReferencedAtBottomMiddle(boxLength, boxWidth, 0.18);
+
+               generator.translate(boxLength, 0.0, 0.0);
+               generator.addCubeReferencedAtBottomMiddle(boxLength, boxWidth, 0.10);
             }
 
             return generator.getPlanarRegionsList();
