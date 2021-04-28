@@ -15,6 +15,7 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -27,6 +28,7 @@ import us.ihmc.euclid.shape.primitives.Torus3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
@@ -96,7 +98,17 @@ public class GDXPose3DWidget implements RenderableProvider
    private float mouseDraggedY = 0.0f;
    private float dragBucketX;
    private float dragBucketY;
-//   private final ImGuiPlot deltaXPlot = new ImGuiPlot()
+   private final Line3D axisDragLine = new Line3D();
+   private final Plane3D axisDragPlane = new Plane3D();
+   private final Point3D axisDragLineClosest = new Point3D();
+   private final Point3D angularDragPlaneIntersection = new Point3D();
+   private final Point3D angularDragPlaneIntersectionPrevious = new Point3D();
+   private final Vector3D clockHandVector = new Vector3D();
+   private final Vector3D previousClockHandVector = new Vector3D();
+   private final Vector3D crossProduct = new Vector3D();
+   private final Vector3D axisMoveVector = new Vector3D();
+   private final AxisAngle axisAngleToRotateBy = new AxisAngle();
+   private final RigidBodyTransform transformToAppend = new RigidBodyTransform();
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -154,16 +166,20 @@ public class GDXPose3DWidget implements RenderableProvider
       {
          dragging = false;
       }
-      else if (isWindowHovered && !dragging)
+      if (isWindowHovered && !dragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
          determineCurrentSelectionFromPickRay(pickRay);
 
-         if (closestCollisionSelection != null)
+         if (rightMouseDown)
          {
-            dragging = true;
-            dragBucketX = 0.0f;
-            dragBucketY = 0.0f;
+            if (closestCollisionSelection != null)
+            {
+               dragging = true;
+               dragBucketX = 0.0f;
+               dragBucketY = 0.0f;
+               angularDragPlaneIntersectionPrevious.setToNaN();
+            }
          }
       }
       if (dragging)
@@ -173,6 +189,75 @@ public class GDXPose3DWidget implements RenderableProvider
 
          dragBucketX += mouseDraggedX;
          dragBucketY += mouseDraggedY;
+
+         Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
+         tempTransform.setToZero();
+         tempTransform.appendTranslation(pose.getPosition());
+         tempTransform.appendOrientation(axisRotations[closestCollisionSelection.toAxis3D().ordinal()]);
+//         tempTransform.appendOrientation(pose.getOrientation());
+//         tempTransform.set(pose.getOrientation(), pose.getPosition());
+
+         axisDragLine.getDirection().set(0.0, 0.0, 1.0);
+         axisDragLine.applyTransform(tempTransform);
+
+         transformToAppend.setToZero();
+
+         if (closestCollisionSelection.isLinear())
+         {
+            axisDragLine.getPoint().set(closestCollision);
+            axisDragPlane.set(axisDragLine.getPoint(), axisDragLine.getDirection());
+
+            pickRay.closestPointsWith(axisDragLine, null, axisDragLineClosest);
+            double distanceToMove = axisDragPlane.signedDistance(axisDragLineClosest);
+            axisMoveVector.set(axisDragLine.getDirection());
+            axisMoveVector.scale(distanceToMove);
+
+            transformToAppend.appendTranslation(axisMoveVector);
+
+            pose.appendTransform(transformToAppend);
+            closestCollision.applyTransform(transformToAppend);
+         }
+         else if (closestCollisionSelection.isAngular())
+         {
+            axisDragPlane.set(closestCollision, axisDragLine.getDirection());
+
+            axisDragPlane.intersectionWith(angularDragPlaneIntersection, pickRay.getPoint(), pickRay.getDirection());
+
+            if (!angularDragPlaneIntersectionPrevious.containsNaN())
+            {
+               clockHandVector.set(angularDragPlaneIntersection.getX() - axisDragPlane.getPoint().getX(),
+                                   angularDragPlaneIntersection.getY() - axisDragPlane.getPoint().getY(),
+                                   angularDragPlaneIntersection.getZ() - axisDragPlane.getPoint().getZ());
+               previousClockHandVector.set(angularDragPlaneIntersectionPrevious.getX() - axisDragPlane.getPoint().getX(),
+                                           angularDragPlaneIntersectionPrevious.getY() - axisDragPlane.getPoint().getY(),
+                                           angularDragPlaneIntersectionPrevious.getZ() - axisDragPlane.getPoint().getZ());
+
+               double deltaAngle = EuclidGeometryTools.angleFromFirstToSecondVector3D(previousClockHandVector.getX(),
+                                                                                      previousClockHandVector.getY(),
+                                                                                      previousClockHandVector.getZ(),
+                                                                                      clockHandVector.getX(),
+                                                                                      clockHandVector.getY(),
+                                                                                      clockHandVector.getZ());
+
+               if (!Double.isNaN(deltaAngle))
+               {
+                  crossProduct.cross(previousClockHandVector, clockHandVector);
+                  if (crossProduct.dot(axisDragPlane.getNormal()) < 0.0)
+                     deltaAngle = -deltaAngle;
+
+                  axisAngleToRotateBy.set(axisDragPlane.getNormal(), deltaAngle);
+                  transformToAppend.appendOrientation(axisAngleToRotateBy);
+                  pose.appendTransform(transformToAppend);
+               }
+            }
+
+            angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
+         }
+
+         if (pose.getPosition().distance(EuclidCoreTools.origin3D) > 20.0)
+         {
+            pose.setToZero();
+         }
       }
    }
 
