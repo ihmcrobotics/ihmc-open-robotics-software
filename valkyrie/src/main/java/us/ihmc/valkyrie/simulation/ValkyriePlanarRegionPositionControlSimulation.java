@@ -62,10 +62,15 @@ public class ValkyriePlanarRegionPositionControlSimulation
    public enum Environment
    {
       FLAT_GROUND,
+      FLAT_IN_FRONT,
+      _30DEG_SLOPE_IN_FRONT,
+      FLAT_ON_SIDE,
+      _30DEG_SLOPE_ON_SIDE,
       GROUND_AND_WALLS,
-      TILTED_TILES,
+      TILTED_TILES
    }
-   public static Environment environment = Environment.GROUND_AND_WALLS;
+
+   public static Environment environment = Environment.FLAT_ON_SIDE;
 
    public enum InitialPose
    {
@@ -187,6 +192,7 @@ public class ValkyriePlanarRegionPositionControlSimulation
       switch (environment)
       {
          case GROUND_AND_WALLS:
+         {
             generator.addRectangle(5.0, 5.0);
 
             double wallHeight = 2.0;
@@ -208,12 +214,60 @@ public class ValkyriePlanarRegionPositionControlSimulation
             generator.addRectangle(0.7, 0.7);
 
             return generator.getPlanarRegionsList();
+         }
+         case FLAT_IN_FRONT:
+         {
+            generator.addRectangle(5.0, 5.0);
+
+            double offsetX = 0.5;
+            double boxDepth = 0.5;
+            double boxWidth = 1.0;
+            double boxHeight = 0.25;
+
+            generator.translate(offsetX + 0.5 * boxDepth, 0.0, 0.0);
+            generator.addCubeReferencedAtBottomMiddle(boxDepth, boxWidth, boxHeight);
+            return generator.getPlanarRegionsList();
+         }
+         case _30DEG_SLOPE_IN_FRONT:
+         {
+            generator.addRectangle(5.0, 5.0);
+
+            double angle = Math.toRadians(30.0);
+            generator.translate(0.5, 0.0, 0.15);
+            generator.rotate(-angle, Axis3D.Y);
+
+            double lengthX = 0.7;
+            generator.translate(0.5 * lengthX, 0.0, 0.0);
+            generator.addRectangle(lengthX, 1.0);
+            return generator.getPlanarRegionsList();
+         }
+         case FLAT_ON_SIDE:
+         {
+            generator.addRectangle(5.0, 5.0);
+
+            double offsetX = 0.2;
+            double offsetY = 0.5;
+            double boxLength = 1.0;
+            double boxWidth = 0.5;
+            double boxHeight = 0.25;
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               generator.identity();
+               generator.translate(offsetX, robotSide.negateIfRightSide(offsetY + 0.5 * boxWidth), 0.0);
+               generator.addCubeReferencedAtBottomMiddle(boxLength, boxWidth, boxHeight);
+            }
+
+            return generator.getPlanarRegionsList();
+         }
 
          case FLAT_GROUND:
          default:
+         {
             generator.translate(0.0, 0.0, 0.0);
             generator.addRectangle(5.0, 5.0);
             return generator.getPlanarRegionsList();
+         }
       }
    }
 }
