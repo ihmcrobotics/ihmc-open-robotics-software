@@ -213,8 +213,12 @@ public class GDXPose3DWidget implements RenderableProvider
          axisDragLine.getPoint().set(pose.getPosition());
          axisDragLine.getDirection().set(0.0, 0.0, 1.0);
          axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
+         pose.getOrientation().transform(axisDragLine.getDirection());
 //         axisDragLine.applyTransform(tempTransform);
          GDXTools.toGDX(axisDragLine.getPoint(), angularDragCenter.transform);
+
+         tempTransform.getTranslation().set(axisDragLine.getPoint());
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(axisDragLine.getDirection(), tempTransform.getRotation());
 
          GDXTools.toGDX(tempTransform, angularAxisLine.transform);
 
@@ -232,8 +236,11 @@ public class GDXPose3DWidget implements RenderableProvider
 
             transformToAppend.appendTranslation(axisMoveVector);
 
-            pose.appendTransform(transformToAppend);
-            closestCollision.applyTransform(transformToAppend);
+            pose.getPosition().add(axisMoveVector);
+//            pose.appendTransform(transformToAppend);
+//            closestCollision.applyTransform(transformToAppend);
+            closestCollision.add(axisMoveVector);
+
          }
          else if (closestCollisionSelection.isAngular())
          {
@@ -272,12 +279,13 @@ public class GDXPose3DWidget implements RenderableProvider
                   crossProduct.cross(previousClockHandVector, clockHandVector);
                   if (crossProduct.dot(axisDragPlane.getNormal()) < 0.0)
                      deltaAngle = -deltaAngle;
-                  if (!axisDragPlane.isOnOrAbove(pickRay.getPoint()))
-                     deltaAngle = -deltaAngle;
+//                  if (!axisDragPlane.isOnOrAbove(pickRay.getPoint()))
+//                     deltaAngle = -deltaAngle;
 
                   axisAngleToRotateBy.set(axisDragPlane.getNormal(), deltaAngle);
-                  transformToAppend.appendOrientation(axisAngleToRotateBy);
-                  pose.appendTransform(transformToAppend);
+                  axisAngleToRotateBy.transform(pose.getOrientation());
+//                  transformToAppend.appendOrientation(axisAngleToRotateBy);
+//                  pose.appendTransform(transformToAppend);
                }
 
                angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
