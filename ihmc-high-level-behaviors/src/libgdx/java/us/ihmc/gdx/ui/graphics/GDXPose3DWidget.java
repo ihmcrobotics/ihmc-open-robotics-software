@@ -91,6 +91,10 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Point3D adjustedRayOrigin = new Point3D();
    private final Point3D closestCollision = new Point3D();
    private ModelInstance pickPointSphere;
+   private ModelInstance angularAxisLine;
+   private ModelInstance angularDragCenter;
+   private ModelInstance angularDragPrevious;
+   private ModelInstance angularDragCurrent;
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private boolean dragging = false;
@@ -101,6 +105,7 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Line3D axisDragLine = new Line3D();
    private final Plane3D axisDragPlane = new Plane3D();
    private final Point3D axisDragLineClosest = new Point3D();
+   private final Point3D axisCollisionWithAngularPickPlane = new Point3D();
    private final Point3D angularDragPlaneIntersection = new Point3D();
    private final Point3D angularDragPlaneIntersectionPrevious = new Point3D();
    private final Vector3D clockHandVector = new Vector3D();
@@ -153,6 +158,13 @@ public class GDXPose3DWidget implements RenderableProvider
       }
 
       pickPointSphere = GDXModelPrimitives.createSphere(0.002f, Color.CORAL, "pickPoint");
+      angularDragCenter = GDXModelPrimitives.createSphere(0.02f, Color.VIOLET, "angularDragCenter");
+      angularDragPrevious = GDXModelPrimitives.createSphere(0.002f, Color.GREEN, "angluarDragPrevious");
+      angularDragCurrent = GDXModelPrimitives.createSphere(0.002f, Color.YELLOW, "angluarDragCurrent");
+      angularAxisLine = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+      {
+         meshBuilder.addCylinder(1.0, 0.0001, new Point3D(0.0, 0.0, -0.5), Color.CYAN);
+      }, "angularAxisLine");
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -192,13 +204,19 @@ public class GDXPose3DWidget implements RenderableProvider
 
          Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
          tempTransform.setToZero();
-         tempTransform.appendTranslation(pose.getPosition());
+         tempTransform.set(pose.getOrientation(), pose.getPosition());
          tempTransform.appendOrientation(axisRotations[closestCollisionSelection.toAxis3D().ordinal()]);
+//         tempTransform.appendTranslation(pose.getPosition());
 //         tempTransform.appendOrientation(pose.getOrientation());
-//         tempTransform.set(pose.getOrientation(), pose.getPosition());
+//         GDXTools.toGDX(pose.getPosition(), angularDragCenter.transform);
 
+         axisDragLine.getPoint().set(pose.getPosition());
          axisDragLine.getDirection().set(0.0, 0.0, 1.0);
-         axisDragLine.applyTransform(tempTransform);
+         axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
+//         axisDragLine.applyTransform(tempTransform);
+         GDXTools.toGDX(axisDragLine.getPoint(), angularDragCenter.transform);
+
+         GDXTools.toGDX(tempTransform, angularAxisLine.transform);
 
          transformToAppend.setToZero();
 
@@ -219,12 +237,22 @@ public class GDXPose3DWidget implements RenderableProvider
          }
          else if (closestCollisionSelection.isAngular())
          {
-            axisDragPlane.set(closestCollision, axisDragLine.getDirection());
-
-            axisDragPlane.intersectionWith(angularDragPlaneIntersection, pickRay.getPoint(), pickRay.getDirection());
-
-            if (!angularDragPlaneIntersectionPrevious.containsNaN())
+            if (angularDragPlaneIntersectionPrevious.containsNaN())
             {
+               axisDragPlane.set(closestCollision, axisDragLine.getDirection());
+               axisDragPlane.intersectionWith(axisDragLine, axisCollisionWithAngularPickPlane);
+               axisDragPlane.getPoint().set(axisCollisionWithAngularPickPlane);
+//               GDXTools.toGDX(axisDragPlane.getPoint(), angularDragCenter.transform);
+
+               angularDragPlaneIntersectionPrevious.set(closestCollision);
+               GDXTools.toGDX(angularDragPlaneIntersectionPrevious, angularDragPrevious.transform);
+            }
+            else
+            {
+               axisDragPlane.intersectionWith(angularDragPlaneIntersection, pickRay.getPoint(), pickRay.getDirection());
+               GDXTools.toGDX(angularDragPlaneIntersection, angularDragCurrent.transform);
+               GDXTools.toGDX(angularDragPlaneIntersectionPrevious, angularDragPrevious.transform);
+
                clockHandVector.set(angularDragPlaneIntersection.getX() - axisDragPlane.getPoint().getX(),
                                    angularDragPlaneIntersection.getY() - axisDragPlane.getPoint().getY(),
                                    angularDragPlaneIntersection.getZ() - axisDragPlane.getPoint().getZ());
@@ -244,14 +272,16 @@ public class GDXPose3DWidget implements RenderableProvider
                   crossProduct.cross(previousClockHandVector, clockHandVector);
                   if (crossProduct.dot(axisDragPlane.getNormal()) < 0.0)
                      deltaAngle = -deltaAngle;
+                  if (!axisDragPlane.isOnOrAbove(pickRay.getPoint()))
+                     deltaAngle = -deltaAngle;
 
                   axisAngleToRotateBy.set(axisDragPlane.getNormal(), deltaAngle);
                   transformToAppend.appendOrientation(axisAngleToRotateBy);
                   pose.appendTransform(transformToAppend);
                }
-            }
 
-            angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
+               angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
+            }
          }
 
          if (pose.getPosition().distance(EuclidCoreTools.origin3D) > 20.0)
@@ -464,6 +494,11 @@ public class GDXPose3DWidget implements RenderableProvider
       ImGui.text("X: " + mouseDraggedX);
       ImGui.text("Y: " + mouseDraggedY);
 
+      if (ImGui.button("Reset"))
+      {
+         pose.setToZero();
+      }
+
       ImGui.end();
 
       for (Axis3D axis : Axis3D.values)
@@ -486,6 +521,11 @@ public class GDXPose3DWidget implements RenderableProvider
 
       if (closestCollisionSelection != null)
          pickPointSphere.getRenderables(renderables, pool);
+
+      angularAxisLine.getRenderables(renderables, pool);
+      angularDragPrevious.getRenderables(renderables, pool);
+      angularDragCurrent.getRenderables(renderables, pool);
+      angularDragCenter.getRenderables(renderables, pool);
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
