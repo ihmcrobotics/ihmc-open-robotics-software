@@ -14,6 +14,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.Line3D;
@@ -54,18 +55,19 @@ public class GDXPose3DWidget implements RenderableProvider
    private static final Color Z_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.3f, 0.3f, 0.9f, 0.9f);
    private static final Color CENTER_SELECTED_DEFAULT_COLOR = new Color(0.5f, 0.5f, 0.5f, 0.9f);
 
-   private final double torusRadius = 0.075f;
-   private final double torusTubeRadius = 0.01f;
-   private final double arrowLengthRatio = 0.7;
-   private final double arrowHeadBodyLengthRatio = 0.55;
-   private final double arrowHeadBodyRadiusRatio = 2.0;
-   private final double animationSpeed = 0.25 * Math.PI;
-   private final double arrowBodyRadius = (float) torusTubeRadius;
-   private final double arrowLength = arrowLengthRatio * torusRadius;
-   private final double arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio) * arrowLength;
-   private final double arrowHeadRadius = arrowHeadBodyRadiusRatio * arrowBodyRadius;
-   private final double arrowHeadLength = arrowHeadBodyLengthRatio * arrowLength;
-   private final double arrowSpacing = 2.2 * (torusRadius + torusTubeRadius);
+   private final ImFloat torusRadius = new ImFloat(0.5f);
+   private final ImFloat torusTubeRadius = new ImFloat(0.016f);
+   private final ImFloat arrowLengthRatio = new ImFloat(0.3f);
+   private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.3f);
+   private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
+   private final ImFloat arrowSpacingFactor = new ImFloat(2.2f);
+   private double animationSpeed = 0.25 * Math.PI;
+   private double arrowBodyRadius;
+   private double arrowLength;
+   private double arrowBodyLength;
+   private double arrowHeadRadius;
+   private double arrowHeadLength;
+   private double arrowSpacing;
    private final Color[] axisColors = {X_AXIS_DEFAULT_COLOR, Y_AXIS_DEFAULT_COLOR, Z_AXIS_DEFAULT_COLOR};
    private final Color[] axisSelectedColors = {X_AXIS_SELECTED_DEFAULT_COLOR, Y_AXIS_SELECTED_DEFAULT_COLOR, Z_AXIS_SELECTED_DEFAULT_COLOR};
    private final Material[] normalMaterials = new Material[3];
@@ -90,11 +92,6 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Point3D interpolatedPoint = new Point3D();
    private final Point3D adjustedRayOrigin = new Point3D();
    private final Point3D closestCollision = new Point3D();
-   private ModelInstance pickPointSphere;
-   private ModelInstance angularAxisLine;
-   private ModelInstance angularDragCenter;
-   private ModelInstance angularDragPrevious;
-   private ModelInstance angularDragCurrent;
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private boolean dragging = false;
@@ -123,48 +120,7 @@ public class GDXPose3DWidget implements RenderableProvider
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
       axisRotations[2] = new RotationMatrix();
 
-      for (Axis3D axis : Axis3D.values)
-      {
-         String axisName = axis.name().toLowerCase();
-
-         Color color = axisColors[axis.ordinal()];
-         ModelInstance arrow = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-         {
-            // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
-            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
-            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
-            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
-            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing - arrowBodyLength), FLIP_180, color);
-         }, axisName);
-         arrow.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
-         normalMaterials[axis.ordinal()] = new Material(arrow.materials.get(0));
-         highlightedMaterials[axis.ordinal()] = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
-         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(paletteTexture));
-         highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, axisSelectedColors[axis.ordinal()].a));
-         GDXTools.toGDX(axisRotations[axis.ordinal()], arrow.transform);
-         linearControlModelInstances[axis.ordinal()] = arrow;
-      }
-      for (Axis3D axis : Axis3D.values)
-      {
-         String axisName = axis.name().toLowerCase();
-
-         int resolution = 25;
-         ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-            meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius, torusTubeRadius, resolution, axisColors[axis.ordinal()]), axisName);
-         ring.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
-         GDXTools.toGDX(axisRotations[axis.ordinal()], ring.transform);
-         angularControlModelInstances[axis.ordinal()] = ring;
-      }
-
-      pickPointSphere = GDXModelPrimitives.createSphere(0.002f, Color.CORAL, "pickPoint");
-      angularDragCenter = GDXModelPrimitives.createSphere(0.02f, Color.VIOLET, "angularDragCenter");
-      angularDragPrevious = GDXModelPrimitives.createSphere(0.002f, Color.GREEN, "angluarDragPrevious");
-      angularDragCurrent = GDXModelPrimitives.createSphere(0.002f, Color.YELLOW, "angluarDragCurrent");
-      angularAxisLine = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-      {
-         meshBuilder.addCylinder(1.0, 0.0001, new Point3D(0.0, 0.0, -0.5), Color.CYAN);
-      }, "angularAxisLine");
+      recreateGraphics();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
@@ -208,13 +164,10 @@ public class GDXPose3DWidget implements RenderableProvider
          axisDragLine.getDirection().set(0.0, 0.0, 1.0);
          axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
          pose.getOrientation().transform(axisDragLine.getDirection());
-         GDXTools.toGDX(axisDragLine.getPoint(), angularDragCenter.transform);
 
          tempTransform.setToZero();
          tempTransform.getTranslation().set(axisDragLine.getPoint());
          EuclidGeometryTools.orientation3DFromZUpToVector3D(axisDragLine.getDirection(), tempTransform.getRotation());
-
-         GDXTools.toGDX(tempTransform, angularAxisLine.transform);
 
          transformToAppend.setToZero();
 
@@ -243,13 +196,10 @@ public class GDXPose3DWidget implements RenderableProvider
                axisDragPlane.getPoint().set(axisCollisionWithAngularPickPlane);
 
                angularDragPlaneIntersectionPrevious.set(closestCollision);
-               GDXTools.toGDX(angularDragPlaneIntersectionPrevious, angularDragPrevious.transform);
             }
             else
             {
                axisDragPlane.intersectionWith(angularDragPlaneIntersection, pickRay.getPoint(), pickRay.getDirection());
-               GDXTools.toGDX(angularDragPlaneIntersection, angularDragCurrent.transform);
-               GDXTools.toGDX(angularDragPlaneIntersectionPrevious, angularDragPrevious.transform);
 
                clockHandVector.set(angularDragPlaneIntersection.getX() - axisDragPlane.getPoint().getX(),
                                    angularDragPlaneIntersection.getY() - axisDragPlane.getPoint().getY(),
@@ -293,11 +243,11 @@ public class GDXPose3DWidget implements RenderableProvider
       {
          GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
          angularCollisionTorus.setToZero();
-         angularCollisionTorus.setRadii(torusRadius, torusTubeRadius);
+         angularCollisionTorus.setRadii(torusRadius.get(), torusTubeRadius.get());
          angularCollisionTorus.applyTransform(tempTransform);
 
          angularCollisionSphere.setToZero();
-         angularCollisionSphere.setRadius(torusRadius + torusTubeRadius);
+         angularCollisionSphere.setRadius(torusRadius.get() + torusTubeRadius.get());
          angularCollisionSphere.applyTransform(tempTransform);
 
          adjustedRayOrigin.setX(pickRay.getPoint().getX() - angularCollisionSphere.getPosition().getX());
@@ -472,8 +422,6 @@ public class GDXPose3DWidget implements RenderableProvider
             linearControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(normalMaterials[axis.ordinal()]);
          }
       }
-
-      GDXTools.toGDX(closestCollision, pickPointSphere.transform);
    }
 
 
@@ -489,6 +437,19 @@ public class GDXPose3DWidget implements RenderableProvider
          pose.setToZero();
       }
 
+      ImGui.pushItemWidth(100.00f);
+      boolean proportionsChanged = false;
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus radius"), torusRadius.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus tube radius"), torusTubeRadius.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow length ratio"), arrowLengthRatio.getData(), 0.001f, 0.0f, 1.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.001f, 0.0f, 1.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.001f, 0.0f, 1.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow spacing factor"), arrowSpacingFactor.getData(), 0.001f, 0.0f, 1000.0f);
+      ImGui.popItemWidth();
+
+      if (proportionsChanged)
+         recreateGraphics();
+
       ImGui.end();
 
       for (Axis3D axis : Axis3D.values)
@@ -500,6 +461,56 @@ public class GDXPose3DWidget implements RenderableProvider
       }
    }
 
+   private void recreateGraphics()
+   {
+      arrowBodyRadius = (float) torusTubeRadius.get();
+      arrowLength = arrowLengthRatio.get() * torusRadius.get();
+      arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio.get()) * arrowLength;
+      arrowHeadRadius = arrowHeadBodyRadiusRatio.get() * arrowBodyRadius;
+      arrowHeadLength = arrowHeadBodyLengthRatio.get() * arrowLength;
+      arrowSpacing = arrowSpacingFactor.get() * (torusRadius.get() + torusTubeRadius.get());
+
+      for (Axis3D axis : Axis3D.values)
+      {
+         if (linearControlModelInstances[axis.ordinal()] != null)
+            linearControlModelInstances[axis.ordinal()].model.dispose();
+
+         String axisName = axis.name().toLowerCase();
+
+         Color color = axisColors[axis.ordinal()];
+         ModelInstance arrow = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+         {
+            // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
+            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
+            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
+            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
+            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing - arrowBodyLength), FLIP_180, color);
+         }, axisName);
+         arrow.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
+         normalMaterials[axis.ordinal()] = new Material(arrow.materials.get(0));
+         highlightedMaterials[axis.ordinal()] = new Material();
+         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
+         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(paletteTexture));
+         highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, axisSelectedColors[axis.ordinal()].a));
+         GDXTools.toGDX(axisRotations[axis.ordinal()], arrow.transform);
+         linearControlModelInstances[axis.ordinal()] = arrow;
+      }
+      for (Axis3D axis : Axis3D.values)
+      {
+         if (angularControlModelInstances[axis.ordinal()] != null)
+            angularControlModelInstances[axis.ordinal()].model.dispose();
+
+         String axisName = axis.name().toLowerCase();
+
+         int resolution = 25;
+         ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+                                                                          meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius.get(), torusTubeRadius.get(), resolution, axisColors[axis.ordinal()]), axisName);
+         ring.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
+         GDXTools.toGDX(axisRotations[axis.ordinal()], ring.transform);
+         angularControlModelInstances[axis.ordinal()] = ring;
+      }
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -508,14 +519,6 @@ public class GDXPose3DWidget implements RenderableProvider
          linearControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
          angularControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
       }
-
-      if (closestCollisionSelection != null)
-         pickPointSphere.getRenderables(renderables, pool);
-
-      angularAxisLine.getRenderables(renderables, pool);
-      angularDragPrevious.getRenderables(renderables, pool);
-      angularDragCurrent.getRenderables(renderables, pool);
-      angularDragCenter.getRenderables(renderables, pool);
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
