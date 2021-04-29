@@ -25,7 +25,6 @@ public class GDXEnvironment implements RenderableProvider
 
       pose3DWidget.create(baseUI);
       baseUI.addImGui3DViewInputProcessor(pose3DWidget::process3DViewInput);
-      pose3DWidget.setEnabled(true);
    }
 
    private void process3DViewInput(ImGui3DViewInput viewInput)
