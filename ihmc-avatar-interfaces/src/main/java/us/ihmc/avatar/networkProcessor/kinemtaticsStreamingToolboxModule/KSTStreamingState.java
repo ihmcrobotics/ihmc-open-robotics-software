@@ -634,7 +634,21 @@ public class KSTStreamingState implements State
       {
          KinematicsToolboxRigidBodyCommand previousInput = previousInputs.getInput(i);
          if (!latestInputs.hasInputFor(previousInput.getEndEffector()))
-            decayingInputs.add().set(previousInput);
+         {
+            boolean addInputToDecay = true;
+
+            for (int j = 0; j < decayingInputs.size(); j++)
+            {
+               if (previousInput.getEndEffector() == decayingInputs.get(j).getEndEffector())
+               {
+                  addInputToDecay = false;
+                  break;
+               }
+            }
+
+            if (addInputToDecay)
+               decayingInputs.add().set(previousInput);
+         }
       }
 
       // 3- Decay inputs by reducing their, if it reaches a low threshold then the input is dropped.
