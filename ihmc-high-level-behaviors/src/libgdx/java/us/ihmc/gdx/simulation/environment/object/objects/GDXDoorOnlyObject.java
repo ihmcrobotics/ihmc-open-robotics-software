@@ -7,7 +7,7 @@ public class GDXDoorOnlyObject extends GDXEnvironmentObject
 {
    public GDXDoorOnlyObject()
    {
-      super(GDXModelLoader.loadG3DModel("DoorOnly.g3dj"));
+      create(GDXModelLoader.loadG3DModel("DoorOnly.g3dj"));
    }
 
    @Override

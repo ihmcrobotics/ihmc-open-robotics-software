@@ -7,7 +7,7 @@ public class GDXDoorFrameObject extends GDXEnvironmentObject
 {
    public GDXDoorFrameObject()
    {
-      super(GDXModelLoader.loadG3DModel("DoorFrame.g3dj"));
+      create(GDXModelLoader.loadG3DModel("DoorFrame.g3dj"));
    }
 
    @Override

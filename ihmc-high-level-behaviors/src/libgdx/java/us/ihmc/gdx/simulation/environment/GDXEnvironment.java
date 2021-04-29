@@ -40,13 +40,13 @@ public class GDXEnvironment implements RenderableProvider
 
       ImGui.end();
 
-      GDXTools.toGDX(pose3DWidget.getTransform(), cinderBlock.getModelInstance().transform);
+      GDXTools.toGDX(pose3DWidget.getTransform(), cinderBlock.getRealisticModelInstance().transform);
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      cinderBlock.getModelInstance().getRenderables(renderables, pool);
+      cinderBlock.getRealisticModelInstance().getRenderables(renderables, pool);
       pose3DWidget.getRenderables(renderables, pool);
    }
 
