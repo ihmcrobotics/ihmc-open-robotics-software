@@ -861,6 +861,15 @@ public class ValkyrieInitialSetupFactories
       return initialSetup;
    }
 
+   /**
+    * Order of joint angles in JSON file:
+    * 1. Left leg (6 values): 7.919233E-5, -0.03010657, -1.5434167, 2.0578954, -0.80010957, -2.4982874E-5,
+    * 2. Right leg (6 values): 7.073794E-5, -0.03009036, -1.5432106, 2.0563831, -0.8001095, -2.4546394E-5,
+    * 3. Spine (3 values): 2.5291948E-4, 0.025048098, -3.908084E-5,
+    * 4. Left arm (4 values): -1.5521886, -1.1981736, 1.3492163, -1.1037868,
+    * 5. Neck (4 values): 0.009494689, -5.318392E-5, 0.00210515, 1.1967057,
+    * 6. Right arm (4 values): -1.5522051, 1.1981682, 1.3492138, 1.1036909
+    */
    public static ValkyrieMutableInitialSetup newAllFoursBellyDown(HumanoidJointNameMap jointMap)
    {
       ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
@@ -882,6 +891,19 @@ public class ValkyrieInitialSetupFactories
       initialSetup.setArmJointQs(RobotSide.RIGHT, -1.5347092, 1.1301415, 1.3192228, 0.55924076);
       initialSetup.setSpineJointQs(0.11051914, 0.03585892, 0.06934927);
       initialSetup.setRootJointPose(-0.16067322295514036, 0.092, 0.664, -0.19280733812854542, 0.6214101134020131, 0.1106679724037626, 0.7512838353175995);
+      return initialSetup;
+   }
+
+   public static ValkyrieMutableInitialSetup newAllFoursGoingDownStepsPartial(HumanoidJointNameMap jointMap)
+   {
+      // , , , , -0.006579297, 2.136231E-4, 0.011883598, 100.0,
+      ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+      initialSetup.setLegJointQs(RobotSide.LEFT, -0.20121925, 0.010199763, -2.0094466, 1.6984907, -0.9972875, -0.0010149578);
+      initialSetup.setLegJointQs(RobotSide.RIGHT, -0.28244376, -0.010222228, -2.3696282, 1.7484268, -0.7049025, 0.10972377);
+      initialSetup.setArmJointQs(RobotSide.LEFT, -1.0121833, -0.92566574, 1.1405622, -1.0445135);
+      initialSetup.setArmJointQs(RobotSide.RIGHT, -0.8424884, 0.40751427, 1.1402806, 1.2626526);
+      initialSetup.setSpineJointQs(-0.030311223, -0.13197364, -0.06452885);
+      initialSetup.setRootJointPose( 0.28508451545003705, 0.002176475927506658, 0.6792942943495437, 0.056949298162032154, 0.6050423985719524, 0.08034868401159971, 0.7900788329950086);
       return initialSetup;
    }
 }
