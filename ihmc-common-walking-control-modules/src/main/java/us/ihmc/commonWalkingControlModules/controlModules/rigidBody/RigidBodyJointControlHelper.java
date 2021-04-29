@@ -43,6 +43,7 @@ public class RigidBodyJointControlHelper
     * over the network.
     */
    private final YoDouble streamTimestampOffset;
+   private final YoDouble streamTimestampSource;
 
    private final YoBoolean usingWeightFromMessage;
    private final List<DoubleProvider> defaultWeights = new ArrayList<>();
@@ -100,6 +101,8 @@ public class RigidBodyJointControlHelper
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
+      streamTimestampSource.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -203,7 +206,10 @@ public class RigidBodyJointControlHelper
          }
 
          if (allDone)
+         {
             streamTimestampOffset.setToNaN();
+            streamTimestampSource.setToNaN();
+         }
 
          generator.compute(timeInTrajectory);
          double desiredPosition = generator.getValue();
@@ -327,10 +333,12 @@ public class RigidBodyJointControlHelper
          if (command.getTimestamp() <= 0)
          {
             streamTimestampOffset.setToNaN();
+            streamTimestampSource.setToNaN();
          }
          else
          {
             double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
+            streamTimestampSource.set(senderTime);
             timeOffset = time.getValue() - senderTime;
             if (Double.isNaN(previousStreamTimestampOffset))
             {
@@ -510,6 +518,7 @@ public class RigidBodyJointControlHelper
          overrideTrajectory(jointIdx);
       }
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    private void overrideTrajectory(int jointIdx)
