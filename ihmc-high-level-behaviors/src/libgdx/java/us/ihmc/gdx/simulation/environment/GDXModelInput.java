@@ -125,7 +125,7 @@ public class GDXModelInput
       for (int i = 0; i < environmentObjects.size(); i++)
       {
          final GDXEnvironmentObject environmentObject = environmentObjects.get(i);
-         environmentObject.getModelInstance().transform.getTranslation(tempModelTranslation);
+         environmentObject.getRealisticModelInstance().transform.getTranslation(tempModelTranslation);
 
          GDXTools.toEuclid(tempModelTranslation, modelPosition);
          cameraOrigin.set(pickRayInWorld.getPointX(), pickRayInWorld.getPointY(), pickRayInWorld.getPointZ());
@@ -135,7 +135,7 @@ public class GDXModelInput
          double perpDist = pickRayInWorld.distance(modelPosition);
 
 
-         if (perpDist <= 0.8 * environmentObject.getModelInstance().radius)
+         if (perpDist <= 0.8 * environmentObject.getRealisticModelInstance().radius)
          {
             result = i;
             finalPerpDist = perpDist;
@@ -299,11 +299,11 @@ public class GDXModelInput
       for (int selection : selectedObjectIndexes)
       {
          GDXEnvironmentObject selectedModel = environmentObjects.get(selection);
-         selectedModel.getModelInstance().transform.getTranslation(tempModelTranslation);
+         selectedModel.getRealisticModelInstance().transform.getTranslation(tempModelTranslation);
 
          if (state != PLACING_XY)
          {
-            GDXTools.toEuclid(selectedModel.getModelInstance().transform, tempRigidBodyTransform);
+            GDXTools.toEuclid(selectedModel.getRealisticModelInstance().transform, tempRigidBodyTransform);
             tempRigidBodyTransform.prependTranslation(translation);
             tempRigidBodyTransform.prependPitchRotation(modelPitch);
             tempRigidBodyTransform.prependYawRotation(modelYaw);
@@ -311,7 +311,7 @@ public class GDXModelInput
             tempRigidBodyTransform.normalizeRotationPart();
          }
 
-         GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getModelInstance().transform);
+         GDXTools.toGDX(tempRigidBodyTransform, selectedModel.getRealisticModelInstance().transform);
       }
    }
 
@@ -323,7 +323,7 @@ public class GDXModelInput
          tempFramePose.setToZero(controllerFrame);
          tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, environmentObjects.get(selectedObjectIndexes.stream().findFirst().get()).getModelInstance().transform);
+         GDXTools.toGDX(tempRigidBodyTransform, environmentObjects.get(selectedObjectIndexes.stream().findFirst().get()).getRealisticModelInstance().transform);
       }
    }
 
@@ -372,12 +372,12 @@ public class GDXModelInput
       {
          for (Integer selectedObjectIndex : selectedObjectIndexes)
          {
-            environmentObjects.get(selectedObjectIndex).getModelInstance().transform.translate(x.get(), y.get(), z.get());
-            GDXTools.toEuclid(environmentObjects.get(selectedObjectIndex).getModelInstance().transform, tempRotationMatrix);
+            environmentObjects.get(selectedObjectIndex).getRealisticModelInstance().transform.translate(x.get(), y.get(), z.get());
+            GDXTools.toEuclid(environmentObjects.get(selectedObjectIndex).getRealisticModelInstance().transform, tempRotationMatrix);
             tempRotationMatrix.appendYawRotation(yaw.get());
             tempRotationMatrix.appendPitchRotation(pitch.get());
             tempRotationMatrix.appendRollRotation(roll.get());
-            GDXTools.toGDX(tempRotationMatrix, environmentObjects.get(selectedObjectIndex).getModelInstance().transform);
+            GDXTools.toGDX(tempRotationMatrix, environmentObjects.get(selectedObjectIndex).getRealisticModelInstance().transform);
          }
       }
 

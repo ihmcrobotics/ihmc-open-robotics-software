@@ -7,7 +7,7 @@ public class GDXLabFloorObject extends GDXEnvironmentObject
 {
    public GDXLabFloorObject()
    {
-      super(GDXModelLoader.loadG3DModel("labFloor.g3dj"));
+      create(GDXModelLoader.loadG3DModel("labFloor.g3dj"));
    }
 
    @Override

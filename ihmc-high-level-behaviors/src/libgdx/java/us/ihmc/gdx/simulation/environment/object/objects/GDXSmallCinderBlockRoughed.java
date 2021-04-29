@@ -7,7 +7,7 @@ public class GDXSmallCinderBlockRoughed extends GDXEnvironmentObject
 {
    public GDXSmallCinderBlockRoughed()
    {
-      super(GDXModelLoader.loadG3DModel("SmallCinderBlockRough.g3dj"));
+      create(GDXModelLoader.loadG3DModel("SmallCinderBlockRough.g3dj"));
    }
 
    @Override
