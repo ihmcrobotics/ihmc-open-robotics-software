@@ -185,7 +185,6 @@ public class GDXPose3DWidget implements RenderableProvider
 
             pose.getPosition().add(axisMoveVector);
             closestCollision.add(axisMoveVector);
-
          }
          else if (closestCollisionSelection.isAngular())
          {
@@ -231,7 +230,7 @@ public class GDXPose3DWidget implements RenderableProvider
       }
    }
 
-   public void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
+   private void determineCurrentSelectionFromPickRay(Line3DReadOnly pickRay)
    {
       closestCollisionSelection = null;
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
@@ -519,6 +518,16 @@ public class GDXPose3DWidget implements RenderableProvider
          linearControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
          angularControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
       }
+   }
+
+   public Pose3D getPose()
+   {
+      return pose;
+   }
+
+   public RigidBodyTransform getTransform()
+   {
+      return tempTransform;
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
