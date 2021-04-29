@@ -11,6 +11,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
                                                               "Environment Builder");
    private final GDXEnvironmentBuilderPanel environmentBuilderUI = new GDXEnvironmentBuilderPanel();
+   private final GDXEnvironment environment = new GDXEnvironment();
    private final ImGui3DViewInputDebugger inputDebugger = new ImGui3DViewInputDebugger();
 
    public GDXEnvironmentBuilderUI()
@@ -29,6 +30,9 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 
       environmentBuilderUI.create(baseUI);
       baseUI.getSceneManager().addRenderableProvider(environmentBuilderUI);
+
+      environment.create(baseUI);
+      baseUI.getImGuiDockingSetup().addWindow(environment.getWindowName(), environment::render);
    }
 
    @Override
