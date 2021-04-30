@@ -24,8 +24,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxOutputConverter;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -83,7 +83,7 @@ public class KSTTools
    private KinematicsStreamingToolboxInputCommand latestInput = null;
    private KinematicsStreamingToolboxInputCommand previousInput = new KinematicsStreamingToolboxInputCommand();
 
-   private final KinematicsStreamingToolboxOutputConfigurationCommand outputConfiguration = new KinematicsStreamingToolboxOutputConfigurationCommand();
+   private final KinematicsStreamingToolboxConfigurationCommand configurationCommand = new KinematicsStreamingToolboxConfigurationCommand();
    private final YoBoolean isNeckJointspaceOutputEnabled;
    private final YoBoolean isChestTaskspaceOutputEnabled;
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
@@ -150,19 +150,19 @@ public class KSTTools
 
    public void update()
    {
-      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxOutputConfigurationCommand.class))
+      if (commandInputManager.isNewCommandAvailable(KinematicsStreamingToolboxConfigurationCommand.class))
       {
-         outputConfiguration.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxOutputConfigurationCommand.class));
+         configurationCommand.set(commandInputManager.pollNewestCommand(KinematicsStreamingToolboxConfigurationCommand.class));
       }
 
-      isNeckJointspaceOutputEnabled.set(outputConfiguration.isNeckJointspaceEnabled());
-      isChestTaskspaceOutputEnabled.set(outputConfiguration.isChestTaskspaceEnabled());
-      isPelvisTaskspaceOutputEnabled.set(outputConfiguration.isPelvisTaskspaceEnabled());
+      isNeckJointspaceOutputEnabled.set(configurationCommand.isNeckJointspaceEnabled());
+      isChestTaskspaceOutputEnabled.set(configurationCommand.isChestTaskspaceEnabled());
+      isPelvisTaskspaceOutputEnabled.set(configurationCommand.isPelvisTaskspaceEnabled());
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         areHandTaskspaceOutputsEnabled.get(robotSide).set(outputConfiguration.isHandTaskspaceEnabled(robotSide));
-         areArmJointspaceOutputsEnabled.get(robotSide).set(outputConfiguration.isArmJointspaceEnabled(robotSide));
+         areHandTaskspaceOutputsEnabled.get(robotSide).set(false);//outputConfiguration.isHandTaskspaceEnabled(robotSide));
+         areArmJointspaceOutputsEnabled.get(robotSide).set(configurationCommand.isArmJointspaceEnabled(robotSide));
       }
 
       RobotConfigurationData newRobotConfigurationData = concurrentRobotConfigurationDataCopier.getCopyForReading();
@@ -200,6 +200,11 @@ public class KSTTools
       return time.getValue();
    }
 
+   public KinematicsStreamingToolboxConfigurationCommand getConfigurationCommand()
+   {
+      return configurationCommand;
+   }
+   
    public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
    {
       MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
