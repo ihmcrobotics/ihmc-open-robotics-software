@@ -8,8 +8,12 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
 {
+   private static final AtomicInteger INDEX = new AtomicInteger();
+
    public GDXMediumCinderBlockRoughed()
    {
       Model realisticModel = GDXModelLoader.loadG3DModel("MediumCinderBlockRough.g3dj");
@@ -22,9 +26,14 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
       Sphere3D boundingSphere = new Sphere3D(collisionBox.getSize().length() / 2.0);
 
       Model collisionModel = GDXModelPrimitives.buildModel(meshBuilder ->
-                                meshBuilder.addBox((float) length, (float) width, (float) height, Color.CORAL), "collisionModel");
+      {
+         meshBuilder.addBox((float) length, (float) width, (float) height, Color.RED);
+         meshBuilder.addBox((float) width, (float) height, (float) length, Color.GREEN);
+         meshBuilder.addBox((float) height, (float) length, (float) width, Color.BLUE);
+         meshBuilder.addSphere((float) width, Color.CORAL);
+      }, "collisionModel" + INDEX.getAndIncrement());
 
-      create(realisticModel, boundingSphere, collisionBox::isPointInside, collisionModel);
+      create(realisticModel, boundingSphere, collisionBox, collisionBox::isPointInside, collisionModel);
    }
 
    @Override

@@ -525,9 +525,16 @@ public class GDXPose3DWidget implements RenderableProvider
       return pose;
    }
 
+   // TODO: Make this transform the ground truth and give the pose as needed only
    public RigidBodyTransform getTransform()
    {
       return tempTransform;
+   }
+
+   public void setPoseFromTransform()
+   {
+      pose.setToZero();
+      pose.appendTransform(tempTransform);
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
