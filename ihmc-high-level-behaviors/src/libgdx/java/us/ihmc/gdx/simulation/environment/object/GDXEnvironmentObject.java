@@ -7,10 +7,13 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.function.Function;
 
@@ -22,6 +25,7 @@ public class GDXEnvironmentObject
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
    private Sphere3D boundingSphere;
+   private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
    private Model collisionMesh;
    private Material originalMaterial;
@@ -37,11 +41,13 @@ public class GDXEnvironmentObject
 
    public void create(Model realisticModel,
                       Sphere3D boundingSphere,
+                      Shape3DBasics collisionGeometryObject,
                       Function<Point3DReadOnly, Boolean> isPointInside,
                       Model collisionMesh)
    {
       this.realisticModel = realisticModel;
       this.boundingSphere = boundingSphere;
+      this.collisionGeometryObject = collisionGeometryObject;
       this.isPointInside = isPointInside;
       this.collisionMesh = collisionMesh;
       realisticModelInstance = new GDXModelInstance(realisticModel);
@@ -55,6 +61,7 @@ public class GDXEnvironmentObject
     */
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
    {
+      GDXTools.toEuclid(realisticModelInstance.transform, boundingSphere.getPosition());
       tempRayOrigin.setX(pickRay.getPoint().getX() - boundingSphere.getPosition().getX());
       tempRayOrigin.setY(pickRay.getPoint().getY() - boundingSphere.getPosition().getY());
       tempRayOrigin.setZ(pickRay.getPoint().getZ() - boundingSphere.getPosition().getZ());
@@ -110,10 +117,15 @@ public class GDXEnvironmentObject
       return collisionModelInstance;
    }
 
+   public Shape3DBasics getCollisionGeometryObject()
+   {
+      return collisionGeometryObject;
+   }
+
    public GDXEnvironmentObject duplicate()
    {
       GDXEnvironmentObject duplicate = new GDXEnvironmentObject();
-      duplicate.create(realisticModel, boundingSphere, isPointInside, collisionMesh);
+      duplicate.create(realisticModel, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
       return duplicate;
    }
 }
