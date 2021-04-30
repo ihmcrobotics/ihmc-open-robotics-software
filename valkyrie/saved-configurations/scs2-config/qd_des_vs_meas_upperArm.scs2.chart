@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<YoChartGroupConfiguration>
+<YoChartGroupConfiguration name="qd_des_vs_meas_upperArm">
     <chartConfigurations>
         <chartStyle>RAW</chartStyle>
         <identifier column="0" row="0"/>
@@ -80,6 +80,34 @@
         <yoVariables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.rightElbowPitchPDController.qd_rightElbowPitch</yoVariables>
         <yoVariables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyFeedbackController.rightElbowPitchPDController.qd_d_rightElbowPitch</yoVariables>
     </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="0" row="4"/>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.leftPalmJointControlHelper.leftPalmJointspaceStreamTimestampSource</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="1" row="4"/>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.main.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.rightPalmJointControlHelper.rightPalmJointspaceStreamTimestampSource</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="0" row="5"/>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.loggerStatus.skippedPackets</yoVariables>
+    </chartConfigurations>
+    <chartConfigurations>
+        <chartStyle>RAW</chartStyle>
+        <identifier column="1" row="5"/>
+        <negates>false</negates>
+        <YBounds lower="NaN" upper="NaN"/>
+        <yoVariables>root.loggerStatus.nonIncreasingTimestamps</yoVariables>
+    </chartConfigurations>
     <numberOfColumns>2</numberOfColumns>
-    <numberOfRows>4</numberOfRows>
+    <numberOfRows>6</numberOfRows>
 </YoChartGroupConfiguration>
