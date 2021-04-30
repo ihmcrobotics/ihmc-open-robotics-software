@@ -71,14 +71,14 @@ public class ValkyriePlanarRegionPositionControlSimulation
       BOXES_FOR_HELP_GETTING_DOWN
    }
 
-   public static Environment environment = Environment.FLAT_ON_SIDE;
+   public static Environment environment = Environment.BOXES_FOR_HELP_GETTING_DOWN;
 
    public enum InitialPose
    {
       STANDING,
       DOWN_ON_ALL_FOURS
    }
-   public static InitialPose initialPose = InitialPose.DOWN_ON_ALL_FOURS;
+   public static InitialPose initialPose = InitialPose.STANDING;
 
    public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
@@ -116,7 +116,8 @@ public class ValkyriePlanarRegionPositionControlSimulation
       }
       if (initialPose == InitialPose.DOWN_ON_ALL_FOURS)
       {
-         ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
+//         ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
+         ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursGoingDownStepsPartial(jointMap);
          simulationStarter.setRobotInitialSetup(initialSetup);
       }
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
