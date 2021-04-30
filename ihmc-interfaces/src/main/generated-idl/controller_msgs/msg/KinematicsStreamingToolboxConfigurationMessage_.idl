@@ -1,5 +1,5 @@
-#ifndef __controller_msgs__msg__KinematicsStreamingToolboxOutputConfigurationMessage__idl__
-#define __controller_msgs__msg__KinematicsStreamingToolboxOutputConfigurationMessage__idl__
+#ifndef __controller_msgs__msg__KinematicsStreamingToolboxConfigurationMessage__idl__
+#define __controller_msgs__msg__KinematicsStreamingToolboxConfigurationMessage__idl__
 
 module controller_msgs
 {
@@ -12,13 +12,23 @@ module controller_msgs
        * This message is part of the KinematicsStreamingToolbox API.
        * Allows to specify the messages the toolbox should stream to the controller.
        */
-      @TypeCode(type="controller_msgs::msg::dds_::KinematicsStreamingToolboxOutputConfigurationMessage_")
-      struct KinematicsStreamingToolboxOutputConfigurationMessage
+      @TypeCode(type="controller_msgs::msg::dds_::KinematicsStreamingToolboxConfigurationMessage_")
+      struct KinematicsStreamingToolboxConfigurationMessage
       {
         /**
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
+        /**
+         * Whether the pelvis should pinned or free to move.
+         * Default value is false.
+         */
+        boolean lock_pelvis;
+        /**
+         * Whether the chest should pinned or free to move.
+         * Default value is false.
+         */
+        boolean lock_chest;
         /**
          * Whether the left arm should be controller in joint-space.
          * This is compatible with the hand task-space control.
