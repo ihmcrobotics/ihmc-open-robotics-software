@@ -6,11 +6,11 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -227,7 +227,7 @@ public abstract class HumanoidControllerWarmup
    private void createWalkingControllerAndSetUpManagerFactory(YoRegistry managerFactoryParent)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
@@ -268,20 +268,16 @@ public abstract class HumanoidControllerWarmup
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction, feet, statusOutputManager,
+                                                                              defaultFinalTransferTime, feet, statusOutputManager,
                                                                               yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory = new HighLevelControlManagerFactory(managerFactoryParent);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
+
 
       walkingControllerState = new WalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox,
                                                           robotModel.getHighLevelControllerParameters(), robotModel.getWalkingControllerParameters());
@@ -308,16 +304,16 @@ public abstract class HumanoidControllerWarmup
       humanoidHighLevelControllerManager.addChild(walkingControllerState.getYoRegistry());
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
 
+      String name = "FootAssumeCopOnEdge";
+      YoBoolean variable = (YoBoolean) registry.findVariable(name);
+      variable.set(true);
+
+      name = "FootAssumeFootBarelyLoaded";
+      variable = (YoBoolean) registry.findVariable(name);
+      variable.set(true);
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         String name = robotSide.getLowerCaseName() + "FootAssumeCopOnEdge";
-         YoBoolean variable = (YoBoolean) registry.findVariable(name);
-         variable.set(true);
-
-         name = robotSide.getLowerCaseName() + "FootAssumeFootBarelyLoaded";
-         variable = (YoBoolean) registry.findVariable(name);
-         variable.set(true);
-
          name = robotSide.getCamelCaseNameForStartOfExpression() + "FootCurrentState";
          YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.findVariable(name);
          footStates.put(robotSide, footState);

@@ -53,7 +53,6 @@ public abstract class PlanarRegionEnvironmentInterface implements CommonAvatarEn
       generator.reset();
    }
 
-
    public CombinedTerrainObject3D getCombinedTerrainObject3D()
    {
       ensureHasBeenGenerated();

@@ -2,10 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 
 /**
  * Command that holds output from the {@link LinearMomentumRateControlModule} going to the walking controller state
@@ -22,57 +21,18 @@ public class LinearMomentumRateControlModuleOutput
    private final FramePoint2D desiredCMP = new FramePoint2D();
 
    /**
-    * If the footstep was adjusted (see {@link #footstepWasAdjusted}) this will contain the shift vector used by the
-    * walking controller to possibly update upcoming footsteps and the CoM plan.
+    * This is the error that wasn't compensated for by momentum feedback. This can be used for other balance mechanisms, like step adjustment.
     */
-   private final FrameVector3D effectiveICPAdjustment = new FrameVector3D();
+   private final FrameVector2D residualICPErrorForStepAdjustment = new FrameVector2D();
 
-   /**
-    * Flag that indicated that the ICP controller might adjust the upcoming footstep. This does not mean that the step
-    * was adjusted (for that see {@link #footstepWasAdjusted}) but merely that the ICP controller assumes it can adjust
-    * the step.
-    */
-   private boolean usingStepAdjustment;
-
-   /**
-    * Flag indicating that the upcoming footstep was adjusted. This can happen if there is significant tracking error.
-    * If this flag is true {@link #footstepSolution} will contain the pose of the adjusted footstep.
-    */
-   private boolean footstepWasAdjusted;
-
-   /**
-    * If {@link #footstepWasAdjusted} is {@code true} this will contain the new adjusted footstep pose.
-    */
-   private final FramePose3D footstepSolution = new FramePose3D();
-
-   public void setFootstepSolution(FramePose3DReadOnly footstepSolution)
+   public void setResidualICPErrorForStepAdjustment(FrameVector2DReadOnly residualICPErrorForStepAdjustment)
    {
-      this.footstepSolution.setIncludingFrame(footstepSolution);
+      this.residualICPErrorForStepAdjustment.setIncludingFrame(residualICPErrorForStepAdjustment);
    }
 
-   public FramePose3D getFootstepSolution()
+   public FrameVector2DBasics getResidualICPErrorForStepAdjustment()
    {
-      return footstepSolution;
-   }
-
-   public void setFootstepWasAdjusted(boolean footstepWasAdjusted)
-   {
-      this.footstepWasAdjusted = footstepWasAdjusted;
-   }
-
-   public boolean getFootstepWasAdjusted()
-   {
-      return footstepWasAdjusted;
-   }
-
-   public void setUsingStepAdjustment(boolean usingStepAdjustment)
-   {
-      this.usingStepAdjustment = usingStepAdjustment;
-   }
-
-   public boolean getUsingStepAdjustment()
-   {
-      return usingStepAdjustment;
+      return residualICPErrorForStepAdjustment;
    }
 
    public void setDesiredCMP(FramePoint2DReadOnly desiredCMP)
@@ -85,23 +45,11 @@ public class LinearMomentumRateControlModuleOutput
       return desiredCMP;
    }
 
-   public void setEffectiveICPAdjustment(FrameVector3DReadOnly effectiveICPAdjustment)
-   {
-      this.effectiveICPAdjustment.setIncludingFrame(effectiveICPAdjustment);
-   }
-
-   public FrameVector3D getEffectiveICPAdjustment()
-   {
-      return effectiveICPAdjustment;
-   }
 
    public void set(LinearMomentumRateControlModuleOutput other)
    {
       desiredCMP.setIncludingFrame(other.desiredCMP);
-      effectiveICPAdjustment.setIncludingFrame(other.effectiveICPAdjustment);
-      usingStepAdjustment = other.usingStepAdjustment;
-      footstepWasAdjusted = other.footstepWasAdjusted;
-      footstepSolution.setIncludingFrame(other.footstepSolution);
+      residualICPErrorForStepAdjustment.setIncludingFrame(other.residualICPErrorForStepAdjustment);
    }
 
    @Override
@@ -116,13 +64,7 @@ public class LinearMomentumRateControlModuleOutput
          LinearMomentumRateControlModuleOutput other = (LinearMomentumRateControlModuleOutput) obj;
          if (!desiredCMP.equals(other.desiredCMP))
             return false;
-         if (!effectiveICPAdjustment.equals(other.effectiveICPAdjustment))
-            return false;
-         if (usingStepAdjustment ^ other.usingStepAdjustment)
-            return false;
-         if (footstepWasAdjusted ^ other.footstepWasAdjusted)
-            return false;
-         if (!footstepSolution.equals(other.footstepSolution))
+         if (!residualICPErrorForStepAdjustment.equals(other.residualICPErrorForStepAdjustment))
             return false;
          return true;
       }

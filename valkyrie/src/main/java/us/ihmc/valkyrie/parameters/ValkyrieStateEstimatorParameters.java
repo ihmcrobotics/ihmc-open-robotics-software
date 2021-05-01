@@ -1,13 +1,16 @@
 package us.ihmc.valkyrie.parameters;
 
-import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.*;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ANGULAR_VELOCITY;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_LINEAR_ACCELERATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.IMU_ORIENTATION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_POSITION;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_TAU;
+import static us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing.SensorType.JOINT_VELOCITY;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
@@ -20,6 +23,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
+import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.valkyrie.fingers.ValkyrieHandJointName;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -48,7 +52,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    private final double angularVelocityFilterFrequencyHz;
    private final double linearAccelerationFilterFrequencyHz;
 
-   private final ValkyrieSensorInformation sensorInformation;
    private final ValkyrieJointMap jointMap;
 
    private SensorNoiseParameters sensorNoiseParameters = null;
@@ -62,20 +65,19 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    private final SideDependentList<String> footForceSensorNames;
    private final SideDependentList<String> wristForceSensorNames;
 
+   private final List<IMUBasedJointStateEstimatorParameters> imuBasedJointStateEstimatorParameters = new ArrayList<>();
+
    /*
-    * Challenge with Valkyrie is that we need minimum delay in all signal, which
-    * is usual but it does matter way more for Valkyrie as there is almost no
-    * natural damping. In the same spirit, all the signals need to be
-    * consistent, for instance joint velocity should be in phase with joint
+    * Challenge with Valkyrie is that we need minimum delay in all signal, which is usual but it does
+    * matter way more for Valkyrie as there is almost no natural damping. In the same spirit, all the
+    * signals need to be consistent, for instance joint velocity should be in phase with joint
     * position.
     */
-   public ValkyrieStateEstimatorParameters(RobotTarget target, double estimatorDT, ValkyrieSensorInformation sensorInformation,
-                                           ValkyrieJointMap jointMap)
+   public ValkyrieStateEstimatorParameters(RobotTarget target, double estimatorDT, ValkyrieSensorInformation sensorInformation, ValkyrieJointMap jointMap)
    {
       this.target = target;
       this.estimatorDT = estimatorDT;
 
-      this.sensorInformation = sensorInformation;
       this.jointMap = jointMap;
       this.footForceSensorNames = sensorInformation.getFeetForceSensorNames();
       this.wristForceSensorNames = sensorInformation.getWristForceSensorNames();
@@ -108,6 +110,17 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
          jointSpecificStiffness.put(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL), 9500.0);
 
       kinematicsPelvisPositionFilterFreqInHertz = Double.POSITIVE_INFINITY;
+
+      String pelvisIMU = sensorInformation.getRearPelvisIMUSensor();
+      String chestIMU = sensorInformation.getLeftTrunkIMUSensor();
+      double breakFrequencyForVelocityEstimation = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.002);
+      double breakFrequencyForPositionEstimation = Double.NaN;
+      imuBasedJointStateEstimatorParameters.add(new IMUBasedJointStateEstimatorParameters("Spine",
+                                                                                          target == RobotTarget.REAL_ROBOT,
+                                                                                          pelvisIMU,
+                                                                                          chestIMU,
+                                                                                          breakFrequencyForVelocityEstimation,
+                                                                                          breakFrequencyForPositionEstimation));
    }
 
    @Override
@@ -126,18 +139,22 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
       DoubleProvider orientationAlphaFilter = sensorProcessing.createAlphaFilter("orientationBreakFrequency", orientationFilterFrequencyHz);
       DoubleProvider angularVelocityAlphaFilter = sensorProcessing.createAlphaFilter("angularVelocityBreakFrequency", angularVelocityFilterFrequencyHz);
-      DoubleProvider linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationBreakFrequency", linearAccelerationFilterFrequencyHz);
+      DoubleProvider linearAccelerationAlphaFilter = sensorProcessing.createAlphaFilter("linearAccelerationBreakFrequency",
+                                                                                        linearAccelerationFilterFrequencyHz);
 
       // Lower body: For the joints using the output encoders: Compute velocity from the joint position using finite difference.
       DoubleProvider jointOutputEncoderVelocityAlphaFilter = sensorProcessing.createAlphaFilter("jointOutputEncoderVelocityBreakFrequency",
                                                                                                 jointOutputEncoderVelocityFilterFrequencyHz);
-      sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter, false,
+      sensorProcessing.computeJointVelocityFromFiniteDifferenceOnlyForSpecifiedJoints(jointOutputEncoderVelocityAlphaFilter,
+                                                                                      false,
                                                                                       namesOfJointsUsingOutputEncoder);
 
       // Lower body: Then apply for all velocity: 1- alpha filter 2- backlash compensator 3- elasticity compensation.
       DoubleProvider lowerBodyJointVelocityAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointVelocityBreakFrequency",
-                                                                                      lowerBodyJointVelocityFilterFrequencyHz);
-      DoubleProvider lowerBodyJointVelocitySlopTime = new DoubleParameter("lowerBodyJointVelocityBacklashSlopTime", registry, lowerBodyJointVelocityBacklashSlopTime);
+                                                                                            lowerBodyJointVelocityFilterFrequencyHz);
+      DoubleProvider lowerBodyJointVelocitySlopTime = new DoubleParameter("lowerBodyJointVelocityBacklashSlopTime",
+                                                                          registry,
+                                                                          lowerBodyJointVelocityBacklashSlopTime);
       sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
       sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime, false, armJointNames);
 
@@ -150,12 +167,20 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       {
          DoubleProvider elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotBreakFrequency", jointElasticityFilterFrequencyHz);
          DoubleProvider maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
-         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffness("stiffness", defaultJointStiffness, jointSpecificStiffness);
+         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffness("stiffness",
+                                                                                                          defaultJointStiffness,
+                                                                                                          jointSpecificStiffness);
 
          Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilter(elasticityAlphaFilter, true, JOINT_TAU);
-         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false,
+         sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness,
+                                                                                maxDeflection,
+                                                                                filteredTauForElasticity,
+                                                                                false,
                                                                                 armJointNames);
-         sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness, maxDeflection, filteredTauForElasticity, false,
+         sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness,
+                                                                                maxDeflection,
+                                                                                filteredTauForElasticity,
+                                                                                false,
                                                                                 armJointNames);
       }
 
@@ -217,12 +242,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    public double getEstimatorDT()
    {
       return estimatorDT;
-   }
-
-   @Override
-   public boolean isRunningOnRealRobot()
-   {
-      return target == RobotTarget.REAL_ROBOT;
    }
 
    @Override
@@ -302,12 +321,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    }
 
    @Override
-   public double getIMUJointVelocityEstimationBacklashSlopTime()
-   {
-      return 0.0;
-   }
-
-   @Override
    public double getDelayTimeForTrustingFoot()
    {
       return 0.02;
@@ -329,28 +342,6 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    public double getPelvisLinearVelocityAlphaNewTwist()
    {
       return 0.15;
-   }
-
-   @Override
-   public boolean useIMUsForSpineJointVelocityEstimation()
-   {
-      return target == RobotTarget.REAL_ROBOT;
-   }
-
-   @Override
-   public double getBreakFrequencyForSpineJointVelocityEstimation()
-   {
-      return AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.95, 0.002);
-   }
-
-   /**
-    * IMUs to use to compute the spine joint velocities.
-    * @return {@code Pair<String, String>} the first element is the name of one pelvis IMU, the second is the name of one IMU of the trunk. 
-    */
-   @Override
-   public ImmutablePair<String, String> getIMUsForSpineJointVelocityEstimation()
-   {
-      return new ImmutablePair<String, String>(sensorInformation.getRearPelvisIMUSensor(), sensorInformation.getLeftTrunkIMUSensor());
    }
 
    @Override
@@ -414,5 +405,11 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
        * which prevents the drift estimator to work reliably.
        */
       // return target == RobotTarget.REAL_ROBOT;
+   }
+
+   @Override
+   public List<IMUBasedJointStateEstimatorParameters> getIMUBasedJointStateEstimatorParameters()
+   {
+      return imuBasedJointStateEstimatorParameters;
    }
 }

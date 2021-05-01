@@ -679,7 +679,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       double duration = initialTransferDuration + transferDuration + 2.0 * swingDuration + finalTransferDuration;
 
       drcSimulationTestHelper.publishToController(footsteps);
-      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration - 0.5 * finalTransferDuration));
+      Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration - 0.7 * finalTransferDuration));
 
       double vy_bef = drcSimulationTestHelper.getYoVariable("desiredICPVelocityY").getValueAsDouble();
 
@@ -687,7 +687,7 @@ public abstract class DRCObstacleCourseFlatTest implements MultiRobotTestInterfa
       Assert.assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(transferDuration / 10.0));
 
       double vy_aft = drcSimulationTestHelper.getYoVariable("desiredICPVelocityY").getValueAsDouble();
-      Assert.assertTrue(Math.signum(vy_bef) == Math.signum(vy_aft));
+      Assert.assertEquals(Math.signum(vy_bef), Math.signum(vy_aft));
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }

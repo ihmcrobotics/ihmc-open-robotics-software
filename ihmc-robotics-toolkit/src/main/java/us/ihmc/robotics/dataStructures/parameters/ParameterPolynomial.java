@@ -49,7 +49,7 @@ public class ParameterPolynomial implements PolynomialReadOnly
    }
 
    @Override
-   public double getPosition()
+   public double getValue()
    {
       return value;
    }

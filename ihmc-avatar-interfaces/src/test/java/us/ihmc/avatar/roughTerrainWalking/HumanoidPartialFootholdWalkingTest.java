@@ -170,7 +170,7 @@ public abstract class HumanoidPartialFootholdWalkingTest implements MultiRobotTe
       FootstepDataListMessage message = new FootstepDataListMessage();
       FootstepDataMessage step = message.getFootstepDataList().add();
       step.setRobotSide(FootstepDataMessage.ROBOT_SIDE_LEFT);
-      step.getLocation().set(blockDistanceFromOrigin + 0.05, width / 2, topHeight);
+      step.getLocation().set(blockDistanceFromOrigin + 0.045, width / 2, topHeight);
 
       FootstepDataMessage step2 = message.getFootstepDataList().add();
       step2.setRobotSide(FootstepDataMessage.ROBOT_SIDE_RIGHT);

@@ -67,6 +67,11 @@ public class LIDARBasedEnvironmentAwarenessUI implements PerceptionUI
 
    private LIDARBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
+      this(uiMessager, primaryStage, true);
+   }
+
+   public LIDARBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage, boolean startMessager) throws Exception
+   {
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -75,7 +80,8 @@ public class LIDARBasedEnvironmentAwarenessUI implements PerceptionUI
 
       // Client
       this.uiMessager = uiMessager;
-      uiMessager.startMessager();
+      if (startMessager)
+         uiMessager.startMessager();
 
       reaMeshViewer = new REAMeshViewer(uiMessager);
       lidarFrameViewer = new SensorFrameViewer<LidarScanMessage>(uiMessager,

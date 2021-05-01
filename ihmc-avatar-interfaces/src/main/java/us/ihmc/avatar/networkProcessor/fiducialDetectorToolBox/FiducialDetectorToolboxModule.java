@@ -6,6 +6,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
@@ -21,11 +22,14 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
 {
    private final FiducialDetectorToolboxController controller;
 
-   public FiducialDetectorToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
+   public FiducialDetectorToolboxModule(String robotName,
+                                        RobotTarget target,
+                                        FullHumanoidRobotModel desiredFullRobotModel,
+                                        LogModelProvider modelProvider,
                                         PubSubImplementation pubSubImplementation)
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 250, pubSubImplementation);
-      controller = new FiducialDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
+      controller = new FiducialDetectorToolboxController(fullRobotModel, target, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(1.2e+6);
    }
 

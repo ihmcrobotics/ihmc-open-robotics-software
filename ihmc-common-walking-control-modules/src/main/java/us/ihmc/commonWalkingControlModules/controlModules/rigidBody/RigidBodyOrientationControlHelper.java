@@ -191,7 +191,7 @@ public class RigidBodyOrientationControlHelper
       }
       else
       {
-         trajectoryGenerator.getOrientation(orientationToPack);
+         orientationToPack.setIncludingFrame(trajectoryGenerator.getOrientation());
       }
    }
 

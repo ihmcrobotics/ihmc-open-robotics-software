@@ -1,10 +1,12 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.robotics.trajectories.providers.PositionProvider;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
+import us.ihmc.robotics.trajectories.providers.FramePositionProvider;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -12,9 +14,11 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class StraightLinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class StraightLinePositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    protected final YoRegistry registry;
+
+   private final ReferenceFrame referenceFrame;
    private final YoDouble currentTime;
    private final YoFramePoint3D currentPosition;
    private final YoFrameVector3D currentVelocity;
@@ -27,18 +31,16 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
 
    private final YoFrameVector3D differenceVector;
 
-   private final PositionProvider initialPositionProvider;
-   private final PositionProvider finalPositionProvider;
-
-   private final FramePoint3D tempInitialPosition;
-   private final FramePoint3D tempFinalPosition;
+   private final FramePositionProvider initialPositionProvider;
+   private final FramePositionProvider finalPositionProvider;
 
    private final YoBoolean continuouslyUpdateFinalPosition;
    private final DoubleProvider trajectoryTimeProvider;
 
    public StraightLinePositionTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, DoubleProvider trajectoryTimeProvider,
-         PositionProvider initialPositionProvider, PositionProvider finalPositionProvider, YoRegistry parentRegistry)
+                                                  FramePositionProvider initialPositionProvider, FramePositionProvider finalPositionProvider, YoRegistry parentRegistry)
    {
+      this.referenceFrame = referenceFrame;
       this.registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.trajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
 
@@ -57,9 +59,6 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       this.initialPositionProvider = initialPositionProvider;
       this.finalPositionProvider = finalPositionProvider;
 
-      tempInitialPosition = new FramePoint3D(referenceFrame);
-      tempFinalPosition = new FramePoint3D(referenceFrame);
-
       this.trajectoryTimeProvider = trajectoryTimeProvider;
       parentRegistry.addChild(registry);
    }
@@ -77,16 +76,12 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
 
    private void updateInitialPosition()
    {
-      initialPositionProvider.getPosition(tempInitialPosition);
-      tempInitialPosition.changeFrame(initialPosition.getReferenceFrame());
-      initialPosition.set(tempInitialPosition);
+      initialPosition.setMatchingFrame(initialPositionProvider.getPosition());
    }
 
    private void updateFinalPosition()
    {
-      finalPositionProvider.getPosition(tempFinalPosition);
-      tempFinalPosition.changeFrame(finalPosition.getReferenceFrame());
-      finalPosition.set(tempFinalPosition);
+      finalPosition.setMatchingFrame(finalPositionProvider.getPosition());
    }
 
    @Override
@@ -102,15 +97,13 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
       parameterPolynomial.compute(time);
       differenceVector.sub(finalPosition, initialPosition);
 
-      double parameter = isDone() ? 1.0 : parameterPolynomial.getPosition();
+      double parameter = isDone() ? 1.0 : parameterPolynomial.getValue();
       double parameterd = isDone() ? 0.0 : parameterPolynomial.getVelocity();
       double parameterdd = isDone() ? 0.0 : parameterPolynomial.getAcceleration();
 
       currentPosition.interpolate(initialPosition, finalPosition, parameter);
-      currentVelocity.set(differenceVector);
-      currentVelocity.scale(parameterd);
-      currentAcceleration.set(differenceVector);
-      currentAcceleration.scale(parameterdd);
+      currentVelocity.setAndScale(parameterd, differenceVector);
+      currentAcceleration.setAndScale(parameterdd, differenceVector);
    }
 
    @Override
@@ -120,34 +113,32 @@ public class StraightLinePositionTrajectoryGenerator implements PositionTrajecto
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      positionToPack.setIncludingFrame(currentPosition);
+      return referenceFrame;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      velocityToPack.setIncludingFrame(currentVelocity);
+      return currentPosition;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      accelerationToPack.setIncludingFrame(currentAcceleration);
+      return currentVelocity;
+   }
+
+   @Override
+   public FrameVector3DReadOnly getAcceleration()
+   {
+      return currentAcceleration;
    }
 
    public void setContinuouslyUpdateFinalPosition(boolean val)
    {
       continuouslyUpdateFinalPosition.set(val);
-   }
-
-   @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
    }
 
    @Override

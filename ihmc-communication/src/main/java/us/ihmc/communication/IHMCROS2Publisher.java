@@ -48,7 +48,7 @@ public class IHMCROS2Publisher<T>
    public IHMCROS2Publisher(ROS2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType), topicName),
-                            DefaultExceptionHandler.PRINT_MESSAGE);
+                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
    }
 
    public static IHMCROS2Publisher<Pose3D> newPose3DPublisher(ROS2NodeInterface ros2Node, ROS2Topic topicName)
@@ -56,7 +56,7 @@ public class IHMCROS2Publisher<T>
       PosePubSubType.setImplementation(new Pose3DPubSubTypeImpl());
       IHMCROS2Publisher<Pose3D> ihmcROS2Publisher = new IHMCROS2Publisher<>();
       ExceptionTools.handle(() -> ihmcROS2Publisher.publisher = ros2Node.createPublisher(new PosePubSubType(), topicName.getName()),
-                            DefaultExceptionHandler.PRINT_MESSAGE);
+                            DefaultExceptionHandler.MESSAGE_AND_STACKTRACE);
       return ihmcROS2Publisher;
    }
 

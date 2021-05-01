@@ -3,19 +3,19 @@ package us.ihmc.robotics.math.trajectories.generators;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotics.math.interpolators.QuinticSplineInterpolator;
-import us.ihmc.robotics.math.trajectories.PositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.FramePositionTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.PositionTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Helper class to create a position trajectory using the quintic spline interpolator Not realtime
  * safe.
  */
-public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements PositionTrajectoryGenerator
+public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements FixedFramePositionTrajectoryGenerator
 {
    private final QuinticSplineInterpolator interpolator;
    private ReferenceFrame trajectoryFrame;
@@ -33,6 +33,10 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
 
    private final FramePoint3D tempPosition;
 
+   private final FramePoint3DReadOnly desiredPosition;
+   private final FrameVector3DReadOnly desiredVelocity;
+   private final FrameVector3DReadOnly desiredAcceleration;
+
    public MultipleWaypointQuinticSplinePositionTrajectoryGenerator(String name, ReferenceFrame trajectoryFrame, int maximumNumberOfPoints,
                                                                    YoRegistry parentRegistry)
    {
@@ -49,6 +53,87 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
       this.a0 = new FrameVector3D(trajectoryFrame);
       this.vf = new FrameVector3D(trajectoryFrame);
       this.af = new FrameVector3D(trajectoryFrame);
+
+      desiredPosition = new FramePoint3DReadOnly()
+      {
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return trajectoryFrame;
+         }
+
+         @Override
+         public double getX()
+         {
+            return interpolator.getPosition(0);
+         }
+
+         @Override
+         public double getY()
+         {
+            return interpolator.getPosition(1);
+         }
+
+         @Override
+         public double getZ()
+         {
+            return interpolator.getPosition(2);
+         }
+      };
+
+      desiredVelocity = new FrameVector3DReadOnly()
+      {
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return trajectoryFrame;
+         }
+
+         @Override
+         public double getX()
+         {
+            return interpolator.getVelocity(0);
+         }
+
+         @Override
+         public double getY()
+         {
+            return interpolator.getVelocity(1);
+         }
+
+         @Override
+         public double getZ()
+         {
+            return interpolator.getVelocity(2);
+         }
+      };
+
+      desiredAcceleration = new FrameVector3DReadOnly()
+      {
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return trajectoryFrame;
+         }
+
+         @Override
+         public double getX()
+         {
+            return interpolator.getAcceleration(0);
+         }
+
+         @Override
+         public double getY()
+         {
+            return interpolator.getAcceleration(1);
+         }
+
+         @Override
+         public double getZ()
+         {
+            return interpolator.getAcceleration(2);
+         }
+      };
    }
 
    /**
@@ -66,7 +151,7 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
    public void clearAndSetTrajectoryFrame(ReferenceFrame trajectoryFrame)
    {
       this.trajectoryFrame = trajectoryFrame;
-      
+
       numberOfPoints = 0;
       v0.setToZero(trajectoryFrame);
       a0.setToZero(trajectoryFrame);
@@ -126,33 +211,21 @@ public class MultipleWaypointQuinticSplinePositionTrajectoryGenerator implements
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      trajectoryFrame.checkReferenceFrameMatch(positionToPack);
-
-      positionToPack.setX(this.interpolator.getPosition(0));
-      positionToPack.setY(this.interpolator.getPosition(1));
-      positionToPack.setZ(this.interpolator.getPosition(2));
+      return desiredPosition;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      trajectoryFrame.checkReferenceFrameMatch(velocityToPack);
-
-      velocityToPack.setX(this.interpolator.getVelocity(0));
-      velocityToPack.setY(this.interpolator.getVelocity(1));
-      velocityToPack.setZ(this.interpolator.getVelocity(2));
+      return desiredVelocity;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      trajectoryFrame.checkReferenceFrameMatch(accelerationToPack);
-
-      accelerationToPack.setX(this.interpolator.getAcceleration(0));
-      accelerationToPack.setY(this.interpolator.getAcceleration(1));
-      accelerationToPack.setZ(this.interpolator.getAcceleration(2));
+      return desiredAcceleration;
    }
 
    @Override

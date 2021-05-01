@@ -3,7 +3,6 @@ package us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine;
 import java.util.ArrayList;
 import java.util.EnumMap;
 
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -35,14 +34,9 @@ public class GenericStateMachine<E extends Enum<E>, T extends State<E>> implemen
 
    protected ArrayList<T> states = new ArrayList<T>();
 
-   public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, E initialState, YoDouble timeVariable, YoRegistry registry)
-   {
-      this(name, switchTimeName, enumType, initialState, new YoVariableDoubleProvider(timeVariable), registry);
-   }
-
    public GenericStateMachine(String name, String switchTimeName, Class<E> enumType, YoDouble timeVariable, YoRegistry registry)
    {
-      this(name, switchTimeName, enumType, null, new YoVariableDoubleProvider(timeVariable), registry);
+      this(name, switchTimeName, enumType, null, timeVariable, registry);
    }
 
    public GenericStateMachine(String stateYoVariableName, String switchTimeName, Class<E> enumType, DoubleProvider timeProvider, YoRegistry registry)

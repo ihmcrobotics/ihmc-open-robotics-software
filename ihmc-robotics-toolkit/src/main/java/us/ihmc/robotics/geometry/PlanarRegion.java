@@ -1345,7 +1345,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     *
     * @param transform transform from current frame to desired frame
     */
-   public void applyTransform(RigidBodyTransform transform)
+   public void applyTransform(RigidBodyTransformReadOnly transform)
    {
       transform.transform(fromLocalToWorldTransform);
       fromWorldToLocalTransform.set(fromLocalToWorldTransform);

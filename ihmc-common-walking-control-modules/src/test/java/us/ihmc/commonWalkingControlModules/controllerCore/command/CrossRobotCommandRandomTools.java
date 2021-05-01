@@ -45,6 +45,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -160,6 +161,7 @@ public class CrossRobotCommandRandomTools
       set.add(ControllerCoreCommand.class);
       set.add(ControllerCoreOutput.class);
       set.add(CenterOfPressureDataHolder.class);
+      set.add(DesiredExternalWrenchHolder.class);
       set.add(HumanoidRobotContextJointData.class);
       set.add(RobotMotionStatusHolder.class);
       set.add(LowLevelOneDoFJointDesiredDataHolder.class);
@@ -448,6 +450,8 @@ public class CrossRobotCommandRandomTools
       next.setJointLimitDistanceForMaxVelocity(random.nextDouble());
       next.setJointLimitFilterBreakFrequency(random.nextDouble());
       next.setVelocityControlGain(random.nextDouble());
+      next.setVelocityDeadbandSize(random.nextDouble());
+      next.setRangeOfMotionMarginFraction(random.nextDouble());
       return next;
    }
 
@@ -1151,6 +1155,18 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
+   public static LinearMomentumRateCostCommand nextLinearMomentumRateCostCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      LinearMomentumRateCostCommand next = new LinearMomentumRateCostCommand();
+      next.setCommandId(random.nextInt());
+      next.setLinearMomentumRateHessian(nextDMatrixRMaj(random, 3, 3));
+      next.setLinearMomentumRateGradient(nextDMatrixRMaj(random, 1, 3));
+      next.setWeightMatrix(nextWeightMatrix6D(random, possibleFrames));
+      next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
+
+      return next;
+   }
+
    public static SpatialFeedbackControlCommand nextSpatialFeedbackControlCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       SpatialFeedbackControlCommand next = new SpatialFeedbackControlCommand();
@@ -1402,6 +1418,30 @@ public class CrossRobotCommandRandomTools
       {
          RigidBodyBasics rigidBody = allBodies.remove(random.nextInt(allBodies.size()));
          next.registerRigidBody(rigidBody, nextFramePoint2D(random, possibleFrames));
+      }
+
+      return next;
+   }
+
+   public static DesiredExternalWrenchHolder nextDesiredExternalWrenchHolder(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
+   {
+      return nextDesiredExternalWrenchHolder(random, false, rootBody, possibleFrames);
+   }
+
+   public static DesiredExternalWrenchHolder nextDesiredExternalWrenchHolder(Random random, boolean ensureNonEmptyCommand, RigidBodyBasics rootBody,
+                                                                             ReferenceFrame... possibleFrames)
+   {
+      DesiredExternalWrenchHolder next = new DesiredExternalWrenchHolder();
+
+      List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
+      int numberOfBodies = random.nextInt(allBodies.size());
+      if (ensureNonEmptyCommand)
+         numberOfBodies = Math.max(numberOfBodies, 1);
+
+      for (int bodyIndex = 0; bodyIndex < numberOfBodies; bodyIndex++)
+      {
+         RigidBodyBasics rigidBody = allBodies.remove(random.nextInt(allBodies.size()));
+         next.registerRigidBody(rigidBody, nextWrench(random, rigidBody.getBodyFixedFrame()));
       }
 
       return next;
@@ -1662,6 +1702,7 @@ public class CrossRobotCommandRandomTools
    {
       ControllerCoreOutput next = new ControllerCoreOutput();
       next.setCenterOfPressureData(nextCenterOfPressureDataHolder(random, rootBody, possibleFrames));
+      next.setDesiredExternalWrenchData(nextDesiredExternalWrenchHolder(random, rootBody, possibleFrames));
       next.setLinearMomentumRate(nextFrameVector3D(random, possibleFrames));
       next.setRootJointDesiredConfigurationData(nextRootJointDesiredConfigurationData(random, possibleFrames));
       next.setLowLevelOneDoFJointDesiredDataHolder(nextJointDesiredOutputListBasics(random, rootBody, possibleFrames));
@@ -1707,10 +1748,7 @@ public class CrossRobotCommandRandomTools
    {
       LinearMomentumRateControlModuleOutput next = new LinearMomentumRateControlModuleOutput();
       next.setDesiredCMP(nextFramePoint2D(random, possibleFrames));
-      next.setEffectiveICPAdjustment(nextFrameVector3D(random, possibleFrames));
-      next.setUsingStepAdjustment(random.nextBoolean());
-      next.setFootstepWasAdjusted(random.nextBoolean());
-      next.setFootstepSolution(nextFramePose3D(random, possibleFrames));
+      next.setResidualICPErrorForStepAdjustment(nextFrameVector2D(random, possibleFrames));
       return next;
    }
 
@@ -1721,27 +1759,19 @@ public class CrossRobotCommandRandomTools
       LinearMomentumRateControlModuleInput next = new LinearMomentumRateControlModuleInput();
       next.setContactStateCommand(new SideDependentList<PlaneContactStateCommand>(nextPlaneContactStateCommand(random, rootBody, possibleFrames),
                                                                                   nextPlaneContactStateCommand(random, rootBody, possibleFrames)));
+      next.setCenterOfMassHeightControlCommand(nextCenterOfMassFeedbackControlCommand(random, rootBody, possibleFrames));
+      next.setPelvisHeightControlCommand(nextPointFeedbackControlCommand(random, rootBody, possibleFrames));
+      next.setUsePelvisHeightCommand(random.nextBoolean());
       next.setControlHeightWithMomentum(random.nextBoolean());
       next.setUseMomentumRecoveryMode(random.nextBoolean());
       next.setDesiredCapturePoint(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCapturePointVelocity(nextFrameVector2D(random, possibleFrames));
-      next.setDesiredICPAtEndOfState(nextFramePoint2D(random, possibleFrames));
-      next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());
-      next.setFinalTransferDuration(random.nextDouble());
-      next.setFootsteps(nextRecyclingArrayList(SimpleFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
-      next.setSwingDurations(nextTDoubleArrayList(random, random.nextInt(10)));
-      next.setTransferDurations(nextTDoubleArrayList(random, random.nextInt(10)));
-      next.setInitializeForSingleSupport(random.nextBoolean());
-      next.setInitializeForStanding(random.nextBoolean());
-      next.setInitializeForTransfer(random.nextBoolean());
+      next.setInitializeOnStateChange(random.nextBoolean());
       next.setKeepCoPInsideSupportPolygon(random.nextBoolean());
       next.setMinimizeAngularMomentumRateZ(random.nextBoolean());
       next.setOmega0(random.nextDouble());
       next.setPerfectCMP(nextFramePoint2D(random, possibleFrames));
       next.setPerfectCoP(nextFramePoint2D(random, possibleFrames));
-      next.setRemainingTimeInSwingUnderDisturbance(random.nextDouble());
-      next.setSupportSide(nextElementIn(random, RobotSide.values));
-      next.setTransferToSide(nextElementIn(random, RobotSide.values));
       return next;
    }
 

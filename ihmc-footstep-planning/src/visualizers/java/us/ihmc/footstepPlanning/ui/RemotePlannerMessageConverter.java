@@ -14,7 +14,7 @@ import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory;
@@ -85,7 +85,7 @@ public class RemotePlannerMessageConverter
       /* subscribers */
       // we want to listen to the incoming request
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerCommunicationProperties.inputTopic(robotName),
+                                                    FootstepPlannerAPI.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
@@ -93,7 +93,7 @@ public class RemotePlannerMessageConverter
 
       // publishers
       outputStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                                 FootstepPlannerCommunicationProperties.outputTopic(robotName));
+                                                                 FootstepPlannerAPI.outputTopic(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());

@@ -4,6 +4,8 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.SwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -19,9 +21,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class FootControlHelper
 {
-   private static final double EPSILON_POINT_ON_EDGE = 5e-3;
-   private static final double EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS = 8e-3;
-
    private final RobotSide robotSide;
    private final ContactableFoot contactableFoot;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
@@ -39,13 +38,19 @@ public class FootControlHelper
 
    private final ExplorationParameters explorationParameters;
    private final FootholdRotationParameters footholdRotationParameters;
+   private final SupportStateParameters supportStateParameters;
+
+   private final SwingTrajectoryCalculator swingTrajectoryCalculator;
+   private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
    public FootControlHelper(RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
+                            YoSwingTrajectoryParameters swingTrajectoryParameters,
                             WorkspaceLimiterParameters workspaceLimiterParameters,
                             HighLevelHumanoidControllerToolbox controllerToolbox,
                             ExplorationParameters explorationParameters,
                             FootholdRotationParameters footholdRotationParameters,
+                            SupportStateParameters supportStateParameters,
                             YoRegistry registry)
    {
       this.robotSide = robotSide;
@@ -53,6 +58,13 @@ public class FootControlHelper
       this.walkingControllerParameters = walkingControllerParameters;
       this.explorationParameters = explorationParameters;
       this.footholdRotationParameters = footholdRotationParameters;
+      this.supportStateParameters = supportStateParameters;
+
+      this.swingTrajectoryParameters = swingTrajectoryParameters;
+      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(), robotSide, controllerToolbox,
+                                                                     walkingControllerParameters,
+                                                                     swingTrajectoryParameters,
+                                                                     registry);
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -114,7 +126,9 @@ public class FootControlHelper
          isDesiredCoPOnEdge.set(false);
       else
       {
-         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ? EPSILON_POINT_ON_EDGE_WITH_HYSTERESIS : EPSILON_POINT_ON_EDGE;
+         double epsilon = isDesiredCoPOnEdge.getBooleanValue() ?
+               supportStateParameters.getCopOnEdgeEpsilonWithHysteresis() :
+               supportStateParameters.getCopOnEdgeEpsilon();
          FrameConvexPolygon2DReadOnly footSupportPolygon = bipedSupportPolygons.getFootPolygonInSoleFrame(robotSide);
          isDesiredCoPOnEdge.set(!footSupportPolygon.isPointInside(desiredCoP, -epsilon)); // Minus means that the check is done with a smaller polygon
       }
@@ -148,11 +162,6 @@ public class FootControlHelper
    public ToeOffParameters getToeOffParameters()
    {
       return walkingControllerParameters.getToeOffParameters();
-   }
-
-   public SwingTrajectoryParameters getSwingTrajectoryParameters()
-   {
-      return walkingControllerParameters.getSwingTrajectoryParameters();
    }
 
    public PartialFootholdControlModule getPartialFootholdControlModule()
@@ -191,5 +200,20 @@ public class FootControlHelper
    public FootholdRotationParameters getFootholdRotationParameters()
    {
       return footholdRotationParameters;
+   }
+
+   public SupportStateParameters getSupportStateParameters()
+   {
+      return supportStateParameters;
+   }
+
+   public YoSwingTrajectoryParameters getSwingTrajectoryParameters()
+   {
+      return swingTrajectoryParameters;
+   }
+
+   public SwingTrajectoryCalculator getSwingTrajectoryCalculator()
+   {
+      return swingTrajectoryCalculator;
    }
 }

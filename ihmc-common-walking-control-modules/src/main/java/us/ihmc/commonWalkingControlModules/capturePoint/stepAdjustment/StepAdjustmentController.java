@@ -104,7 +104,7 @@ public class StepAdjustmentController
    private final BipedSupportPolygons bipedSupportPolygons;
 
    public StepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
-                                   SideDependentList<ReferenceFrame> soleZUpFrames,
+                                   SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                    BipedSupportPolygons bipedSupportPolygons,
                                    ICPControlPolygons icpControlPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -125,7 +125,7 @@ public class StepAdjustmentController
 
    public StepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                    ICPOptimizationParameters icpOptimizationParameters,
-                                   SideDependentList<ReferenceFrame> soleZUpFrames,
+                                   SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                    BipedSupportPolygons bipedSupportPolygons,
                                    ICPControlPolygons icpControlPolygons,
                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet,

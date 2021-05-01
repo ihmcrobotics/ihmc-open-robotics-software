@@ -13,15 +13,15 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DefaultSimulationLowLevelControllerFactory implements SimulationLowLevelControllerFactory
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
    private final double simulateDT;
 
-   public DefaultSimulationLowLevelControllerFactory(DRCRobotJointMap jointMap, double simulateDT)
+   public DefaultSimulationLowLevelControllerFactory(HumanoidJointNameMap jointMap, double simulateDT)
    {
       this.jointMap = jointMap;
       this.simulateDT = simulateDT;

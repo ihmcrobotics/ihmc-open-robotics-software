@@ -19,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -58,17 +59,31 @@ public class WalkingCommandConsumer
                                  HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
                                  WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
    {
-      this.walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
-      yoTime = controllerToolbox.getYoTime();
+    this(commandInputManager,
+         statusMessageOutputManager,
+         controllerToolbox.getWalkingMessageHandler(),
+         controllerToolbox.getYoTime(),
+         controllerToolbox.getFullRobotModel(),
+         controllerToolbox.getPelvisZUpFrame(),
+         managerFactory,
+         walkingControllerParameters,
+         parentRegistry);
+   }
 
-      this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, controllerToolbox.getYoTime());
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
+                                 WalkingMessageHandler walkingMessageHandler, YoDouble yoTime, FullHumanoidRobotModel fullRobotModel,
+                                 ReferenceFrame pelvisZUpFrame, HighLevelControlManagerFactory managerFactory,
+                                 WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
+   {
+      this.walkingMessageHandler = walkingMessageHandler;
+      this.yoTime = yoTime;
+
+      this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
       this.statusMessageOutputManager = statusMessageOutputManager;
 
-      RigidBodyBasics head = controllerToolbox.getFullRobotModel().getHead();
-      RigidBodyBasics chest = controllerToolbox.getFullRobotModel().getChest();
-      RigidBodyBasics pelvis = controllerToolbox.getFullRobotModel().getPelvis();
-
-      ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
+      RigidBodyBasics head = fullRobotModel.getHead();
+      RigidBodyBasics chest = fullRobotModel.getChest();
+      RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       ReferenceFrame chestBodyFrame = null;
       if (chest != null)
@@ -93,10 +108,10 @@ public class WalkingCommandConsumer
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
          if (hand != null)
          {
-            ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
+            ReferenceFrame handControlFrame = fullRobotModel.getHandControlFrame(robotSide);
             RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
             handManager.setDoPrepareForLocomotion(walkingControllerParameters.doPrepareManipulationForLocomotion());
             handManagers.put(robotSide, handManager);

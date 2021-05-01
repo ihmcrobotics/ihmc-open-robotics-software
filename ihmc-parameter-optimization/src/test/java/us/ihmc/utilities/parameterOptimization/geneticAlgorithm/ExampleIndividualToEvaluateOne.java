@@ -149,5 +149,11 @@ public class ExampleIndividualToEvaluateOne extends IndividualToEvaluate
    }
 
 
+   @Override
+   public void replay()
+   {      
+   }
+
+
 
 }

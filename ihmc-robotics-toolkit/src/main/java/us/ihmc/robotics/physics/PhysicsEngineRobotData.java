@@ -116,7 +116,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
    public void initialize()
    {
-      robotInitialStateWriter.write();
+      if (robotInitialStateWriter != null) 
+         robotInitialStateWriter.write();
       updateFrames();
    }
 

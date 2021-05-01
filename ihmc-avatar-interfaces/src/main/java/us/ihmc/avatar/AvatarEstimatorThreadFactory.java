@@ -66,13 +66,13 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
+import us.ihmc.yoVariables.exceptions.IllegalOperationException;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class AvatarEstimatorThreadFactory
 {
    private final YoRegistry estimatorRegistry = new YoRegistry("DRCEstimatorThread");
-   private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
 
    // Required fields -----------------------------------------------
    private final RequiredFactoryField<Double> gravityField = new RequiredFactoryField<>("gravity");
@@ -85,6 +85,7 @@ public class AvatarEstimatorThreadFactory
    private final RequiredFactoryField<WholeBodyControllerParameters<RobotSide>> controllerParametersField = new RequiredFactoryField<>("controllerParameters");
 
    // Optional fields -----------------------------------------------
+   private final OptionalFactoryField<YoGraphicsListRegistry> yoGraphicsListRegistryField = new OptionalFactoryField<>("yoGraphicsListRegistry");
    private final OptionalFactoryField<StateEstimatorController> mainStateEstimatorField = new OptionalFactoryField<>("mainEstimatorController");
    private final OptionalFactoryField<PairList<BooleanSupplier, StateEstimatorController>> secondaryStateEstimatorsField = new OptionalFactoryField<>("secondaryEstimatorControllers");
 
@@ -93,8 +94,8 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    private final OptionalFactoryField<RealtimeROS2Node> realtimeROS2NodeField = new OptionalFactoryField<>("realtimeROS2Node");
-   private final OptionalFactoryField<ROS2Topic> outputTopicField = new OptionalFactoryField<>("outputTopic");
-   private final OptionalFactoryField<ROS2Topic> inputTopicField = new OptionalFactoryField<>("inputTopic");
+   private final OptionalFactoryField<ROS2Topic<?>> outputTopicField = new OptionalFactoryField<>("outputTopic");
+   private final OptionalFactoryField<ROS2Topic<?>> inputTopicField = new OptionalFactoryField<>("inputTopic");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
@@ -165,14 +166,14 @@ public class AvatarEstimatorThreadFactory
     * <li>Set the contact point parameters using {@link DRCRobotModel#getContactPointParameters()}.
     * </ul>
     *
-    * @param robotModel the robot model used to configure this factory.
+    * @param robotModel        the robot model used to configure this factory.
     * @param robotInitialSetup
     */
    public void configureWithDRCRobotModel(DRCRobotModel robotModel)
    {
       configureWithDRCRobotModel(robotModel, null);
    }
-   
+
    public void configureWithDRCRobotModel(DRCRobotModel robotModel, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup)
    {
       configureWithWholeBodyControllerParameters(robotModel);
@@ -222,14 +223,11 @@ public class AvatarEstimatorThreadFactory
    /**
     * ROS 2 necessary information to create the real-time publisher/subscriber.
     *
-    * @param ros2Node                     the real-time node to create the publisher with.
-    * @param outputTopic  the generator to use for creating the topic name for
-    *                                     publishers.
-    * @param inputTopic the generator to use for creating the topic name for
-    *                                     subscribers.
+    * @param ros2Node    the real-time node to create the publisher with.
+    * @param outputTopic the generator to use for creating the topic name for publishers.
+    * @param inputTopic  the generator to use for creating the topic name for subscribers.
     */
-   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic outputTopic,
-                           ROS2Topic inputTopic)
+   public void setROS2Info(RealtimeROS2Node ros2Node, ROS2Topic<?> outputTopic, ROS2Topic<?> inputTopic)
    {
       realtimeROS2NodeField.set(ros2Node);
       outputTopicField.set(outputTopic);
@@ -363,7 +361,7 @@ public class AvatarEstimatorThreadFactory
    public void setMainStateEstimator(StateEstimatorController mainStateEstimator)
    {
       if (mainStateEstimatorField.hasValue())
-         throw new IllegalArgumentException("The main state estimator has already been set.");
+         throw new IllegalOperationException("The main state estimator has already been set.");
       mainStateEstimatorField.set(mainStateEstimator);
    }
 
@@ -407,8 +405,13 @@ public class AvatarEstimatorThreadFactory
    public void addSecondaryStateEstimators(BooleanSupplier reinitilizeSupplier, StateEstimatorController secondaryStateEstimator)
    {
       if (!useStateEstimator())
-         throw new IllegalArgumentException("Cannot add state estimator because SensorReaderFactory.useStateEstimator() is false.");
+         throw new IllegalOperationException("Cannot add state estimator because SensorReaderFactory.useStateEstimator() is false.");
       getSecondaryStateEstimators().add(reinitilizeSupplier, secondaryStateEstimator);
+   }
+
+   public void setYoGraphicsListRegistry(YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      yoGraphicsListRegistryField.set(yoGraphicsListRegistry);
    }
 
    public AvatarEstimatorThread createAvatarEstimatorThread()
@@ -495,7 +498,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2Topic getOutputTopic()
+   public ROS2Topic<?> getOutputTopic()
    {
       if (outputTopicField.hasValue())
          return outputTopicField.get();
@@ -503,7 +506,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2Topic getInputTopic()
+   public ROS2Topic<?> getInputTopic()
    {
       if (inputTopicField.hasValue())
          return inputTopicField.get();
@@ -533,7 +536,7 @@ public class AvatarEstimatorThreadFactory
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2NodeField.get(),
                                                           RequestWristForceSensorCalibrationPacket.class,
                                                           inputTopicField.get(),
-                                                 subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
+                                                          subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdaterField.get().setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
       }
@@ -785,7 +788,9 @@ public class AvatarEstimatorThreadFactory
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
-      return yoGraphicsListRegistry;
+      if (!yoGraphicsListRegistryField.hasValue())
+         yoGraphicsListRegistryField.set(new YoGraphicsListRegistry());
+      return yoGraphicsListRegistryField.get();
    }
 
    public YoRegistry getEstimatorRegistry()

@@ -31,7 +31,7 @@ public class IDLSequenceLongSerializer extends Serializer<IDLSequence.Long>
          output.writeLong(collection.get(i));
    }
 
-   public IDLSequence.Long read(Kryo kryo, Input input, Class<IDLSequence.Long> type)
+   public IDLSequence.Long read(Kryo kryo, Input input, Class<? extends IDLSequence.Long> type)
    {
       int length = input.readInt(true);
       IDLSequence.Long resultList = new IDLSequence.Long(length, TYPE_CODE);

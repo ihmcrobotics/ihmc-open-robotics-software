@@ -4,9 +4,9 @@ import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -14,12 +14,11 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.javaFXVisualizers.MeshHolder;
+import us.ihmc.javafx.MeshHolder;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -36,6 +35,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private static final Color idealStepColor = Color.color(0.0, 0.0, 1.0, 0.4);
    private static final Color leftFootColor = Color.color(0.9, 0.05, 0.05, 0.9);
    private static final Color rightFootColor = Color.color(0.0, 0.52, 0.0, 0.9);
+   private static final Color bodyBoxColor = Color.color(0.0, 0.52, 0.0, 0.9);
 
    private final List<Point2D> defaultFootPoints = new ArrayList<>();
    private final ConvexPolygon2D defaultFootPolygon = new ConvexPolygon2D();
@@ -49,11 +49,13 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private final MeshHolder loggedSnappedCandidateStepGraphic = new MeshHolder(root);
    private final MeshHolder loggedWiggledCandidateStepGraphic = new MeshHolder(root);
    private final MeshHolder loggedIealStepGraphic = new MeshHolder(root);
+   private final MeshHolder loggedBodyBoxGraphic = new MeshHolder(root);
 
    private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> startOfSwingStepToVisualize;
    private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> stanceStepToVisualize;
    private final AtomicReference<Pair<DiscreteFootstep, FootstepSnapData>> touchdownStepToVisualize;
    private final AtomicReference<RigidBodyTransform> idealStep;
+   private final AtomicReference<List<Box3D>> collisionBoxes;
 
    public FootstepPlannerLogRenderer(SideDependentList<List<Point2D>> defaultContactPoints, Messager messager)
    {
@@ -77,6 +79,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       stanceStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.StanceStepToVisualize);
       touchdownStepToVisualize = messager.createInput(FootstepPlannerMessagerAPI.TouchdownStepToVisualize);
       idealStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedIdealStep);
+      collisionBoxes = messager.createInput(FootstepPlannerMessagerAPI.LoggedCollisionBoxes);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStartOfSwingStep, startOfSwingStepGraphic.getMeshView()::setVisible);
@@ -84,7 +87,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, loggedUnsnappedCandidateStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.getMeshView()::setVisible);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.getMeshView()::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, loggedIealStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowBodyBox, loggedBodyBoxGraphic.getMeshView()::setVisible);
 
       root.setVisible(false);
    }
@@ -192,6 +195,31 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          addFootstep(idealStep.getTranslation(), idealStep.getRotation(), defaultFootPoints, defaultFootPolygon, idealStepColor);
          this.loggedIealStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedIealStepGraphic.update();
+      }
+
+      // Render collision box
+      List<Box3D> collisionBoxes = this.collisionBoxes.getAndSet(null);
+      if (collisionBoxes != null)
+      {
+         if (collisionBoxes.isEmpty())
+         {
+            loggedBodyBoxGraphic.remove();
+         }
+         else
+         {
+            meshBuilder.clear();
+
+            for (int i = 0; i < collisionBoxes.size(); i++)
+            {
+               Box3D collisionBox = collisionBoxes.get(i);
+               meshBuilder.addMesh(MeshDataGenerator.Cube(collisionBox.getSizeX(), collisionBox.getSizeY(), collisionBox.getSizeZ(), true),
+                                   collisionBox.getPosition(),
+                                   collisionBox.getOrientation(),
+                                   bodyBoxColor);
+               loggedBodyBoxGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+               loggedBodyBoxGraphic.update();
+            }
+         }
       }
    }
 

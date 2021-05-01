@@ -7,89 +7,67 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.ComboBox?>
-<?import javafx.scene.control.ToggleButton?>
 <AnchorPane prefHeight="400.0" prefWidth="1260.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.RobotOperationTabController">
 	<children>
-		<GridPane layoutX="15.0" layoutY="27.0">
-			<children>
-				<Label contentDisplay="CENTER" prefHeight="16.0" prefWidth="328.0" style="-fx-font-weight: bold" text="Robot control" textAlignment="CENTER" GridPane.columnSpan="2" />
-				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" GridPane.rowIndex="1" />
-				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="2" />
-				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="3" />
-				<Button fx:id="shutdown" onAction="#shutdown" prefWidth="130.0" text="Shutdown" GridPane.rowIndex="4" />
-
-				<Button fx:id="abortWalking" onAction="#abortWalking" prefHeight="26.0" prefWidth="146.0" text="Abort Walking" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-				<Button fx:id="pauseWalking" onAction="#pauseWalking" prefHeight="26.0" prefWidth="145.0" text="Pause Walking" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-				<Button fx:id="continueWalking" onAction="#continueWalking" prefHeight="26.0" prefWidth="145.0" text="Continue Walking" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-
-				<Label style="-fx-font-weight: bold" text="Support regions" GridPane.columnIndex="2" GridPane.rowIndex="0" />
-				<Label text="Enable support regions" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-				<Label text="Support regions scale" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-				<CheckBox fx:id="enableSupportRegions" prefHeight="18.0" prefWidth="454.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Label text="REA" GridPane.columnIndex="5">
-               <font>
-                  <Font name="System Bold" size="13.0" />
-               </font>
-            </Label>
-            <Button fx:id="clearREA" mnemonicParsing="false" onAction="#clearREA" text="Clear" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-
-                <Label style="-fx-font-weight: bold" text="Arms" GridPane.columnIndex="6" GridPane.rowIndex="0" />
-                <Button onAction="#sendLeftArmIn" text="Left Arm In" GridPane.columnIndex="6" GridPane.rowIndex="1" />
-                <Button onAction="#sendRightArmIn" text="Right Arm In" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-
-                <Label style="-fx-font-weight: bold" text="Kinematics control" GridPane.columnIndex="7" GridPane.rowIndex="0" />
-                <ToggleButton text="Enable" fx:id="enableIK" GridPane.columnIndex="7" GridPane.rowIndex="1" />
-                <Button text="Reset" fx:id="resetIK" onAction="#resetIKOffset" GridPane.columnIndex="7" GridPane.rowIndex="2" />
-                <Label text="IK Mode" GridPane.columnIndex="7" GridPane.rowIndex="3" />
-                <Label text="x" GridPane.columnIndex="7" GridPane.rowIndex="4" />
-                <Label text="y" GridPane.columnIndex="7" GridPane.rowIndex="5" />
-                <Label text="z" GridPane.columnIndex="7" GridPane.rowIndex="6" />
-                <Label text="yaw" GridPane.columnIndex="7" GridPane.rowIndex="7" />
-                <Label text="pitch" GridPane.columnIndex="7" GridPane.rowIndex="8" />
-                <Label text="roll" GridPane.columnIndex="7" GridPane.rowIndex="9" />
-
-                <Button text="Send jointspace trajectory" onAction="#sendJointspaceTrajectory" GridPane.columnIndex="8" GridPane.rowIndex="1" GridPane.columnSpan="2"/>
-                <Button text="Send taskspace trajectory" onAction="#sendTaskspaceTrajectory" GridPane.columnIndex="8" GridPane.rowIndex="2" GridPane.columnSpan="2"/>
-                <ComboBox fx:id="ikMode" prefWidth="120.0" GridPane.columnIndex="8" GridPane.rowIndex="3" />
-                <Slider fx:id="xIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="2" GridPane.rowIndex="4" />
-                <Slider fx:id="yIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="5" GridPane.rowIndex="5" />
-                <Slider fx:id="zIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="0.5" min="-0.5" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="6" GridPane.rowIndex="6" />
-                <Slider fx:id="yawIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.57" min="-1.57" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="7" GridPane.rowIndex="7" />
-                <Slider fx:id="pitchIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.57" min="-1.57" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="8" GridPane.rowIndex="8" />
-                <Slider fx:id="rollIKSlider" blockIncrement="0.01" majorTickUnit="0.05" max="1.57" min="-1.57" minorTickCount="4" prefHeight="20.0" GridPane.columnIndex="8" GridPane.columnSpan="9" GridPane.rowIndex="9" />
-
-            </children>
-            <columnConstraints>
-                <ColumnConstraints />
-                <ColumnConstraints maxWidth="275.0" minWidth="52.0" prefWidth="185.0" />
-                <ColumnConstraints maxWidth="275.0" minWidth="52.0" prefWidth="185.0" />
-                <ColumnConstraints maxWidth="124.0" minWidth="0.0" prefWidth="90.0" />
-                <ColumnConstraints maxWidth="124.0" minWidth="10.0" prefWidth="15.0" />
-                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="100.0" />
-                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="175.0" />
-                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="150.0" />
-                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="150.0" />
-                <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="150.0" />
-            <ColumnConstraints />
-            <ColumnConstraints />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-                <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            <RowConstraints />
-            </rowConstraints>
-        </GridPane>
+      <HBox fx:id="robotOperationHBox">
+         <children>
+      		<GridPane>
+      			<children>
+      				<Label contentDisplay="CENTER" prefHeight="16.0" prefWidth="328.0" style="-fx-font-weight: bold" text="Robot control" textAlignment="CENTER" GridPane.columnSpan="2" />
+      				<Button fx:id="homeAll" onAction="#homeAll" prefWidth="130.0" text="Home All" GridPane.rowIndex="1" />
+      				<Button fx:id="freeze" onAction="#freeze" prefWidth="130.0" text="Freeze" GridPane.rowIndex="2" />
+      				<Button fx:id="standPrep" onAction="#standPrep" prefWidth="130.0" text="Stand Prep" GridPane.rowIndex="3" />
+      				<Button fx:id="shutdown" onAction="#shutdown" prefWidth="130.0" text="Shutdown" GridPane.rowIndex="4" />
+      
+      				<Button fx:id="abortWalking" onAction="#abortWalking" prefHeight="26.0" prefWidth="146.0" text="Abort Walking" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      				<Button fx:id="pauseWalking" onAction="#pauseWalking" prefHeight="26.0" prefWidth="145.0" text="Pause Walking" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      				<Button fx:id="continueWalking" onAction="#continueWalking" prefHeight="26.0" prefWidth="145.0" text="Continue Walking" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+      
+      				<Label style="-fx-font-weight: bold" text="Support regions" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+      				<Label text="Enable support regions" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+      				<Label text="Support regions scale" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+      				<Button fx:id="sendSupportRegionParameters" onAction="#sendSupportRegionParameters" text="Send parameters" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+      				<CheckBox fx:id="enableSupportRegions" prefHeight="18.0" prefWidth="454.0" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+      				<Spinner fx:id="supportRegionScale" editable="true" prefWidth="130.0" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+                  <Label text="REA" GridPane.columnIndex="5">
+                     <font>
+                        <Font name="System Bold" size="13.0" />
+                     </font>
+                  </Label>
+                  <Button fx:id="clearREA" mnemonicParsing="false" onAction="#clearREA" text="Clear" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+      
+                  </children>
+                  <columnConstraints>
+                      <ColumnConstraints />
+                      <ColumnConstraints maxWidth="275.0" minWidth="52.0" prefWidth="185.0" />
+                      <ColumnConstraints maxWidth="275.0" minWidth="52.0" prefWidth="185.0" />
+                      <ColumnConstraints maxWidth="124.0" minWidth="0.0" prefWidth="90.0" />
+                      <ColumnConstraints maxWidth="124.0" minWidth="10.0" prefWidth="15.0" />
+                      <ColumnConstraints maxWidth="225.0" minWidth="10.0" prefWidth="100.0" />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  <ColumnConstraints />
+                  </columnConstraints>
+                  <rowConstraints>
+                      <RowConstraints />
+                      <RowConstraints />
+                      <RowConstraints />
+                      <RowConstraints />
+                      <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  <RowConstraints />
+                  </rowConstraints>
+              </GridPane>
+         </children>
+      </HBox>
     </children>
 </AnchorPane>

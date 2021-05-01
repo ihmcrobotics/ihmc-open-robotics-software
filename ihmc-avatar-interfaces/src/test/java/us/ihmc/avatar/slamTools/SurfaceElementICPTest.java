@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.io.File;
 import java.util.List;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Tag;
@@ -14,14 +13,11 @@ import org.junit.jupiter.api.Test;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TIntArrayList;
-import javafx.scene.paint.Color;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.SLAMViewer;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
@@ -65,13 +61,13 @@ public class SurfaceElementICPTest
 
       if (VISUALIZE)
       {
-         SLAMViewer slamViewer = new SLAMViewer();
-         slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-         slamViewer.addOctree(map, Color.CORAL, octreeResolution);
-         slamViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
-
-         slamViewer.start("testSurfaceElements");
-         ThreadTools.sleepForever();
+//         SLAMViewer slamViewer = new SLAMViewer();
+//         slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
+//         slamViewer.addOctree(map, Color.CORAL, octreeResolution);
+//         slamViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
+//
+//         slamViewer.start("testSurfaceElements");
+//         ThreadTools.sleepForever();
       }
    }
 
@@ -140,14 +136,14 @@ public class SurfaceElementICPTest
 
       if (VISUALIZE)
       {
-         SLAMViewer slamViewer = new SLAMViewer();
-         slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-         slamViewer.addOctree(map, Color.CORAL, octreeResolution);
-         slamViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
-         slamViewer.addPointCloud(bigPoints, Color.RED, 0.02);
-
-         slamViewer.start("testDistanceComputation");
-         ThreadTools.sleepForever();
+//         SLAMViewer slamViewer = new SLAMViewer();
+//         slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
+//         slamViewer.addOctree(map, Color.CORAL, octreeResolution);
+//         slamViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
+//         slamViewer.addPointCloud(bigPoints, Color.RED, 0.02);
+//
+//         slamViewer.start("testDistanceComputation");
+//         ThreadTools.sleepForever();
       }
    }
 
@@ -179,12 +175,12 @@ public class SurfaceElementICPTest
 
       if (VISUALIZE)
       {
-         SLAMViewer originalViewer = new SLAMViewer();
-         originalViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-
-         originalViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.CYAN);
-         originalViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
-         originalViewer.start("originalViewer");
+//         SLAMViewer originalViewer = new SLAMViewer();
+//         originalViewer.addOctree(map, Color.CORAL, octreeResolution, true);
+//
+//         originalViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.CYAN);
+//         originalViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
+//         originalViewer.start("originalViewer");
       }
 
       int numberOfSurfel = frame2.getNumberOfSurfaceElements();
@@ -280,16 +276,16 @@ public class SurfaceElementICPTest
 
       if (VISUALIZE)
       {
-         SLAMViewer slamViewer = new SLAMViewer();
-         slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-         slamViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.GREEN);
-         slamViewer.addSensorPose(frame2.getCorrectedSensorPoseInWorld(), Color.GREEN);
-         slamViewer.addSensorPose(frame2.getUncorrectedSensorPoseInWorld(), Color.BLUE);
-         slamViewer.start("testDriftCorrection");
-
-         assertTrue(0.005 > qualityArray[qualityArray.length - 1], "GOOD!");
-
-         ThreadTools.sleepForever();
+//         SLAMViewer slamViewer = new SLAMViewer();
+//         slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
+//         slamViewer.addPointCloud(frame2.getCorrectedPointCloudInWorld(), Color.GREEN);
+//         slamViewer.addSensorPose(frame2.getCorrectedSensorPoseInWorld(), Color.GREEN);
+//         slamViewer.addSensorPose(frame2.getUncorrectedSensorPoseInWorld(), Color.BLUE);
+//         slamViewer.start("testDriftCorrection");
+//
+//         assertTrue(0.005 > qualityArray[qualityArray.length - 1], "GOOD!");
+//
+//         ThreadTools.sleepForever();
       }
    }
 

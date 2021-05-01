@@ -3,6 +3,7 @@ package us.ihmc.tools.string;
 import org.apache.logging.log4j.message.ParameterizedMessageFactory;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 
 import java.util.function.Supplier;
 
@@ -56,6 +57,14 @@ public class StringTools
             + ", " + FormattingTools.getFormattedDecimal3D(pose.getY())
             + ", " + FormattingTools.getFormattedDecimal3D(pose.getZ())
             + ") yaw: " + FormattingTools.getFormattedDecimal3D(pose.getYaw());
+   }
+
+   public static String tupleString(Tuple3DReadOnly tuple)
+   {
+      return "(" + FormattingTools.getFormattedDecimal3D(tuple.getX())
+             + ", " + FormattingTools.getFormattedDecimal3D(tuple.getY())
+             + ", " + FormattingTools.getFormattedDecimal3D(tuple.getZ())
+             + ")";
    }
 
    public static class FormattedDouble

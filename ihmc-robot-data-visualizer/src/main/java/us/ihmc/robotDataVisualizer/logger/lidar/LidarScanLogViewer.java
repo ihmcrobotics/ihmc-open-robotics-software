@@ -17,7 +17,7 @@ import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import javafx.scene.transform.Affine;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -103,16 +103,14 @@ public class LidarScanLogViewer extends AnimationTimer
 
       Point3D32 scanPoint = new Point3D32();
       scanMeshBuilder.clear();
-      int numberOfScanPoints = message.getScan().size() / 3;
-      for (int i = 0; i < numberOfScanPoints; i++)
+      int numberOfScanPoints = message.getNumberOfPoints();
+      LidarPointCloudCompression.decompressPointCloud(message.getScan(), message.getNumberOfPoints(), (i, x, y, z) ->
       {
          double alpha = i / (double) numberOfScanPoints;
          Color color = Color.hsb(alpha * 240.0, 1.0, 1.0);
-
-         MessageTools.unpackScanPoint(message, i, scanPoint);
-
+         scanPoint.set(x, y, z);
          scanMeshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, color);
-      }
+      });
 
       MeshView scanMeshView = new MeshView(scanMeshBuilder.generateMesh());
       scanMeshView.setMaterial(scanMeshBuilder.generateMaterial());

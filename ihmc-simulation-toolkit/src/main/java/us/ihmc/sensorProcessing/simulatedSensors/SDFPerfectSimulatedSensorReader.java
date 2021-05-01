@@ -1,20 +1,29 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.robotController.RawSensorReader;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
@@ -25,8 +34,10 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.IMUMount;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.simulatedSensors.WrenchCalculatorInterface;
+import us.ihmc.tools.lists.PairList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoLong;
 
@@ -37,9 +48,9 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrames referenceFrames;
 
+   private final List<Runnable> oneDoFJointStateUpdaters = new ArrayList<>();
    private final List<OneDoFJointStateReadOnly> jointSensorOutputList = new ArrayList<>();
    private final Map<OneDoFJointBasics, OneDoFJointStateReadOnly> jointToSensorOutputMap = new HashMap<>();
-   private final List<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>> oneDoFJointPairs = new ArrayList<>();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoLong timestamp = new YoLong("timestamp", registry);
@@ -47,6 +58,7 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    private final YoLong sensorHeadPPSTimetamp = new YoLong("sensorHeadPPSTimetamp", registry);
 
    private final LinkedHashMap<ForceSensorDefinition, WrenchCalculatorInterface> forceTorqueSensors = new LinkedHashMap<>();
+   private final PairList<IMUSensor, IMUMount> imuSensorPairs = new PairList<>();
    private final List<IMUSensor> imuSensors = new ArrayList<>();
 
    private final ForceSensorDataHolder forceSensorDataHolderToUpdate;
@@ -77,11 +89,24 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          if (joint instanceof OneDoFJointBasics)
          {
             OneDoFJointBasics oneDoFJoint = (OneDoFJointBasics) joint;
-            String name = oneDoFJoint.getName();
-            OneDegreeOfFreedomJoint oneDegreeOfFreedomJoint = robot.getOneDegreeOfFreedomJoint(name);
 
-            ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = new ImmutablePair<>(oneDegreeOfFreedomJoint, oneDoFJoint);
-            oneDoFJointPairs.add(jointPair);
+            if (oneDoFJoint instanceof InvertedFourBarJoint)
+            {
+               String jointAName = ((InvertedFourBarJoint) oneDoFJoint).getJointA().getName();
+               String jointBName = ((InvertedFourBarJoint) oneDoFJoint).getJointB().getName();
+               String jointCName = ((InvertedFourBarJoint) oneDoFJoint).getJointC().getName();
+               String jointDName = ((InvertedFourBarJoint) oneDoFJoint).getJointD().getName();
+               oneDoFJointStateUpdaters.add(new InvertedFourBarJointStateUpdater((InvertedFourBarJoint) oneDoFJoint,
+                                                                                 robot.getOneDegreeOfFreedomJoint(jointAName),
+                                                                                 robot.getOneDegreeOfFreedomJoint(jointBName),
+                                                                                 robot.getOneDegreeOfFreedomJoint(jointCName),
+                                                                                 robot.getOneDegreeOfFreedomJoint(jointDName)));
+            }
+            else
+            {
+               oneDoFJointStateUpdaters.add(new OneDoFJointStateUpdater(oneDoFJoint, robot.getOneDegreeOfFreedomJoint(oneDoFJoint.getName())));
+            }
+
             OneDoFJointStateReadOnly jointSensorOutput = OneDoFJointStateReadOnly.createFromOneDoFJoint(oneDoFJoint, true);
             jointSensorOutputList.add(jointSensorOutput);
             jointToSensorOutputMap.put(oneDoFJoint, jointSensorOutput);
@@ -96,7 +121,14 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
 
    public void addIMUSensor(IMUDefinition imuDefinition)
    {
-      imuSensors.add(new IMUSensor(imuDefinition, null));
+      addIMUSensor(imuDefinition, null);
+   }
+
+   public void addIMUSensor(IMUDefinition imuDefinition, IMUMount imuMount)
+   {
+      IMUSensor imuSensor = new IMUSensor(imuDefinition, null);
+      imuSensorPairs.add(new ImmutablePair<>(imuSensor, imuMount));
+      imuSensors.add(imuSensor);
    }
 
    @Override
@@ -124,12 +156,18 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    }
 
    private final RigidBodyTransform temporaryRootToWorldTransform = new RigidBodyTransform();
+   private final Vector3D linearAcceleration = new Vector3D();
+   private final Vector3D angularVelocity = new Vector3D();
+   private final Quaternion orientation = new Quaternion();
 
    @Override
    public void read()
    {
       // Think about adding root body acceleration to the fullrobotmodel
-      readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations();
+      for (int i = 0; i < oneDoFJointStateUpdaters.size(); i++)
+      {
+         oneDoFJointStateUpdaters.get(i).run();
+      }
       readAndUpdateRootJointPositionAndOrientation();
       readAndUpdateRootJointAngularAndLinearVelocity();
       // Update frames after setting angular and linear velocities to correctly update zup frames
@@ -150,15 +188,35 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
          }
       }
 
-      for (IMUSensor imuSensor : imuSensors)
+      for (ImmutablePair<IMUSensor, IMUMount> imuSensorPair : imuSensorPairs)
       {
+         IMUSensor imuSensor = imuSensorPair.getLeft();
+         IMUMount imuMount = imuSensorPair.getRight();
+
          ReferenceFrame measurementFrame = imuSensor.getMeasurementFrame();
-         Twist twist = new Twist(imuSensor.getMeasurementLink().getBodyFixedFrame().getTwistOfFrame());
-         twist.changeFrame(measurementFrame);
-         imuSensor.setOrientationMeasurement(measurementFrame.getTransformToRoot().getRotation());
-         imuSensor.setAngularVelocityMeasurement(twist.getAngularPart());
-         // TODO Add acceleration update.
+
+         if (imuMount != null)
+         {
+            imuMount.getLinearAccelerationInBody(linearAcceleration);
+            imuMount.getAngularVelocityInBody(angularVelocity);
+            imuMount.getOrientation(orientation);
+
+            imuSensor.setLinearAccelerationMeasurement(linearAcceleration);
+            imuSensor.setAngularVelocityMeasurement(angularVelocity);
+            imuSensor.setOrientationMeasurement(orientation);
+         }
+         else
+         {
+            Twist twist = new Twist(imuSensor.getMeasurementLink().getBodyFixedFrame().getTwistOfFrame());
+            twist.changeFrame(measurementFrame);
+            imuSensor.setAngularVelocityMeasurement(twist.getAngularPart());
+            imuSensor.setOrientationMeasurement(measurementFrame.getTransformToRoot().getRotation());
+
+            // TODO add acceleration
+         }
+
       }
+
    }
 
    private void readAndUpdateRootJointAngularAndLinearVelocity()
@@ -197,24 +255,6 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
       packRootTransform(robot, temporaryRootToWorldTransform);
       temporaryRootToWorldTransform.getRotation().normalize();
       rootJoint.setJointConfiguration(temporaryRootToWorldTransform);
-   }
-
-   private void readAndUpdateOneDoFJointPositionsVelocitiesAndAccelerations()
-   {
-      for (int i = 0; i < oneDoFJointPairs.size(); i++)
-      {
-         ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics> jointPair = oneDoFJointPairs.get(i);
-         OneDegreeOfFreedomJoint pinJoint = jointPair.getLeft();
-         OneDoFJointBasics revoluteJoint = jointPair.getRight();
-
-         if (pinJoint == null)
-            continue;
-
-         revoluteJoint.setQ(pinJoint.getQYoVariable().getDoubleValue());
-         revoluteJoint.setQd(pinJoint.getQDYoVariable().getDoubleValue());
-         revoluteJoint.setQdd(pinJoint.getQDDYoVariable().getDoubleValue());
-         revoluteJoint.setTau(pinJoint.getTau());
-      }
    }
 
    protected void packRootTransform(FloatingRootJointRobot robot, RigidBodyTransform transformToPack)
@@ -262,5 +302,68 @@ public class SDFPerfectSimulatedSensorReader implements RawSensorReader, SensorO
    public ForceSensorDataHolderReadOnly getForceSensorOutputs()
    {
       return forceSensorDataHolderToUpdate;
+   }
+
+   public static class OneDoFJointStateUpdater implements Runnable
+   {
+      private final OneDoFJointBasics inverseDynamicsJoint;
+      private final OneDegreeOfFreedomJoint scsJoint;
+
+      public OneDoFJointStateUpdater(OneDoFJointBasics inverseDynamicsJoint, OneDegreeOfFreedomJoint scsJoint)
+      {
+         this.inverseDynamicsJoint = inverseDynamicsJoint;
+         this.scsJoint = scsJoint;
+      }
+
+      public void run()
+      {
+         if (scsJoint == null)
+            return;
+
+         inverseDynamicsJoint.setQ(scsJoint.getQ());
+         inverseDynamicsJoint.setQd(scsJoint.getQD());
+         inverseDynamicsJoint.setQdd(scsJoint.getQDD());
+         inverseDynamicsJoint.setTau(scsJoint.getTau());
+      }
+   }
+
+   public static class InvertedFourBarJointStateUpdater implements Runnable
+   {
+      private final InvertedFourBarJoint invertedFourBarJoint;
+      private final OneDegreeOfFreedomJoint scsJointA, scsJointB, scsJointC, scsJointD;
+
+      public InvertedFourBarJointStateUpdater(InvertedFourBarJoint invertedFourBarJoint, OneDegreeOfFreedomJoint scsJointA, OneDegreeOfFreedomJoint scsJointB,
+                                              OneDegreeOfFreedomJoint scsJointC, OneDegreeOfFreedomJoint scsJointD)
+      {
+         this.invertedFourBarJoint = invertedFourBarJoint;
+         this.scsJointA = scsJointA;
+         this.scsJointB = scsJointB;
+         this.scsJointC = scsJointC;
+         this.scsJointD = scsJointD;
+      }
+
+      @Override
+      public void run()
+      {
+         FourBarKinematicLoopFunction fourBarFunction = invertedFourBarJoint.getFourBarFunction();
+
+         DMatrixRMaj loopJacobian = fourBarFunction.getLoopJacobian();
+         if (scsJointA != null && scsJointD != null)
+         {
+            invertedFourBarJoint.setQ(scsJointA.getQ() + scsJointD.getQ());
+            invertedFourBarJoint.setQd(scsJointA.getQD() + scsJointD.getQD());
+            invertedFourBarJoint.setQdd(scsJointA.getQDD() + scsJointD.getQDD());
+            fourBarFunction.updateState(false, false);
+            invertedFourBarJoint.setTau(loopJacobian.get(0) * scsJointA.getTau() + loopJacobian.get(3) * scsJointD.getTau());
+         }
+         else
+         {
+            invertedFourBarJoint.setQ(scsJointB.getQ() + scsJointC.getQ());
+            invertedFourBarJoint.setQd(scsJointB.getQD() + scsJointC.getQD());
+            invertedFourBarJoint.setQdd(scsJointB.getQDD() + scsJointC.getQDD());
+            fourBarFunction.updateState(false, false);
+            invertedFourBarJoint.setTau(loopJacobian.get(1) * scsJointB.getTau() + loopJacobian.get(2) * scsJointC.getTau());
+         }
+      }
    }
 }

@@ -5,14 +5,14 @@ import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieSimulationLowLevelControllerFactory implements SimulationLowLevelControllerFactory
 {
    private final double controlDT;
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
-   public ValkyrieSimulationLowLevelControllerFactory(DRCRobotJointMap jointMap, double controlDT)
+   public ValkyrieSimulationLowLevelControllerFactory(HumanoidJointNameMap jointMap, double controlDT)
    {
       this.jointMap = jointMap;
       this.controlDT = controlDT;

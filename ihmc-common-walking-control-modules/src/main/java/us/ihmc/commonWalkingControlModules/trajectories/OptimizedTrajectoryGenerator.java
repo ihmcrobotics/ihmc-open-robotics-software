@@ -5,7 +5,7 @@ import gnu.trove.map.TIntIntMap;
 import gnu.trove.map.hash.TIntIntHashMap;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.generators.TrajectoryPointOptimizer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -344,7 +344,7 @@ public class OptimizedTrajectoryGenerator
 
       YoPolynomial polynomial = trajectories.get(activeSegment);
       polynomial.compute(time);
-      desiredPosition.set(polynomial.getPosition());
+      desiredPosition.set(polynomial.getValue());
       desiredVelocity.set(polynomial.getVelocity());
       desiredAcceleration.set(polynomial.getAcceleration());
       desiredJerk.set(polynomial.getJerk());
@@ -386,19 +386,19 @@ public class OptimizedTrajectoryGenerator
 
    public double getVelocity()
    {
-      double duration = waypointTimes.get(waypointTimes.size() - 1).getDoubleValue();
+      double duration = waypointTimes.get(segments.getIntegerValue() - 1).getDoubleValue();
       return desiredVelocity.getDoubleValue() / duration;
    }
 
    public double getAcceleration()
    {
-      double squaredDuration = MathTools.square(waypointTimes.get(waypointTimes.size() - 1).getDoubleValue());
+      double squaredDuration = MathTools.square(waypointTimes.get(segments.getIntegerValue() - 1).getDoubleValue());
       return desiredAcceleration.getDoubleValue() / squaredDuration;
    }
 
    public double getJerk()
    {
-      double duration = waypointTimes.get(waypointTimes.size() - 1).getDoubleValue();
+      double duration = waypointTimes.get(segments.getIntegerValue()  - 1).getDoubleValue();
       double cubedDuration = MathTools.pow(duration, 3);
       return desiredJerk.getDoubleValue() / cubedDuration;
    }

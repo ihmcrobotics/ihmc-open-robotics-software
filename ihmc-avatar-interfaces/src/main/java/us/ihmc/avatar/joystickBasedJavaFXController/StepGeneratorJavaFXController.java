@@ -74,7 +74,7 @@ import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.javaFXToolkit.graphics.JavaFXMeshDataInterpreter;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.javaFXVisualizers.JavaFXRobotVisualizer;
+import us.ihmc.javafx.JavaFXRobotVisualizer;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -266,9 +266,8 @@ public class StepGeneratorJavaFXController
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
       double collisionBoxHeight = 1.0;
-      double collisionXYProximityCheck = 0.01;
       collisionDetector = new BoundingBoxCollisionDetector();
-      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
+      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight);
    }
 
    public void update(long now)

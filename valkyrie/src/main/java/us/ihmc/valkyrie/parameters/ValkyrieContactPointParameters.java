@@ -13,7 +13,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -21,10 +21,10 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
 {
    private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
 
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
    private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, ValkyriePhysicalProperties physicalProperties,
+   public ValkyrieContactPointParameters(HumanoidJointNameMap jointMap, ValkyriePhysicalProperties physicalProperties,
                                          FootContactPoints<RobotSide> footContactPoints)
    {
       super(jointMap, physicalProperties.getFootWidth(), physicalProperties.getFootLength(), physicalProperties.getSoleToAnkleFrameTransforms());

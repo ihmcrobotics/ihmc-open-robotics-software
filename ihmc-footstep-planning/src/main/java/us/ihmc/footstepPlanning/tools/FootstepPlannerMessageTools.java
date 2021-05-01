@@ -114,8 +114,7 @@ public class FootstepPlannerMessageTools
       packet.setForwardWeight(parameters.getForwardWeight());
       packet.setLateralWeight(parameters.getLateralWeight());
       packet.setCostPerStep(parameters.getCostPerStep());
-      packet.setNumberOfBoundingBoxChecks(parameters.getNumberOfBoundingBoxChecks());
-      packet.setMaximum2dDistanceFromBoundingBoxToPenalize(parameters.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      packet.setIntermediateBodyBoxChecks(parameters.getIntermediateBodyBoxChecks());
       packet.setFootholdAreaWeight(parameters.getFootholdAreaWeight());
       packet.setDistanceFromPathTolerance(parameters.getDistanceFromPathTolerance());
       packet.setDeltaYawFromReferenceTolerance(parameters.getDeltaYawFromReferenceTolerance());

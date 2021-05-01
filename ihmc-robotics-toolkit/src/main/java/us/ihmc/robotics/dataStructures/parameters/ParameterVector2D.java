@@ -39,4 +39,14 @@ public class ParameterVector2D implements Vector2DReadOnly
    {
       return y.getValue();
    }
+
+   public DoubleParameter getXParameter()
+   {
+      return x;
+   }
+
+   public DoubleParameter getYParameter()
+   {
+      return y;
+   }
 }

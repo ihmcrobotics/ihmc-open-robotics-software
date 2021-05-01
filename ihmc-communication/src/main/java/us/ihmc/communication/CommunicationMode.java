@@ -11,6 +11,10 @@ public enum CommunicationMode
    INTERPROCESS(DomainFactory.PubSubImplementation.FAST_RTPS),
    INTRAPROCESS(DomainFactory.PubSubImplementation.INTRAPROCESS);
 
+   public static final CommunicationMode[] VALUES = values();
+   public static final String[] ROS2_NAMES = new String[] {"Fast-RTPS", "Intraprocess"};
+   public static final String[] MESSAGER_NAMES = new String[] {"Kryonet", "Shared memory"};
+
    private DomainFactory.PubSubImplementation pubSubImplementation;
 
    CommunicationMode(DomainFactory.PubSubImplementation pubSubImplementation)
@@ -21,5 +25,10 @@ public enum CommunicationMode
    public DomainFactory.PubSubImplementation getPubSubImplementation()
    {
       return pubSubImplementation;
+   }
+
+   public static CommunicationMode fromOrdinal(int ordinal)
+   {
+      return VALUES[ordinal];
    }
 }

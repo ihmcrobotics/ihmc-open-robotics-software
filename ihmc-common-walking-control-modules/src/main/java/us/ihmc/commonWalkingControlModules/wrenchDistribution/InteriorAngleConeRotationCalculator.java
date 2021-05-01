@@ -5,6 +5,8 @@ import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 public class InteriorAngleConeRotationCalculator implements FrictionConeRotationCalculator
 {
@@ -16,14 +18,13 @@ public class InteriorAngleConeRotationCalculator implements FrictionConeRotation
    }
 
    @Override
-   public double computeConeRotation(YoPlaneContactState yoPlaneContactState, int contactPointIndex)
+   public double computeConeRotation(ConvexPolygon2DReadOnly supportPolygonInPlaneFrame, Point3DReadOnly contactPoint)
    {
-      point2d.set(yoPlaneContactState.getContactPoints().get(contactPointIndex));
-      ConvexPolygon2DReadOnly supportPolygon = yoPlaneContactState.getSupportPolygonInPlaneFrame();
-      int vertexIndex = supportPolygon.getClosestVertexIndex(point2d);
+      point2d.set(contactPoint);
+      int vertexIndex = supportPolygonInPlaneFrame.getClosestVertexIndex(point2d);
 
-      double angleOfEdge = getAngleOfEdgeAfterPoint(supportPolygon, vertexIndex);
-      double interiorAngle = getInteriorAngle(supportPolygon, vertexIndex);
+      double angleOfEdge = getAngleOfEdgeAfterPoint(supportPolygonInPlaneFrame, vertexIndex);
+      double interiorAngle = getInteriorAngle(supportPolygonInPlaneFrame, vertexIndex);
       return angleOfEdge - 0.5 * interiorAngle + offset;
    }
 

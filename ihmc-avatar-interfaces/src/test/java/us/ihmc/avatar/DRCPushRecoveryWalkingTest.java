@@ -12,7 +12,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,6 +19,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -107,7 +107,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
       double percentInSwing = 0.5;
       RobotSide side = RobotSide.LEFT;
@@ -133,7 +133,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      magnitude = 700.0;
+      magnitude = pushMagnitude;
       duration = 0.05;
       side = RobotSide.LEFT;
 
@@ -148,7 +148,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(-0.5, 1.0, 0.0);
-      double magnitude = 700;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
       double percentInSwing = 0.2;
       RobotSide side = RobotSide.LEFT;
@@ -164,7 +164,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.5, 1.0, 0.0);
-      double magnitude = 800.0;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
       double percentInSwing = 0.4;
       RobotSide side = RobotSide.LEFT;
@@ -180,7 +180,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 600.0;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
@@ -190,7 +190,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(0.5, -1.0, 0.0);
-      magnitude = 700.0;
+      magnitude = pushMagnitude;
       duration = 0.05;
       double percentInSwing = 0.4;
       side = RobotSide.RIGHT;
@@ -206,7 +206,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 600.0;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
       double percentInTransferState = 0.5;
       RobotSide side = RobotSide.LEFT;
@@ -216,7 +216,7 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // push the robot again with new parameters
       forceDirection = new Vector3D(0.0, 1.0, 0.0);
-      magnitude = 600.0;
+      magnitude = pushMagnitude;
       duration = 0.05;
       double percentInSwing = 0.4;
       side = RobotSide.LEFT;
@@ -232,13 +232,13 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
 
       // setup all parameters
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
-      double magnitude = 700.0;
+      double magnitude = pushMagnitude;
       double duration = 0.05;
 
       // This doesn't work for 0.5 or higher. We need to do more development to get this working better. So for now, just stick with 0.4.
       // 0.9 * Math.random();
       double percentInTransferState = 0.4;
-      PrintTools.info(this, "percentInTransferState = " + percentInTransferState);
+      LogTools.info("percentInTransferState = " + percentInTransferState);
       RobotSide side = RobotSide.LEFT;
 
       // apply the push
@@ -264,10 +264,9 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
          final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule",
-               footPrefix + "CurrentState");
+                                                                                                     footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController",
-               "walkingCurrentState");
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController", "walkingCurrentState");
          swingStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          swingFinishConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
@@ -283,12 +282,12 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       double stepWidth = 0.14;
       int steps = 10;
 
-      ReferenceFrame pelvisFrame = drcSimulationTestHelper.getSDFFullRobotModel().getPelvis().getBodyFixedFrame();
+      ReferenceFrame pelvisFrame = drcSimulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame();
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       for (int i = 1; i <= steps; i++)
       {
-         RobotSide robotSide = i%2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+         RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
          double footstepY = robotSide == RobotSide.LEFT ? stepWidth : -stepWidth;
          double footstepX = stepLength * i;
          FramePoint3D location = new FramePoint3D(pelvisFrame, footstepX, footstepY, 0.0);
@@ -299,13 +298,14 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
          footsteps.getFootstepDataList().add().set(footstepData);
       }
 
+      footsteps.setAreFootstepsAdjustable(true);
       drcSimulationTestHelper.publishToController(footsteps);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
    }
 
    private void testPush(Vector3D forceDirection, double magnitude, double duration, double percentInState, RobotSide side,
-         SideDependentList<StateTransitionCondition> condition, double stateTime)
-               throws SimulationExceededMaximumTimeException
+                         SideDependentList<StateTransitionCondition> condition, double stateTime)
+         throws SimulationExceededMaximumTimeException
    {
       walkForward();
       double delay = stateTime * percentInState;

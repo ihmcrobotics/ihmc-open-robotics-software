@@ -97,7 +97,7 @@ public class WalkingFailureDetectionControlModule
 
    private final FrameVector2D tempFallingDirection = new FrameVector2D();
 
-   public void checkIfRobotIsFalling(FramePoint2D capturePoint2d, FramePoint2D desiredCapturePoint2d)
+   public void checkIfRobotIsFalling(FramePoint2DReadOnly capturePoint2d, FramePoint2DReadOnly desiredCapturePoint2d)
    {
       updateCombinedPolygon();
 

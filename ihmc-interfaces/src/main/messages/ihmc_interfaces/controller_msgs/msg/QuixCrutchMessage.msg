@@ -12,4 +12,5 @@ bool continuous_walking false
 controller_msgs/FlatStepTypeMessage flat_step_type
 controller_msgs/QuixStairsStepTypeMessage stairs_step_type
 controller_msgs/QuixSideStepDirectionMessage side_step_direction
-bool cancel_requested_behavior false
+controller_msgs/QuixSlopeStepTypeMessage slope_step_type
+byte force_swing_side 255

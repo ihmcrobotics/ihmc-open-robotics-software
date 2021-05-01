@@ -10,6 +10,7 @@ import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactive
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolverWithInactiveVariables;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public interface ControllerCoreOptimizationSettings
 {
@@ -17,14 +18,14 @@ public interface ControllerCoreOptimizationSettings
     * Gets the weight specifying how much high joint velocity values should be penalized in the
     * optimization problem.
     * <p>
-    * This parameter is used in {@link InverseKinematicsOptimizationControlModule} which itself is
-    * used when running the {@link WholeBodyControllerCore} in the
+    * This parameter is used in {@link InverseKinematicsOptimizationControlModule} which itself is used
+    * when running the {@link WholeBodyControllerCore} in the
     * {@link WholeBodyControllerCoreMode#INVERSE_KINEMATICS} mode.
     * </p>
     * <p>
     * A non-zero positive value should be used to ensure the Hessian matrix in the optimization is
-    * invertible. It is should preferably be above {@code 1.0e-8}. A high value will cause the
-    * system to become too 'lazy'.
+    * invertible. It is should preferably be above {@code 1.0e-8}. A high value will cause the system
+    * to become too 'lazy'.
     * </p>
     *
     * @return the weight to use for joint acceleration regularization.
@@ -41,18 +42,17 @@ public interface ControllerCoreOptimizationSettings
     * This parameter is used in:
     * <ul>
     * <li>{@link InverseDynamicsOptimizationControlModule} which itself is used when running the
-    * {@link WholeBodyControllerCore} in the {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS}
-    * mode.
+    * {@link WholeBodyControllerCore} in the {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
     * <li>{@link InverseKinematicsOptimizationControlModule} which itself is used when running the
     * {@link WholeBodyControllerCore} in the {@link WholeBodyControllerCoreMode#INVERSE_KINEMATICS}
     * mode.
     * </ul>
     * </p>
     * <p>
-    * When used for the inverse dynamics mode, a non-zero positive value should be used to ensure
-    * the Hessian matrix in the optimization is invertible. It is should preferably be above
-    * {@code 1.0e-8}. A high value will cause the system to become too 'lazy'. A value of
-    * {@code 0.005} is used for Atlas' simulations.
+    * When used for the inverse dynamics mode, a non-zero positive value should be used to ensure the
+    * Hessian matrix in the optimization is invertible. It is should preferably be above
+    * {@code 1.0e-8}. A high value will cause the system to become too 'lazy'. A value of {@code 0.005}
+    * is used for Atlas' simulations.
     * </p>
     *
     * @return the weight to use for joint acceleration regularization.
@@ -62,8 +62,8 @@ public interface ControllerCoreOptimizationSettings
    /**
     * Gets the maximum value for the absolute joint accelerations in the optimization problem.
     * <p>
-    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is
-    * used when running the {@link WholeBodyControllerCore} in the
+    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is used
+    * when running the {@link WholeBodyControllerCore} in the
     * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
     * </p>
     *
@@ -79,23 +79,53 @@ public interface ControllerCoreOptimizationSettings
     * Gets the weight specifying how much high joint jerk values should be penalized in the
     * optimization problem.
     * <p>
-    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is
-    * used when running the {@link WholeBodyControllerCore} in the
+    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is used
+    * when running the {@link WholeBodyControllerCore} in the
     * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
     * </p>
     * <p>
-    * A positive value should be used but does not necessarily need to be non-zero. This weight
-    * helps to improve smoothness of the resulting motions. A high value will cause the system to
-    * become too 'floppy'. A value of {@code 0.1} is used for Atlas' simulations.
+    * A positive value should be used but does not necessarily need to be non-zero. This weight helps
+    * to improve smoothness of the resulting motions. A high value will cause the system to become too
+    * 'floppy'. A value of {@code 0.1} is used for Atlas' simulations.
     * </p>
     *
     * @return the weight to use for joint jerk regularization.
     */
    double getJointJerkWeight();
 
+   /**
+    * Gets the weight specifying how much high joint torque values should be penalized in the
+    * optimization problem.
+    * <p>
+    * This parameter is used in {@link InverseDynamicsOptimizationControlModule} which itself is used
+    * when running the {@link WholeBodyControllerCore} in the
+    * {@link WholeBodyControllerCoreMode#INVERSE_DYNAMICS} mode.
+    * </p>
+    * <p>
+    * This parameter is only used when the joint torques are part of the optimization's objective.
+    * </p>
+    *
+    * @return the weight to use for joint torques regularization.
+    */
    default double getJointTorqueWeight()
    {
       return 0.005;
+   }
+
+   /**
+    * Whether the desired joint torques coming out of the controller core should be limited.
+    * <p>
+    * When enabled, {@link OneDoFJointReadOnly#getEffortLimitLower()} and
+    * {@link OneDoFJointReadOnly#getEffortLimitUpper()} are used to clamp the desired joint torque for
+    * each individual joint.
+    * </p>
+    *
+    * @return {@code true} if the desired joint torques should be limited to the joint's limits,
+    *         {@code false} for not limiting the joint torques. Default value: {@code false}.
+    */
+   default boolean areJointTorqueLimitsConsidered()
+   {
+      return false;
    }
 
    /**
@@ -109,15 +139,15 @@ public interface ControllerCoreOptimizationSettings
     * </p>
     * <p>
     * A non-zero positive value should be used to ensure the Hessian matrix in the optimization is
-    * invertible. It is should preferably be above {@code 1.0e-8}. A high value will cause the
-    * system to become too 'floppy'. A value of {@code 1.0e-5} is used for Atlas' simulations. Be
-    * careful as the weight is for forces and thus is affected by the total weight of the robot. A
-    * higher value should be picked for a lighter robot.
+    * invertible. It is should preferably be above {@code 1.0e-8}. A high value will cause the system
+    * to become too 'floppy'. A value of {@code 1.0e-5} is used for Atlas' simulations. Be careful as
+    * the weight is for forces and thus is affected by the total weight of the robot. A higher value
+    * should be picked for a lighter robot.
     * </p>
     * <p>
-    * The notation 'rho' is used to describe the contact force magnitude to exert at each basis
-    * vector of each contact point. As the setup is somewhat hectic to explain, you can refer to the
-    * following paper at page 9: <br>
+    * The notation 'rho' is used to describe the contact force magnitude to exert at each basis vector
+    * of each contact point. As the setup is somewhat hectic to explain, you can refer to the following
+    * paper at page 9: <br>
     * <a href=
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
@@ -136,15 +166,15 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCoreMode#VIRTUAL_MODEL} respectively.
     * </p>
     * <p>
-    * A positive value will ensure that the optimization is setup to satisfy a unilateral contact
-    * for each contacting body. A non-zero and positive value ensures that any rigid-body that is
-    * assumed to be in contact will exert a minimum amount of force onto the environment. This tends
-    * to reduce foot slipping.
+    * A positive value will ensure that the optimization is setup to satisfy a unilateral contact for
+    * each contacting body. A non-zero and positive value ensures that any rigid-body that is assumed
+    * to be in contact will exert a minimum amount of force onto the environment. This tends to reduce
+    * foot slipping.
     * </p>
     * <p>
-    * The notation 'rho' is used to describe the contact force magnitude to exert at each basis
-    * vector of each contact point. As the setup is somewhat hectic to explain, you can refer to the
-    * following paper at page 9: <br>
+    * The notation 'rho' is used to describe the contact force magnitude to exert at each basis vector
+    * of each contact point. As the setup is somewhat hectic to explain, you can refer to the following
+    * paper at page 9: <br>
     * <a href=
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
@@ -155,8 +185,8 @@ public interface ControllerCoreOptimizationSettings
    double getRhoMin();
 
    /**
-    * Gets the default weight specifying how much high variations of contact forces should be
-    * penalized in the optimization problem.
+    * Gets the default weight specifying how much high variations of contact forces should be penalized
+    * in the optimization problem.
     * <p>
     * This parameter is used in {@link InverseDynamicsOptimizationControlModule} and
     * {@link VirtualModelControlOptimizationControlModule} which are use when running the
@@ -164,11 +194,11 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCoreMode#VIRTUAL_MODEL} respectively.
     * </p>
     * <p>
-    * A positive value should be used but does not necessarily need to be non-zero. This weight
-    * helps to improve smoothness of the resulting forces. A high value will cause the system to
-    * become too 'floppy' and unresponsive. A value of {@code 0.002} is used for Atlas' simulations.
-    * Be careful as the weight is for forces and thus is affected by the total weight of the robot.
-    * A higher value should be picked for a lighter robot.
+    * A positive value should be used but does not necessarily need to be non-zero. This weight helps
+    * to improve smoothness of the resulting forces. A high value will cause the system to become too
+    * 'floppy' and unresponsive. A value of {@code 0.002} is used for Atlas' simulations. Be careful as
+    * the weight is for forces and thus is affected by the total weight of the robot. A higher value
+    * should be picked for a lighter robot.
     * </p>
     *
     * @return the weight to use for the regularization of the rate of change of contact forces.
@@ -187,12 +217,12 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Gets the weight specifying how much deviation of the desired center of pressure (CoP) off of
-    * the contact support centroid should be penalized.
+    * Gets the weight specifying how much deviation of the desired center of pressure (CoP) off of the
+    * contact support centroid should be penalized.
     * <p>
-    * In other words, a high positive value will result in the controller core trying to keep the
-    * CoP in the middle of each foot for instance. This value does not need to be non-zero. A value
-    * of about {@code 100.0} is used for Atlas' simulations.
+    * In other words, a high positive value will result in the controller core trying to keep the CoP
+    * in the middle of each foot for instance. This value does not need to be non-zero. A value of
+    * about {@code 100.0} is used for Atlas' simulations.
     * </p>
     * <p>
     * This parameter is used in {@link InverseDynamicsOptimizationControlModule} and
@@ -206,8 +236,8 @@ public interface ControllerCoreOptimizationSettings
    Vector2D getCoPWeight();
 
    /**
-    * Gets the default weight specifying how much variations of the desired center of pressure
-    * should be penalized.
+    * Gets the default weight specifying how much variations of the desired center of pressure should
+    * be penalized.
     * <p>
     * This parameter is used in {@link InverseDynamicsOptimizationControlModule} and
     * {@link VirtualModelControlOptimizationControlModule} which are use when running the
@@ -215,10 +245,9 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCoreMode#VIRTUAL_MODEL} respectively.
     * </p>
     * <p>
-    * The value should be positive but not necessarily non-zero. It helps smoothing the motion of
-    * the center pressure of each contacting body.
+    * The value should be positive but not necessarily non-zero. It helps smoothing the motion of the
+    * center pressure of each contacting body.
     * </p>
-    *
     *
     * @return the regularization weight to use for center of pressure variations.
     */
@@ -244,8 +273,8 @@ public interface ControllerCoreOptimizationSettings
     * {@link WholeBodyControllerCoreMode#VIRTUAL_MODEL} respectively.
     * </p>
     * <p>
-    * The value should very likely be {@code 4} as a lower value would be too conservative and
-    * higher values would be too computationally expensive.
+    * The value should very likely be {@code 4} as a lower value would be too conservative and higher
+    * values would be too computationally expensive.
     * </p>
     * <p>
     * Please refer to the following paper page 9 to find the description of this variable:<br>
@@ -275,8 +304,8 @@ public interface ControllerCoreOptimizationSettings
    int getNumberOfContactPointsPerContactableBody();
 
    /**
-    * Gets the number of contactable bodies for the entire robot, i.e. the number of bodies that can
-    * be used to bear the robot weight.
+    * Gets the number of contactable bodies for the entire robot, i.e. the number of bodies that can be
+    * used to bear the robot weight.
     * <p>
     * This parameter is used in {@link InverseDynamicsOptimizationControlModule} and
     * {@link VirtualModelControlOptimizationControlModule} which are use when running the
@@ -292,9 +321,9 @@ public interface ControllerCoreOptimizationSettings
     * This should simply be equal to:<br>
     * {@code rhoSize = numberOfBasisVectorsPerContactPoint * numberOfContactPointsPerContactableBody * numberOfContactableBodies}
     * <p>
-    * The notation 'rho' is used to describe the contact force magnitude to exert at each basis
-    * vector of each contact point. As the setup is somewhat hectic to explain, you can refer to the
-    * following paper at page 9: <br>
+    * The notation 'rho' is used to describe the contact force magnitude to exert at each basis vector
+    * of each contact point. As the setup is somewhat hectic to explain, you can refer to the following
+    * paper at page 9: <br>
     * <a href=
     * "https://www.researchgate.net/publication/280839675_Design_of_a_Momentum-Based_Control_Framework_and_Application_to_the_Humanoid_Robot_Atlas">
     * Design of a Momentum-Based Control Framework and Application to the Humanoid Robot Atlas.</a>
@@ -332,8 +361,8 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Sets whether or not to use a warm start in the active set solver where the previous active set
-    * is retained between control ticks.
+    * Sets whether or not to use a warm start in the active set solver where the previous active set is
+    * retained between control ticks.
     */
    default boolean useWarmStartInSolver()
    {
@@ -370,9 +399,9 @@ public interface ControllerCoreOptimizationSettings
    }
 
    /**
-    * Adds the ability to define a robot specific friction cone rotation. This can be useful when
-    * using friction cone representations with a low number of basis vectors and for feet with a lot
-    * of contact points. By default this will return a zero offset provider.
+    * Adds the ability to define a robot specific friction cone rotation. This can be useful when using
+    * friction cone representations with a low number of basis vectors and for feet with a lot of
+    * contact points. By default this will return a zero offset provider.
     */
    default public FrictionConeRotationCalculator getFrictionConeRotation()
    {

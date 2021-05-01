@@ -13,7 +13,6 @@ import org.ejml.data.DMatrixRMaj;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.lqrControl.LQRMomentumController;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
@@ -46,7 +45,8 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
-import us.ihmc.robotics.math.trajectories.Trajectory3D;
+import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
+import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
@@ -105,7 +105,7 @@ public class SimpleLinearMomentumRateControlModule
    private final FixedFramePoint2DBasics desiredCoP = new FramePoint2D();
    private final FixedFramePoint2DBasics achievedCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics desiredCoPInMidFeet;
-   private final List<Trajectory3D> vrpTrajectories = new ArrayList<>();
+   private final List<Polynomial3DReadOnly> vrpTrajectories = new ArrayList<>();
    private double timeInContactPhase = 0;
    
    private boolean controlHeightWithMomentum;
@@ -121,13 +121,10 @@ public class SimpleLinearMomentumRateControlModule
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
 
-   private final StepAdjustmentController stepAdjustmentController;
    private final LQRMomentumController lqrMomentumController;
    private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
 
-   private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final ICPControlPolygons icpControlPolygons;
 
    private final YoDouble yoTime;
 
@@ -226,21 +223,9 @@ public class SimpleLinearMomentumRateControlModule
       yoCenterOfMass.setToNaN();
       yoCapturePoint.setToNaN();
 
-      ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
-      icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane,  registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
 
       lqrMomentumController = new LQRMomentumController(omega0, registry);
-      stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
-                                                              soleZUpFrames,
-                                                              bipedSupportPolygons,
-                                                              icpControlPolygons,
-                                                              contactableFeet,
-                                                              controlDT,
-                                                              registry,
-                                                              yoGraphicsListRegistry);
       parentRegistry.addChild(registry);
    }
 
@@ -362,7 +347,7 @@ public class SimpleLinearMomentumRateControlModule
     * Computes the {@link MomentumRateCommand} and the {@link CenterOfPressureCommand} for the controller core.
     * <p>
     * This methods requires that the input to this module from the walking state machine is set via
-    * {@link #setInputFromWalkingStateMachine(LinearMomentumRateControlModuleInput)} which provides quantities such as
+    * {@link #setInputFromWalkingStateMachine(SimpleLinearMomentumRateControlModuleInput)} which provides quantities such as
     * the desired ICP.
     *
     * @return whether the computation was successful.
@@ -435,8 +420,6 @@ public class SimpleLinearMomentumRateControlModule
 
    private void updatePolygons()
    {
-      icpControlPlane.setOmega0(omega0);
-      icpControlPolygons.updateUsingContactStateCommand(contactStateCommands);
       bipedSupportPolygons.updateUsingContactStateCommand(contactStateCommands);
    }
 
@@ -447,28 +430,6 @@ public class SimpleLinearMomentumRateControlModule
       {
          throw new RuntimeException("Can only initialize once per compute.");
       }
-
-      if (initializeForStanding)
-      {
-         stepAdjustmentController.reset();
-      }
-      if (initializeForSingleSupport)
-      {
-         stepAdjustmentController.reset();
-
-         double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
-         stepAdjustmentController.setFootstepToAdjust(footsteps.get(0), swingDurations.get(0), transferDuration);
-         stepAdjustmentController.initialize(yoTime.getDoubleValue(), supportSide);
-      }
-      if (initializeForTransfer)
-      {
-         stepAdjustmentController.reset();
-      }
-
-      if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-         stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-      if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
-         stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
    }
 
    public void updateCurrentState(FramePoint3DReadOnly CenterOfMassPosition, FrameVector3DReadOnly CenterOfMassVelocity)
@@ -482,7 +443,6 @@ public class SimpleLinearMomentumRateControlModule
          lqrMomentumController.setOmega(omega0);
          lqrMomentumController.setVRPTrajectory(vrpTrajectories);
          lqrMomentumController.computeControlInput(currentState, timeInContactPhase);
-         stepAdjustmentController.compute(yoTime.getDoubleValue(), desiredCapturePoint, capturePoint, new FrameVector2D(), omega0);
    }
 
    private void checkAndPackOutputs()
@@ -512,9 +472,6 @@ public class SimpleLinearMomentumRateControlModule
       }
 
       output.setDesiredCMP(desiredCMP);
-      output.setFootstepSolution(stepAdjustmentController.getFootstepSolution());
-      output.setFootstepWasAdjusted(stepAdjustmentController.wasFootstepAdjusted());
-      output.setUsingStepAdjustment(stepAdjustmentController.useStepAdjustment());
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()

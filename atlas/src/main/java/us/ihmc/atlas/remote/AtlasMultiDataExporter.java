@@ -48,7 +48,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.gui.SwingUtils;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.yoVariables.buffer.YoBuffer;
 import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -80,7 +80,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
       final AtlasRobotVersion ATLAS_ROBOT_VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
       int numberOfEntries = 0;
       DRCRobotModel model = new AtlasRobotModel(ATLAS_ROBOT_VERSION, RobotTarget.SCS, false);
-      DRCRobotJointMap jointMap = model.getJointMap();
+      HumanoidJointNameMap jointMap = model.getJointMap();
       ArmJointName[] joints = jointMap.getArmJointNames();
       FullHumanoidRobotModel robotModel = model.createFullRobotModel();
       boolean showGUIAndSaveSCSVideo = false;

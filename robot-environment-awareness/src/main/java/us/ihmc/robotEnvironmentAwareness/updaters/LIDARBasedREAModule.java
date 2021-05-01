@@ -83,7 +83,7 @@ public class LIDARBasedREAModule implements PerceptionModule
 
    private final REANetworkProvider networkProvider;
 
-   private LIDARBasedREAModule(Messager reaMessager, FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider)
+   public LIDARBasedREAModule(Messager reaMessager, FilePropertyHelper filePropertyHelper, REANetworkProvider networkProvider)
    {
       this(reaMessager, filePropertyHelper, networkProvider, true);
    }
@@ -173,6 +173,7 @@ public class LIDARBasedREAModule implements PerceptionModule
          return;
 
       LidarScanMessage message = subscriber.takeNextData();
+
       moduleStateReporter.registerLidarScanMessage(message);
       lidarBufferUpdater.handleLidarScanMessage(message);
       latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
@@ -308,7 +309,7 @@ public class LIDARBasedREAModule implements PerceptionModule
             timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose.getPosition()), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
 
-            networkProvider.update(planarRegionFeatureUpdater, ocTreeUpdateSuccess);
+            networkProvider.update(planarRegionFeatureUpdater, ocTreeUpdateSuccess, mainOctree);
             networkProvider.publishCurrentState();
          }
 

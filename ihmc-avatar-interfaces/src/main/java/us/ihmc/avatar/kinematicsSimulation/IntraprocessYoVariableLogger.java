@@ -1,6 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import com.google.common.collect.Lists;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
@@ -47,7 +48,22 @@ public class IntraprocessYoVariableLogger
    public static final String MODEL_RESOURCE_BUNDLE = "resources.zip";
    public static final String INDEX_FILENAME = "robotData.dat";
    public static final String SUMMARY_FILENAME = "summary.csv";
-   public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY = Paths.get(System.getProperty("user.home")).resolve(".ihmc/logs");
+   public static final Path DEFAULT_INCOMING_LOGS_DIRECTORY;
+   static
+   {
+      Path incomingLogsDirectory = Paths.get(System.getProperty("user.home")).resolve(".ihmc");
+      if (ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer())
+      {
+         incomingLogsDirectory = incomingLogsDirectory.resolve("bamboo-logs")
+                                                      .resolve(System.getenv("bamboo_planKey"))
+                                                      .resolve(System.getenv("bamboo_buildResultKey"));
+      }
+      else
+      {
+         incomingLogsDirectory = incomingLogsDirectory.resolve("logs");
+      }
+      DEFAULT_INCOMING_LOGS_DIRECTORY = incomingLogsDirectory;
+   }
 
    private final String logName;
    private final LogModelProvider logModelProvider;
@@ -78,30 +94,27 @@ public class IntraprocessYoVariableLogger
                                        RigidBodyBasics rootBody,
                                        YoGraphicsListRegistry yoGraphicsListRegistry,
                                        int maxTicksToRecord,
-                                       double dt,
-                                       Path incomingLogsFolder)
+                                       double dt)
    {
       this(logName,
            logModelProvider,
            Lists.newArrayList(new RegistrySendBufferBuilder(registry, rootBody, yoGraphicsListRegistry)),
            maxTicksToRecord,
-           dt,
-           incomingLogsFolder);
+           dt);
    }
 
    public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
                                        List<RegistrySendBufferBuilder> registrySendBufferBuilders,
                                        int maxTicksToRecord,
-                                       double dt,
-                                       Path incomingLogsFolder)
+                                       double dt)
    {
       this.logName = logName;
       this.logModelProvider = logModelProvider;
       this.registrySendBufferBuilders = registrySendBufferBuilders;
       this.maxTicksToRecord = maxTicksToRecord;
       this.dt = dt;
-      this.incomingLogsFolder = incomingLogsFolder;
+      this.incomingLogsFolder = DEFAULT_INCOMING_LOGS_DIRECTORY;
    }
 
    public void start()

@@ -9,7 +9,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -20,6 +20,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.CalibrationState;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorController;
+import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -66,7 +67,10 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       timeForEstimatingOffset.set(highLevelControllerParameters.getCalibrationDuration());
 
       boolean useArms = ValkyrieRosControlController.VERSION.hasArms();
-      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter, useArms);
+      JointTorqueOffsetEstimatorParameters parameters = new JointTorqueOffsetEstimatorParameters();
+      if (!useArms)
+         parameters.setArmJointsToRun(null);
+      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter, parameters);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoRegistry());
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -153,7 +157,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
             trajectory.compute(timeInTrajectory);
-            double desiredPosition = trajectory.getPosition();
+            double desiredPosition = trajectory.getValue();
 
             JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();
@@ -269,7 +273,7 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
             YoPolynomial trajectory = trajectoryData.getTrajectory();
 
             trajectory.compute(timeInTrajectory);
-            double desiredPosition = trajectory.getPosition();
+            double desiredPosition = trajectory.getValue();
 
             JointDesiredOutputBasics lowLevelJointData = lowLevelOneDoFJointDesiredDataHolder.getJointDesiredOutput(joint);
             lowLevelJointData.clear();

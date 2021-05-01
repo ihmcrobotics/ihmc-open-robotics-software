@@ -85,7 +85,6 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
    {
       FootstepDataListMessage footsteps = createYawingForwardWalkingFootstepMessage();
       setupAndRunTest(footsteps);
-      drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       // push parameters:
       StateTransitionCondition firstPushCondition = singleSupportStartConditions.get(RobotSide.RIGHT);
@@ -97,35 +96,13 @@ public abstract class AvatarICPOptimizationPushRecoveryBTest extends AvatarICPOp
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
       pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
-      boolean success;
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
-      assertTrue(success);
-
-      pushRobotController.applyForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
-
-      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0);
-
+      pushRobotController.queueForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
+      pushRobotController.queueForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+      pushRobotController.queueForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
+      pushRobotController.queueForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+      pushRobotController.queueForceDelayed(secondPushCondition, delay, secondForceDirection, magnitude, duration);
+      
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(9.0);
       assertTrue(success);
 
       validateTest(footsteps, false);

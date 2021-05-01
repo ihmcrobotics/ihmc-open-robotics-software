@@ -1,19 +1,19 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-
-import java.nio.file.Path;
+import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
 {
    private boolean createYoVariableServer = false;
    private boolean logToFile = false;
    private PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
-   private Path incomingLogsDirectory;
    private double initialGroundHeight = 0.0;
    private double initialRobotYaw = 0.0;
    private double initialRobotX = 0.0;
    private double initialRobotY = 0.0;
+   private double playbackSpeedMultiplier = 10.0;
+   private double dt = UnitConversions.hertzToSeconds(70);
 
    public double getInitialGroundHeight()
    {
@@ -75,16 +75,6 @@ public class HumanoidKinematicsSimulationParameters
       return logToFile;
    }
 
-   public void setIncomingLogsDirectory(Path incomingLogsDirectory)
-   {
-      this.incomingLogsDirectory = incomingLogsDirectory;
-   }
-
-   public Path getIncomingLogsDirectory()
-   {
-      return incomingLogsDirectory;
-   }
-
    public void setPubSubImplementation(PubSubImplementation pubSubImplementation)
    {
       this.pubSubImplementation = pubSubImplementation;
@@ -93,5 +83,25 @@ public class HumanoidKinematicsSimulationParameters
    public PubSubImplementation getPubSubImplementation()
    {
       return pubSubImplementation;
+   }
+
+   public void setPlaybackSpeedMultiplier(double playbackSpeedMultiplier)
+   {
+      this.playbackSpeedMultiplier = playbackSpeedMultiplier;
+   }
+
+   public void setUpdateFrequencyHz(double updateFrequencyHz)
+   {
+      this.dt = UnitConversions.hertzToSeconds(updateFrequencyHz);
+   }
+
+   public double getDt()
+   {
+      return dt;
+   }
+
+   public double getUpdatePeriod()
+   {
+      return dt / playbackSpeedMultiplier;
    }
 }

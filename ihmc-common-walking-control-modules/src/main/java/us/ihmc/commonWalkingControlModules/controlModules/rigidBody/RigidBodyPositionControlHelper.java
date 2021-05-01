@@ -244,7 +244,7 @@ public class RigidBodyPositionControlHelper
       }
       else
       {
-         trajectoryGenerator.getPosition(positionToPack);
+         positionToPack.setIncludingFrame(trajectoryGenerator.getPosition());
       }
    }
 

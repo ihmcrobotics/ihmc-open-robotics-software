@@ -22,6 +22,7 @@ import boofcv.struct.image.ImageType;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -36,18 +37,18 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FiducialDetectorToolboxController extends ToolboxController
 {
-   /** Toggle this when running on the real robot vs sim */
-   private static final boolean USE_SIM_PARAMETERS = true;
-
    private static final RescaleOp imageRescalingForSim = new RescaleOp(3.5f, 35, null);
    private static final RescaleOp imageRescalingForRealRobot = new RescaleOp(1.5f, 35, null);
-   private static final RescaleOp imageRescalingOperation = USE_SIM_PARAMETERS ? imageRescalingForSim : imageRescalingForRealRobot;
+   private static RescaleOp imageRescalingOperation;
 
    private final AtomicReference<VideoPacket> videoPacket = new AtomicReference<VideoPacket>();
+
+   private final Timer statusTimer = new Timer();
 
    //debugging only
    private boolean DEBUG = false;
@@ -76,10 +77,14 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private AtomicReference<Boolean> inProcessingThread = new AtomicReference<Boolean>();
 
    public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel,
+                                            RobotTarget target,
                                             StatusMessageOutputManager statusOutputManager,
                                             YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
+
+      imageRescalingOperation = target == RobotTarget.REAL_ROBOT ? imageRescalingForRealRobot : imageRescalingForSim;
+
       inProcessingThread.set(false);
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize), ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10),
                                               GrayF32.class);
@@ -209,6 +214,12 @@ public class FiducialDetectorToolboxController extends ToolboxController
          packet.fiducial_id_ = detector.getId(i);
 
          Pose3D pose = new Pose3D(reportedFiducialPoseInWorldFrame.getPosition(), reportedFiducialPoseInWorldFrame.getOrientation());
+
+         if (!statusTimer.isRunning(5.0))
+         {
+            LogTools.info("Found fiducial: id: {} pose: {}", packet.getFiducialId(), pose);
+            statusTimer.reset();
+         }
 
          packet.fiducial_transform_to_world_ = pose;
 

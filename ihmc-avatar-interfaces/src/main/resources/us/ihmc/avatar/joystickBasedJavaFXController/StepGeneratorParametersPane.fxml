@@ -62,7 +62,7 @@
                   <Slider fx:id="swingHeightSlider" majorTickUnit="0.05" max="0.35" min="0.025" minorTickCount="4" prefHeight="38.0" prefWidth="200.0" showTickLabels="true" showTickMarks="true" value="0.125" GridPane.columnIndex="5" />
                   <Label text="Swing height" GridPane.columnIndex="4" />
                   <Label text="Swing time" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                  <Slider fx:id="swingDurationSlider" blockIncrement="0.2" majorTickUnit="0.2" max="2.0" min="0.6" prefHeight="38.0" prefWidth="127.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
+                  <Slider fx:id="swingDurationSlider" blockIncrement="0.2" majorTickUnit="0.2" max="2.0" min="0.3" prefHeight="38.0" prefWidth="127.0" showTickLabels="true" showTickMarks="true" snapToTicks="true" GridPane.columnIndex="5" GridPane.rowIndex="1" />
                   <Label text="Transfer time" GridPane.columnIndex="4" GridPane.rowIndex="2" />
                   <Slider fx:id="transferDurationSlider" blockIncrement="0.2" majorTickUnit="0.2" max="2.0" min="0.1" prefHeight="38.0" prefWidth="200.0" showTickLabels="true" showTickMarks="true" GridPane.columnIndex="5" GridPane.rowIndex="2" />
                   <Label text="Default width" GridPane.columnIndex="2" GridPane.rowIndex="1" />

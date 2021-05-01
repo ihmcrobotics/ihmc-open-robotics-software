@@ -17,7 +17,6 @@ public class BoundingBoxCollisionDetector
    private double boxDepth = Double.NaN;
    private double boxWidth = Double.NaN;
    private double boxHeight = Double.NaN;
-   private double xyProximityCheck = Double.NaN;
 
    private double bodyPoseX = Double.NaN;
    private double bodyPoseY = Double.NaN;
@@ -29,20 +28,16 @@ public class BoundingBoxCollisionDetector
    // this is the bounding box of "bodyBox", used as an optimization before doing a full collision check
    private final BoundingBox3D boundingBox = new BoundingBox3D();
 
-   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final Point3D tempPoint1 = new Point3D();
-
    public void setPlanarRegionsList(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
    }
 
-   public void setBoxDimensions(double boxDepth, double boxWidth, double boxHeight, double xyProximityCheck)
+   public void setBoxDimensions(double boxDepth, double boxWidth, double boxHeight)
    {
       this.boxDepth = boxDepth;
       this.boxWidth = boxWidth;
       this.boxHeight = boxHeight;
-      this.xyProximityCheck = xyProximityCheck;
    }
 
    public void setBoxPose(double bodyPoseX, double bodyPoseY, double bodyPoseZ, double bodyPoseYaw)
@@ -56,51 +51,22 @@ public class BoundingBoxCollisionDetector
    public BodyCollisionData checkForCollision()
    {
       checkInputs();
-
       setBoundingBoxPosition();
+      setDimensions();
+
       BodyCollisionData collisionData = new BodyCollisionData();
 
-      for(int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
-         setDimensionsToUpperBound();
          PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(i);
 
-         if(planarRegion.getBoundingBox3dInWorld().intersectsExclusive(bodyBox.getBoundingBox()))
+         if (planarRegion.getBoundingBox3dInWorld().intersectsExclusive(bodyBox.getBoundingBox()))
          {
             PlanarRegion region = planarRegionsList.getPlanarRegion(i);
-            EuclidShape3DCollisionResult collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
-
-            if(collisionResult.areShapesColliding())
+            if (collisionDetector.evaluateCollision(region, bodyBox).areShapesColliding())
             {
-               setDimensionsToLowerBound();
-               collisionResult = collisionDetector.evaluateCollision(region, bodyBox);
-
-               if(collisionResult.areShapesColliding())
-               {
-                  collisionData.setCollisionDetected(true);
-                  break;
-               }
-               else
-               {
-                  tempPoint1.set(collisionResult.getPointOnA());
-                  tempTransform.setTranslationAndIdentityRotation(bodyPoseX, bodyPoseY, bodyPoseZ);
-                  tempTransform.getRotation().setToYawOrientation(bodyPoseYaw);
-                  tempTransform.invert();
-                  tempTransform.transform(tempPoint1);
-
-                  double dx = Math.abs(tempPoint1.getX()) - 0.5 * boxDepth;
-                  double dy = Math.abs(tempPoint1.getY()) - 0.5 * boxWidth;
-                  collisionData.setDistanceFromBoundingBox(getMinimumPositiveValue(dx, dy, collisionData.getDistanceFromBoundingBox()));
-
-                  if(tempPoint1.getX() < 0.0 && dx > 0.0)
-                  {
-                     collisionData.setDistanceOfClosestPointInBack(getMinimumPositiveValue(dx, collisionData.getDistanceOfClosestPointInBack()));
-                  }
-                  else if(tempPoint1.getX() > 0.0 && dx > 0.0)
-                  {
-                     collisionData.setDistanceOfClosestPointInFront(getMinimumPositiveValue(dx, collisionData.getDistanceOfClosestPointInFront()));
-                  }
-               }
+               collisionData.setCollisionDetected(true);
+               break;
             }
          }
       }
@@ -131,22 +97,15 @@ public class BoundingBoxCollisionDetector
       bodyBox.getPose().getRotation().setYawPitchRoll(bodyPoseYaw, 0.0, 0.0);
    }
 
-   private void setDimensionsToLowerBound()
+   private void setDimensions()
    {
       bodyBox.getSize().set(boxDepth, boxWidth, boxHeight);
       bodyBox.getBoundingBox(boundingBox);
    }
 
-   private void setDimensionsToUpperBound()
-   {
-      double planarDimensionIncrease = 2.0 * xyProximityCheck;
-      bodyBox.getSize().set(boxDepth + planarDimensionIncrease, boxWidth + planarDimensionIncrease, boxHeight);
-      bodyBox.getBoundingBox(boundingBox);
-   }
-
    private void checkInputs()
    {
-      if (Double.isNaN(boxDepth) || Double.isNaN(boxWidth) || Double.isNaN(boxHeight) || Double.isNaN(xyProximityCheck))
+      if (Double.isNaN(boxDepth) || Double.isNaN(boxWidth) || Double.isNaN(boxHeight))
          throw new RuntimeException("Bounding box dimensions has not been set");
 
       if(Double.isNaN(bodyPoseX) || Double.isNaN(bodyPoseY) || Double.isNaN(bodyPoseZ) || Double.isNaN(bodyPoseYaw))

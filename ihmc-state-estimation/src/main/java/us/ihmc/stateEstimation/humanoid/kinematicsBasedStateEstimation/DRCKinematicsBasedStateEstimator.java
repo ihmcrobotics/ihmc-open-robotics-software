@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
-import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.ExternalWrenchJointTorqueBasedEstimatorVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -55,7 +55,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final EstimatedFromTorquesWrenchVisualizer estimatedWrenchVisualizer;
+   private final ExternalWrenchJointTorqueBasedEstimatorVisualizer estimatedWrenchVisualizer;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -78,12 +78,16 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final FloatingJointBasics rootJoint;
    private final YoFixedFrameTwist yoRootTwist;
 
-   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-                                           SensorOutputMapReadOnly sensorOutputMap, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
-                                           String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
+   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                           StateEstimatorParameters stateEstimatorParameters,
+                                           SensorOutputMapReadOnly sensorOutputMap,
+                                           CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
+                                           String[] imuSensorsToUseInStateEstimator,
+                                           double gravitationalAcceleration,
                                            Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                            CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-                                           RobotMotionStatusHolder robotMotionStatusFromController, Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
+                                           RobotMotionStatusHolder robotMotionStatusFromController,
+                                           Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -224,13 +228,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             ContactablePlaneBody contactableBody = feet.get(rigidBody);
             contactablePlaneBodies.add(contactableBody);
          }
-         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
-                                                                                                                      inverseDynamicsStructure.getRootJoint()
-                                                                                                                                              .getSuccessor(),
-                                                                                                                      contactablePlaneBodies,
-                                                                                                                      1.0,
-                                                                                                                      yoGraphicsListRegistry,
-                                                                                                                      registry);
+         estimatedWrenchVisualizer = ExternalWrenchJointTorqueBasedEstimatorVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
+                                                                                                                                   inverseDynamicsStructure.getRootJoint()
+                                                                                                                                                           .getSuccessor(),
+                                                                                                                                   contactablePlaneBodies,
+                                                                                                                                   1.0,
+                                                                                                                                   yoGraphicsListRegistry,
+                                                                                                                                   registry);
       }
       else
       {

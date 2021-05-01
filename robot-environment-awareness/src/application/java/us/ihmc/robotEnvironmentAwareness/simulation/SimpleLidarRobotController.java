@@ -1,6 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.simulation;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import controller_msgs.msg.dds.LidarScanMessage;
@@ -8,6 +10,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -132,7 +135,7 @@ public class SimpleLidarRobotController implements RobotController
             }
          }
 
-         TFloatArrayList newScan = new TFloatArrayList();
+         List<Point3D> newScan = new ArrayList<>();
          for (int i = 0; i < scan.size(); i++)
          {
             Point3D sensorOrigin = new Point3D();
@@ -140,9 +143,7 @@ public class SimpleLidarRobotController implements RobotController
             Point3D scanPoint = scan.getPoint(i);
             if (sensorOrigin.distance(scanPoint) < lidarRange.getDoubleValue())
             {
-               newScan.add((float) scanPoint.getX());
-               newScan.add((float) scanPoint.getY());
-               newScan.add((float) scanPoint.getZ());
+               newScan.add(scanPoint);
             }
          }
 
@@ -150,7 +151,7 @@ public class SimpleLidarRobotController implements RobotController
          lidarScanMessage.setRobotTimestamp(-1L);
          lidarScanMessage.getLidarPosition().set(lidarPosition);
          lidarScanMessage.getLidarOrientation().set(lidarOrientation);
-         MessageTools.copyData(newScan, lidarScanMessage.getScan());
+         LidarPointCloudCompression.compressPointCloud(scan.size(), lidarScanMessage, (i, j) -> newScan.get(i).getElement32(j));
          lidarScanPublisher.publish(lidarScanMessage);
       }
 

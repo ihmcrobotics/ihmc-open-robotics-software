@@ -122,8 +122,8 @@ public class BipedContactSequenceUpdater implements ContactSequenceProvider
       int i = 0;
       for (; i < contactSequenceInRelativeTime.size(); i++)
       {
-         startCoPs.get(i).set(contactSequenceInRelativeTime.get(i).getCopStartPosition());
-         endCoPs.get(i).set(contactSequenceInRelativeTime.get(i).getCopEndPosition());
+         startCoPs.get(i).set(contactSequenceInRelativeTime.get(i).getECMPStartPosition());
+         endCoPs.get(i).set(contactSequenceInRelativeTime.get(i).getECMPEndPosition());
       }
       for (; i < maxCapacity; i++)
       {

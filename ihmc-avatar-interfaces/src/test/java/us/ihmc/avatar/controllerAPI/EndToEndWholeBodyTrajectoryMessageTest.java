@@ -225,8 +225,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       // Now we can do the usual test.
       double trajectoryTime = 1.0;
       FramePose3D desiredFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.5));
+      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.05, 0.15));
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       messageCollectionMessenger.addMessage(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
@@ -259,7 +259,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.7));
       desiredPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.03, 0.05));
       desiredPelvisPose.setZ(desiredPelvisPose.getZ() - 0.1);
       desiredPosition = new Point3D();
@@ -347,8 +347,8 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       // Now we can do the usual test.
       double trajectoryTime = 1.0;
       FramePose3D desiredFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
+      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.5));
+      desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.05, 0.15));
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
       messageCollectionMessenger.addMessage(HumanoidMessageTools.createFootTrajectoryMessage(footSide, trajectoryTime, desiredPosition, desiredOrientation));
@@ -383,7 +383,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
       ReferenceFrame pelvisZUpFrame = humanoidReferenceFrames.getPelvisZUpFrame();
       FramePose3D desiredPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.7));
       desiredPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.03, 0.05));
       desiredPelvisPose.setZ(desiredPelvisPose.getZ() - 0.1);
       desiredPosition = new Point3D();

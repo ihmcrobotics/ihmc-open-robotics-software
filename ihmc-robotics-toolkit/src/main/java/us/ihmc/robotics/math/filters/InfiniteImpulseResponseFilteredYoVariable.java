@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -108,8 +108,8 @@ public class InfiniteImpulseResponseFilteredYoVariable extends YoDouble
 
    public void setPolesAndZeros(double dcScale, double[] realPoles, ComplexNumber[] complexPairPoles, double[] realZeros, ComplexNumber[] complexPairZeros)
    {
-      Polynomial numeratorPolynomial = Polynomial.constructFromScaleFactorAndRoots(dcScale, realZeros, complexPairZeros);
-      Polynomial denominatorPolynomial = Polynomial.constructFromScaleFactorAndRoots(1.0, realPoles, complexPairPoles);
+      ObsoletePolynomial numeratorPolynomial = ObsoletePolynomial.constructFromScaleFactorAndRoots(dcScale, realZeros, complexPairZeros);
+      ObsoletePolynomial denominatorPolynomial = ObsoletePolynomial.constructFromScaleFactorAndRoots(1.0, realPoles, complexPairPoles);
 
       if (DEBUG)
       {

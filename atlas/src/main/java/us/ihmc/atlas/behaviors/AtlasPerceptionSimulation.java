@@ -5,6 +5,9 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.atlas.sensors.AtlasSLAMBasedREAStandaloneLauncher;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.tools.perception.MultisenseHeadStereoSimulator;
+import us.ihmc.behaviors.tools.perception.MultisenseLidarSimulator;
+import us.ihmc.behaviors.tools.perception.RealsensePelvisSimulator;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
@@ -12,8 +15,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
-import us.ihmc.humanoidBehaviors.tools.perception.*;
+import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
@@ -28,11 +30,14 @@ import java.io.File;
 import java.nio.file.Paths;
 import java.util.List;
 
+import static us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity.*;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
 
 public class AtlasPerceptionSimulation
 {
+   public enum Fidelity { LOW, HIGH }
+
    private final boolean runRealsenseSLAM;
    private final boolean runLidarREA;
    private PausablePeriodicThread multisenseLidarPublisher;
@@ -47,7 +52,8 @@ public class AtlasPerceptionSimulation
                                     boolean runRealsenseSLAM,
                                     boolean spawnUIs,
                                     boolean runLidarREA,
-                                    DRCRobotModel robotModel)
+                                    DRCRobotModel robotModel,
+                                    Fidelity fidelity)
    {
       this.runRealsenseSLAM = runRealsenseSLAM;
       this.runLidarREA = runLidarREA;
@@ -56,9 +62,27 @@ public class AtlasPerceptionSimulation
       // might be a weird delay with threads at 0.5 hz depending on each other
       double period = 1.0;
 
+      int multisenseLidarScanSize;
+      int multisenseStereoSphereScanSize;
+      int realsenseSphereScanSize;
+      double realsenseRange = 3.0;
+      double multisenseStereoRange = 10.0;
+      if (fidelity == LOW)
+      {
+         multisenseLidarScanSize = 200;
+         multisenseStereoSphereScanSize = 8000;
+         realsenseSphereScanSize = 4000;
+      }
+      else
+      {
+         multisenseLidarScanSize = 500;
+         multisenseStereoSphereScanSize = 50000;
+         realsenseSphereScanSize = 30000;
+      }
+
       if (runLidarREA)
       {
-         MultisenseLidarSimulator multisenseLidar = new MultisenseLidarSimulator(robotModel, ros2Node, map);
+         MultisenseLidarSimulator multisenseLidar = new MultisenseLidarSimulator(robotModel, ros2Node, map, multisenseLidarScanSize);
          IHMCROS2Publisher<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MULTISENSE_LIDAR_SCAN);
          multisenseLidar.addLidarScanListener(scan -> publisher.publish(PointCloudMessageTools.toLidarScanMessage(scan, multisenseLidar.getSensorPose())));
 
@@ -78,14 +102,18 @@ public class AtlasPerceptionSimulation
       }
       else
       {
-         MultisenseHeadStereoSimulator multisenseStereo = new MultisenseHeadStereoSimulator(map, robotModel, ros2Node);
+         MultisenseHeadStereoSimulator multisenseStereo = new MultisenseHeadStereoSimulator(map,
+                                                                                            robotModel,
+                                                                                            ros2Node,
+                                                                                            multisenseStereoRange,
+                                                                                            multisenseStereoSphereScanSize);
          IHMCROS2Publisher<PlanarRegionsListMessage> publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.LIDAR_REA_REGIONS);
          multisenseRegionsPublisher = new PausablePeriodicThread("MultisenseREARegionsPublisher", period,
             () -> publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(multisenseStereo.computeRegions())));
          multisenseRegionsPublisher.start();
       }
 
-      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(map, robotModel, ros2Node);
+      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(map, robotModel, ros2Node, realsenseRange, realsenseSphereScanSize);
       if (runRealsenseSLAM)
       {
          IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.D435_POINT_CLOUD);
