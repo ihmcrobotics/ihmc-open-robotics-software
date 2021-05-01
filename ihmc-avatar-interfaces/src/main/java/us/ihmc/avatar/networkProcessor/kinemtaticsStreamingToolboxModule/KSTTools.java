@@ -44,6 +44,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoLong;
 
 public class KSTTools
 {
@@ -89,6 +90,8 @@ public class KSTTools
    private final YoBoolean isPelvisTaskspaceOutputEnabled;
    private final SideDependentList<YoBoolean> areHandTaskspaceOutputsEnabled = new SideDependentList<>();
    private final SideDependentList<YoBoolean> areArmJointspaceOutputsEnabled = new SideDependentList<>();
+
+   private final YoLong latestInputTimestamp;
 
    public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
                    FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod, DoubleProvider time,
@@ -146,6 +149,8 @@ public class KSTTools
          YoBoolean isArmJointspaceOutputEnabled = new YoBoolean("is" + robotSide.getPascalCaseName() + "ArmJointspaceOutputEnabled", registry);
          areArmJointspaceOutputsEnabled.put(robotSide, isArmJointspaceOutputEnabled);
       }
+
+      latestInputTimestamp = new YoLong("latestInputTimestamp", registry);
    }
 
    public void update()
@@ -204,7 +209,7 @@ public class KSTTools
    {
       return configurationCommand;
    }
-   
+
    public void getCurrentState(KinematicsToolboxOutputStatus currentStateToPack)
    {
       MessageTools.packDesiredJointState(currentStateToPack, currentFullRobotModel.getRootJoint(), currentOneDoFJoint);
@@ -234,10 +239,11 @@ public class KSTTools
          if (latestInput.getTimestamp() <= 0)
             latestInput.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
 
+         latestInputTimestamp.set(latestInput.getTimestamp());
          latestInputReceivedTime.set(time.getValue());
       }
    }
-   
+
    public boolean hasNewInputCommand()
    {
       return hasNewInputCommand.getValue();
@@ -303,7 +309,9 @@ public class KSTTools
          outputConverter.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
-      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage, streamIntegrationDuration.getValue(), Conversions.secondsToNanoseconds(time.getValue()));
+      HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,
+                                                 streamIntegrationDuration.getValue(),
+                                                 Conversions.secondsToNanoseconds(time.getValue()));
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
       return wholeBodyTrajectoryMessage;
    }
