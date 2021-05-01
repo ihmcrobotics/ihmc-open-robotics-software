@@ -18,7 +18,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class AtlasDrivingInitialSetupTest
 {
@@ -30,7 +30,7 @@ public class AtlasDrivingInitialSetupTest
 	   AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties(1);
       AtlasRobotModel robotModel = new AtlasRobotModel(version, RobotTarget.SCS, false);
       HumanoidFloatingRootJointRobot robot = robotModel.createHumanoidFloatingRootJointRobot(false);
-      DRCRobotJointMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
+      HumanoidJointNameMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
       
       AtlasInitialSetupFromFile initialSetup = new AtlasInitialSetupFromFile("initialDrivingSetup");
       initialSetup.initializeRobot(robot, jointMap);
@@ -41,7 +41,7 @@ public class AtlasDrivingInitialSetupTest
    {
       boolean containsAllJoints = true;
       AtlasPhysicalProperties atlasPhysicalProperties = new AtlasPhysicalProperties(1);
-      DRCRobotJointMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
+      HumanoidJointNameMap jointMap = new AtlasJointMap(version, atlasPhysicalProperties);
       try
       {
          Properties properties = new Properties();

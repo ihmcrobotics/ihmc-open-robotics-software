@@ -11,7 +11,11 @@ import us.ihmc.wholeBodyController.DRCHandType;
 
 public enum AtlasRobotVersion
 {
-   ATLAS_UNPLUGGED_V5_NO_FOREARMS, ATLAS_UNPLUGGED_V5_NO_HANDS, ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI, ATLAS_UNPLUGGED_V5_TROOPER;
+   ATLAS_UNPLUGGED_V5_NO_FOREARMS,
+   ATLAS_UNPLUGGED_V5_NO_HANDS,
+   ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ,
+   ATLAS_UNPLUGGED_V5_ROBOTIQ_AND_SRI,
+   ATLAS_UNPLUGGED_V5_TROOPER;
 
    private static String[] resourceDirectories;
    private final SideDependentList<RigidBodyTransform> offsetHandFromAttachmentPlate = new SideDependentList<RigidBodyTransform>();

@@ -18,13 +18,13 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 {
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
 
-   public ValkyrieKinematicsCollisionModel(DRCRobotJointMap jointMap)
+   public ValkyrieKinematicsCollisionModel(HumanoidJointNameMap jointMap)
    {
       this.jointMap = jointMap;
    }

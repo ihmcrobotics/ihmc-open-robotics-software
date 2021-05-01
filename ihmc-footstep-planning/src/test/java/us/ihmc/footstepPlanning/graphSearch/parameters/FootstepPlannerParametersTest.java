@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Random;
 
@@ -176,8 +175,8 @@ public class FootstepPlannerParametersTest
       assertEquals(finalTurnProximity, parameters.getFinalTurnProximity(), epsilon);
 
       int numberOfBoundingBoxChecks = RandomNumbers.nextInt(random, -10, 10);
-      parameters.setNumberOfBoundingBoxChecks(numberOfBoundingBoxChecks);
-      assertEquals(numberOfBoundingBoxChecks, parameters.getNumberOfBoundingBoxChecks());
+      parameters.setIntermediateBodyBoxChecks(numberOfBoundingBoxChecks);
+      assertEquals(numberOfBoundingBoxChecks, parameters.getIntermediateBodyBoxChecks());
 
       double aStarHeuristicWeight = RandomNumbers.nextDouble(random, 10.0);
       parameters.setAStarHeuristicsWeight(aStarHeuristicWeight);
@@ -214,10 +213,6 @@ public class FootstepPlannerParametersTest
       double pitchWeight = RandomNumbers.nextDouble(random, 10.0);
       parameters.setPitchWeight(pitchWeight);
       assertEquals(pitchWeight, parameters.getPitchWeight(), epsilon);
-
-      double maximumDistanceFromBoundingBox = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMaximum2dDistanceFromBoundingBoxToPenalize(maximumDistanceFromBoundingBox);
-      assertEquals(maximumDistanceFromBoundingBox, parameters.getMaximum2dDistanceFromBoundingBoxToPenalize(), epsilon);
 
       double footholdAreaWeight = RandomNumbers.nextDouble(random, 10.00);
       parameters.setFootholdAreaWeight(footholdAreaWeight);

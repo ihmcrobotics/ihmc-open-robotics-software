@@ -4,7 +4,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInput;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPVariableSubstitution;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
@@ -144,7 +144,7 @@ public class InverseKinematicsQPSolver
    private final DMatrixRMaj tempTask_H = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempTask_f = new DMatrixRMaj(1, 1);
 
-   public void addMotionInput(QPInput input)
+   public void addMotionInput(QPInputTypeA input)
    {
       switch (input.getConstraintType())
       {

@@ -9,8 +9,8 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 /**
- * Input to {@link GradientDescentStepConstraintSolver}. The solver can perform the following checks depending on the input:
- * - Transform a polygon such that the constraints in {@link #wiggleParameters} are met
+ * Input to {@link GradientDescentStepConstraintSolver} The solver wiggles the foot polygon such that following can be satisfied, if requested:
+ * - The constraints in {@link #wiggleParameters} are met
  * - Check for collisions with the leg
  * - Check for collisions with another polygon (e.g. stance foot)
  */

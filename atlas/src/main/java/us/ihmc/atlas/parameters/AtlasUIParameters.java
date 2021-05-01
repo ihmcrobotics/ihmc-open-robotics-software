@@ -4,6 +4,7 @@ import com.jme3.math.Transform;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.humanoidRobotics.footstep.footstepGenerator.UIFootstepGeneratorParameters;
 import us.ihmc.jMonkeyEngineToolkit.jme.util.JMEDataTypeUtils;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.wholeBodyController.UIParameters;
@@ -79,5 +80,11 @@ public class AtlasUIParameters implements UIParameters
       RigidBodyTransform attachmentPlateToPalm = selectedVersion.getOffsetFromAttachmentPlate(side);
       Transform jmeAttachmentPlateToPalm = JMEDataTypeUtils.j3dTransform3DToJMETransform(attachmentPlateToPalm);
       return jmeAttachmentPlateToPalm;
+   }
+
+   @Override
+   public UIFootstepGeneratorParameters getUIFootstepGeneratorParameters()
+   {
+      return new AtlasUIFootstepGeneratorParameters();
    }
 }

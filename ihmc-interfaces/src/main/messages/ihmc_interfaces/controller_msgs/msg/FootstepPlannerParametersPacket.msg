@@ -356,13 +356,8 @@ float64 cost_per_step -11.1
 # Gets the weight for the heuristics in the A Star planner.
 float64 a_star_heuristics_weight -11.1
 
-# This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
-# Additional checks are done by interpolating between the start and end steps
-uint32 number_of_bounding_box_checks 1
-
-# If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-# @see FootstepPlannerCostParameters#getBoundingBoxCost
-float64 maximum_2d_distance_from_bounding_box_to_penalize -11.1
+# Number of body collision checks done by interpolation between steps. If zero, only collision checks centered at the step are done.
+uint32 intermediate_body_box_checks 1
 
 # If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
 # Otherwise, it will turn towards the body path

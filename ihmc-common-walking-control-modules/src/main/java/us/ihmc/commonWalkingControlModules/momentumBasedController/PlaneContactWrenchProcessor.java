@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.ihmc.commonWalkingControlModules.controlModules.CenterOfPressureResolver;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -44,6 +45,7 @@ public class PlaneContactWrenchProcessor
    private final Map<ContactablePlaneBody, FramePoint2D> cops = new LinkedHashMap<>();
 
    private final CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
+   private final DesiredExternalWrenchHolder desiredExternalWrenchHolder;
 
    public PlaneContactWrenchProcessor(List<? extends ContactablePlaneBody> contactablePlaneBodies, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoRegistry parentRegistry)
@@ -91,6 +93,7 @@ public class PlaneContactWrenchProcessor
       }
 
       desiredCenterOfPressureDataHolder = new CenterOfPressureDataHolder(feet);
+      desiredExternalWrenchHolder = new DesiredExternalWrenchHolder(feet);
 
       parentRegistry.addChild(registry);
    }
@@ -131,6 +134,7 @@ public class PlaneContactWrenchProcessor
 
          yoCop.set(cop);
          desiredCenterOfPressureDataHolder.setCenterOfPressure(cop, contactablePlaneBody.getRigidBody());
+         desiredExternalWrenchHolder.setDesiredExternalWrench(wrench, contactablePlaneBody.getRigidBody());
       }
    }
 
@@ -152,5 +156,10 @@ public class PlaneContactWrenchProcessor
    public CenterOfPressureDataHolder getDesiredCenterOfPressureDataHolder()
    {
       return desiredCenterOfPressureDataHolder;
+   }
+
+   public DesiredExternalWrenchHolder getDesiredExternalWrenchHolder()
+   {
+      return desiredExternalWrenchHolder;
    }
 }

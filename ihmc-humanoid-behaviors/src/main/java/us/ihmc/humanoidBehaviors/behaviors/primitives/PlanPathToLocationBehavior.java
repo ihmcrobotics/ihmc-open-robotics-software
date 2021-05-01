@@ -51,8 +51,10 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    private final FramePose3D startLeftFootPose = new FramePose3D();
    private final FramePose3D startRightFootPose = new FramePose3D();
    private RobotSide initialStanceSide;
+   private double desiredHeading;
    private FootstepDataListMessage footstepDataListMessage;
    private FootstepPlanningToolboxOutputStatus footstepPlanningToolboxOutputStatus;
+   private boolean squareUpEndSteps = true;
 
    protected final ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus> footPlanStatusQueue = new ConcurrentListeningQueue<FootstepPlanningToolboxOutputStatus>(2);
    private final IHMCROS2Publisher<ToolboxStateMessage> toolboxStatePublisher;
@@ -88,14 +90,17 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          Pose3DReadOnly leftFootPose,
                          Pose3DReadOnly rightFootPose,
                          boolean planBodyPath,
-                         boolean assumeFlatGround)
+                         boolean assumeFlatGround,
+                         double desiredHeading, boolean squareUpEndSteps)
    {
+      this.squareUpEndSteps = squareUpEndSteps;
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
       this.planBodyPath = planBodyPath;
       this.initialStanceSide = initialStanceSide;
       this.startLeftFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), leftFootPose);
       this.startRightFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), rightFootPose);
+      this.desiredHeading = desiredHeading;
    }
 
    public FootstepDataListMessage getFootStepList()
@@ -162,6 +167,14 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             goalRightFootPose.appendTranslation(0.0, -0.5 * footstepPlannerParameters.getIdealFootstepWidth(), 0.0);
             footstepPlan.addFootstep(RobotSide.LEFT, startLeftFootPose);
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
+            request.setRequestedPathHeading(desiredHeading);
+            if(squareUpEndSteps)
+            {
+               request.getGoalLeftFootPose().set(goalLeftFootPose);
+               request.getGoalRightFootPose().set(goalRightFootPose);
+            }
+
+
             FootstepDataListMessage footstepDataGoalStepForVisualization = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                                        0.0,
                                                                                                                                        0.0);

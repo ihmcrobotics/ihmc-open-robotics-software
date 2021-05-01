@@ -59,14 +59,14 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
    // for path 8, if DIFFICULT_STEPPING_STONES true creates an extension to the path with harder steps
    private static final boolean DIFFICULT_STEPPING_STONES = false;
 
-   private static final AppearanceDefinition cinderBlockAppearance = YoAppearance.DarkGray();
-   private static final double cinderBlockLength = 0.40; // 40 cm (approx 16 in, just less than 16in)
-   private static final double cinderBlockWidth = cinderBlockLength / 2.0;
-   private static final double cinderBlockHeight = 0.15; // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
-   private static final double overlapToPreventGaps = 0.002;
+   public static final AppearanceDefinition cinderBlockAppearance = YoAppearance.DarkGray();
+   public static final double cinderBlockLength = 0.40; // 40 cm (approx 16 in, just less than 16in)
+   public static final double cinderBlockWidth = cinderBlockLength / 2.0;
+   public static final double cinderBlockHeight = 0.15; // 15 cm (approx 6 in, less than 6 in, but consistent with other cm measurements)
+   public static final double overlapToPreventGaps = 0.002;
 
    private static final double cinderBlockTiltDegrees = 15;
-   private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
+   public static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
 
    private static final boolean VISUALIZE_BOUNDING_BOXES = false;
 

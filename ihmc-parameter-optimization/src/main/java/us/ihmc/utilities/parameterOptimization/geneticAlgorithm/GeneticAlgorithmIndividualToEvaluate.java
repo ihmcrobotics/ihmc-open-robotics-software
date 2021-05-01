@@ -168,6 +168,11 @@ public class GeneticAlgorithmIndividualToEvaluate
       return makeNewIndividual(this);
    }
 
+   public void replay()
+   {
+      individualToEvaluate.replay();
+   }
+
    
 
 }

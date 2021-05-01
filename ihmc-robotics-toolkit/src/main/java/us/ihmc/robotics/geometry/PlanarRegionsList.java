@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
@@ -399,7 +400,7 @@ public class PlanarRegionsList
     *
     * @param rigidBodyTransform transform from current frame to desired frame
     */
-   public void applyTransform(RigidBodyTransform rigidBodyTransform)
+   public void applyTransform(RigidBodyTransformReadOnly rigidBodyTransform)
    {
       for (int i = 0; i < regions.size(); i++)
       {

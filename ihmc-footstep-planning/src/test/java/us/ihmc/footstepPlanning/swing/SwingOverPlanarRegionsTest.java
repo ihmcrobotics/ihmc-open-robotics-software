@@ -24,6 +24,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -35,7 +36,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -299,7 +299,6 @@ public class SwingOverPlanarRegionsTest
                                                                          new DefaultVisibilityGraphParameters(),
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          swingPlannerParameters,
-                                                                         new DefaultSplitFractionCalculatorParameters(),
                                                                          walkingControllerParameters,
                                                                          footPolygons);
 
@@ -360,7 +359,7 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      planningModule.getPostProcessHandler().computeSwingWaypoints(request, footstepPlan);
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.POSITION);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
@@ -466,8 +465,7 @@ public class SwingOverPlanarRegionsTest
       for (double time = 0.0; time <= 1.0; time += dt)
       {
          twoWaypointSwingGenerator.compute(time);
-         FramePoint3D desiredPosition = new FramePoint3D();
-         twoWaypointSwingGenerator.getPosition(desiredPosition);
+         FramePoint3DReadOnly desiredPosition = twoWaypointSwingGenerator.getPosition();
 
          foot.getPosition().set(desiredPosition);
          foot.getPosition().addX(0.5 * (heelLength - toeLength));
@@ -620,12 +618,6 @@ public class SwingOverPlanarRegionsTest
 
          @Override
          public MomentumOptimizationSettings getMomentumOptimizationSettings()
-         {
-            return null;
-         }
-
-         @Override
-         public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
          }

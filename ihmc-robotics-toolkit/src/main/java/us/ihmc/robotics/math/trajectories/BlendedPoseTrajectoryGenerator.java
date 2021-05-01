@@ -1,28 +1,30 @@
 package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
+public class BlendedPoseTrajectoryGenerator implements FixedFramePoseTrajectoryGenerator
 {
    private final BlendedPositionTrajectoryGenerator blendedPositionTrajectory;
    private final BlendedOrientationTrajectoryGenerator blendedOrientationTrajectory;
+
+   private final FixedFramePoseTrajectoryGenerator trajectory;
 
    private final FramePoint3D tempPosition = new FramePoint3D();
    private final FrameVector3D tempVelocity = new FrameVector3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
-   private final PoseTrajectoryGenerator trajectory;
-
-   public BlendedPoseTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoRegistry parentRegistry)
+   public BlendedPoseTrajectoryGenerator(String prefix, FixedFramePoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoRegistry parentRegistry)
    {
       this.trajectory = trajectory;
       this.blendedPositionTrajectory = new BlendedPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
@@ -85,49 +87,73 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       trajectory.initialize();
    }
 
+   private final FramePose3DReadOnly dummyPose = new FramePose3DReadOnly()
+   {
+      @Override
+      public FramePoint3DReadOnly getPosition()
+      {
+         return blendedPositionTrajectory.getPosition();
+      }
+
+      @Override
+      public FrameQuaternionReadOnly getOrientation()
+      {
+         return blendedOrientationTrajectory.getOrientation();
+      }
+
+      @Override
+      public ReferenceFrame getReferenceFrame()
+      {
+         return blendedPositionTrajectory.getReferenceFrame();
+      }
+   };
 
    @Override
-   public void getPose(FramePose3D framePoseToPack)
+   public ReferenceFrame getReferenceFrame()
    {
-      blendedPositionTrajectory.getPosition(tempPosition);
-      blendedOrientationTrajectory.getOrientation(tempOrientation);
-      framePoseToPack.setIncludingFrame(tempPosition, tempOrientation);
+      return blendedPositionTrajectory.getReferenceFrame();
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePose3DReadOnly getPose()
    {
-      blendedPositionTrajectory.getPosition(positionToPack);
+      return dummyPose;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      blendedPositionTrajectory.getVelocity(velocityToPack);
+      return blendedPositionTrajectory.getPosition();
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      blendedPositionTrajectory.getAcceleration(accelerationToPack);
+      return blendedPositionTrajectory.getVelocity();
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      blendedOrientationTrajectory.getOrientation(orientationToPack);
+      return blendedPositionTrajectory.getAcceleration();
    }
 
    @Override
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      blendedOrientationTrajectory.getAngularVelocity(angularVelocityToPack);
+      return blendedOrientationTrajectory.getOrientation();
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      blendedOrientationTrajectory.getAngularAcceleration(angularAccelerationToPack);
+      return blendedOrientationTrajectory.getAngularVelocity();
+   }
+
+   @Override
+   public FrameVector3DReadOnly getAngularAcceleration()
+   {
+      return blendedOrientationTrajectory.getAngularAcceleration();
    }
 
    @Override

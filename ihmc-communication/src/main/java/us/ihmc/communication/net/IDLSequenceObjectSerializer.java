@@ -88,7 +88,8 @@ public class IDLSequenceObjectSerializer extends Serializer<IDLSequence.Object>
    }
 
    @SuppressWarnings("unchecked")
-   public IDLSequence.Object read(Kryo kryo, Input input, Class<IDLSequence.Object> type)
+   @Override
+   public IDLSequence.Object read(Kryo kryo, Input input, Class<? extends IDLSequence.Object> type)
    {
       if (genericType != null)
       {

@@ -44,6 +44,10 @@ module controller_msgs
          * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
          */
         sequence<geometry_msgs::msg::dds::Point, 10> contact_point_positions;
+        /**
+         * (in beta) Estimates the location of the contact point at a single rigid body (the first provided). The root joint wrench is not estimated.
+         */
+        boolean estimate_contact_location;
       };
     };
   };

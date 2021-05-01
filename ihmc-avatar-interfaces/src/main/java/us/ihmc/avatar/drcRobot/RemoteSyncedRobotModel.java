@@ -1,8 +1,9 @@
 package us.ihmc.avatar.drcRobot;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.exceptions.NotARotationMatrixException;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -13,10 +14,10 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class RemoteSyncedRobotModel
@@ -42,7 +43,7 @@ public class RemoteSyncedRobotModel
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
                                                     RobotConfigurationData.class,
                                                     ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
-                                                    ROS2TopicNameTools.newMessageInstance(RobotConfigurationData.class),
+                                                    robotConfigurationData,
                                                     message ->
                                                     {
                                                        FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
@@ -61,6 +62,11 @@ public class RemoteSyncedRobotModel
    {
       robotConfigurationData = robotConfigurationDataInput.getLatest();
 
+      updateInternal();
+   }
+
+   protected void updateInternal()
+   {
       fullRobotModel.getRootJoint().setJointOrientation(robotConfigurationData.getRootOrientation());
       fullRobotModel.getRootJoint().setJointPosition(robotConfigurationData.getRootTranslation());
 
@@ -71,7 +77,14 @@ public class RemoteSyncedRobotModel
 
       fullRobotModel.getElevator().updateFramesRecursively();
 
-      referenceFrames.updateFrames();
+      try
+      {
+         referenceFrames.updateFrames();
+      }
+      catch (NotARotationMatrixException e)
+      {
+         LogTools.error(e.getMessage());
+      }
    }
 
    public FullHumanoidRobotModel getFullRobotModel()
@@ -113,5 +126,10 @@ public class RemoteSyncedRobotModel
    public void addRobotConfigurationDataReceivedCallback(Runnable callback)
    {
       robotConfigurationDataInput.addCallback(message -> callback.run());
+   }
+
+   public void addRobotConfigurationDataReceivedCallback(Consumer<RobotConfigurationData> callback)
+   {
+      robotConfigurationDataInput.addCallback(callback);
    }
 }

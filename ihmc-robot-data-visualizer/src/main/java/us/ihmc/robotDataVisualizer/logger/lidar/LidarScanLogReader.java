@@ -220,11 +220,11 @@ public class LidarScanLogReader
          double w = logDataInputStream.readFloat();
          lidarScanMessage.getLidarOrientation().set(x, y, z, w);
 
-         int scanLength = logDataInputStream.readInt();
+         int scanDataLength = logDataInputStream.readInt();
 
-         for (int i = 0; i < scanLength; i++)
+         for (int i = 0; i < scanDataLength; i++)
          {
-            lidarScanMessage.getScan().add(logDataInputStream.readFloat());
+            lidarScanMessage.getScan().add(logDataInputStream.readByte());
          }
          return lidarScanMessage;
       }

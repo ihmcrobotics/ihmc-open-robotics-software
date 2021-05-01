@@ -26,7 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -181,7 +181,7 @@ public class ControllerBasedBodyPathTest
                double percent = (double) i / (double) (numberOfPoints - 1);
                xPoly.compute(percent);
                yPoly.compute(percent);
-               Point3D point2d = new Point3D(xPoly.getPosition(), yPoly.getPosition(), 0.0);
+               Point3D point2d = new Point3D(xPoly.getValue(), yPoly.getValue(), 0.0);
                waypoints.add(point2d);
             }
 

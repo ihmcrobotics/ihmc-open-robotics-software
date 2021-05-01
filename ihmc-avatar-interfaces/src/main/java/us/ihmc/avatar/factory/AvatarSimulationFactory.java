@@ -189,6 +189,8 @@ public class AvatarSimulationFactory
          RobotCollisionModel simulationRobotCollisionModel = robotModel.get()
                                                                        .getSimulationRobotCollisionModel(helper, robotCollisionMask, environmentCollisionMask);
          experimentalSimulation.configureRobot(robotModel.get(), simulationRobotCollisionModel, robotInitialStateWriter);
+         if (scsInitialSetup.get().getExperimentalPhysicsEngineContactParameters() != null)
+            experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(scsInitialSetup.get().getExperimentalPhysicsEngineContactParameters());
 
          simulationConstructionSet = new SimulationConstructionSet(experimentalSimulation,
                                                                    guiInitialSetup.get().getGraphics3DAdapter(),
@@ -367,13 +369,12 @@ public class AvatarSimulationFactory
       {
          ArrayList<RegistrySendBufferBuilder> builders = new ArrayList<>();
          builders.add(new RegistrySendBufferBuilder(estimatorThread.getYoRegistry(), estimatorThread.getFullRobotModel().getElevator(), null));
-         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), null, controllerThread.getYoGraphicsListRegistry()));
+         builders.add(new RegistrySendBufferBuilder(controllerThread.getYoVariableRegistry(), controllerThread.getYoGraphicsListRegistry()));
          intraprocessYoVariableLogger = new IntraprocessYoVariableLogger(getClass().getSimpleName(),
                                                                          robotModel.getLogModelProvider(),
                                                                          builders,
                                                                          100000,
-                                                                         robotModel.getEstimatorDT(),
-                                                                         IntraprocessYoVariableLogger.DEFAULT_INCOMING_LOGS_DIRECTORY);
+                                                                         robotModel.getEstimatorDT());
          estimatorTask.addRunnableOnTaskThread(() -> intraprocessYoVariableLogger.update(estimatorThread.getHumanoidRobotContextData().getTimestamp()));
       }
 

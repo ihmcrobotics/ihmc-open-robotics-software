@@ -19,7 +19,7 @@ public class Point3DSerializer extends Serializer<Point3D>
    }
 
    @Override
-   public Point3D read(Kryo kryo, Input input, Class<Point3D> type)
+   public Point3D read(Kryo kryo, Input input, Class<? extends Point3D> type)
    {
       return new Point3D(input.readDouble(), input.readDouble(), input.readDouble());
    }

@@ -3,8 +3,8 @@ package us.ihmc.utilities.ros;
 import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.Map.Entry;
+import java.util.function.Consumer;
 
-import org.ros.exception.RosRuntimeException;
 import org.ros.exception.ServiceNotFoundException;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
@@ -22,13 +22,15 @@ import org.ros.node.service.ServiceServer;
 import org.ros.node.topic.Publisher;
 import org.ros.node.topic.Subscriber;
 
-import us.ihmc.commons.PrintTools;
+import sensor_msgs.CameraInfo;
+import sensor_msgs.CompressedImage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.ROS1Subscriber;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
-public class RosMainNode implements NodeMain
+public class RosMainNode implements NodeMain, RosNodeInterface
 {
    private final LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>> subscribers = new LinkedHashMap<String, RosTopicSubscriberInterface<? extends Message>>();
    private final LinkedHashMap<String, RosTopicPublisher<? extends Message>> publishers = new LinkedHashMap<String, RosTopicPublisher<? extends Message>>();
@@ -64,6 +66,7 @@ public class RosMainNode implements NodeMain
       this.useTf2 = useTf2;
    }
 
+   @Override
    public boolean isStarted()
    {
       return isStarted;
@@ -79,6 +82,7 @@ public class RosMainNode implements NodeMain
       return useTf2;
    }
 
+   @Override
    public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
    {
       checkNotStarted();
@@ -86,12 +90,14 @@ public class RosMainNode implements NodeMain
       clients.put(topicName, client);
    }
 
+   @Override
    public void attachServiceServer(String topicName, RosServiceServer<? extends Message, ? extends Message> server)
    {
       checkNotStarted();
       servers.put(topicName, server);
    }
 
+   @Override
    public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
    {
       checkNotStarted();
@@ -99,6 +105,7 @@ public class RosMainNode implements NodeMain
       publishers.put(topicName, publisher);
    }
 
+   @Override
    public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       checkNotStarted();
@@ -106,6 +113,24 @@ public class RosMainNode implements NodeMain
       subscribers.put(topicName, subscriber);
    }
 
+   @Override
+   public <T extends Message> void attachSubscriber(String topicName, Class<T> type, Consumer<T> callback)
+   {
+      if (type.equals(CompressedImage.class))
+      {
+         attachSubscriber(topicName, new ROS1Subscriber<>(CompressedImage._TYPE, callback).getSubscriber());
+      }
+      else if (type.equals(CameraInfo.class))
+      {
+         attachSubscriber(topicName, new ROS1Subscriber<>(CameraInfo._TYPE, callback).getSubscriber());
+      }
+      else
+      {
+         throw new RuntimeException("Implement type: " + type);
+      }
+   }
+
+   @Override
    public void removeSubscriber(RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       if (subscribers.containsValue(subscriber) && rosSubscribers.containsKey(subscriber))
@@ -117,6 +142,7 @@ public class RosMainNode implements NodeMain
       }
    }
 
+   @Override
    public void attachParameterListener(String topicName, ParameterListener listener)
    {
       checkNotStarted();
@@ -132,6 +158,7 @@ public class RosMainNode implements NodeMain
    }
 
    @SuppressWarnings({ "unchecked", "rawtypes" })
+   @Override
    public void onStart(ConnectedNode connectedNode)
    {
       parameters = connectedNode.getParameterTree();
@@ -195,6 +222,7 @@ public class RosMainNode implements NodeMain
       isStarted = true;
    }
 
+   @Override
    public Time getCurrentTime()
    {
       if (connectedNode == null)
@@ -204,19 +232,25 @@ public class RosMainNode implements NodeMain
       return connectedNode.getCurrentTime();
    }
 
+   @Override
    public void onShutdown(Node node)
    {
       isShutdownInProgress = true;
    }
 
+   @Override
    public void onShutdownComplete(Node node)
    {
+
    }
 
+   @Override
    public void onError(Node node, Throwable throwable)
    {
+
    }
 
+   @Override
    public final GraphName getDefaultNodeName()
    {
       return GraphName.of(graphName);

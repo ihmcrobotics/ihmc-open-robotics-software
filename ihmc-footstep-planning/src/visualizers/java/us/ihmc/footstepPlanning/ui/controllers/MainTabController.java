@@ -60,10 +60,6 @@ public class MainTabController
    @FXML
    private CheckBox performAStarSearch;
    @FXML
-   private CheckBox performPositionBasedSplitFractionCalculation;
-   @FXML
-   private CheckBox performAreaBasedSplitFractionCalculation;
-   @FXML
    private CheckBox ignorePartialFootholds;
    @FXML
    private Spinner<Double> timeout;
@@ -91,8 +87,6 @@ public class MainTabController
 
    @FXML
    private Button computePath;
-   @FXML
-   private Button postProcess;
    @FXML
    private Button abortPlanning;
 
@@ -143,20 +137,18 @@ public class MainTabController
    }
 
    @FXML
+   public void computeSwing()
+   {
+      messager.submitMessage(ReplanSwing, true);
+   }
+
+   @FXML
    public void abortPlanning()
    {
       if (verbose)
          LogTools.info("Clicked abort planning...");
 
       messager.submitMessage(HaltPlanning, true);
-   }
-
-   @FXML
-   public void postProcess()
-   {
-      if (verbose)
-         LogTools.info("Clicked post process...");
-      messager.submitMessage(PostProcessPlan, true);
    }
 
    @FXML
@@ -234,6 +226,7 @@ public class MainTabController
       swingPlannerType.setItems(FXCollections.observableArrayList(SwingPlannerType.values()));
       swingPlannerType.setValue(SwingPlannerType.NONE);
 
+      messager.bindBidirectional(BindStartToRobot, bindStartToRobot.selectedProperty(), true);
       messager.bindBidirectional(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty(), true);
       messager.bindBidirectional(OverrideStepTimings, overrideTiming.selectedProperty(), true);
       messager.bindBidirectional(ManualSwingTime, swingTimeSpinner.valueFactoryProperty().getValue().valueProperty(), true);
@@ -282,8 +275,6 @@ public class MainTabController
 
       messager.bindBidirectional(PlanBodyPath, planBodyPath.selectedProperty(), true);
       messager.bindBidirectional(PerformAStarSearch, performAStarSearch.selectedProperty(), true);
-      messager.bindBidirectional(PerformPositionBasedSplitFractionCalculation, performPositionBasedSplitFractionCalculation.selectedProperty(), true);
-      messager.bindBidirectional(PerformAreaBasedSplitFractionCalculation, performAreaBasedSplitFractionCalculation.selectedProperty(), true);
       messager.bindBidirectional(RequestedSwingPlannerType, swingPlannerType.valueProperty(), true);
 
       walkingPreviewPlaybackManager = new WalkingPreviewPlaybackManager(messager);

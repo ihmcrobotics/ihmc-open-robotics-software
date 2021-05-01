@@ -2,26 +2,26 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoSpline3D;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePolynomial3DBasics;
+import us.ihmc.robotics.math.trajectories.interfaces.FixedFramePoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoFramePolynomial3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGenerator
+public class SoftTouchdownPoseTrajectoryGenerator implements FixedFramePoseTrajectoryGenerator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry;
-   
-   private final YoSpline3D positionTouchdownTrajectory;
-   private final FramePoint3D desiredPosition = new FramePoint3D();
-   
+
+   private final FixedFramePolynomial3DBasics positionTouchdownTrajectory;
+
    private final YoDouble timeInitial;
    private final YoDouble timeFinal;
    private final YoDouble timeIntoTouchdown;
@@ -33,16 +33,39 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    private final FrameQuaternion constantOrientation = new FrameQuaternion();
    private final FrameVector3D constantAngularVelocity = new FrameVector3D();
    private final FrameVector3D constantAngularAcceleration = new FrameVector3D();
+
+   private final FramePose3DReadOnly pose;
    
    public SoftTouchdownPoseTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
       
-      positionTouchdownTrajectory = new YoSpline3D(3, 3, worldFrame, registry, namePrefix + "Trajectory");
+      positionTouchdownTrajectory = new YoFramePolynomial3D(namePrefix + "Trajectory", 3, worldFrame, registry);
       timeInitial = new YoDouble(namePrefix + "TimeInitial", registry);
       timeFinal = new YoDouble(namePrefix + "TimeFinal", registry);
       timeIntoTouchdown = new YoDouble(namePrefix + "TimeIntoTouchdown", registry);
+
+      pose = new FramePose3DReadOnly()
+      {
+         @Override
+         public FramePoint3DReadOnly getPosition()
+         {
+            return positionTouchdownTrajectory.getPosition();
+         }
+
+         @Override
+         public FrameQuaternionReadOnly getOrientation()
+         {
+            return constantOrientation;
+         }
+
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return worldFrame;
+         }
+      };
       
       timeFinal.set(Double.POSITIVE_INFINITY);
    }
@@ -50,15 +73,17 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    public void setOrientation(FrameQuaternionReadOnly orientation)
    {
       constantOrientation.setIncludingFrame(orientation);
-      constantAngularVelocity.setToZero(worldFrame);
-      constantAngularAcceleration.setToZero(worldFrame);
+      constantAngularVelocity.setToZero(getReferenceFrame());
+      constantAngularAcceleration.setToZero(getReferenceFrame());
    }
 
    public void setOrientation(FrameQuaternionReadOnly orientation, FrameVector3DReadOnly angularVelocity)
    {
       constantOrientation.setIncludingFrame(orientation);
       constantAngularVelocity.setIncludingFrame(angularVelocity);
-      constantAngularAcceleration.setToZero(worldFrame);
+      constantOrientation.changeFrame(getReferenceFrame());
+      constantAngularVelocity.changeFrame(getReferenceFrame());
+      constantAngularAcceleration.setToZero(getReferenceFrame());
    }
 
    public void setLinearTrajectory(double initialTime, FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly initialVelocity, FrameVector3DReadOnly initialAcceleration)
@@ -69,9 +94,9 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
       this.initialVelocity.setIncludingFrame(initialVelocity);
       this.initialAcceleration.setIncludingFrame(initialAcceleration);
       
-      this.initialPosition.changeFrame(worldFrame);
-      this.initialVelocity.changeFrame(worldFrame);
-      this.initialAcceleration.changeFrame(worldFrame);
+      this.initialPosition.changeFrame(getReferenceFrame());
+      this.initialVelocity.changeFrame(getReferenceFrame());
+      this.initialAcceleration.changeFrame(getReferenceFrame());
    }
 
    @Override
@@ -79,7 +104,7 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    {
       double t0 = timeInitial.getDoubleValue();
       double tf = timeFinal.getDoubleValue();
-      positionTouchdownTrajectory.setQuadraticUsingInitialVelocityAndAcceleration(t0, tf, initialPosition, initialVelocity, initialAcceleration);
+      positionTouchdownTrajectory.setQuadraticUsingInitialAcceleration(t0, tf, initialPosition, initialVelocity, initialAcceleration);
    }
 
    @Override
@@ -97,48 +122,36 @@ public class SoftTouchdownPoseTrajectoryGenerator implements PoseTrajectoryGener
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePose3DReadOnly getPose()
    {
-      positionTouchdownTrajectory.getPosition(positionToPack);
+      return pose;
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      positionTouchdownTrajectory.getVelocity(velocityToPack);
+      return positionTouchdownTrajectory.getVelocity();
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      positionTouchdownTrajectory.getAcceleration(accelerationToPack);
+      return positionTouchdownTrajectory.getAcceleration();
+   }
+
+
+   @Override
+   public FrameVector3DReadOnly getAngularVelocity()
+   {
+      return constantAngularVelocity;
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public FrameVector3DReadOnly getAngularAcceleration()
    {
-      orientationToPack.setIncludingFrame(constantOrientation);
+      return constantAngularAcceleration;
    }
 
-   @Override
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
-   {
-      angularVelocityToPack.setIncludingFrame(constantAngularVelocity);
-   }
-
-   @Override
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
-   {
-      angularAccelerationToPack.setIncludingFrame(constantAngularAcceleration);
-   }
-
-   @Override
-   public void getPose(FramePose3D framePoseToPack)
-   {
-      getPosition(desiredPosition);
-      framePoseToPack.set(desiredPosition, constantOrientation);
-   }
-   
    @Override
    public void showVisualization()
    {

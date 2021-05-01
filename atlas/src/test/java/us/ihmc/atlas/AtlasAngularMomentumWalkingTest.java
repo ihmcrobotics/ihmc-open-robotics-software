@@ -1,20 +1,20 @@
 package us.ihmc.atlas;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.atlas.parameters.AtlasICPOptimizationParameters;
 import us.ihmc.atlas.parameters.AtlasPhysicalProperties;
-import us.ihmc.atlas.parameters.AtlasSmoothCMPPlannerParameters;
 import us.ihmc.atlas.parameters.AtlasWalkingControllerParameters;
 import us.ihmc.avatar.angularMomentumTest.AvatarAngularMomentumWalkingTest;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
+@Disabled // TODO Since the PR #1678 about switching to a new ICP planner, the feature tested here is not available.
 @Tag("humanoid-flat-ground-slow-2")
 public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkingTest
 {
@@ -23,12 +23,6 @@ public class AtlasAngularMomentumWalkingTest extends AvatarAngularMomentumWalkin
    private final RobotTarget target = RobotTarget.SCS;
    private final AtlasRobotModel robotModel = new AtlasRobotModel(version, target, false)
    {
-      @Override
-      public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
-      {
-         return new AtlasSmoothCMPPlannerParameters(new AtlasPhysicalProperties(), target);
-      }
-
       @Override
       public WalkingControllerParameters getWalkingControllerParameters()
       {

@@ -9,6 +9,8 @@ import us.ihmc.atlas.parameters.AtlasContactPointParameters;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.behaviors.tools.PlanarRegionsMappingModule;
+import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -31,8 +33,8 @@ import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.humanoidBehaviors.tools.*;
-import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.javafx.simulation.RobotAndMapViewer;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -249,7 +251,12 @@ public class AtlasCorridorNavigationTest
          }
          if (VISUALIZE)
          {
-            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoints);
+            ArrayList<Pose3DReadOnly> pathPoses = new ArrayList<>();
+            for (Point3DReadOnly pathPoint : pathPoints)
+            {
+               pathPoses.add(new Pose3D(pathPoint, new Quaternion()));
+            }
+            robotAndMapViewer.setBodyPathPlanToVisualize(pathPoses);
          }
 
          LogTools.info("Computing poses from path");

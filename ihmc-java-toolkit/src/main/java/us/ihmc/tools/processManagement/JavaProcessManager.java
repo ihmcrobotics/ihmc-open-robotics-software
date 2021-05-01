@@ -2,17 +2,12 @@ package us.ihmc.tools.processManagement;
 
 import org.apache.commons.io.output.TeeOutputStream;
 import org.apache.commons.lang3.ArrayUtils;
-import org.apache.commons.lang3.SystemUtils;
-import org.fusesource.jansi.AnsiPrintStream;
-import org.fusesource.jansi.WindowsAnsiPrintStream;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.io.PrintStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;

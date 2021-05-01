@@ -7,16 +7,7 @@ import java.util.Map;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -54,8 +45,9 @@ public class InverseDynamicsOptimizationControlModule
 
    private final BasisVectorVisualizer basisVectorVisualizer;
    private final InverseDynamicsQPSolver qpSolver;
-   private final QPInput motionQPInput;
-   private final QPInput rhoQPInput;
+   private final QPInputTypeB directMotionQPInput;
+   private final QPInputTypeA motionQPInput;
+   private final QPInputTypeA rhoQPInput;
    private final QPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
@@ -117,8 +109,9 @@ public class InverseDynamicsOptimizationControlModule
       else
          basisVectorVisualizer = null;
 
-      motionQPInput = new QPInput(numberOfDoFs);
-      rhoQPInput = new QPInput(rhoSize);
+      motionQPInput = new QPInputTypeA(numberOfDoFs);
+      directMotionQPInput = new QPInputTypeB(numberOfDoFs);
+      rhoQPInput = new QPInputTypeA(rhoSize);
       motionQPVariableSubstitution = new QPVariableSubstitution();
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
@@ -333,6 +326,13 @@ public class InverseDynamicsOptimizationControlModule
       boolean success = motionQPInputCalculator.convertMomentumRateCommand(command, motionQPInput);
       if (success)
          qpSolver.addMotionInput(motionQPInput);
+   }
+
+   public void submitLinearMomentumRateCostCommand(LinearMomentumRateCostCommand command)
+   {
+      boolean success = motionQPInputCalculator.convertLinearMomentumRateCostCommand(command, directMotionQPInput);
+      if (success)
+         qpSolver.addMotionInput(directMotionQPInput);
    }
 
    public void submitPrivilegedConfigurationCommand(PrivilegedConfigurationCommand command)

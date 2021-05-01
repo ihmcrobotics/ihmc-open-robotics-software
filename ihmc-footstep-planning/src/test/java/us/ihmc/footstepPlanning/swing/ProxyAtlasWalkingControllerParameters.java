@@ -109,12 +109,6 @@ import us.ihmc.robotics.sensors.FootSwitchFactory;
    }
 
    @Override
-   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
-   {
-      return null;
-   }
-
-   @Override
    public double getMaxICPErrorBeforeSingleSupportForwardX()
    {
       return 0;

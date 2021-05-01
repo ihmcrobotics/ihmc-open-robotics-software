@@ -1,5 +1,7 @@
 package us.ihmc.robotics.time;
 
+import us.ihmc.commons.MathTools;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -7,6 +9,38 @@ import java.util.List;
 @SuppressWarnings("unchecked")
 public class TimeIntervalTools
 {
+
+   public static boolean areTimeIntervalsConsecutive(TimeIntervalProvider intervalA, TimeIntervalProvider intervalB)
+   {
+      return areTimeIntervalsConsecutive(intervalA, intervalB, 5e-3);
+   }
+
+   public static boolean areTimeIntervalsConsecutive(TimeIntervalProvider intervalA, TimeIntervalProvider intervalB, double epsilon)
+   {
+      return areTimeIntervalsConsecutive(intervalA.getTimeInterval(), intervalB.getTimeInterval(), epsilon);
+   }
+
+   public static boolean areTimeIntervalsConsecutive(TimeIntervalReadOnly intervalA, TimeIntervalReadOnly intervalB, double epsilon)
+   {
+      return MathTools.epsilonEquals(intervalA.getEndTime(), intervalB.getStartTime(), epsilon);
+   }
+
+   public static boolean isTimeSequenceContinuous(List<? extends TimeIntervalProvider> contactStateSequence)
+   {
+      return isTimeSequenceContinuous(contactStateSequence, 5e-3);
+   }
+
+   public static boolean isTimeSequenceContinuous(List<? extends TimeIntervalProvider> contactStateSequence, double epsilon)
+   {
+      for (int index = 0; index < contactStateSequence.size() - 1; index++)
+      {
+         if (!areTimeIntervalsConsecutive(contactStateSequence.get(index), contactStateSequence.get(index + 1), epsilon))
+            return false;
+      }
+
+      return true;
+   }
+
    public static boolean doIntervalsOverlap(TimeIntervalReadOnly intervalA, TimeIntervalReadOnly intervalB)
    {
       if (intervalA.intervalContains(intervalB.getStartTime()))

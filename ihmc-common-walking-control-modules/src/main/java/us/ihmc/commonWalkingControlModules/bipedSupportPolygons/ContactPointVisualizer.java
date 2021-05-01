@@ -15,24 +15,22 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
- * @author twan
- *         Date: 5/28/13
+ * @author twan Date: 5/28/13
  */
 public class ContactPointVisualizer implements Updatable
 {
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final List<YoFramePoint3D> contactPointsWorld = new ArrayList<YoFramePoint3D>();
-   private final List<YoGraphicPosition> yoGraphicPositions = new ArrayList<YoGraphicPosition>();
-   private final List<YoGraphicVector> yoGraphicVectors = new ArrayList<YoGraphicVector>();
-   private final List<YoFrameVector3D> normalVectors = new ArrayList<YoFrameVector3D>();
+   private final List<YoFramePoint3D> contactPointsWorld = new ArrayList<>();
+   private final List<YoGraphicPosition> yoGraphicPositions = new ArrayList<>();
+   private final List<YoGraphicVector> yoGraphicVectors = new ArrayList<>();
+   private final List<YoFrameVector3D> normalVectors = new ArrayList<>();
    private final double normalVectorScale = 0.1;
    private final int maxNumberOfYoGraphicPositions;
-   private final ArrayList<? extends PlaneContactState> contactStates;
+   private final List<? extends PlaneContactState> contactStates;
 
-   public ContactPointVisualizer(ArrayList<? extends PlaneContactState> contactStates, YoGraphicsListRegistry yoGraphicsListRegistry,
-         YoRegistry parentRegistry)
+   public ContactPointVisualizer(List<? extends PlaneContactState> contactStates, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.contactStates = contactStates;
       int totalNumberOfContactPoints = 0;
@@ -43,7 +41,7 @@ public class ContactPointVisualizer implements Updatable
 
       for (int i = 0; i < maxNumberOfYoGraphicPositions; i++)
       {
-         YoFramePoint3D contactPointWorld = new YoFramePoint3D("contactPoint" + i, worldFrame, this.registry);
+         YoFramePoint3D contactPointWorld = new YoFramePoint3D("contactPoint" + i, worldFrame, registry);
          contactPointsWorld.add(contactPointWorld);
          YoGraphicPosition yoGraphicPosition = new YoGraphicPosition("contactViz" + i, contactPointWorld, 0.01, YoAppearance.Crimson());
          yoGraphicPositions.add(yoGraphicPosition);

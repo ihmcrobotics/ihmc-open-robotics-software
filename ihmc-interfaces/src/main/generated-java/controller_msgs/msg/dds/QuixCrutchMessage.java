@@ -22,7 +22,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
    public controller_msgs.msg.dds.FlatStepTypeMessage flat_step_type_;
    public controller_msgs.msg.dds.QuixStairsStepTypeMessage stairs_step_type_;
    public controller_msgs.msg.dds.QuixSideStepDirectionMessage side_step_direction_;
-   public boolean cancel_requested_behavior_;
+   public controller_msgs.msg.dds.QuixSlopeStepTypeMessage slope_step_type_;
+   public byte force_swing_side_ = (byte) 255;
 
    public QuixCrutchMessage()
    {
@@ -30,6 +31,7 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       flat_step_type_ = new controller_msgs.msg.dds.FlatStepTypeMessage();
       stairs_step_type_ = new controller_msgs.msg.dds.QuixStairsStepTypeMessage();
       side_step_direction_ = new controller_msgs.msg.dds.QuixSideStepDirectionMessage();
+      slope_step_type_ = new controller_msgs.msg.dds.QuixSlopeStepTypeMessage();
    }
 
    public QuixCrutchMessage(QuixCrutchMessage other)
@@ -56,7 +58,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       controller_msgs.msg.dds.FlatStepTypeMessagePubSubType.staticCopy(other.flat_step_type_, flat_step_type_);
       controller_msgs.msg.dds.QuixStairsStepTypeMessagePubSubType.staticCopy(other.stairs_step_type_, stairs_step_type_);
       controller_msgs.msg.dds.QuixSideStepDirectionMessagePubSubType.staticCopy(other.side_step_direction_, side_step_direction_);
-      cancel_requested_behavior_ = other.cancel_requested_behavior_;
+      controller_msgs.msg.dds.QuixSlopeStepTypeMessagePubSubType.staticCopy(other.slope_step_type_, slope_step_type_);
+      force_swing_side_ = other.force_swing_side_;
 
    }
 
@@ -138,13 +141,19 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       return side_step_direction_;
    }
 
-   public void setCancelRequestedBehavior(boolean cancel_requested_behavior)
+
+   public controller_msgs.msg.dds.QuixSlopeStepTypeMessage getSlopeStepType()
    {
-      cancel_requested_behavior_ = cancel_requested_behavior;
+      return slope_step_type_;
    }
-   public boolean getCancelRequestedBehavior()
+
+   public void setForceSwingSide(byte force_swing_side)
    {
-      return cancel_requested_behavior_;
+      force_swing_side_ = force_swing_side;
+   }
+   public byte getForceSwingSide()
+   {
+      return force_swing_side_;
    }
 
 
@@ -181,7 +190,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.flat_step_type_.epsilonEquals(other.flat_step_type_, epsilon)) return false;
       if (!this.stairs_step_type_.epsilonEquals(other.stairs_step_type_, epsilon)) return false;
       if (!this.side_step_direction_.epsilonEquals(other.side_step_direction_, epsilon)) return false;
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.cancel_requested_behavior_, other.cancel_requested_behavior_, epsilon)) return false;
+      if (!this.slope_step_type_.epsilonEquals(other.slope_step_type_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.force_swing_side_, other.force_swing_side_, epsilon)) return false;
 
 
       return true;
@@ -212,7 +222,8 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       if (!this.flat_step_type_.equals(otherMyClass.flat_step_type_)) return false;
       if (!this.stairs_step_type_.equals(otherMyClass.stairs_step_type_)) return false;
       if (!this.side_step_direction_.equals(otherMyClass.side_step_direction_)) return false;
-      if(this.cancel_requested_behavior_ != otherMyClass.cancel_requested_behavior_) return false;
+      if (!this.slope_step_type_.equals(otherMyClass.slope_step_type_)) return false;
+      if(this.force_swing_side_ != otherMyClass.force_swing_side_) return false;
 
 
       return true;
@@ -244,8 +255,10 @@ public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Sett
       builder.append(this.stairs_step_type_);      builder.append(", ");
       builder.append("side_step_direction=");
       builder.append(this.side_step_direction_);      builder.append(", ");
-      builder.append("cancel_requested_behavior=");
-      builder.append(this.cancel_requested_behavior_);
+      builder.append("slope_step_type=");
+      builder.append(this.slope_step_type_);      builder.append(", ");
+      builder.append("force_swing_side=");
+      builder.append(this.force_swing_side_);
       builder.append("}");
       return builder.toString();
    }

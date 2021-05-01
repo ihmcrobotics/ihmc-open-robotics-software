@@ -166,8 +166,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -384,9 +382,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -534,9 +529,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getAStarHeuristicsWeight());
 
-      cdr.write_type_4(data.getNumberOfBoundingBoxChecks());
-
-      cdr.write_type_6(data.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      cdr.write_type_4(data.getIntermediateBodyBoxChecks());
 
       cdr.write_type_6(data.getDistanceFromPathTolerance());
 
@@ -680,9 +673,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setAStarHeuristicsWeight(cdr.read_type_6());
       	
-      data.setNumberOfBoundingBoxChecks(cdr.read_type_4());
-      	
-      data.setMaximum2dDistanceFromBoundingBoxToPenalize(cdr.read_type_6());
+      data.setIntermediateBodyBoxChecks(cdr.read_type_4());
       	
       data.setDistanceFromPathTolerance(cdr.read_type_6());
       	
@@ -768,8 +759,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("foothold_area_weight", data.getFootholdAreaWeight());
       ser.write_type_6("cost_per_step", data.getCostPerStep());
       ser.write_type_6("a_star_heuristics_weight", data.getAStarHeuristicsWeight());
-      ser.write_type_4("number_of_bounding_box_checks", data.getNumberOfBoundingBoxChecks());
-      ser.write_type_6("maximum_2d_distance_from_bounding_box_to_penalize", data.getMaximum2dDistanceFromBoundingBoxToPenalize());
+      ser.write_type_4("intermediate_body_box_checks", data.getIntermediateBodyBoxChecks());
       ser.write_type_6("distance_from_path_tolerance", data.getDistanceFromPathTolerance());
       ser.write_type_6("delta_yaw_from_reference_tolerance", data.getDeltaYawFromReferenceTolerance());
       ser.write_type_2("maximum_branch_factor", data.getMaximumBranchFactor());
@@ -844,8 +834,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setFootholdAreaWeight(ser.read_type_6("foothold_area_weight"));
       data.setCostPerStep(ser.read_type_6("cost_per_step"));
       data.setAStarHeuristicsWeight(ser.read_type_6("a_star_heuristics_weight"));
-      data.setNumberOfBoundingBoxChecks(ser.read_type_4("number_of_bounding_box_checks"));
-      data.setMaximum2dDistanceFromBoundingBoxToPenalize(ser.read_type_6("maximum_2d_distance_from_bounding_box_to_penalize"));
+      data.setIntermediateBodyBoxChecks(ser.read_type_4("intermediate_body_box_checks"));
       data.setDistanceFromPathTolerance(ser.read_type_6("distance_from_path_tolerance"));
       data.setDeltaYawFromReferenceTolerance(ser.read_type_6("delta_yaw_from_reference_tolerance"));
       data.setMaximumBranchFactor(ser.read_type_2("maximum_branch_factor"));

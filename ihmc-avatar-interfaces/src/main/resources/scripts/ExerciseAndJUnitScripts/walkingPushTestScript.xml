@@ -354,7 +354,7 @@
     <default__swing__duration__shift__fraction__>-1.0</default__swing__duration__shift__fraction__>
     <final__transfer__split__fraction__>-1.0</final__transfer__split__fraction__>
     <trust__height__of__footsteps__>true</trust__height__of__footsteps__>
-    <are__footsteps__adjustable__>false</are__footsteps__adjustable__>
+    <are__footsteps__adjustable__>true</are__footsteps__adjustable__>
     <offset__footsteps__with__execution__error__>false</offset__footsteps__with__execution__error__>
     <queueing__properties__>
       <uniqueId>0</uniqueId>

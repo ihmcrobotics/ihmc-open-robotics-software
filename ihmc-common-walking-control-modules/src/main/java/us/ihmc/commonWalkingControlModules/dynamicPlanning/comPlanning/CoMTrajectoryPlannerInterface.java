@@ -27,8 +27,15 @@ public interface CoMTrajectoryPlannerInterface
     */
    default void compute(double timeInPhase)
    {
-      compute(0, timeInPhase);
+      int segmentNumber = getSegmentNumber(timeInPhase);
+      double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
+      timeInSegment = Math.min(timeInSegment, CoMTrajectoryPlannerTools.sufficientlyLongTime);
+      compute(segmentNumber, timeInSegment);
    }
+
+   int getSegmentNumber(double time);
+
+   double getTimeInSegment(int segmentNumber, double time);
 
    /**
     * Computes the desired values for the segment {@param segmentId} at time {@param timeInPhase}.

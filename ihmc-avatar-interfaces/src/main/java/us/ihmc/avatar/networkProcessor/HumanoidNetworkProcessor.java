@@ -159,6 +159,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    {
       if (realtimeROS2Node == null)
       {
+         LogTools.info("Creating ROS 2 node in {} mode", pubSubImplementation.name());
          realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
          modulesToClose.add(realtimeROS2Node::destroy);
       }
@@ -445,6 +446,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       try
       {
          FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                                  robotModel.getTarget(),
                                                                                   robotModel.createFullRobotModel(),
                                                                                   robotModel.getLogModelProvider(),
                                                                                   pubSubImplementation);

@@ -1,16 +1,19 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -452,6 +455,48 @@ public class ConvexFourBarTest
       }
    }
 
+   @Disabled // Just to do benchmark.
+   @Test
+   public void testBenchmark() throws Throwable
+   {
+      Random random = new Random(345);
+      FourBar fourBar = new FourBar();
+
+      List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+      if (random.nextBoolean())
+         Collections.reverse(vertices);
+      Point2D A = vertices.get(0);
+      Point2D B = vertices.get(1);
+      Point2D C = vertices.get(2);
+      Point2D D = vertices.get(3);
+      fourBar.setup(A, B, C, D);
+
+      for (int i = 0; i < 100000; i++)
+      { // Warmup for the JIT to do its job
+         double nextAngle = EuclidCoreRandomTools.nextDouble(random, fourBar.getVertexA().getMinAngle(), fourBar.getVertexA().getMaxAngle());
+         double nextAngleDot = random.nextDouble();
+         double nextAngleDDot = Double.NaN;
+
+         fourBar.update(FourBarAngle.DAB, nextAngle, nextAngleDot, nextAngleDDot);
+      }
+
+      long total = 0;
+      int iter = 1000000;
+
+      for (int i = 0; i < iter; i++)
+      {
+         double nextAngle = EuclidCoreRandomTools.nextDouble(random, fourBar.getVertexA().getMinAngle(), fourBar.getVertexA().getMaxAngle());
+         double nextAngleDot = random.nextDouble();
+         double nextAngleDDot = random.nextDouble();
+
+         long start = System.nanoTime();
+         fourBar.update(FourBarAngle.DAB, nextAngle, nextAngleDot, nextAngleDDot);
+         total += System.nanoTime() - start;
+      }
+
+      System.out.println("Average time in millisec: " + total / 1.0e3 / iter);
+   }
+
    @Test
    public void testGeometry() throws Throwable
    {
@@ -468,6 +513,70 @@ public class ConvexFourBarTest
          Point2D C = vertices.get(2);
          Point2D D = vertices.get(3);
          performBasicGeometricAssertions(random, fourBar, i, A, B, C, D);
+      }
+   }
+
+   @Test
+   public void testAtLimits()
+   {
+      // Test the min/max configurations are continuous with configurations that are close to the limit.
+      Random random = new Random(3465764);
+      FourBar fourBar = new FourBar();
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+         Point2D A = vertices.get(0);
+         Point2D B = vertices.get(1);
+         Point2D C = vertices.get(2);
+         Point2D D = vertices.get(3);
+         fourBar.setup(A, B, C, D);
+
+         double expectedDAB, expectedABC, expectedBCD, expectedCDA;
+         double angleLimitVariation = 1.0e-10;
+         double tolerance = 1.0e-3;
+
+         for (FourBarAngle fourBarAngle : FourBarAngle.values)
+         {
+            double minAngle = fourBar.getVertex(fourBarAngle).getMinAngle();
+            double maxAngle = fourBar.getVertex(fourBarAngle).getMaxAngle();
+
+            assertNull(fourBar.update(fourBarAngle, minAngle + angleLimitVariation)); // Assert that the given angle doesn't trigger limit edge-case
+            expectedDAB = fourBar.getAngleDAB();
+            expectedABC = fourBar.getAngleABC();
+            expectedBCD = fourBar.getAngleBCD();
+            expectedCDA = fourBar.getAngleCDA();
+
+            fourBar.setToMin(fourBarAngle);
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+
+            assertEquals(Bound.MIN, fourBar.update(fourBarAngle, minAngle)); // Assert that the given angle triggers the limit
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+
+            assertNull(fourBar.update(fourBarAngle, maxAngle - angleLimitVariation)); // Assert that the given angle doesn't trigger limit edge-case
+            expectedDAB = fourBar.getAngleDAB();
+            expectedABC = fourBar.getAngleABC();
+            expectedBCD = fourBar.getAngleBCD();
+            expectedCDA = fourBar.getAngleCDA();
+
+            fourBar.setToMax(fourBarAngle);
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+
+            assertEquals(Bound.MAX, fourBar.update(fourBarAngle, maxAngle)); // Assert that the given angle triggers the limit
+            assertEquals(expectedDAB, fourBar.getAngleDAB(), tolerance);
+            assertEquals(expectedABC, fourBar.getAngleABC(), tolerance);
+            assertEquals(expectedBCD, fourBar.getAngleBCD(), tolerance);
+            assertEquals(expectedCDA, fourBar.getAngleCDA(), tolerance);
+         }
       }
    }
 

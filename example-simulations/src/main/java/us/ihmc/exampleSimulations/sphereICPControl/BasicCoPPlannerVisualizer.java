@@ -3,8 +3,6 @@ package us.ihmc.exampleSimulations.sphereICPControl;
 import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footLengthForControl;
 import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.footWidthForControl;
 import static us.ihmc.commonWalkingControlModules.configurations.DummySteppingParameters.toeWidthForControl;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultLeftColor;
-import static us.ihmc.exampleSimulations.sphereICPControl.SphereICPPlannerVisualizer.defaultRightColor;
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 import java.awt.Color;
@@ -52,6 +50,9 @@ public class BasicCoPPlannerVisualizer
    private static final int BUFFER_SIZE = 16000;
    private final double dt = 0.006;
    private final ArrayList<Updatable> updatables = new ArrayList<>();
+
+   public static final Color defaultLeftColor = new Color(0.85f, 0.35f, 0.65f, 1.0f);
+   public static final Color defaultRightColor = new Color(0.15f, 0.8f, 0.15f, 1.0f);
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
@@ -163,7 +164,7 @@ public class BasicCoPPlannerVisualizer
             midFeetZUpFrame.update();
          }
       });
-      copPlanner = new BasicCoPPlanner(contactableFeet, midFeetZUpFrame, registry);
+      copPlanner = new BasicCoPPlanner(contactableFeet, registry);
 
       YoGraphicPosition desiredCoPGraphic = new YoGraphicPosition("desiredCoP", yoDesiredCoP, 0.01, YoAppearance.Black(), YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       yoGraphicsListRegistry.registerYoGraphic("desiredCoP", desiredCoPGraphic);

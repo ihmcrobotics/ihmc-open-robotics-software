@@ -15,7 +15,7 @@ import javafx.scene.Node;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
-import us.ihmc.javaFXVisualizers.FootstepMeshManager;
+import us.ihmc.javafx.FootstepMeshManager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;

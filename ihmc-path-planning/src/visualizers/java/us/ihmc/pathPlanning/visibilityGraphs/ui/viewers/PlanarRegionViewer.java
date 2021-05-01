@@ -18,7 +18,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
+import us.ihmc.javafx.IdMappedColorFunction;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -29,7 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class PlanarRegionViewer
 {
    private static final boolean VERBOSE = false;
-   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
 

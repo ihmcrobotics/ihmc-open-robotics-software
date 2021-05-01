@@ -17,9 +17,9 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
    private final List<JointDesiredOutput> jointOutputs = new ArrayList<>();
 
    /**
-    * This map guarantees that the same output object will be reused for the same joint even if the joint is removed
-    * from this data holder and later added again. It serves as storage of the output objects so they can be recycled
-    * and does not represent the state of this data holder.
+    * This map guarantees that the same output object will be reused for the same joint even if the
+    * joint is removed from this data holder and later added again. It serves as storage of the output
+    * objects so they can be recycled and does not represent the state of this data holder.
     */
    private final transient TLongObjectHashMap<JointDesiredOutput> lowLevelJointDataMap;
 
@@ -158,5 +158,20 @@ public class LowLevelOneDoFJointDesiredDataHolder implements JointDesiredOutputL
          return JointDesiredOutputListBasics.super.equals((JointDesiredOutputListReadOnly) object);
       else
          return false;
+   }
+
+   @Override
+   public String toString()
+   {
+      StringBuilder ret = new StringBuilder();
+      for (int i = 0; i < joints.size(); i++)
+      {
+         OneDoFJointReadOnly joint = joints.get(i);
+         JointDesiredOutput output = jointOutputs.get(i);
+         if (i > 0)
+            ret.append("\n");
+         ret.append(joint.getName()).append(", ").append(output.getShortRepresentativeString());
+      }
+      return ret.toString();
    }
 }
