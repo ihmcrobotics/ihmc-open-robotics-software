@@ -10,6 +10,7 @@ import com.martiansoftware.jsap.SimpleJSAP;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlModule;
 import us.ihmc.log.LogTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -24,7 +25,7 @@ public class DirectionalControlApplication
       LogTools.info("-------------------------------------------------------------------");
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, ValkyrieRosControlController.VERSION);
 
-      new DirectionalControlModule(robotModel, false);
+      new DirectionalControlModule(robotModel, false, PubSubImplementation.FAST_RTPS);
    }
 
    /**
