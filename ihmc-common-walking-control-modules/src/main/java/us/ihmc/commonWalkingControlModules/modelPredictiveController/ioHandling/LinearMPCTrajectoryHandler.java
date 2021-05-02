@@ -132,12 +132,12 @@ public class LinearMPCTrajectoryHandler
     * Extracts the solution from the MPC module into the CoM and VRP trajectories for the preview window
     * @param solutionCoefficients full set of coefficients that go into calculate the motion function.
     * @param planningWindow nominal contact sequence for the preview window used to compute the solution coefficients
-    * @param contactPlaneHelpers contact planes that contain the generalized contact vectors for the MPC planning window
+    * @param contactPlanes contact planes that contain the generalized contact vectors for the MPC planning window
     * @param omega time constant for the motion function
     */
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
-                                               List<? extends List<MPCContactPlane>> contactPlaneHelpers,
+                                               List<? extends List<MPCContactPlane>> contactPlanes,
                                                List<ContactPlaneProvider> fullContactSequence,
                                                double omega)
    {
@@ -147,7 +147,7 @@ public class LinearMPCTrajectoryHandler
          this.planningWindowForSolution.add().set(planningWindow.get(i));
 
       computeCoMSegmentCoefficients(solutionCoefficients,
-                                    contactPlaneHelpers,
+                                    contactPlanes,
                                     xCoefficientVector,
                                     yCoefficientVector,
                                     zCoefficientVector);
@@ -369,6 +369,11 @@ public class LinearMPCTrajectoryHandler
    public List<ContactPlaneProvider> getFullPlanningSequence()
    {
       return fullContactSet;
+   }
+
+   public List<ContactPlaneProvider> getPlanningWindowForSolution()
+   {
+      return planningWindowForSolution;
    }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()

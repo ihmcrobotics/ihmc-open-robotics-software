@@ -5,10 +5,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.WrenchMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
@@ -33,6 +30,8 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 import java.util.function.Supplier;
@@ -48,7 +47,6 @@ public abstract class EuclideanModelPredictiveController
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
    private static final double defaultMinRhoValue = 0.0;//05;
-   private final double maxContactForce;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -56,8 +54,6 @@ public abstract class EuclideanModelPredictiveController
    protected final DoubleProvider omega;
    protected final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
-
-   private static final double mu = 0.8;
 
    public static final double defaultInitialComWeight = 5e3;
    public static final double defaultVrpTrackingWeight = 1e2;
@@ -89,7 +85,7 @@ public abstract class EuclideanModelPredictiveController
    private final YoDouble initialComWeight = new YoDouble("initialComWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
 
-   public final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
+   protected final MPCContactHandler contactHandler;
 
    protected final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler linearTrajectoryHandler;
@@ -120,8 +116,7 @@ public abstract class EuclideanModelPredictiveController
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       linearTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
       wrenchTrajectoryHandler = new WrenchMPCTrajectoryHandler(registry);
-
-      this.maxContactForce = 2.0 * Math.abs(gravityZ);
+      contactHandler = new MPCContactHandler(gravityZ, mass);
 
       minRhoValue.set(defaultMinRhoValue);
       initialComWeight.set(defaultInitialComWeight);
@@ -129,10 +124,6 @@ public abstract class EuclideanModelPredictiveController
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
-
-      FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
-      Supplier<MPCContactPlane> contactPlaneHelperProvider = () -> new MPCContactPlane(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
-      contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
 
       parentRegistry.addChild(registry);
    }
@@ -149,18 +140,7 @@ public abstract class EuclideanModelPredictiveController
 
    public void setContactPlaneViewers(Supplier<ContactPlaneForceViewer> viewerSupplier)
    {
-      contactPlaneHelperPool.clear();
-      for (int i = 0; i < 2; i++)
-      {
-         RecyclingArrayList<MPCContactPlane> helpers = contactPlaneHelperPool.add();
-         helpers.clear();
-         for (int j = 0; j < 6; j++)
-         {
-            helpers.add().setContactPointForceViewer(viewerSupplier.get());
-         }
-         helpers.clear();
-      }
-      contactPlaneHelperPool.clear();
+      contactHandler.setContactPlaneViewers(viewerSupplier);
    }
 
    /**
@@ -217,7 +197,7 @@ public abstract class EuclideanModelPredictiveController
       commandProvider.reset();
       mpcCommands.clear();
 
-      computeMatrixHelpers(planningWindow);
+      contactHandler.computeMatrixHelpers(planningWindow, omega.getValue());
       computeObjectives(planningWindow);
 
       mpcAssemblyTime.stopMeasurement();
@@ -261,31 +241,12 @@ public abstract class EuclideanModelPredictiveController
    protected void extractSolution(DMatrixRMaj solutionCoefficients)
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
-      linearTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, previewWindowCalculator.getFullPlanningSequence(), omega.getValue());
-      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactPlaneHelperPool, mass, omega.getValue());
-   }
-
-   protected void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
-   {
-      contactPlaneHelperPool.clear();
-
-      for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
-      {
-         ContactPlaneProvider contact = contactSequence.get(sequenceId);
-         double duration = contact.getTimeInterval().getDuration();
-
-         RecyclingArrayList<MPCContactPlane> contactPlaneHelpers = contactPlaneHelperPool.add();
-         contactPlaneHelpers.clear();
-
-         double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
-         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
-         {
-            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.add();
-            contactPlaneHelper.setMaxNormalForce(maxContactForce);
-            contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
-            contactPlaneHelper.computeAccelerationIntegrationMatrix(duration, omega.getValue(), objectiveForce);
-         }
-      }
+      linearTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients,
+                                                              planningWindow,
+                                                              contactHandler.getContactPlanes(),
+                                                              previewWindowCalculator.getFullPlanningSequence(),
+                                                              omega.getValue());
+      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactHandler.getContactPlanes(), mass, omega.getValue());
    }
 
    protected void computeObjectives(List<ContactPlaneProvider> contactSequence)
@@ -351,7 +312,7 @@ public abstract class EuclideanModelPredictiveController
       }
 
       // set terminal constraint
-      ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
+      ContactStateProvider<ContactPlaneProvider> lastContactPhase = contactSequence.get(numberOfPhases - 1);
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
       mpcCommands.addCommand(computeCoMPositionObjective(commandProvider.getNextCoMPositionCommand(),
                                                          comPositionAtEndOfWindow,
@@ -379,9 +340,9 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
-      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
       {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(0, i));
       }
 
       return objectiveToPack;
@@ -396,10 +357,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
-      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(0, i));
 
       return objectiveToPack;
    }
@@ -412,15 +371,11 @@ public abstract class EuclideanModelPredictiveController
       continuityObjectiveToPack.setFirstSegmentDuration(firstSegmentDuration);
       continuityObjectiveToPack.setConstraintType(ConstraintType.EQUALITY);
 
-      for (int i = 0; i < contactPlaneHelperPool.get(firstSegmentNumber).size(); i++)
-      {
-         continuityObjectiveToPack.addFirstSegmentContactPlaneHelper(contactPlaneHelperPool.get(firstSegmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(firstSegmentNumber); i++)
+         continuityObjectiveToPack.addFirstSegmentContactPlaneHelper(contactHandler.getContactPlane(firstSegmentNumber, i));
 
-      for (int i = 0; i < contactPlaneHelperPool.get(firstSegmentNumber + 1).size(); i++)
-      {
-         continuityObjectiveToPack.addSecondSegmentContactPlaneHelper(contactPlaneHelperPool.get(firstSegmentNumber + 1).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(firstSegmentNumber + 1); i++)
+         continuityObjectiveToPack.addSecondSegmentContactPlaneHelper(contactHandler.getContactPlane(firstSegmentNumber + 1, i));
 
       return continuityObjectiveToPack;
    }
@@ -434,10 +389,8 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
       valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
       valueObjective.setUseScalarObjective(true);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         valueObjective.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         valueObjective.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return valueObjective;
    }
@@ -452,9 +405,9 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setUseScalarObjective(false);
 
       int objectiveSize = 0;
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
-         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
+         MPCContactPlane contactPlaneHelper = contactHandler.getContactPlane(segmentNumber, i);
          objectiveSize += contactPlaneHelper.getRhoSize();
          valueObjective.addContactPlaneHelper(contactPlaneHelper);
       }
@@ -462,9 +415,9 @@ public abstract class EuclideanModelPredictiveController
       int rowStart = 0;
       DMatrixRMaj objectiveVector = valueObjective.getObjectiveVector();
       objectiveVector.reshape(objectiveSize, 1);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
-         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
+         MPCContactPlane contactPlaneHelper = contactHandler.getContactPlane(segmentNumber, i);
          MatrixTools.setMatrixBlock(objectiveVector, rowStart, 0, contactPlaneHelper.getRhoMaxMatrix(), 0, 0, contactPlaneHelper.getRhoSize(), 1, 1.0);
 
          rowStart += contactPlaneHelper.getRhoSize();
@@ -488,10 +441,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setStartVRP(desiredStartVRPPosition);
       objectiveToPack.setEndVRP(desiredEndVRPPosition);
       objectiveToPack.setCostToGoConsumer(costToGoConsumer);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -507,10 +458,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -526,10 +475,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -545,10 +492,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredVelocity);
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -565,10 +510,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -730,5 +673,10 @@ public abstract class EuclideanModelPredictiveController
          throw new RuntimeException("CoM Trajectories are not calculated");
 
       return linearTrajectoryHandler.getComTrajectory();
+   }
+
+   public List<? extends List<MPCContactPlane>> getContactPlanes()
+   {
+      return contactHandler.getContactPlanes();
    }
 }
