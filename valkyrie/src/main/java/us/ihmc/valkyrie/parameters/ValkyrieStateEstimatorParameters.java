@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.sensors.footSwitch.WrenchBasedFootSwitchFactory;
@@ -128,6 +129,8 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
    {
       String[] namesOfJointsUsingOutputEncoder = jointMap.getNamesOfJointsUsingOutputEncoder();
       String[] armJointNames = createArrayWithArmJointNames();
+      String[] fingerJointNames = createArrayWithFingerJointNames();
+      String[] hokuyoJointName = createArrayWithHokuyoJointName();
 
       YoRegistry registry = sensorProcessing.getYoVariableRegistry();
 
@@ -155,33 +158,44 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
       DoubleProvider lowerBodyJointVelocitySlopTime = new DoubleParameter("lowerBodyJointVelocityBacklashSlopTime",
                                                                           registry,
                                                                           lowerBodyJointVelocityBacklashSlopTime);
-      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter, false, JOINT_VELOCITY, armJointNames);
-      sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime, false, armJointNames);
+      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointVelocityAlphaFilter,
+                                                               false,
+                                                               JOINT_VELOCITY,
+                                                               combine(armJointNames, hokuyoJointName));
+      sensorProcessing.addJointVelocityBacklashFilterWithJointsToIgnore(lowerBodyJointVelocitySlopTime,
+                                                                        false,
+                                                                        combine(armJointNames, fingerJointNames, hokuyoJointName));
 
       // Lower body: Apply an alpha filter on the position to be in phase with the velocity
       DoubleProvider lowerBodyJointPositionAlphaFilter = sensorProcessing.createAlphaFilter("lowerBodyJointPositionBreakFrequency",
                                                                                             lowerBodyJointPositionFilterFrequencyHz);
-      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointPositionAlphaFilter, false, JOINT_POSITION, armJointNames);
+      sensorProcessing.addSensorAlphaFilterWithSensorsToIgnore(lowerBodyJointPositionAlphaFilter,
+                                                               false,
+                                                               JOINT_POSITION,
+                                                               combine(armJointNames, fingerJointNames, hokuyoJointName));
 
       if (doElasticityCompensation)
       {
          DoubleProvider elasticityAlphaFilter = sensorProcessing.createAlphaFilter("jointDeflectionDotBreakFrequency", jointElasticityFilterFrequencyHz);
          DoubleProvider maxDeflection = sensorProcessing.createMaxDeflection("jointAngleMaxDeflection", maximumDeflection);
-         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffness("stiffness",
-                                                                                                          defaultJointStiffness,
-                                                                                                          jointSpecificStiffness);
+         Map<OneDoFJointBasics, DoubleProvider> jointPositionStiffness = sensorProcessing.createStiffnessWithJointsToIgnore("stiffness",
+                                                                                                                            defaultJointStiffness,
+                                                                                                                            jointSpecificStiffness,
+                                                                                                                            combine(armJointNames,
+                                                                                                                                    fingerJointNames,
+                                                                                                                                    hokuyoJointName));
 
          Map<String, Integer> filteredTauForElasticity = sensorProcessing.addSensorAlphaFilter(elasticityAlphaFilter, true, JOINT_TAU);
          sensorProcessing.addJointPositionElasticyCompensatorWithJointsToIgnore(jointPositionStiffness,
                                                                                 maxDeflection,
                                                                                 filteredTauForElasticity,
                                                                                 false,
-                                                                                armJointNames);
+                                                                                combine(armJointNames, fingerJointNames, hokuyoJointName));
          sensorProcessing.addJointVelocityElasticyCompensatorWithJointsToIgnore(jointPositionStiffness,
                                                                                 maxDeflection,
                                                                                 filteredTauForElasticity,
                                                                                 false,
-                                                                                armJointNames);
+                                                                                combine(armJointNames, fingerJointNames, hokuyoJointName));
       }
 
       // Arm joints: Apply for all velocity: 1- backlash compensator.
@@ -194,12 +208,32 @@ public class ValkyrieStateEstimatorParameters extends StateEstimatorParameters
 
       // Filter the finger joint position a lot as they're super noisy.
       DoubleProvider fingerPositionAlphaFilter = sensorProcessing.createAlphaFilter("fingerPositionBreakFrequency", fingerPositionFilterFrequencyHz);
-      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(fingerPositionAlphaFilter, false, JOINT_POSITION, createArrayWithFingerJointNames());
+      sensorProcessing.addSensorAlphaFilterOnlyForSpecifiedSensors(fingerPositionAlphaFilter, false, JOINT_POSITION, fingerJointNames);
 
       //imu
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
       sensorProcessing.addSensorAlphaFilter(linearAccelerationAlphaFilter, false, IMU_LINEAR_ACCELERATION);
+   }
+
+   private String[] combine(String[]... stringArrays)
+   {
+      int length = Stream.of(stringArrays).mapToInt(a -> a.length).sum();
+      String[] combined = new String[length];
+
+      int startIndex = 0;
+
+      for (int i = 0; i < stringArrays.length; i++)
+      {
+         System.arraycopy(stringArrays[i], 0, combined, startIndex, stringArrays[i].length);
+         startIndex += stringArrays[i].length;
+      }
+      return combined;
+   }
+
+   private String[] createArrayWithHokuyoJointName()
+   {
+      return new String[] {"hokuyo_joint"};
    }
 
    private String[] createArrayWithArmJointNames()
