@@ -7,15 +7,15 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 public class DirectionalControlModule extends ToolboxModule
 {
@@ -32,9 +32,10 @@ public class DirectionalControlModule extends ToolboxModule
     */
    private final static int UPDATE_PERIOD_IN_MS = 10;
 
-   public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer)
+   public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
-      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS);
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS,
+            pubSubImplementation);
 
       steppingController = new DirectionalControlController(fullRobotModel, robotModel, statusOutputManager, registry);
 
@@ -76,7 +77,7 @@ public class DirectionalControlModule extends ToolboxModule
     * standalone mode.
     */
    @Override
-   public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
+   public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
    }
 
@@ -125,18 +126,6 @@ public class DirectionalControlModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
-   {
-      return getPublisherTopicNameGenerator(robotName);
-   }
-
-   @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
-   {
-      return getSubscriberTopicNameGenerator(robotName);
-   }
-
-   @Override
    public void sleep()
    {
       LogTools.info("Directional control toolbox told to sleep");
@@ -150,13 +139,25 @@ public class DirectionalControlModule extends ToolboxModule
       super.wakeUp();
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   @Override
+   public ROS2Topic<?> getOutputTopic()
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.DIRECTIONAL_CONTROL_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return getOutputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.DIRECTIONAL_CONTROL_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.DIRECTIONAL_CONTROL_TOOLBOX.withRobot(robotName).withOutput();
+   }
+
+   @Override
+   public ROS2Topic<?> getInputTopic()
+   {
+      return getInputTopic(robotName);
+   }
+
+   public static ROS2Topic<?> getInputTopic(String robotName)
+   {
+      return ROS2Tools.DIRECTIONAL_CONTROL_TOOLBOX.withRobot(robotName).withInput();
    }
 }

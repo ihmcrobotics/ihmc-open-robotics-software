@@ -5,6 +5,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
@@ -21,10 +22,10 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import us.ihmc.avatar.joystickBasedJavaFXController.UserProfileManager;
-import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProperty.JoystickStepParameters;
+import us.ihmc.avatar.joystickBasedJavaFXController.UserProfileManager;
+import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
@@ -46,11 +47,11 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStepParameters;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -60,13 +61,12 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.concurrent.TimeUnit;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * Controller for walking the robot using directional control messages.
@@ -113,7 +113,6 @@ import java.util.concurrent.TimeUnit;
  *         Bertand)
  */
 
-@SuppressWarnings("restriction")
 public class DirectionalControlController extends ToolboxController
 {
 
@@ -188,12 +187,12 @@ public class DirectionalControlController extends ToolboxController
    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(4);
 
    // Comm to other nodes
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "ihmc_directional_control");
+   private final ROS2Node ros2Node = ROS2Tools.createROS2Node(PubSubImplementation.FAST_RTPS, "ihmc_directional_control");
 
    public DirectionalControlController(FullHumanoidRobotModel robotModel,
                                        DRCRobotModel robot,
                                        StatusMessageOutputManager statusOutputManager,
-                                       YoVariableRegistry registry)
+                                       YoRegistry registry)
    {
       this(robotModel, robot, statusOutputManager, registry, false);
    }
@@ -214,7 +213,7 @@ public class DirectionalControlController extends ToolboxController
    public DirectionalControlController(FullHumanoidRobotModel robotModel,
                                        DRCRobotModel robot,
                                        StatusMessageOutputManager statusOutputManager,
-                                       YoVariableRegistry registry,
+                                       YoRegistry registry,
                                        boolean toolboxBypass)
    {
       super(statusOutputManager, registry);
@@ -251,8 +250,8 @@ public class DirectionalControlController extends ToolboxController
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeDistanceFromObstacle);
       continuousStepGenerator.addFootstepValidityIndicator(this::isSafeStepHeight);
 
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
+      ROS2Topic<?> controllerSubGenerator = ControllerAPIDefinition.getInputTopic(robotName);
 
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
@@ -293,7 +292,7 @@ public class DirectionalControlController extends ToolboxController
       // REA planes
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            PlanarRegionsListMessage.class,
-                                           REACommunicationProperties.publisherTopicNameGenerator,
+                                           REACommunicationProperties.outputTopic,
                                            s -> planarRegionsListMessage.set(s.takeNextData()));
 
       // Inform if a controller failure occurs so we can ensure we stop walking 
@@ -307,8 +306,8 @@ public class DirectionalControlController extends ToolboxController
          CapturabilityBasedStatus status = s.takeNextData();
          queuedTasksToProcess.add(() ->
          {
-            isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());
-            isRightFootInSupport.set(!status.getRightFootSupportPolygon2d().isEmpty());
+            isLeftFootInSupport.set(!status.getLeftFootSupportPolygon3d().isEmpty());
+            isRightFootInSupport.set(!status.getRightFootSupportPolygon3d().isEmpty());
          });
       });
 
@@ -316,7 +315,7 @@ public class DirectionalControlController extends ToolboxController
       footstepPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
       footstepVisualizationPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                  FootstepDataListMessage.class,
-                                                                 DirectionalControlModule.getPublisherTopicNameGenerator(robotName));
+                                                                 DirectionalControlModule.getOutputTopic(robotName));
 
       // TODO: Collision box parameters taken from StepGeneratorJavaFXController.java
       // These are specific to the robot. To some degree, they should be derived from
@@ -327,9 +326,8 @@ public class DirectionalControlController extends ToolboxController
       double collisionBoxDepth = 0.65;
       double collisionBoxWidth = 1.15;
       double collisionBoxHeight = 1.0;
-      double collisionXYProximityCheck = 0.01;
       collisionDetector = new BoundingBoxCollisionDetector();
-      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight, collisionXYProximityCheck);
+      collisionDetector.setBoxDimensions(collisionBoxDepth, collisionBoxWidth, collisionBoxHeight);
 
       // Option to bypass toolbox control and accept messages directly sent to the controller
       if (toolboxBypass)
@@ -546,7 +544,7 @@ public class DirectionalControlController extends ToolboxController
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       // Initial Z position matches the stance foot
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
-      adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
+      adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
 
       // If there are planar regions, attempt to modify the pose such that the foot
       // fits on a plane.
@@ -747,14 +745,14 @@ public class DirectionalControlController extends ToolboxController
       if (planarRegionsList.get() == null)
          return true;
 
-      tempTransform.setTranslation(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
-      tempTransform.setRotationYaw(touchdownPose.getYaw());
+      tempTransform.getTranslation().set(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
+      tempTransform.getRotation().setToYawOrientation(touchdownPose.getYaw());
 
       footPolygon.set(footPolygons.get(swingSide));
       footPolygon.applyTransform(tempTransform, false);
 
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, tempRegion) != null;
+      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, Double.POSITIVE_INFINITY, tempRegion) != null;
    }
 
    /**
