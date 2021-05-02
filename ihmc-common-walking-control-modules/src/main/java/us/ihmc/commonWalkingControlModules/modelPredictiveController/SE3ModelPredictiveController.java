@@ -194,7 +194,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                                momentOfInertia,
                                                linearTrajectoryHandler,
                                                orientationTrajectoryHandler,
-                                               contactPlaneHelperPool);
+                                               contactHandler.getContactPlanes());
 
       int numberOfSegments = indexHandler.getNumberOfSegments();
       for (int i = 0; i < numberOfSegments; i++)
@@ -395,7 +395,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    public void computeTorque(double time, FixedFrameVector3DBasics torqueToPack)
    {
-      List<MPCContactPlane> contactPlanes = contactPlaneHelperPool.get(0);
+      List<MPCContactPlane> contactPlanes = contactHandler.getContactPlanesForSegment(0);
       linearTrajectoryHandler.compute(time);
 
       torqueToPack.setToZero();
