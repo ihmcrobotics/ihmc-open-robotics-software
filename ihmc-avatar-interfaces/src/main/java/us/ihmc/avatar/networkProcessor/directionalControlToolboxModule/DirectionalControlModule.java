@@ -3,23 +3,34 @@ package us.ihmc.avatar.networkProcessor.directionalControlToolboxModule;
 import java.util.ArrayList;
 import java.util.List;
 
+import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepStatusMessage;
+import controller_msgs.msg.dds.PauseWalkingMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.directionalControlToolboxAPI.DirectionalControlInputCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 
 public class DirectionalControlModule extends ToolboxModule
 {
-
+   private IHMCRealtimeROS2Publisher<PauseWalkingMessage> pauseWalkingPublisher;
+   private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepPublisher;
+   private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepVisualizationPublisher;
    private final DirectionalControlController steppingController;
 
    /*
@@ -37,7 +48,10 @@ public class DirectionalControlModule extends ToolboxModule
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS,
             pubSubImplementation);
 
-      steppingController = new DirectionalControlController(fullRobotModel, robotModel, statusOutputManager, registry);
+      steppingController = new DirectionalControlController(fullRobotModel, robotModel.getWalkingControllerParameters(), statusOutputManager, registry);
+      steppingController.setPauseWalkingPublisher(pauseWalkingPublisher::publish);
+      steppingController.setFootstepPublisher(footstepPublisher::publish);
+      steppingController.setFootstepVisualizationPublisher(footstepVisualizationPublisher::publish);
 
       /*
        * Register a listener to process incoming commands to the toolbox. This listener is tailored to the
@@ -45,26 +59,19 @@ public class DirectionalControlModule extends ToolboxModule
        * Actions taken by the handler should be as short as possible, since the handler blocks processing
        * of incoming commands by the CommandInputManager.
        */
-      commandInputManager.registerHasReceivedInputListener(new HasReceivedInputListener()
+      commandInputManager.registerHasReceivedInputListener(commandClass ->
       {
-
-         @Override
-         public void hasReceivedInput(Class<? extends Command<?, ?>> commandClass)
+         DirectionalControlConfigurationCommand configCommand = commandInputManager.pollNewestCommand(DirectionalControlConfigurationCommand.class);
+         if (configCommand != null)
          {
-
-            DirectionalControlConfigurationCommand configCommand = commandInputManager.pollNewestCommand(DirectionalControlConfigurationCommand.class);
-            if (configCommand != null)
-            {
-               steppingController.updateConfiguration(configCommand);
-            }
-
-            DirectionalControlInputCommand inputCommand = commandInputManager.pollNewestCommand(DirectionalControlInputCommand.class);
-            if (inputCommand != null)
-            {
-               steppingController.updateInputs(inputCommand);
-            }
+            steppingController.updateConfiguration(configCommand);
          }
 
+         DirectionalControlInputCommand inputCommand = commandInputManager.pollNewestCommand(DirectionalControlInputCommand.class);
+         if (inputCommand != null)
+         {
+            steppingController.updateInputs(inputCommand);
+         }
       });
 
       // Must start the Yo Variable Server since it is used to track message timeouts
@@ -79,6 +86,42 @@ public class DirectionalControlModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
+      ROS2Topic<?> controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      {
+         if (steppingController != null)
+            steppingController.updateRobotConfigurationData(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (steppingController != null)
+            steppingController.updateFootstepStatusMessage(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, s ->
+      {
+         if (steppingController != null)
+            steppingController.updatePlanarRegionsListMessage(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (steppingController != null)
+            steppingController.updateWalkingControllerFailureStatusMessage(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      {
+         if (steppingController != null)
+            steppingController.updateCapturabilityBasedStatus(s.takeNextData());
+      });
+
+      ROS2Topic<?> controllerSubGenerator = ControllerAPIDefinition.getInputTopic(robotName);
+
+      pauseWalkingPublisher = ROS2Tools.createPublisher(realtimeROS2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      footstepPublisher = ROS2Tools.createPublisher(realtimeROS2Node, FootstepDataListMessage.class, controllerSubGenerator);
+      footstepVisualizationPublisher = ROS2Tools.createPublisher(realtimeROS2Node,
+                                                                 FootstepDataListMessage.class,
+                                                                 DirectionalControlModule.getOutputTopic(robotName));
+
    }
 
    @Override
