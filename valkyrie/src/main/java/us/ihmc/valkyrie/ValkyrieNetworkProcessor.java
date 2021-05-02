@@ -33,7 +33,7 @@ public class ValkyrieNetworkProcessor
          else
             return IHMC;
       }
-   };
+   }
 
    /** Whether or not to start the footstep planner when running the IHMC network processor. */
    private static final boolean ihmc_launchFootstepPlannerModule = false;
@@ -75,36 +75,43 @@ public class ValkyrieNetworkProcessor
       networkProcessor.setupShutdownHook();
       networkProcessor.start();
    }
-   
+
    public static EnumMap<ValkyrieNetworkProcessorParameters, Boolean> iniToParameters(File file)
    {
-      EnumMap<ValkyrieNetworkProcessorParameters, Boolean> parameters = new EnumMap<ValkyrieNetworkProcessorParameters, Boolean>(
-            ValkyrieNetworkProcessorParameters.class);
+      EnumMap<ValkyrieNetworkProcessorParameters, Boolean> parameters = new EnumMap<>(ValkyrieNetworkProcessorParameters.class);
 
-      for (ValkyrieNetworkProcessorParameters key : ValkyrieNetworkProcessorParameters.values()) {
+      for (ValkyrieNetworkProcessorParameters key : ValkyrieNetworkProcessorParameters.values())
+      {
          parameters.put(key, key.getDefaultValue());
       }
-      
-      if (file.exists() && file.isFile()) {
+
+      if (file.exists() && file.isFile())
+      {
          LogTools.info("Found parameters file at " + file.getAbsolutePath());
-         try {
+         try
+         {
             Properties properties = new Properties();
             FileInputStream stream = new FileInputStream(file);
             properties.load(stream);
-            for (ValkyrieNetworkProcessorParameters key : ValkyrieNetworkProcessorParameters.values()) {
+            for (ValkyrieNetworkProcessorParameters key : ValkyrieNetworkProcessorParameters.values())
+            {
                String keyString = key.toString();
-               if (properties.containsKey(keyString)) {
+               if (properties.containsKey(keyString))
+               {
                   parameters.put(key, Boolean.valueOf(properties.getProperty(keyString)));
                   LogTools.info("Valkyrie Network Processor Setting " + keyString + " to " + parameters.get(key).toString());
                }
             }
             stream.close();
-         } catch (IOException e) {
-            System.err.println(
-                  "Valkyrie network processor parameter file " + file.getAbsolutePath() + "exists but cannot be loaded. See stack trace.");
+         }
+         catch (IOException e)
+         {
+            System.err.println("Valkyrie network processor parameter file " + file.getAbsolutePath() + "exists but cannot be loaded. See stack trace.");
             e.printStackTrace();
          }
-      } else {
+      }
+      else
+      {
          LogTools.warn("Valkyrie network processor parameter file " + file.getAbsolutePath() + " does not exist.");
       }
       return parameters;
@@ -113,51 +120,58 @@ public class ValkyrieNetworkProcessor
    public static void startJSCNetworkProcessor(ValkyrieRobotModel robotModel)
    {
       HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
-      final String valkyrieNetworkProcessorConfig = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "ValkyrieNetworkProcessorModuleConfig.ini";
-      
+      final String valkyrieNetworkProcessorConfig = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator
+            + "ValkyrieNetworkProcessorModuleConfig.ini";
+
       File configurationFile = new File(System.getProperty("us.ihmc.networkParameterFile", valkyrieNetworkProcessorConfig)).getAbsoluteFile();
       LogTools.info("Looking for network processor module configuration in " + configurationFile.getAbsolutePath());
       EnumMap<ValkyrieNetworkProcessorParameters, Boolean> parameters = iniToParameters(configurationFile);
-      
-      if (parameters.get(ValkyrieNetworkProcessorParameters.start_kinematics_streaming_toolbox)) {
 
-         networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null,
-               true);
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_kinematics_streaming_toolbox))
+      {
+
+         networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
       }
 
-      if (parameters.get(ValkyrieNetworkProcessorParameters.start_force_estimation)) {
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_force_estimation))
+      {
          new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
       }
 
-      if (parameters.get(ValkyrieNetworkProcessorParameters.start_footstep_planning)) {
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_footstep_planning))
+      {
          networkProcessor.setupFootstepPlanningToolboxModule();
       }
 
-      if (parameters.get(ValkyrieNetworkProcessorParameters.start_walking_preview)) {
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_walking_preview))
+      {
          networkProcessor.setupWalkingPreviewModule(false);
       }
 
-      if (parameters.get(ValkyrieNetworkProcessorParameters.start_rea)) {
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_rea))
+      {
          networkProcessor.setupRobotEnvironmentAwerenessModule(REAConfigurationFilePath);
          networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
          networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       }
-      
-      if (parameters.get(ValkyrieNetworkProcessorParameters.start_directional_nav)) {
+
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_directional_nav))
+      {
          networkProcessor.setupDirectionalControlModule(true);
       }
 
-       // Always required for Valkyrie
-       networkProcessor.setupRosModule();
+      // Always required for Valkyrie
+      networkProcessor.setupRosModule();
 
-       if (parameters.get(ValkyrieNetworkProcessorParameters.start_sensor_processing)) {
-          ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
-          sensorSuiteManager.setEnableLidarScanPublisher(parameters.get(ValkyrieNetworkProcessorParameters.start_lidar));
-          sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(parameters.get(ValkyrieNetworkProcessorParameters.start_stereo_vision_pointcloud));
-          
-          sensorSuiteManager.setEnableVideoPublisher(false);
-          networkProcessor.setupSensorModule();
-       }
+      if (parameters.get(ValkyrieNetworkProcessorParameters.start_sensor_processing))
+      {
+         ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
+         sensorSuiteManager.setEnableLidarScanPublisher(parameters.get(ValkyrieNetworkProcessorParameters.start_lidar));
+         sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(parameters.get(ValkyrieNetworkProcessorParameters.start_stereo_vision_pointcloud));
+
+         sensorSuiteManager.setEnableVideoPublisher(false);
+         networkProcessor.setupSensorModule();
+      }
 
       LogTools.info("ROS_MASTER_URI=" + networkProcessor.getOrCreateRosURI());
 
