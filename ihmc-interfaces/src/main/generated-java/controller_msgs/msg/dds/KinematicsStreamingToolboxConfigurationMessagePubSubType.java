@@ -2,21 +2,21 @@ package controller_msgs.msg.dds;
 
 /**
 * 
-* Topic data type of the struct "KinematicsStreamingToolboxOutputConfigurationMessage" defined in "KinematicsStreamingToolboxOutputConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
+* Topic data type of the struct "KinematicsStreamingToolboxConfigurationMessage" defined in "KinematicsStreamingToolboxConfigurationMessage_.idl". Use this class to provide the TopicDataType to a Participant. 
 *
-* This file was automatically generated from KinematicsStreamingToolboxOutputConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
-* Do not update this file directly, edit KinematicsStreamingToolboxOutputConfigurationMessage_.idl instead.
+* This file was automatically generated from KinematicsStreamingToolboxConfigurationMessage_.idl by us.ihmc.idl.generator.IDLGenerator. 
+* Do not update this file directly, edit KinematicsStreamingToolboxConfigurationMessage_.idl instead.
 *
 */
-public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage>
+public class KinematicsStreamingToolboxConfigurationMessagePubSubType implements us.ihmc.pubsub.TopicDataType<controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage>
 {
-   public static final java.lang.String name = "controller_msgs::msg::dds_::KinematicsStreamingToolboxOutputConfigurationMessage_";
+   public static final java.lang.String name = "controller_msgs::msg::dds_::KinematicsStreamingToolboxConfigurationMessage_";
 
    private final us.ihmc.idl.CDR serializeCDR = new us.ihmc.idl.CDR();
    private final us.ihmc.idl.CDR deserializeCDR = new us.ihmc.idl.CDR();
 
    @Override
-   public void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
+   public void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.pubsub.common.SerializedPayload serializedPayload) throws java.io.IOException
    {
       serializeCDR.serialize(serializedPayload);
       write(data, serializeCDR);
@@ -24,7 +24,7 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
    }
 
    @Override
-   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data) throws java.io.IOException
+   public void deserialize(us.ihmc.pubsub.common.SerializedPayload serializedPayload, controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data) throws java.io.IOException
    {
       deserializeCDR.deserialize(serializedPayload);
       read(data, deserializeCDR);
@@ -56,16 +56,20 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data)
    {
       return getCdrSerializedSize(data, 0);
    }
 
-   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, int current_alignment)
+   public final static int getCdrSerializedSize(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, int current_alignment)
    {
       int initial_alignment = current_alignment;
 
@@ -93,13 +97,23 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
 
-   public static void write(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public static void write(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       cdr.write_type_4(data.getSequenceId());
+
+      cdr.write_type_7(data.getLockPelvis());
+
+      cdr.write_type_7(data.getLockChest());
 
       cdr.write_type_7(data.getEnableLeftArmJointspace());
 
@@ -117,9 +131,13 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
 
    }
 
-   public static void read(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public static void read(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       data.setSequenceId(cdr.read_type_4());
+      	
+      data.setLockPelvis(cdr.read_type_7());
+      	
+      data.setLockChest(cdr.read_type_7());
       	
       data.setEnableLeftArmJointspace(cdr.read_type_7());
       	
@@ -139,9 +157,11 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
    }
 
    @Override
-   public final void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
+   public final void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
+      ser.write_type_7("lock_pelvis", data.getLockPelvis());
+      ser.write_type_7("lock_chest", data.getLockChest());
       ser.write_type_7("enable_left_arm_jointspace", data.getEnableLeftArmJointspace());
       ser.write_type_7("enable_right_arm_jointspace", data.getEnableRightArmJointspace());
       ser.write_type_7("enable_neck_jointspace", data.getEnableNeckJointspace());
@@ -152,9 +172,11 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
    }
 
    @Override
-   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data)
+   public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data)
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
+      data.setLockPelvis(ser.read_type_7("lock_pelvis"));
+      data.setLockChest(ser.read_type_7("lock_chest"));
       data.setEnableLeftArmJointspace(ser.read_type_7("enable_left_arm_jointspace"));
       data.setEnableRightArmJointspace(ser.read_type_7("enable_right_arm_jointspace"));
       data.setEnableNeckJointspace(ser.read_type_7("enable_neck_jointspace"));
@@ -164,15 +186,15 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
       data.setEnablePelvisTaskspace(ser.read_type_7("enable_pelvis_taskspace"));
    }
 
-   public static void staticCopy(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage src, controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage dest)
+   public static void staticCopy(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage dest)
    {
       dest.set(src);
    }
 
    @Override
-   public controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage createData()
+   public controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage createData()
    {
-      return new controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage();
+      return new controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage();
    }
    @Override
    public int getTypeSize()
@@ -186,24 +208,24 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
       return name;
    }
    
-   public void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       write(data, cdr);
    }
 
-   public void deserialize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.CDR cdr)
+   public void deserialize(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
       read(data, cdr);
    }
    
-   public void copy(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage src, controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage dest)
+   public void copy(controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage src, controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage dest)
    {
       staticCopy(src, dest);
    }
 
    @Override
-   public KinematicsStreamingToolboxOutputConfigurationMessagePubSubType newInstance()
+   public KinematicsStreamingToolboxConfigurationMessagePubSubType newInstance()
    {
-      return new KinematicsStreamingToolboxOutputConfigurationMessagePubSubType();
+      return new KinematicsStreamingToolboxConfigurationMessagePubSubType();
    }
 }

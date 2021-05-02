@@ -13,6 +13,7 @@ import java.util.List;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlModule;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
@@ -31,6 +32,7 @@ import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSu
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
@@ -44,6 +46,7 @@ import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -113,6 +116,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupWalkingPreviewModule(parameters.isVisualizeWalkingPreviewModule());
       if (parameters.isUseHumanoidAvatarREAStateUpdater())
          humanoidNetworkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      if (parameters.isUseDirectionalControlModule())
+    	 humanoidNetworkProcessor.setupDirectionalControlModule(false);
 
       return humanoidNetworkProcessor;
    }
@@ -573,6 +578,22 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          reportFailure(e);
          return null;
       }
+   }
+   
+   public DirectionalControlModule setupDirectionalControlModule(boolean enableYoVariableServer)
+   {
+	  checkIfModuleCanBeCreated(DirectionalControlModule.class);
+	  
+	  try 
+	  {
+	     DirectionalControlModule module = new DirectionalControlModule(robotModel, enableYoVariableServer);
+		 return module;
+	  }
+	  catch (Throwable e)
+	  {
+	     reportFailure(e);
+	     return null;
+	  }	   
    }
 
    private static void reportFailure(Throwable e)
