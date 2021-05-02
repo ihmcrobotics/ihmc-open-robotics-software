@@ -197,7 +197,7 @@ public abstract class EuclideanModelPredictiveController
       commandProvider.reset();
       mpcCommands.clear();
 
-      contactHandler.computeMatrixHelpers(planningWindow, omega.getValue());
+      contactHandler.computeMatrixHelpers(planningWindow, linearTrajectoryHandler.getPlanningWindowForSolution(), omega.getValue());
       computeObjectives(planningWindow);
 
       mpcAssemblyTime.stopMeasurement();

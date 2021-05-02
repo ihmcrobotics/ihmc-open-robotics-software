@@ -26,11 +26,6 @@ import java.util.List;
  */
 public class ContactPlaneProvider implements ContactStateBasics<ContactPlaneProvider>
 {
-   public static final double gridSizeXY = 0.05;
-   public static final int yawDivisions = 36;
-   public static final double gridSizeYaw = 2.0 * Math.PI / yawDivisions;
-
-
    private int planeProviderId = -1;
    private ContactState contactState = ContactState.IN_CONTACT;
    private final FramePoint3D startECMPPosition = new FramePoint3D();
