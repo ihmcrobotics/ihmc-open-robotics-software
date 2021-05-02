@@ -10,12 +10,22 @@ import us.ihmc.pubsub.TopicDataType;
        * This message is part of the KinematicsStreamingToolbox API.
        * Allows to specify the messages the toolbox should stream to the controller.
        */
-public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet<KinematicsStreamingToolboxOutputConfigurationMessage> implements Settable<KinematicsStreamingToolboxOutputConfigurationMessage>, EpsilonComparable<KinematicsStreamingToolboxOutputConfigurationMessage>
+public class KinematicsStreamingToolboxConfigurationMessage extends Packet<KinematicsStreamingToolboxConfigurationMessage> implements Settable<KinematicsStreamingToolboxConfigurationMessage>, EpsilonComparable<KinematicsStreamingToolboxConfigurationMessage>
 {
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
+   /**
+            * Whether the pelvis should pinned or free to move.
+            * Default value is false.
+            */
+   public boolean lock_pelvis_;
+   /**
+            * Whether the chest should pinned or free to move.
+            * Default value is false.
+            */
+   public boolean lock_chest_;
    /**
             * Whether the left arm should be controller in joint-space.
             * This is compatible with the hand task-space control.
@@ -57,19 +67,23 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
             */
    public boolean enable_pelvis_taskspace_ = true;
 
-   public KinematicsStreamingToolboxOutputConfigurationMessage()
+   public KinematicsStreamingToolboxConfigurationMessage()
    {
    }
 
-   public KinematicsStreamingToolboxOutputConfigurationMessage(KinematicsStreamingToolboxOutputConfigurationMessage other)
+   public KinematicsStreamingToolboxConfigurationMessage(KinematicsStreamingToolboxConfigurationMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(KinematicsStreamingToolboxOutputConfigurationMessage other)
+   public void set(KinematicsStreamingToolboxConfigurationMessage other)
    {
       sequence_id_ = other.sequence_id_;
+
+      lock_pelvis_ = other.lock_pelvis_;
+
+      lock_chest_ = other.lock_chest_;
 
       enable_left_arm_jointspace_ = other.enable_left_arm_jointspace_;
 
@@ -100,6 +114,40 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+   /**
+            * Whether the pelvis should pinned or free to move.
+            * Default value is false.
+            */
+   public void setLockPelvis(boolean lock_pelvis)
+   {
+      lock_pelvis_ = lock_pelvis;
+   }
+   /**
+            * Whether the pelvis should pinned or free to move.
+            * Default value is false.
+            */
+   public boolean getLockPelvis()
+   {
+      return lock_pelvis_;
+   }
+
+   /**
+            * Whether the chest should pinned or free to move.
+            * Default value is false.
+            */
+   public void setLockChest(boolean lock_chest)
+   {
+      lock_chest_ = lock_chest;
+   }
+   /**
+            * Whether the chest should pinned or free to move.
+            * Default value is false.
+            */
+   public boolean getLockChest()
+   {
+      return lock_chest_;
    }
 
    /**
@@ -232,24 +280,28 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    }
 
 
-   public static Supplier<KinematicsStreamingToolboxOutputConfigurationMessagePubSubType> getPubSubType()
+   public static Supplier<KinematicsStreamingToolboxConfigurationMessagePubSubType> getPubSubType()
    {
-      return KinematicsStreamingToolboxOutputConfigurationMessagePubSubType::new;
+      return KinematicsStreamingToolboxConfigurationMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return KinematicsStreamingToolboxOutputConfigurationMessagePubSubType::new;
+      return KinematicsStreamingToolboxConfigurationMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(KinematicsStreamingToolboxOutputConfigurationMessage other, double epsilon)
+   public boolean epsilonEquals(KinematicsStreamingToolboxConfigurationMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.lock_pelvis_, other.lock_pelvis_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.lock_chest_, other.lock_chest_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_left_arm_jointspace_, other.enable_left_arm_jointspace_, epsilon)) return false;
 
@@ -274,11 +326,15 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof KinematicsStreamingToolboxOutputConfigurationMessage)) return false;
+      if(!(other instanceof KinematicsStreamingToolboxConfigurationMessage)) return false;
 
-      KinematicsStreamingToolboxOutputConfigurationMessage otherMyClass = (KinematicsStreamingToolboxOutputConfigurationMessage) other;
+      KinematicsStreamingToolboxConfigurationMessage otherMyClass = (KinematicsStreamingToolboxConfigurationMessage) other;
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
+      if(this.lock_pelvis_ != otherMyClass.lock_pelvis_) return false;
+
+      if(this.lock_chest_ != otherMyClass.lock_chest_) return false;
 
       if(this.enable_left_arm_jointspace_ != otherMyClass.enable_left_arm_jointspace_) return false;
 
@@ -303,9 +359,13 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("KinematicsStreamingToolboxOutputConfigurationMessage {");
+      builder.append("KinematicsStreamingToolboxConfigurationMessage {");
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append("lock_pelvis=");
+      builder.append(this.lock_pelvis_);      builder.append(", ");
+      builder.append("lock_chest=");
+      builder.append(this.lock_chest_);      builder.append(", ");
       builder.append("enable_left_arm_jointspace=");
       builder.append(this.enable_left_arm_jointspace_);      builder.append(", ");
       builder.append("enable_right_arm_jointspace=");

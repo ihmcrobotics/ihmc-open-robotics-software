@@ -44,6 +44,7 @@ public class RigidBodyOrientationControlHelper
     * over the network.
     */
    private final YoDouble streamTimestampOffset;
+   private final YoDouble streamTimestampSource;
 
    private boolean messageWeightValid = false;
    private final BooleanProvider useWeightFromMessage;
@@ -109,6 +110,8 @@ public class RigidBodyOrientationControlHelper
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
+      streamTimestampSource.setToNaN();
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -204,7 +207,10 @@ public class RigidBodyOrientationControlHelper
       }
 
       if (done)
+      {
          streamTimestampOffset.setToNaN();
+         streamTimestampSource.setToNaN();
+      }
 
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getAngularData(desiredOrientation, desiredVelocity, feedForwardAcceleration);
@@ -329,11 +335,13 @@ public class RigidBodyOrientationControlHelper
          if (command.getTimestamp() <= 0)
          {
             streamTimestampOffset.setToNaN();
+            streamTimestampSource.setToNaN();
          }
          else
          {
             double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
             timeOffset = time.getValue() - senderTime;
+            streamTimestampSource.set(senderTime);
             if (Double.isNaN(previousStreamTimestampOffset))
             {
                streamTimestampOffset.set(timeOffset);
@@ -498,6 +506,7 @@ public class RigidBodyOrientationControlHelper
       setDefaultControlFrame();
       pointQueue.clear();
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    public void disable()
