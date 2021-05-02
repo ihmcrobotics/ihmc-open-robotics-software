@@ -317,6 +317,10 @@ public class MPCContactPlane
       contactPoints[contactPointIndex].clear();
    }
 
+   public void reset()
+   {
+   }
+
    /**
     * Computes the collapsed wrench function. That is, it adds all the generalized contact force functions together in Euclidean space to get a much more
     * compact time function.

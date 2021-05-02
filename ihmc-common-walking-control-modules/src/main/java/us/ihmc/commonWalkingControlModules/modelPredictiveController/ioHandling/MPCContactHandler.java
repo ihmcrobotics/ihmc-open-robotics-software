@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ActiveSetData;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.function.Supplier;
 
@@ -21,8 +22,20 @@ public class MPCContactHandler
    private final double mass;
    private final double gravityZ;
 
-   public final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlanePool;
-   public final RecyclingArrayList<List<MPCContactPlane>> contactPlanes;
+   private final HashMap<ContactPlaneProvider, ContactData> contactMap = new HashMap<>();
+
+   private final RecyclingArrayList<ActiveSetData> activeSetPool = new RecyclingArrayList<>(ActiveSetData::new);
+   private final RecyclingArrayList<MPCContactPlane> contactPlanePool;
+   private final RecyclingArrayList<List<MPCContactPlane>> contactPlaneListPool = new RecyclingArrayList<>(ArrayList::new);
+   private final RecyclingArrayList<ContactData> contactDataPool = new RecyclingArrayList<>(ContactData::new);
+
+   private final List<ActiveSetData> unusedActiveSetList = new ArrayList<>();
+   private final List<MPCContactPlane> unusedContactPlanes = new ArrayList<>();
+   private final List<List<MPCContactPlane>> unusedContactLists = new ArrayList<>();
+   private final List<ContactData> unusedContactDataList = new ArrayList<>();
+   private final List<ContactPlaneProvider> unusedPlaneProvider = new ArrayList<>();
+
+   public final List<List<MPCContactPlane>> contactPlanes;
 
    public MPCContactHandler(double gravityZ, double mass)
    {
@@ -33,140 +46,124 @@ public class MPCContactHandler
 
       FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
       Supplier<MPCContactPlane> contactPlaneHelperProvider = () -> new MPCContactPlane(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
-      contactPlanePool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
-      contactPlanes = new RecyclingArrayList<>(ArrayList::new);
+      contactPlanePool = new RecyclingArrayList<>(contactPlaneHelperProvider);
+
+      contactPlanes = new ArrayList<>();
    }
 
 
    public void setContactPlaneViewers(Supplier<ContactPlaneForceViewer> viewerSupplier)
    {
       contactPlanePool.clear();
-      for (int i = 0; i < 2; i++)
-      {
-         RecyclingArrayList<MPCContactPlane> helpers = contactPlanePool.add();
-         helpers.clear();
-         for (int j = 0; j < 6; j++)
-         {
-            helpers.add().setContactPointForceViewer(viewerSupplier.get());
-         }
-         helpers.clear();
-      }
+      for (int i = 0; i < 12; i++)
+         contactPlanePool.add().setContactPointForceViewer(viewerSupplier.get());
       contactPlanePool.clear();
    }
 
-   public void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence, double omega)
+   public void computeMatrixHelpers(List<ContactPlaneProvider> currentContactSequence, List<ContactPlaneProvider> previousContactSequence, double omega)
    {
-      contactPlanePool.clear();
+      updatePreviousLists(previousContactSequence);
 
-      for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
+      for (int sequenceId = 0; sequenceId < currentContactSequence.size(); sequenceId++)
       {
-         ContactPlaneProvider contact = contactSequence.get(sequenceId);
-         double duration = contact.getTimeInterval().getDuration();
+         ContactPlaneProvider contact = currentContactSequence.get(sequenceId);
 
-         RecyclingArrayList<MPCContactPlane> contactPlaneHelpers = contactPlanePool.add();
-         contactPlaneHelpers.clear();
-
-         double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
-         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
-         {
-            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.add();
-            contactPlaneHelper.setMaxNormalForce(maxContactForce);
-            contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
-            contactPlaneHelper.computeAccelerationIntegrationMatrix(duration, omega, objectiveForce);
-         }
-      }
-   }
-
-   /*
-   private void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
-   {
-      List<ContactPlaneProvider> planningWindowForPreviousSolution = linearTrajectoryHandler.getPlanningWindowForSolution();
-      boolean firstSegmentRemoved = false;
-
-      if (!doTwoPlaneProvidersMatch(planningWindowForPreviousSolution.get(0), contactSequence.get(0)))
-      {
-         // check if the next one changed, which is possible
-         firstSegmentRemoved = true;
-         contactPlanePool.fastRemove(0);
-      }
-
-      int sequenceId = 0;
-      for (; sequenceId < contactSequence.size(); sequenceId++)
-      {
-         ContactPlaneProvider contact = contactSequence.get(sequenceId);
-         double duration = contact.getTimeInterval().getDuration();
-
-         int previousId = firstSegmentRemoved ? sequenceId + 1 : sequenceId;
-         boolean recycleSegment = doTwoPlaneProvidersMatch(planningWindowForPreviousSolution.get(previousId), contactSequence.get(sequenceId));
-
-         RecyclingArrayList<MPCContactPlane> contactPlanes;
-         if (recycleSegment)
-         {
-            contactPlanes = contactPlanePool.get(sequenceId);
-         }
+         ContactData contactData = contactMap.get(contact);
+         if (contactData == null)
+            contactData = createNewContactData(contact);
          else
-         {
-            contactPlanePool.remove(sequenceId);
-            contactPlanes = contactPlanePool.insertAtIndex(sequenceId);
-            contactPlanes.clear();
-         }
+            registerAsUsed(contact, contactData);
 
+         List<MPCContactPlane> contactPlanes = contactData.getPlanes();
          double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
+         double duration = contact.getTimeInterval().getDuration();
+
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
-            MPCContactPlane contactPlane;
-            if (recycleSegment)
-            {
-               contactPlane = contactPlanes.get(contactId);
-            }
-            else
-            {
-               contactPlane = contactPlanes.add();
-               // TODO make this do something
-               contactPlane.reset();
-            }
+            MPCContactPlane contactPlane = contactPlanes.get(contactId);
             contactPlane.setMaxNormalForce(maxContactForce);
             contactPlane.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
-            contactPlane.computeAccelerationIntegrationMatrix(duration, omega.getValue(), objectiveForce);
+            contactPlane.computeAccelerationIntegrationMatrix(duration, omega, objectiveForce);
          }
+
+         this.contactPlanes.add(contactPlanes);
+
+         // store it back to update the change a little better
+         contactMap.put(contact, contactData);
       }
+
+      // remove the unused ones from the pool
+      deallocateUnusedObjects();
    }
 
-    */
-
-
-   private static final double timeEpsilon = 1e-4;
-   private static final double positionEpsilon = 5e-3;
-
-   private static boolean doTwoPlaneProvidersMatch(ContactPlaneProvider groundTruth, ContactPlaneProvider candidate)
+   private void updatePreviousLists(List<ContactPlaneProvider> previousContactSequence)
    {
-      if (groundTruth == null || candidate == null)
-         return false;
+      unusedPlaneProvider.clear();
+      for (int i = 0; i < previousContactSequence.size(); i++)
+         unusedPlaneProvider.add(previousContactSequence.get(i));
 
-      if (!groundTruth.getTimeInterval().epsilonContains(candidate.getTimeInterval().getStartTime(), timeEpsilon))
-         return false;
-      if (!MathTools.epsilonEquals(groundTruth.getTimeInterval().getEndTime(), candidate.getTimeInterval().getEndTime(), timeEpsilon))
-         return false;
+      unusedActiveSetList.clear();
+      for (int i = 0; i < activeSetPool.size(); i++)
+         unusedActiveSetList.add(activeSetPool.get(i));
 
-      if (groundTruth.getNumberOfContactPlanes() != candidate.getNumberOfContactPlanes())
-         return false;
+      unusedContactPlanes.clear();
+      for (int i = 0; i < contactPlanePool.size(); i++)
+         unusedContactPlanes.add(contactPlanePool.get(i));
 
-      for (int i = 0; i < groundTruth.getNumberOfContactPlanes(); i++)
-      {
-         if (groundTruth.getNumberOfContactPointsInPlane(i) != candidate.getNumberOfContactPointsInPlane(i))
-            return false;
+      unusedContactLists.clear();
+      for (int i = 0; i < contactPlaneListPool.size(); i++)
+         unusedContactLists.add(contactPlaneListPool.get(i));
 
-         if (!groundTruth.getContactPose(i).getPosition().epsilonEquals(candidate.getContactPose(i).getPosition(), positionEpsilon))
-            return false;
-      }
-
-      return true;
+      unusedContactDataList.clear();
+      for (int i = 0; i < contactDataPool.size(); i++)
+         unusedContactDataList.add(contactDataPool.get(i));
    }
 
+   private ContactData createNewContactData(ContactPlaneProvider contact)
+   {
+      ContactData contactData = contactDataPool.add();
+      List<MPCContactPlane> contactPlanes = contactPlaneListPool.add();
+      contactPlanes.clear();
+      for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
+         contactPlanes.add(contactPlanePool.add());
+
+      contactData.setPlanes(contactPlanes);
+      contactData.setActiveSetData(activeSetPool.add());
+      return contactData;
+   }
+
+   private void registerAsUsed(ContactPlaneProvider contact, ContactData contactData)
+   {
+      unusedPlaneProvider.remove(contact);
+      unusedContactDataList.remove(contactData);
+      unusedActiveSetList.remove(contactData.getActiveSetData());
+      List<MPCContactPlane> contactPlanes = contactData.getPlanes();
+      unusedContactLists.remove(contactPlanes);
+      for (int contactId = 0; contactId < contactPlanes.size(); contactId++)
+         unusedContactPlanes.remove(contactPlanes.get(contactId));
+   }
+
+   private void deallocateUnusedObjects()
+   {
+      for (int i = 0; i < unusedActiveSetList.size(); i++)
+         activeSetPool.remove(unusedActiveSetList.get(i));
+
+      for (int i = 0; i < unusedContactPlanes.size(); i++)
+         contactPlanePool.remove(unusedContactPlanes.get(i));
+
+      for (int i = 0; i < unusedContactLists.size(); i++)
+         contactPlaneListPool.remove(unusedContactLists.get(i));
+
+      for (int i = 0; i < unusedContactDataList.size(); i++)
+         contactDataPool.remove(unusedContactDataList.get(i));
+
+      for (int i = 0; i < unusedPlaneProvider.size(); i++)
+         contactMap.remove(unusedPlaneProvider.get(i));
+   }
 
    public List<? extends List<MPCContactPlane>> getContactPlanes()
    {
-      return contactPlanePool;
+      return contactPlanes;
    }
 
    public int getNumberOfContactPlanesInSegment(int segmentId)
@@ -176,11 +173,34 @@ public class MPCContactHandler
 
    public List<MPCContactPlane> getContactPlanesForSegment(int segmentId)
    {
-      return contactPlanePool.get(segmentId);
+      return contactPlanes.get(segmentId);
    }
 
    public MPCContactPlane getContactPlane(int segmentId, int planeId)
    {
-      return contactPlanePool.get(segmentId).get(planeId);
+      return contactPlanes.get(segmentId).get(planeId);
+   }
+
+   private static class ContactData extends MutablePair<List<MPCContactPlane>, ActiveSetData>
+   {
+      public List<MPCContactPlane> getPlanes()
+      {
+         return getLeft();
+      }
+
+      public ActiveSetData getActiveSetData()
+      {
+         return getRight();
+      }
+
+      public void setPlanes(List<MPCContactPlane> planes)
+      {
+         setLeft(planes);
+      }
+
+      public void setActiveSetData(ActiveSetData activeSetData)
+      {
+         setRight(activeSetData);
+      }
    }
 }
