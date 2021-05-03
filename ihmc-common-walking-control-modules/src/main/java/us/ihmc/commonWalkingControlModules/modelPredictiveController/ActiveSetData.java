@@ -34,6 +34,13 @@ public class ActiveSetData
       clearActiveSet();
    }
 
+   public void resetConstraintCounter()
+   {
+      numberOfInequalityConstraints = 0;
+      numberOfLowerBoundConstraints = 0;
+      numberOfUpperBoundConstraints = 0;
+   }
+
    public void clearActiveSet()
    {
       activeInequalityIndices.reset();

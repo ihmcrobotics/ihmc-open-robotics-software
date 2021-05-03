@@ -24,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -266,11 +267,17 @@ public abstract class EuclideanModelPredictiveController
                                     1.0);
 
          for (int i = 0; i < activeSetData.getNumberOfActiveInequalityConstraints(); i++)
+         {
             activeInequalityConstraints.add(activeSetData.getActiveInequalityIndex(i) + inequalityStartIndex);
+         }
          for (int i = 0; i < activeSetData.getNumberOfActiveLowerBoundConstraints(); i++)
+         {
             activeLowerBoundConstraints.add(activeSetData.getActiveLowerBoundIndex(i) + lowerBoundStartIndex);
+         }
          for (int i = 0; i < activeSetData.getNumberOfActiveUpperBoundConstraints(); i++)
+         {
             activeUpperBoundConstraints.add(activeSetData.getActiveUpperBoundIndex(i) + upperBoundStartIndex);
+         }
 
          inequalityStartIndex += activeSetData.getNumberOfInequalityConstraints();
          lowerBoundStartIndex += activeSetData.getNumberOfLowerBoundConstraints();
@@ -368,6 +375,9 @@ public abstract class EuclideanModelPredictiveController
    {
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
+
+      for (int i = 0; i < numberOfPhases; i++)
+         contactHandler.getActiveSetData(i).resetConstraintCounter();
 
       mpcCommands.addCommand(computeInitialCoMPositionObjective(commandProvider.getNextCoMPositionCommand()));
       if (includeVelocityObjective)
