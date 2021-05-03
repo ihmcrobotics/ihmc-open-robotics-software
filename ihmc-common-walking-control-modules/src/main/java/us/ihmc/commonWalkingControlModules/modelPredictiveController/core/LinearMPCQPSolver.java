@@ -85,6 +85,7 @@ public class LinearMPCQPSolver
    private final MPCQPInputCalculator inputCalculator;
 
    protected final double dt;
+   protected final double dt2;
 
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
@@ -101,6 +102,7 @@ public class LinearMPCQPSolver
    {
       this.indexHandler = indexHandler;
       this.dt = dt;
+      dt2 = dt * dt;
 
       rhoCoefficientRegularization.set(1e-5);
       comCoefficientRegularization.set(1e-5);
@@ -245,8 +247,8 @@ public class LinearMPCQPSolver
 
    public void addRateRegularization()
    {
-      double comCoefficientFactor = dt * dt / comRateCoefficientRegularization.getDoubleValue();
-      double rhoCoefficientFactor = dt * dt / rhoRateCoefficientRegularization.getDoubleValue();
+      double comCoefficientFactor = comRateCoefficientRegularization.getDoubleValue() / dt2;
+      double rhoCoefficientFactor = rhoRateCoefficientRegularization.getDoubleValue() / dt2;
 
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
@@ -256,8 +258,8 @@ public class LinearMPCQPSolver
             double previousValue = previousSolution.get(start + i, 0);
             if (Double.isNaN(previousValue))
                continue;
-            solverInput_H.add(start + i, start + i, 1.0 / comCoefficientFactor);
-            solverInput_f.add(start + i, 0, -previousValue / comCoefficientFactor);
+            solverInput_H.add(start + i, start + i, comCoefficientFactor);
+            solverInput_f.add(start + i, 0, -previousValue * comCoefficientFactor);
          }
 
          start += LinearMPCIndexHandler.comCoefficientsPerSegment;
@@ -266,8 +268,8 @@ public class LinearMPCQPSolver
             double previousValue = previousSolution.get(start + i, 0);
             if (Double.isNaN(previousValue))
                continue;
-            solverInput_H.add(start + i, start + i, 1.0 / rhoCoefficientFactor);
-            solverInput_f.add(start + i, 0, -previousValue / rhoCoefficientFactor);
+            solverInput_H.add(start + i, start + i, rhoCoefficientFactor);
+            solverInput_f.add(start + i, 0, -previousValue * rhoCoefficientFactor);
          }
       }
    }
