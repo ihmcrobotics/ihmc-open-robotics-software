@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 public class SE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
@@ -80,6 +81,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
    private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
 
+   private final IntUnaryOperator firstVariableIndex;
+
    public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
                                        double gravityZ,
                                        double nominalCoMHeight,
@@ -109,6 +112,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
+
+      firstVariableIndex = indexHandler::getOrientationStartIndex;
 
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
       orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
@@ -296,7 +301,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
       if (useWarmStart.getBooleanValue())
       {
-         assembleActiveSet();
+         assembleActiveSet(firstVariableIndex);
+         qpSolver.setPreviousSolution(previousSolution);
          qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
          qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
          qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
@@ -308,7 +314,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
          return null;
       }
 
-      extractNewActiveSetData(qpSolver);
+      extractNewActiveSetData(qpSolver, firstVariableIndex);
 
       return qpSolver.getSolution();
    }

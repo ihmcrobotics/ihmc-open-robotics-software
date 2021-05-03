@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ActiveSetData;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -38,8 +39,11 @@ public class MPCContactHandler
    public final List<List<MPCContactPlane>> contactPlanes = new ArrayList<>();
    public final List<ActiveSetData> activeSetData = new ArrayList<>();
 
-   public MPCContactHandler(double gravityZ, double mass)
+   private final LinearMPCIndexHandler indexHandler;
+
+   public MPCContactHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double mass)
    {
+      this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
 
@@ -70,7 +74,7 @@ public class MPCContactHandler
 
          ContactData contactData = contactMap.get(contact);
          if (contactData == null)
-            contactData = createNewContactData(contact);
+            contactData = createNewContactData(sequenceId, contact);
          else
             registerAsUsed(contact, contactData);
 
@@ -120,11 +124,15 @@ public class MPCContactHandler
          unusedContactDataList.add(contactDataPool.get(i));
    }
 
-   private ContactData createNewContactData(ContactPlaneProvider contact)
+   private ContactData createNewContactData(int sequenceId, ContactPlaneProvider contact)
    {
       ContactData contactData = contactDataPool.add();
+
       ActiveSetData activeSetData = activeSetPool.add();
       activeSetData.reset();
+      activeSetData.setSegmentNumber(sequenceId);
+      activeSetData.setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(sequenceId));
+
       List<MPCContactPlane> contactPlanes = contactPlaneListPool.add();
       contactPlanes.clear();
       for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
