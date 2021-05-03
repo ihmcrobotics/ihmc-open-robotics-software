@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import imgui.type.ImFloat;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
@@ -27,11 +26,6 @@ public class GDXEnvironment implements RenderableProvider
    private boolean selected = false;
    private boolean intersecting = false;
    private final Point3D intersection = new Point3D();
-
-   private final ImFloat r = new ImFloat(1.0f);
-   private final ImFloat g = new ImFloat(1.0f);
-   private final ImFloat b = new ImFloat(1.0f);
-   private final ImFloat a = new ImFloat(1.0f);
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -87,16 +81,9 @@ public class GDXEnvironment implements RenderableProvider
       ImGui.text("Selected: " + selected);
       ImGui.text("Intersecting: " + intersecting);
 
-      ImGui.dragFloat("R", r.getData(), 0.01f, 0.0f, 1.0f);
-      ImGui.dragFloat("G", g.getData(), 0.01f, 0.0f, 1.0f);
-      ImGui.dragFloat("B", b.getData(), 0.01f, 0.0f, 1.0f);
-      ImGui.dragFloat("A", a.getData(), 0.01f, 0.0f, 1.0f);
-
       pose3DWidget.render();
 
       ImGui.end();
-
-      cinderBlock.getCollisionModelInstance().materials.get(0).set(ColorAttribute.createDiffuse(r.get(), g.get(), b.get(), a.get()));
    }
 
    @Override
