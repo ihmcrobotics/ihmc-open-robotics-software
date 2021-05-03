@@ -66,13 +66,16 @@ public class GDXEnvironment implements RenderableProvider
             pose3DWidget.process3DViewInput(viewInput);
             selectedObject.set(pose3DWidget.getTransform());
 
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
-               GDXEnvironmentObject pickedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
-               if (pickedObject != selectedObject)
+               if (intersectedObject != selectedObject)
                {
-                  selectedObject = null;
-                  intersectedObject = null;
+                  selectedObject = intersectedObject;
+                  if (selectedObject != null)
+                  {
+                     GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+                  }
                }
             }
          }
@@ -125,6 +128,13 @@ public class GDXEnvironment implements RenderableProvider
          placing = true;
       }
 
+      if (selectedObject != null && ImGui.button("Delete selected"))
+      {
+         objects.remove(selectedObject);
+         selectedObject = null;
+         intersectedObject = null;
+      }
+
       pose3DWidget.render();
 
       ImGui.end();
@@ -143,7 +153,7 @@ public class GDXEnvironment implements RenderableProvider
          selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
          pose3DWidget.getRenderables(renderables, pool);
       }
-      else if (intersectedObject != null)
+      if (intersectedObject != null && intersectedObject != selectedObject)
       {
          intersectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
       }
