@@ -62,6 +62,7 @@ public class MPCContactHandler
    public void computeMatrixHelpers(List<ContactPlaneProvider> currentContactSequence, List<ContactPlaneProvider> previousContactSequence, double omega)
    {
       updatePreviousLists(previousContactSequence);
+      contactPlanes.clear();
 
       for (int sequenceId = 0; sequenceId < currentContactSequence.size(); sequenceId++)
       {

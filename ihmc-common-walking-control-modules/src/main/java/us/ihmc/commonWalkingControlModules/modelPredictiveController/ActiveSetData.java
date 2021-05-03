@@ -86,4 +86,34 @@ public class ActiveSetData
    {
       return numberOfUpperBoundConstraints;
    }
+
+   public int getNumberOfActiveInequalityConstraints()
+   {
+      return activeInequalityIndices.size();
+   }
+
+   public int getNumberOfActiveLowerBoundConstraints()
+   {
+      return activeLowerBoundIndices.size();
+   }
+
+   public int getNumberOfActiveUpperBoundConstraints()
+   {
+      return activeUpperBoundIndices.size();
+   }
+
+   public int getActiveInequalityIndex(int constraint)
+   {
+      return activeInequalityIndices.get(constraint);
+   }
+
+   public int getActiveLowerBoundIndex(int constraint)
+   {
+      return activeLowerBoundIndices.get(constraint);
+   }
+
+   public int getActiveUpperBoundIndex(int constraint)
+   {
+      return activeUpperBoundIndices.get(constraint);
+   }
 }

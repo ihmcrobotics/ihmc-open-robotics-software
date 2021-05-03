@@ -193,7 +193,7 @@ public class LinearMPCQPSolver
          solverOutput.reshape(problemSize, 1);
 
          resetRateRegularization();
-         notifyResetActiveSet();
+//         notifyResetActiveSet();
       }
 
       solverInput_Aeq.zero();
@@ -630,6 +630,21 @@ public class LinearMPCQPSolver
    public DMatrixRMaj getSolution()
    {
       return solverOutput;
+   }
+
+   public void setActiveInequalityIndices(TIntList activeInequalityIndices)
+   {
+      qpSolver.setActiveInequalityIndices(activeInequalityIndices);
+   }
+
+   public void setActiveLowerBoundIndices(TIntList activeLowerBoundIndices)
+   {
+      qpSolver.setActiveLowerBoundIndices(activeLowerBoundIndices);
+   }
+
+   public void setActiveUpperBoundIndices(TIntList activeUpperBoundIndices)
+   {
+      qpSolver.setActiveUpperBoundIndices(activeUpperBoundIndices);
    }
 
    public TIntList getActiveInequalityIndices()
