@@ -16,6 +16,7 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 import java.util.function.Consumer;
 
+// TODO: Rename to GDXModelBuilder?
 public class GDXModelPrimitives
 {
    public static ModelInstance createCoordinateFrameInstance(double length)
