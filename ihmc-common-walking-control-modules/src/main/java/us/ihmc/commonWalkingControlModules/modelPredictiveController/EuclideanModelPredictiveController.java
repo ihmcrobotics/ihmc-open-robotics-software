@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
@@ -30,6 +31,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -103,6 +105,12 @@ public abstract class EuclideanModelPredictiveController
    private final ExecutionTimer mpcQPTime = new ExecutionTimer("mpcQPTime", registry);
    private final ExecutionTimer mpcExtractionTime = new ExecutionTimer("mpcExtractionTime", registry);
 
+   protected final YoBoolean useWarmStart = new YoBoolean("mpcUseWarmStart", registry);
+
+   protected final TIntArrayList activeInequalityConstraints = new TIntArrayList();
+   protected final TIntArrayList activeLowerBoundConstraints = new TIntArrayList();
+   protected final TIntArrayList activeUpperBoundConstraints = new TIntArrayList();
+
    private MPCCornerPointViewer cornerPointViewer = null;
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
 
@@ -129,6 +137,8 @@ public abstract class EuclideanModelPredictiveController
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
+
+      useWarmStart.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -225,7 +235,34 @@ public abstract class EuclideanModelPredictiveController
       mpcTotalTime.stopMeasurement();
    }
 
-   protected void extractActiveSetData(LinearMPCQPSolver qpSolver)
+   protected void assembleActiveSet()
+   {
+      activeInequalityConstraints.reset();
+      activeLowerBoundConstraints.reset();
+      activeUpperBoundConstraints.reset();
+
+      int inequalityStartIndex = 0;
+      int lowerBoundStartIndex = 0;
+      int upperBoundStartIndex = 0;
+
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      {
+         ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
+
+         for (int i = 0; i < activeSetData.getNumberOfActiveInequalityConstraints(); i++)
+            activeInequalityConstraints.add(activeSetData.getActiveInequalityIndex(i) + inequalityStartIndex);
+         for (int i = 0; i < activeSetData.getNumberOfActiveLowerBoundConstraints(); i++)
+            activeLowerBoundConstraints.add(activeSetData.getActiveLowerBoundIndex(i) + lowerBoundStartIndex);
+         for (int i = 0; i < activeSetData.getNumberOfActiveUpperBoundConstraints(); i++)
+            activeUpperBoundConstraints.add(activeSetData.getActiveUpperBoundIndex(i) + upperBoundStartIndex);
+
+         inequalityStartIndex += activeSetData.getNumberOfInequalityConstraints();
+         lowerBoundStartIndex += activeSetData.getNumberOfLowerBoundConstraints();
+         upperBoundStartIndex += activeSetData.getNumberOfUpperBoundConstraints();
+      }
+   }
+
+   protected void extractNewActiveSetData(LinearMPCQPSolver qpSolver)
    {
       TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
       TIntList activeLowerBoundIndices = qpSolver.getActiveLowerBoundIndices();

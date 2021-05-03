@@ -292,13 +292,23 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       qpSolver.initialize();
       qpSolver.submitMPCCommandList(mpcCommands);
+
+      qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
+      if (useWarmStart.getBooleanValue())
+      {
+         assembleActiveSet();
+         qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
+         qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
+         qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
+      }
+
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");
          return null;
       }
 
-      extractActiveSetData(qpSolver);
+      extractNewActiveSetData(qpSolver);
 
       return qpSolver.getSolution();
    }
