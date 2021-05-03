@@ -116,11 +116,11 @@ public class DirectionalControlModule extends ToolboxModule
 
       ROS2Topic<?> controllerSubGenerator = ControllerAPIDefinition.getInputTopic(robotName);
 
-      pauseWalkingPublisher = ROS2Tools.createPublisher(realtimeROS2Node, PauseWalkingMessage.class, controllerSubGenerator);
-      footstepPublisher = ROS2Tools.createPublisher(realtimeROS2Node, FootstepDataListMessage.class, controllerSubGenerator);
-      footstepVisualizationPublisher = ROS2Tools.createPublisher(realtimeROS2Node,
-                                                                 FootstepDataListMessage.class,
-                                                                 DirectionalControlModule.getOutputTopic(robotName));
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      footstepPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, FootstepDataListMessage.class, controllerSubGenerator);
+      footstepVisualizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
+                                                                          FootstepDataListMessage.class,
+                                                                          DirectionalControlModule.getOutputTopic(robotName));
 
    }
 
