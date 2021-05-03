@@ -1,10 +1,12 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import gnu.trove.list.TIntList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
@@ -91,6 +93,8 @@ public abstract class EuclideanModelPredictiveController
    final LinearMPCTrajectoryHandler linearTrajectoryHandler;
    protected final WrenchMPCTrajectoryHandler wrenchTrajectoryHandler;
 
+   private final LinearMPCIndexHandler indexHandler;
+
    protected final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
 
@@ -112,6 +116,7 @@ public abstract class EuclideanModelPredictiveController
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.mass = mass;
       this.omega = omega;
+      this.indexHandler = indexHandler;
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       linearTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
@@ -220,6 +225,51 @@ public abstract class EuclideanModelPredictiveController
       mpcTotalTime.stopMeasurement();
    }
 
+   protected void extractActiveSetData(LinearMPCQPSolver qpSolver)
+   {
+      TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
+      TIntList activeLowerBoundIndices = qpSolver.getActiveLowerBoundIndices();
+      TIntList activeUpperBoundIndices = qpSolver.getActiveUpperBoundIndices();
+
+      int inequalityStartIndex = 0;
+      int lowerBoundStartIndex = 0;
+      int upperBoundStartIndex = 0;
+
+      int currentInequalityIndex = 0;
+      int currentLowerBoundIndex = 0;
+      int currentUpperBoundIndex = 0;
+
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      {
+         ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
+         int inequalityEndIndex = inequalityStartIndex + activeSetData.getNumberOfInequalityConstraints();
+         int lowerBoundEndIndex = lowerBoundStartIndex + activeSetData.getNumberOfLowerBoundConstraints();
+         int upperBoundEndIndex = upperBoundStartIndex + activeSetData.getNumberOfUpperBoundConstraints();
+
+         while (currentInequalityIndex < activeInequalityIndices.size() && activeInequalityIndices.get(currentInequalityIndex) < inequalityEndIndex)
+         {
+            activeSetData.addActiveInequalityConstraint(activeInequalityIndices.get(currentInequalityIndex) - inequalityStartIndex);
+            currentInequalityIndex++;
+         }
+
+         while (currentLowerBoundIndex < activeLowerBoundIndices.size() && activeLowerBoundIndices.get(currentLowerBoundIndex) < lowerBoundEndIndex)
+         {
+            activeSetData.addActiveLowerBoundConstraint(activeLowerBoundIndices.get(currentLowerBoundIndex) - lowerBoundStartIndex);
+            currentLowerBoundIndex++;
+         }
+
+         while (currentUpperBoundIndex < activeUpperBoundIndices.size() && activeUpperBoundIndices.get(currentUpperBoundIndex) < upperBoundEndIndex)
+         {
+            activeSetData.addActiveUpperBoundConstraint(activeUpperBoundIndices.get(currentUpperBoundIndex) - upperBoundStartIndex);
+            currentUpperBoundIndex++;
+         }
+
+         inequalityStartIndex = inequalityEndIndex;
+         lowerBoundStartIndex = lowerBoundEndIndex;
+         upperBoundStartIndex = upperBoundEndIndex;
+      }
+   }
+
    protected abstract void initializeIndexHandler();
 
    protected void solveForTrajectoryOutsidePreviewWindow(List<ContactPlaneProvider> contactSequence)
@@ -274,10 +324,14 @@ public abstract class EuclideanModelPredictiveController
          if (includeRhoMaxInequality)
             mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
       }
+      contactHandler.getActiveSetData(0).setSegmentNumber(0);
+      contactHandler.getActiveSetData(0).setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(0));
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
       {
          int nextSequence = transition + 1;
+
+         contactHandler.getActiveSetData(nextSequence).setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(nextSequence));
 
          double firstSegmentDuration = contactSequence.get(transition).getTimeInterval().getDuration();
 
@@ -390,7 +444,11 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
       valueObjective.setUseScalarObjective(true);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
-         valueObjective.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+      {
+         MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
+         valueObjective.addContactPlaneHelper(contactPlane);
+         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
+      }
 
       return valueObjective;
    }
@@ -407,10 +465,11 @@ public abstract class EuclideanModelPredictiveController
       int objectiveSize = 0;
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
-         MPCContactPlane contactPlaneHelper = contactHandler.getContactPlane(segmentNumber, i);
-         objectiveSize += contactPlaneHelper.getRhoSize();
-         valueObjective.addContactPlaneHelper(contactPlaneHelper);
+         MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
+         objectiveSize += contactPlane.getRhoSize();
+         valueObjective.addContactPlaneHelper(contactPlane);
       }
+      contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(objectiveSize);
 
       int rowStart = 0;
       DMatrixRMaj objectiveVector = valueObjective.getObjectiveVector();

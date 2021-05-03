@@ -35,7 +35,8 @@ public class MPCContactHandler
    private final List<ContactData> unusedContactDataList = new ArrayList<>();
    private final List<ContactPlaneProvider> unusedPlaneProvider = new ArrayList<>();
 
-   public final List<List<MPCContactPlane>> contactPlanes;
+   public final List<List<MPCContactPlane>> contactPlanes = new ArrayList<>();
+   public final List<ActiveSetData> activeSetData = new ArrayList<>();
 
    public MPCContactHandler(double gravityZ, double mass)
    {
@@ -47,8 +48,6 @@ public class MPCContactHandler
       FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
       Supplier<MPCContactPlane> contactPlaneHelperProvider = () -> new MPCContactPlane(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
       contactPlanePool = new RecyclingArrayList<>(contactPlaneHelperProvider);
-
-      contactPlanes = new ArrayList<>();
    }
 
 
@@ -87,6 +86,7 @@ public class MPCContactHandler
          }
 
          this.contactPlanes.add(contactPlanes);
+         this.activeSetData.add(contactData.getActiveSetData());
 
          // store it back to update the change a little better
          contactMap.put(contact, contactData);
@@ -122,13 +122,15 @@ public class MPCContactHandler
    private ContactData createNewContactData(ContactPlaneProvider contact)
    {
       ContactData contactData = contactDataPool.add();
+      ActiveSetData activeSetData = activeSetPool.add();
+      activeSetData.reset();
       List<MPCContactPlane> contactPlanes = contactPlaneListPool.add();
       contactPlanes.clear();
       for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          contactPlanes.add(contactPlanePool.add());
 
       contactData.setPlanes(contactPlanes);
-      contactData.setActiveSetData(activeSetPool.add());
+      contactData.setActiveSetData(activeSetData);
       return contactData;
    }
 
@@ -179,6 +181,11 @@ public class MPCContactHandler
    public MPCContactPlane getContactPlane(int segmentId, int planeId)
    {
       return contactPlanes.get(segmentId).get(planeId);
+   }
+
+   public ActiveSetData getActiveSetData(int segmentId)
+   {
+      return activeSetData.get(segmentId);
    }
 
    private static class ContactData extends MutablePair<List<MPCContactPlane>, ActiveSetData>

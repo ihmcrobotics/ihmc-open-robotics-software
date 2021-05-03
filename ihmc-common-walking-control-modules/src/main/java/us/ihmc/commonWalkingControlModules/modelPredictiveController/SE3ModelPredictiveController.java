@@ -298,6 +298,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
          return null;
       }
 
+      extractActiveSetData(qpSolver);
+
       return qpSolver.getSolution();
    }
 
