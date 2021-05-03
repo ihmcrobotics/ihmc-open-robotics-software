@@ -644,6 +644,8 @@ public class BambooTools
          return "Valkyrie";
       case ATLAS:
          return "Atlas";
+      case NADIA:
+         return "Nadia";
       case BONO:
          return "Bono";
       case SPOKED_RUNNER:
@@ -659,6 +661,6 @@ public class BambooTools
 
    public static enum SimpleRobotNameKeys
    {
-      M2V2, R2, VALKYRIE, ATLAS, BONO, SPOKED_RUNNER, V2EXOSKELETON,V3EXOSKELETON
+      M2V2, R2, VALKYRIE, ATLAS, NADIA, BONO, SPOKED_RUNNER, V2EXOSKELETON,V3EXOSKELETON
    }
 }
