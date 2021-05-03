@@ -47,6 +47,7 @@ public class LinearMPCIndexHandler
       rhoStartIndices.clear();
       comStartIndices.clear();
       rhoCoefficientsInSegment.clear();
+      variablesInSegment.clear();
 
       totalProblemSize = 0;
       for (int i = 0; i < numberOfContacts; i++)
