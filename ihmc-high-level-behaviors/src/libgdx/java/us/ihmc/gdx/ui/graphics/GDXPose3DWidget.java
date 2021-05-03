@@ -113,7 +113,6 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Vector3D crossProduct = new Vector3D();
    private final Vector3D axisMoveVector = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
-//   private final RigidBodyTransform transformToAppend = new RigidBodyTransform();
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -170,12 +169,6 @@ public class GDXPose3DWidget implements RenderableProvider
          axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
          transform.getRotation().transform(axisDragLine.getDirection());
 
-//         tempTransform.setToZero();
-//         tempTransform.getTranslation().set(axisDragLine.getPoint());
-//         EuclidGeometryTools.orientation3DFromZUpToVector3D(axisDragLine.getDirection(), tempTransform.getRotation());
-
-//         transformToAppend.setToZero();
-
          if (closestCollisionSelection.isLinear())
          {
             axisDragLine.getPoint().set(closestCollision);
@@ -185,8 +178,6 @@ public class GDXPose3DWidget implements RenderableProvider
             double distanceToMove = axisDragPlane.signedDistance(axisDragLineClosest);
             axisMoveVector.set(axisDragLine.getDirection());
             axisMoveVector.scale(distanceToMove);
-
-//            transformToAppend.appendTranslation(axisMoveVector);
 
             transform.getTranslation().add(axisMoveVector);
             closestCollision.add(axisMoveVector);
