@@ -45,33 +45,36 @@ public class GDXEnvironment implements RenderableProvider
 
    private void process3DViewInput(ImGui3DViewInput viewInput)
    {
-      intersecting = cinderBlock.intersect(viewInput.getPickRayInWorld(baseUI), intersection);
-
       if (selected)
       {
          pose3DWidget.process3DViewInput(viewInput);
          GDXTools.toGDX(pose3DWidget.getTransform(), cinderBlock.getRealisticModelInstance().transform);
          GDXTools.toGDX(pose3DWidget.getTransform(), cinderBlock.getCollisionModelInstance().transform);
-         cinderBlock.getCollisionGeometryObject().getPose().setToZero();
-         cinderBlock.getCollisionGeometryObject().getPose().applyTransform(pose3DWidget.getTransform());
+         cinderBlock.getCollisionGeometryObject().getPose().set(pose3DWidget.getTransform());
 
-         if (ImGui.getMouseDragDeltaX() == 0.0f && ImGui.getMouseDragDeltaX() == 0.0f && ImGui.isMouseReleased(ImGuiMouseButton.Left))
+         if (ImGui.getMouseDragDeltaX() == 0.0f
+          && ImGui.getMouseDragDeltaX() == 0.0f
+          && ImGui.isMouseReleased(ImGuiMouseButton.Left)
+          && viewInput.isWindowHovered())
          {
             selected = intersecting = cinderBlock.intersect(viewInput.getPickRayInWorld(baseUI), intersection);
          }
       }
       else
       {
-         Line3DReadOnly pickRay = viewInput.getPickRayInWorld(baseUI);
-         intersecting = cinderBlock.intersect(pickRay, intersection);
-
-         if (ImGui.getMouseDragDeltaX() == 0.0f && ImGui.getMouseDragDeltaX() == 0.0f && ImGui.isMouseReleased(ImGuiMouseButton.Left))
+         if (viewInput.isWindowHovered())
          {
-            selected = intersecting;
+            Line3DReadOnly pickRay = viewInput.getPickRayInWorld(baseUI);
+            intersecting = cinderBlock.intersect(pickRay, intersection);
 
-            if (intersecting)
+            if (ImGui.getMouseDragDeltaX() == 0.0f && ImGui.getMouseDragDeltaX() == 0.0f && ImGui.isMouseReleased(ImGuiMouseButton.Left))
             {
-               GDXTools.toEuclid(cinderBlock.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+               selected = intersecting;
+
+               if (intersecting)
+               {
+                  GDXTools.toEuclid(cinderBlock.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+               }
             }
          }
       }

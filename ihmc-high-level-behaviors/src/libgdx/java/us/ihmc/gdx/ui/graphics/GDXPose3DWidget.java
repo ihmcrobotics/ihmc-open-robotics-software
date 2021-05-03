@@ -21,6 +21,7 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
@@ -83,7 +84,9 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Plane3D arrowHeadCollisionTipFacingBase = new Plane3D();
    private final Line3D arrowHeadCollisionAxis = new Line3D();
    private final Point3D arrowHeadCollisionAxisPoint = new Point3D();
-   private final Pose3D pose = new Pose3D(1.0, 0.5, 0.25, 0.0, 0.0, 0.0);
+   private final Pose3D pose = new Pose3D();
+   /** The main, source, true, base transform that this thing represents. */
+   private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform tempPolytopeTransform = new RigidBodyTransform();
    private GDXImGuiBasedUI baseUI;
@@ -110,7 +113,7 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Vector3D crossProduct = new Vector3D();
    private final Vector3D axisMoveVector = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
-   private final RigidBodyTransform transformToAppend = new RigidBodyTransform();
+//   private final RigidBodyTransform transformToAppend = new RigidBodyTransform();
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -129,6 +132,8 @@ public class GDXPose3DWidget implements RenderableProvider
       float mouseDragDeltaX = ImGui.getMouseDragDeltaX(ImGuiMouseButton.Right);
       float mouseDragDeltaY = ImGui.getMouseDragDeltaY(ImGuiMouseButton.Right);
       boolean isWindowHovered = ImGui.isWindowHovered();
+
+      updateFromSourceTransform();
 
       if (!rightMouseDown)
       {
@@ -160,16 +165,16 @@ public class GDXPose3DWidget implements RenderableProvider
 
          Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
 
-         axisDragLine.getPoint().set(pose.getPosition());
-         axisDragLine.getDirection().set(0.0, 0.0, 1.0);
+         axisDragLine.getPoint().set(transform.getTranslation());
+         axisDragLine.getDirection().set(Axis3D.Z);
          axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
-         pose.getOrientation().transform(axisDragLine.getDirection());
+         transform.getRotation().transform(axisDragLine.getDirection());
 
-         tempTransform.setToZero();
-         tempTransform.getTranslation().set(axisDragLine.getPoint());
-         EuclidGeometryTools.orientation3DFromZUpToVector3D(axisDragLine.getDirection(), tempTransform.getRotation());
+//         tempTransform.setToZero();
+//         tempTransform.getTranslation().set(axisDragLine.getPoint());
+//         EuclidGeometryTools.orientation3DFromZUpToVector3D(axisDragLine.getDirection(), tempTransform.getRotation());
 
-         transformToAppend.setToZero();
+//         transformToAppend.setToZero();
 
          if (closestCollisionSelection.isLinear())
          {
@@ -181,9 +186,9 @@ public class GDXPose3DWidget implements RenderableProvider
             axisMoveVector.set(axisDragLine.getDirection());
             axisMoveVector.scale(distanceToMove);
 
-            transformToAppend.appendTranslation(axisMoveVector);
+//            transformToAppend.appendTranslation(axisMoveVector);
 
-            pose.getPosition().add(axisMoveVector);
+            transform.getTranslation().add(axisMoveVector);
             closestCollision.add(axisMoveVector);
          }
          else if (closestCollisionSelection.isAngular())
@@ -221,12 +226,27 @@ public class GDXPose3DWidget implements RenderableProvider
                      deltaAngle = -deltaAngle;
 
                   axisAngleToRotateBy.set(axisDragPlane.getNormal(), deltaAngle);
-                  axisAngleToRotateBy.transform(pose.getOrientation());
+                  axisAngleToRotateBy.transform(transform.getRotation());
                }
 
                angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
             }
          }
+      }
+
+      // after things have been modified, update the derivative stuff
+      updateFromSourceTransform();
+   }
+
+   private void updateFromSourceTransform()
+   {
+      for (Axis3D axis : Axis3D.values)
+      {
+         pose.set(transform);
+         tempTransform.set(transform);
+         tempTransform.appendOrientation(axisRotations[axis.ordinal()]);
+         GDXTools.toGDX(tempTransform, linearControlModelInstances[axis.ordinal()].transform);
+         GDXTools.toGDX(tempTransform, angularControlModelInstances[axis.ordinal()].transform);
       }
    }
 
@@ -241,6 +261,7 @@ public class GDXPose3DWidget implements RenderableProvider
       for (Axis3D axis : Axis3D.values)
       {
          GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
+
          angularCollisionTorus.setToZero();
          angularCollisionTorus.setRadii(torusRadius.get(), torusTubeRadius.get());
          angularCollisionTorus.applyTransform(tempTransform);
@@ -285,6 +306,7 @@ public class GDXPose3DWidget implements RenderableProvider
       for (Axis3D axis : Axis3D.values)
       {
          GDXTools.toEuclid(linearControlModelInstances[axis.ordinal()].transform, tempTransform);
+
          for (RobotSide side : RobotSide.values)
          {
             // collide arrow body cylinder
@@ -433,7 +455,7 @@ public class GDXPose3DWidget implements RenderableProvider
 
       if (ImGui.button("Reset"))
       {
-         pose.setToZero();
+         transform.setToZero();
       }
 
       ImGui.pushItemWidth(100.00f);
@@ -450,14 +472,6 @@ public class GDXPose3DWidget implements RenderableProvider
          recreateGraphics();
 
       ImGui.end();
-
-      for (Axis3D axis : Axis3D.values)
-      {
-         tempTransform.set(pose.getOrientation(), pose.getPosition());
-         tempTransform.appendOrientation(axisRotations[axis.ordinal()]);
-         GDXTools.toGDX(tempTransform, linearControlModelInstances[axis.ordinal()].transform);
-         GDXTools.toGDX(tempTransform, angularControlModelInstances[axis.ordinal()].transform);
-      }
    }
 
    private void recreateGraphics()
@@ -520,7 +534,7 @@ public class GDXPose3DWidget implements RenderableProvider
       }
    }
 
-   public Pose3D getPose()
+   public Pose3DReadOnly getPose()
    {
       return pose;
    }
@@ -528,13 +542,7 @@ public class GDXPose3DWidget implements RenderableProvider
    // TODO: Make this transform the ground truth and give the pose as needed only
    public RigidBodyTransform getTransform()
    {
-      return tempTransform;
-   }
-
-   public void setPoseFromTransform()
-   {
-      pose.setToZero();
-      pose.appendTransform(tempTransform);
+      return transform;
    }
 
    public static Mesh angularHighlightMesh(double majorRadius, double minorRadius)
