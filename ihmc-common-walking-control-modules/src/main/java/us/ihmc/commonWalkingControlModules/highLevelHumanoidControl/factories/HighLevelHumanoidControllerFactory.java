@@ -104,7 +104,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private HeadingAndVelocityEvaluationScriptParameters headingAndVelocityEvaluationScriptParameters;
    private boolean createComponentBasedFootstepDataMessageGenerator = false;
    private boolean createQueuedControllerCommandGenerator = false;
-   private boolean createUserDesiredControllerCommandGenerator = true;
+   private boolean createUserDesiredControllerCommandGenerator = false;
    private boolean useHeadingAndVelocityScript = true;
    private HeightMap heightMapForFootstepZ = null;
 
