@@ -10,7 +10,10 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.GeometryObject;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.tools.GDXTools;
@@ -57,11 +60,10 @@ public class GDXEnvironmentObject
 
    /**
     * If we are colliding spheres or boxes, this is overkill. Maybe make this a class that the complicated
-    * objects can instantiate?
+    * objects can instantiate? or they can override this method...
     */
    public boolean intersect(Line3DReadOnly pickRay, Point3D intersectionToPack)
    {
-      GDXTools.toEuclid(realisticModelInstance.transform, boundingSphere.getPosition());
       tempRayOrigin.setX(pickRay.getPoint().getX() - boundingSphere.getPosition().getX());
       tempRayOrigin.setY(pickRay.getPoint().getY() - boundingSphere.getPosition().getY());
       tempRayOrigin.setZ(pickRay.getPoint().getZ() - boundingSphere.getPosition().getZ());
@@ -120,6 +122,22 @@ public class GDXEnvironmentObject
    public Shape3DBasics getCollisionGeometryObject()
    {
       return collisionGeometryObject;
+   }
+
+   public void set(Point3DBasics translation)
+   {
+      GDXTools.toGDX(translation, getRealisticModelInstance().transform);
+      GDXTools.toGDX(translation, getCollisionModelInstance().transform);
+      getCollisionGeometryObject().getPose().getTranslation().set(translation);
+      boundingSphere.getPosition().set(translation);
+   }
+
+   public void set(RigidBodyTransform transform)
+   {
+      GDXTools.toGDX(transform, getRealisticModelInstance().transform);
+      GDXTools.toGDX(transform, getCollisionModelInstance().transform);
+      getCollisionGeometryObject().getPose().set(transform);
+      boundingSphere.getPosition().set(transform.getTranslation());
    }
 
    public GDXEnvironmentObject duplicate()
