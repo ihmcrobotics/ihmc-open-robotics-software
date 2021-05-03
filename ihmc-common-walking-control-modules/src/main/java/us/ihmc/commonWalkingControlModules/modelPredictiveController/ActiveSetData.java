@@ -27,6 +27,11 @@ public class ActiveSetData
       numberOfLowerBoundConstraints = 0;
       numberOfUpperBoundConstraints = 0;
 
+      clearActiveSet();
+   }
+
+   public void clearActiveSet()
+   {
       activeInequalityIndices.reset();
       activeLowerBoundIndices.reset();
       activeUpperBoundIndices.reset();
