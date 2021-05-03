@@ -21,7 +21,7 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
    {
       Model realisticModel = GDXModelLoader.loadG3DModel("mediumCinderBlockRoughed/MediumCinderBlockRoughed.g3dj");
 
-      double height = 0.141535;
+      double height = 0.141535; // these were measured in blender
       double width = 0.188522;
       double length = 0.393001;
       Box3D collisionBox = new Box3D(length, width, height);
@@ -32,7 +32,7 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
       {
          Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
          meshBuilder.addBox((float) length, (float) width, (float) height, color);
-         meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color);
+         meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
       }, "collisionModel" + INDEX.getAndIncrement());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
 
