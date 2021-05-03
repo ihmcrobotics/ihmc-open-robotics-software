@@ -23,43 +23,86 @@ public class OrientationTrajectoryInputCalculator
    }
 
 
-   public boolean compute(QPInputTypeA inputToPack, DirectOrientationValueCommand command)
+   public int compute(QPInputTypeA inputToPack, DirectOrientationValueCommand command)
+   {
+      int orientationIndex = indexHandler.getOrientationStartIndex(command.getSegmentNumber());
+
+      if (computeInternal(inputToPack, command, SE3MPCIndexHandler.variablesPerOrientationTick, orientationIndex))
+         return 0;
+      else
+         return -1;
+   }
+
+   public int computeCompact(QPInputTypeA inputToPack, DirectOrientationValueCommand command)
+   {
+      int orientationIndex = indexHandler.getOrientationStartIndex(command.getSegmentNumber());
+
+      if (computeInternal(inputToPack, command, SE3MPCIndexHandler.variablesPerOrientationTick, 0))
+         return orientationIndex;
+      else
+         return -1;
+   }
+
+   private boolean computeInternal(QPInputTypeA inputToPack, DirectOrientationValueCommand command, int numberOfVariables, int startIndex)
    {
       inputToPack.setConstraintType(command.getConstraintType());
       inputToPack.setWeight(command.getObjectiveWeight());
       inputToPack.setUseWeightScalar(true);
-      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
-      inputToPack.reshape(6);
+      inputToPack.setNumberOfVariables(numberOfVariables);
+      inputToPack.reshape(SE3MPCIndexHandler.variablesPerOrientationTick);
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
-      int segmentNumber = command.getSegmentNumber();
-
-      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
-
       // V = This
-      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, identity6, 0, 0, 6, 6, 1.0);
+      MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, startIndex, identity6, 0, 0, 6, 6, 1.0);
       inputToPack.getTaskObjective().set(command.getObjectiveValue());
 
       return true;
    }
 
-   public boolean compute(QPInputTypeA inputToPack, OrientationValueCommand command)
+   public int compute(QPInputTypeA inputToPack, OrientationValueCommand command)
+   {
+      int segmentNumber = command.getSegmentNumber();
+
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+
+      if (computeInternal(inputToPack, command, indexHandler.getTotalProblemSize(), comIndex, orientationIndex))
+         return 0;
+      else
+         return -1;
+   }
+
+   public int computeCompact(QPInputTypeA inputToPack, OrientationValueCommand command)
+   {
+      int segmentNumber = command.getSegmentNumber();
+
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+
+      if (computeInternal(inputToPack, command, indexHandler.getVariablesInSegment(segmentNumber), SE3MPCIndexHandler.variablesPerOrientationTick, 0))
+         return orientationIndex;
+      else
+         return -1;
+   }
+
+   private boolean computeInternal(QPInputTypeA inputToPack,
+                                   OrientationValueCommand command,
+                                   int numberOfVariables,
+                                   int comIndex,
+                                   int orientationIndex)
    {
       inputToPack.setConstraintType(command.getConstraintType());
       inputToPack.setWeight(command.getObjectiveWeight());
       inputToPack.setUseWeightScalar(true);
-      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
-      inputToPack.reshape(6);
+      inputToPack.setNumberOfVariables(numberOfVariables);
+      inputToPack.reshape(SE3MPCIndexHandler.variablesPerOrientationTick);
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
       int segmentNumber = command.getSegmentNumber();
 
-      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
-      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
       int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
 
       // V = A This + B c + C -> A This + B c = V - C
@@ -71,7 +114,51 @@ public class OrientationTrajectoryInputCalculator
       return true;
    }
 
-   public boolean compute(QPInputTypeA inputToPack, OrientationContinuityCommand command)
+   public int compute(QPInputTypeA inputToPack, OrientationContinuityCommand command)
+   {
+      int segmentNumber = command.getSegmentNumber();
+      if (segmentNumber == indexHandler.getNumberOfSegments() - 1)
+         return -1;
+
+      if (computeInternal(inputToPack,
+                          command,
+                          indexHandler.getTotalProblemSize(),
+                          indexHandler.getComCoefficientStartIndex(segmentNumber),
+                          indexHandler.getOrientationStartIndex(segmentNumber),
+                          indexHandler.getOrientationStartIndex(segmentNumber + 1)))
+         return 0;
+      else
+         return -1;
+   }
+
+   public int computeCompact(QPInputTypeA inputToPack, OrientationContinuityCommand command)
+   {
+      int segmentNumber = command.getSegmentNumber();
+      if (segmentNumber == indexHandler.getNumberOfSegments() - 1)
+         return -1;
+
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+      int nextOrientationIndex = indexHandler.getOrientationStartIndex(segmentNumber + 1);
+      int numberOfVariables = indexHandler.getVariablesInSegment(segmentNumber) + SE3MPCIndexHandler.variablesPerOrientationTick;
+
+      if (computeInternal(inputToPack,
+                          command,
+                          numberOfVariables,
+                          comIndex - orientationIndex,
+                          orientationIndex,
+                          nextOrientationIndex - orientationIndex))
+         return 0;
+      else
+         return -1;
+   }
+
+   private boolean computeInternal(QPInputTypeA inputToPack,
+                                   OrientationContinuityCommand command,
+                                   int numberOfVariables,
+                                   int comIndex,
+                                   int orientationIndex,
+                                   int nextOrientationIndex)
    {
       int segmentNumber = command.getSegmentNumber();
       if (segmentNumber == indexHandler.getNumberOfSegments() - 1)
@@ -81,15 +168,12 @@ public class OrientationTrajectoryInputCalculator
       inputToPack.setWeight(command.getObjectiveWeight());
       inputToPack.setUseWeightScalar(true);
 
-      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
-      inputToPack.reshape(6);
+      inputToPack.setNumberOfVariables(numberOfVariables);
+      inputToPack.reshape(SE3MPCIndexHandler.variablesPerOrientationTick);
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
 
-      int nextOrientationIndex = indexHandler.getOrientationStartIndex(segmentNumber + 1);
-      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
-      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
       int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
 
       // Next = A This + B c + C -> Next - A This - B c = C
@@ -102,17 +186,49 @@ public class OrientationTrajectoryInputCalculator
       return true;
    }
 
+   public int compute(int tick, QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
+   {
+      int segmentNumber = command.getSegmentNumber();
+
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+
+      if (computeInternal(tick, inputToPack, command, indexHandler.getTotalProblemSize(), comIndex, orientationIndex))
+         return 0;
+      else
+         return -1;
+   }
+
+   public int computeCompact(int tick, QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
+   {
+      int segmentNumber = command.getSegmentNumber();
+
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
+      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
+      int numberOfVariables = indexHandler.getVariablesInSegment(segmentNumber);
+
+      if (computeInternal(tick, inputToPack, command, numberOfVariables, comIndex - orientationIndex, 0))
+         return orientationIndex;
+      else
+         return -1;
+   }
+
    private final DMatrixRMaj orientationWeight = new DMatrixRMaj(6, 6);
 
-   public boolean compute(int tick, QPInputTypeA inputToPack, OrientationTrajectoryCommand command)
+   public boolean computeInternal(int tick,
+                                  QPInputTypeA inputToPack,
+                                  OrientationTrajectoryCommand command,
+                                  int numberOfVariables,
+                                  int comIndex,
+                                  int orientationIndex)
    {
       int segmentNumber = command.getSegmentNumber();
 
       int numberOfLinearVariables = LinearMPCIndexHandler.comCoefficientsPerSegment + indexHandler.getRhoCoefficientsInSegment(segmentNumber);
 
       inputToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
-      inputToPack.reshape(6);
+      inputToPack.setNumberOfVariables(numberOfVariables);
+      inputToPack.reshape(SE3MPCIndexHandler.variablesPerOrientationTick);
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
@@ -123,9 +239,6 @@ public class OrientationTrajectoryInputCalculator
          orientationWeight.set(i + 3, i + 3, command.getVelocityErrorMinimizationWeight());
       }
       inputToPack.setTaskWeightMatrix(orientationWeight);
-
-      int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
-      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
 
       // A This + B c + C = 0 -> A This + B c = -C
       MatrixTools.setMatrixBlock(inputToPack.getTaskJacobian(), 0, orientationIndex, command.getAMatrix(tick), 0, 0, 6, 6, 1.0);
