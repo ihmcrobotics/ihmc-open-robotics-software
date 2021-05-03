@@ -92,6 +92,14 @@ public class ImGui3DViewInput
       return pickRayInWorld;
    }
 
+   /**
+    * This is a better way to detect a singular mouse click than any of the provided methods.
+    */
+   public boolean mouseReleasedWithoutDrag(int button)
+   {
+      return ImGui.getMouseDragDeltaX() == 0.0f && ImGui.getMouseDragDeltaX() == 0.0f && ImGui.isMouseReleased(button);
+   }
+
    public boolean isWindowHovered()
    {
       return isWindowHovered;

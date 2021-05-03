@@ -454,6 +454,8 @@ public class GDXPose3DWidget implements RenderableProvider
          recreateGraphics();
 
       ImGui.end();
+
+      updateFromSourceTransform();
    }
 
    private void recreateGraphics()
