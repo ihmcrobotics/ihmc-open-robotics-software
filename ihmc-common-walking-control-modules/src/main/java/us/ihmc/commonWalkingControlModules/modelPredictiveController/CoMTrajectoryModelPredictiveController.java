@@ -8,6 +8,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredictiveController
 {
@@ -17,6 +18,8 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
 
    private final LinearMPCIndexHandler indexHandler;
    private final LinearMPCSolutionInspection solutionInspection;
+
+   private final IntUnaryOperator firstVariableIndex;
 
    public CoMTrajectoryModelPredictiveController(double mass, double gravityZ, double nominalCoMHeight, double dt, YoRegistry parentRegistry)
    {
@@ -33,6 +36,7 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
 
       this.indexHandler = indexHandler;
+      firstVariableIndex = indexHandler::getComCoefficientStartIndex;
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
 
@@ -67,7 +71,8 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
       if (useWarmStart.getBooleanValue())
       {
-         assembleActiveSet();
+         assembleActiveSet(firstVariableIndex);
+         qpSolver.setPreviousSolution(previousSolution);
          qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
          qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
          qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
@@ -84,7 +89,7 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       if (solutionInspection != null)
          solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
-      extractNewActiveSetData(qpSolver);
+      extractNewActiveSetData(qpSolver, firstVariableIndex);
 
       return solutionCoefficients;
    }

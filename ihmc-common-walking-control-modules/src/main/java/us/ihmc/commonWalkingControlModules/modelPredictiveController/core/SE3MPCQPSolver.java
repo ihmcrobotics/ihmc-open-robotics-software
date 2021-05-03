@@ -97,11 +97,17 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
          for (int var = startVar; var < startVar + 3; var++)
          {
-            solverInput_H.add(var, var, firstOrientationCoefficientFactor);
-            solverInput_f.add(var, 0, -solverOutput.get(var, 0) / firstOrientationCoefficientFactor);
+            if (!Double.isNaN(previousSolution.get(var, 0)))
+            {
+               solverInput_H.add(var, var, firstOrientationCoefficientFactor);
+               solverInput_f.add(var, 0, -solverOutput.get(var, 0) / firstOrientationCoefficientFactor);
+            }
 
-            solverInput_H.add(var + 3, var + 3, secondOrientationCoefficientFactor);
-            solverInput_f.add(var + 3, 0, -solverOutput.get(var + 3, 0) / secondOrientationCoefficientFactor);
+            if (!Double.isNaN(previousSolution.get(var + 3, 0)))
+            {
+               solverInput_H.add(var + 3, var + 3, secondOrientationCoefficientFactor);
+               solverInput_f.add(var + 3, 0, -solverOutput.get(var + 3, 0) / secondOrientationCoefficientFactor);
+            }
          }
       }
    }

@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 public class ActiveSetData
 {
@@ -15,6 +17,8 @@ public class ActiveSetData
    private final TIntArrayList activeInequalityIndices = new TIntArrayList();
    private final TIntArrayList activeLowerBoundIndices = new TIntArrayList();
    private final TIntArrayList activeUpperBoundIndices = new TIntArrayList();
+
+   private final DMatrixRMaj previousSolution = new DMatrixRMaj(1, 1);
 
    public void reset()
    {
@@ -45,6 +49,13 @@ public class ActiveSetData
    public void setNumberOfVariablesInSegment(int numberOfVariablesInSegment)
    {
       this.numberOfVariablesInSegment = numberOfVariablesInSegment;
+      previousSolution.reshape(numberOfVariablesInSegment, 1);
+      CommonOps_DDRM.fill(previousSolution, Double.NaN);
+   }
+
+   public DMatrixRMaj getPreviousSolution()
+   {
+      return previousSolution;
    }
 
    public void addInequalityConstraints(int numberOfConstraints)

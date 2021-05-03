@@ -55,6 +55,8 @@ public class LinearMPCQPSolver
    public final DMatrixRMaj solverOutput_beq;
    public final DMatrixRMaj solverOutput_bin;
 
+   protected final DMatrixRMaj previousSolution;
+
    public final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
    public final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
@@ -126,6 +128,8 @@ public class LinearMPCQPSolver
       solverOutput_bin = new DMatrixRMaj(0, 1);
       solverOutput_beq = new DMatrixRMaj(0, 1);
 
+      previousSolution = new DMatrixRMaj(0, 0);
+
       solverOutput = new DMatrixRMaj(problemSize, 1);
 
       parentRegistry.addChild(registry);
@@ -166,6 +170,12 @@ public class LinearMPCQPSolver
       this.resetActiveSet = true;
    }
 
+   public void setPreviousSolution(DMatrixRMaj previousSolution)
+   {
+      this.previousSolution.set(previousSolution);
+      addRateRegularization.set(true);
+   }
+
    private boolean pollResetActiveSet()
    {
       boolean ret = resetActiveSet;
@@ -175,12 +185,8 @@ public class LinearMPCQPSolver
 
    public void initialize()
    {
-      int previousProblemSize = problemSize;
       problemSize = indexHandler.getTotalProblemSize();
 
-      //      if (previousProblemSize != problemSize )
-      if (true)
-      {
          qpInputTypeA.setNumberOfVariables(problemSize);
          qpInputTypeC.setNumberOfVariables(problemSize);
 
@@ -193,8 +199,6 @@ public class LinearMPCQPSolver
          solverOutput.reshape(problemSize, 1);
 
          resetRateRegularization();
-//         notifyResetActiveSet();
-      }
 
       solverInput_Aeq.zero();
       solverInput_beq.zero();
@@ -249,15 +253,21 @@ public class LinearMPCQPSolver
          int start = indexHandler.getComCoefficientStartIndex(segmentId);
          for (int i = 0; i < LinearMPCIndexHandler.comCoefficientsPerSegment; i++)
          {
+            double previousValue = previousSolution.get(start + i, 0);
+            if (Double.isNaN(previousValue))
+               continue;
             solverInput_H.add(start + i, start + i, 1.0 / comCoefficientFactor);
-            solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / comCoefficientFactor);
+            solverInput_f.add(start + i, 0, -previousValue / comCoefficientFactor);
          }
 
          start += LinearMPCIndexHandler.comCoefficientsPerSegment;
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
          {
+            double previousValue = previousSolution.get(start + i, 0);
+            if (Double.isNaN(previousValue))
+               continue;
             solverInput_H.add(start + i, start + i, 1.0 / rhoCoefficientFactor);
-            solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / rhoCoefficientFactor);
+            solverInput_f.add(start + i, 0, -previousValue / rhoCoefficientFactor);
          }
       }
    }

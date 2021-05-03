@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.DoubleConsumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
@@ -109,6 +110,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected final YoBoolean useWarmStart = new YoBoolean("mpcUseWarmStart", registry);
 
+   protected final DMatrixRMaj previousSolution = new DMatrixRMaj(1, 1);
    protected final TIntArrayList activeInequalityConstraints = new TIntArrayList();
    protected final TIntArrayList activeLowerBoundConstraints = new TIntArrayList();
    protected final TIntArrayList activeUpperBoundConstraints = new TIntArrayList();
@@ -131,7 +133,7 @@ public abstract class EuclideanModelPredictiveController
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       linearTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
       wrenchTrajectoryHandler = new WrenchMPCTrajectoryHandler(registry);
-      contactHandler = new MPCContactHandler(gravityZ, mass);
+      contactHandler = new MPCContactHandler(indexHandler, gravityZ, mass);
 
       minRhoValue.set(defaultMinRhoValue);
       initialComWeight.set(defaultInitialComWeight);
@@ -238,11 +240,12 @@ public abstract class EuclideanModelPredictiveController
       mpcTotalTime.stopMeasurement();
    }
 
-   protected void assembleActiveSet()
+   protected void assembleActiveSet(IntUnaryOperator startIndexGetter)
    {
       activeInequalityConstraints.reset();
       activeLowerBoundConstraints.reset();
       activeUpperBoundConstraints.reset();
+      previousSolution.reshape(indexHandler.getTotalProblemSize(), 1);
 
       int inequalityStartIndex = 0;
       int lowerBoundStartIndex = 0;
@@ -251,6 +254,16 @@ public abstract class EuclideanModelPredictiveController
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
+
+         MatrixTools.setMatrixBlock(previousSolution,
+                                    startIndexGetter.applyAsInt(segmentId),
+                                    0,
+                                    activeSetData.getPreviousSolution(),
+                                    0,
+                                    0,
+                                    indexHandler.getVariablesInSegment(segmentId),
+                                    1,
+                                    1.0);
 
          for (int i = 0; i < activeSetData.getNumberOfActiveInequalityConstraints(); i++)
             activeInequalityConstraints.add(activeSetData.getActiveInequalityIndex(i) + inequalityStartIndex);
@@ -265,7 +278,7 @@ public abstract class EuclideanModelPredictiveController
       }
    }
 
-   protected void extractNewActiveSetData(LinearMPCQPSolver qpSolver)
+   protected void extractNewActiveSetData(LinearMPCQPSolver qpSolver, IntUnaryOperator startIndexGetter)
    {
       TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
       TIntList activeLowerBoundIndices = qpSolver.getActiveLowerBoundIndices();
@@ -283,6 +296,16 @@ public abstract class EuclideanModelPredictiveController
       {
          ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
          activeSetData.clearActiveSet();
+
+         MatrixTools.setMatrixBlock(activeSetData.getPreviousSolution(),
+                                    0,
+                                    0,
+                                    qpSolver.getSolution(),
+                                    startIndexGetter.applyAsInt(segmentId),
+                                    0,
+                                    indexHandler.getVariablesInSegment(segmentId),
+                                    1,
+                                    1.0);
 
          int inequalityEndIndex = inequalityStartIndex + activeSetData.getNumberOfInequalityConstraints();
          int lowerBoundEndIndex = lowerBoundStartIndex + activeSetData.getNumberOfLowerBoundConstraints();
@@ -366,14 +389,12 @@ public abstract class EuclideanModelPredictiveController
          if (includeRhoMaxInequality)
             mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
       }
-      contactHandler.getActiveSetData(0).setSegmentNumber(0);
-      contactHandler.getActiveSetData(0).setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(0));
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
       {
          int nextSequence = transition + 1;
 
-         contactHandler.getActiveSetData(nextSequence).setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(nextSequence));
+//         contactHandler.getActiveSetData(nextSequence).setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(nextSequence));
 
          double firstSegmentDuration = contactSequence.get(transition).getTimeInterval().getDuration();
 
