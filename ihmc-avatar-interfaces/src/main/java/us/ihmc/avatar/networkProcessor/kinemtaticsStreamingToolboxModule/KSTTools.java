@@ -93,9 +93,15 @@ public class KSTTools
 
    private final YoLong latestInputTimestamp;
 
-   public KSTTools(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FullHumanoidRobotModel desiredFullRobotModel,
-                   FullHumanoidRobotModelFactory fullRobotModelFactory, double walkingControllerPeriod, double toolboxControllerPeriod, DoubleProvider time,
-                   YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry registry)
+   public KSTTools(CommandInputManager commandInputManager,
+                   StatusMessageOutputManager statusOutputManager,
+                   FullHumanoidRobotModel desiredFullRobotModel,
+                   FullHumanoidRobotModelFactory fullRobotModelFactory,
+                   double walkingControllerPeriod,
+                   double toolboxControllerPeriod,
+                   DoubleProvider time,
+                   YoGraphicsListRegistry yoGraphicsListRegistry,
+                   YoRegistry registry)
    {
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;
@@ -114,7 +120,9 @@ public class KSTTools
       currentRootJoint = currentFullRobotModel.getRootJoint();
       currentOneDoFJoint = FullRobotModelUtils.getAllJointsExcludingHands(currentFullRobotModel);
 
-      ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(), KinematicsToolboxModule.supportedCommands());
+      ikCommandInputManager = new CommandInputManager(HumanoidKinematicsToolboxController.class.getSimpleName(),
+                                                      KinematicsToolboxModule.supportedCommands(),
+                                                      32); // Need at least 17: 2*7 (for each arm) + 3 (for the neck).
       ikController = new HumanoidKinematicsToolboxController(ikCommandInputManager,
                                                              statusOutputManager,
                                                              desiredFullRobotModel,
@@ -498,7 +506,9 @@ public class KSTTools
       MultiBodySystemTools.copyJointsState(Arrays.asList(source.getOneDoFJoints()), Arrays.asList(destination.getOneDoFJoints()), stateSelection);
    }
 
-   public static void computeLinearVelocity(double dt, FramePoint3DReadOnly previousPosition, FramePoint3DReadOnly currentPosition,
+   public static void computeLinearVelocity(double dt,
+                                            FramePoint3DReadOnly previousPosition,
+                                            FramePoint3DReadOnly currentPosition,
                                             FixedFrameVector3DBasics linearVelocityToPack)
    {
       linearVelocityToPack.sub(currentPosition, previousPosition);
@@ -509,7 +519,9 @@ public class KSTTools
     * Computes the angular velocity from finite difference. The result is the angular velocity
     * expressed in the local frame described by {@code currentOrientation}.
     */
-   public static void computeAngularVelocity(double dt, FrameQuaternionReadOnly previousOrientation, FrameQuaternionReadOnly currentOrientation,
+   public static void computeAngularVelocity(double dt,
+                                             FrameQuaternionReadOnly previousOrientation,
+                                             FrameQuaternionReadOnly currentOrientation,
                                              FixedFrameVector3DBasics angularVelocityToPack)
    {
       previousOrientation.checkReferenceFrameMatch(currentOrientation);
@@ -532,13 +544,17 @@ public class KSTTools
       angularVelocityToPack.scale(2.0 / dt);
    }
 
-   public static void integrateLinearVelocity(double dt, FramePoint3DReadOnly initialPosition, FrameVector3DReadOnly linearVelocity,
+   public static void integrateLinearVelocity(double dt,
+                                              FramePoint3DReadOnly initialPosition,
+                                              FrameVector3DReadOnly linearVelocity,
                                               FixedFramePoint3DBasics finalPosition)
    {
       finalPosition.scaleAdd(dt, linearVelocity, initialPosition);
    }
 
-   public static void integrateAngularVelocity(double dt, FrameQuaternionReadOnly initialOrientation, FrameVector3DReadOnly angularVelocity,
+   public static void integrateAngularVelocity(double dt,
+                                               FrameQuaternionReadOnly initialOrientation,
+                                               FrameVector3DReadOnly angularVelocity,
                                                FixedFrameQuaternionBasics finalOrientation)
    {
       double qInit_x = initialOrientation.getX();
