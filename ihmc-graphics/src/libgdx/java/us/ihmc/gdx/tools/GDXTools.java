@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
 
 public class GDXTools
@@ -188,5 +189,13 @@ public class GDXTools
    public static javafx.scene.paint.Color toJavaFX(Color gdxColor)
    {
       return javafx.scene.paint.Color.color(gdxColor.r, gdxColor.g, gdxColor.b, gdxColor.a);
+   }
+
+   public static Color toGDX(AppearanceDefinition appearanceDefinition)
+   {
+      return new Color(appearanceDefinition.getColor().getX(),
+                       appearanceDefinition.getColor().getY(),
+                       appearanceDefinition.getColor().getZ(),
+                       1.0f - (float) appearanceDefinition.getTransparency());
    }
 }

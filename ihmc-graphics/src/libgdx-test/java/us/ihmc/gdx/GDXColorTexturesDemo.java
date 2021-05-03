@@ -8,6 +8,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 public class GDXColorTexturesDemo
 {
@@ -41,6 +43,12 @@ public class GDXColorTexturesDemo
                   coloredSpheres.materials.get(0).set(new BlendingAttribute(true, mutableJ.getValue() / 100.0f));
                }
             }
+
+            ModelInstance coloredSphere = GDXModelPrimitives.buildModelInstance(meshBuilder ->
+            {
+               meshBuilder.addSphere(0.5, new Point3D(4.0, 4.0, 0.0), GDXTools.toGDX(YoAppearance.LightSkyBlue()));
+            }, "ColoredSphere");
+            sceneManager.addModelInstance(coloredSphere);
 
             sceneManager.addModelInstance(new BoxesDemoModel().newInstance());
          }
