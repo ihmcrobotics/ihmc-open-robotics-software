@@ -43,15 +43,15 @@ public class GDXEnvironmentObject
                       Sphere3D boundingSphere,
                       Shape3DBasics collisionGeometryObject,
                       Function<Point3DReadOnly, Boolean> isPointInside,
-                      Model collisionMesh)
+                      Model collisionGraphic)
    {
       this.realisticModel = realisticModel;
       this.boundingSphere = boundingSphere;
       this.collisionGeometryObject = collisionGeometryObject;
       this.isPointInside = isPointInside;
-      this.collisionMesh = collisionMesh;
+      this.collisionMesh = collisionGraphic;
       realisticModelInstance = new GDXModelInstance(realisticModel);
-      collisionModelInstance = new GDXModelInstance(collisionMesh);
+      collisionModelInstance = new GDXModelInstance(collisionGraphic);
       originalMaterial = new Material(realisticModelInstance.materials.get(0));
    }
 

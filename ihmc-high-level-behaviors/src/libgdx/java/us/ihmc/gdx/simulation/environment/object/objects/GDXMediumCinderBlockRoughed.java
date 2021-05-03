@@ -2,11 +2,14 @@ package us.ihmc.gdx.simulation.environment.object.objects;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Model;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -16,7 +19,7 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
 
    public GDXMediumCinderBlockRoughed()
    {
-      Model realisticModel = GDXModelLoader.loadG3DModel("MediumCinderBlockRough.g3dj");
+      Model realisticModel = GDXModelLoader.loadG3DModel("mediumCinderBlockRoughed/MediumCinderBlockRoughed.g3dj");
 
       double height = 0.141535;
       double width = 0.188522;
@@ -25,15 +28,15 @@ public class GDXMediumCinderBlockRoughed extends GDXEnvironmentObject
 
       Sphere3D boundingSphere = new Sphere3D(collisionBox.getSize().length() / 2.0);
 
-      Model collisionModel = GDXModelPrimitives.buildModel(meshBuilder ->
+      Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
       {
-         meshBuilder.addBox((float) length, (float) width, (float) height, Color.RED);
-         meshBuilder.addBox((float) width, (float) height, (float) length, Color.GREEN);
-         meshBuilder.addBox((float) height, (float) length, (float) width, Color.BLUE);
-         meshBuilder.addSphere((float) width, Color.CORAL);
+         Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+         meshBuilder.addBox((float) length, (float) width, (float) height, color);
+         meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color);
       }, "collisionModel" + INDEX.getAndIncrement());
+      collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
 
-      create(realisticModel, boundingSphere, collisionBox, collisionBox::isPointInside, collisionModel);
+      create(realisticModel, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
    }
 
    @Override
