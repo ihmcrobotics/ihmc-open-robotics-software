@@ -135,32 +135,32 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
    public void submitOrientationValueCommand(OrientationValueCommand command)
    {
-      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
+      int offset = orientationInputCalculator.computeCompact(qpInputTypeA, command);
+      if (offset > -1)
+         addInput(qpInputTypeA, offset);
    }
 
    public void submitDirectOrientationValueCommand(DirectOrientationValueCommand command)
    {
-      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
+      int offset = orientationInputCalculator.computeCompact(qpInputTypeA, command);
+      if (offset > -1)
+         addInput(qpInputTypeA, offset);
    }
 
    public void submitOrientationContinuityCommand(OrientationContinuityCommand command)
    {
-      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
-      if (success)
-         addInput(qpInputTypeA);
+      int offset = orientationInputCalculator.computeCompact(qpInputTypeA, command);
+      if (offset > -1)
+         addInput(qpInputTypeA, offset);
    }
 
    public void submitOrientationTrajectoryCommand(OrientationTrajectoryCommand command)
    {
       for (int tick = 0; tick < command.getNumberOfTicksInSegment(); tick++)
       {
-         boolean success = orientationInputCalculator.compute(tick, qpInputTypeA, command);
-         if (success)
-            addInput(qpInputTypeA);
+         int offset = orientationInputCalculator.computeCompact(tick, qpInputTypeA, command);
+         if (offset > -1)
+            addInput(qpInputTypeA, offset);
       }
    }
 }
