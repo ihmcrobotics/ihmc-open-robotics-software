@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import java.net.BindException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -81,20 +82,33 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    private final boolean startYoVariableServer;
    protected YoVariableServer yoVariableServer;
 
-   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                        int updatePeriodMilliseconds, RealtimeROS2Node realtimeROS2Node)
+   public ToolboxModule(String robotName,
+                        FullHumanoidRobotModel fullRobotModelToLog,
+                        LogModelProvider modelProvider,
+                        boolean startYoVariableServer,
+                        int updatePeriodMilliseconds,
+                        RealtimeROS2Node realtimeROS2Node)
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, realtimeROS2Node, null);
    }
 
-   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                        int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
+   public ToolboxModule(String robotName,
+                        FullHumanoidRobotModel fullRobotModelToLog,
+                        LogModelProvider modelProvider,
+                        boolean startYoVariableServer,
+                        int updatePeriodMilliseconds,
+                        PubSubImplementation pubSubImplementation)
    {
       this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, null, pubSubImplementation);
    }
 
-   protected ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                           int updatePeriodMilliseconds, RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
+   protected ToolboxModule(String robotName,
+                           FullHumanoidRobotModel fullRobotModelToLog,
+                           LogModelProvider modelProvider,
+                           boolean startYoVariableServer,
+                           int updatePeriodMilliseconds,
+                           RealtimeROS2Node realtimeROS2Node,
+                           PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
 
@@ -177,24 +191,57 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       if (!startYoVariableServer)
          return;
 
-      yoVariableServer = new YoVariableServer(getClass(), modelProvider, getYoVariableServerSettings(), YO_VARIABLE_SERVER_DT);
-      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
-      startYoVariableServerOnAThread(yoVariableServer);
+      DataServerSettings yoVariableServerSettings = getYoVariableServerSettings();
 
-      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer),
-                                                                      0,
-                                                                      updatePeriodMilliseconds,
-                                                                      TimeUnit.MILLISECONDS);
+      new Thread(() ->
+      {
+         for (int tentative = 0; tentative < 10; tentative++)
+         {
+            try
+            {
+               LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
+               yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
+               yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+               yoVariableServer.start();
+               break;
+            }
+            catch (RuntimeException e)
+            {
+               if (e.getCause() instanceof BindException)
+               {
+                  // There's another YoVariableServer running on the same port.
+                  // Trying the next port
+                  yoVariableServer = null;
+                  LogTools.warn("{}: Failed to start YoVariableServer, port {} is busy. Trying next port number", name, yoVariableServerSettings.getPort());
+                  yoVariableServerSettings.setPort(yoVariableServerSettings.getPort() + 1);
+               }
+               else
+               {
+                  throw e;
+               }
+            }
+         }
+
+         if (yoVariableServer == null)
+         {
+            LogTools.error("{}: Failed to start the YoVariableServer.", name);
+            return;
+         }
+         else
+         {
+            LogTools.info("{}: Successfully started YoVariableServer on port: {}.", name, yoVariableServerSettings.getPort());
+            yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer),
+                                                                            0,
+                                                                            updatePeriodMilliseconds,
+                                                                            TimeUnit.MILLISECONDS);
+         }
+
+      }, name + "ToolboxYoVariableServer").start();
    }
 
    public DataServerSettings getYoVariableServerSettings()
    {
       return new DataServerSettings(false);
-   }
-
-   private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
-   {
-      new Thread(yoVariableServer::start, name + "ToolboxYoVariableServer").start();
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
