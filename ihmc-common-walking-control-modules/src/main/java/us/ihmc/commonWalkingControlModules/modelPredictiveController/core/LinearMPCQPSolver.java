@@ -476,8 +476,12 @@ public class LinearMPCQPSolver
                              DMatrixRMaj solverInput_f)
    {
       int taskSize = taskJacobian.getNumRows();
+      if (taskJacobian.getNumCols() != problemSize)
+      {
+         throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
+      }
       int variables = taskJacobian.getNumCols();
-      if (offset + variables > problemSize)
+      if (variables > problemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
