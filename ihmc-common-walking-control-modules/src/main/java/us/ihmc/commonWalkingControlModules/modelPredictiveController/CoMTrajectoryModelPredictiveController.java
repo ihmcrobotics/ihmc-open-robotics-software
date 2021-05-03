@@ -103,6 +103,10 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       if (solutionInspection != null)
          solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
+      extractActiveSetData(qpSolver);
+
       return solutionCoefficients;
    }
+
+
 }

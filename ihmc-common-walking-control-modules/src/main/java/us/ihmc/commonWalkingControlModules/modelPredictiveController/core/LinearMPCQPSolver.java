@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
@@ -628,5 +630,20 @@ public class LinearMPCQPSolver
    public DMatrixRMaj getSolution()
    {
       return solverOutput;
+   }
+
+   public TIntList getActiveInequalityIndices()
+   {
+      return qpSolver.getActiveInequalityIndices();
+   }
+
+   public TIntList getActiveLowerBoundIndices()
+   {
+      return qpSolver.getActiveLowerBoundIndices();
+   }
+
+   public TIntList getActiveUpperBoundIndices()
+   {
+      return qpSolver.getActiveUpperBoundIndices();
    }
 }
