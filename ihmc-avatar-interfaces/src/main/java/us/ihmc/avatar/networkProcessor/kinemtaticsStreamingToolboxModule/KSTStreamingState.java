@@ -10,7 +10,6 @@ import java.util.stream.Stream;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
-import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
 import us.ihmc.commons.Conversions;
@@ -91,14 +90,18 @@ public class KSTStreamingState implements State
    private final YoBoolean lockChest = new YoBoolean("lockChest", registry);
    private final YoFramePose3D lockPelvisPose = new YoFramePose3D("lockPelvisPose", worldFrame, registry);
    private final YoFramePose3D lockChestPose = new YoFramePose3D("lockChestPose", worldFrame, registry);
+
+   private final YoDouble defaultArmMessageWeight = new YoDouble("defaultArmMessageWeight", registry);
+   private final YoDouble defaultNeckMessageWeight = new YoDouble("defaultNeckMessageWeight", registry);
    private final YoDouble defaultPelvisMessageLinearWeight = new YoDouble("defaultPelvisMessageLinearWeight", registry);
    private final YoDouble defaultPelvisMessageAngularWeight = new YoDouble("defaultPelvisMessageAngularWeight", registry);
-   private final YoDouble defaultPelvisMessageLockWeight = new YoDouble("defaultPelvisMessageLockWeight", registry);
    private final YoDouble defaultChestMessageAngularWeight = new YoDouble("defaultChestMessageAngularWeight", registry);
+
+   private final YoDouble defaultPelvisMessageLockWeight = new YoDouble("defaultPelvisMessageLockWeight", registry);
    private final YoDouble defaultChestMessageLockWeight = new YoDouble("defaultChestMessageLockWeight", registry);
 
-   private final YoDouble preferredArmConfigWeight = new YoDouble("preferredArmConfigWeight", registry);
-   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> preferredArmJointMessages = new SideDependentList<>();
+   //   private final YoDouble preferredArmConfigWeight = new YoDouble("preferredArmConfigWeight", registry);
+   //   private final SideDependentList<List<KinematicsToolboxOneDoFJointMessage>> preferredArmJointMessages = new SideDependentList<>();
 
    private final YoDouble inputDecayFactor;
    private final YoInteger numberOfDecayingInputs = new YoInteger("numberOfDecayingInputs", registry);
@@ -182,10 +185,13 @@ public class KSTStreamingState implements State
                                            .collect(Collectors.toList()));
       }
 
+      defaultArmMessageWeight.set(10.0);
+      defaultNeckMessageWeight.set(10.0);
       defaultPelvisMessageLinearWeight.set(2.5);
       defaultPelvisMessageAngularWeight.set(1.0);
-      defaultPelvisMessageLockWeight.set(1000.0);
       defaultChestMessageAngularWeight.set(0.75);
+
+      defaultPelvisMessageLockWeight.set(1000.0);
       defaultChestMessageLockWeight.set(1000.0);
 
       defaultLinearWeight.set(20.0);
@@ -195,15 +201,15 @@ public class KSTStreamingState implements State
        * impacting too much the task-space objectives and preventing the privileged configuration to kick
        * in when there's a singularity.
        */
-      preferredArmConfigWeight.set(0.075);
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         OneDoFJointBasics[] joints = armJoints.get(robotSide);
-         preferredArmJointMessages.put(robotSide,
-                                       Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
-                                             .collect(Collectors.toList()));
-      }
+      //      preferredArmConfigWeight.set(0.075);
+      //
+      //      for (RobotSide robotSide : RobotSide.values)
+      //      {
+      //         OneDoFJointBasics[] joints = armJoints.get(robotSide);
+      //         preferredArmJointMessages.put(robotSide,
+      //                                       Stream.of(joints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
+      //                                             .collect(Collectors.toList()));
+      //      }
 
       publishingPeriod.set(5.0 * tools.getWalkingControllerPeriod());
 
@@ -299,14 +305,37 @@ public class KSTStreamingState implements State
       configurationMessage.setEnableJointVelocityLimits(true);
       ikCommandInputManager.submitMessage(configurationMessage);
 
+      /*
+       * The desiredFullRobotModel can either be at the current configuration or at a configuration
+       * pre-defined at construction. Let's initialize the arms and neck joints using the current robot
+       * configuration.
+       */
+      FullHumanoidRobotModel controllerFullRobotModel = tools.getCurrentFullRobotModel();
+
+      for (OneDoFJointBasics neckJoint : neckJoints)
+      {
+         neckJoint.setQ(controllerFullRobotModel.getOneDoFJointByName(neckJoint.getName()).getQ());
+      }
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (OneDoFJointBasics armJoint : armJoints.get(robotSide))
+            armJoint.setQ(controllerFullRobotModel.getOneDoFJointByName(armJoint.getName()).getQ());
+      }
+
       for (int i = 0; i < neckJoints.length; i++)
-         defaultNeckJointMessages.get(i).setDesiredPosition(neckJoints[i].getQ());
+      {
+         defaultNeckJointMessages.get(i).setDesiredPosition(controllerFullRobotModel.getOneDoFJointByName(neckJoints[i].getName()).getQ());
+         defaultNeckJointMessages.get(i).setWeight(defaultNeckMessageWeight.getValue());
+      }
+
       // TODO change to using mid-feet z-up frame for initializing pelvis and chest
       lockPelvis.set(tools.getConfigurationCommand().isLockPelvis());
-      lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
 
+      // TODO Make it possible to lock/unlock pelvis/chest while streaming
       if (lockPelvis.getValue())
       {
+         lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
          defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
          defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPose.getOrientation());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
@@ -316,6 +345,7 @@ public class KSTStreamingState implements State
       }
       else
       {
+         lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
          defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
          defaultPelvisMessage.getDesiredOrientationInWorld().setToYawOrientation(lockPelvisPose.getYaw());
          defaultPelvisMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, true, worldFrame));
@@ -325,10 +355,10 @@ public class KSTStreamingState implements State
       }
 
       lockChest.set(tools.getConfigurationCommand().isLockChest());
-      lockChestPose.setFromReferenceFrame(chest.getBodyFixedFrame());
 
       if (lockChest.getValue())
       {
+         lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
          defaultChestMessage.getDesiredPositionInWorld().set(lockChestPose.getPosition());
          defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPose.getOrientation());
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(true, true, true, worldFrame));
@@ -338,6 +368,7 @@ public class KSTStreamingState implements State
       }
       else
       {
+         lockChestPose.setFromReferenceFrame(chest.getBodyFixedFrame());
          defaultChestMessage.getDesiredPositionInWorld().setToZero();
          defaultChestMessage.getDesiredOrientationInWorld().setToYawOrientation(lockChestPose.getYaw());
          defaultChestMessage.getLinearSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(false, false, false, worldFrame));
@@ -352,25 +383,28 @@ public class KSTStreamingState implements State
          List<KinematicsToolboxOneDoFJointMessage> defaultMessages = defaultArmJointMessages.get(robotSide);
 
          for (int i = 0; i < joints.length; i++)
-            defaultMessages.get(i).setDesiredPosition(joints[i].getQ());
-      }
-
-      TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = ikController.getInitialRobotConfigurationMap();
-
-      if (initialRobotConfigurationMap != null)
-      {
-         for (RobotSide robotSide : RobotSide.values)
          {
-            OneDoFJointBasics[] joints = armJoints.get(robotSide);
-            List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
-
-            for (int i = 0; i < joints.length; i++)
-            {
-               OneDoFJointBasics joint = joints[i];
-               preferredMessages.get(i).setDesiredPosition(initialRobotConfigurationMap.get(joint.getName()));
-            }
+            defaultMessages.get(i).setDesiredPosition(controllerFullRobotModel.getOneDoFJointByName(joints[i].getName()).getQ());
+            defaultMessages.get(i).setWeight(defaultArmMessageWeight.getValue());
          }
       }
+
+      //      TObjectDoubleHashMap<OneDoFJointBasics> initialRobotConfigurationMap = ikController.getInitialRobotConfigurationMap();
+      //
+      //      if (initialRobotConfigurationMap != null)
+      //      {
+      //         for (RobotSide robotSide : RobotSide.values)
+      //         {
+      //            OneDoFJointBasics[] joints = armJoints.get(robotSide);
+      //            List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
+      //
+      //            for (int i = 0; i < joints.length; i++)
+      //            {
+      //               OneDoFJointBasics joint = joints[i];
+      //               preferredMessages.get(i).setDesiredPosition(initialRobotConfigurationMap.get(joint.getName()));
+      //            }
+      //         }
+      //      }
       resetFilter = true;
       streamingStartTime.set(Double.NaN);
 
@@ -429,16 +463,18 @@ public class KSTStreamingState implements State
    {
       tools.pollInputCommand();
 
+      FullHumanoidRobotModel controllerFullRobotModel = tools.getCurrentFullRobotModel();
+
       if (lockPelvis.getValue() && !tools.getConfigurationCommand().isPelvisTaskspaceEnabled())
       {
-         lockPelvisPose.setFromReferenceFrame(pelvis.getBodyFixedFrame());
+         lockPelvisPose.setFromReferenceFrame(controllerFullRobotModel.getPelvis().getBodyFixedFrame());
          defaultPelvisMessage.getDesiredPositionInWorld().set(lockPelvisPose.getPosition());
          defaultPelvisMessage.getDesiredOrientationInWorld().set(lockPelvisPose.getOrientation());
       }
 
       if (lockChest.getValue() && !tools.getConfigurationCommand().isChestTaskspaceEnabled())
       {
-         lockChestPose.setFromReferenceFrame(chest.getBodyFixedFrame());
+         lockChestPose.setFromReferenceFrame(controllerFullRobotModel.getChest().getBodyFixedFrame());
          defaultChestMessage.getDesiredPositionInWorld().set(lockChestPose.getPosition());
          defaultChestMessage.getDesiredOrientationInWorld().set(lockChestPose.getOrientation());
       }
@@ -541,16 +577,16 @@ public class KSTStreamingState implements State
             {
                ikCommandInputManager.submitMessages(defaultArmJointMessages.get(robotSide));
             }
-            else
-            {
-               List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
-               for (int i = 0; i < preferredMessages.size(); i++)
-               {
-                  KinematicsToolboxOneDoFJointMessage preferredMessage = preferredMessages.get(i);
-                  preferredMessage.setWeight(preferredArmConfigWeight.getValue());
-                  ikCommandInputManager.submitMessage(preferredMessage);
-               }
-            }
+            //            else
+            //            {
+            //               List<KinematicsToolboxOneDoFJointMessage> preferredMessages = preferredArmJointMessages.get(robotSide);
+            //               for (int i = 0; i < preferredMessages.size(); i++)
+            //               {
+            //                  KinematicsToolboxOneDoFJointMessage preferredMessage = preferredMessages.get(i);
+            //                  preferredMessage.setWeight(preferredArmConfigWeight.getValue());
+            //                  ikCommandInputManager.submitMessage(preferredMessage);
+            //               }
+            //            }
          }
 
          isStreaming.set(latestInput.getStreamToController());
