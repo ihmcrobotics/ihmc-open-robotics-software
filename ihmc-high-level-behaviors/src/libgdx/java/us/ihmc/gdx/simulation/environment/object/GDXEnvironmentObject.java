@@ -39,6 +39,7 @@ public class GDXEnvironmentObject
    public void create(Model realisticModel)
    {
       this.realisticModel = realisticModel;
+      realisticModelInstance = new GDXModelInstance(realisticModel);
    }
 
    public void create(Model realisticModel,
