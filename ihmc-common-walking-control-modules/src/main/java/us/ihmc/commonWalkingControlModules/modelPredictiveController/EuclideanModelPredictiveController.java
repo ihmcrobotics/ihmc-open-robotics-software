@@ -47,7 +47,7 @@ public abstract class EuclideanModelPredictiveController
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
-   private static final double minRhoValue = 0.0;//05;
+   private static final double defaultMinRhoValue = 0.0;//05;
    private final double maxContactForce;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -59,8 +59,8 @@ public abstract class EuclideanModelPredictiveController
 
    private static final double mu = 0.8;
 
-   public static final double initialComWeight = 5e3;
-   public static final double vrpTrackingWeight = 1e2;
+   public static final double defaultInitialComWeight = 5e3;
+   public static final double defaultVrpTrackingWeight = 1e2;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -85,11 +85,9 @@ public abstract class EuclideanModelPredictiveController
    private final YoFramePoint3D dcmAtEndOfWindow = new YoFramePoint3D("dcmAtEndOfWindow", worldFrame, registry);
    private final YoFramePoint3D vrpAtEndOfWindow = new YoFramePoint3D("vrpAtEndOfWindow", worldFrame, registry);
 
-   private final YoDouble initialCoMPositionCostToGo = new YoDouble("initialCoMPositionCostToGo", registry);
-   private final YoDouble initialCoMVelocityCostToGo = new YoDouble("initialCoMVelocityCostToGo", registry);
-   private final YoDouble vrpTrackingCostToGo0 = new YoDouble("vrpTrackingCostToGo0", registry);
-   private final YoDouble vrpTrackingCostToGo1 = new YoDouble("vrpTrackingCostToGo1", registry);
-   private final YoDouble vrpTrackingCostToGo2 = new YoDouble("vrpTrackingCostToGo2", registry);
+   private final YoDouble minRhoValue = new YoDouble("minRhoValue", registry);
+   private final YoDouble initialComWeight = new YoDouble("initialComWeight", registry);
+   private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
 
    public final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
 
@@ -108,12 +106,6 @@ public abstract class EuclideanModelPredictiveController
    private MPCCornerPointViewer cornerPointViewer = null;
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
 
-   private final DoubleConsumer initialComPositionConsumer = initialCoMPositionCostToGo::set;
-   private final DoubleConsumer initialComVelocityConsumer = initialCoMVelocityCostToGo::set;
-   private final DoubleConsumer vrpTrackingConsumer0 = vrpTrackingCostToGo0::set;
-   private final DoubleConsumer vrpTrackingConsumer1 = vrpTrackingCostToGo1::set;
-   private final DoubleConsumer vrpTrackingConsumer2 = vrpTrackingCostToGo2::set;
-
    public EuclideanModelPredictiveController(LinearMPCIndexHandler indexHandler,
                                              double mass,
                                              double gravityZ,
@@ -130,6 +122,10 @@ public abstract class EuclideanModelPredictiveController
       wrenchTrajectoryHandler = new WrenchMPCTrajectoryHandler(registry);
 
       this.maxContactForce = 2.0 * Math.abs(gravityZ);
+
+      minRhoValue.set(defaultMinRhoValue);
+      initialComWeight.set(defaultInitialComWeight);
+      vrpTrackingWeight.set(defaultVrpTrackingWeight);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
@@ -297,10 +293,6 @@ public abstract class EuclideanModelPredictiveController
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
 
-      vrpTrackingCostToGo0.setToNaN();
-      vrpTrackingCostToGo1.setToNaN();
-      vrpTrackingCostToGo2.setToNaN();
-
       mpcCommands.addCommand(computeInitialCoMPositionObjective(commandProvider.getNextCoMPositionCommand()));
       if (includeVelocityObjective)
       {
@@ -315,7 +307,7 @@ public abstract class EuclideanModelPredictiveController
                                                             endVRPPositions.get(0),
                                                             0,
                                                             initialDuration,
-                                                            vrpTrackingConsumer0));
+                                                            null));
          if (includeRhoMinInequality)
             mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
          if (includeRhoMaxInequality)
@@ -345,17 +337,12 @@ public abstract class EuclideanModelPredictiveController
 
          if (contactSequence.get(nextSequence).getContactState().isLoadBearing())
          {
-            DoubleConsumer costToGoConsumer = null;
-            if (nextSequence == 1)
-               costToGoConsumer = vrpTrackingConsumer1;
-            else if (nextSequence == 2)
-               costToGoConsumer = vrpTrackingConsumer2;
             mpcCommands.addCommand(computeVRPTrackingObjective(commandProvider.getNextVRPTrackingCommand(),
                                                                startVRPPositions.get(nextSequence),
                                                                endVRPPositions.get(nextSequence),
                                                                nextSequence,
                                                                nextDuration,
-                                                               costToGoConsumer));
+                                                               null));
             if (includeRhoMinInequality)
                mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
             if (includeRhoMaxInequality)
@@ -387,12 +374,11 @@ public abstract class EuclideanModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-      objectiveToPack.setWeight(initialComWeight);
+      objectiveToPack.setWeight(initialComWeight.getDoubleValue());
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
-      objectiveToPack.setCostToGoConsumer(initialComPositionConsumer);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -406,11 +392,10 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
       //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      objectiveToPack.setWeight(initialComWeight);
+      objectiveToPack.setWeight(initialComWeight.getDoubleValue());
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
-      objectiveToPack.setCostToGoConsumer(initialComVelocityConsumer);
       for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
       {
          objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
@@ -447,7 +432,7 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setTimeOfObjective(constraintTime);
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      valueObjective.setScalarObjective(minRhoValue);
+      valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
       valueObjective.setUseScalarObjective(true);
       for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
       {
@@ -497,7 +482,7 @@ public abstract class EuclideanModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-      objectiveToPack.setWeight(vrpTrackingWeight);
+      objectiveToPack.setWeight(vrpTrackingWeight.getDoubleValue());
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setSegmentDuration(segmentDuration);
       objectiveToPack.setStartVRP(desiredStartVRPPosition);

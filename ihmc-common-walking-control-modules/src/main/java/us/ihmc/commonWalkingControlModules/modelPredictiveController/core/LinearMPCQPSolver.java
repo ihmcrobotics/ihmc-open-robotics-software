@@ -29,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class LinearMPCQPSolver
 {
-   private static  final boolean debug = false;
+   private static  final boolean debug = true;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -87,7 +87,9 @@ public class LinearMPCQPSolver
       this(indexHandler,
            dt,
            gravityZ,
-           new BlockInverseCalculator(indexHandler, i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
+           new BlockInverseCalculator(indexHandler,
+                                      indexHandler::getComCoefficientStartIndex,
+                                      i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
            parentRegistry);
    }
 
@@ -332,7 +334,7 @@ public class LinearMPCQPSolver
             if (input.useWeightScalar())
                addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), offset);
             else
-               throw new IllegalArgumentException("Not yet implemented.");
+               addObjective(input.taskJacobian, input.taskObjective, input.getTaskWeightMatrix(), offset);
             break;
          case EQUALITY:
             addEqualityConstraint(input.taskJacobian, input.taskObjective, offset);
@@ -383,6 +385,44 @@ public class LinearMPCQPSolver
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+      if (debug && MatrixTools.containsNaN(solverInput_f))
+         throw new RuntimeException("error");
+   }
+
+   public void addObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, int offset)
+   {
+      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset, solverInput_H, solverInput_f);
+   }
+
+   private final DMatrixRMaj tempJtW = new DMatrixRMaj(0, 0);
+
+   private void addObjective(DMatrixRMaj taskJacobian,
+                             DMatrixRMaj taskObjective,
+                             DMatrixRMaj taskWeight,
+                             int problemSize,
+                             int offset,
+                             DMatrixRMaj solverInput_H,
+                             DMatrixRMaj solverInput_f)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      tempJtW.reshape(variables, taskSize);
+
+      // J^T W
+      CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
+
+      // Compute: H += J^T W J
+      MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
+      if (debug && MatrixTools.containsNaN(solverInput_H))
+         throw new RuntimeException("error");
+
+      // Compute: f += - J^T W Objective
+      MatrixTools.multAddBlock(-1.0, tempJtW, taskObjective, solverInput_f, offset, 0);
       if (debug && MatrixTools.containsNaN(solverInput_f))
          throw new RuntimeException("error");
    }

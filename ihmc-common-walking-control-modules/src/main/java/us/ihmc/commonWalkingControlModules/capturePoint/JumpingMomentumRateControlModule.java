@@ -41,6 +41,9 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.*;
 
 public class JumpingMomentumRateControlModule
 {
+   private static final boolean useLinearLQR = true;
+   private static final boolean useAngularLQR = false;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -210,43 +213,61 @@ public class JumpingMomentumRateControlModule
 
    private void computeDesiredLinearMomentumRateOfChange()
    {
-      lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
-      lqrMomentumController.computeControlInput(currentState, 0.0);//timeInContactPhase);
+      if (useLinearLQR)
+      {
+         lqrMomentumController.setVRPTrajectory(vrpTrajectories, contactStateProviders);
+         lqrMomentumController.computeControlInput(currentState, 0.0);//timeInContactPhase);
 
-      if (inFlight)
-         linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
+         if (inFlight)
+            linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), 0.0, 0.0, -controllerToolbox.getGravityZ());
+         else
+         {
+            //         vrpTrajectories.get(0).compute(0.0);
+            //         yoDesiredVRP.set(vrpTrajectories.get(0).getPosition());
+            //         linearMomentumRateOfChange.setToZero(worldFrame);
+            //         linearMomentumRateOfChange.sub(yoCenterOfMass, yoDesiredVRP);
+            //         linearMomentumRateOfChange.scale(omega0 * omega0);
+            linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+         }
+
+         controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
+
+         linearMomentumRateOfChange.changeFrame(worldFrame);
+         linearMomentumRateOfChange.scale(totalMass);
+         yoDesiredVRP.set(lqrMomentumController.getFeedbackVRPPosition());
+      }
       else
       {
-//         vrpTrajectories.get(0).compute(0.0);
-//         yoDesiredVRP.set(vrpTrajectories.get(0).getPosition());
-//         linearMomentumRateOfChange.setToZero(worldFrame);
-//         linearMomentumRateOfChange.sub(yoCenterOfMass, yoDesiredVRP);
-//         linearMomentumRateOfChange.scale(omega0 * omega0);
-         linearMomentumRateOfChange.setIncludingFrame(ReferenceFrame.getWorldFrame(), lqrMomentumController.getU());
+         linearMomentumRateOfChange.set(mpcLinearMomentumRateOfChange);
+
+         controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
+         controlledCoMAcceleration.scale(1.0 / totalMass);
+
+         yoDesiredVRP.set(controlledCoMAcceleration);
+         yoDesiredVRP.scale(-1.0 / (omega0 * omega0));
+         yoDesiredVRP.add(yoCenterOfMass);
       }
-
-      // TODO double check the momentum rate command here is the same
-      controlledCoMAcceleration.setMatchingFrame(linearMomentumRateOfChange);
-
-      linearMomentumRateOfChange.changeFrame(worldFrame);
-      linearMomentumRateOfChange.scale(totalMass);
-
-      yoDesiredVRP.set(lqrMomentumController.getFeedbackVRPPosition());
    }
 
    private final FramePose3D centerOfMass = new FramePose3D();
 
    private void computeDesiredAngularMomentumRateOfChange()
    {
-      MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
-      centerOfMass.setToZero(chestFrame);
-      centerOfMass.changeFrame(worldFrame);
-//      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
+      if (useAngularLQR)
+      {
+         MovingReferenceFrame chestFrame = controllerToolbox.getFullRobotModel().getChest().getBodyFixedFrame();
+         centerOfMass.setToZero(chestFrame);
+         centerOfMass.changeFrame(worldFrame);
+         //      orientationController.compute(centerOfMass.getOrientation(), chestFrame.getTwistOfFrame().getAngularPart());
 
-//      orientationController.getDesiredTorque(angularMomentumRateOfChange);
+         //      orientationController.getDesiredTorque(angularMomentumRateOfChange);
 
-//      angularMomentumRateOfChange.changeFrame(worldFrame);
-      angularMomentumRateOfChange.set(mpcAngularMomentumRateOfChange);
+         angularMomentumRateOfChange.changeFrame(worldFrame);
+      }
+      else
+      {
+         angularMomentumRateOfChange.set(mpcAngularMomentumRateOfChange);
+      }
    }
 
 }

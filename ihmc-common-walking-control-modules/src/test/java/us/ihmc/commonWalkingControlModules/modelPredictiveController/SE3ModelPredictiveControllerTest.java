@@ -177,14 +177,6 @@ public class SE3ModelPredictiveControllerTest
 
       DMatrixRMaj solutionCoefficients = mpc.qpSolver.getSolution();
 
-      DMatrixRMaj expectedSolutionMatrix = MPCTestHelper.getVectorOfCoefficients(gravityZ, rhoHelper, solutionCoefficients);
-      DMatrixRMaj expectedContactForceMatrix = MPCTestHelper.getContactForceCoefficients(rhoHelper, solutionCoefficients);
-      DMatrixRMaj contactForceMatrix = mpc.contactPlaneHelperPool.get(0).get(0).getContactWrenchCoefficientMatrix();
-
-      EjmlUnitTests.assertEquals(expectedContactForceMatrix, contactForceMatrix, epsilon);
-
-      //      assertCoefficientsEqual(expectedSolutionMatrix, mpc.trajectoryHandler);
-
       visualize(mpc,
                 contactProviders,
                 duration,
