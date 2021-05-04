@@ -158,7 +158,10 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
    {
       for (int tick = 0; tick < command.getNumberOfTicksInSegment(); tick++)
       {
-         int offset = orientationInputCalculator.computeCompact(tick, qpInputTypeA, command);
+         int offset = orientationInputCalculator.computeAngleErrorMinimizationCompact(tick, qpInputTypeA, command);
+         if (offset > -1)
+            addInput(qpInputTypeA, offset);
+         offset = orientationInputCalculator.computeVelocityErrorMinimizationCompact(tick, qpInputTypeA, command);
          if (offset > -1)
             addInput(qpInputTypeA, offset);
       }
