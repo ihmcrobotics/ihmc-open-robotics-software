@@ -22,7 +22,7 @@ public class ImGui3DViewInputDebugger
             screenXPlot.setValue(input.getMousePosX());
             screenYPlot.setValue(input.getMousePosY());
          }
-         if (input.isDragging())
+         if (input.isDraggingLeft())
          {
             deltaXPlot.setValue(input.getMouseDraggedX());
             deltaYPlot.setValue(input.getMouseDraggedY());

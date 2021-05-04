@@ -21,6 +21,8 @@ public class ImGuiTools
 {
    public static float TAB_BAR_HEIGHT = 20.0f;
    public static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
+   public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
+   public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
    public static void glClearDarkGray()
    {

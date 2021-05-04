@@ -227,7 +227,7 @@ public class FocusBasedGDXCamera extends Camera
       isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
       isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
 
-      if (input.isDragging())
+      if (input.isDraggingLeft())
       {
          mouseDragged(input.getMouseDraggedX(), input.getMouseDraggedY());
       }

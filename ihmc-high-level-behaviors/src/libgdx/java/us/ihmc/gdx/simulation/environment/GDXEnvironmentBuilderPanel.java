@@ -8,7 +8,6 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -21,9 +20,7 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXL515SensorObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXLargeCinderBlockRoughed;
+import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -54,28 +51,26 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
-   private GDXEnvironmentObject sensorModelInstance;
-
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
-   private final ImBoolean editModeChecked = new ImBoolean(false);
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
 
    private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
    private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
    private final ArrayList<Path> reaDataSetPaths = new ArrayList<>();
    private boolean loadedDatasetsOnce = false;
+//   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
 
    public void create(GDXImGuiBasedUI baseUI)
    {
       vrManager = baseUI.getVRManager();
 
       modelInput.setBaseUI(baseUI);
-
       modelInput.create();
 
-      sensorModelInstance = new GDXL515SensorObject();
-      modelInput.addInstance(sensorModelInstance);
+//      pose3DWidget.create(baseUI);
+//      baseUI.addImGui3DViewInputProcessor(pose3DWidget::process3DViewInput);
+//      baseUI.getSceneManager().addRenderableProvider(pose3DWidget);
 
       if (GDXVRManager.isVREnabled())
       {
@@ -126,7 +121,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          tempFramePose.setToZero(controllerFrame);
          tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
          tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.getModelInstance().transform);
+         GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.getRealisticModelInstance().transform);
       }
    }
 
@@ -156,10 +151,34 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          pushed = true;
          ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
       }
-      if (ImGui.button("Place Cinder Block"))
+      boolean placeNewObject;
+      if (placeNewObject = ImGui.button("Place Large Cinder Block"))
+      {
+         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
+      }
+      else if (placeNewObject = ImGui.button("Place Medium Cinder Block"))
+      {
+         modelBeingPlaced = new GDXMediumCinderBlockRoughed();
+      }
+      else if (placeNewObject = ImGui.button("Place Small Cinder Block"))
+      {
+         modelBeingPlaced = new GDXSmallCinderBlockRoughed();
+      }
+      else if (placeNewObject = ImGui.button("Place Door Frame"))
+      {
+         modelBeingPlaced = new GDXDoorFrameObject();
+      }
+      else if (placeNewObject = ImGui.button("Place Door Only"))
+      {
+         modelBeingPlaced = new GDXDoorOnlyObject();
+      }
+      else if (placeNewObject = ImGui.button("Place Floor"))
+      {
+         modelBeingPlaced = new GDXLabFloorObject();
+      }
+      if (placeNewObject)
       {
          modelInput.setState(GDXModelInput.State.PLACING_XY);
-         modelBeingPlaced = new GDXLargeCinderBlockRoughed();
          modelInput.addAndSelectInstance(modelBeingPlaced);
       }
       if (pushed)
@@ -167,10 +186,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
          ImGui.popItemFlag();
       }
 
-      ImGui.checkbox("Edit Mode", editModeChecked);
-      modelInput.setEditMode(editModeChecked.get());
+      modelInput.renderImGuiPanel();
 
       ImGui.end();
+
 
       ImGui.begin(ImGuiTools.uniqueLabel(this, "Planar Region Data Sets"));
 
@@ -216,6 +235,8 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       ImGui.end();
 
+//      pose3DWidget.render();
+
       for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
       {
          if (planarRegionsGraphic != null)
@@ -258,11 +279,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       return WINDOW_NAME;
    }
 
-   public GDXEnvironmentObject getSensorObject()
-   {
-      return sensorModelInstance;
-   }
-
    public ModelInstance placeFloor()
    {
       GDXLabFloorObject floor = new GDXLabFloorObject();
@@ -270,8 +286,8 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       RigidBodyTransform transform = new RigidBodyTransform();
       pose.set(new Point3D(0.0f, 0.0f, 0.0f), new YawPitchRoll(0.0, 0.0, Math.toRadians(90.0)));
       pose.get(transform);
-      GDXTools.toGDX(transform, floor.getModelInstance().transform);
-      return floor.getModelInstance();
+      GDXTools.toGDX(transform, floor.getRealisticModelInstance().transform);
+      return floor.getRealisticModelInstance();
    }
 
    @Override
@@ -287,12 +303,17 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       for (GDXEnvironmentObject placedModel : modelInput.getEnvironmentObjects())
       {
-         placedModel.getModelInstance().getRenderables(renderables, pool);
+         placedModel.getRealisticModelInstance().getRenderables(renderables, pool);
       }
 
       for(ModelInstance controlAxis : modelInput.getControlAxes())
       {
          controlAxis.getRenderables(renderables, pool);
       }
+   }
+
+   public GDXModelInput getModelInput()
+   {
+      return modelInput;
    }
 }
