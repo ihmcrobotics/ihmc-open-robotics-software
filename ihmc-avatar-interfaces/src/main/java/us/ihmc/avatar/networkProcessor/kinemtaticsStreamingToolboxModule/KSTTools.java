@@ -347,7 +347,7 @@ public class KSTTools
       if (isPelvisTaskspaceOutputEnabled.getValue())
          outputConverter.computePelvisTrajectoryMessage();
 
-      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
+      wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
       setAllIDs(wholeBodyTrajectoryMessage, currentMessageId++);
 
