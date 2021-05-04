@@ -59,6 +59,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 50);
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 230, 30);
+   private final ImBoolean showGraphics = new ImBoolean(true);
 
    private GDXImGuiBasedUI baseUI;
    private ModelInstance sphere;
@@ -85,6 +86,8 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Footstep Planner Parameters (for Look and Step)"));
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Swing Planner Parameters (for Look and Step)"));
+
+   private final ImGuiBehaviorTreePanel treePanel = new ImGuiBehaviorTreePanel("Look and step");
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper behaviorHelper)
    {
@@ -121,10 +124,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
       float sphereRadius = 0.03f;
       sphere = GDXModelPrimitives.createSphere(sphereRadius, Color.CYAN);
-      baseUI.getSceneManager().addRenderableProvider(sphere, GDXSceneLevel.VIRTUAL);
-
       arrow = GDXModelPrimitives.createArrow(sphereRadius * 6.0, Color.CYAN);
-      baseUI.getSceneManager().addRenderableProvider(arrow, GDXSceneLevel.VIRTUAL);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
       {
@@ -251,10 +251,15 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       }
    }
 
-   public void render()
+   public void renderAsWindow()
    {
       ImGui.begin(getWindowName());
+      renderWidgetsOnly();
+      ImGui.end();
+   }
 
+   public void renderWidgetsOnly()
+   {
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
       {
@@ -308,7 +313,9 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
 
-      ImGui.end();
+      ImGui.checkbox("Show graphics", showGraphics);
+
+      treePanel.renderWidgetsOnly();
 
       lookAndStepParameterTuner.render();
       footstepPlannerParameterTuner.render();
@@ -326,12 +333,17 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
    private boolean areGraphicsEnabled()
    {
-      return !currentState.isEmpty() && !currentState.equals(LookAndStepBehavior.State.RESET.name());
+      return showGraphics.get() && !currentState.isEmpty() && !currentState.equals(LookAndStepBehavior.State.RESET.name());
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      if (showGraphics.get())
+      {
+         sphere.getRenderables(renderables, pool);
+         arrow.getRenderables(renderables, pool);
+      }
       if (areGraphicsEnabled())
       {
          footstepPlanGraphic.getRenderables(renderables, pool);

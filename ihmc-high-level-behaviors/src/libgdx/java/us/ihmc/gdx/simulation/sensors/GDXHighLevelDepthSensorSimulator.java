@@ -2,6 +2,7 @@ package us.ihmc.gdx.simulation.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -47,7 +48,10 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
@@ -66,8 +70,11 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 
    private final RosNodeInterface ros1Node;
    private RosImagePublisher ros1DepthPublisher;
-   private RosCameraInfoPublisher ros1CameraInfoPublisher;
+   private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
    private ChannelBuffer ros1DepthChannelBuffer;
+   private RosImagePublisher ros1ColorPublisher;
+   private RosCameraInfoPublisher ros1ColorCameraInfoPublisher;
+   private ChannelBuffer ros1ColorChannelBuffer;
 
    private final ROS2NodeInterface ros2Node;
    private boolean ros2IsLidarScan;
@@ -77,7 +84,9 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    private final FramePose3D tempSensorFramePose = new FramePose3D();
 
    private final Timer throttleTimer = new Timer();
-   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService depthExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService colorExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService pointCloudExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final double publishRateHz;
    private boolean debugCoordinateFrame;
    private ModelInstance coordinateFrame;
@@ -88,9 +97,9 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    private final ImBoolean renderPointCloudDirectly = new ImBoolean(false);
    private final ImBoolean renderDepthVideoDirectly = new ImBoolean(false);
    private final ImBoolean renderColorVideoDirectly = new ImBoolean(false);
-   private final ImBoolean publishDepthImageROS1 = new ImBoolean(true);
-   private final ImBoolean publishColorImageROS1 = new ImBoolean(true);
-   private final ImBoolean publishPointCloudROS2 = new ImBoolean(true);
+   private final ImBoolean publishDepthImageROS1 = new ImBoolean(false);
+   private final ImBoolean publishColorImageROS1 = new ImBoolean(false);
+   private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
    private final ImFloat fx;
    private final ImFloat fy;
    private final ImFloat skew;
@@ -99,8 +108,10 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 
    public GDXHighLevelDepthSensorSimulator(RosNodeInterface ros1Node,
                                            String ros1DepthImageTopic,
-                                           String ros1CameraInfoTopic,
+                                           String ros1DepthCameraInfoTopic,
                                            CameraPinholeBrown depthCameraIntrinsics,
+                                           String ros1ColorImageTopic,
+                                           String ros1ColorCameraInfoTopic,
                                            ROS2NodeInterface ros2Node,
                                            ROS2Topic<?> ros2Topic,
                                            ReferenceFrame sensorFrame,
@@ -133,12 +144,18 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 
       if (ros1Node != null)
       {
-         LogTools.info("Publishing ROS 1: {} {}", ros1DepthImageTopic, ros1CameraInfoTopic);
+         LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
          ros1DepthPublisher = new RosImagePublisher();
-         ros1CameraInfoPublisher = new RosCameraInfoPublisher();
-         ros1Node.attachPublisher(ros1CameraInfoTopic, ros1CameraInfoPublisher);
+         ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
+         ros1Node.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
          ros1Node.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
          ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * imageWidth * imageHeight);
+         LogTools.info("Publishing ROS 1 color: {} {}", ros1ColorImageTopic, ros1ColorCameraInfoTopic);
+         ros1ColorPublisher = new RosImagePublisher();
+         ros1ColorCameraInfoPublisher = new RosCameraInfoPublisher();
+         ros1Node.attachPublisher(ros1ColorCameraInfoTopic, ros1ColorCameraInfoPublisher);
+         ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
+         ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(4 * imageWidth * imageHeight);
       }
       if (ros2Node != null)
       {
@@ -189,6 +206,8 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
             {
                if (publishDepthImageROS1.get())
                   publishDepthImageROS1();
+               if (publishColorImageROS1.get())
+                  publishColorImageROS1();
             }
             if (ros2Node != null)
             {
@@ -202,9 +221,80 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       }
    }
 
+   private void publishColorImageROS1()
+   {
+      if (ros1ColorPublisher.isConnected() && ros1ColorCameraInfoPublisher.isConnected() && !colorExecutor.isExecuting())
+      {
+//         Pixmap colorPixmap = depthSensorSimulator.getColorPixmap();
+//         ArrayList<Integer> colors = depthSensorSimulator.getColors();
+//
+//         if (colors.isEmpty())
+//            return;
+
+         IntBuffer colorRGB8Buffer = depthSensorSimulator.getColorRGB8Buffer();
+         colorRGB8Buffer.rewind();
+//         ByteBuffer rawColorByteBuffer = depthSensorSimulator.getRawColorByteBuffer();
+//         rawColorByteBuffer.rewind();
+
+         int bytesPerPixel = 4;
+         ros1ColorChannelBuffer.clear();
+         int size = 4 * imageWidth * imageHeight;
+         for (int y = 0; y < imageHeight; y++)
+         {
+            for (int x = 0; x < imageWidth; x++)
+            {
+//               int pixelColor = colorPixmap.getPixel(x, y);
+//               ros1ColorChannelBuffer.writeInt(pixelColor);
+
+try
+{
+               int index = size - (x * bytesPerPixel + (y + 1) * imageHeight * bytesPerPixel);
+//               ros1ColorChannelBuffer.setInt(index, colorRGB8Buffer.get());
+//               ros1ColorChannelBuffer.setBytes(index, rawColorByteBuffer.g);
+//               ros1ColorChannelBuffer.setByte(index, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.setByte(index + 1, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.setByte(index + 2, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.setByte(index + 3, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+               ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+//               ros1ColorChannelBuffer.setBytes(index, colorRGB8Buffer.get());
+
+}
+catch (IndexOutOfBoundsException e)
+{
+   System.err.println(e.getMessage());
+}
+//                 ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+            }
+         }
+//         for (int i = 0; i < imageWidth * imageHeight; i++)
+//            ros1ColorChannelBuffer.writeInt(colors.get(i));
+//         for (int i = 0; i < imageWidth * imageHeight; i++)
+//            ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+//
+//         colors.clear();
+
+         ros1ColorChannelBuffer.readerIndex(0);
+         ros1ColorChannelBuffer.writerIndex(size);
+
+         colorExecutor.execute(() ->
+         {
+            Image message = ros1ColorPublisher.createMessage(imageWidth, imageHeight, bytesPerPixel, "rgb8", ros1ColorChannelBuffer);
+
+            if(syncedRobot != null)
+               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp())));
+
+            ros1ColorPublisher.publish(message);
+         });
+      }
+   }
+
    private void publishDepthImageROS1()
    {
-      if (ros1DepthPublisher.isConnected() && ros1CameraInfoPublisher.isConnected() && !executor.isExecuting())
+      if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected() && !depthExecutor.isExecuting())
       {
          PerspectiveCamera camera = depthSensorSimulator.getCamera();
          FloatBuffer depthFloatBuffer = depthSensorSimulator.getEyeDepthMetersBuffer();
@@ -236,7 +326,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          ros1DepthChannelBuffer.readerIndex(0);
          ros1DepthChannelBuffer.writerIndex(size);
 
-         executor.execute(() ->
+         depthExecutor.execute(() ->
          {
             if (tuning)
             {
@@ -246,8 +336,8 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                depthCameraIntrinsics.setCx(cx.get());
                depthCameraIntrinsics.setCx(cx.get());
             }
-            ros1CameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
-            Image message = ros1DepthPublisher.createMessage(imageWidth, imageHeight, ros1DepthChannelBuffer); // maybe need to copy here if there are errors
+            ros1DepthCameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
+            Image message = ros1DepthPublisher.createMessage(imageWidth, imageHeight, 2, "16UC1", ros1DepthChannelBuffer); // maybe need to copy here if there are errors
 
             if(syncedRobot != null)
                message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp())));
@@ -292,7 +382,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 
    private void publishPointCloudROS2()
    {
-      if (!executor.isExecuting())
+      if (!pointCloudExecutor.isExecuting())
       {
          ros2PointsToPublish.clear();
          for (int i = 0; i < depthSensorSimulator.getPoints().size(); i++)
@@ -302,7 +392,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                ros2ColorsToPublish[i] = depthSensorSimulator.getColors().get(i);
          }
 
-         executor.execute(() ->
+         pointCloudExecutor.execute(() ->
          {
             long timestamp = syncedRobot == null ? System.nanoTime() : syncedRobot.getTimestamp();
             tempSensorFramePose.setToZero(sensorFrame);
@@ -330,7 +420,9 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 
    public void dispose()
    {
-      executor.destroy();
+      depthExecutor.destroy();
+      colorExecutor.destroy();
+      pointCloudExecutor.destroy();
       depthSensorSimulator.dispose();
    }
 
@@ -351,6 +443,21 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    public void setRenderPointCloudDirectly(boolean renderPointCloudDirectly)
    {
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
+   }
+
+   public void setPublishDepthImageROS1(boolean publish)
+   {
+      publishDepthImageROS1.set(publish);
+   }
+
+   public void setPublishColorImageROS1(boolean publish)
+   {
+      publishColorImageROS1.set(publish);
+   }
+
+   public void setPublishPointCloudROS2(boolean publish)
+   {
+      publishPointCloudROS2.set(publish);
    }
 
    public void setDebugCoordinateFrame(boolean debugCoordinateFrame)

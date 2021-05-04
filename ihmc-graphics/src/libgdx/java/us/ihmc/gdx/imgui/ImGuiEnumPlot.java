@@ -12,6 +12,11 @@ public class ImGuiEnumPlot
    private final int height;
    private int index = 0;
 
+   public ImGuiEnumPlot()
+   {
+      this(1000, 250, 50);
+   }
+
    public ImGuiEnumPlot(int bufferSize, int width, int height)
    {
       this.bufferSize = bufferSize;
