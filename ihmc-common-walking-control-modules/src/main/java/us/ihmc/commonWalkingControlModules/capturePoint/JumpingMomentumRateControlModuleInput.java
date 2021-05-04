@@ -65,7 +65,7 @@ public class JumpingMomentumRateControlModuleInput
 
    public void setDesiredLinearMomentumRateOfChange(FrameVector3DReadOnly desiredLinearMomentumRateOfChange)
    {
-      this.desiredAngularMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
+      this.desiredLinearMomentumRateOfChange.set(desiredLinearMomentumRateOfChange);
    }
 
    public FrameVector3DReadOnly getDesiredLinearMomentumRateOfChange()

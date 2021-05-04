@@ -18,8 +18,9 @@ public class CommandProvider
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoAccelerationObjectiveCommand> rhoAccelerationObjectiveCommandPool = new RecyclingArrayList<>(RhoAccelerationObjectiveCommand::new);
-   private final RecyclingArrayList<DiscreteAngularVelocityOrientationCommand> discreteOrientationCommandPool = new RecyclingArrayList<>(
-         DiscreteAngularVelocityOrientationCommand::new);
+   private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
+   private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
+   private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
 
 
    /**
@@ -38,7 +39,9 @@ public class CommandProvider
       comVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
       rhoAccelerationObjectiveCommandPool.clear();
-      discreteOrientationCommandPool.clear();
+      orientationValueCommandPool.clear();
+      directOrientationValueCommandPool.clear();
+      orientationContinuityCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -96,8 +99,18 @@ public class CommandProvider
       return rhoAccelerationObjectiveCommandPool.add();
    }
 
-   public DiscreteAngularVelocityOrientationCommand getNextDiscreteAngularVelocityOrientationCommand()
+   public DirectOrientationValueCommand getNextDirectOrientationValueCommand()
    {
-      return discreteOrientationCommandPool.add();
+      return directOrientationValueCommandPool.add();
+   }
+
+   public OrientationValueCommand getNextOrientationValueCommand()
+   {
+      return orientationValueCommandPool.add();
+   }
+
+   public OrientationContinuityCommand getNextOrientationContinuityCommand()
+   {
+      return orientationContinuityCommandPool.add();
    }
 }

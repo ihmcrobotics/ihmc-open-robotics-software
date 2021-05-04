@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.*;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.jumpingController.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.SE3ModelPredictiveController;
@@ -14,10 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.WrenchBasics;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -58,11 +54,13 @@ public class JumpingBalanceManager
    private final YoFrameQuaternion yoDesiredBodyOrientation = new YoFrameQuaternion("desiredBodyOrientation", worldFrame, registry);
    private final YoFrameYawPitchRoll yoDesiredBodyYawPitchRoll = new YoFrameYawPitchRoll("desiredBodyOrientation", worldFrame, registry);
    private final YoFrameVector3D yoDesiredBodyAngularVelocity = new YoFrameVector3D("desiredBodyAngularVelocity", worldFrame, registry);
+   private final YoFrameVector3D yoDesiredBodyAngularAcceleration = new YoFrameVector3D("desiredBodyAngularAcceleration", worldFrame, registry);
    private final YoFramePoint3D touchdownCoMPosition = new YoFramePoint3D("touchdownCoMPosition", worldFrame, registry);
    private final YoFramePoint3D touchdownDCMPosition = new YoFramePoint3D("touchdownDCMPosition", worldFrame, registry);
    private final YoFramePoint3D yoPerfectVRP = new YoFramePoint3D("perfectVRP", worldFrame, registry);
 
    private final YoFixedFrameWrench desiredWrench;
+   private final YoFrameVector3D desiredTorque = new YoFrameVector3D("desiredCoMTorque", worldFrame, registry);
    private final FrameVector3D desiredLinearMomentumRate = new FrameVector3D();
    private final FrameVector3D desiredAngularMomentumRate = new FrameVector3D();
 
@@ -119,11 +117,11 @@ public class JumpingBalanceManager
                                                             yoGraphicsListRegistry);
 
       comTrajectoryPlanner = new SE3ModelPredictiveController(chest.getInertia().getMomentOfInertia(),
-                                                              gravityZ,
-                                                              nominalHeight,
-                                                              totalMass,
-                                                              controllerToolbox.getControlDT(),
-                                                              registry);
+                                                                      gravityZ,
+                                                                      nominalHeight,
+                                                                      totalMass,
+                                                                      controllerToolbox.getControlDT(),
+                                                                      registry);
 //      comTrajectoryPlanner.addCostPolicy(new TouchDownHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 //      comTrajectoryPlanner.addCostPolicy(new TakeOffHeightObjectivePolicy(controllerToolbox.getOmega0Provider(), OptimizedCoMTrajectoryPlanner.MEDIUM_WEIGHT));
 
@@ -199,6 +197,7 @@ public class JumpingBalanceManager
       yoDesiredBodyOrientation.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
       yoDesiredBodyYawPitchRoll.set(comTrajectoryPlanner.getDesiredBodyOrientationSolution());
       yoDesiredBodyAngularVelocity.set(comTrajectoryPlanner.getDesiredBodyAngularVelocitySolution());
+      yoDesiredBodyAngularAcceleration.set(comTrajectoryPlanner.getDesiredBodyAngularAccelerationSolution());
 
       double omega0 = controllerToolbox.getOmega0();
       if (Double.isNaN(omega0))
@@ -255,6 +254,8 @@ public class JumpingBalanceManager
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       desiredWrench.setMatchingFrame(comTrajectoryPlanner.getDesiredWrench());
+
+      comTrajectoryPlanner.computeTorque(timeInSupportSequence.getDoubleValue(), desiredTorque);
 
       desiredLinearMomentumRate.setMatchingFrame(desiredWrench.getLinearPart());
       desiredLinearMomentumRate.addZ(controllerToolbox.getFullRobotModel().getTotalMass() * -Math.abs(controllerToolbox.getGravityZ()));
@@ -333,6 +334,9 @@ public class JumpingBalanceManager
       jumpingMomentumRateControlModuleInput.setContactStateProviders(comTrajectoryPlanner.getContactStateProviders());
 
       desiredWrench.setMatchingFrame(comTrajectoryPlanner.getDesiredWrench());
+
+      comTrajectoryPlanner.computeTorque(timeInSupportSequence.getDoubleValue(), desiredTorque);
+
 
       desiredLinearMomentumRate.setMatchingFrame(desiredWrench.getLinearPart());
       desiredLinearMomentumRate.addZ(controllerToolbox.getFullRobotModel().getTotalMass() * -Math.abs(controllerToolbox.getGravityZ()));

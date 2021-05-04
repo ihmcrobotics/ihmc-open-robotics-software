@@ -128,9 +128,9 @@ public class SE3MPCVisualizer
          desiredCoMVelocity.setMatchingFrame(mpc.getDesiredCoMVelocity());
 
          desiredBodyOrientation.setMatchingFrame(mpc.getDesiredBodyOrientationSolution());
-         desiredBodyOrientationFeedForward.setMatchingFrame(mpc.getDesiredFeedForwardBodyOrientation());
+         desiredBodyOrientationFeedForward.setMatchingFrame(mpc.getReferenceBodyOrientation());
          desiredBodyAngularVelocity.setMatchingFrame(mpc.getDesiredBodyAngularVelocitySolution());
-         desiredBodyAngularVelocityFeedForward.setMatchingFrame(mpc.getDesiredFeedForwardBodyAngularVelocity());
+         desiredBodyAngularVelocityFeedForward.setMatchingFrame(mpc.getReferenceBodyAngularVelocity());
 
          scs.setTime(time);
          scs.tickAndUpdate();
