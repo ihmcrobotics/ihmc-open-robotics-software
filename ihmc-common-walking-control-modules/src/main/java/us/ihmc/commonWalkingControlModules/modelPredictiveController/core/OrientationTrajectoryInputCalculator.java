@@ -27,7 +27,7 @@ public class OrientationTrajectoryInputCalculator
    {
       int orientationIndex = indexHandler.getOrientationStartIndex(command.getSegmentNumber());
 
-      if (computeInternal(inputToPack, command, SE3MPCIndexHandler.variablesPerOrientationTick, orientationIndex))
+      if (computeInternal(inputToPack, command, indexHandler.getTotalProblemSize(), orientationIndex))
          return 0;
       else
          return -1;
@@ -137,18 +137,18 @@ public class OrientationTrajectoryInputCalculator
       if (segmentNumber == indexHandler.getNumberOfSegments() - 1)
          return -1;
 
-      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber);
       int orientationIndex = indexHandler.getOrientationStartIndex(segmentNumber);
-      int nextOrientationIndex = indexHandler.getOrientationStartIndex(segmentNumber + 1);
+      int comIndex = indexHandler.getComCoefficientStartIndex(segmentNumber) - orientationIndex;
+      int nextOrientationIndex = indexHandler.getOrientationStartIndex(segmentNumber + 1) - orientationIndex;
       int numberOfVariables = indexHandler.getVariablesInSegment(segmentNumber) + SE3MPCIndexHandler.variablesPerOrientationTick;
 
       if (computeInternal(inputToPack,
                           command,
                           numberOfVariables,
-                          comIndex - orientationIndex,
-                          orientationIndex,
-                          nextOrientationIndex - orientationIndex))
-         return 0;
+                          comIndex,
+                          0,
+                          nextOrientationIndex))
+         return orientationIndex;
       else
          return -1;
    }
