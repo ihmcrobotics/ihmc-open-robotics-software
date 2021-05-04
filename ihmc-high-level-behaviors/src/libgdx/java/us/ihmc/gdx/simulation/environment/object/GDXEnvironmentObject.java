@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.function.Function;
@@ -143,5 +144,17 @@ public class GDXEnvironmentObject
       GDXEnvironmentObject duplicate = new GDXEnvironmentObject();
       duplicate.create(realisticModel, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
       return duplicate;
+   }
+
+   public static GDXEnvironmentObject loadByName(String objectClassName)
+   {
+      if (objectClassName.equals(GDXMediumCinderBlockRoughed.class.getSimpleName()))
+      {
+         return new GDXMediumCinderBlockRoughed();
+      }
+      else
+      {
+         throw new RuntimeException("There is no object of that name!");
+      }
    }
 }

@@ -59,6 +59,14 @@ public class JSONFileTools
       }
    }
 
+   public static void loadFromWorkspace(String directoryNameToAssumePresent,
+                                        String subsequentPathToResourceFolder,
+                                        String resourcePathString,
+                                        Consumer<JsonNode> jsonNodeConsumer)
+   {
+      load(WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString), jsonNodeConsumer);
+   }
+
    public static boolean loadFromClasspath(Class<?> classForLoading,
                                            String resourcePathString,
                                            Consumer<JsonNode> jsonNodeConsumer)

@@ -4,13 +4,22 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImString;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
@@ -18,8 +27,13 @@ import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRou
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXPose3DWidget;
+import us.ihmc.tools.io.JSONFileTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Iterator;
 
 public class GDXEnvironment implements RenderableProvider
 {
@@ -30,7 +44,13 @@ public class GDXEnvironment implements RenderableProvider
    private GDXEnvironmentObject intersectedObject;
    private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
    private boolean placing = false;
-
+   private boolean loadedFilesOnce = false;
+   private int selectedEnvironmentFile = -1;
+   private final ArrayList<Path> environmentFiles = new ArrayList<>();
+   private final ImString saveString = new ImString("", 100);
+   private final Point3D tempTranslation = new Point3D();
+   private final Quaternion tempOrientation = new Quaternion();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -133,6 +153,86 @@ public class GDXEnvironment implements RenderableProvider
          objects.remove(selectedObject);
          selectedObject = null;
          intersectedObject = null;
+      }
+
+      ImGui.text("Environments:");
+      boolean reindexClicked = imgui.internal.ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
+      if (!loadedFilesOnce || reindexClicked)
+      {
+         loadedFilesOnce = true;
+         Path scriptsPath = WorkspacePathTools.findPathToResource("ihmc-open-robotics-software",
+                                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                                  "environments");
+         environmentFiles.clear();
+         PathTools.walkFlat(scriptsPath, (path, pathType) ->
+         {
+            if (pathType == BasicPathVisitor.PathType.FILE)
+            {
+               environmentFiles.add(path);
+            }
+            return FileVisitResult.CONTINUE;
+         });
+      }
+      for (int i = 0; i < environmentFiles.size(); i++)
+      {
+         if (ImGui.radioButton(environmentFiles.get(i).getFileName().toString(), selectedEnvironmentFile == i))
+         {
+            selectedEnvironmentFile = i;
+            objects.clear();
+            selectedObject = null;
+            intersectedObject = null;
+
+            JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
+                                            "ihmc-high-level-behaviors/src/libgdx/resources",
+                                            "environments/" + environmentFiles.get(i).getFileName().toString(),
+            node ->
+            {
+               for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+               {
+                  JsonNode objectNode = it.next();
+                  GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
+                  tempTranslation.setX(objectNode.get("x").asDouble());
+                  tempTranslation.setY(objectNode.get("y").asDouble());
+                  tempTranslation.setZ(objectNode.get("z").asDouble());
+                  tempOrientation.set(objectNode.get("qx").asDouble(),
+                                      objectNode.get("qy").asDouble(),
+                                      objectNode.get("qz").asDouble(),
+                                      objectNode.get("qs").asDouble());
+                  tempTransform.set(tempOrientation, tempTranslation);
+                  object.set(tempTransform);
+                  objects.add(object);
+               }
+            });
+         }
+      }
+      int flags = ImGuiInputTextFlags.None;
+      flags += ImGuiInputTextFlags.CallbackResize;
+      ImGui.inputText("###saveText", saveString, flags);
+      ImGui.sameLine();
+      if (ImGui.button("Save as new"))
+      {
+         JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
+                                       "ihmc-high-level-behaviors/src/libgdx/resources",
+                                       "environments/" + saveString.get(),
+         rootNode ->
+         {
+            ArrayNode objectsArrayNode = rootNode.putArray("objects");
+            for (GDXEnvironmentObject object : this.objects)
+            {
+               ObjectNode objectNode = objectsArrayNode.addObject();
+               objectNode.put("type", object.getClass().getSimpleName());
+               GDXTools.toEuclid(object.getRealisticModelInstance().transform, tempTransform);
+               tempTranslation.set(tempTransform.getTranslation());
+               tempOrientation.set(tempTransform.getRotation());
+               objectNode.put("x", tempTranslation.getX());
+               objectNode.put("y", tempTranslation.getY());
+               objectNode.put("z", tempTranslation.getZ());
+               objectNode.put("qx", tempOrientation.getX());
+               objectNode.put("qy", tempOrientation.getY());
+               objectNode.put("qz", tempOrientation.getZ());
+               objectNode.put("qs", tempOrientation.getS());
+            }
+         });
       }
 
       pose3DWidget.render();
