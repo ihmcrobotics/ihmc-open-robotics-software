@@ -303,7 +303,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(getOrCreateROS2Node(), robotModel);
          modulesToClose.add(module);
 
          return module;
@@ -491,7 +491,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          LIDARBasedREAModule module;
 
-         REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
+         REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(getOrCreateROS2Node(), outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
          FilePropertyHelper filePropertyHelper;
          if (reaConfigurationFilePath != null)
             filePropertyHelper = new FilePropertyHelper(reaConfigurationFilePath);
@@ -584,7 +584,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 	  
 	  try 
 	  {
-	     DirectionalControlModule module = new DirectionalControlModule(robotModel, enableYoVariableServer, pubSubImplementation);
+	     DirectionalControlModule module = new DirectionalControlModule(robotModel, enableYoVariableServer, getOrCreateROS2Node());
 		 return module;
 	  }
 	  catch (Throwable e)

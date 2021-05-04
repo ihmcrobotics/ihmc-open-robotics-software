@@ -129,13 +129,12 @@ public class ValkyrieNetworkProcessor
 
       if (parameters.get(ValkyrieNetworkProcessorParameters.start_kinematics_streaming_toolbox))
       {
-
          networkProcessor.setupKinematicsStreamingToolboxModule(ValkyrieKinematicsStreamingToolboxModule.class, null, true);
       }
 
       if (parameters.get(ValkyrieNetworkProcessorParameters.start_force_estimation))
       {
-         new ValkyrieExternalForceEstimationModule(robotModel, false, PubSubImplementation.FAST_RTPS);
+         new ValkyrieExternalForceEstimationModule(robotModel, false, networkProcessor.getOrCreateROS2Node());
       }
 
       if (parameters.get(ValkyrieNetworkProcessorParameters.start_footstep_planning))
@@ -165,7 +164,7 @@ public class ValkyrieNetworkProcessor
 
       if (parameters.get(ValkyrieNetworkProcessorParameters.start_sensor_processing))
       {
-         ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
+         ValkyrieSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(networkProcessor.getOrCreateROS2Node());
          sensorSuiteManager.setEnableLidarScanPublisher(parameters.get(ValkyrieNetworkProcessorParameters.start_lidar));
          sensorSuiteManager.setEnableStereoVisionPointCloudPublisher(parameters.get(ValkyrieNetworkProcessorParameters.start_stereo_vision_pointcloud));
 

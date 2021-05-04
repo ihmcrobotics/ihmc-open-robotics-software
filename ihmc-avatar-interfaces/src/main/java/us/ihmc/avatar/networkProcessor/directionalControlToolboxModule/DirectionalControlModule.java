@@ -43,12 +43,26 @@ public class DirectionalControlModule extends ToolboxModule
     */
    private final static int UPDATE_PERIOD_IN_MS = 10;
 
+   public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer, RealtimeROS2Node ros2Node)
+   {
+      super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS,
+            ros2Node);
+
+      steppingController = new DirectionalControlController(fullRobotModel, robotModel.getWalkingControllerParameters(), statusOutputManager, registry);
+      setup(robotModel);
+   }
+
    public DirectionalControlModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
       super(robotModel.getSimpleRobotName(), robotModel.createFullRobotModel(), robotModel.getLogModelProvider(), startYoVariableServer, UPDATE_PERIOD_IN_MS,
             pubSubImplementation);
 
       steppingController = new DirectionalControlController(fullRobotModel, robotModel.getWalkingControllerParameters(), statusOutputManager, registry);
+      setup(robotModel);
+   }
+
+   private void setup(DRCRobotModel robotModel)
+   {
       steppingController.setPauseWalkingPublisher(pauseWalkingPublisher::publish);
       steppingController.setFootstepPublisher(footstepPublisher::publish);
       steppingController.setFootstepVisualizationPublisher(footstepVisualizationPublisher::publish);
