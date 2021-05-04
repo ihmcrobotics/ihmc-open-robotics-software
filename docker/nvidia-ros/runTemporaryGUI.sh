@@ -13,9 +13,10 @@ sudo -u root docker run \
     --interactive \
     --rm \
     --network host \
+    --dns=1.1.1.1 \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    ihmcrobotics/nvidia-ros:0.1
+    ihmcrobotics/nvidia-ros:0.2
