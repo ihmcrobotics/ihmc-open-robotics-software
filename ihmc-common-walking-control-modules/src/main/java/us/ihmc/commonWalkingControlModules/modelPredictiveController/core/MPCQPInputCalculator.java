@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 
@@ -755,7 +756,7 @@ public class MPCQPInputCalculator
     * @param command command to process
     * @return whether or not the calculation was successful.
     */
-   public int calculateCompactRhoValueCommand(QPInputTypeA inputToPack, RhoObjectiveCommand command)
+   public int calculateCompactRhoValueCommand(NativeQPInputTypeA inputToPack, RhoObjectiveCommand command)
    {
       int numberOfVariables = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
