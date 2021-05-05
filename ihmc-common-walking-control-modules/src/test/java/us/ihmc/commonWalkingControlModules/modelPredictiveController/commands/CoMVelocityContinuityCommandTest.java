@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CoMVelocityContinuityCommandTest
@@ -71,20 +72,20 @@ public class CoMVelocityContinuityCommandTest
 
       solver.solve();
 
-      DMatrixRMaj solvedObjectiveVelocity = new DMatrixRMaj(3, 1);
+      NativeMatrix solvedObjectiveVelocity = new NativeMatrix(3, 1);
       FrameVector3D solvedObjectiveVelocityTuple = new FrameVector3D();
 
       FrameVector3D valueEndOf1 = new FrameVector3D();
       FrameVector3D valueStartOf2 = new FrameVector3D();
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
 
-      CommonOps_DDRM.mult(solver.qpInputTypeA.taskJacobian, solution, solvedObjectiveVelocity);
+      solvedObjectiveVelocity.mult(solver.qpInputTypeA.taskJacobian, solution);
       solvedObjectiveVelocityTuple.set(solvedObjectiveVelocity);
       solvedObjectiveVelocityTuple.scaleAdd(duration1, gravityVector, solvedObjectiveVelocityTuple);
 
       DMatrixRMaj taskObjectiveExpected = new DMatrixRMaj(3, 1);
-      DMatrixRMaj achievedObjective = new DMatrixRMaj(3, 1);
+      NativeMatrix achievedObjective = new NativeMatrix(3, 1);
       taskObjectiveExpected.add(2, 0, -duration1 * -Math.abs(gravityZ));
 
       DMatrixRMaj taskJacobianExpected = new DMatrixRMaj(3, indexHandler.getTotalProblemSize());
@@ -133,7 +134,7 @@ public class CoMVelocityContinuityCommandTest
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.qpInputTypeA.taskJacobian, 1e-5);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.qpInputTypeA.taskObjective, 1e-5);
 
-      CommonOps_DDRM.mult(taskJacobianExpected, solution, achievedObjective);
+      achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
       EjmlUnitTests.assertEquals(taskObjectiveExpected, achievedObjective, 1e-4);
 
 //      DMatrixRMaj solverInput_H_Expected = new DMatrixRMaj(taskJacobianExpected.getNumCols(), taskJacobianExpected.getNumCols());
