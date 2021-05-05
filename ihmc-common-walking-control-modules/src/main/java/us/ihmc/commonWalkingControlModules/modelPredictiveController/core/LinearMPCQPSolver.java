@@ -709,7 +709,7 @@ public class LinearMPCQPSolver
       return true;
    }
 
-   public DMatrix getSolution()
+   public NativeMatrix getSolution()
    {
       return solverOutput;
    }
