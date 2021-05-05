@@ -30,7 +30,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
    protected final KinematicsStreamingToolboxController controller;
-   private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
+   private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -50,7 +51,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
-      controller.setOutputPublisher(outputPublisher::publish);
+      controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
+      controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
       if (yoVariableServer != null)
@@ -83,7 +85,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ROS2Topic controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
+      trajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
+      streamingMessagePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyStreamingMessage.class, controllerInputTopic);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 

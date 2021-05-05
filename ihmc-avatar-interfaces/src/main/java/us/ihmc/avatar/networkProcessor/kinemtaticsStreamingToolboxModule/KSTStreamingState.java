@@ -11,7 +11,8 @@ import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOneDoFJointMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyStreamingMessagePublisher;
+import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.WholeBodyTrajectoryMessagePublisher;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -67,9 +68,12 @@ public class KSTStreamingState implements State
    private final KSTTools tools;
    private final double toolboxControllerPeriod;
 
-   private OutputPublisher outputPublisher = m ->
+   private final YoBoolean useStreamingPublisher = new YoBoolean("useStreamingPublisher", registry);
+
+   private WholeBodyTrajectoryMessagePublisher trajectoryMessagePublisher = m ->
    {
    };
+   private WholeBodyStreamingMessagePublisher streamingMessagePublisher = null;
    private final YoDouble timeOfLastMessageSentToController = new YoDouble("timeOfLastMessageSentToController", registry);
    private final YoDouble publishingPeriod = new YoDouble("publishingPeriod", registry);
    private final KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
@@ -152,6 +156,7 @@ public class KSTStreamingState implements State
 
    public KSTStreamingState(KSTTools tools)
    {
+      useStreamingPublisher.set(true);
       this.tools = tools;
       toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();
@@ -282,9 +287,14 @@ public class KSTStreamingState implements State
       }
    }
 
-   public void setOutputPublisher(OutputPublisher outputPublisher)
+   public void setTrajectoryMessagerPublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
    {
-      this.outputPublisher = outputPublisher;
+      this.trajectoryMessagePublisher = outputPublisher;
+   }
+
+   public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher streamingMessagePublisher)
+   {
+      this.streamingMessagePublisher = streamingMessagePublisher;
    }
 
    private boolean resetFilter = false;
@@ -692,11 +702,17 @@ public class KSTStreamingState implements State
                double alpha = MathTools.clamp(timeInBlending / streamingBlendingDuration.getValue(), 0.0, 1.0);
                double alphaDot = 1.0 / streamingBlendingDuration.getValue();
                blendedRobotState.interpolate(initialRobotState.getStatus(), outputRobotState.getStatus(), alpha, alphaDot);
-               outputPublisher.publish(tools.setupStreamingMessage(blendedRobotState.getStatus()));
+               if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
+                  trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(blendedRobotState.getStatus()));
+               else
+                  streamingMessagePublisher.publish(tools.setupStreamingMessage(blendedRobotState.getStatus()));
             }
             else
             {
-               outputPublisher.publish(tools.setupStreamingMessage(outputRobotState.getStatus()));
+               if (streamingMessagePublisher == null || !useStreamingPublisher.getValue())
+                  trajectoryMessagePublisher.publish(tools.setupTrajectoryMessage(outputRobotState.getStatus()));
+               else
+                  streamingMessagePublisher.publish(tools.setupStreamingMessage(outputRobotState.getStatus()));
             }
 
             timeOfLastMessageSentToController.set(timeInState);
@@ -708,7 +724,7 @@ public class KSTStreamingState implements State
          {
             outputRobotState.set(filteredRobotState);
             outputRobotState.scaleVelocities(outputJointVelocityScale.getValue());
-            outputPublisher.publish(tools.setupFinalizeStreamingMessage(outputRobotState.getStatus()));
+            trajectoryMessagePublisher.publish(tools.setupFinalizeTrajectoryMessage(outputRobotState.getStatus()));
          }
 
          timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
