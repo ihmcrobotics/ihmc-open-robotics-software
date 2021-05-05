@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -54,6 +56,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private final DMatrixRMaj solutionCoefficients = new DMatrixRMaj(0, 0);
    private final double mass;
    protected final DoubleProvider omega;
    protected final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
@@ -237,13 +240,15 @@ public abstract class EuclideanModelPredictiveController
 
       mpcAssemblyTime.stopMeasurement();
       mpcQPTime.startMeasurement();
-      DMatrixRMaj solutionCoefficients = solveQP();
+      NativeMatrix solutionCoefficients = solveQP();
       mpcQPTime.stopMeasurement();
 
       mpcExtractionTime.startMeasurement();
       if (solutionCoefficients != null)
       {
-         extractSolution(solutionCoefficients);
+         this.solutionCoefficients.reshape(indexHandler.getTotalProblemSize(), 1);
+         solutionCoefficients.get(this.solutionCoefficients);
+         extractSolution(this.solutionCoefficients);
       }
 
       if (cornerPointViewer != null)
@@ -688,7 +693,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected abstract void resetActiveSet();
 
-   protected abstract DMatrixRMaj solveQP();
+   protected abstract NativeMatrix solveQP();
 
    public void compute(double timeInPhase)
    {
