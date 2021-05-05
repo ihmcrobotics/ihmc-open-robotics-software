@@ -276,10 +276,10 @@ public class OrientationTrajectoryInputCalculator
       inputToPack.setWeight(command.getAngleErrorMinimizationWeight());
 
       // A This + B c + C = 0 -> A This + B c = -C
-      inputToPack.getTaskJacobian().insert(command.getAMatrix(tick), 0, 0, 3, 6, 0, orientationIndex);
-      inputToPack.getTaskJacobian().insert(command.getBMatrix(tick), 0, 0, 3, numberOfLinearVariables, 0, comIndex);
+      inputToPack.getTaskJacobian().insert(command.getAMatrix(tick), 3, 6, 0, 6, 0, orientationIndex);
+      inputToPack.getTaskJacobian().insert(command.getBMatrix(tick), 3, 6, 0, numberOfLinearVariables, 0, comIndex);
 
-      inputToPack.getTaskObjective().insert(command.getCMatrix(tick), 0, 0, 3, 1, 0, 0);
+      inputToPack.getTaskObjective().insert(command.getCMatrix(tick), 3, 6, 0, 1, 0, 0);
       inputToPack.getTaskObjective().scale(-1.0);
 
       return true;
@@ -332,10 +332,10 @@ public class OrientationTrajectoryInputCalculator
       inputToPack.setWeight(command.getVelocityErrorMinimizationWeight());
 
       // A This + B c + C = 0 -> A This + B c = -C
-      inputToPack.getTaskJacobian().insert(command.getAMatrix(tick), 3, 0, 3, 6, 0, orientationIndex);
-      inputToPack.getTaskJacobian().insert(command.getBMatrix(tick), 3, 0, 3, numberOfLinearVariables, 0, comIndex);
+      inputToPack.getTaskJacobian().insert(command.getAMatrix(tick), 3, 6, 0, 6, 0, orientationIndex);
+      inputToPack.getTaskJacobian().insert(command.getBMatrix(tick), 3, 6, 0, numberOfLinearVariables, 0, comIndex);
 
-      inputToPack.getTaskObjective().insert(command.getCMatrix(tick), 3, 0, 3, 1, 0, 0);
+      inputToPack.getTaskObjective().insert(command.getCMatrix(tick), 3, 6, 0, 1, 0, 0);
       inputToPack.getTaskObjective().scale(-1.0);
 
       return true;
