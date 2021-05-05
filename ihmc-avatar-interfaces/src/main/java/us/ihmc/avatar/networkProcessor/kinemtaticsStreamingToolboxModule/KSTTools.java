@@ -142,7 +142,7 @@ public class KSTTools
       trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
-      streamIntegrationDuration.set(0.2);
+      streamIntegrationDuration.set(0.3);
 
       hasNewInputCommand = new YoBoolean("hasNewInputCommand", registry);
       hasPreviousInput = new YoBoolean("hasPreviousInput", registry);
@@ -305,8 +305,8 @@ public class KSTTools
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            streamingMessageFactory.computeHandStreamingMessage(robotSide);
+//         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+//            streamingMessageFactory.computeHandStreamingMessage(robotSide);
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
