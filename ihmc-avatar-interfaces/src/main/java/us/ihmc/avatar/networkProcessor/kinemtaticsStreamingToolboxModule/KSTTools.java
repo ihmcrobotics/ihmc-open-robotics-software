@@ -6,6 +6,7 @@ import java.util.Collections;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
@@ -62,7 +63,9 @@ public class KSTTools
    private final OneDoFJointBasics[] currentOneDoFJoint;
 
    private final HumanoidKinematicsToolboxController ikController;
-   private final KinematicsToolboxOutputConverter outputConverter;
+   private final KSTStreamingMessageFactory streamingMessageFactory;
+   private final KinematicsToolboxOutputConverter trajectoryMessageFactory;
+   private final WholeBodyStreamingMessage wholeBodyStreamingMessage = new WholeBodyStreamingMessage();
    private final WholeBodyTrajectoryMessage wholeBodyTrajectoryMessage = new WholeBodyTrajectoryMessage();
    private final YoDouble streamIntegrationDuration;
 
@@ -135,7 +138,8 @@ public class KSTTools
       ikController.setPreserveUserCommandHistory(false);
       ikController.minimizeAngularMomentum(true);
 
-      outputConverter = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
+      streamingMessageFactory = new KSTStreamingMessageFactory(fullRobotModelFactory);
+      trajectoryMessageFactory = new KinematicsToolboxOutputConverter(fullRobotModelFactory);
 
       streamIntegrationDuration = new YoDouble("streamIntegrationDuration", registry);
       streamIntegrationDuration.set(0.2);
@@ -292,29 +296,60 @@ public class KSTTools
       previousInputReceivedTime.set(-1.0);
    }
 
-   public WholeBodyTrajectoryMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyStreamingMessage setupStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
-      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      outputConverter.updateFullRobotModel(solutionToConvert);
-      outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
-      outputConverter.setTrajectoryTime(0.0);
-      outputConverter.setEnableVelocity(true);
+      HumanoidMessageTools.resetWholeBodyStreamingMessage(wholeBodyStreamingMessage);
+      streamingMessageFactory.updateFullRobotModel(solutionToConvert);
+      streamingMessageFactory.setMessageToCreate(wholeBodyStreamingMessage);
+      streamingMessageFactory.setEnableVelocity(true);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            outputConverter.computeHandTrajectoryMessage(robotSide);
+            streamingMessageFactory.computeHandStreamingMessage(robotSide);
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
-            outputConverter.computeArmTrajectoryMessage(robotSide);
+            streamingMessageFactory.computeArmStreamingMessage(robotSide);
       }
 
       if (isNeckJointspaceOutputEnabled.getValue())
-         outputConverter.computeNeckTrajectoryMessage();
+         streamingMessageFactory.computeNeckStreamingMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
-         outputConverter.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
+         streamingMessageFactory.computeChestStreamingMessage(ReferenceFrame.getWorldFrame());
       if (isPelvisTaskspaceOutputEnabled.getValue())
-         outputConverter.computePelvisTrajectoryMessage();
+         streamingMessageFactory.computePelvisStreamingMessage();
+
+      wholeBodyStreamingMessage.setEnableUserPelvisControl(true);
+      wholeBodyStreamingMessage.setStreamIntegrationDuration((float) streamIntegrationDuration.getValue());
+      wholeBodyStreamingMessage.setTimestamp(Conversions.secondsToNanoseconds(time.getValue()));
+      wholeBodyStreamingMessage.setSequenceId(currentMessageId++);
+      wholeBodyStreamingMessage.setUniqueId(currentMessageId++);
+      return wholeBodyStreamingMessage;
+   }
+
+   public WholeBodyTrajectoryMessage setupTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   {
+      HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
+      trajectoryMessageFactory.setTrajectoryTime(0.0);
+      trajectoryMessageFactory.setEnableVelocity(true);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide);
+
+         if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
+            trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
+      }
+
+      if (isNeckJointspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeNeckTrajectoryMessage();
+      if (isChestTaskspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computeChestTrajectoryMessage(ReferenceFrame.getWorldFrame());
+      if (isPelvisTaskspaceOutputEnabled.getValue())
+         trajectoryMessageFactory.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(true);
       HumanoidMessageTools.configureForStreaming(wholeBodyTrajectoryMessage,
@@ -324,28 +359,28 @@ public class KSTTools
       return wholeBodyTrajectoryMessage;
    }
 
-   public WholeBodyTrajectoryMessage setupFinalizeStreamingMessage(KinematicsToolboxOutputStatus solutionToConvert)
+   public WholeBodyTrajectoryMessage setupFinalizeTrajectoryMessage(KinematicsToolboxOutputStatus solutionToConvert)
    {
       HumanoidMessageTools.resetWholeBodyTrajectoryToolboxMessage(wholeBodyTrajectoryMessage);
-      outputConverter.updateFullRobotModel(solutionToConvert);
-      outputConverter.setMessageToCreate(wholeBodyTrajectoryMessage);
-      outputConverter.setTrajectoryTime(0.5);
+      trajectoryMessageFactory.updateFullRobotModel(solutionToConvert);
+      trajectoryMessageFactory.setMessageToCreate(wholeBodyTrajectoryMessage);
+      trajectoryMessageFactory.setTrajectoryTime(0.5);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-            outputConverter.computeHandTrajectoryMessage(robotSide);
+            trajectoryMessageFactory.computeHandTrajectoryMessage(robotSide);
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
-            outputConverter.computeArmTrajectoryMessage(robotSide);
+            trajectoryMessageFactory.computeArmTrajectoryMessage(robotSide);
       }
 
       if (isNeckJointspaceOutputEnabled.getValue())
-         outputConverter.computeNeckTrajectoryMessage();
+         trajectoryMessageFactory.computeNeckTrajectoryMessage();
       if (isChestTaskspaceOutputEnabled.getValue())
-         outputConverter.computeChestTrajectoryMessage();
+         trajectoryMessageFactory.computeChestTrajectoryMessage();
       if (isPelvisTaskspaceOutputEnabled.getValue())
-         outputConverter.computePelvisTrajectoryMessage();
+         trajectoryMessageFactory.computePelvisTrajectoryMessage();
 
       wholeBodyTrajectoryMessage.getPelvisTrajectoryMessage().setEnableUserPelvisControl(false);
       HumanoidMessageTools.configureForOverriding(wholeBodyTrajectoryMessage);
@@ -446,7 +481,7 @@ public class KSTTools
 
    public KinematicsToolboxOutputConverter getOutputConverter()
    {
-      return outputConverter;
+      return trajectoryMessageFactory;
    }
 
    public FullHumanoidRobotModel getCurrentFullRobotModel()
