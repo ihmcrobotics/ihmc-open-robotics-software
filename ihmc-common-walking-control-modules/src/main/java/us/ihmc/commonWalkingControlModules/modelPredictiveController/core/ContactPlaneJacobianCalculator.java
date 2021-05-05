@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.ejml.data.DMatrix;
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -61,7 +60,7 @@ public class ContactPlaneJacobianCalculator
       double positiveExponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
       double negativeExponential = scale / positiveExponential;
 
-      setLinearJacobianCoefficients(contactPlane, scale * positiveExponential, negativeExponential, t3, t2, startColumn, positionJacobianToPack);
+      addLinearJacobianCoefficients(contactPlane, scale * positiveExponential, negativeExponential, t3, t2, startColumn, positionJacobianToPack);
    }
 
    public static void computeLinearVelocityJacobian(double scale,
@@ -78,7 +77,7 @@ public class ContactPlaneJacobianCalculator
       double thirdVelocityCoefficient = scale * 3 * time * time;
       double fourthVelocityCoefficient = scale * 2 * time;
 
-      setLinearJacobianCoefficients(contactPlane,
+      addLinearJacobianCoefficients(contactPlane,
                                     firstVelocityCoefficient,
                                     secondVelocityCoefficient,
                                     thirdVelocityCoefficient,
@@ -101,7 +100,7 @@ public class ContactPlaneJacobianCalculator
       double thirdVelocityCoefficient = scale * 6 * time;
       double fourthVelocityCoefficient = scale * 2;
 
-      setLinearJacobianCoefficients(contactPlane,
+      addLinearJacobianCoefficients(contactPlane,
                                     firstVelocityCoefficient,
                                     secondVelocityCoefficient,
                                     thirdVelocityCoefficient,
@@ -124,7 +123,7 @@ public class ContactPlaneJacobianCalculator
       double thirdVelocityCoefficient = scale * 6;
       double fourthVelocityCoefficient = 0.0;
 
-      setLinearJacobianCoefficients(contactPlane,
+      addLinearJacobianCoefficients(contactPlane,
                                     firstVelocityCoefficient,
                                     secondVelocityCoefficient,
                                     thirdVelocityCoefficient,
@@ -133,7 +132,7 @@ public class ContactPlaneJacobianCalculator
                                     jerkJacobianToPack);
    }
 
-   private static void setLinearJacobianCoefficients(MPCContactPlane contactPlane,
+   private static void addLinearJacobianCoefficients(MPCContactPlane contactPlane,
                                                      double firstCoefficient,
                                                      double secondCoefficient,
                                                      double thirdCoefficient,
@@ -152,16 +151,21 @@ public class ContactPlaneJacobianCalculator
 
             for (int ordinal = 0; ordinal < 3; ordinal++)
             {
-               jacobianToPack.unsafe_set(ordinal, startColumn, basisVector.getElement(ordinal) * firstCoefficient);
-               jacobianToPack.unsafe_set(ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondCoefficient);
+               unsafe_add(jacobianToPack, ordinal, startColumn, basisVector.getElement(ordinal) * firstCoefficient);
+               unsafe_add(jacobianToPack, ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondCoefficient);
 
-               jacobianToPack.unsafe_set(ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdCoefficient);
-               jacobianToPack.unsafe_set(ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthCoefficient);
+               unsafe_add(jacobianToPack, ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdCoefficient);
+               unsafe_add(jacobianToPack, ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthCoefficient);
             }
 
             startColumn += LinearMPCIndexHandler.coefficientsPerRho;
          }
       }
+   }
+
+   private static void unsafe_add(DMatrix matrix, int row, int col, double value)
+   {
+      matrix.unsafe_set(row, col, value + matrix.unsafe_get(row, col));
    }
 
    public static void computeRhoJacobian(int derivativeOrder,
