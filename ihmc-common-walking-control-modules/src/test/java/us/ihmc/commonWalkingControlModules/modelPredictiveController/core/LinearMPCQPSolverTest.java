@@ -8,7 +8,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;f
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -129,8 +131,8 @@ public class LinearMPCQPSolverTest
       dcmEndPositionCommand.addContactPlaneHelper(contactPlaneHelper);
 
 
-      DMatrixRMaj solverH_Expected = new DMatrixRMaj(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
-      DMatrixRMaj solverf_Expected = new DMatrixRMaj(indexHandler.getTotalProblemSize(), 1);
+      NativeMatrix solverH_Expected = new NativeMatrix(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
+      NativeMatrix solverf_Expected = new NativeMatrix(indexHandler.getTotalProblemSize(), 1);
 
       DMatrixRMaj expectedVRPStartPositionObjective = new DMatrixRMaj(3, 1);
       DMatrixRMaj expectedVRPStartVelocityObjective = new DMatrixRMaj(3, 1);
@@ -211,7 +213,7 @@ public class LinearMPCQPSolverTest
       FramePoint3D reconstructedVRPAtStart = new FramePoint3D();
       FramePoint3D reconstructedVRPAtEnd = new FramePoint3D();
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
 
       MatrixTools.addDiagonal(solverH_Expected, regularization);
       EjmlUnitTests.assertEquals(solverH_Expected, solver.solverInput_H, 1e-6);
@@ -1004,7 +1006,7 @@ public class LinearMPCQPSolverTest
       DMatrixRMaj rhoValueVectorEnd1 = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
       DMatrixRMaj rhoValueVectorEnd2 = new DMatrixRMaj(rhoHelper.getRhoSize(), 1);
 
-      DMatrixRMaj solution = solver.getSolution();
+      NativeMatrix solution = solver.getSolution();
       DMatrixRMaj rhoSolution1 = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
       DMatrixRMaj rhoSolution2 = new DMatrixRMaj(rhoHelper.getRhoSize() * 4, 1);
 
@@ -1223,21 +1225,29 @@ public class LinearMPCQPSolverTest
       EjmlUnitTests.assertEquals(solverInput_f_Expected, solver.solverInput_f, 1e-10);
    }
 
-   private static void addTask(QPInputTypeA input, DMatrixRMaj hessianToPack, DMatrixRMaj gradientToPack)
+   private static void addTask(NativeQPInputTypeA input, NativeMatrix hessianToPack, NativeMatrix gradientToPack)
    {
       addTaskToHessian(input.taskJacobian, hessianToPack);
       addTaskToGradient(input.taskJacobian, input.taskObjective, gradientToPack);
    }
 
-   private static void addTaskToHessian(DMatrixRMaj jacobian, DMatrixRMaj hessianToPack)
+   private static void addTaskToHessian(NativeMatrix jacobian, NativeMatrix hessianToPack)
    {
-      DMatrixRMaj jTJ = new DMatrixRMaj(hessianToPack);
-      CommonOps_DDRM.multInner(jacobian, jTJ);
-      CommonOps_DDRM.addEquals(hessianToPack, jTJ);
+      hessianToPack.multAddQuad(jacobian, identity(jacobian.getNumRows()));
    }
 
-   private static void addTaskToGradient(DMatrixRMaj jacobian, DMatrixRMaj objective, DMatrixRMaj gradientToPack)
+   private static void addTaskToGradient(NativeMatrix jacobian, NativeMatrix objective, NativeMatrix gradientToPack)
    {
-      CommonOps_DDRM.multAddTransA(-1.0, jacobian, objective, gradientToPack);
+      gradientToPack.multAddTransA(-1.0, jacobian, objective);
+   }
+
+   private static NativeMatrix identity(int size)
+   {
+      NativeMatrix identity = new NativeMatrix(size, size);
+      identity.zero();
+      for (int i = 0; i < size; i++)
+         identity.set(i, i, 1.0);
+
+      return identity;
    }
 }

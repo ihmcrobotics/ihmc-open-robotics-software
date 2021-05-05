@@ -6,10 +6,13 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeC;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
+import us.ihmc.matrixlib.NativeMatrix;
 
 /**
  * This class is meant to compute the cost-to-gos for the individual MPC commands submitted to the core, using the solution to the MPC problem.
@@ -19,8 +22,8 @@ public class LinearMPCSolutionInspection
    protected static final double epsilon = 1e-3;
    private final LinearMPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
-   protected final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
-   protected final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
+   protected final NativeQPInputTypeA qpInputTypeA = new NativeQPInputTypeA(0);
+   protected final NativeQPInputTypeC qpInputTypeC = new NativeQPInputTypeC(0);
 
    public LinearMPCSolutionInspection(LinearMPCIndexHandler indexHandler, double gravityZ)
    {
@@ -28,7 +31,7 @@ public class LinearMPCSolutionInspection
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
    }
 
-   public void inspectSolution(MPCCommandList commandList, DMatrixRMaj solution)
+   public void inspectSolution(MPCCommandList commandList, NativeMatrix solution)
    {
       qpInputTypeA.setNumberOfVariables(indexHandler.getTotalProblemSize());
       qpInputTypeC.setNumberOfVariables(indexHandler.getTotalProblemSize());
@@ -60,35 +63,35 @@ public class LinearMPCSolutionInspection
       }
    }
 
-   public void inspectRhoValueCommand(RhoObjectiveCommand command, DMatrixRMaj solution)
+   public void inspectRhoValueCommand(RhoObjectiveCommand command, NativeMatrix solution)
    {
       int offset = inputCalculator.calculateRhoValueCommand(qpInputTypeA, command);
       if (offset != -1)
          inspectInput(qpInputTypeA, solution);
    }
 
-   public void inspectMPCValueObjective(MPCValueCommand command, DMatrixRMaj solution)
+   public void inspectMPCValueObjective(MPCValueCommand command, NativeMatrix solution)
    {
       int offset = inputCalculator.calculateValueObjective(qpInputTypeA, command);
       if (offset != -1)
          command.setCostToGo(inspectInput(qpInputTypeA, solution));
    }
 
-   public void inspectCoMContinuityObjective(MPCContinuityCommand command, DMatrixRMaj solution)
+   public void inspectCoMContinuityObjective(MPCContinuityCommand command, NativeMatrix solution)
    {
       int offset = inputCalculator.calculateCoMContinuityObjective(qpInputTypeA, command);
       if (offset != -1)
          inspectInput(qpInputTypeA, solution);
    }
 
-   public void inspectVRPTrackingObjective(VRPTrackingCommand command, DMatrixRMaj solution)
+   public void inspectVRPTrackingObjective(VRPTrackingCommand command, NativeMatrix solution)
    {
       int offset = inputCalculator.calculateVRPTrackingObjective(qpInputTypeC, command);
       if (offset != -1)
          command.setCostToGo(inspectInput(qpInputTypeC, solution));
    }
 
-   public double inspectInput(QPInputTypeA input, DMatrixRMaj solution)
+   public double inspectInput(NativeQPInputTypeA input, NativeMatrix solution)
    {
       switch (input.getConstraintType())
       {
@@ -113,51 +116,43 @@ public class LinearMPCSolutionInspection
       return 0.0;
    }
 
-   public double inspectInput(QPInputTypeC input, DMatrixRMaj solution)
+   public double inspectInput(NativeQPInputTypeC input, NativeMatrix solution)
    {
-      int problemSize = indexHandler.getTotalProblemSize();
-
-      Hx.reshape(problemSize, 1);
-
-      CommonOps_DDRM.mult(input.getDirectCostHessian(), solution, Hx);
-      CommonOps_DDRM.multTransA(solution, Hx, cost);
-      CommonOps_DDRM.multAddTransA(input.getDirectCostGradient(), solution, cost);
-      CommonOps_DDRM.scale(input.getWeightScalar(), cost);
+      cost.multQuad(solution, input.getDirectCostHessian());
+      cost.multAddTransA(input.getDirectCostGradient(), solution);
+      cost.scale(input.getWeightScalar());
 
       return cost.get(0, 0);
    }
 
-   private final DMatrixRMaj solverInput_H = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj solverInput_f = new DMatrixRMaj(0, 0);
+   private final NativeMatrix solverInput_H = new NativeMatrix(0, 0);
+   private final NativeMatrix solverInput_f = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj Hx = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj cost = new DMatrixRMaj(1, 1);
+   private final NativeMatrix cost = new NativeMatrix(1, 1);
 
-   private double inspectObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, double taskWeight, DMatrixRMaj solution)
+   private double inspectObjective(NativeMatrix taskJacobian, NativeMatrix taskObjective, double taskWeight, NativeMatrix solution)
    {
       int problemSize = indexHandler.getTotalProblemSize();
 
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_f.reshape(problemSize, 1);
-      Hx.reshape(problemSize, 1);
 
       solverInput_H.zero();
       solverInput_f.zero();
 
       LinearMPCQPSolver.addObjective(taskJacobian, taskObjective, taskWeight, problemSize, 0, solverInput_H, solverInput_f);
 
-      CommonOps_DDRM.mult(solverInput_H, solution, Hx);
-      CommonOps_DDRM.multTransA(solution, Hx, cost);
-      CommonOps_DDRM.multAddTransA(solverInput_f, solution, cost);
+      cost.multQuad(solution, solverInput_H);
+      cost.multAddTransA(solverInput_f, solution);
 
       return cost.get(0, 0);
    }
 
-   private final DMatrixRMaj solverInput_Aeq = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj solverInput_beq = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj solverOutput_beq = new DMatrixRMaj(0, 0);
+   private final NativeMatrix solverInput_Aeq = new NativeMatrix(0, 0);
+   private final NativeMatrix solverInput_beq = new NativeMatrix(0, 0);
+   private final NativeMatrix solverOutput_beq = new NativeMatrix(0, 0);
 
-   public void inspectEqualityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj solution)
+   public void inspectEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix solution)
    {
       int problemSize = indexHandler.getTotalProblemSize();
       int constraints = taskJacobian.getNumRows();
@@ -170,10 +165,7 @@ public class LinearMPCSolutionInspection
 
       LinearMPCQPSolver.addEqualityConstraint(taskJacobian, taskObjective, problemSize, solverInput_Aeq, solverInput_beq);
 
-      solverOutput_beq.reshape(constraints, problemSize);
-      solverOutput_beq.zero();
-
-      CommonOps_DDRM.mult(taskJacobian, solution, solverOutput_beq);
+      solverOutput_beq.mult(taskJacobian, solution);
 
       for (int i = 0; i < constraints; i++)
       {
@@ -182,11 +174,11 @@ public class LinearMPCSolutionInspection
       }
    }
 
-   private final DMatrixRMaj solverInput_Ain = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj solverInput_bin = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj solverOutput_bin = new DMatrixRMaj(0, 0);
+   private final NativeMatrix solverInput_Ain = new NativeMatrix(0, 0);
+   private final NativeMatrix solverInput_bin = new NativeMatrix(0, 0);
+   private final NativeMatrix solverOutput_bin = new NativeMatrix(0, 0);
 
-   public void inspectMotionLesserOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj solution)
+   public void inspectMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix solution)
    {
       int problemSize = indexHandler.getTotalProblemSize();
       int constraints = taskJacobian.getNumRows();
@@ -199,10 +191,7 @@ public class LinearMPCSolutionInspection
 
       LinearMPCQPSolver.addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Ain, solverInput_bin);
 
-      solverOutput_bin.reshape(constraints, problemSize);
-      solverOutput_bin.zero();
-
-      CommonOps_DDRM.mult(taskJacobian, solution, solverOutput_bin);
+      solverOutput_bin.mult(taskJacobian, solution);
 
       for (int i = 0; i < constraints; i++)
       {
@@ -211,7 +200,7 @@ public class LinearMPCSolutionInspection
       }
    }
 
-   public void inspectMotionGreaterOrEqualInequalityConstraint(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj solution)
+   public void inspectMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, NativeMatrix solution)
    {
       int problemSize = indexHandler.getTotalProblemSize();
       int constraints = taskJacobian.getNumRows();
@@ -224,10 +213,7 @@ public class LinearMPCSolutionInspection
 
       LinearMPCQPSolver.addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Ain, solverInput_bin);
 
-      solverOutput_bin.reshape(constraints, problemSize);
-      solverOutput_bin.zero();
-
-      CommonOps_DDRM.mult(taskJacobian, solution, solverOutput_bin);
+      solverOutput_bin.mult(taskJacobian, solution);
 
       for (int i = 0; i < constraints; i++)
       {
