@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.MatrixMissingTools;
@@ -243,6 +244,7 @@ public class CoMPositionContinuityCommandTest
       valueStartOf2.setY(0.0 * solution.get(startOf2 + 2, 0) + solution.get(startOf2 + 3, 0));
       valueStartOf2.setZ(0.0 * solution.get(startOf2 + 4, 0) + solution.get(startOf2 + 5, 0));
 
+      LogTools.info("made it here.");
       for (int rhoIdx  = 0; rhoIdx < rhoHelper1.getRhoSize(); rhoIdx++)
       {
          int startIdx = indexHandler.getRhoCoefficientStartIndex(0) + 4 * rhoIdx;
