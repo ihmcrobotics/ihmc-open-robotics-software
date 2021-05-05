@@ -14,9 +14,11 @@ public enum ValkyrieMultiContactEnvironment
    _30DEG_SLOPE_ON_SIDE,
    GROUND_AND_WALLS,
    TILTED_TILES,
-   BOXES_FOR_HELP_GETTING_DOWN;
+   BOXES_FOR_HELP_GETTING_DOWN,
+   FLAT_HAND_HOLDS,
+   TILTED_HANDHOLDS;
 
-   public static ValkyrieMultiContactEnvironment environment = FLAT_IN_FRONT;
+   public static ValkyrieMultiContactEnvironment environment = FLAT_HAND_HOLDS;
 
    public static PlanarRegionsList createPlanarRegions()
    {
@@ -118,6 +120,47 @@ public enum ValkyrieMultiContactEnvironment
 
                generator.translate(boxLength, 0.0, 0.0);
                generator.addCubeReferencedAtBottomMiddle(boxLength, boxWidth, 0.10);
+            }
+
+            return generator.getPlanarRegionsList();
+         }
+         case FLAT_HAND_HOLDS:
+         {
+            generator.addRectangle(5.0, 5.0);
+
+            double boxHeight = 0.91;
+            double boxWidth = 0.3;
+            double offsetX = 0.35;
+            double offsetY = 0.45;
+            double offsetZ = 0.7;
+
+            for (RobotSide robotSide : RobotSide.values())
+            {
+               generator.identity();
+               generator.translate(offsetX, robotSide.negateIfRightSide(offsetY), offsetZ);
+               generator.addCubeReferencedAtBottomMiddle(boxWidth, boxWidth, boxHeight - offsetZ);
+            }
+
+            return generator.getPlanarRegionsList();
+         }
+
+         case TILTED_HANDHOLDS:
+         {
+            generator.addRectangle(5.0, 5.0);
+
+            double boxHeight = 0.85;
+            double boxWidth = 0.3;
+            double offsetX = 0.0;
+            double offsetY = 0.45;
+            double offsetZ = 0.7;
+            double angle = Math.toRadians(45.0);
+
+            for (RobotSide robotSide : RobotSide.values())
+            {
+               generator.identity();
+               generator.translate(offsetX, robotSide.negateIfRightSide(offsetY), offsetZ);
+               generator.rotate(angle, Axis3D.Y);
+               generator.addCubeReferencedAtBottomMiddle(boxWidth, boxWidth, boxHeight - offsetZ);
             }
 
             return generator.getPlanarRegionsList();
