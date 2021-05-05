@@ -126,6 +126,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public boolean initialize()
    {
       isDone.set(false);
+      initialTimestamp = System.nanoTime();
       return true;
    }
 
@@ -136,8 +137,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    {
       try
       {
-         if (initialTimestamp == -1L)
-            initialTimestamp = System.nanoTime();
          time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
 
          if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
