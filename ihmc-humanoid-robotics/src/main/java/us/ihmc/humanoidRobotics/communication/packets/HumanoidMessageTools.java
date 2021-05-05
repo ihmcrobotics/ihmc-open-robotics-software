@@ -1805,6 +1805,7 @@ public class HumanoidMessageTools
    public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
       configureForStreaming(messageToModify.getHeadTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getNeckTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getChestTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getPelvisTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getLeftArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
