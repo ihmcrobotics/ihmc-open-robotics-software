@@ -286,8 +286,49 @@ public class RigidBodyJointControlHelper
          return false;
       }
 
-      // The timestamp is being cleared in the overrideTrajectory method, need to save it to use it further down.
-      double previousStreamTimestampOffset = streamTimestampOffset.getValue();
+      double streamTimeOffset = 0.0;
+      double streamTimestampOffset = this.streamTimestampOffset.getValue();
+      double streamTimestampSource = this.streamTimestampSource.getValue();
+
+      if (command.getExecutionMode() == ExecutionMode.STREAM)
+      { // Need to do time checks before moving on.
+         if (command.getTimestamp() <= 0)
+         {
+            streamTimestampOffset = Double.NaN;
+            streamTimestampSource = Double.NaN;
+         }
+         else
+         {
+            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
+
+            if (!Double.isNaN(streamTimestampSource) && senderTime < streamTimestampSource)
+            {
+               // Messages are out of order which is fine, we just don't want to handle the new message.
+               return true;
+            }
+
+            streamTimestampSource = senderTime;
+
+            streamTimeOffset = time.getValue() - senderTime;
+
+            if (Double.isNaN(streamTimestampOffset))
+            {
+               streamTimestampOffset = streamTimeOffset;
+            }
+            else
+            {
+               /*
+                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
+                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
+                * for safety.
+                */
+               if (Math.abs(streamTimeOffset - streamTimestampOffset) > 0.5)
+                  streamTimestampOffset = streamTimeOffset;
+               else
+                  streamTimestampOffset = Math.min(streamTimeOffset, streamTimestampOffset);
+            }
+         }
+      }
 
       // Both OVERRIDE and STREAM should override the current trajectory stored.
       boolean override = command.getExecutionMode() != ExecutionMode.QUEUE;
@@ -326,37 +367,10 @@ public class RigidBodyJointControlHelper
          usingWeightFromMessage.set(messageHasValidWeights);
       }
 
-      double timeOffset = 0.0;
-
       if (command.getExecutionMode() == ExecutionMode.STREAM)
       {
-         if (command.getTimestamp() <= 0)
-         {
-            streamTimestampOffset.setToNaN();
-            streamTimestampSource.setToNaN();
-         }
-         else
-         {
-            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
-            streamTimestampSource.set(senderTime);
-            timeOffset = time.getValue() - senderTime;
-            if (Double.isNaN(previousStreamTimestampOffset))
-            {
-               streamTimestampOffset.set(timeOffset);
-            }
-            else
-            {
-               /*
-                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
-                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
-                * for safety.
-                */
-               if (Math.abs(timeOffset - previousStreamTimestampOffset) > 0.5)
-                  streamTimestampOffset.set(timeOffset);
-               else
-                  streamTimestampOffset.set(Math.min(timeOffset, previousStreamTimestampOffset));
-            }
-         }
+         this.streamTimestampOffset.set(streamTimestampOffset);
+         this.streamTimestampSource.set(streamTimestampSource);
       }
 
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
@@ -381,7 +395,7 @@ public class RigidBodyJointControlHelper
 
             // When a message is delayed during shipping over network, timeOffset > streamTimestampOffset.getValue().
             // This new time will put the trajectory point in the past, closer to when it should have been received.
-            double t0 = streamTimestampOffset.isNaN() ? 0.0 : streamTimestampOffset.getValue() - timeOffset;
+            double t0 = Double.isNaN(streamTimestampOffset) ? 0.0 : streamTimestampOffset - streamTimeOffset;
             double q0 = trajectoryPoint.getPosition();
             double qd0 = trajectoryPoint.getVelocity();
 

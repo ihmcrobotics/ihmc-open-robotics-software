@@ -114,8 +114,10 @@ public class PelvisICPBasedTranslationManager
    private final YoDouble streamTimestampSource = new YoDouble("pelvisTranslationStreamTimestampSource", registry);
    private final TaskspaceTrajectoryStatusMessageHelper statusHelper = new TaskspaceTrajectoryStatusMessageHelper("pelvisXY");
 
-   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox, double pelvisTranslationICPSupportPolygonSafeMargin,
-                                           BipedSupportPolygons bipedSupportPolygons, YoRegistry parentRegistry)
+   public PelvisICPBasedTranslationManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                           double pelvisTranslationICPSupportPolygonSafeMargin,
+                                           BipedSupportPolygons bipedSupportPolygons,
+                                           YoRegistry parentRegistry)
    {
       dt = controllerToolbox.getControlDT();
 
@@ -307,12 +309,9 @@ public class PelvisICPBasedTranslationManager
       }
       else if (se3Trajectory.getExecutionMode() == ExecutionMode.STREAM)
       {
-         isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(se3Trajectory.getCommandId());
-         initialPelvisPositionTime.set(yoTime.getDoubleValue());
-
          double timeOffset = 0.0;
 
+         // Need to do time checks before moving on.
          if (se3Trajectory.getTimestamp() <= 0)
          {
             streamTimestampOffset.setToNaN();
@@ -321,10 +320,18 @@ public class PelvisICPBasedTranslationManager
          else
          {
             double senderTime = Conversions.nanosecondsToSeconds(se3Trajectory.getTimestamp());
-            timeOffset = yoTime.getValue() - senderTime;
+
+            if (!streamTimestampSource.isNaN() && senderTime < streamTimestampSource.getValue())
+            {
+               // Messages are out of order which is fine, we just don't want to handle the new message.
+               return;
+            }
+
             streamTimestampSource.set(senderTime);
 
-            if (streamTimestampOffset.isNaN())
+            timeOffset = yoTime.getValue() - senderTime;
+
+            if (Double.isNaN(streamTimestampOffset.getValue()))
             {
                streamTimestampOffset.set(timeOffset);
             }
@@ -341,6 +348,10 @@ public class PelvisICPBasedTranslationManager
                   streamTimestampOffset.set(Math.min(timeOffset, streamTimestampOffset.getValue()));
             }
          }
+
+         isReadyToHandleQueuedCommands.set(true);
+         clearCommandQueue(se3Trajectory.getCommandId());
+         initialPelvisPositionTime.set(yoTime.getDoubleValue());
 
          if (se3Trajectory.getNumberOfTrajectoryPoints() != 1)
          {
@@ -382,7 +393,8 @@ public class PelvisICPBasedTranslationManager
          positionTrajectoryGenerator.initialize();
          isTrajectoryStopped.set(false);
          isRunning.set(true);
-         statusHelper.registerNewTrajectory(se3Trajectory);
+         if (se3Trajectory.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(se3Trajectory);
          return;
       }
       else
