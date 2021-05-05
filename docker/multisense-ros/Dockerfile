@@ -20,11 +20,9 @@ RUN chmod a+x /home/robotlab/multisense_entrypoint.sh
 USER robotlab
 WORKDIR /home/robotlab
 
-RUN mkdir -p dev/multisense_ws/src
+RUN mkdir -p dev/multisense_ws
+VOLUME /home/robotlab/dev/multisense_ws
 WORKDIR /home/robotlab/dev/multisense_ws
-
-RUN cd src \
- && git clone --recurse-submodules https://github.com/carnegierobotics/multisense_ros.git
 
 ENTRYPOINT ["/home/robotlab/multisense_entrypoint.sh"]
 CMD ["bash"]
