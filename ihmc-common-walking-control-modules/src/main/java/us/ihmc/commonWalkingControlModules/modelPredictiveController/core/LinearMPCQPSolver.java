@@ -457,12 +457,13 @@ public class LinearMPCQPSolver
       }
 
       // Compute: H += J^T W J
-      MatrixTools.multAddBlockInner(taskWeight, taskJacobian, solverInput_H, offset, offset);
+      // TODO figure out an efficient inner product in eigen
+      solverInput_H.multAddBlockTransA(taskWeight, taskJacobian, taskJacobian, offset, offset);
       if (debug && solverInput_H.containsNaN())
          throw new RuntimeException("error");
 
       // Compute: f += - J^T W Objective
-      MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+      solverInput_f.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, offset, 0);
       if (debug && solverInput_f.containsNaN())
          throw new RuntimeException("error");
    }
@@ -504,9 +505,7 @@ public class LinearMPCQPSolver
          throw new RuntimeException("error");
 
       // Compute: f += - J^T W Objective
-      // TODO add a scale as an input to the mult add block method
-      tempJtW.scale(-1.0);
-      solverInput_f.multAddBlock(tempJtW, taskObjective, offset, 0);
+      solverInput_f.multAddBlock(-1.0, tempJtW, taskObjective, offset, 0);
       if (debug && solverInput_f.containsNaN())
          throw new RuntimeException("error");
    }
@@ -553,8 +552,8 @@ public class LinearMPCQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.reshape(previousSize + taskSize, totalProblemSize, true);
-      solverInput_beq.reshape(previousSize + taskSize, 1, true);
+      solverInput_Aeq.conservativeReshapeRows(previousSize + taskSize);
+      solverInput_beq.conservativeReshapeRows(previousSize + taskSize);
 
       solverInput_Aeq.insert(taskJacobian, previousSize, colOffset);
       solverInput_beq.insert(taskObjective, previousSize, 0);
@@ -632,9 +631,10 @@ public class LinearMPCQPSolver
       int previousSize = solverInput_bin.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Ain.reshape(previousSize + taskSize, totalProblemSize, true);
-      solverInput_bin.reshape(previousSize + taskSize, 1, true);
+      solverInput_Ain.conservativeReshapeRows(previousSize + taskSize);
+      solverInput_bin.conservativeReshapeRows(previousSize + taskSize);
 
+      taskJacobian.scale(sign);
       solverInput_Ain.insert(taskJacobian, previousSize, colOffset);
       solverInput_bin.insert(taskObjective, previousSize, 0);
    }
