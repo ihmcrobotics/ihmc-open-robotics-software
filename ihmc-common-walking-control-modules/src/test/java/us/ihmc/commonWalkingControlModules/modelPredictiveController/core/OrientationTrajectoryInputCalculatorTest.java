@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import org.apache.batik.svggen.font.table.CmapFormat;
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
@@ -11,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.Or
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationTrajectoryCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.OrientationValueCommand;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.RandomNumbers;
@@ -76,7 +78,7 @@ public class OrientationTrajectoryInputCalculatorTest
       qpSolver.setFirstOrientationVariableRegularization(1.0);
       qpSolver.setSecondOrientationVariableRegularization(1.0);
 
-      QPInputTypeA qpInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA qpInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -193,7 +195,7 @@ public class OrientationTrajectoryInputCalculatorTest
       qpSolver.setFirstOrientationVariableRegularization(1.0);
       qpSolver.setSecondOrientationVariableRegularization(1.0);
 
-      QPInputTypeA qpInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA qpInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -314,8 +316,8 @@ public class OrientationTrajectoryInputCalculatorTest
       SE3MPCQPSolver qpSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
       SE3MPCQPSolver compactSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
 
-      QPInputTypeA regularInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
-      QPInputTypeA compactInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA regularInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA compactInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -386,8 +388,8 @@ public class OrientationTrajectoryInputCalculatorTest
       SE3MPCQPSolver qpSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
       SE3MPCQPSolver compactSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
 
-      QPInputTypeA regularInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
-      QPInputTypeA compactInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA regularInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA compactInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -470,8 +472,8 @@ public class OrientationTrajectoryInputCalculatorTest
       SE3MPCQPSolver qpSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
       SE3MPCQPSolver compactSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
 
-      QPInputTypeA regularInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
-      QPInputTypeA compactInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA regularInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA compactInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -552,8 +554,8 @@ public class OrientationTrajectoryInputCalculatorTest
       SE3MPCQPSolver qpSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
       SE3MPCQPSolver compactSolver = new SE3MPCQPSolver(indexHandler, 0.001, gravityZ, new YoRegistry("test"));
 
-      QPInputTypeA regularInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
-      QPInputTypeA compactInput = new QPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA regularInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
+      NativeQPInputTypeA compactInput = new NativeQPInputTypeA(indexHandler.getTotalProblemSize());
 
       Random random = new Random(1738L);
       for (int i = 0; i < 100; i++)
@@ -594,7 +596,7 @@ public class OrientationTrajectoryInputCalculatorTest
 
 
 
-   private static double rowSum(int row, DMatrixRMaj matrix)
+   private static double rowSum(int row, DMatrix matrix)
    {
       double sum = 0.0;
       for (int i = 0; i < matrix.getNumCols(); i++)
@@ -603,7 +605,7 @@ public class OrientationTrajectoryInputCalculatorTest
       return sum;
    }
 
-   private static double colSum(int col, DMatrixRMaj matrix)
+   private static double colSum(int col, DMatrix matrix)
    {
       double sum = 0.0;
       for (int i = 0; i < matrix.getNumRows(); i++)

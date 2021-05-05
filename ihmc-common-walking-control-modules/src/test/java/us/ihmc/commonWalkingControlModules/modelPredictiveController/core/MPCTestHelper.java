@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
@@ -13,8 +14,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.MatrixMissingTools;
 
+import java.lang.annotation.Native;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.IntFunction;
@@ -41,62 +44,62 @@ public class MPCTestHelper
       return contactPolygon;
    }
 
-   public static DMatrixRMaj getDCMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getDCMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getDCMPositionJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
    }
 
-   public static DMatrixRMaj getDCMPositionJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static NativeMatrix getDCMPositionJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
       return getDCMPositionJacobian(time, omega, contactPlane.getRhoSize(), contactPlane::getBasisVector);
    }
 
-   public static DMatrixRMaj getDCMPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
+   public static NativeMatrix getDCMPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
    {
-      DMatrixRMaj jacobian = getCoMPositionJacobian(time, omega, rhoSize, basisVectors);
-      CommonOps_DDRM.addEquals(jacobian, 1.0 / omega, getCoMVelocityJacobian(time, omega, rhoSize, basisVectors));
+      NativeMatrix jacobian = getCoMPositionJacobian(time, omega, rhoSize, basisVectors);
+      jacobian.addEquals(1.0 / omega, getCoMVelocityJacobian(time, omega, rhoSize, basisVectors));
 
       return jacobian;
    }
 
-   public static DMatrixRMaj getVRPPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getVRPPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getVRPPositionJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
    }
 
-   public static DMatrixRMaj getVRPPositionJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static NativeMatrix getVRPPositionJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
       return getVRPPositionJacobian(time, omega, contactPlane.getRhoSize(), contactPlane::getBasisVector);
    }
 
-   public static DMatrixRMaj getVRPPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
+   public static NativeMatrix getVRPPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
    {
-      DMatrixRMaj jacobian = getCoMPositionJacobian(time, omega, rhoSize, basisVectors);
-      CommonOps_DDRM.addEquals(jacobian, -1.0 / (omega * omega), getCoMAccelerationJacobian(time, omega, rhoSize, basisVectors));
+      NativeMatrix jacobian = getCoMPositionJacobian(time, omega, rhoSize, basisVectors);
+      jacobian.addEquals(-1.0 / (omega * omega), getCoMAccelerationJacobian(time, omega, rhoSize, basisVectors));
 
       return jacobian;
    }
 
-   public static DMatrixRMaj getVRPVelocityJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getVRPVelocityJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
-      DMatrixRMaj jacobian = getCoMVelocityJacobian(time, omega, rhoHelper);
-      CommonOps_DDRM.addEquals(jacobian, -1.0 / (omega * omega), getCoMJerkJacobian(time, omega, rhoHelper));
+      NativeMatrix jacobian = getCoMVelocityJacobian(time, omega, rhoHelper);
+      jacobian.addEquals(-1.0 / (omega * omega), getCoMJerkJacobian(time, omega, rhoHelper));
 
       return jacobian;
    }
 
-   public static DMatrixRMaj getVectorOfCoefficients(double gravityZ, ContactStateMagnitudeToForceMatrixHelper rhoHelper, DMatrixRMaj solution)
+   public static DMatrixRMaj getVectorOfCoefficients(double gravityZ, ContactStateMagnitudeToForceMatrixHelper rhoHelper, NativeMatrix solution)
    {
       DMatrixRMaj contactForceCoefficients = getContactForceCoefficients(rhoHelper, solution);
 
       DMatrixRMaj coefficients = new DMatrixRMaj(3, 6);
 
-      coefficients.set(0, 4, solution.get(0));
-      coefficients.set(0, 5, solution.get(1));
-      coefficients.set(1, 4, solution.get(2));
-      coefficients.set(1, 5, solution.get(3));
-      coefficients.set(2, 4, solution.get(4));
-      coefficients.set(2, 5, solution.get(5));
+      coefficients.set(0, 4, solution.get(0, 0));
+      coefficients.set(0, 5, solution.get(1, 0));
+      coefficients.set(1, 4, solution.get(2, 0));
+      coefficients.set(1, 5, solution.get(3, 0));
+      coefficients.set(2, 4, solution.get(4, 0));
+      coefficients.set(2, 5, solution.get(5, 0));
 
       MatrixTools.addMatrixBlock(coefficients, 0, 0, contactForceCoefficients, 0, 0, 3, 4, 1.0);
 
@@ -105,7 +108,7 @@ public class MPCTestHelper
       return coefficients;
    }
 
-   public static DMatrixRMaj getContactForceCoefficients(ContactStateMagnitudeToForceMatrixHelper rhoHelper, DMatrixRMaj solution)
+   public static DMatrixRMaj getContactForceCoefficients(ContactStateMagnitudeToForceMatrixHelper rhoHelper, NativeMatrix solution)
    {
       DMatrixRMaj coefficients = new DMatrixRMaj(3, 4);
 
@@ -114,35 +117,35 @@ public class MPCTestHelper
          int startIdx = 6 + 4 * rhoIdx;
 
          FrameVector3DReadOnly basisVector = rhoHelper.getBasisVector(rhoIdx);
-         coefficients.add(0, 0, basisVector.getX() * solution.get(startIdx));
-         coefficients.add(1, 0, basisVector.getY() * solution.get(startIdx));
-         coefficients.add(2, 0, basisVector.getZ() * solution.get(startIdx));
+         coefficients.add(0, 0, basisVector.getX() * solution.get(startIdx, 0));
+         coefficients.add(1, 0, basisVector.getY() * solution.get(startIdx, 0));
+         coefficients.add(2, 0, basisVector.getZ() * solution.get(startIdx, 0));
 
-         coefficients.add(0, 1, basisVector.getX() * solution.get(startIdx + 1));
-         coefficients.add(1, 1, basisVector.getY() * solution.get(startIdx + 1));
-         coefficients.add(2, 1, basisVector.getZ() * solution.get(startIdx + 1));
+         coefficients.add(0, 1, basisVector.getX() * solution.get(startIdx + 1, 0));
+         coefficients.add(1, 1, basisVector.getY() * solution.get(startIdx + 1, 0));
+         coefficients.add(2, 1, basisVector.getZ() * solution.get(startIdx + 1, 0));
 
-         coefficients.add(0, 2, basisVector.getX() * solution.get(startIdx + 2));
-         coefficients.add(1, 2, basisVector.getY() * solution.get(startIdx + 2));
-         coefficients.add(2, 2, basisVector.getZ() * solution.get(startIdx + 2));
+         coefficients.add(0, 2, basisVector.getX() * solution.get(startIdx + 2, 0));
+         coefficients.add(1, 2, basisVector.getY() * solution.get(startIdx + 2, 0));
+         coefficients.add(2, 2, basisVector.getZ() * solution.get(startIdx + 2, 0));
 
-         coefficients.add(0, 3, basisVector.getX() * solution.get(startIdx + 3));
-         coefficients.add(1, 3, basisVector.getY() * solution.get(startIdx + 3));
-         coefficients.add(2, 3, basisVector.getZ() * solution.get(startIdx + 3));
+         coefficients.add(0, 3, basisVector.getX() * solution.get(startIdx + 3, 0));
+         coefficients.add(1, 3, basisVector.getY() * solution.get(startIdx + 3, 0));
+         coefficients.add(2, 3, basisVector.getZ() * solution.get(startIdx + 3, 0));
       }
 
       return coefficients;
    }
 
-   public static DMatrixRMaj getContactValueJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static NativeMatrix getContactValueJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
       return getContactValueJacobian(time, omega, contactPlane.getRhoSize());
    }
 
-   public static DMatrixRMaj getContactValueJacobian(double time, double omega, int rhoSize)
+   public static NativeMatrix getContactValueJacobian(double time, double omega, int rhoSize)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
-      DMatrixRMaj jacobian = new DMatrixRMaj(rhoSize, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(rhoSize, coefficients);
 
       double c2 = Math.exp(omega * time);
       double c3 = Math.exp(-omega * time);
@@ -162,15 +165,15 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getContactRateJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static NativeMatrix getContactRateJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
       return getContactRateJacobian(time, omega, contactPlane.getRhoSize());
    }
 
-   public static DMatrixRMaj getContactRateJacobian(double time, double omega, int rhoSize)
+   public static NativeMatrix getContactRateJacobian(double time, double omega, int rhoSize)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
-      DMatrixRMaj jacobian = new DMatrixRMaj(rhoSize, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(rhoSize, coefficients);
 
       double c2 = omega * Math.exp(omega * time);
       double c3 = -omega * Math.exp(-omega * time);
@@ -190,15 +193,15 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getContactAccelerationJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static NativeMatrix getContactAccelerationJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
       return getContactAccelerationJacobian(time, omega, contactPlane.getRhoSize());
    }
 
-   public static DMatrixRMaj getContactAccelerationJacobian(double time, double omega, int rhoSize)
+   public static NativeMatrix getContactAccelerationJacobian(double time, double omega, int rhoSize)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
-      DMatrixRMaj jacobian = new DMatrixRMaj(rhoSize, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(rhoSize, coefficients);
 
       double c2 = omega * omega * Math.exp(omega * time);
       double c3 = omega * omega * Math.exp(-omega * time);
@@ -253,15 +256,15 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getCoMPositionJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getCoMPositionJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
    }
 
-   public static FramePoint3DReadOnly computeCoMPosition(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static FramePoint3DReadOnly computeCoMPosition(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
-      DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
-      CommonOps_DDRM.mult(getCoMPositionJacobian(time, omega, contactPlane), coefficientVector, solutionPosition);
+      NativeMatrix solutionPosition = new NativeMatrix(3, 1);
+      solutionPosition.mult(getCoMPositionJacobian(time, omega, contactPlane), coefficientVector);
       solutionPosition.add(2, 0, 0.5 * time * time * gravity);
 
       FramePoint3D position = new FramePoint3D();
@@ -270,10 +273,10 @@ public class MPCTestHelper
       return position;
    }
 
-   public static FramePoint3DReadOnly computeCoMPosition(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane... contactPlanes)
+   public static FramePoint3DReadOnly computeCoMPosition(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane... contactPlanes)
    {
-      DMatrixRMaj solutionPosition = new DMatrixRMaj(3, 1);
-      CommonOps_DDRM.mult(getCoMPositionJacobian(time, omega, contactPlanes), coefficientVector, solutionPosition);
+      NativeMatrix solutionPosition = new NativeMatrix(3, 1);
+      solutionPosition.mult(getCoMPositionJacobian(time, omega, contactPlanes), coefficientVector);
       solutionPosition.add(2, 0, 0.5 * time * time * gravity);
 
       FramePoint3D position = new FramePoint3D();
@@ -282,10 +285,10 @@ public class MPCTestHelper
       return position;
    }
 
-   public static FrameVector3DReadOnly computeCoMVelocity(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static FrameVector3DReadOnly computeCoMVelocity(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
-      DMatrixRMaj solutionVelocity = new DMatrixRMaj(3, 1);
-      CommonOps_DDRM.mult(getCoMVelocityJacobian(time, omega, contactPlane), coefficientVector, solutionVelocity);
+      NativeMatrix solutionVelocity = new NativeMatrix(3, 1);
+      solutionVelocity.mult(getCoMVelocityJacobian(time, omega, contactPlane), coefficientVector);
       solutionVelocity.add(2, 0, time * gravity);
 
       FrameVector3D velocity = new FrameVector3D();
@@ -294,10 +297,10 @@ public class MPCTestHelper
       return velocity;
    }
 
-   public static FrameVector3DReadOnly computeCoMAcceleration(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static FrameVector3DReadOnly computeCoMAcceleration(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
-      DMatrixRMaj solutionAcceleration = new DMatrixRMaj(3, 1);
-      CommonOps_DDRM.mult(getCoMAccelerationJacobian(time, omega, contactPlane), coefficientVector, solutionAcceleration);
+      NativeMatrix solutionAcceleration = new NativeMatrix(3, 1);
+      solutionAcceleration.mult(getCoMAccelerationJacobian(time, omega, contactPlane), coefficientVector);
       solutionAcceleration.add(2, 0, time * gravity);
 
       FrameVector3D acceleration = new FrameVector3D();
@@ -307,7 +310,7 @@ public class MPCTestHelper
    }
 
 
-   public static FramePoint3DReadOnly computeDCMPosition(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static FramePoint3DReadOnly computeDCMPosition(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
       FramePoint3D dcmPosition = new FramePoint3D();
       CapturePointTools.computeCapturePointPosition(computeCoMPosition(time, omega, gravity, coefficientVector, contactPlane),
@@ -318,7 +321,7 @@ public class MPCTestHelper
       return dcmPosition;
    }
 
-   public static FrameVector3DReadOnly computeDCMVelocity(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static FrameVector3DReadOnly computeDCMVelocity(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
       FrameVector3D dcmVelocity = new FrameVector3D();
       dcmVelocity.scaleAdd(1.0 / omega, computeCoMAcceleration(time, omega, gravity, coefficientVector, contactPlane), computeCoMVelocity(time, omega, gravity, coefficientVector, contactPlane));
@@ -326,7 +329,7 @@ public class MPCTestHelper
       return dcmVelocity;
    }
 
-   public static FramePoint3DReadOnly computeVRPPosition(double time, double omega, double gravity, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static FramePoint3DReadOnly computeVRPPosition(double time, double omega, double gravity, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
       FramePoint3D dcmPosition = new FramePoint3D();
       CapturePointTools.computeCentroidalMomentumPivot(computeDCMPosition(time, omega, gravity, coefficientVector, contactPlane),
@@ -337,23 +340,23 @@ public class MPCTestHelper
       return dcmPosition;
    }
 
-   public static DMatrixRMaj computeRhoValueVector(double time, double omega, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static NativeMatrix computeRhoValueVector(double time, double omega, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(contactPlane.getRhoSize(), 1);
-      CommonOps_DDRM.mult(getContactValueJacobian(time, omega, contactPlane), coefficientVector, rhoValueVector);
+      NativeMatrix rhoValueVector = new NativeMatrix(contactPlane.getRhoSize(), 1);
+      rhoValueVector.mult(getContactValueJacobian(time, omega, contactPlane), coefficientVector);
 
       return rhoValueVector;
    }
 
-   public static DMatrixRMaj computeRhoAccelerationVector(double time, double omega, DMatrixRMaj coefficientVector, MPCContactPlane contactPlane)
+   public static NativeMatrix computeRhoAccelerationVector(double time, double omega, NativeMatrix coefficientVector, MPCContactPlane contactPlane)
    {
-      DMatrixRMaj rhoValueVector = new DMatrixRMaj(contactPlane.getRhoSize(), 1);
-      CommonOps_DDRM.mult(getContactAccelerationJacobian(time, omega, contactPlane), coefficientVector, rhoValueVector);
+      NativeMatrix rhoValueVector = new NativeMatrix(contactPlane.getRhoSize(), 1);
+      rhoValueVector.mult(getContactAccelerationJacobian(time, omega, contactPlane), coefficientVector);
 
       return rhoValueVector;
    }
 
-   public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, MPCContactPlane... contactPlanes)
+   public static NativeMatrix getCoMPositionJacobian(double time, double omega, MPCContactPlane... contactPlanes)
    {
       if (contactPlanes == null)
          return getCoMPositionJacobian(time, omega, 0, null);
@@ -368,10 +371,10 @@ public class MPCTestHelper
       return getCoMPositionJacobian(time, omega, basisVectors.size(), basisVectors::get);
    }
 
-   public static DMatrixRMaj getCoMPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
+   public static NativeMatrix getCoMPositionJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(3, coefficients);
 
       double c0 = time;
       double c1 = 1.0;
@@ -404,20 +407,20 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getCoMVelocityJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getCoMVelocityJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getCoMVelocityJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
    }
 
-   public static DMatrixRMaj getCoMVelocityJacobian(double time, double omega, MPCContactPlane contactPlane)
+   public static NativeMatrix getCoMVelocityJacobian(double time, double omega, MPCContactPlane contactPlane)
    {
       return getCoMVelocityJacobian(time, omega, contactPlane.getRhoSize(), contactPlane::getBasisVector);
    }
 
-   public static DMatrixRMaj getCoMVelocityJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
+   public static NativeMatrix getCoMVelocityJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(3, coefficients);
 
       double c0Dot = 1.0;
       double c1Dot = 0.0;
@@ -458,20 +461,20 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getCoMAccelerationJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getCoMAccelerationJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       return getCoMVelocityJacobian(time, omega, rhoHelper.getRhoSize(), rhoHelper::getBasisVector);
    }
 
-   public static DMatrixRMaj getCoMAccelerationJacobian(double time, double omega, MPCContactPlane contact)
+   public static NativeMatrix getCoMAccelerationJacobian(double time, double omega, MPCContactPlane contact)
    {
       return getCoMVelocityJacobian(time, omega, contact.getRhoSize(), contact::getBasisVector);
    }
 
-   public static DMatrixRMaj getCoMAccelerationJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
+   public static NativeMatrix getCoMAccelerationJacobian(double time, double omega, int rhoSize, IntFunction<FrameVector3DReadOnly> basisVectors)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(3, coefficients);
 
       double c0Ddot = 0.0;
       double c1Ddot = 0.0;
@@ -512,10 +515,10 @@ public class MPCTestHelper
       return jacobian;
    }
 
-   public static DMatrixRMaj getCoMJerkJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
+   public static NativeMatrix getCoMJerkJacobian(double time, double omega, ContactStateMagnitudeToForceMatrixHelper rhoHelper)
    {
       int coefficients = LinearMPCIndexHandler.comCoefficientsPerSegment + LinearMPCIndexHandler.coefficientsPerRho * rhoHelper.getRhoSize();
-      DMatrixRMaj jacobian = new DMatrixRMaj(3, coefficients);
+      NativeMatrix jacobian = new NativeMatrix(3, coefficients);
 
       double c0Dddot = 0.0;
       double c1Dddot = 0.0;
