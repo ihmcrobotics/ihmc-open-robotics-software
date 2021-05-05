@@ -23,7 +23,7 @@ if [ ! "$(sudo -u root docker ps -a | grep multisense)" ]; then
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
-    ihmcrobotics/multisense-ros:0.1
+    ihmcrobotics/multisense-ros:0.2
 else
     sudo -u root docker start --attach multisense
 fi
