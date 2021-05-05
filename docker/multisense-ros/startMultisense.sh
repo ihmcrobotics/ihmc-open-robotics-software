@@ -14,6 +14,7 @@ if [ ! "$(sudo -u root docker ps -a | grep multisense)" ]; then
     echo "multisense not found. Running new container."
     sudo -u root docker run \
     --tty \
+    --interactive \
     --name multisense \
     --network host \
     --dns 1.1.1.1 \
