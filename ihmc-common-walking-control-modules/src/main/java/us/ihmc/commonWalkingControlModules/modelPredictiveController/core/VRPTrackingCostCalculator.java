@@ -138,8 +138,8 @@ public class VRPTrackingCostCalculator
          double c0 = t2 / 3.0 * vrpDelta.getElement(ordinal) + t2 / 2.0 * vrpStart.getElement(ordinal);
          double c1 = t / 2.0 * vrpDelta.getElement(ordinal) + t * vrpStart.getElement(ordinal);
 
-         costGradientToPack.set(offset, 0, -c0);
-         costGradientToPack.set(offset + 1, 0, -c1);
+         unsafe_add(costGradientToPack, offset, 0, -c0);
+         unsafe_add(costGradientToPack, offset + 1, 0, -c1);
       }
 
 
@@ -149,10 +149,10 @@ public class VRPTrackingCostCalculator
 
          FrameVector3DReadOnly basisVector = allBasisVectors.get(i);
 
-         costHessianToPack.set(idxI, idxI, a2a2);
-         costHessianToPack.set(idxI, idxI + 1, a2a3);
-         costHessianToPack.set(idxI + 1, idxI, a2a3);
-         costHessianToPack.set(idxI + 1, idxI + 1, a3a3);
+         unsafe_add(costHessianToPack, idxI, idxI, a2a2);
+         unsafe_add(costHessianToPack, idxI, idxI + 1, a2a3);
+         unsafe_add(costHessianToPack, idxI + 1, idxI, a2a3);
+         unsafe_add(costHessianToPack, idxI + 1, idxI + 1, a3a3);
 
          for (int j = i + 1; j < allBasisVectors.size(); j++)
          {
@@ -162,16 +162,16 @@ public class VRPTrackingCostCalculator
 
             int idxJ = 4 * j + startRhoIdx + 2;
 
-            costHessianToPack.set(idxI, idxJ, basisDot * a2a2);
-            costHessianToPack.set(idxI, idxJ + 1, basisDot * a2a3);
-            costHessianToPack.set(idxI + 1, idxJ, basisDot * a2a3);
-            costHessianToPack.set(idxI + 1, idxJ + 1, basisDot * a3a3);
+            unsafe_add(costHessianToPack, idxI, idxJ, basisDot * a2a2);
+            unsafe_add(costHessianToPack, idxI, idxJ + 1, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxI + 1, idxJ, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxI + 1, idxJ + 1, basisDot * a3a3);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            costHessianToPack.set(idxJ, idxI, basisDot * a2a2);
-            costHessianToPack.set(idxJ + 1, idxI, basisDot * a2a3);
-            costHessianToPack.set(idxJ, idxI + 1, basisDot * a2a3);
-            costHessianToPack.set(idxJ + 1, idxI + 1, basisDot * a3a3);
+            unsafe_add(costHessianToPack, idxJ, idxI, basisDot * a2a2);
+            unsafe_add(costHessianToPack, idxJ + 1, idxI, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxJ, idxI + 1, basisDot * a2a3);
+            unsafe_add(costHessianToPack, idxJ + 1, idxI + 1, basisDot * a3a3);
          }
 
 
@@ -179,26 +179,32 @@ public class VRPTrackingCostCalculator
          {
             int offset = startCoMIdx + 2 * ordinal;
             double value = basisVector.getElement(ordinal);
-            costHessianToPack.set(offset, idxI, a2c0 * value);
-            costHessianToPack.set(offset, idxI + 1, a3c0 * value);
-            costHessianToPack.set(offset + 1, idxI, a2c1 * value);
-            costHessianToPack.set(offset + 1, idxI + 1, a3c1 * value);
+            unsafe_add(costHessianToPack, offset, idxI, a2c0 * value);
+            unsafe_add(costHessianToPack, offset, idxI + 1, a3c0 * value);
+            unsafe_add(costHessianToPack, offset + 1, idxI, a2c1 * value);
+            unsafe_add(costHessianToPack, offset + 1, idxI + 1, a3c1 * value);
 
             // symmetric...
-            costHessianToPack.set(idxI, offset, a2c0 * value);
-            costHessianToPack.set(idxI + 1, offset,  a3c0 * value);
-            costHessianToPack.set(idxI, offset + 1, a2c1 * value);
-            costHessianToPack.set(idxI + 1, offset + 1, a3c1 * value);
+            unsafe_add(costHessianToPack, idxI, offset, a2c0 * value);
+            unsafe_add(costHessianToPack, idxI + 1, offset,  a3c0 * value);
+            unsafe_add(costHessianToPack, idxI, offset + 1, a2c1 * value);
+            unsafe_add(costHessianToPack, idxI + 1, offset + 1, a3c1 * value);
          }
 
          double basisDotDelta = vrpDelta.dot(basisVector);
          double basisDotStart = vrpStart.dot(basisVector);
          double basisDotG = basisVector.getZ() * gravityZ;
 
-         costGradientToPack.set(idxI, 0, -basisDotDelta * a2Delta - basisDotStart * a2Start + basisDotG * ga2);
-         costGradientToPack.set(idxI + 1, 0, -basisDotDelta * a3Delta - basisDotStart * a3Start + basisDotG * ga3);
+         unsafe_add(costGradientToPack, idxI, 0, -basisDotDelta * a2Delta - basisDotStart * a2Start + basisDotG * ga2);
+         unsafe_add(costGradientToPack, idxI + 1, 0, -basisDotDelta * a3Delta - basisDotStart * a3Start + basisDotG * ga3);
       }
 
       return true;
    }
+
+   private static  void unsafe_add(DMatrix matrixToPack, int row, int col, double value)
+   {
+      matrixToPack.unsafe_set(row, col, matrixToPack.unsafe_get(row, col) + value);
+   }
+
 }

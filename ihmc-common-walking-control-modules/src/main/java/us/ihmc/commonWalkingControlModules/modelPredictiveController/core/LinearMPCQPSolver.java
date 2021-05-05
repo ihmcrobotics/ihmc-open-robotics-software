@@ -49,6 +49,8 @@ public class LinearMPCQPSolver
    public final NativeMatrix solverInput_H;
    public final NativeMatrix solverInput_f;
 
+   private final NativeMatrix tempA;
+   private final NativeMatrix tempB;
    public final NativeMatrix solverInput_Aeq;
    public final NativeMatrix solverInput_beq;
    public final NativeMatrix solverInput_Ain;
@@ -127,6 +129,8 @@ public class LinearMPCQPSolver
       solverInput_H_previous = new NativeMatrix(problemSize, problemSize);
       solverInput_f_previous = new NativeMatrix(problemSize, 1);
 
+      tempA = new NativeMatrix(0, problemSize);
+      tempB = new NativeMatrix(0, 1);
       solverInput_Aeq = new NativeMatrix(0, problemSize);
       solverInput_beq = new NativeMatrix(0, 1);
       solverInput_Ain = new NativeMatrix(0, problemSize);
@@ -517,25 +521,14 @@ public class LinearMPCQPSolver
 
    public void addEqualityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int taskColOffset)
    {
-      addEqualityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, taskColOffset, solverInput_Aeq, solverInput_beq);
+      addEqualityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, taskColOffset);
    }
 
-   public static void addEqualityConstraint(NativeMatrix taskJacobian,
-                                            NativeMatrix taskObjective,
-                                            int problemSize,
-                                            NativeMatrix solverInput_Aeq,
-                                            NativeMatrix solverInput_beq)
-   {
-      addEqualityConstraint(taskJacobian, taskObjective, problemSize, problemSize, 0, solverInput_Aeq, solverInput_beq);
-   }
-
-   public static void addEqualityConstraint(NativeMatrix taskJacobian,
+   public void addEqualityConstraint(NativeMatrix taskJacobian,
                                             NativeMatrix taskObjective,
                                             int problemSize,
                                             int totalProblemSize,
-                                            int colOffset,
-                                            NativeMatrix solverInput_Aeq,
-                                            NativeMatrix solverInput_beq)
+                                            int colOffset)
    {
       if (taskJacobian.getNumCols() != problemSize)
       {
@@ -552,8 +545,14 @@ public class LinearMPCQPSolver
       int previousSize = solverInput_beq.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Aeq.conservativeReshapeRows(previousSize + taskSize);
-      solverInput_beq.conservativeReshapeRows(previousSize + taskSize);
+      tempA.set(solverInput_Aeq);
+      tempB.set(solverInput_beq);
+
+      solverInput_Aeq.reshape(previousSize + taskSize, totalProblemSize);
+      solverInput_beq.reshape(previousSize + taskSize, 1);
+
+      solverInput_Aeq.insert(tempA, 0, 0);
+      solverInput_beq.insert(tempB, 0, 0);
 
       solverInput_Aeq.insert(taskJacobian, previousSize, colOffset);
       solverInput_beq.insert(taskObjective, previousSize, 0);
@@ -573,18 +572,16 @@ public class LinearMPCQPSolver
 
    public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int colOffset)
    {
-      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addMotionLesserOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
    }
 
-   public static void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian,
+   public void addMotionLesserOrEqualInequalityConstraint(NativeMatrix taskJacobian,
                                                                  NativeMatrix taskObjective,
                                                                  int problemSize,
                                                                  int totalProblemSize,
-                                                                 int colOffset,
-                                                                 NativeMatrix solverInput_Ain,
-                                                                 NativeMatrix solverInput_bin)
+                                                                 int colOffset)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, totalProblemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, 1.0, problemSize, totalProblemSize, colOffset);
    }
 
    public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective)
@@ -594,28 +591,24 @@ public class LinearMPCQPSolver
 
    public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian, NativeMatrix taskObjective, int colOffset)
    {
-      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addMotionGreaterOrEqualInequalityConstraint(taskJacobian, taskObjective, taskJacobian.getNumCols(), problemSize, colOffset);
    }
 
-   public static void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian,
+   public void addMotionGreaterOrEqualInequalityConstraint(NativeMatrix taskJacobian,
                                                                   NativeMatrix taskObjective,
                                                                   int problemSize,
                                                                   int totalProblemSize,
-                                                                  int colOffset,
-                                                                  NativeMatrix solverInput_Ain,
-                                                                  NativeMatrix solverInput_bin)
+                                                                  int colOffset)
    {
-      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, totalProblemSize, colOffset, solverInput_Ain, solverInput_bin);
+      addInequalityConstraintInternal(taskJacobian, taskObjective, -1.0, problemSize, totalProblemSize, colOffset);
    }
 
-   private static void addInequalityConstraintInternal(NativeMatrix taskJacobian,
+   private void addInequalityConstraintInternal(NativeMatrix taskJacobian,
                                                        NativeMatrix taskObjective,
                                                        double sign,
                                                        int problemSize,
                                                        int totalProblemSize,
-                                                       int colOffset,
-                                                       NativeMatrix solverInput_Ain,
-                                                       NativeMatrix solverInput_bin)
+                                                       int colOffset)
    {
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
@@ -631,12 +624,17 @@ public class LinearMPCQPSolver
       int previousSize = solverInput_bin.getNumRows();
 
       // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      solverInput_Ain.conservativeReshapeRows(previousSize + taskSize);
-      solverInput_bin.conservativeReshapeRows(previousSize + taskSize);
+      tempA.set(solverInput_Ain);
+      tempB.set(solverInput_bin);
 
-      taskJacobian.scale(sign);
-      solverInput_Ain.insert(taskJacobian, previousSize, colOffset);
-      solverInput_bin.insert(taskObjective, previousSize, 0);
+      solverInput_Ain.reshape(previousSize + taskSize, totalProblemSize);
+      solverInput_bin.reshape(previousSize + taskSize, 1);
+
+      solverInput_Ain.insert(tempA, 0, 0);
+      solverInput_bin.insert(tempB, 0, 0);
+
+      solverInput_Ain.insertScaled(taskJacobian, previousSize, colOffset, sign);
+      solverInput_bin.insertScaled(taskObjective, previousSize, 0, sign);
    }
 
    public void addInput(NativeQPInputTypeC input)
