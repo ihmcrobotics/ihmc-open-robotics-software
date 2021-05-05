@@ -1,9 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
-import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCSolutionInspection;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -18,7 +16,6 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
    final LinearMPCQPSolver qpSolver;
 
    private final LinearMPCIndexHandler indexHandler;
-   private final LinearMPCSolutionInspection solutionInspection;
 
    private final IntUnaryOperator firstVariableIndex;
 
@@ -40,11 +37,6 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       firstVariableIndex = indexHandler::getComCoefficientStartIndex;
 
       qpSolver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, registry);
-
-      if (debug)
-         solutionInspection = new LinearMPCSolutionInspection(indexHandler, gravityZ);
-      else
-         solutionInspection = null;
 
       parentRegistry.addChild(registry);
    }
@@ -88,9 +80,6 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       }
 
       NativeMatrix solutionCoefficients = qpSolver.getSolution();
-
-      if (solutionInspection != null)
-         solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
       extractNewActiveSetData(true, qpSolver, firstVariableIndex);
 
