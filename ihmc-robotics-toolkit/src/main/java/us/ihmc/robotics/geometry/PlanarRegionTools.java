@@ -1041,7 +1041,7 @@ public class PlanarRegionTools
       return closestPoint;
    }
 
-   public static double distanceToPlanarRegion(Point3D pointInWorld, PlanarRegion planarRegion)
+   public static double distanceToPlanarRegion(Point3DReadOnly pointInWorld, PlanarRegion planarRegion)
    {
       return pointInWorld.distance(closestPointOnPlanarRegion(pointInWorld, planarRegion));
    }
