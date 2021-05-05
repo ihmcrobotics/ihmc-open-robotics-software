@@ -550,6 +550,8 @@ public class LinearMPCQPSolver
 
       solverInput_Aeq.reshape(previousSize + taskSize, totalProblemSize);
       solverInput_beq.reshape(previousSize + taskSize, 1);
+      solverInput_Ain.zero();
+      solverInput_bin.zero();
 
       solverInput_Aeq.insert(tempA, 0, 0);
       solverInput_beq.insert(tempB, 0, 0);
@@ -604,11 +606,11 @@ public class LinearMPCQPSolver
    }
 
    private void addInequalityConstraintInternal(NativeMatrix taskJacobian,
-                                                       NativeMatrix taskObjective,
-                                                       double sign,
-                                                       int problemSize,
-                                                       int totalProblemSize,
-                                                       int colOffset)
+                                                NativeMatrix taskObjective,
+                                                double sign,
+                                                int problemSize,
+                                                int totalProblemSize,
+                                                int colOffset)
    {
       int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
@@ -629,6 +631,8 @@ public class LinearMPCQPSolver
 
       solverInput_Ain.reshape(previousSize + taskSize, totalProblemSize);
       solverInput_bin.reshape(previousSize + taskSize, 1);
+      solverInput_Ain.zero();
+      solverInput_bin.zero();
 
       solverInput_Ain.insert(tempA, 0, 0);
       solverInput_bin.insert(tempB, 0, 0);
