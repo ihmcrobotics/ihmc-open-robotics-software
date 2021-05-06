@@ -396,7 +396,7 @@ public class ContactPlaneProvider implements ContactStateBasics<ContactPlaneProv
       return equals(this, other);
    }
 
-   private static final double timeEpsilon = 1e-4;
+   private static final double timeEpsilon = 1e-2;
    private static final double positionEpsilon = 5e-3;
 
    private static boolean equals(ContactPlaneProvider planeA, ContactPlaneProvider planeB)
@@ -404,15 +404,19 @@ public class ContactPlaneProvider implements ContactStateBasics<ContactPlaneProv
       return epsilonEquals(planeA, planeB, timeEpsilon, positionEpsilon);
    }
 
-   private static boolean epsilonEquals(ContactPlaneProvider planeA, ContactPlaneProvider planeB, double timeEpsilon, double positionEpsilon)
+   public static boolean epsilonEquals(ContactPlaneProvider planeA, ContactPlaneProvider planeB, double timeEpsilon, double positionEpsilon)
    {
       if (planeA == null || planeB == null)
          return false;
 
-      if (!planeA.getTimeInterval().epsilonContains(planeB.getTimeInterval().getStartTime(), timeEpsilon))
-         return false;
       if (!MathTools.epsilonEquals(planeA.getTimeInterval().getEndTime(), planeB.getTimeInterval().getEndTime(), timeEpsilon))
          return false;
+
+      if (planeA.getContactState() != planeB.getContactState())
+         return false;
+
+      if (planeA.getContactState() == ContactState.FLIGHT)
+         return true;
 
       if (planeA.getNumberOfContactPlanes() != planeB.getNumberOfContactPlanes())
          return false;
@@ -422,7 +426,7 @@ public class ContactPlaneProvider implements ContactStateBasics<ContactPlaneProv
          if (planeA.getNumberOfContactPointsInPlane(i) != planeB.getNumberOfContactPointsInPlane(i))
             return false;
 
-         if (!planeA.getContactPose(i).getPosition().epsilonEquals(planeB.getContactPose(i).getPosition(), positionEpsilon))
+         if (planeA.getContactPose(i).getPosition().distanceXYSquared(planeB.getContactPose(i).getPosition()) >  positionEpsilon * positionEpsilon)
             return false;
       }
 
