@@ -305,8 +305,8 @@ public class KSTTools
 
       for (RobotSide robotSide : RobotSide.values)
       {
-//         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
-//            streamingMessageFactory.computeHandStreamingMessage(robotSide);
+         if (areHandTaskspaceOutputsEnabled.get(robotSide).getValue())
+            streamingMessageFactory.computeHandStreamingMessage(robotSide);
 
          if (areArmJointspaceOutputsEnabled.get(robotSide).getValue())
             streamingMessageFactory.computeArmStreamingMessage(robotSide);
