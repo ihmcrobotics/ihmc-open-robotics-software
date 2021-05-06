@@ -24,11 +24,11 @@ public class MPCQPInputCalculator
 
    private final VRPTrackingCostCalculator vrpTrackingCostCalculator;
 
-   private final DMatrixSparseCSC tempJacobian = new DMatrixSparseCSC(0, 0);
+   private final DMatrixRMaj tempJacobian = new DMatrixRMaj(0, 0);
    private final DMatrixRMaj tempObjective = new DMatrixRMaj(0, 0);
 
-   private final DMatrixSparseCSC tempHessian = new DMatrixSparseCSC(0, 0);
-   private final DMatrixSparseCSC tempGradient = new DMatrixSparseCSC(0, 0);
+   private final DMatrixRMaj tempHessian = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj tempGradient = new DMatrixRMaj(0, 0);
 
    private final double gravityZ;
 
