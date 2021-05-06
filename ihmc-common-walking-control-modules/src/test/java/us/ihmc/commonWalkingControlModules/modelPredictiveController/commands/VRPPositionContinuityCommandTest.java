@@ -315,7 +315,6 @@ public class VRPPositionContinuityCommandTest
 
 
       EjmlUnitTests.assertEquals(taskJacobianExpected, solver.solverInput_Aeq, 1e-10);
-      EjmlUnitTests.assertEquals(taskObjectiveExpected, solver.solverOutput_beq, 1e-10);
 
 
       achievedObjective.mult(new NativeMatrix(taskJacobianExpected), solution);
