@@ -32,7 +32,7 @@ import java.lang.annotation.Native;
  */
 public class LinearMPCQPSolver
 {
-   private static  final boolean debug = true;
+   private static  final boolean debug = false;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -41,9 +41,6 @@ public class LinearMPCQPSolver
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final YoBoolean foundSolution = new YoBoolean("foundSolution", registry);
-
-   private final NativeMatrix solverInput_H_previous;
-   private final NativeMatrix solverInput_f_previous;
 
    // These are all public to help with testing. DO NOT USE THEM IN A PUBLIC FASHION
    public final NativeMatrix solverInput_H;
@@ -55,8 +52,6 @@ public class LinearMPCQPSolver
    public final NativeMatrix solverInput_beq;
    public final NativeMatrix solverInput_Ain;
    public final NativeMatrix solverInput_bin;
-   public final NativeMatrix solverOutput_beq;
-   public final NativeMatrix solverOutput_bin;
 
    protected final NativeMatrix previousSolution;
 
@@ -126,17 +121,12 @@ public class LinearMPCQPSolver
       solverInput_H = new NativeMatrix(problemSize, problemSize);
       solverInput_f = new NativeMatrix(problemSize, 1);
 
-      solverInput_H_previous = new NativeMatrix(problemSize, problemSize);
-      solverInput_f_previous = new NativeMatrix(problemSize, 1);
-
       tempA = new NativeMatrix(0, problemSize);
       tempB = new NativeMatrix(0, 1);
       solverInput_Aeq = new NativeMatrix(0, problemSize);
       solverInput_beq = new NativeMatrix(0, 1);
       solverInput_Ain = new NativeMatrix(0, problemSize);
       solverInput_bin = new NativeMatrix(0, 1);
-      solverOutput_bin = new NativeMatrix(0, 1);
-      solverOutput_beq = new NativeMatrix(0, 1);
 
       previousSolution = new NativeMatrix(0, 0);
 
@@ -197,18 +187,15 @@ public class LinearMPCQPSolver
    {
       problemSize = indexHandler.getTotalProblemSize();
 
-         qpInputTypeA.setNumberOfVariables(problemSize);
-         qpInputTypeC.setNumberOfVariables(problemSize);
+      qpInputTypeA.setNumberOfVariables(problemSize);
+      qpInputTypeC.setNumberOfVariables(problemSize);
 
-         solverInput_H.reshape(problemSize, problemSize);
-         solverInput_f.reshape(problemSize, 1);
+      solverInput_H.reshape(problemSize, problemSize);
+      solverInput_f.reshape(problemSize, 1);
 
-         solverInput_H_previous.reshape(problemSize, problemSize);
-         solverInput_f_previous.reshape(problemSize, 1);
+      solverOutput.reshape(problemSize, 1);
 
-         solverOutput.reshape(problemSize, 1);
-
-         resetRateRegularization();
+      resetRateRegularization();
 
       solverInput_Aeq.zero();
       solverInput_beq.zero();
@@ -698,15 +685,6 @@ public class LinearMPCQPSolver
       foundSolution.set(true);
 
       addRateRegularization.set(true);
-
-      solverInput_H_previous.set(solverInput_H);
-      solverInput_f_previous.set(solverInput_f);
-
-      solverOutput_beq.reshape(numberOfEqualityConstraints.getIntegerValue(), 1);
-      solverOutput_bin.reshape(numberOfInequalityConstraints.getIntegerValue(), 1);
-
-      solverOutput_bin.mult(solverInput_Ain, solverOutput);
-      solverOutput_beq.mult(solverInput_Aeq, solverOutput);
 
       return true;
    }
