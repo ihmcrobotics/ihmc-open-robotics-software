@@ -2,9 +2,8 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.tools;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
-import org.ejml.interfaces.linsol.LinearSolverDense;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 
 /**
  * This class is the same as the matrix exponential. However, it assumes that the state matrix can be segmented into blocks,
@@ -16,45 +15,45 @@ public class EfficientMatrixExponentialCalculator
    private int Bcols;
    private int Ccols;
 
-   private final DMatrixRMaj temp = new DMatrixRMaj(0, 0);
-   private final LinearSolverDense<DMatrixRMaj> solver;
+   private final NativeMatrix temp = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj As = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Bs = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Cs = new DMatrixRMaj(0, 0);
+   private final NativeMatrix As = new NativeMatrix(0, 0);
+   private final NativeMatrix Bs = new NativeMatrix(0, 0);
+   private final NativeMatrix Cs = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj As_2 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Bs_2 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Cs_2 = new DMatrixRMaj(0, 0);
+   private final NativeMatrix As_2 = new NativeMatrix(0, 0);
+   private final NativeMatrix Bs_2 = new NativeMatrix(0, 0);
+   private final NativeMatrix Cs_2 = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj As_4 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Bs_4 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Cs_4 = new DMatrixRMaj(0, 0);
+   private final NativeMatrix As_4 = new NativeMatrix(0, 0);
+   private final NativeMatrix Bs_4 = new NativeMatrix(0, 0);
+   private final NativeMatrix Cs_4 = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj As_6 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Bs_6 = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj Cs_6 = new DMatrixRMaj(0, 0);
+   private final NativeMatrix As_6 = new NativeMatrix(0, 0);
+   private final NativeMatrix Bs_6 = new NativeMatrix(0, 0);
+   private final NativeMatrix Cs_6 = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj U_A = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj U_B = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj U_C = new DMatrixRMaj(0, 0);
+   private final NativeMatrix U_A = new NativeMatrix(0, 0);
+   private final NativeMatrix U_B = new NativeMatrix(0, 0);
+   private final NativeMatrix U_C = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj V_A = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj V_B = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj V_C = new DMatrixRMaj(0, 0);
+   private final NativeMatrix V_A = new NativeMatrix(0, 0);
+   private final NativeMatrix V_B = new NativeMatrix(0, 0);
+   private final NativeMatrix V_C = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj N_A = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj N_B = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj N_C = new DMatrixRMaj(0, 0);
+   private final NativeMatrix N_A = new NativeMatrix(0, 0);
+   private final NativeMatrix N_B = new NativeMatrix(0, 0);
+   private final NativeMatrix N_C = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj D_Ainverse = new DMatrixRMaj(0, 0);
+   private final NativeMatrix D_Ainverse = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj D_A = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj D_B = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj D_C = new DMatrixRMaj(0, 0);
+   private final NativeMatrix D_A = new NativeMatrix(0, 0);
+   private final NativeMatrix D_B = new NativeMatrix(0, 0);
+   private final NativeMatrix D_C = new NativeMatrix(0, 0);
 
-   private final DMatrixRMaj tempBd = new DMatrixRMaj(0, 0);
-   private final DMatrixRMaj tempCd = new DMatrixRMaj(0, 0);
+   private final NativeMatrix nativeAd = new NativeMatrix(0, 0);
+   private final NativeMatrix nativeBd = new NativeMatrix(0, 0);
+   private final NativeMatrix nativeCd = new NativeMatrix(0, 0);
 
    // constants for pade approximation
    private static final double c0 = 1.0;
@@ -75,8 +74,6 @@ public class EfficientMatrixExponentialCalculator
    public EfficientMatrixExponentialCalculator(int rows, int Bcols, int Ccols)
    {
       reshape(rows, Bcols, Ccols);
-
-      solver = LinearSolverFactory_DDRM.linear(rows);
    }
 
    public void reshape(int rows, int Bcols, int Ccols)
@@ -85,36 +82,6 @@ public class EfficientMatrixExponentialCalculator
       this.Bcols = Bcols;
       this.Ccols = Ccols;
 
-      As.reshape(rows, rows);
-      Bs.reshape(rows, Bcols);
-      Cs.reshape(rows, Ccols);
-
-      As_2.reshape(rows, rows);
-      Bs_2.reshape(rows, Bcols);
-      Cs_2.reshape(rows, Ccols);
-
-      As_4.reshape(rows, rows);
-      Bs_4.reshape(rows, Bcols);
-      Cs_4.reshape(rows, Ccols);
-
-      As_6.reshape(rows, rows);
-      Bs_6.reshape(rows, Bcols);
-      Cs_6.reshape(rows, Ccols);
-
-      U_A.reshape(rows, rows);
-      U_B.reshape(rows, Bcols);
-      U_C.reshape(rows, Ccols);
-
-      V_A.reshape(rows, rows);
-      V_B.reshape(rows, Bcols);
-      V_C.reshape(rows, Ccols);
-
-      N_A.reshape(rows, rows);
-      N_B.reshape(rows, Bcols);
-      N_C.reshape(rows, Ccols);
-
-      D_Ainverse.reshape(rows, rows);
-
       Ainternal.reshape(rows, rows);
       Binternal.reshape(rows, Bcols);
       Cinternal.reshape(rows, Ccols);
@@ -122,9 +89,6 @@ public class EfficientMatrixExponentialCalculator
       Adinternal.reshape(rows, rows);
       Bdinternal.reshape(rows, Bcols);
       Cdinternal.reshape(rows, Ccols);
-
-      tempBd.reshape(rows, Bcols);
-      tempCd.reshape(rows, Ccols);
    }
 
    private final DMatrixRMaj Ainternal = new DMatrixRMaj(0, 0);
@@ -137,9 +101,9 @@ public class EfficientMatrixExponentialCalculator
 
    public void compute(DMatrixRMaj result, DMatrixRMaj A)
    {
-      MatrixTools.setMatrixBlock(Ainternal, 0, 0, A, 0, 0, rows, rows, 1.0);
-      MatrixTools.setMatrixBlock(Binternal, 0, 0, A, 0, rows, rows, Bcols, 1.0);
-      MatrixTools.setMatrixBlock(Cinternal, 0, 0, A, 0, rows + Bcols, rows, Ccols, 1.0);
+      CommonOps_DDRM.extract(A, 0, rows, 0, rows, Ainternal);
+      CommonOps_DDRM.extract(A, 0, rows, rows, rows + Bcols, Binternal);
+      CommonOps_DDRM.extract(A, 0, rows, rows + Bcols, rows + Bcols + Ccols, Cinternal);
 
       compute(Ainternal, Binternal, Cinternal, Adinternal, Bdinternal, Cdinternal);
 
@@ -163,119 +127,97 @@ public class EfficientMatrixExponentialCalculator
       MatrixTools.checkMatrixDimensions(Cd, rows, Ccols);
 
       int j = Math.max(0, 1 + (int) Math.floor(Math.log(inducedPInf(A, B, C)) / Math.log(2)));
+      double inverseJ = 1.0 / Math.pow(2, j);
 
-      As.set(A);
-      Bs.set(B);
-      Cs.set(C);
-      CommonOps_DDRM.scale(1.0 / Math.pow(2, j), As);    // scaled version of A
-      CommonOps_DDRM.scale(1.0 / Math.pow(2, j), Bs);    // scaled version of B
-      CommonOps_DDRM.scale(1.0 / Math.pow(2, j), Cs);    // scaled version of C
+      As.scale(inverseJ, A); // scaled version of A
+      Bs.scale(inverseJ, B); // scaled version of B
+      Cs.scale(inverseJ, C); // scaled version of C
 
       // calculate D and N using special Horner techniques
-      CommonOps_DDRM.mult(As, As, As_2);
-      CommonOps_DDRM.mult(As, Bs, Bs_2);
-      CommonOps_DDRM.mult(As, Cs, Cs_2);
+      As_2.mult(As, As);
+      Bs_2.mult(As, Bs);
+      Cs_2.mult(As, Cs);
 
-      CommonOps_DDRM.mult(As_2, As_2, As_4);
-      CommonOps_DDRM.mult(As_2, Bs_2, Bs_4);
-      CommonOps_DDRM.mult(As_2, Cs_2, Cs_4);
+      As_4.mult(As_2, As_2);
+      Bs_4.mult(As_2, Bs_2);
+      Cs_4.mult(As_2, Cs_2);
 
-      CommonOps_DDRM.mult(As_4, As_2, As_6);
-      CommonOps_DDRM.mult(As_4, Bs_2, Bs_6);
-      CommonOps_DDRM.mult(As_4, Cs_2, Cs_6);
+      As_6.mult(As_4, As_2);
+      Bs_6.mult(As_4, Bs_2);
+      Cs_6.mult(As_4, Cs_2);
 
       // U = c0*I + c2*A^2 + c4*A^4 + (c6*I + c8*A^2 + c10*A^4 + c12*A^6)*A^6
-      MatrixTools.setDiagonal(U_A, c0);
-      CommonOps_DDRM.addEquals(U_A, c2, As_2);
-      CommonOps_DDRM.addEquals(U_A, c4, As_4);
+      U_A.add(c2, As_2, c4, As_4);
+      U_A.addDiagonal(c0);
 
-      U_B.zero();
-      CommonOps_DDRM.addEquals(U_B, c2, Bs_2);
-      CommonOps_DDRM.addEquals(U_B, c4, Bs_4);
+      U_B.add(c2, Bs_2, c4, Bs_4);
 
-      U_C.zero();
-      CommonOps_DDRM.addEquals(U_C, c2, Cs_2);
-      CommonOps_DDRM.addEquals(U_C, c4, Cs_4);
+      U_C.add(c2, Cs_2, c4, Cs_4);
 
-      temp.reshape(rows, rows);
-      MatrixTools.setDiagonal(temp, c6);
-      CommonOps_DDRM.addEquals(temp, c8, As_2);
-      CommonOps_DDRM.addEquals(temp, c10, As_4);
-      CommonOps_DDRM.addEquals(temp, c12, As_6);
+      temp.add(c8, As_2, c10, As_4);
+      temp.addEquals(c12, As_6);
+      temp.addDiagonal(c6);
 
-      CommonOps_DDRM.multAdd(temp, As_6, U_A);
-      CommonOps_DDRM.multAdd(temp, Bs_6, U_B);
-      CommonOps_DDRM.multAdd(temp, Cs_6, U_C);
+      U_A.multAdd(temp, As_6);
+      U_B.multAdd(temp, Bs_6);
+      U_C.multAdd(temp, Cs_6);
 
       // V = c1*I + c3*A^2 + c5*A^4 + (c7*I + c9*A^2 + c11*A^4 + c13*A^6)*A^6
-      MatrixTools.setDiagonal(V_A, c1);
-      CommonOps_DDRM.addEquals(V_A, c3, As_2);
-      CommonOps_DDRM.addEquals(V_A, c5, As_4);
+      V_A.add(c3, As_2, c5, As_4);
+      V_A.addDiagonal(c1);
 
-      V_B.zero();
-      CommonOps_DDRM.addEquals(V_B, c3, Bs_2);
-      CommonOps_DDRM.addEquals(V_B, c5, Bs_4);
+      V_B.add(c3, Bs_2, c5, Bs_4);
 
-      V_C.zero();
-      CommonOps_DDRM.addEquals(V_C, c3, Cs_2);
-      CommonOps_DDRM.addEquals(V_C, c5, Cs_4);
+      V_C.add(c3, Cs_2, c5, Cs_4);
 
-      temp.reshape(rows, rows);
+      temp.add(c9, As_2, c11, As_4);
+      temp.addEquals(c13, As_6);
+      temp.addDiagonal(c7);
 
-      MatrixTools.setDiagonal(temp, c7);
-      CommonOps_DDRM.addEquals(temp, c9, As_2);
-      CommonOps_DDRM.addEquals(temp, c11, As_4);
-      CommonOps_DDRM.addEquals(temp, c13, As_6);
-
-      CommonOps_DDRM.multAdd(temp, As_6, V_A);
-      CommonOps_DDRM.multAdd(temp, Bs_6, V_B);
-      CommonOps_DDRM.multAdd(temp, Cs_6, V_C);
+      V_A.multAdd(temp, As_6);
+      V_B.multAdd(temp, Bs_6);
+      V_C.multAdd(temp, Cs_6);
 
       N_A.set(U_A);
-      CommonOps_DDRM.multAdd(As, V_A, N_A);
+      N_A.multAdd(As, V_A);
 
-      CommonOps_DDRM.add(U_B, c1, Bs, N_B);
-      CommonOps_DDRM.multAdd(As, V_B, N_B);
+      N_B.add(U_B, c1, Bs);
+      N_B.multAdd(As, V_B);
 
-      CommonOps_DDRM.add(U_C, c1, Cs, N_C);
-      CommonOps_DDRM.multAdd(As, V_C, N_C);
+      N_C.add(U_C, c1, Cs);
+      N_C.multAdd(As, V_C);
 
       D_A.set(U_A);
-      CommonOps_DDRM.multAdd(-1.0, As, V_A, D_A);
+      D_A.multAdd(-1.0, As, V_A);
 
-      CommonOps_DDRM.add(U_B, -c1, Bs, D_B);
-      CommonOps_DDRM.multAdd(-1.0, As, V_B, D_B);
+      D_B.add(U_B, -c1, Bs);
+      D_B.multAdd(-1.0, As, V_B);
 
-      CommonOps_DDRM.add(U_C, -c1, Cs, D_C);
-      CommonOps_DDRM.multAdd(-1.0, As, V_C, D_C);
+      D_C.add(U_C, -c1, Cs);
+      D_C.multAdd(-1.0, As, V_C);
 
       // solve DF = N for F
-      solver.setA(D_A);
-      solver.invert(D_Ainverse);
+      D_Ainverse.invert(D_A);
 
-      CommonOps_DDRM.mult(D_Ainverse, N_A, Ad);
+      nativeAd.mult(D_Ainverse, N_A);
 
-      temp.reshape(rows, Bcols);
-      CommonOps_DDRM.subtract(N_B, D_B, temp);
-      CommonOps_DDRM.mult(D_Ainverse, temp, Bd);
+      temp.subtract(N_B, D_B);
+      nativeBd.mult(D_Ainverse, temp);
 
-      temp.reshape(rows, Ccols);
-      CommonOps_DDRM.subtract(N_C, D_C, temp);
-      CommonOps_DDRM.mult(D_Ainverse, temp, Cd);
+      temp.subtract(N_C, D_C);
+      nativeCd.mult(D_Ainverse, temp);
 
       // now square j times
       for (int k = 0; k < j; k++)
       {
-         temp.set(Ad);
-         CommonOps_DDRM.mult(temp, temp, Ad);
-
-         tempBd.set(Bd);
-         tempCd.set(Cd);
-         MatrixTools.addDiagonal(temp, 1.0);
-
-         CommonOps_DDRM.mult(temp, tempBd, Bd);
-         CommonOps_DDRM.mult(temp, tempCd, Cd);
+         nativeBd.multAdd(nativeAd, nativeBd);
+         nativeCd.multAdd(nativeAd, nativeCd);
+         nativeAd.mult(nativeAd, nativeAd);
       }
+
+      nativeAd.get(Ad);
+      nativeBd.get(Bd);
+      nativeCd.get(Cd);
    }
 
    public static double inducedPInf(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C)
