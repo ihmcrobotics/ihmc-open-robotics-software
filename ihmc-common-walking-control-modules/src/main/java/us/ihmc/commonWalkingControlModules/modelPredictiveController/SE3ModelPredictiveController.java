@@ -29,7 +29,9 @@ import us.ihmc.yoVariables.euclid.YoVector3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.List;
 import java.util.function.IntUnaryOperator;
@@ -42,6 +44,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    private static final double defaultInitialOrientationWeight = 1e6;
    private static final double defaultFinalOrientationWeight = 1e-6;
+
+   private static final boolean defaultIncludeIntermediateOrientationTracking = true;
 
    private final double gravityZ;
    protected final double mass;
@@ -78,6 +82,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 
+   private final YoBoolean includeIntermediateOrientationTracking = new YoBoolean("includeIntermediateOrientationTracking", registry);
    private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
    private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
    private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
@@ -115,6 +120,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
 
+      registry.addChild(indexHandler.getRegistry());
+
       firstVariableIndex = indexHandler::getOrientationStartIndex;
 
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
@@ -139,6 +146,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
       qpSolver.setFirstOrientationVariableRegularization(1e-10);
       qpSolver.setSecondOrientationVariableRegularization(1e-10);
+
+      includeIntermediateOrientationTracking.set(defaultIncludeIntermediateOrientationTracking);
 
       parentRegistry.addChild(registry);
    }
@@ -206,7 +215,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       int numberOfSegments = indexHandler.getNumberOfSegments();
       for (int i = 0; i < numberOfSegments; i++)
       {
-         mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
+         if (includeIntermediateOrientationTracking.getBooleanValue())
+            mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
          if (i < numberOfSegments - 1)
             mpcCommands.addCommand(computeOrientationContinuityCommand(i, commandProvider.getNextOrientationContinuityCommand()));
       }
