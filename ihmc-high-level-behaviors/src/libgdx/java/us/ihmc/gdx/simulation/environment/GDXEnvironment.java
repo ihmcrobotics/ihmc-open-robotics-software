@@ -23,6 +23,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -140,11 +141,18 @@ public class GDXEnvironment implements RenderableProvider
       ImGui.text("Selected: " + selectedObject);
       ImGui.text("Intersecting: " + intersectedObject);
 
-      if (ImGui.button("Place Medium Cinder Block Roughed"))
+      GDXEnvironmentObject objectToPlace = null;
+      if (!placing)
       {
-         GDXMediumCinderBlockRoughed mediumCinderBlockRoughed = new GDXMediumCinderBlockRoughed();
-         objects.add(mediumCinderBlockRoughed);
-         selectedObject = mediumCinderBlockRoughed;
+         if (ImGui.button("Place Medium Cinder Block Roughed"))
+            objectToPlace = new GDXMediumCinderBlockRoughed();
+         if (ImGui.button("Place Lab Floor"))
+            objectToPlace = new GDXLabFloorObject();
+      }
+      if (objectToPlace != null)
+      {
+         objects.add(objectToPlace);
+         selectedObject = objectToPlace;
          placing = true;
       }
 
@@ -156,22 +164,10 @@ public class GDXEnvironment implements RenderableProvider
       }
 
       ImGui.text("Environments:");
-      boolean reindexClicked = imgui.internal.ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
+      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
       if (!loadedFilesOnce || reindexClicked)
       {
-         loadedFilesOnce = true;
-         Path scriptsPath = WorkspacePathTools.findPathToResource("ihmc-open-robotics-software",
-                                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                                  "environments");
-         environmentFiles.clear();
-         PathTools.walkFlat(scriptsPath, (path, pathType) ->
-         {
-            if (pathType == BasicPathVisitor.PathType.FILE)
-            {
-               environmentFiles.add(path);
-            }
-            return FileVisitResult.CONTINUE;
-         });
+         reindexScripts();
       }
       for (int i = 0; i < environmentFiles.size(); i++)
       {
@@ -233,11 +229,29 @@ public class GDXEnvironment implements RenderableProvider
                objectNode.put("qs", tempOrientation.getS());
             }
          });
+         reindexScripts();
       }
 
       pose3DWidget.render();
 
       ImGui.end();
+   }
+
+   private void reindexScripts()
+   {
+      loadedFilesOnce = true;
+      Path scriptsPath = WorkspacePathTools.findPathToResource("ihmc-open-robotics-software",
+                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                               "environments");
+      environmentFiles.clear();
+      PathTools.walkFlat(scriptsPath, (path, pathType) ->
+      {
+         if (pathType == BasicPathVisitor.PathType.FILE)
+         {
+            environmentFiles.add(path);
+         }
+         return FileVisitResult.CONTINUE;
+      });
    }
 
    @Override
