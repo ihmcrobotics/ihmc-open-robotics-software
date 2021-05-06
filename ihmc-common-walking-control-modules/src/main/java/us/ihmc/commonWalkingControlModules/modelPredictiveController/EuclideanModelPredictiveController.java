@@ -463,8 +463,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(initialComWeight.getDoubleValue());
-      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
@@ -480,8 +479,8 @@ public abstract class EuclideanModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
-      //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+//      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       objectiveToPack.setWeight(initialComWeight.getDoubleValue());
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
@@ -646,7 +645,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setWeight(finalComWeight.getDoubleValue());
-      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
