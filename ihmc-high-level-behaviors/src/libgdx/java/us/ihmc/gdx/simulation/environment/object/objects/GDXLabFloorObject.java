@@ -21,10 +21,10 @@ public class GDXLabFloorObject extends GDXEnvironmentObject
    {
       Model realisticModel = GDXModelLoader.loadG3DModel("labFloor/LabFloor.g3dj");
 
-      double sizeX = 0.178334;
-      double sizeY = 0.178334;
-      double sizeZ = 0.178334;
-      Sphere3D boundingSphere = new Sphere3D(100.0);
+      double sizeX = 0.3;
+      double sizeY = 0.3;
+      double sizeZ = 0.01;
+      Sphere3D boundingSphere = new Sphere3D(0.7);
       Box3D collisionBox = new Box3D(sizeX, sizeY, sizeZ);
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
       {
