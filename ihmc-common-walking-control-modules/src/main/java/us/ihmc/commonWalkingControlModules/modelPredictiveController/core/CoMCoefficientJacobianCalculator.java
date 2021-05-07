@@ -4,6 +4,7 @@ import org.ejml.data.DMatrix;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import org.ejml.data.DMatrixSparseCSC;
 import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.MatrixMissingTools;
 
 /**
  * This is a coefficient calculator for the portions of the motion function that are not dependent on the contact force magnitudes.
@@ -79,17 +80,17 @@ public class CoMCoefficientJacobianCalculator
 
       double c1 = scale;
 
-      add(positionJacobianToPack, 0, startIndex + 1, c1);
-      add(positionJacobianToPack, 1, startIndex + 3, c1);
-      add(positionJacobianToPack, 2, startIndex + 5, c1);
+      MatrixMissingTools.unsafe_add(positionJacobianToPack, 0, startIndex + 1, c1);
+      MatrixMissingTools.unsafe_add(positionJacobianToPack, 1, startIndex + 3, c1);
+      MatrixMissingTools.unsafe_add(positionJacobianToPack, 2, startIndex + 5, c1);
 
       if (!MathTools.epsilonEquals(time, 0.0, 1e-5))
       {
          time = Math.min(MPCQPInputCalculator.sufficientlyLongTime, time);
          double c0 = time * c1;
-         add(positionJacobianToPack, 0, startIndex, c0);
-         add(positionJacobianToPack, 1, startIndex + 2, c0);
-         add(positionJacobianToPack, 2, startIndex + 4, c0);
+         MatrixMissingTools.unsafe_add(positionJacobianToPack, 0, startIndex, c0);
+         MatrixMissingTools.unsafe_add(positionJacobianToPack, 1, startIndex + 2, c0);
+         MatrixMissingTools.unsafe_add(positionJacobianToPack, 2, startIndex + 4, c0);
       }
    }
 
@@ -98,9 +99,9 @@ public class CoMCoefficientJacobianCalculator
       if (velocityJacobianToPack.getNumRows() < 3 || startIndex < 0 || velocityJacobianToPack.getNumCols() < startIndex + 6)
          throw new IllegalArgumentException("Outside of matrix bounds");
 
-      add(velocityJacobianToPack, 0, startIndex, scale);
-      add(velocityJacobianToPack, 1, startIndex + 2, scale);
-      add(velocityJacobianToPack, 2, startIndex + 4, scale);
+      MatrixMissingTools.unsafe_add(velocityJacobianToPack, 0, startIndex, scale);
+      MatrixMissingTools.unsafe_add(velocityJacobianToPack, 1, startIndex + 2, scale);
+      MatrixMissingTools.unsafe_add(velocityJacobianToPack, 2, startIndex + 4, scale);
    }
 
    private static void calculateAccelerationJacobian()
@@ -109,13 +110,5 @@ public class CoMCoefficientJacobianCalculator
 
    private static void calculateJerkJacobian()
    {
-   }
-
-   /**
-    * Convenience function to allow the use of any dense matrix (e.g. {@link org.ejml.data.DMatrixRMaj} or {@link org.ejml.data.DMatrixSparseCSC}).
-    */
-   private static void add(DMatrix matrixToPack, int row, int col, double value)
-   {
-      matrixToPack.unsafe_set(row, col, value + matrixToPack.unsafe_get(row, col));
    }
 }
