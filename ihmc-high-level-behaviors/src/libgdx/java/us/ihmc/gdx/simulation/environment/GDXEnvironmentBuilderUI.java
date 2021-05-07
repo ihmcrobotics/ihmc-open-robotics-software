@@ -1,6 +1,7 @@
 package us.ihmc.gdx.simulation.environment;
 
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
+import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGui3DViewInputDebugger;
 
@@ -17,6 +18,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    public GDXEnvironmentBuilderUI()
    {
       baseUI.getImGuiDockingSetup().addWindow(environmentBuilderUI.getWindowName(), environmentBuilderUI::renderImGuiWindow);
+      baseUI.getImGuiDockingSetup().addWindow(GDX3DSceneTools.TUNING_WINDOW_NAME, GDX3DSceneTools::renderTuningSliders);
       baseUI.launchGDXApplication(this);
    }
 
