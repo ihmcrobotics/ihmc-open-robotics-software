@@ -287,10 +287,6 @@ public class MatrixMissingTools
       skewSymmetricToPack.setM22(0.0);
    }
 
-   public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
-   {
-      matrix.data[ row * matrix.numCols + col ] += value;
-   }
 
    public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src)
    {
@@ -345,5 +341,18 @@ public class MatrixMissingTools
          }
          aIndexStart += a.numCols;
       }
+   }
+
+   public static void unsafe_add(DMatrix matrix, int row, int col, double value)
+   {
+      if (matrix instanceof DMatrixRMaj)
+         unsafe_add((DMatrixRMaj) matrix, row, col, value);
+      else
+         matrix.unsafe_set(row, col, value + matrix.unsafe_get(row, col));
+   }
+
+   public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
+   {
+      matrix.data[ row * matrix.numCols + col ] += value;
    }
 }
