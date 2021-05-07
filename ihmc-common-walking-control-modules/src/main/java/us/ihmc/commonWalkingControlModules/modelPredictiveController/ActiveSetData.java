@@ -43,6 +43,8 @@ public class ActiveSetData
 
    public void clearActiveSet()
    {
+      CommonOps_DDRM.fill(previousSolution, Double.NaN);
+
       activeInequalityIndices.reset();
       activeLowerBoundIndices.reset();
       activeUpperBoundIndices.reset();

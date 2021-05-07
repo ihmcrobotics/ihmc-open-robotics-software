@@ -285,7 +285,7 @@ public abstract class EuclideanModelPredictiveController
       }
    }
 
-   protected void extractNewActiveSetData(LinearMPCQPSolver qpSolver, IntUnaryOperator startIndexGetter)
+   protected void extractNewActiveSetData(boolean foundSolution, LinearMPCQPSolver qpSolver, IntUnaryOperator startIndexGetter)
    {
       TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
       TIntList activeLowerBoundIndices = qpSolver.getActiveLowerBoundIndices();
@@ -304,15 +304,18 @@ public abstract class EuclideanModelPredictiveController
          ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
          activeSetData.clearActiveSet();
 
-         MatrixTools.setMatrixBlock(activeSetData.getPreviousSolution(),
-                                    0,
-                                    0,
-                                    qpSolver.getSolution(),
-                                    startIndexGetter.applyAsInt(segmentId),
-                                    0,
-                                    indexHandler.getVariablesInSegment(segmentId),
-                                    1,
-                                    1.0);
+         if (foundSolution)
+         {
+            MatrixTools.setMatrixBlock(activeSetData.getPreviousSolution(),
+                                       0,
+                                       0,
+                                       qpSolver.getSolution(),
+                                       startIndexGetter.applyAsInt(segmentId),
+                                       0,
+                                       indexHandler.getVariablesInSegment(segmentId),
+                                       1,
+                                       1.0);
+         }
 
          int inequalityEndIndex = inequalityStartIndex + activeSetData.getNumberOfInequalityConstraints();
          int lowerBoundEndIndex = lowerBoundStartIndex + activeSetData.getNumberOfLowerBoundConstraints();
