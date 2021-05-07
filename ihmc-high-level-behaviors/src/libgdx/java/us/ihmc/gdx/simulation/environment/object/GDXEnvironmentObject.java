@@ -16,6 +16,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXPalletObject;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.function.Function;
@@ -157,6 +158,10 @@ public class GDXEnvironmentObject
       else if (objectClassName.equals(GDXLabFloorObject.class.getSimpleName()))
       {
          return new GDXLabFloorObject();
+      }
+      else if (objectClassName.equals(GDXPalletObject.class.getSimpleName()))
+      {
+         return new GDXPalletObject();
       }
       else
       {
