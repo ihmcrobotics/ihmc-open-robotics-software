@@ -178,11 +178,20 @@ public class GDXEnvironment implements RenderableProvider
          loadedFilesOnce = true;
          reindexScripts();
       }
+      String fileNameToSave = null;
       for (Path environmentFile : environmentFiles)
       {
          if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile == environmentFile))
          {
             loadEnvironment(environmentFile);
+         }
+         if (selectedEnvironmentFile == environmentFile)
+         {
+            ImGui.sameLine();
+            if (ImGui.button("Save"))
+            {
+               fileNameToSave = environmentFile.getFileName().toString();
+            }
          }
       }
       int flags = ImGuiInputTextFlags.None;
@@ -191,9 +200,13 @@ public class GDXEnvironment implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button("Save as new"))
       {
+         fileNameToSave = saveString.get();
+      }
+      if (fileNameToSave != null)
+      {
          JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
                                        "ihmc-high-level-behaviors/src/libgdx/resources",
-                                       "environments/" + saveString.get(),
+                                       "environments/" + fileNameToSave,
          rootNode ->
          {
             ArrayNode objectsArrayNode = rootNode.putArray("objects");
