@@ -21,7 +21,11 @@ public class GDXTools
 {
    public static void syncLogLevelWithLogTools()
    {
-      Level log4jLevel = LogTools.getLevel();
+      Gdx.app.setLogLevel(toGDX(LogTools.getLevel()));
+   }
+
+   public static int toGDX(Level log4jLevel)
+   {
       int gdxLogLevel = 2;
       switch (log4jLevel.getStandardLevel())
       {
@@ -41,7 +45,7 @@ public class GDXTools
             gdxLogLevel = Application.LOG_DEBUG;
             break;
       }
-      Gdx.app.setLogLevel(gdxLogLevel);
+      return gdxLogLevel;
    }
 
    public static void toGDX(AffineTransform euclidAffine, Matrix4 gdxAffineToPack)
