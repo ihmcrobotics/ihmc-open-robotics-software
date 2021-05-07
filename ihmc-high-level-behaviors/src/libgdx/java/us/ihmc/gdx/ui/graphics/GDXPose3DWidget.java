@@ -430,8 +430,9 @@ public class GDXPose3DWidget implements RenderableProvider
 
    public void render()
    {
-      ImGui.begin(ImGuiTools.uniqueLabel(this, "3D Gizmo Tuner"));
+      ImGui.begin(ImGuiTools.uniqueLabel(this, "3D Widget Tuner"));
 
+      ImGui.text("Use the right mouse button to manipulate the widget.");
       ImGui.text("X: " + mouseDraggedX);
       ImGui.text("Y: " + mouseDraggedY);
 
