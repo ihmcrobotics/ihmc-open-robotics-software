@@ -5,22 +5,30 @@ import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
+import jxl.format.RGB;
 import org.jboss.netty.buffer.ChannelBuffer;
+import sensor_msgs.CompressedImage;
 import sensor_msgs.Image;
+import us.ihmc.codecs.generated.RGBPicture;
+import us.ihmc.codecs.generated.YUVPicture;
+import us.ihmc.codecs.util.ByteBufferProvider;
+import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoWindow;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class GDXROS1VideoVisualizer
+import java.nio.ByteBuffer;
+
+public class GDXROS1CompressedVideoVisualizer
 {
-   private AbstractRosTopicSubscriber<Image> subscriber;
+   private AbstractRosTopicSubscriber<CompressedImage> subscriber;
    private final String topic;
    private Pixmap pixmap;
    private Texture texture;
    private ImGuiVideoWindow window;
-   private volatile Image image;
+   private volatile CompressedImage image;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
@@ -29,19 +37,24 @@ public class GDXROS1VideoVisualizer
 
    private boolean enabled = false;
 
-   public GDXROS1VideoVisualizer(String topic)
+   private final ByteBufferProvider byteBufferProvider = new ByteBufferProvider();
+   private final JPEGDecoder jpegDecoder = new JPEGDecoder();
+   private YUVPicture yuvPicture;
+   private RGBPicture rgbPicture;
+
+   public GDXROS1CompressedVideoVisualizer(String topic)
    {
       this.topic = topic;
    }
 
    public void subscribe(RosNodeInterface ros1Node)
    {
-      subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
+      subscriber = new AbstractRosTopicSubscriber<CompressedImage>(sensor_msgs.CompressedImage._TYPE)
       {
          @Override
-         public void onNewMessage(Image image)
+         public void onNewMessage(CompressedImage image)
          {
-            GDXROS1VideoVisualizer.this.image = image;
+            GDXROS1CompressedVideoVisualizer.this.image = image;
             ++receivedCount;
          }
       };
@@ -68,11 +81,22 @@ public class GDXROS1VideoVisualizer
    {
       if (enabled)
       {
-         Image image = this.image; // store the latest one here
+         CompressedImage image = this.image; // store the latest one here
 
          if (image != null)
          {
-            if (texture == null || texture.getWidth() < image.getWidth() || texture.getHeight() < image.getHeight())
+            ByteBuffer byteBuffer = byteBufferProvider.getOrCreateBuffer(image.getData().array().length);
+            byteBuffer.put(image.getData().array());
+            byteBuffer.flip();
+            yuvPicture = jpegDecoder.decode(byteBuffer);
+            rgbPicture = yuvPicture.toRGB();
+
+            ByteBuffer dstBuffer = byteBufferProvider.getOrCreateBuffer(rgbPicture.getWidth() * rgbPicture.getHeight() * 3);
+            dstBuffer.put(10, (byte) 31);
+            rgbPicture.get(dstBuffer);
+
+
+            if (texture == null || texture.getWidth() < rgbPicture.getWidth() || texture.getHeight() < rgbPicture.getHeight())
             {
                if (texture != null)
                {
@@ -80,23 +104,22 @@ public class GDXROS1VideoVisualizer
                   pixmap.dispose();
                }
 
-               pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
+               pixmap = new Pixmap(rgbPicture.getWidth(), rgbPicture.getHeight(), Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
                window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic), texture, false);
             }
 
-            boolean is16BitDepth = image.getEncoding().equals("16UC1");
-            boolean is8BitRGB = image.getEncoding().equals("rgb8");
+            boolean is16BitDepth = image.getFormat().contains("16UC1");
+            boolean is8BitRGB = image.getFormat().contains("rgb8");
             if (is16BitDepth || is8BitRGB)
             {
-               ChannelBuffer data = image.getData();
-               byte[] array = data.array();
-               int dataIndex = data.arrayOffset();
+               byte[] array = dstBuffer.array();
+               int dataIndex = dstBuffer.arrayOffset();
                int zeroedIndex = 0;
-               for (int y = 0; y < image.getHeight(); y++)
+               for (int y = 0; y < rgbPicture.getHeight(); y++)
                {
-                  for (int x = 0; x < image.getWidth(); x++)
+                  for (int x = 0; x < rgbPicture.getWidth(); x++)
                   {
                      if (is16BitDepth)
                      {
@@ -119,9 +142,9 @@ public class GDXROS1VideoVisualizer
                      }
                      else
                      {
-                        int unsignedMedium = data.getUnsignedMedium(zeroedIndex);
+                        int unsignedMedium = dstBuffer.getInt(zeroedIndex);
                         zeroedIndex += 3;
-                        pixmap.drawPixel(x, y, (unsignedMedium << 8) | 255);
+                        pixmap.drawPixel(x, y, (unsignedMedium) | 255);
                      }
                   }
                }
