@@ -61,9 +61,11 @@ public abstract class EuclideanModelPredictiveController
    protected final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
 
-   public static final double defaultInitialComWeight = 5e2;
+   public static final double defaultInitialComWeight = 1e2;
+   public static final double defaultInitialComVelocityWeight = 5e1;
    public static final double defaultFinalComWeight = 5e2;
-   public static final double defaultVrpTrackingWeight = 1e2;
+   public static final double defaultFinalVRPWeight = 5e1;
+   public static final double defaultVrpTrackingWeight = 5.0;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -90,7 +92,9 @@ public abstract class EuclideanModelPredictiveController
 
    private final YoDouble minRhoValue = new YoDouble("minRhoValue", registry);
    private final YoDouble initialComWeight = new YoDouble("initialComWeight", registry);
+   private final YoDouble initialComVelocityWeight = new YoDouble("initialComVelocityWeight", registry);
    private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
+   private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
 
    protected final MPCContactHandler contactHandler;
@@ -138,7 +142,9 @@ public abstract class EuclideanModelPredictiveController
 
       minRhoValue.set(defaultMinRhoValue);
       initialComWeight.set(defaultInitialComWeight);
+      initialComVelocityWeight.set(defaultInitialComVelocityWeight);
       finalComWeight.set(defaultFinalComWeight);
+      finalVRPWeight.set(defaultFinalVRPWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
@@ -482,9 +488,8 @@ public abstract class EuclideanModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-//      objectiveToPack.setConstraintType(ConstraintType.OBJECTIVE);
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      objectiveToPack.setWeight(initialComWeight.getDoubleValue());
+      objectiveToPack.setWeight(initialComVelocityWeight.getDoubleValue());
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
@@ -513,6 +518,10 @@ public abstract class EuclideanModelPredictiveController
 
    private MPCCommand<?> computeMinForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
    {
+      int numberOfContactPlanes = contactHandler.getNumberOfContactPlanesInSegment(segmentNumber);
+      if (numberOfContactPlanes < 1)
+         return null;
+
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
       valueObjective.setTimeOfObjective(constraintTime);
@@ -520,7 +529,7 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
       valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
       valueObjective.setUseScalarObjective(true);
-      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+      for (int i = 0; i < numberOfContactPlanes; i++)
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
          valueObjective.addContactPlaneHelper(contactPlane);
@@ -647,7 +656,7 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
-      objectiveToPack.setWeight(finalComWeight.getDoubleValue());
+      objectiveToPack.setWeight(finalVRPWeight.getDoubleValue());
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
