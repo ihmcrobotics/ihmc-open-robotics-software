@@ -14,19 +14,28 @@ public class RowMajorNativeMatrixGrower
    public void appendRows(NativeMatrix matrixToAppendTo, int colOffset, NativeMatrix matrixToAppend)
    {
       int dimension = matrixToAppendTo.getNumCols();
+      int colsToInsert = matrixToAppend.getNumCols();
+      int endCol = colOffset + colsToInsert;
+      int leftOverCols = dimension - endCol;
 
-      if (dimension < matrixToAppend.getNumCols() + colOffset)
+      if (leftOverCols < 0)
          throw new IllegalArgumentException("Invalid matrix size.");
 
       int previousSize = matrixToAppendTo.getNumRows();
       int taskSize = matrixToAppend.getNumRows();
 
-
       tempMatrix.set(matrixToAppendTo);
       matrixToAppendTo.reshape(previousSize + taskSize, dimension);
       matrixToAppendTo.insert(tempMatrix, 0, 0);
-      matrixToAppendTo.fillBlock(previousSize, 0, taskSize, dimension, 0.0);
+
+      // zero left side
+      if (colOffset > 0)
+         matrixToAppendTo.fillBlock(previousSize, 0, taskSize, colOffset, 0.0);
+      // insert new values
       matrixToAppendTo.insert(matrixToAppend, previousSize, colOffset);
+      // zero right side
+      if (leftOverCols > 0)
+         matrixToAppendTo.fillBlock(previousSize, endCol, taskSize, leftOverCols, 0.0);
    }
 
 }
