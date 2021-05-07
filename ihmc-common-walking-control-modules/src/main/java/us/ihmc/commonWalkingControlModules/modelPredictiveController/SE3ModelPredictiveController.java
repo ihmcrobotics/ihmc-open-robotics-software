@@ -133,7 +133,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.momentOfInertia = momentOfInertia;
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
-      qpSolver.setMaxNumberOfIterations(1000);
+      qpSolver.setMaxNumberOfIterations(10);
 
       qpSolver.setFirstOrientationVariableRegularization(1e-10);
       qpSolver.setSecondOrientationVariableRegularization(1e-10);
@@ -311,10 +311,11 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");
+         extractNewActiveSetData(false, qpSolver, firstVariableIndex);
          return null;
       }
 
-      extractNewActiveSetData(qpSolver, firstVariableIndex);
+      extractNewActiveSetData(true, qpSolver, firstVariableIndex);
 
       return qpSolver.getSolution();
    }

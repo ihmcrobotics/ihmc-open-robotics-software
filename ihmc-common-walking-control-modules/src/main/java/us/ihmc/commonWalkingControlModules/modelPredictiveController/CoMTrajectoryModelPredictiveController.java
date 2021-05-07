@@ -81,6 +81,8 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");
+         extractNewActiveSetData(false, qpSolver, firstVariableIndex);
+
          return null;
       }
 
@@ -89,7 +91,7 @@ public class CoMTrajectoryModelPredictiveController extends EuclideanModelPredic
       if (solutionInspection != null)
          solutionInspection.inspectSolution(mpcCommands, solutionCoefficients);
 
-      extractNewActiveSetData(qpSolver, firstVariableIndex);
+      extractNewActiveSetData(true, qpSolver, firstVariableIndex);
 
       return solutionCoefficients;
    }

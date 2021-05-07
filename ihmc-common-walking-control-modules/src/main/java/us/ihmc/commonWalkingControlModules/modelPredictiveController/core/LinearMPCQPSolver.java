@@ -107,8 +107,8 @@ public class LinearMPCQPSolver
       rhoCoefficientRegularization.set(1e-5);
       comCoefficientRegularization.set(1e-5);
 
-      rhoRateCoefficientRegularization.set(1e-6);
-      comRateCoefficientRegularization.set(1e-6);
+      rhoRateCoefficientRegularization.set(1e-10);
+      comRateCoefficientRegularization.set(1e-10);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       if (inverseMatrixCalculator != null)
@@ -116,7 +116,7 @@ public class LinearMPCQPSolver
 
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
-      int problemSize = 4 * 4 * 4 * 2 + 10;
+      int problemSize = 3 * (2 * 4 * LinearMPCIndexHandler.coefficientsPerRho + LinearMPCIndexHandler.comCoefficientsPerSegment);
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f = new DMatrixRMaj(problemSize, 1);
 
