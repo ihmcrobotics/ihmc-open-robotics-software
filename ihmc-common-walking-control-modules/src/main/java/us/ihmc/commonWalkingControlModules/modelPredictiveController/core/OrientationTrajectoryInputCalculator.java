@@ -160,8 +160,8 @@ public class OrientationTrajectoryInputCalculator
 
       // Next = A This + B c + C -> Next - A This - B c = C
       inputToPack.getTaskJacobian().zero();
-      inputToPack.getTaskJacobian().insert(command.getAMatrix(), 0, orientationIndex);
-      inputToPack.getTaskJacobian().insert(command.getBMatrix(), 0, comIndex);
+      inputToPack.getTaskJacobian().insertScaled(command.getAMatrix(), 0, orientationIndex, -1.0);
+      inputToPack.getTaskJacobian().insertScaled(command.getBMatrix(), 0, comIndex, -1.0);
       inputToPack.getTaskJacobian().insert(identity6, 0, nextOrientationIndex);
 
       inputToPack.getTaskObjective().set(command.getCMatrix());
@@ -223,8 +223,7 @@ public class OrientationTrajectoryInputCalculator
       inputToPack.getTaskJacobian().insert(command.getAMatrix(tick), 0, orientationIndex);
       inputToPack.getTaskJacobian().insert(command.getBMatrix(tick), 0, comIndex);
 
-      inputToPack.getTaskObjective().set(command.getCMatrix(tick));
-      inputToPack.getTaskObjective().scale(-1.0);
+      inputToPack.getTaskObjective().scale(-1.0, command.getCMatrix(tick));
 
       return true;
    }
