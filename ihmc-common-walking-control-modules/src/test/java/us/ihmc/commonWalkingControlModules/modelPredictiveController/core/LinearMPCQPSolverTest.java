@@ -341,6 +341,166 @@ public class LinearMPCQPSolverTest
       EuclidCoreTestTools.assertTuple3DEquals(dcmObjective, reconstructedVRPAtEnd, 8e-3);
    }
 
+   @Test
+   public void testJumpWithLowerAndUpperBounds()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      double dt = 1e-3;
+
+      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper3 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
+
+      FramePose3D contactPose = new FramePose3D();
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose, mu);
+      contactPlaneHelper3.computeBasisVectors(contactPolygon, contactPose, mu);
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+
+      double firstSegmentDuration = 0.7;
+      double secondSegmentDuration = 0.5;
+      double thirdSegmentDuration = 0.9;
+      double minRho = 0.001;
+      double maxRho = 0.001; // FIXME
+
+      RhoAccelerationObjectiveCommand segment1InitialMinAccel = new RhoAccelerationObjectiveCommand();
+      segment1InitialMinAccel.setOmega(omega);
+      segment1InitialMinAccel.setTimeOfObjective(0.0);
+      segment1InitialMinAccel.setSegmentNumber(0);
+      segment1InitialMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      segment1InitialMinAccel.setScalarObjective(minRho);
+      segment1InitialMinAccel.setUseScalarObjective(true);
+      segment1InitialMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoAccelerationObjectiveCommand segment1InitialMaxAccel = new RhoAccelerationObjectiveCommand();
+      segment1InitialMinAccel.setOmega(omega);
+      segment1InitialMinAccel.setTimeOfObjective(0.0);
+      segment1InitialMinAccel.setSegmentNumber(0);
+      segment1InitialMinAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment1InitialMinAccel.setScalarObjective(maxRho);
+      segment1InitialMinAccel.setUseScalarObjective(true);
+      segment1InitialMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoAccelerationObjectiveCommand segment1FinalMinAccel = new RhoAccelerationObjectiveCommand();
+      segment1FinalMinAccel.setOmega(omega);
+      segment1FinalMinAccel.setTimeOfObjective(firstSegmentDuration);
+      segment1FinalMinAccel.setSegmentNumber(0);
+      segment1FinalMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      segment1FinalMinAccel.setScalarObjective(minRho);
+      segment1FinalMinAccel.setUseScalarObjective(true);
+      segment1FinalMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoAccelerationObjectiveCommand segment1FinalMaxAccel = new RhoAccelerationObjectiveCommand();
+      segment1FinalMaxAccel.setOmega(omega);
+      segment1FinalMaxAccel.setTimeOfObjective(firstSegmentDuration);
+      segment1FinalMaxAccel.setSegmentNumber(0);
+      segment1FinalMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment1FinalMaxAccel.setScalarObjective(maxRho);
+      segment1FinalMaxAccel.setUseScalarObjective(true);
+      segment1FinalMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoAccelerationObjectiveCommand segment3InitialMinAccel = new RhoAccelerationObjectiveCommand();
+      segment3InitialMinAccel.setOmega(omega);
+      segment3InitialMinAccel.setTimeOfObjective(0.0);
+      segment3InitialMinAccel.setSegmentNumber(1);
+      segment3InitialMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      segment3InitialMinAccel.setScalarObjective(minRho);
+      segment3InitialMinAccel.setUseScalarObjective(true);
+      segment3InitialMinAccel.addContactPlaneHelper(contactPlaneHelper3);
+
+      RhoAccelerationObjectiveCommand segment3InitialMaxAccel = new RhoAccelerationObjectiveCommand();
+      segment3InitialMaxAccel.setOmega(omega);
+      segment3InitialMaxAccel.setTimeOfObjective(0.0);
+      segment3InitialMaxAccel.setSegmentNumber(1);
+      segment3InitialMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment3InitialMaxAccel.setScalarObjective(maxRho);
+      segment3InitialMaxAccel.setUseScalarObjective(true);
+      segment3InitialMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
+
+      RhoAccelerationObjectiveCommand segment3FinalMinAccel = new RhoAccelerationObjectiveCommand();
+      segment3FinalMinAccel.setOmega(omega);
+      segment3FinalMinAccel.setTimeOfObjective(thirdSegmentDuration);
+      segment3FinalMinAccel.setSegmentNumber(1);
+      segment3FinalMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      segment3FinalMinAccel.setScalarObjective(minRho);
+      segment3FinalMinAccel.setUseScalarObjective(true);
+      segment3FinalMinAccel.addContactPlaneHelper(contactPlaneHelper3);
+
+      RhoAccelerationObjectiveCommand segment3FinalMaxAccel = new RhoAccelerationObjectiveCommand();
+      segment3FinalMaxAccel.setOmega(omega);
+      segment3FinalMaxAccel.setTimeOfObjective(thirdSegmentDuration);
+      segment3FinalMaxAccel.setSegmentNumber(1);
+      segment3FinalMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment3FinalMaxAccel.setScalarObjective(maxRho);
+      segment3FinalMaxAccel.setUseScalarObjective(true);
+      segment3FinalMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
+
+
+      CoMPositionContinuityCommand positionContinuityCommand1 = new CoMPositionContinuityCommand();
+      positionContinuityCommand1.setOmega(omega);
+      positionContinuityCommand1.setConstraintType(ConstraintType.EQUALITY);
+      positionContinuityCommand1.setFirstSegmentNumber(0);
+      positionContinuityCommand1.setFirstSegmentDuration(firstSegmentDuration);
+      positionContinuityCommand1.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
+//      positionContinuityCommand.addSecondSegmentContactPlaneHelper(contactPlaneHelper3);
+
+      CoMVelocityContinuityCommand velocityContinuityCommand1 = new CoMVelocityContinuityCommand();
+      velocityContinuityCommand1.setOmega(omega);
+      velocityContinuityCommand1.setConstraintType(ConstraintType.EQUALITY);
+      velocityContinuityCommand1.setFirstSegmentNumber(0);
+      velocityContinuityCommand1.setFirstSegmentDuration(firstSegmentDuration);
+      velocityContinuityCommand1.addFirstSegmentContactPlaneHelper(contactPlaneHelper1);
+//      velocityContinuityCommand.addSecondSegmentContactPlaneHelper(contactPlaneHelper3);
+
+      CoMPositionContinuityCommand positionContinuityCommand2 = new CoMPositionContinuityCommand();
+      positionContinuityCommand2.setOmega(omega);
+      positionContinuityCommand2.setConstraintType(ConstraintType.EQUALITY);
+      positionContinuityCommand2.setFirstSegmentNumber(1);
+      positionContinuityCommand2.setFirstSegmentDuration(secondSegmentDuration);
+      positionContinuityCommand2.addSecondSegmentContactPlaneHelper(contactPlaneHelper3);
+
+      CoMVelocityContinuityCommand velocityContinuityCommand2 = new CoMVelocityContinuityCommand();
+      velocityContinuityCommand2.setOmega(omega);
+      velocityContinuityCommand2.setConstraintType(ConstraintType.EQUALITY);
+      velocityContinuityCommand2.setFirstSegmentNumber(1);
+      velocityContinuityCommand2.setFirstSegmentDuration(secondSegmentDuration);
+      velocityContinuityCommand2.addSecondSegmentContactPlaneHelper(contactPlaneHelper3);
+
+
+
+      double regularization = 1e-5;
+      solver.initialize();
+      solver.submitRhoValueCommand(segment1InitialMinAccel);
+      solver.submitRhoValueCommand(segment1InitialMaxAccel);
+      solver.submitRhoValueCommand(segment1FinalMinAccel);
+      solver.submitRhoValueCommand(segment1FinalMaxAccel);
+      solver.submitRhoValueCommand(segment3InitialMinAccel);
+      solver.submitRhoValueCommand(segment3InitialMaxAccel);
+      solver.submitRhoValueCommand(segment3FinalMinAccel);
+      solver.submitRhoValueCommand(segment3FinalMaxAccel);
+
+      solver.submitContinuityObjective(positionContinuityCommand1);
+      solver.submitContinuityObjective(velocityContinuityCommand1);
+      solver.submitContinuityObjective(positionContinuityCommand2);
+      solver.submitContinuityObjective(velocityContinuityCommand2);
+
+      // TODO VRP function
+      // TODO initial CoM
+      // TODO final CoM
+
+      solver.setComCoefficientRegularizationWeight(regularization);
+      solver.setRhoCoefficientRegularizationWeight(regularization);
+
+      solver.solve();
+   }
+
 
    @Test
    public void testCommandOptimizeBeginningAndEnd2Segments()
