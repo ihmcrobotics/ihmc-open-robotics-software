@@ -85,6 +85,8 @@ public class LinearMPCQPSolver
    protected final double dt;
    protected final double dt2;
 
+   private final RowMajorNativeMatrixGrower nativeMatrixGrower = new RowMajorNativeMatrixGrower();
+
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
       this(indexHandler,
@@ -535,6 +537,10 @@ public class LinearMPCQPSolver
       tempA.set(solverInput_Aeq);
       tempB.set(solverInput_beq);
 
+      nativeMatrixGrower.appendRows(solverInput_Aeq, colOffset, taskJacobian);
+      nativeMatrixGrower.appendRows(solverInput_beq, taskObjective);
+
+      /*
       solverInput_Aeq.reshape(previousSize + taskSize, totalProblemSize);
       solverInput_beq.reshape(previousSize + taskSize, 1);
       solverInput_Ain.zero();
@@ -545,6 +551,8 @@ public class LinearMPCQPSolver
 
       solverInput_Aeq.insert(taskJacobian, previousSize, colOffset);
       solverInput_beq.insert(taskObjective, previousSize, 0);
+
+       */
 
       if (debug && solverInput_Aeq.containsNaN())
          throw new RuntimeException("error");
