@@ -113,6 +113,7 @@ public class LinearMPCQPSolver
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       if (inverseMatrixCalculator != null)
          qpSolver.setInverseHessianCalculator(inverseMatrixCalculator);
+      qpSolver.setResetActiveSetOnSizeChange(false);
 
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
