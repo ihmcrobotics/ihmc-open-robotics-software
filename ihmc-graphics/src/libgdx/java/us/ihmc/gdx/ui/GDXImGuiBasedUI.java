@@ -129,8 +129,6 @@ public class GDXImGuiBasedUI
       LogTools.info("create()");
 
       sceneManager.create(GDXInputMode.ImGui);
-      if (vrManager.isVREnabled())
-         vrManager.create();
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
       imGuiInputProcessors.add(sceneManager.getCamera3D()::processImGuiInput);
@@ -140,17 +138,25 @@ public class GDXImGuiBasedUI
 
       sceneManager.addCoordinateFrame(0.3);
 
-      if (vrManager.isVREnabled())
-         sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
+      if (GDXVRManager.isVREnabled())
+      {
+         enableVR();
+      }
 
       imGuiWindowAndDockSystem.create(((Lwjgl3Graphics) Gdx.graphics).getWindow().getWindowHandle());
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> Gdx.app.exit(), "Exit" + getClass().getSimpleName()));
    }
 
+   private void enableVR()
+   {
+      vrManager.create();
+      sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
+   }
+
    public void pollVREvents()
    {
-      if (vrManager.isVREnabled())
+      if (GDXVRManager.isVREnabled())
       {
          vrManager.pollEvents();
       }
@@ -184,23 +190,13 @@ public class GDXImGuiBasedUI
             }
          }
          ImGui.separator();
-         if (ImGui.getIO().getKeyCtrl())
+         if (ImGui.menuItem("Save Layout"))
          {
-            if (ImGui.menuItem("Save Default Layout"))
-            {
-               saveApplicationSettings(true);
-            }
+            saveApplicationSettings(false);
          }
-         else
+         if (ImGui.menuItem("Save Default Layout"))
          {
-            if (ImGui.menuItem("Save Layout"))
-            {
-               saveApplicationSettings(false);
-            }
-         }
-         if (ImGui.isItemHovered())
-         {
-            ImGui.setTooltip("Hold Ctrl to save default. This will let you change the default for users running this app for the first time.");
+            saveApplicationSettings(true);
          }
          ImGui.endMenu();
       }
@@ -222,8 +218,21 @@ public class GDXImGuiBasedUI
          ImGui.popItemWidth();
          ImGui.endMenu();
       }
-      ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
+      ImGui.sameLine(ImGui.getWindowSizeX() - 170.0f);
       ImGui.text(FormattingTools.getFormattedDecimal2D(runTime.totalElapsed()) + " s");
+      ImGui.sameLine(ImGui.getWindowSizeX() - 100.0f);
+      if (GDXVRManager.isVREnabled())
+      {
+         ImGui.text("VR Enabled");
+      }
+      else if (ImGui.button("Enable VR"))
+      {
+         enableVR();
+      }
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
+      }
       ImGui.endMainMenuBar();
 
       ImGui.setNextWindowSize(800.0f, 600.0f, ImGuiCond.FirstUseEver);
@@ -298,7 +307,7 @@ public class GDXImGuiBasedUI
 
       imGuiWindowAndDockSystem.afterWindowManagement();
 
-      if (vrManager.isVREnabled())
+      if (GDXVRManager.isVREnabled())
          vrManager.render(sceneManager);
    }
 
@@ -326,7 +335,7 @@ public class GDXImGuiBasedUI
    public void dispose()
    {
       imGuiWindowAndDockSystem.dispose();
-      if (vrManager.isVREnabled())
+      if (GDXVRManager.isVREnabled())
          vrManager.dispose();
       sceneManager.dispose();
    }
