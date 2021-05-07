@@ -10,10 +10,11 @@ import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class GDXROS1VideoVisualizer
+public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
 {
    private AbstractRosTopicSubscriber<Image> subscriber;
    private final String topic;
@@ -27,13 +28,13 @@ public class GDXROS1VideoVisualizer
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
 
-   private boolean enabled = false;
-
-   public GDXROS1VideoVisualizer(String topic)
+   public GDXROS1VideoVisualizer(String title, String topic)
    {
+      super(title);
       this.topic = topic;
    }
 
+   @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
       subscriber = new AbstractRosTopicSubscriber<Image>(sensor_msgs.Image._TYPE)
@@ -48,25 +49,25 @@ public class GDXROS1VideoVisualizer
       ros1Node.attachSubscriber(topic, subscriber);
    }
 
+   @Override
    public void unsubscribe(RosNodeInterface ros1Node)
    {
       ros1Node.removeSubscriber(subscriber);
    }
 
-   public void setEnabled(boolean enabled)
+   @Override
+   public void renderImGuiWidgets()
    {
-      this.enabled = enabled;
-   }
-
-   public void renderWidgets()
-   {
+      super.renderImGuiWidgets();
       ImGui.text(topic);
       receivedPlot.render(receivedCount);
    }
 
-   public void renderVideo()
+   @Override
+   public void renderGraphics()
    {
-      if (enabled)
+      super.renderGraphics();
+      if (isActive())
       {
          Image image = this.image; // store the latest one here
 
