@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.robotics.MatrixMissingTools;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
 
@@ -151,21 +152,16 @@ public class ContactPlaneJacobianCalculator
 
             for (int ordinal = 0; ordinal < 3; ordinal++)
             {
-               unsafe_add(jacobianToPack, ordinal, startColumn, basisVector.getElement(ordinal) * firstCoefficient);
-               unsafe_add(jacobianToPack, ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondCoefficient);
+               MatrixMissingTools.unsafe_add(jacobianToPack, ordinal, startColumn, basisVector.getElement(ordinal) * firstCoefficient);
+               MatrixMissingTools.unsafe_add(jacobianToPack, ordinal, startColumn + 1, basisVector.getElement(ordinal) * secondCoefficient);
 
-               unsafe_add(jacobianToPack, ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdCoefficient);
-               unsafe_add(jacobianToPack, ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthCoefficient);
+               MatrixMissingTools.unsafe_add(jacobianToPack, ordinal, startColumn + 2, basisVector.getElement(ordinal) * thirdCoefficient);
+               MatrixMissingTools.unsafe_add(jacobianToPack, ordinal, startColumn + 3, basisVector.getElement(ordinal) * fourthCoefficient);
             }
 
             startColumn += LinearMPCIndexHandler.coefficientsPerRho;
          }
       }
-   }
-
-   private static void unsafe_add(DMatrix matrix, int row, int col, double value)
-   {
-      matrix.unsafe_set(row, col, value + matrix.unsafe_get(row, col));
    }
 
    public static void computeRhoJacobian(int derivativeOrder,
