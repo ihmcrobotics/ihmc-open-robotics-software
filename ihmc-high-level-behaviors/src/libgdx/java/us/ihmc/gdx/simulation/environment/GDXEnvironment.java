@@ -25,6 +25,7 @@ import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXPalletObject;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.graphics.GDXPose3DWidget;
@@ -148,6 +149,8 @@ public class GDXEnvironment implements RenderableProvider
             objectToPlace = new GDXMediumCinderBlockRoughed();
          if (ImGui.button("Place Lab Floor"))
             objectToPlace = new GDXLabFloorObject();
+         if (ImGui.button("Place Pallet"))
+            objectToPlace = new GDXPalletObject();
       }
       if (objectToPlace != null)
       {
