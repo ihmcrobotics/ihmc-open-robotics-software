@@ -524,35 +524,14 @@ public class LinearMPCQPSolver
          throw new RuntimeException("Motion task needs to have size matching the DoFs of the robot.");
       }
 
-      int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
       if (variables + colOffset > totalProblemSize)
       {
          throw new RuntimeException("This task does not fit.");
       }
 
-      int previousSize = solverInput_beq.getNumRows();
-
-      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      tempA.set(solverInput_Aeq);
-      tempB.set(solverInput_beq);
-
       nativeMatrixGrower.appendRows(solverInput_Aeq, colOffset, taskJacobian);
       nativeMatrixGrower.appendRows(solverInput_beq, taskObjective);
-
-      /*
-      solverInput_Aeq.reshape(previousSize + taskSize, totalProblemSize);
-      solverInput_beq.reshape(previousSize + taskSize, 1);
-      solverInput_Ain.zero();
-      solverInput_bin.zero();
-
-      solverInput_Aeq.insert(tempA, 0, 0);
-      solverInput_beq.insert(tempB, 0, 0);
-
-      solverInput_Aeq.insert(taskJacobian, previousSize, colOffset);
-      solverInput_beq.insert(taskObjective, previousSize, 0);
-
-       */
 
       if (debug && solverInput_Aeq.containsNaN())
          throw new RuntimeException("error");
@@ -607,7 +586,6 @@ public class LinearMPCQPSolver
                                                 int totalProblemSize,
                                                 int colOffset)
    {
-      int taskSize = taskJacobian.getNumRows();
       int variables = taskJacobian.getNumCols();
       if (taskJacobian.getNumCols() != problemSize)
       {
@@ -618,22 +596,8 @@ public class LinearMPCQPSolver
          throw new RuntimeException("This task does not fit.");
       }
 
-      int previousSize = solverInput_bin.getNumRows();
-
-      // Careful on that one, it works as long as matrices are row major and that the number of columns is not changed.
-      tempA.set(solverInput_Ain);
-      tempB.set(solverInput_bin);
-
-      solverInput_Ain.reshape(previousSize + taskSize, totalProblemSize);
-      solverInput_bin.reshape(previousSize + taskSize, 1);
-      solverInput_Ain.zero();
-      solverInput_bin.zero();
-
-      solverInput_Ain.insert(tempA, 0, 0);
-      solverInput_bin.insert(tempB, 0, 0);
-
-      solverInput_Ain.insertScaled(taskJacobian, previousSize, colOffset, sign);
-      solverInput_bin.insertScaled(taskObjective, previousSize, 0, sign);
+      nativeMatrixGrower.appendRows(solverInput_Ain, colOffset, sign, taskJacobian);
+      nativeMatrixGrower.appendRows(solverInput_bin, sign, taskObjective);
    }
 
    public void addInput(NativeQPInputTypeC input)
