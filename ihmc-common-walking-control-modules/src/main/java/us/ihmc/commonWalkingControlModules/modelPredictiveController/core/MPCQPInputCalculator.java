@@ -623,7 +623,6 @@ public class MPCQPInputCalculator
       tempJacobian.reshape(3, numberOfVariables);
       tempObjective.reshape(3, 1);
       tempJacobian.zero();
-      tempObjective.zero();
 
       double timeOfObjective = objective.getTimeOfObjective();
       double omega = objective.getOmega();
