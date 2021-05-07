@@ -13,21 +13,33 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.lwjgl.opengl.GL32.glClear;
 import static org.lwjgl.opengl.GL32.glClearColor;
 
 public class ImGuiTools
 {
+   private static final AtomicInteger GLOBAL_WIDGET_INDEX = new AtomicInteger();
    public static float TAB_BAR_HEIGHT = 20.0f;
    public static final int GDX_TO_IMGUI_KEY_CODE_OFFSET = GLFW.GLFW_KEY_A - Input.Keys.A;
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
+   public static int nextWidgetIndex()
+   {
+      return GLOBAL_WIDGET_INDEX.getAndIncrement();
+   }
+
    public static void glClearDarkGray()
    {
       glClearColor(0.3f, 0.3f, 0.3f, 1.0f);
       glClear(GL32.GL_COLOR_BUFFER_BIT);
+   }
+
+   public static String uniqueLabel(String label)
+   {
+      return label + "###GlobalWidgetIndex:" + nextWidgetIndex() + ":" + label;
    }
 
    public static String uniqueLabel(String id, String label)

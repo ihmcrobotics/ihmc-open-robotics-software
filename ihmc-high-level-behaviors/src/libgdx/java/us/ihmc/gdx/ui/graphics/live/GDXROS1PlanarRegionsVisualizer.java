@@ -9,16 +9,16 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.avatar.sensors.realsense.MapsenseTools;
 import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosNodeInterface;
 
-public class GDXROS1PlanarRegionsVisualizer implements RenderableProvider
+public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer implements RenderableProvider
 {
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final String topic;
-   private boolean enabled = false;
 
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("Received", 1000, 230, 20);
@@ -27,8 +27,9 @@ public class GDXROS1PlanarRegionsVisualizer implements RenderableProvider
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
    private DelayFixedPlanarRegionsSubscription delayFixedPlanarRegionsSubscription;
 
-   public GDXROS1PlanarRegionsVisualizer(ROS2NodeInterface ros2Node, DRCRobotModel robotModel, String topic)
+   public GDXROS1PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, DRCRobotModel robotModel, String topic)
    {
+      super(title);
       this.topic = topic;
 
       delayFixedPlanarRegionsSubscription = MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, topic, planarRegionsList ->
@@ -36,34 +37,45 @@ public class GDXROS1PlanarRegionsVisualizer implements RenderableProvider
          ++receivedCount;
          planarRegionsGraphic.generateMeshes(planarRegionsList);
       });
-      delayFixedPlanarRegionsSubscription.setEnabled(enabled);
+      delayFixedPlanarRegionsSubscription.setEnabled(isActive());
 
       gpuPlanarRegionUpdater.attachROS2Tuner(ros2Node);
    }
 
+   @Override
    public void subscribe(RosNodeInterface ros1Node)
    {
       delayFixedPlanarRegionsSubscription.subscribe(ros1Node);
    }
 
+   @Override
    public void unsubscribe(RosNodeInterface ros1Node)
    {
       delayFixedPlanarRegionsSubscription.unsubscribe(ros1Node);
    }
 
-   public void setEnabled(boolean enabled)
+   @Override
+   public void setActive(boolean active)
    {
-      this.enabled = enabled;
-      delayFixedPlanarRegionsSubscription.setEnabled(enabled);
+      super.setActive(active);
+      delayFixedPlanarRegionsSubscription.setEnabled(active);
    }
 
-   public void render()
+   @Override
+   public void renderGraphics()
    {
-      if (enabled)
+      super.renderGraphics();
+      if (isActive())
       {
          planarRegionsGraphic.render();
       }
+   }
 
+   @Override
+   public void renderImGuiWidgets()
+   {
+      super.renderImGuiWidgets();
+      delayFixedPlanarRegionsSubscription.setEnabled(isActive());
       ImGui.text(topic);
       receivedPlot.render(receivedCount);
       ImGui.text("Delay:");
@@ -73,7 +85,7 @@ public class GDXROS1PlanarRegionsVisualizer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (enabled)
+      if (isActive())
       {
          planarRegionsGraphic.getRenderables(renderables, pool);
       }
