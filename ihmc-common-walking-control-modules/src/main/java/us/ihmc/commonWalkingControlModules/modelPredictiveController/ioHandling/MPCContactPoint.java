@@ -476,6 +476,11 @@ public class MPCContactPoint
          viewer.update(basisVectorOrigin, contactAcceleration, basisMagnitudes);
    }
 
+   public FrameVector3DReadOnly getBasisMagnitude(int rhoIdx)
+   {
+      return basisMagnitudes[rhoIdx];
+   }
+
    public void clearViz()
    {
       if (viewer != null)
