@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -16,7 +17,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -353,10 +356,11 @@ public class LinearMPCQPSolverTest
       double mu = 0.8;
       double dt = 1e-3;
 
-      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
-      MPCContactPlane contactPlaneHelper3 = new MPCContactPlane(4, 4, new ZeroConeRotationCalculator());
+      int bases = 3;
+      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, bases, new ZeroConeRotationCalculator());
+      MPCContactPlane contactPlaneHelper3 = new MPCContactPlane(4, bases, new ZeroConeRotationCalculator());
 
-      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(4);
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(bases);
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
 
       FramePose3D contactPose = new FramePose3D();
@@ -364,6 +368,8 @@ public class LinearMPCQPSolverTest
       ConvexPolygon2D contactPolygon = new ConvexPolygon2D();
       contactPolygon.addVertex(0.0, 0.0);
       contactPolygon.update();
+
+//      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
 
       contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose, mu);
       contactPlaneHelper3.computeBasisVectors(contactPolygon, contactPose, mu);
@@ -390,7 +396,8 @@ public class LinearMPCQPSolverTest
       double secondSegmentDuration = 0.5;
       double thirdSegmentDuration = 0.9;
       double minRho = 0.001;
-      double maxRho = 100.0; // FIXME
+      double maxGs = 2.5;
+      double maxRho = maxGs * Math.abs(gravityZ) / (contactPolygon.getNumberOfVertices() * bases) / mu;
 
       RhoAccelerationObjectiveCommand segment1InitialMinAccel = new RhoAccelerationObjectiveCommand();
       segment1InitialMinAccel.setOmega(omega);
@@ -431,7 +438,7 @@ public class LinearMPCQPSolverTest
       RhoAccelerationObjectiveCommand segment3InitialMinAccel = new RhoAccelerationObjectiveCommand();
       segment3InitialMinAccel.setOmega(omega);
       segment3InitialMinAccel.setTimeOfObjective(0.0);
-      segment3InitialMinAccel.setSegmentNumber(1);
+      segment3InitialMinAccel.setSegmentNumber(2);
       segment3InitialMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
       segment3InitialMinAccel.setScalarObjective(minRho);
       segment3InitialMinAccel.setUseScalarObjective(true);
@@ -440,7 +447,7 @@ public class LinearMPCQPSolverTest
       RhoAccelerationObjectiveCommand segment3InitialMaxAccel = new RhoAccelerationObjectiveCommand();
       segment3InitialMaxAccel.setOmega(omega);
       segment3InitialMaxAccel.setTimeOfObjective(0.0);
-      segment3InitialMaxAccel.setSegmentNumber(1);
+      segment3InitialMaxAccel.setSegmentNumber(2);
       segment3InitialMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
       segment3InitialMaxAccel.setScalarObjective(maxRho);
       segment3InitialMaxAccel.setUseScalarObjective(true);
@@ -449,7 +456,7 @@ public class LinearMPCQPSolverTest
       RhoAccelerationObjectiveCommand segment3FinalMinAccel = new RhoAccelerationObjectiveCommand();
       segment3FinalMinAccel.setOmega(omega);
       segment3FinalMinAccel.setTimeOfObjective(thirdSegmentDuration);
-      segment3FinalMinAccel.setSegmentNumber(1);
+      segment3FinalMinAccel.setSegmentNumber(2);
       segment3FinalMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
       segment3FinalMinAccel.setScalarObjective(minRho);
       segment3FinalMinAccel.setUseScalarObjective(true);
@@ -550,6 +557,7 @@ public class LinearMPCQPSolverTest
       endComPositionCommand.addContactPlaneHelper(contactPlaneHelper3);
 
       double regularization = 1e-5;
+      solver.setMaxNumberOfIterations(1000);
       solver.initialize();
       solver.submitMPCCommand(segment1InitialMinAccel);
       solver.submitMPCCommand(segment1FinalMinAccel);
@@ -579,6 +587,71 @@ public class LinearMPCQPSolverTest
       solver.setRhoCoefficientRegularizationWeight(regularization);
 
       assertTrue(solver.solve());
+
+      contactPlaneHelper1.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
+      contactPlaneHelper3.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(2));
+
+      double epsilon = 1e-2;
+
+      for (double time = 0.0; time <= firstSegmentDuration; time += 0.001)
+      {
+         contactPlaneHelper1.computeContactForce(omega, time);
+         for (int contactPointIdx = 0; contactPointIdx < contactPlaneHelper1.getNumberOfContactPoints(); contactPointIdx++)
+         {
+            MPCContactPoint contactPoint = contactPlaneHelper1.getContactPointHelper(contactPointIdx);
+            for (int rhoIdx = 0; rhoIdx < contactPoint.getRhoSize(); rhoIdx++)
+            {
+               FrameVector3DReadOnly basis = contactPoint.getBasisMagnitude(rhoIdx);
+               double force = basis.length();
+               String minMessage = "Force is " + force + " at time " + time + ", and is expected to be above " + minRho;
+               String maxMessage = "Force is " + force + " at time " + time + ", and is expected to be below " + maxRho;
+               boolean minGood = force>= minRho - epsilon;
+               boolean maxGood = force <= maxRho + epsilon;
+               if (time == 0.0 || time == firstSegmentDuration)
+               {
+                  assertTrue(minMessage, minGood);
+                  assertTrue(maxMessage, maxGood);
+               }
+               else
+               {
+                  if (!minGood)
+                     LogTools.info(minMessage);
+                  if (!maxGood)
+                     LogTools.info(maxMessage);
+               }
+            }
+         }
+      }
+
+      for (double time = 0.0; time < thirdSegmentDuration; time += 0.001)
+      {
+         contactPlaneHelper3.computeContactForce(omega, time);
+         for (int contactPointIdx = 0; contactPointIdx < contactPlaneHelper3.getNumberOfContactPoints(); contactPointIdx++)
+         {
+            MPCContactPoint contactPoint = contactPlaneHelper3.getContactPointHelper(contactPointIdx);
+            for (int rhoIdx = 0; rhoIdx < contactPoint.getRhoSize(); rhoIdx++)
+            {
+               FrameVector3DReadOnly basis = contactPoint.getBasisMagnitude(rhoIdx);
+               double force = basis.length();
+               String minMessage = "Force is " + force + " at time " + time + ", and is expected to be above " + minRho;
+               String maxMessage = "Force is " + force + " at time " + time + ", and is expected to be below " + maxRho;
+               boolean minGood = force>= minRho - epsilon;
+               boolean maxGood = force <= maxRho + epsilon;
+               if (time == 0.0 || time == thirdSegmentDuration)
+               {
+                  assertTrue(minMessage, minGood);
+                  assertTrue(maxMessage, maxGood);
+               }
+               else
+               {
+                  if (!minGood)
+                     LogTools.info(minMessage);
+                  if (!maxGood)
+                     LogTools.info(maxMessage);
+               }
+            }
+         }
+      }
    }
 
 
