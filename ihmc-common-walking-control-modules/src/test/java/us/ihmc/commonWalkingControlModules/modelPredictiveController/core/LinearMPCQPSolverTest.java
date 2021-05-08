@@ -527,6 +527,7 @@ public class LinearMPCQPSolverTest
       startVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
       startVRPCommand.setStartVRP(startPosition);
       startVRPCommand.setEndVRP(startPosition);
+      startVRPCommand.addContactPlaneHelper(contactPlaneHelper1);
 
       VRPTrackingCommand endVRPCommand = new VRPTrackingCommand();
       endVRPCommand.setSegmentNumber(2);
@@ -535,6 +536,7 @@ public class LinearMPCQPSolverTest
       endVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
       endVRPCommand.setStartVRP(endPosition);
       endVRPCommand.setEndVRP(endPosition);
+      endVRPCommand.addContactPlaneHelper(contactPlaneHelper3);
 
       VRPPositionCommand endVRPPositionCommand = new VRPPositionCommand();
       endVRPPositionCommand.setSegmentNumber(2);
@@ -542,17 +544,22 @@ public class LinearMPCQPSolverTest
       endVRPPositionCommand.setTimeOfObjective(thirdSegmentDuration);
       endVRPPositionCommand.setObjective(endPosition);
       endVRPPositionCommand.setConstraintType(ConstraintType.OBJECTIVE);
+      endComPositionCommand.addContactPlaneHelper(contactPlaneHelper3);
 
       double regularization = 1e-5;
       solver.initialize();
       solver.submitMPCCommand(segment1InitialMinAccel);
-      solver.submitMPCCommand(segment1InitialMaxAccel);
       solver.submitMPCCommand(segment1FinalMinAccel);
-      solver.submitMPCCommand(segment1FinalMaxAccel);
       solver.submitMPCCommand(segment3InitialMinAccel);
-      solver.submitMPCCommand(segment3InitialMaxAccel);
       solver.submitMPCCommand(segment3FinalMinAccel);
+
+      /*
+      solver.submitMPCCommand(segment1InitialMaxAccel);
+      solver.submitMPCCommand(segment1FinalMaxAccel);
+      solver.submitMPCCommand(segment3InitialMaxAccel);
       solver.submitMPCCommand(segment3FinalMaxAccel);
+
+       */
 
       solver.submitMPCCommand(startComPositionCommand);
       solver.submitMPCCommand(startComVelocityCommand);
