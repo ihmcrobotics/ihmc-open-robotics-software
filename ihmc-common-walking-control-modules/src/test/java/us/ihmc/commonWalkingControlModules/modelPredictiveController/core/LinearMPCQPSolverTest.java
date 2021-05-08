@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -360,7 +361,9 @@ public class LinearMPCQPSolverTest
 
       FramePose3D contactPose = new FramePose3D();
 
-      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+      ConvexPolygon2D contactPolygon = new ConvexPolygon2D();
+      contactPolygon.addVertex(0.0, 0.0);
+      contactPolygon.update();
 
       contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose, mu);
       contactPlaneHelper3.computeBasisVectors(contactPolygon, contactPose, mu);
@@ -387,7 +390,7 @@ public class LinearMPCQPSolverTest
       double secondSegmentDuration = 0.5;
       double thirdSegmentDuration = 0.9;
       double minRho = 0.001;
-      double maxRho = 0.001; // FIXME
+      double maxRho = 100.0; // FIXME
 
       RhoAccelerationObjectiveCommand segment1InitialMinAccel = new RhoAccelerationObjectiveCommand();
       segment1InitialMinAccel.setOmega(omega);
@@ -399,13 +402,13 @@ public class LinearMPCQPSolverTest
       segment1InitialMinAccel.addContactPlaneHelper(contactPlaneHelper1);
 
       RhoAccelerationObjectiveCommand segment1InitialMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment1InitialMinAccel.setOmega(omega);
-      segment1InitialMinAccel.setTimeOfObjective(0.0);
-      segment1InitialMinAccel.setSegmentNumber(0);
-      segment1InitialMinAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment1InitialMinAccel.setScalarObjective(maxRho);
-      segment1InitialMinAccel.setUseScalarObjective(true);
-      segment1InitialMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+      segment1InitialMaxAccel.setOmega(omega);
+      segment1InitialMaxAccel.setTimeOfObjective(0.0);
+      segment1InitialMaxAccel.setSegmentNumber(0);
+      segment1InitialMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment1InitialMaxAccel.setScalarObjective(maxRho);
+      segment1InitialMaxAccel.setUseScalarObjective(true);
+      segment1InitialMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
 
       RhoAccelerationObjectiveCommand segment1FinalMinAccel = new RhoAccelerationObjectiveCommand();
       segment1FinalMinAccel.setOmega(omega);
@@ -553,13 +556,10 @@ public class LinearMPCQPSolverTest
       solver.submitMPCCommand(segment3InitialMinAccel);
       solver.submitMPCCommand(segment3FinalMinAccel);
 
-      /*
       solver.submitMPCCommand(segment1InitialMaxAccel);
       solver.submitMPCCommand(segment1FinalMaxAccel);
       solver.submitMPCCommand(segment3InitialMaxAccel);
       solver.submitMPCCommand(segment3FinalMaxAccel);
-
-       */
 
       solver.submitMPCCommand(startComPositionCommand);
       solver.submitMPCCommand(startComVelocityCommand);
@@ -574,8 +574,6 @@ public class LinearMPCQPSolverTest
       solver.submitMPCCommand(velocityContinuityCommand1);
       solver.submitMPCCommand(positionContinuityCommand2);
       solver.submitMPCCommand(velocityContinuityCommand2);
-
-      // TODO VRP function
 
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
