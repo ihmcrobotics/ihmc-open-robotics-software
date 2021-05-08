@@ -5,6 +5,7 @@ import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
@@ -17,6 +18,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
+
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class LinearMPCQPSolverTest
 {
@@ -362,7 +365,23 @@ public class LinearMPCQPSolverTest
       contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose, mu);
       contactPlaneHelper3.computeBasisVectors(contactPolygon, contactPose, mu);
 
-      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 2);
+      FramePoint3D startPosition = new FramePoint3D(contactPose.getPosition());
+      startPosition.setZ(0.75);
+
+      FramePoint3D endPosition = new FramePoint3D(contactPose.getPosition());
+      endPosition.setZ(1.0);
+
+      FrameVector3D zeroVelocity = new FrameVector3D();
+
+
+      indexHandler.initialize(
+            i ->
+            {
+               if (i == 1)
+                  return 0;
+               else
+                  return contactPolygon.getNumberOfVertices();
+            }, 3);
 
       double firstSegmentDuration = 0.7;
       double secondSegmentDuration = 0.5;
@@ -473,32 +492,88 @@ public class LinearMPCQPSolverTest
       velocityContinuityCommand2.setFirstSegmentDuration(secondSegmentDuration);
       velocityContinuityCommand2.addSecondSegmentContactPlaneHelper(contactPlaneHelper3);
 
+      CoMPositionCommand startComPositionCommand = new CoMPositionCommand();
+      startComPositionCommand.setSegmentNumber(0);
+      startComPositionCommand.setOmega(omega);
+      startComPositionCommand.setTimeOfObjective(0.0);
+      startComPositionCommand.setConstraintType(ConstraintType.EQUALITY);
+      startComPositionCommand.setObjective(startPosition);
 
+      CoMPositionCommand endComPositionCommand = new CoMPositionCommand();
+      endComPositionCommand.setSegmentNumber(2);
+      endComPositionCommand.setOmega(omega);
+      endComPositionCommand.setTimeOfObjective(thirdSegmentDuration);
+      endComPositionCommand.setConstraintType(ConstraintType.EQUALITY);
+      endComPositionCommand.setObjective(endPosition);
+
+      CoMVelocityCommand startComVelocityCommand = new CoMVelocityCommand();
+      startComVelocityCommand.setSegmentNumber(0);
+      startComVelocityCommand.setOmega(omega);
+      startComVelocityCommand.setTimeOfObjective(0.0);
+      startComVelocityCommand.setConstraintType(ConstraintType.EQUALITY);
+      startComVelocityCommand.setObjective(zeroVelocity);
+
+      CoMVelocityCommand endComVelocityCommand = new CoMVelocityCommand();
+      endComVelocityCommand.setSegmentNumber(2);
+      endComVelocityCommand.setOmega(omega);
+      endComVelocityCommand.setTimeOfObjective(thirdSegmentDuration);
+      endComVelocityCommand.setConstraintType(ConstraintType.EQUALITY);
+      endComVelocityCommand.setObjective(zeroVelocity);
+
+      VRPTrackingCommand startVRPCommand = new VRPTrackingCommand();
+      startVRPCommand.setSegmentNumber(0);
+      startVRPCommand.setOmega(omega);
+      startVRPCommand.setSegmentDuration(firstSegmentDuration);
+      startVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
+      startVRPCommand.setStartVRP(startPosition);
+      startVRPCommand.setEndVRP(startPosition);
+
+      VRPTrackingCommand endVRPCommand = new VRPTrackingCommand();
+      endVRPCommand.setSegmentNumber(2);
+      endVRPCommand.setOmega(omega);
+      endVRPCommand.setSegmentDuration(thirdSegmentDuration);
+      endVRPCommand.setWeight(EuclideanModelPredictiveController.defaultVrpTrackingWeight);
+      endVRPCommand.setStartVRP(endPosition);
+      endVRPCommand.setEndVRP(endPosition);
+
+      VRPPositionCommand endVRPPositionCommand = new VRPPositionCommand();
+      endVRPPositionCommand.setSegmentNumber(2);
+      endVRPPositionCommand.setOmega(omega);
+      endVRPPositionCommand.setTimeOfObjective(thirdSegmentDuration);
+      endVRPPositionCommand.setObjective(endPosition);
+      endVRPPositionCommand.setConstraintType(ConstraintType.OBJECTIVE);
 
       double regularization = 1e-5;
       solver.initialize();
-      solver.submitRhoValueCommand(segment1InitialMinAccel);
-      solver.submitRhoValueCommand(segment1InitialMaxAccel);
-      solver.submitRhoValueCommand(segment1FinalMinAccel);
-      solver.submitRhoValueCommand(segment1FinalMaxAccel);
-      solver.submitRhoValueCommand(segment3InitialMinAccel);
-      solver.submitRhoValueCommand(segment3InitialMaxAccel);
-      solver.submitRhoValueCommand(segment3FinalMinAccel);
-      solver.submitRhoValueCommand(segment3FinalMaxAccel);
+      solver.submitMPCCommand(segment1InitialMinAccel);
+      solver.submitMPCCommand(segment1InitialMaxAccel);
+      solver.submitMPCCommand(segment1FinalMinAccel);
+      solver.submitMPCCommand(segment1FinalMaxAccel);
+      solver.submitMPCCommand(segment3InitialMinAccel);
+      solver.submitMPCCommand(segment3InitialMaxAccel);
+      solver.submitMPCCommand(segment3FinalMinAccel);
+      solver.submitMPCCommand(segment3FinalMaxAccel);
 
-      solver.submitContinuityObjective(positionContinuityCommand1);
-      solver.submitContinuityObjective(velocityContinuityCommand1);
-      solver.submitContinuityObjective(positionContinuityCommand2);
-      solver.submitContinuityObjective(velocityContinuityCommand2);
+      solver.submitMPCCommand(startComPositionCommand);
+      solver.submitMPCCommand(startComVelocityCommand);
+      solver.submitMPCCommand(endComPositionCommand);
+      solver.submitMPCCommand(endComVelocityCommand);
+
+      solver.submitMPCCommand(startVRPCommand);
+      solver.submitMPCCommand(endVRPCommand);
+      solver.submitMPCCommand(endVRPPositionCommand);
+
+      solver.submitMPCCommand(positionContinuityCommand1);
+      solver.submitMPCCommand(velocityContinuityCommand1);
+      solver.submitMPCCommand(positionContinuityCommand2);
+      solver.submitMPCCommand(velocityContinuityCommand2);
 
       // TODO VRP function
-      // TODO initial CoM
-      // TODO final CoM
 
       solver.setComCoefficientRegularizationWeight(regularization);
       solver.setRhoCoefficientRegularizationWeight(regularization);
 
-      solver.solve();
+      assertTrue(solver.solve());
    }
 
 
