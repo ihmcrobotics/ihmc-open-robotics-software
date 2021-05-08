@@ -5,10 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
 
@@ -18,15 +15,9 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Global Visualizers";
 
-   private final RemoteSyncedRobotModel syncedRobot;
    private final ArrayList<ImGuiGDXVisualizer> visualizers = new ArrayList<>();
 
    private RosMainNode ros1Node;
-
-   public ImGuiGDXGlobalVisualizersPanel(DRCRobotModel robotModel, ROS2Node ros2Node)
-   {
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node); // TODO: Only create this when enabled
-   }
 
    public void addVisualizer(ImGuiGDXVisualizer visualizer)
    {
@@ -63,9 +54,6 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 
    public void render()
    {
-      if (syncedRobot != null)
-         syncedRobot.update();
-
       ImGui.begin(WINDOW_NAME);
 
       boolean anyNewROS1Enabled = false;
@@ -110,12 +98,6 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
             visualizer.getRenderables(renderables, pool);
          }
       }
-   }
-
-   // TODO: Remove, this is temporary
-   public RemoteSyncedRobotModel getSyncedRobot()
-   {
-      return syncedRobot;
    }
 
    public void destroy()
