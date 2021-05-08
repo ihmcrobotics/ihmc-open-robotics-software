@@ -44,6 +44,7 @@ public class RosTools
    public static final String D435_CAMERA_INFO = "/chest_d435/color/camera_info";
    public static final String D435_POINT_CLOUD = "/chest_d435/depth/color/points";
    public static final String L515_VIDEO = "/chest_l515/color/image_raw";
+   public static final String L515_COMPRESSED_VIDEO = "/camera/color/image_raw/compressed";
    public static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
    public static final String L515_POINT_CLOUD = "/chest_l515/depth/color/points";
    public static final String L515_COLOR_CAMERA_INFO = "/chest_l515/color/camera_info";
@@ -132,14 +133,13 @@ public class RosTools
    public static NodeConfiguration createNodeConfiguration(URI master)
    {
       InetAddress listenAddress = getMyIP(master);
-      
 
       NodeConfiguration nodeConfiguration = NodeConfiguration.newPublic(listenAddress.getHostAddress(), master);
       nodeConfiguration.setMasterUri(master);
 
       return nodeConfiguration;
    }
-   
+
    public static InetAddress getMyIP(URI master)
    {
 
@@ -200,10 +200,7 @@ public class RosTools
 
       }
       return listenAddress;
-
    }
-   
-   
 
    public static InetAddress getMyIP(String rosMasterURI)
    {
@@ -217,11 +214,9 @@ public class RosTools
       }
    }
 
-   
    public static void packRosQuaternionToEuclidQuaternion(Quaternion rosQuat, QuaternionBasics quat)
    {
       quat.set(rosQuat.getX(), rosQuat.getY(), rosQuat.getZ(), rosQuat.getW());
-      
    }
 
    public static void packRosVector3ToEuclidTuple3D(Vector3 rosVector, Tuple3DBasics vectorToPack)
@@ -230,14 +225,14 @@ public class RosTools
       vectorToPack.setY(rosVector.getY());
       vectorToPack.setZ(rosVector.getZ());
    }
-   
+
    public static void packEuclidTuple3DToGeometry_msgsVector3(Tuple3DReadOnly vector, Vector3 rosVectorToPack)
    {
       rosVectorToPack.setX(vector.getX());
       rosVectorToPack.setY(vector.getY());
       rosVectorToPack.setZ(vector.getZ());
    }
-   
+
    public static void packEuclidTuple3DToGeometry_MsgPoint(Tuple3DReadOnly position, Point point)
    {
       point.setX(position.getX());
@@ -252,10 +247,10 @@ public class RosTools
 
       us.ihmc.euclid.tuple4D.Quaternion rotation = new us.ihmc.euclid.tuple4D.Quaternion();
       rotation.set(pelvisTransform.getRotation());
-      
+
       packEuclidTuple3DAndQuaternionToGeometry_msgsPose(point, rotation, pose);
    }
-   
+
    public static void packEuclidTuple3DAndQuaternionToGeometry_msgsPose(Tuple3DReadOnly point, QuaternionReadOnly rotation, Pose pose)
    {
       RosTools.packEuclidTuple3DToGeometry_MsgPoint(point, pose.getPosition());
@@ -269,4 +264,4 @@ public class RosTools
       orientation.setY(quat.getY());
       orientation.setZ(quat.getZ());
    }
- }
+}
