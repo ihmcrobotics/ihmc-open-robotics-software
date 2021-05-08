@@ -1,29 +1,22 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import imgui.internal.ImGui;
-import jxl.format.RGB;
 import sensor_msgs.CompressedImage;
-import us.ihmc.codecs.generated.RGBPicture;
-import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.util.ByteBufferProvider;
 import us.ihmc.codecs.yuv.JPEGDecoder;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoWindow;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
-import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
 import java.awt.image.DataBufferByte;
-import java.nio.ByteBuffer;
 
 public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
 {
@@ -111,13 +104,10 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
                {
                   for (int x = 0; x < bufferedImage.getWidth(); x++)
                   {
-                        int rgbaColor = data[zeroedIndex] << 24
-                              | data[zeroedIndex + 1] << 16
-                              | data[zeroedIndex + 2] << 8
-                              | 255;
-                        int color = bufferedImage.getRGB(x,y);
-                        zeroedIndex += 3;
-                        pixmap.drawPixel(x, y, (color << 8) | 255);
+                     int rgbaColor = data[zeroedIndex] << 24 | data[zeroedIndex + 1] << 16 | data[zeroedIndex + 2] << 8 | 255;
+                     int color = bufferedImage.getRGB(x, y);
+                     zeroedIndex += 3;
+                     pixmap.drawPixel(x, y, (color << 8) | 255);
                   }
                }
                texture.draw(pixmap, 0, 0);
