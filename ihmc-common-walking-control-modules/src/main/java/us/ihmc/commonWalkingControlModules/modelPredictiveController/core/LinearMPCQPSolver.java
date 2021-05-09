@@ -301,6 +301,9 @@ public class LinearMPCQPSolver
          case RHO_BOUND:
             submitRhoBoundCommand((RhoBoundCommand) command);
             break;
+         case NORMAL_FORCE_BOUND:
+            submitNormalForceBoundCommand((NormalForceBoundCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -337,6 +340,13 @@ public class LinearMPCQPSolver
    public void submitRhoBoundCommand(RhoBoundCommand command)
    {
       int offset = inputCalculator.calculateRhoBoundCommandCompact(qpInputTypeA, command);
+      if (offset != -1)
+         addInput(qpInputTypeA, offset);
+   }
+
+   public void submitNormalForceBoundCommand(NormalForceBoundCommand command)
+   {
+      int offset = inputCalculator.calculateNormalForceBoundCommandCompact(qpInputTypeA, command);
       if (offset != -1)
          addInput(qpInputTypeA, offset);
    }

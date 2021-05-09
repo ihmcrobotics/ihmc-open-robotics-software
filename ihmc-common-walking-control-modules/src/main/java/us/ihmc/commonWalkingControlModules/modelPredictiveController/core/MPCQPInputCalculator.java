@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.matrixlib.MatrixTools;
@@ -838,6 +839,94 @@ public class MPCQPInputCalculator
 
             startCol += LinearMPCIndexHandler.coefficientsPerRho;
          }
+      }
+
+      inputToPack.setConstraintType(command.getConstraintType());
+
+      return true;
+   }
+
+   public int calculateNormalForceBoundCommandCompact(QPInputTypeA inputToPack, NormalForceBoundCommand command)
+   {
+      int numberOfVariables = 0;
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         numberOfVariables += command.getContactPlane(i).getCoefficientSize();
+      }
+      int segmentNumber = command.getSegmentNumber();
+
+      if (calculateNormalForceBoundCommandInternal(inputToPack, command, numberOfVariables, 0))
+         return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+
+      return -1;
+   }
+
+   public boolean calculateNormalForceBoundCommandInternal(QPInputTypeA inputToPack, NormalForceBoundCommand command, int numberOfVariables, int rhoStartIdx)
+   {
+      int rhoSize = 0;
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+         rhoSize += command.getContactPlane(i).getRhoSize();
+
+      if (rhoSize < 1)
+         return false;
+
+      inputToPack.setNumberOfVariables(numberOfVariables);
+      inputToPack.reshape(4 * rhoSize);
+
+      inputToPack.getTaskJacobian().zero();
+      inputToPack.getTaskObjective().zero();
+
+      double duration = command.getSegmentDuration();
+      double omega = command.getOmega();
+      double omega2 = omega * omega;
+      double exponential = Math.exp(omega * duration);
+
+      int startCol = rhoStartIdx;
+      int startRow = 0;
+
+      for (int i = 0; i < command.getNumberOfContacts(); i++)
+      {
+         MPCContactPlane contactPlane = command.getContactPlane(i);
+         double normalForceLimit = command.getRhoValue(i);
+
+         int row1 = startRow + 1;
+         int row2 = startRow + 2;
+         int row3 = startRow + 3;
+
+         for (int pointIdx = 0; pointIdx < contactPlane.getNumberOfContactPoints(); pointIdx++)
+         {
+            MPCContactPoint point = contactPlane.getContactPointHelper(pointIdx);
+            for (int rhoIdx = 0; rhoIdx < point.getRhoSize(); rhoIdx++)
+            {
+               double rhoZ = point.getRhoNormalZ();
+
+               inputToPack.getTaskJacobian().set(startRow, startCol, rhoZ * omega2);
+               inputToPack.getTaskJacobian().set(startRow, startCol + 1, rhoZ * omega2);
+               inputToPack.getTaskJacobian().set(startRow, startCol + 3, rhoZ * 2.0);
+
+               inputToPack.getTaskJacobian().set(row1, startCol, 2.0 * rhoZ * omega2);
+               inputToPack.getTaskJacobian().set(row1, startCol + 2, 6.0 / rhoZ * omega);
+               inputToPack.getTaskJacobian().set(row1, startCol + 3, rhoZ * 2.0);
+
+               inputToPack.getTaskJacobian().set(row2, startCol + 1, rhoZ * omega2 / exponential * 2.0);
+               inputToPack.getTaskJacobian().set(row2, startCol + 2, 6.0 * rhoZ * (duration - 1.0 / omega));
+               inputToPack.getTaskJacobian().set(row2, startCol + 3, 2.0 * rhoZ);
+
+               inputToPack.getTaskJacobian().set(row3, startCol, rhoZ * omega2 * exponential);
+               inputToPack.getTaskJacobian().set(row3, startCol + 1, rhoZ * omega2 / exponential);
+               inputToPack.getTaskJacobian().set(row3, startCol + 2, 6.0 * rhoZ * duration);
+               inputToPack.getTaskJacobian().set(row3, startCol + 3, 2.0 * rhoZ);
+
+               startCol += LinearMPCIndexHandler.coefficientsPerRho;
+            }
+         }
+
+         inputToPack.getTaskObjective().set(startRow, 0, normalForceLimit);
+         inputToPack.getTaskObjective().set(row1, 0, normalForceLimit);
+         inputToPack.getTaskObjective().set(row2, 0, normalForceLimit);
+         inputToPack.getTaskObjective().set(row3, 0, normalForceLimit);
+
+         startRow += 4;
       }
 
       inputToPack.setConstraintType(command.getConstraintType());
