@@ -27,10 +27,7 @@ public class MPCContactPoint
    private final double basisVectorAngleIncrement;
    private final PoseReferenceFrame planeFrame;
 
-   private final DMatrixRMaj rhoMaxMatrix;
-
-   private double maxContactForce;
-   private double timeOfContact = Double.NaN;
+   private double rhoNormalZ;
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
@@ -52,10 +49,6 @@ public class MPCContactPoint
       coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * numberOfBasisVectorsPerContactPoint;
 
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
-
-      rhoMaxMatrix = new DMatrixRMaj(this.numberOfBasisVectorsPerContactPoint, 1);
-
-      maxContactForce = Double.POSITIVE_INFINITY;
 
       basisVectors = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisMagnitudes = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
@@ -81,15 +74,6 @@ public class MPCContactPoint
    public void setContactPointForceViewer(ContactPointForceViewer viewer)
    {
       this.viewer = viewer;
-   }
-
-   /**
-    * Sets the maximum net force allowed in the normal force for this contact point.
-    * @param maxNormalForce maximum normal force
-    */
-   public void setMaxNormalForce(double maxNormalForce)
-   {
-      this.maxContactForce = maxNormalForce;
    }
 
    /**
@@ -138,18 +122,13 @@ public class MPCContactPoint
     */
    public void computeBasisVectors(Point2DReadOnly contactPointInPlaneFrame, FramePose3DReadOnly framePose, double rotationOffset, double mu)
    {
-      timeOfContact = Double.NaN;
       planeFrame.setPoseAndUpdate(framePose);
 
       // Compute the orientation of the normal contact vector and the corresponding transformation matrix
       computeNormalContactVectorRotation(normalContactVectorRotationMatrix);
 
-      rhoMaxMatrix.reshape(numberOfBasisVectorsPerContactPoint, 1);
-      rhoMaxMatrix.zero();
-
       int rhoIndex = 0;
 
-      double maxRhoZ = maxContactForce / numberOfBasisVectorsPerContactPoint;
       basisVectorOrigin.setIncludingFrame(planeFrame, contactPointInPlaneFrame, 0.0);
       basisVectorOrigin.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -160,10 +139,10 @@ public class MPCContactPoint
 
          computeBasisVector(basisVectorIndex, rotationOffset, normalContactVectorRotationMatrix, basisVector, mu);
 
-         rhoMaxMatrix.set(rhoIndex, 0, maxRhoZ / basisVector.getZ());
-
          rhoIndex++;
       }
+
+      rhoNormalZ = basisVectors[0].getZ();
    }
 
 
@@ -364,8 +343,6 @@ public class MPCContactPoint
       {
          FrameVector3D basisVector = basisVectors[rhoIndex];
          basisVector.setToZero(ReferenceFrame.getWorldFrame());
-
-         rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
       }
 
       if (viewer != null)
@@ -389,9 +366,9 @@ public class MPCContactPoint
       basisVectorToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   public DMatrixRMaj getRhoMaxMatrix()
+   public double getRhoNormalZ()
    {
-      return rhoMaxMatrix;
+      return rhoNormalZ;
    }
 
    public DMatrixRMaj getAccelerationIntegrationHessian()
@@ -512,9 +489,7 @@ public class MPCContactPoint
             return false;
          if (basisVectors.length != other.basisVectors.length)
             return false;
-         if (timeOfContact != other.timeOfContact)
-            return false;
-         if (maxContactForce != other.maxContactForce)
+         if (rhoNormalZ != other.rhoNormalZ)
             return false;
          if (basisCoefficients.length != other.basisCoefficients.length)
             return false;

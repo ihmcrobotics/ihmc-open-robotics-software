@@ -32,8 +32,6 @@ public class MPCContactPlane
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
 
-   private final DMatrixRMaj rhoMaxMatrix;
-
    private final DMatrixRMaj accelerationIntegrationHessian;
    private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
@@ -60,8 +58,6 @@ public class MPCContactPlane
 
       int coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
-      rhoMaxMatrix = new DMatrixRMaj(rhoSize, 1);
-
       accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
       accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
@@ -75,18 +71,6 @@ public class MPCContactPlane
 
       for (MPCContactPoint pointHelper : contactPoints)
          pointHelper.setContactPointForceViewer(viewer.getNextPointForceViewer());
-   }
-
-   /**
-    * Sets the net maximum force allowed for the entire contact plane.
-    *
-    * @param maxNormalForce maximum normal force.
-    */
-   public void setMaxNormalForce(double maxNormalForce)
-   {
-      double pointNormalForce = maxNormalForce / numberOfContactPoints;
-      for (int i = 0; i < numberOfContactPoints; i++)
-         contactPoints[i].setMaxNormalForce(pointNormalForce);
    }
 
    /**
@@ -134,15 +118,9 @@ public class MPCContactPlane
       return contactPoints[index];
    }
 
-   /**
-    * Returns a vector of the maximum generalized contact values that are allowed to achieve the maximum total contact force specified by
-    * {@link #setMaxNormalForce(double)}
-    *
-    * @return vector of maximum generalized contact values.
-    */
-   public DMatrixRMaj getRhoMaxMatrix()
+   public double getRhoNormalZ(int index)
    {
-      return rhoMaxMatrix;
+      return contactPoints[index].getRhoNormalZ();
    }
 
    /**
@@ -189,11 +167,7 @@ public class MPCContactPlane
       rhoSize = numberOfContactPoints * numberOfBasisVectorsPerContactPoint;
       coefficientSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
-      rhoMaxMatrix.reshape(rhoSize, 1);
-      rhoMaxMatrix.zero();
-
       int contactPointIndex = 0;
-      int rowStart = 0;
 
       for (; contactPointIndex < numberOfContactPoints; contactPointIndex++)
       {
@@ -205,9 +179,6 @@ public class MPCContactPlane
 
          MPCContactPoint contactPoint = contactPoints[contactPointIndex];
          contactPoint.computeBasisVectors(contactPointLocation, framePose, angleOffset, mu);
-         MatrixTools.setMatrixBlock(rhoMaxMatrix, rowStart, 0, contactPoint.getRhoMaxMatrix(), 0, 0, contactPoint.getRhoSize(), 1, 1.0);
-
-         rowStart += contactPoint.getRhoSize();
       }
 
       // Should not get there as long as the number of contact points of the contactable body is less or equal to maxNumberOfContactPoints.
@@ -354,10 +325,8 @@ public class MPCContactPlane
 
    public void computeContactForce(double omega, double time)
    {
-      for (MPCContactPoint contactPoint : contactPoints)
-      {
-         contactPoint.computeContactForce(omega, time);
-      }
+      for (int i = 0; i < numberOfContactPoints; i++)
+         contactPoints[i].computeContactForce(omega, time);
    }
 
    public void clearViz()
