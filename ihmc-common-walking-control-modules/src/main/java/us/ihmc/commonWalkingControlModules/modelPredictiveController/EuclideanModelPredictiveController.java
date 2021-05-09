@@ -404,9 +404,9 @@ public abstract class EuclideanModelPredictiveController
                                                             initialDuration,
                                                             null));
          if (includeRhoMinInequality)
-            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), 0, initialDuration));
          if (includeRhoMaxInequality)
-            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextNormalForceBoundCommand(), 0, initialDuration));
       }
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
@@ -425,10 +425,7 @@ public abstract class EuclideanModelPredictiveController
 
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
-            if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
-            if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
+
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
 
@@ -441,9 +438,9 @@ public abstract class EuclideanModelPredictiveController
                                                                nextDuration,
                                                                null));
             if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), nextSequence, nextDuration));
             if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextNormalForceBoundCommand(), nextSequence, nextDuration));
          }
       }
 
@@ -461,10 +458,6 @@ public abstract class EuclideanModelPredictiveController
 
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
-      if (includeRhoMinInequality)
-         mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
-      if (includeRhoMaxInequality)
-         mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -516,7 +509,7 @@ public abstract class EuclideanModelPredictiveController
       return continuityObjectiveToPack;
    }
 
-   private MPCCommand<?> computeMinForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMinForceObjective(RhoBoundCommand valueObjective, int segmentNumber, double segmentDuration)
    {
       int numberOfContactPlanes = contactHandler.getNumberOfContactPlanesInSegment(segmentNumber);
       if (numberOfContactPlanes < 1)
@@ -524,7 +517,7 @@ public abstract class EuclideanModelPredictiveController
 
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
-      valueObjective.setTimeOfObjective(constraintTime);
+      valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
       valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
@@ -532,28 +525,27 @@ public abstract class EuclideanModelPredictiveController
       for (int i = 0; i < numberOfContactPlanes; i++)
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
-         valueObjective.addContactPlaneHelper(contactPlane);
+         valueObjective.addContactPlane(contactPlane, minRhoValue.getDoubleValue());
          contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
       }
 
       return valueObjective;
    }
 
-   private MPCCommand<?> computeMaxForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMaxForceObjective(NormalForceBoundCommand valueObjective, int segmentNumber, double segmentDuration)
    {
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
-      valueObjective.setTimeOfObjective(constraintTime);
+      valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      valueObjective.setUseScalarObjective(false);
 
       int objectiveSize = 0;
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
          objectiveSize += contactPlane.getRhoSize();
-         valueObjective.addContactPlaneHelper(contactPlane);
+         valueObjective.addContactPlane(contactPlane, maxContactForce);
       }
       contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(objectiveSize);
 
