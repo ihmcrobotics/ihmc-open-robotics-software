@@ -398,127 +398,39 @@ public class LinearMPCQPSolverTest
       double thirdSegmentDuration = 0.9;
       double minRho = 0.001;
       double maxGs = 2.5;
-      double maxRho = maxGs * Math.abs(gravityZ) / (contactPolygon.getNumberOfVertices() * bases) / mu;
+      double maxForce = maxGs * Math.abs(gravityZ);
+      double maxRho = maxForce / (contactPolygon.getNumberOfVertices() * bases) / mu;
 
-      RhoBoundCommand forceBoundsCommand1 = new RhoBoundCommand();
-      forceBoundsCommand1.setOmega(omega);
-      forceBoundsCommand1.setSegmentDuration(firstSegmentDuration);
-      forceBoundsCommand1.setSegmentNumber(0);
-      forceBoundsCommand1.addContactPlane(contactPlaneHelper1, minRho, maxRho);
+      RhoBoundCommand rhoMinBoundsSegment1 = new RhoBoundCommand();
+      rhoMinBoundsSegment1.setOmega(omega);
+      rhoMinBoundsSegment1.setSegmentDuration(firstSegmentDuration);
+      rhoMinBoundsSegment1.setSegmentNumber(0);
+      rhoMinBoundsSegment1.addContactPlane(contactPlaneHelper1, minRho);
+      rhoMinBoundsSegment1.setConstraintType(ConstraintType.GEQ_INEQUALITY);
 
-      RhoBoundCommand forceBoundsCommand3 = new RhoBoundCommand();
-      forceBoundsCommand3.setOmega(omega);
-      forceBoundsCommand3.setSegmentDuration(thirdSegmentDuration);
-      forceBoundsCommand3.setSegmentNumber(2);
-      forceBoundsCommand3.addContactPlane(contactPlaneHelper3, minRho, maxRho);
 
-      RhoAccelerationObjectiveCommand segment1InitialMinAccel = new RhoAccelerationObjectiveCommand();
-      segment1InitialMinAccel.setOmega(omega);
-      segment1InitialMinAccel.setTimeOfObjective(0.0);
-      segment1InitialMinAccel.setSegmentNumber(0);
-      segment1InitialMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      segment1InitialMinAccel.setScalarObjective(minRho);
-      segment1InitialMinAccel.setUseScalarObjective(true);
-      segment1InitialMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+      RhoBoundCommand rhoMinBoundsSegment3 = new RhoBoundCommand();
+      rhoMinBoundsSegment3.setOmega(omega);
+      rhoMinBoundsSegment3.setSegmentDuration(thirdSegmentDuration);
+      rhoMinBoundsSegment3.setSegmentNumber(2);
+      rhoMinBoundsSegment3.addContactPlane(contactPlaneHelper3, minRho);
+      rhoMinBoundsSegment3.setConstraintType(ConstraintType.GEQ_INEQUALITY);
 
-      RhoAccelerationObjectiveCommand segment1InitialMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment1InitialMaxAccel.setOmega(omega);
-      segment1InitialMaxAccel.setTimeOfObjective(0.0);
-      segment1InitialMaxAccel.setSegmentNumber(0);
-      segment1InitialMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment1InitialMaxAccel.setScalarObjective(maxRho);
-      segment1InitialMaxAccel.setUseScalarObjective(true);
-      segment1InitialMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
+      RhoBoundCommand rhoMaxBoundsSegment1 = new RhoBoundCommand();
+      rhoMaxBoundsSegment1.setOmega(omega);
+      rhoMaxBoundsSegment1.setSegmentDuration(firstSegmentDuration);
+      rhoMaxBoundsSegment1.setSegmentNumber(0);
+      rhoMaxBoundsSegment1.addContactPlane(contactPlaneHelper1, maxRho);
+      rhoMaxBoundsSegment1.setConstraintType(ConstraintType.LEQ_INEQUALITY);
 
-      RhoAccelerationObjectiveCommand segment1MidMinAccel = new RhoAccelerationObjectiveCommand();
-      segment1MidMinAccel.setOmega(omega);
-      segment1MidMinAccel.setTimeOfObjective(firstSegmentDuration / 2.0);
-      segment1MidMinAccel.setSegmentNumber(0);
-      segment1MidMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      segment1MidMinAccel.setScalarObjective(minRho);
-      segment1MidMinAccel.setUseScalarObjective(true);
-      segment1MidMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+      RhoBoundCommand rhoMaxBoundsSegment3 = new RhoBoundCommand();
+      rhoMaxBoundsSegment3.setOmega(omega);
+      rhoMaxBoundsSegment3.setSegmentDuration(thirdSegmentDuration);
+      rhoMaxBoundsSegment3.setSegmentNumber(2);
+      rhoMaxBoundsSegment3.addContactPlane(contactPlaneHelper3, maxRho);
+      rhoMaxBoundsSegment3.setConstraintType(ConstraintType.LEQ_INEQUALITY);
 
-      RhoAccelerationObjectiveCommand segment1MidMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment1MidMaxAccel.setOmega(omega);
-      segment1MidMaxAccel.setTimeOfObjective(firstSegmentDuration / 2.0);
-      segment1MidMaxAccel.setSegmentNumber(0);
-      segment1MidMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment1MidMaxAccel.setScalarObjective(maxRho);
-      segment1MidMaxAccel.setUseScalarObjective(true);
-      segment1MidMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
 
-      RhoAccelerationObjectiveCommand segment1FinalMinAccel = new RhoAccelerationObjectiveCommand();
-      segment1FinalMinAccel.setOmega(omega);
-      segment1FinalMinAccel.setTimeOfObjective(firstSegmentDuration);
-      segment1FinalMinAccel.setSegmentNumber(0);
-      segment1FinalMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      segment1FinalMinAccel.setScalarObjective(minRho);
-      segment1FinalMinAccel.setUseScalarObjective(true);
-      segment1FinalMinAccel.addContactPlaneHelper(contactPlaneHelper1);
-
-      RhoAccelerationObjectiveCommand segment1FinalMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment1FinalMaxAccel.setOmega(omega);
-      segment1FinalMaxAccel.setTimeOfObjective(firstSegmentDuration);
-      segment1FinalMaxAccel.setSegmentNumber(0);
-      segment1FinalMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment1FinalMaxAccel.setScalarObjective(maxRho);
-      segment1FinalMaxAccel.setUseScalarObjective(true);
-      segment1FinalMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
-
-      RhoAccelerationObjectiveCommand segment3InitialMinAccel = new RhoAccelerationObjectiveCommand();
-      segment3InitialMinAccel.setOmega(omega);
-      segment3InitialMinAccel.setTimeOfObjective(0.0);
-      segment3InitialMinAccel.setSegmentNumber(2);
-      segment3InitialMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      segment3InitialMinAccel.setScalarObjective(minRho);
-      segment3InitialMinAccel.setUseScalarObjective(true);
-      segment3InitialMinAccel.addContactPlaneHelper(contactPlaneHelper3);
-
-      RhoAccelerationObjectiveCommand segment3InitialMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment3InitialMaxAccel.setOmega(omega);
-      segment3InitialMaxAccel.setTimeOfObjective(0.0);
-      segment3InitialMaxAccel.setSegmentNumber(2);
-      segment3InitialMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment3InitialMaxAccel.setScalarObjective(maxRho);
-      segment3InitialMaxAccel.setUseScalarObjective(true);
-      segment3InitialMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
-
-      RhoAccelerationObjectiveCommand segment3MidMinAccel = new RhoAccelerationObjectiveCommand();
-      segment3MidMinAccel.setOmega(omega);
-      segment3MidMinAccel.setTimeOfObjective(thirdSegmentDuration / 2.0);
-      segment3MidMinAccel.setSegmentNumber(2);
-      segment3MidMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      segment3MidMinAccel.setScalarObjective(minRho);
-      segment3MidMinAccel.setUseScalarObjective(true);
-      segment3MidMinAccel.addContactPlaneHelper(contactPlaneHelper3);
-
-      RhoAccelerationObjectiveCommand segment3MidMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment3MidMaxAccel.setOmega(omega);
-      segment3MidMaxAccel.setTimeOfObjective(thirdSegmentDuration / 2.0);
-      segment3MidMaxAccel.setSegmentNumber(1);
-      segment3MidMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment3MidMaxAccel.setScalarObjective(maxRho);
-      segment3MidMaxAccel.setUseScalarObjective(true);
-      segment3MidMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
-
-      RhoAccelerationObjectiveCommand segment3FinalMinAccel = new RhoAccelerationObjectiveCommand();
-      segment3FinalMinAccel.setOmega(omega);
-      segment3FinalMinAccel.setTimeOfObjective(thirdSegmentDuration);
-      segment3FinalMinAccel.setSegmentNumber(2);
-      segment3FinalMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      segment3FinalMinAccel.setScalarObjective(minRho);
-      segment3FinalMinAccel.setUseScalarObjective(true);
-      segment3FinalMinAccel.addContactPlaneHelper(contactPlaneHelper3);
-
-      RhoAccelerationObjectiveCommand segment3FinalMaxAccel = new RhoAccelerationObjectiveCommand();
-      segment3FinalMaxAccel.setOmega(omega);
-      segment3FinalMaxAccel.setTimeOfObjective(thirdSegmentDuration);
-      segment3FinalMaxAccel.setSegmentNumber(1);
-      segment3FinalMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      segment3FinalMaxAccel.setScalarObjective(maxRho);
-      segment3FinalMaxAccel.setUseScalarObjective(true);
-      segment3FinalMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
 
 
       CoMPositionContinuityCommand positionContinuityCommand1 = new CoMPositionContinuityCommand();
@@ -608,24 +520,11 @@ public class LinearMPCQPSolverTest
       double regularization = 1e-5;
       solver.setMaxNumberOfIterations(1000);
       solver.initialize();
-      /*
-      solver.submitMPCCommand(segment1InitialMinAccel);
-      solver.submitMPCCommand(segment1MidMinAccel);
-      solver.submitMPCCommand(segment1FinalMinAccel);
-      solver.submitMPCCommand(segment3InitialMinAccel);
-      solver.submitMPCCommand(segment3MidMinAccel);
-      solver.submitMPCCommand(segment3FinalMinAccel);
-       */
 
-      solver.submitMPCCommand(forceBoundsCommand1);
-      solver.submitMPCCommand(forceBoundsCommand3);
-
-//      solver.submitMPCCommand(segment1InitialMaxAccel);
-//      solver.submitMPCCommand(segment1MidMaxAccel);
-//      solver.submitMPCCommand(segment1FinalMaxAccel);
-//      solver.submitMPCCommand(segment3InitialMaxAccel);
-//      solver.submitMPCCommand(segment3MidMaxAccel);
-//      solver.submitMPCCommand(segment3FinalMaxAccel);
+      solver.submitMPCCommand(rhoMinBoundsSegment1);
+      solver.submitMPCCommand(rhoMinBoundsSegment3);
+      solver.submitMPCCommand(rhoMaxBoundsSegment1);
+      solver.submitMPCCommand(rhoMaxBoundsSegment3);
 
       solver.submitMPCCommand(startComPositionCommand);
       solver.submitMPCCommand(startComVelocityCommand);
