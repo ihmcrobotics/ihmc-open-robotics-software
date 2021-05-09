@@ -17,7 +17,8 @@ public class CommandProvider
    private final RecyclingArrayList<CoMPositionContinuityCommand> comPositionContinuityCommandPool = new RecyclingArrayList<>(CoMPositionContinuityCommand::new);
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
-   private final RecyclingArrayList<RhoAccelerationObjectiveCommand> rhoAccelerationObjectiveCommandPool = new RecyclingArrayList<>(RhoAccelerationObjectiveCommand::new);
+   private final RecyclingArrayList<RhoBoundCommand> rhoBoundCommandPool = new RecyclingArrayList<>(RhoBoundCommand::new);
+   private final RecyclingArrayList<NormalForceBoundCommand> normalForceBoundCommandPool = new RecyclingArrayList<>(NormalForceBoundCommand::new);
    private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
    private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
    private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
@@ -38,7 +39,8 @@ public class CommandProvider
       comPositionContinuityCommandPool.clear();
       comVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
-      rhoAccelerationObjectiveCommandPool.clear();
+      rhoBoundCommandPool.clear();
+      normalForceBoundCommandPool.clear();
       orientationValueCommandPool.clear();
       directOrientationValueCommandPool.clear();
       orientationContinuityCommandPool.clear();
@@ -94,9 +96,14 @@ public class CommandProvider
       return vrpPositionContinuityCommandPool.add();
    }
 
-   public RhoAccelerationObjectiveCommand getNextRhoAccelerationObjectiveCommand()
+   public RhoBoundCommand getNextRhoBoundCommand()
    {
-      return rhoAccelerationObjectiveCommandPool.add();
+      return rhoBoundCommandPool.add();
+   }
+
+   public NormalForceBoundCommand getNextNormalForceBoundCommand()
+   {
+      return normalForceBoundCommandPool.add();
    }
 
    public DirectOrientationValueCommand getNextDirectOrientationValueCommand()
