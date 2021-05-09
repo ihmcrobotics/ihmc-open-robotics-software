@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -399,6 +400,18 @@ public class LinearMPCQPSolverTest
       double maxGs = 2.5;
       double maxRho = maxGs * Math.abs(gravityZ) / (contactPolygon.getNumberOfVertices() * bases) / mu;
 
+      RhoBoundCommand forceBoundsCommand1 = new RhoBoundCommand();
+      forceBoundsCommand1.setOmega(omega);
+      forceBoundsCommand1.setSegmentDuration(firstSegmentDuration);
+      forceBoundsCommand1.setSegmentNumber(0);
+      forceBoundsCommand1.addContactPlane(contactPlaneHelper1, minRho, maxRho);
+
+      RhoBoundCommand forceBoundsCommand3 = new RhoBoundCommand();
+      forceBoundsCommand3.setOmega(omega);
+      forceBoundsCommand3.setSegmentDuration(thirdSegmentDuration);
+      forceBoundsCommand3.setSegmentNumber(2);
+      forceBoundsCommand3.addContactPlane(contactPlaneHelper3, minRho, maxRho);
+
       RhoAccelerationObjectiveCommand segment1InitialMinAccel = new RhoAccelerationObjectiveCommand();
       segment1InitialMinAccel.setOmega(omega);
       segment1InitialMinAccel.setTimeOfObjective(0.0);
@@ -416,6 +429,24 @@ public class LinearMPCQPSolverTest
       segment1InitialMaxAccel.setScalarObjective(maxRho);
       segment1InitialMaxAccel.setUseScalarObjective(true);
       segment1InitialMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoAccelerationObjectiveCommand segment1MidMinAccel = new RhoAccelerationObjectiveCommand();
+      segment1MidMinAccel.setOmega(omega);
+      segment1MidMinAccel.setTimeOfObjective(firstSegmentDuration / 2.0);
+      segment1MidMinAccel.setSegmentNumber(0);
+      segment1MidMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      segment1MidMinAccel.setScalarObjective(minRho);
+      segment1MidMinAccel.setUseScalarObjective(true);
+      segment1MidMinAccel.addContactPlaneHelper(contactPlaneHelper1);
+
+      RhoAccelerationObjectiveCommand segment1MidMaxAccel = new RhoAccelerationObjectiveCommand();
+      segment1MidMaxAccel.setOmega(omega);
+      segment1MidMaxAccel.setTimeOfObjective(firstSegmentDuration / 2.0);
+      segment1MidMaxAccel.setSegmentNumber(0);
+      segment1MidMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment1MidMaxAccel.setScalarObjective(maxRho);
+      segment1MidMaxAccel.setUseScalarObjective(true);
+      segment1MidMaxAccel.addContactPlaneHelper(contactPlaneHelper1);
 
       RhoAccelerationObjectiveCommand segment1FinalMinAccel = new RhoAccelerationObjectiveCommand();
       segment1FinalMinAccel.setOmega(omega);
@@ -452,6 +483,24 @@ public class LinearMPCQPSolverTest
       segment3InitialMaxAccel.setScalarObjective(maxRho);
       segment3InitialMaxAccel.setUseScalarObjective(true);
       segment3InitialMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
+
+      RhoAccelerationObjectiveCommand segment3MidMinAccel = new RhoAccelerationObjectiveCommand();
+      segment3MidMinAccel.setOmega(omega);
+      segment3MidMinAccel.setTimeOfObjective(thirdSegmentDuration / 2.0);
+      segment3MidMinAccel.setSegmentNumber(2);
+      segment3MidMinAccel.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+      segment3MidMinAccel.setScalarObjective(minRho);
+      segment3MidMinAccel.setUseScalarObjective(true);
+      segment3MidMinAccel.addContactPlaneHelper(contactPlaneHelper3);
+
+      RhoAccelerationObjectiveCommand segment3MidMaxAccel = new RhoAccelerationObjectiveCommand();
+      segment3MidMaxAccel.setOmega(omega);
+      segment3MidMaxAccel.setTimeOfObjective(thirdSegmentDuration / 2.0);
+      segment3MidMaxAccel.setSegmentNumber(1);
+      segment3MidMaxAccel.setConstraintType(ConstraintType.LEQ_INEQUALITY);
+      segment3MidMaxAccel.setScalarObjective(maxRho);
+      segment3MidMaxAccel.setUseScalarObjective(true);
+      segment3MidMaxAccel.addContactPlaneHelper(contactPlaneHelper3);
 
       RhoAccelerationObjectiveCommand segment3FinalMinAccel = new RhoAccelerationObjectiveCommand();
       segment3FinalMinAccel.setOmega(omega);
@@ -559,15 +608,24 @@ public class LinearMPCQPSolverTest
       double regularization = 1e-5;
       solver.setMaxNumberOfIterations(1000);
       solver.initialize();
+      /*
       solver.submitMPCCommand(segment1InitialMinAccel);
+      solver.submitMPCCommand(segment1MidMinAccel);
       solver.submitMPCCommand(segment1FinalMinAccel);
       solver.submitMPCCommand(segment3InitialMinAccel);
+      solver.submitMPCCommand(segment3MidMinAccel);
       solver.submitMPCCommand(segment3FinalMinAccel);
+       */
 
-      solver.submitMPCCommand(segment1InitialMaxAccel);
-      solver.submitMPCCommand(segment1FinalMaxAccel);
-      solver.submitMPCCommand(segment3InitialMaxAccel);
-      solver.submitMPCCommand(segment3FinalMaxAccel);
+      solver.submitMPCCommand(forceBoundsCommand1);
+      solver.submitMPCCommand(forceBoundsCommand3);
+
+//      solver.submitMPCCommand(segment1InitialMaxAccel);
+//      solver.submitMPCCommand(segment1MidMaxAccel);
+//      solver.submitMPCCommand(segment1FinalMaxAccel);
+//      solver.submitMPCCommand(segment3InitialMaxAccel);
+//      solver.submitMPCCommand(segment3MidMaxAccel);
+//      solver.submitMPCCommand(segment3FinalMaxAccel);
 
       solver.submitMPCCommand(startComPositionCommand);
       solver.submitMPCCommand(startComVelocityCommand);
@@ -593,7 +651,8 @@ public class LinearMPCQPSolverTest
 
       double epsilon = 1e-2;
 
-      for (double time = 0.0; time <= firstSegmentDuration; time += 0.001)
+      double timeStep = 0.05;
+      for (double time = 0.0; time <= (firstSegmentDuration + timeStep / 10.0); time += timeStep)
       {
          contactPlaneHelper1.computeContactForce(omega, time);
          for (int contactPointIdx = 0; contactPointIdx < contactPlaneHelper1.getNumberOfContactPoints(); contactPointIdx++)
@@ -603,11 +662,11 @@ public class LinearMPCQPSolverTest
             {
                FrameVector3DReadOnly basis = contactPoint.getBasisMagnitude(rhoIdx);
                double force = basis.length();
-               String minMessage = "Force is " + force + " at time " + time + ", and is expected to be above " + minRho;
-               String maxMessage = "Force is " + force + " at time " + time + ", and is expected to be below " + maxRho;
+               String minMessage = "Force 1 is " + force + " at time " + time + ", and is expected to be above " + minRho;
+               String maxMessage = "Force 1 is " + force + " at time " + time + ", and is expected to be below " + maxRho;
                boolean minGood = force>= minRho - epsilon;
                boolean maxGood = force <= maxRho + epsilon;
-               if (time == 0.0 || time == firstSegmentDuration)
+               if (time == 0.0 || MathTools.epsilonEquals(time, firstSegmentDuration, timeStep / 10.0))
                {
                   assertTrue(minMessage, minGood);
                   assertTrue(maxMessage, maxGood);
@@ -623,7 +682,7 @@ public class LinearMPCQPSolverTest
          }
       }
 
-      for (double time = 0.0; time < thirdSegmentDuration; time += 0.001)
+      for (double time = 0.0; time <= (thirdSegmentDuration + timeStep / 10.0); time += timeStep)
       {
          contactPlaneHelper3.computeContactForce(omega, time);
          for (int contactPointIdx = 0; contactPointIdx < contactPlaneHelper3.getNumberOfContactPoints(); contactPointIdx++)
@@ -633,11 +692,11 @@ public class LinearMPCQPSolverTest
             {
                FrameVector3DReadOnly basis = contactPoint.getBasisMagnitude(rhoIdx);
                double force = basis.length();
-               String minMessage = "Force is " + force + " at time " + time + ", and is expected to be above " + minRho;
-               String maxMessage = "Force is " + force + " at time " + time + ", and is expected to be below " + maxRho;
+               String minMessage = "Force 3 is " + force + " at time " + time + ", and is expected to be above " + minRho;
+               String maxMessage = "Force 3 is " + force + " at time " + time + ", and is expected to be below " + maxRho;
                boolean minGood = force>= minRho - epsilon;
                boolean maxGood = force <= maxRho + epsilon;
-               if (time == 0.0 || time == thirdSegmentDuration)
+               if (time == 0.0 || MathTools.epsilonEquals(time, thirdSegmentDuration, timeStep / 10.0))
                {
                   assertTrue(minMessage, minGood);
                   assertTrue(maxMessage, maxGood);
