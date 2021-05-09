@@ -4,13 +4,8 @@ import gnu.trove.list.TIntList;
 import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.sparse.csc.CommonOps_DSCC;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.BlockInverseCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
@@ -303,6 +298,9 @@ public class LinearMPCQPSolver
          case VRP_TRACKING:
             submitVRPTrackingCommand((VRPTrackingCommand) command);
             break;
+         case RHO_BOUND:
+            submitRhoBoundCommand((RhoBoundCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -334,6 +332,13 @@ public class LinearMPCQPSolver
       int offset = inputCalculator.calculateCompactVRPTrackingObjective(qpInputTypeC, command);
       if (offset != -1)
          addInput(qpInputTypeC, offset);
+   }
+
+   public void submitRhoBoundCommand(RhoBoundCommand command)
+   {
+      int offset = inputCalculator.calculateRhoBoundCommandCompact(qpInputTypeA, command);
+      if (offset != -1)
+         addInput(qpInputTypeA, offset);
    }
 
    public void addInput(QPInputTypeA input)
