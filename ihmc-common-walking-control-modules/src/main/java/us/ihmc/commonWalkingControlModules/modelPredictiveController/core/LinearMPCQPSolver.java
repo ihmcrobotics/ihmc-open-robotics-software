@@ -106,6 +106,8 @@ public class LinearMPCQPSolver
       comRateCoefficientRegularization.set(1e-10);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver.setConvergenceThreshold(5e-6);
+      qpSolver.setConvergenceThresholdForLagrangeMultipliers(1e-4);
       if (inverseMatrixCalculator != null)
          qpSolver.setInverseHessianCalculator(inverseMatrixCalculator);
       qpSolver.setResetActiveSetOnSizeChange(false);
