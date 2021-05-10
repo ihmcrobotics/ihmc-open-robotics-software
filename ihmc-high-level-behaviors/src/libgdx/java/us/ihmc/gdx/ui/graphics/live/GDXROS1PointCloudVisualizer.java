@@ -23,7 +23,7 @@ import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implements RenderableProvider
 {
-   private static final int MAX_POINTS = 50000;
+   private static final int MAX_POINTS = 100000;
 
    private final String ros1PointCloudTopic;
    private ReferenceFrame frame;
@@ -100,7 +100,7 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
          {
             try
             {
-               boolean hasColors = true;
+               boolean hasColors = false;
                PointCloudData pointCloudData = new PointCloudData(message, MAX_POINTS, hasColors);
 
                pointCloudData.flipToZUp();
