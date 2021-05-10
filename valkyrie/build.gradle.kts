@@ -20,7 +20,7 @@ mainDependencies {
    api("org.ejml:ejml-simple:0.39")
    api("org.ejml:ejml-ddense:0.39")
    api("org.apache.commons:commons-lang3:3.8.1")
-   api("net.java.jinput:jinput:2.0.6-ihmc2")
+   api("us.ihmc:jinput:2.0.6-ihmc2")
 
    api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:euclid-geometry:0.16.2")
@@ -31,7 +31,7 @@ mainDependencies {
    api("us.ihmc:mecano-yovariables:0.8.2")
    api("us.ihmc:ihmc-yovariables:0.9.9")
    api("us.ihmc:ihmc-realtime:1.3.1")
-   api("us.ihmc:IHMCRosControl:0.5.0") {
+   api("us.ihmc:ihmc-ros-control:0.6.0") {
       setChanging(true)
    }
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
