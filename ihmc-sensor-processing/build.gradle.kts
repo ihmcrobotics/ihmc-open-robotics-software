@@ -25,7 +25,7 @@ mainDependencies {
    api("org.ejml:ejml-ddense:0.39")
    api("org.ejml:ejml-core:0.39")
    api("jgraph:jgraph:5.13.0.0")
-   api("org.jmonkeyengine:jme3-core:3.2.0-171208")
+   api("us.ihmc:jme3-core:3.2.0-171209")
    api("org.boofcv:boofcv-geo:0.36")
 
    api("us.ihmc:euclid-frame:0.16.2")
