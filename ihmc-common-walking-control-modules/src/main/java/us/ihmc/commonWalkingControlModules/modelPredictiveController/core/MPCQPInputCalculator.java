@@ -803,6 +803,8 @@ public class MPCQPInputCalculator
       double omega2 = omega * omega;
       double exponential = Math.exp(omega * duration);
 
+      double alpha = 1.0 * omega;
+
       int startCol = rhoStartIdx;
       int startRow = 0;
       for (int i = 0; i < command.getNumberOfContacts(); i++)
@@ -812,28 +814,34 @@ public class MPCQPInputCalculator
 
          for (int rhoIdx = 0; rhoIdx < contactPlane.getRhoSize(); rhoIdx++)
          {
+            int startCol1 = startCol + 1;
+            int startCol2 = startCol + 2;
+            int startCol3 = startCol + 3;
+
             inputToPack.getTaskJacobian().set(startRow, startCol, omega2);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 1, omega2);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 3, 2.0);
+            inputToPack.getTaskJacobian().set(startRow, startCol1, omega2);
+            inputToPack.getTaskJacobian().set(startRow, startCol3, 2.0);
             inputToPack.getTaskObjective().set(startRow, 0, rhoValue);
             startRow++;
 
-            inputToPack.getTaskJacobian().set(startRow, startCol, 2.0 * omega2);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 2, 6.0 / omega);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 3, 2.0);
+            inputToPack.getTaskJacobian().set(startRow, startCol, omega2 * (1.0 + omega / alpha));
+            inputToPack.getTaskJacobian().set(startRow, startCol1, omega2 * (1.0 - omega / alpha));
+            inputToPack.getTaskJacobian().set(startRow, startCol2, 6.0 / alpha);
+            inputToPack.getTaskJacobian().set(startRow, startCol3, 2.0);
             inputToPack.getTaskObjective().set(startRow, 0, rhoValue);
             startRow++;
 
-            inputToPack.getTaskJacobian().set(startRow, startCol + 1, omega2 / exponential * 2.0);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 2, 6.0 * (duration - 1.0 / omega));
-            inputToPack.getTaskJacobian().set(startRow, startCol + 3, 2.0);
+            inputToPack.getTaskJacobian().set(startRow, startCol, omega2 * exponential * (1.0 - omega / alpha));
+            inputToPack.getTaskJacobian().set(startRow, startCol1, omega2 / exponential * (1.0 + omega / alpha));
+            inputToPack.getTaskJacobian().set(startRow, startCol2, 6.0 * (duration - 1.0 / alpha));
+            inputToPack.getTaskJacobian().set(startRow, startCol3, 2.0);
             inputToPack.getTaskObjective().set(startRow, 0, rhoValue);
             startRow++;
 
             inputToPack.getTaskJacobian().set(startRow, startCol, omega2 * exponential);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 1, omega2 / exponential);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 2, 6.0 * duration);
-            inputToPack.getTaskJacobian().set(startRow, startCol + 3, 2.0);
+            inputToPack.getTaskJacobian().set(startRow, startCol1, omega2 / exponential);
+            inputToPack.getTaskJacobian().set(startRow, startCol2, 6.0 * duration);
+            inputToPack.getTaskJacobian().set(startRow, startCol3, 2.0);
             inputToPack.getTaskObjective().set(startRow, 0, rhoValue);
             startRow++;
 
