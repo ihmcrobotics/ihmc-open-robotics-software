@@ -10,7 +10,6 @@ public class HumanoidNetworkProcessorParameters
    private URI rosURI;
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
-   private boolean useTextToSpeechEngine;
    private boolean useZeroPoseRobotConfigurationPublisherModule;
    private boolean useWholeBodyTrajectoryToolboxModule, visualizeWholeBodyTrajectoryToolboxModule;
    private boolean useKinematicsToolboxModule, visualizeKinematicsToolboxModule;
@@ -54,11 +53,6 @@ public class HumanoidNetworkProcessorParameters
    public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
-   }
-
-   public void setUseTextToSpeechEngine(boolean enable)
-   {
-      this.useTextToSpeechEngine = enable;
    }
 
    public void setUseZeroPoseRobotConfigurationPublisherModule(boolean enable)
@@ -206,11 +200,6 @@ public class HumanoidNetworkProcessorParameters
    public LocalObjectCommunicator getSimulatedSensorCommunicator()
    {
       return simulatedSensorCommunicator;
-   }
-
-   public boolean isUseTextToSpeechEngine()
-   {
-      return useTextToSpeechEngine;
    }
 
    public boolean isUseZeroPoseRobotConfigurationPublisherModule()
