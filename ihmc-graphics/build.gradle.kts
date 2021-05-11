@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.19.3")
+   api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 }
 
