@@ -28,6 +28,9 @@ import java.util.logging.Level;
 /**
  * TODO: FIX ME: This code has been commented because there are problems with
  * the POM included with javacpp-presets. @dcalvert
+ * 
+ * <p>
+ * TODO: FIX ME: this class depends on us.ihmcPerception:cuda:7.5 which could not be found. This is completely broken.
  */
 public class ValveDetector
 {
