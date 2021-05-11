@@ -41,7 +41,6 @@ import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
@@ -76,8 +75,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       humanoidNetworkProcessor.setRosURI(parameters.getRosURI());
       humanoidNetworkProcessor.setSimulatedSensorCommunicator(parameters.getSimulatedSensorCommunicator());
 
-      if (parameters.isUseTextToSpeechEngine())
-         humanoidNetworkProcessor.setupTextToSpeechEngine();
       if (parameters.isUseZeroPoseRobotConfigurationPublisherModule())
          humanoidNetworkProcessor.setupZeroPoseRobotConfigurationPublisherModule();
       if (parameters.isUseWholeBodyTrajectoryToolboxModule())
@@ -181,23 +178,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (simulatedSensorCommunicator == null)
          throw new RuntimeException("Simulated sensor communicator has not been set.");
       return simulatedSensorCommunicator;
-   }
-
-   public TextToSpeechNetworkModule setupTextToSpeechEngine()
-   {
-      checkIfModuleCanBeCreated(TextToSpeechNetworkModule.class);
-
-      try
-      {
-         TextToSpeechNetworkModule module = new TextToSpeechNetworkModule(pubSubImplementation);
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
    }
 
    public ZeroPoseMockRobotConfigurationDataPublisherModule setupZeroPoseRobotConfigurationPublisherModule()
