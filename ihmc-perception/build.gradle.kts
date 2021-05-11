@@ -35,7 +35,7 @@ mainDependencies {
    api("org.boofcv:boofcv-io:0.36")
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.boofcv:boofcv-calibration:0.36")
-   api("us.ihmc.ihmcPerception:valvenet:0.0.4")
+   api("us.ihmc:valvenet:0.0.4")
    api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.18")
 
