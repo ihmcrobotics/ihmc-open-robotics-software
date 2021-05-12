@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.StoredPropertySetMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -72,6 +73,8 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
    public static final MessagerAPIFactory.Topic<Double> MeasuredPlanarRegionDelay = topic("MeasuredPlanarRegionDelay");
+   public static final MessagerAPIFactory.Topic<ArrayList<Pair<Integer, Double>>> FootstepPlannerRejectionReasons = topic("FootstepPlannerRejectionReasons");
+   public static final MessagerAPIFactory.Topic<String> FootstepPlannerLatestLogPath = topic("FootstepPlannerLatestLogPath");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

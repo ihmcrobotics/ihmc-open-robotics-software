@@ -198,7 +198,7 @@ public class GDXEnvironment implements RenderableProvider
       flags += ImGuiInputTextFlags.CallbackResize;
       ImGui.inputText("###saveText", saveString, flags);
       ImGui.sameLine();
-      if (ImGui.button("Save as new"))
+      if (ImGui.button("Save as"))
       {
          fileNameToSave = saveString.get();
       }
