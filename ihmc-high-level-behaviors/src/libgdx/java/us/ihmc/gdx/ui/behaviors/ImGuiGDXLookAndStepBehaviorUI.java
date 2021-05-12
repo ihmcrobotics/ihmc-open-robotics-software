@@ -6,11 +6,14 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
+import imgui.type.ImString;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -21,17 +24,14 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
-import us.ihmc.gdx.imgui.ImGuiEnumPlot;
-import us.ihmc.gdx.imgui.ImGuiPlot;
-import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -48,6 +48,8 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
@@ -55,11 +57,15 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final BehaviorHelper behaviorHelper;
 
    private String currentState = "";
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 50);
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 230, 30);
    private final ImBoolean showGraphics = new ImBoolean(true);
+   private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
+   private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
+   private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
 
    private GDXImGuiBasedUI baseUI;
    private ModelInstance sphere;
@@ -73,20 +79,20 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final Point3D32 spherePosition = new Point3D32();
    private final Vector3D32 rotationVector = new Vector3D32();
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
+   private final ImString latestFootstepPlannerLogPath = new ImString();
+   private ArrayList<Pair<Integer, Double>> latestFootstepPlannerRejectionReasons = new ArrayList<>();
 
    private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final GDXBodyPathPlanGraphic bodyPathPlanGraphic = new GDXBodyPathPlanGraphic();
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic commandedFootstepsGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic startAndGoalFootstepsGraphic = new GDXFootstepPlanGraphic();
-
    private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Look and Step Parameters"));
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Footstep Planner Parameters (for Look and Step)"));
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner
          = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Swing Planner Parameters (for Look and Step)"));
-
    private final ImGuiBehaviorTreePanel treePanel = new ImGuiBehaviorTreePanel("Look and step");
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper behaviorHelper)
@@ -176,6 +182,8 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
       startAndGoalFootstepsGraphic.setTransparency(0.4);
       behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      behaviorHelper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
+      behaviorHelper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -315,11 +323,36 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
       ImGui.checkbox("Show graphics", showGraphics);
 
-      treePanel.renderWidgetsOnly();
+      if (ImGui.collapsingHeader("Behavior Visualization"))
+      {
+         ImGui.checkbox("Show tuner", showLookAndStepParametersTuner);
+         treePanel.renderWidgetsOnly();
+      }
+      if (ImGui.collapsingHeader("Footstep Planning"))
+      {
+         int flags = ImGuiInputTextFlags.ReadOnly;
+         latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
+         ImGui.inputText("Latest log", latestFootstepPlannerLogPath, flags);
+         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
-      lookAndStepParameterTuner.render();
-      footstepPlannerParameterTuner.render();
-      swingPlannerParameterTuner.render();
+         ImGui.text("Rejection reasons:");
+         for (Pair<Integer, Double> latestFootstepPlannerRejectionReason : latestFootstepPlannerRejectionReasons)
+         {
+            ImGui.text(latestFootstepPlannerRejectionReason.getRight() + "%: "
+                       + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReason.getLeft()].name());
+         }
+      }
+      if (ImGui.collapsingHeader("Swing Planning"))
+      {
+         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
+      }
+
+      if (showLookAndStepParametersTuner.get())
+         lookAndStepParameterTuner.render();
+      if (showFootstepPlanningParametersTuner.get())
+         footstepPlannerParameterTuner.render();
+      if (showSwingPlanningParametersTuner.get())
+         swingPlannerParameterTuner.render();
 
       if (areGraphicsEnabled())
       {
