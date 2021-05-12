@@ -319,6 +319,13 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
       hasBeenInitialized.set(false);
    }
 
+   public void initialize(Orientation3DReadOnly initialOrientation)
+   {
+      estimatedOrientation.set(initialOrientation);
+      angularVelocityBias.setToZero();
+      hasBeenInitialized.set(true);
+   }
+
    private void initialize(Vector3DReadOnly acceleration, Vector3DReadOnly magneticVector)
    {
       boolean success = computeRotationMatrixFromXZAxes(magneticVector, acceleration, estimatedOrientation);
