@@ -43,7 +43,6 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp() && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
