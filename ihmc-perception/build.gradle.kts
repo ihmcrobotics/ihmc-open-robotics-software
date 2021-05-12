@@ -7,7 +7,7 @@ buildscript {
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.17"
+   id("us.ihmc.ihmc-cd") version "1.20"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -35,15 +35,13 @@ mainDependencies {
    api("org.boofcv:boofcv-io:0.36")
    api("org.boofcv:boofcv-recognition:0.36")
    api("org.boofcv:boofcv-calibration:0.36")
-   api("us.ihmc.ihmcPerception:valvenet:0.0.4")
-   api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.18")
 
    api("us.ihmc:euclid:0.16.2")
    api("us.ihmc:ihmc-yovariables:0.9.9")
-   api("us.ihmc:simulation-construction-set:0.21.8")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
-   api("us.ihmc:ihmc-graphics-description:0.19.3")
+   api("us.ihmc:simulation-construction-set:0.21.9")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
+   api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -90,7 +88,7 @@ fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotat
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.4")
-   api("us.ihmc:simulation-construction-set:0.21.8")
+   api("us.ihmc:simulation-construction-set:0.21.9")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

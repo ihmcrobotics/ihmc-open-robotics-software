@@ -7,7 +7,6 @@ import java.util.List;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
@@ -27,8 +26,6 @@ public class JointStateUpdater
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final RigidBodyBasics rootBody;
-
    private OneDoFJointBasics[] oneDoFJoints;
    private final SensorOutputMapReadOnly sensorMap;
    private final List<IMUBasedJointStateEstimator> imuBasedJointStateEstimators;
@@ -38,8 +35,6 @@ public class JointStateUpdater
                             StateEstimatorParameters stateEstimatorParameters,
                             YoRegistry parentRegistry)
    {
-      rootBody = inverseDynamicsStructure.getElevator();
-
       this.sensorMap = sensorOutputMapReadOnly;
 
       JointBasics[] joints = MultiBodySystemTools.collectSupportAndSubtreeJoints(inverseDynamicsStructure.getRootJoint().getSuccessor());
@@ -151,8 +146,7 @@ public class JointStateUpdater
          oneDoFJoint.setQ(positionSensorData);
          oneDoFJoint.setQd(velocitySensorData);
          oneDoFJoint.setTau(torqueSensorData);
+         oneDoFJoint.updateFrame();
       }
-
-      rootBody.updateFramesRecursively();
    }
 }
