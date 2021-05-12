@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
@@ -25,7 +26,11 @@ import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.utilities.ros.RosMainNode;
 
+import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.function.Supplier;
+
+import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
 public class GDXBehaviorsPanel implements RenderableProvider
 {
@@ -36,9 +41,11 @@ public class GDXBehaviorsPanel implements RenderableProvider
    private volatile boolean connecting = false;
    private Messager messager = null;
 
-
    private final GDXBuildingExplorationBehaviorUI buildingExplorationUI;
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
+   private final BehaviorHelper behaviorHelper;
+   private final LinkedList<String> logArray = new LinkedList<>();
+   private final ImInt selectedLogEntry = new ImInt();
 
    public GDXBehaviorsPanel(RosMainNode ros1Node,
                             ROS2Node ros2Node,
@@ -47,8 +54,11 @@ public class GDXBehaviorsPanel implements RenderableProvider
    {
       this.behaviorRegistry = behaviorRegistry;
 
+      behaviorHelper = new BehaviorHelper(robotModelSupplier.get(), null, ros1Node, ros2Node);
       buildingExplorationUI = new GDXBuildingExplorationBehaviorUI();
-      lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(new BehaviorHelper(robotModelSupplier.get(), null, ros1Node, ros2Node));
+      lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(behaviorHelper);
+
+      logArray.addLast("Log started at " + LocalDateTime.now());
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -58,6 +68,11 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
       lookAndStepUI.create(baseUI);
       baseUI.getSceneManager().addRenderableProvider(lookAndStepUI, GDXSceneLevel.VIRTUAL);
+   }
+
+   public void setupMessagerSubscribers()
+   {
+      behaviorHelper.subscribeViaCallback(StatusLog, logEntry -> logArray.addLast(logEntry.getRight()));
    }
 
    public void handleVREvents(GDXVRManager vrManager)
@@ -130,6 +145,16 @@ public class GDXBehaviorsPanel implements RenderableProvider
             lookAndStepUI.renderWidgetsOnly();
          }
       }
+
+      selectedLogEntry.set(logArray.size() - 1);
+      ImGui.text("Behavior status log:");
+      ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
+      int numLogEntriesToShow = 15;
+      while (logArray.size() > numLogEntriesToShow)
+         logArray.removeFirst();
+      ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), logArray.size(), numLogEntriesToShow);
+      ImGui.popItemWidth();
+
       ImGui.end();
    }
 
@@ -153,6 +178,9 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
    private void updateMessager()
    {
+      behaviorHelper.setNewMessager(messager);
+      setupMessagerSubscribers();
+
       buildingExplorationUI.setMessager(messager);
       lookAndStepUI.setMessager(messager);
    }

@@ -332,7 +332,10 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       {
          int flags = ImGuiInputTextFlags.ReadOnly;
          latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
-         ImGui.inputText("Latest log", latestFootstepPlannerLogPath, flags);
+         ImGui.pushItemWidth(ImGui.getWindowWidth() - 3);
+         ImGui.text("Latest log:");
+         ImGui.inputText("", latestFootstepPlannerLogPath, flags);
+         ImGui.popItemWidth();
          ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
          ImGui.text("Rejection reasons:");
@@ -389,7 +392,6 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
    public void setMessager(Messager messager)
    {
-      behaviorHelper.setNewMessager(messager);
       setupSubscribers();
    }
 
