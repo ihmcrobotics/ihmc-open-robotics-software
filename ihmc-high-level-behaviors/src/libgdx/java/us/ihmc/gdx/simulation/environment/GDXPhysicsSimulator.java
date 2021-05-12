@@ -11,8 +11,8 @@ public class GDXPhysicsSimulator
 
    public GDXPhysicsSimulator()
    {
-      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
-                                                                                 simulationConstructionSetParameters.getDataBufferSize());
-      experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
+//      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(allSimulatedRobotList.toArray(new Robot[0]),
+//                                                                                 simulationConstructionSetParameters.getDataBufferSize());
+//      experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -Math.abs(gravity.get())));
    }
 }
