@@ -304,16 +304,16 @@ public abstract class HumanoidControllerWarmup
       humanoidHighLevelControllerManager.addChild(walkingControllerState.getYoRegistry());
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
 
+      String name = "FootAssumeCopOnEdge";
+      YoBoolean variable = (YoBoolean) registry.findVariable(name);
+      variable.set(true);
+
+      name = "FootAssumeFootBarelyLoaded";
+      variable = (YoBoolean) registry.findVariable(name);
+      variable.set(true);
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         String name = robotSide.getLowerCaseName() + "FootAssumeCopOnEdge";
-         YoBoolean variable = (YoBoolean) registry.findVariable(name);
-         variable.set(true);
-
-         name = robotSide.getLowerCaseName() + "FootAssumeFootBarelyLoaded";
-         variable = (YoBoolean) registry.findVariable(name);
-         variable.set(true);
-
          name = robotSide.getCamelCaseNameForStartOfExpression() + "FootCurrentState";
          YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.findVariable(name);
          footStates.put(robotSide, footState);

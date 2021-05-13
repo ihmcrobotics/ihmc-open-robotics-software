@@ -101,11 +101,21 @@ public class ExceptionHandlingThreadPoolExecutor extends ThreadPoolExecutor
 
       try
       {
-         afterExecuteHandlers.remove(runnableFuture).handleException(throwable);
+         ExceptionHandler handler = afterExecuteHandlers.remove(runnableFuture);
+         if (handler != null)
+         {
+            handler.handleException(throwable);
+         }
+         else
+         {
+            LogTools.warn("There were no afterExecute handlers to run.");
+         }
+
       }
       catch (NullPointerException nullPointerException)
       {
          LogTools.error(nullPointerException.getMessage());
+         nullPointerException.printStackTrace();
       }
    }
 }

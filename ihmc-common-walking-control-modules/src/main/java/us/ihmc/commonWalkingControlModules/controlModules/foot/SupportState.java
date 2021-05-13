@@ -47,7 +47,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class SupportState extends AbstractFootControlState
 {
-   private static final double defaultFootLoadThreshold = 0.2;
    private static final int dofs = Twist.SIZE;
 
    private final YoRegistry registry;
@@ -56,7 +55,6 @@ public class SupportState extends AbstractFootControlState
 
    private final YoBoolean footBarelyLoaded;
    private final YoBoolean copOnEdge;
-   private final YoDouble footLoadThreshold;
    private final boolean[] isDirectionFeedbackControlled = new boolean[dofs];
 
    private final FootSwitchInterface footSwitch;
@@ -83,15 +81,6 @@ public class SupportState extends AbstractFootControlState
    private final FramePoint3D footPosition = new FramePoint3D();
    private final FrameQuaternion footOrientation = new FrameQuaternion();
 
-   // For testing:
-   private final BooleanProvider assumeCopOnEdge;
-   private final BooleanProvider assumeFootBarelyLoaded;
-   private final BooleanProvider neverHoldRotation;
-   private final BooleanProvider neverHoldPosition;
-
-   // For line contact walking and balancing:
-   private final BooleanProvider holdFootOrientationFlat;
-
    // For foothold exploration:
    private final ExplorationHelper explorationHelper;
    private final PartialFootholdControlModule partialFootholdControlModule;
@@ -103,9 +92,7 @@ public class SupportState extends AbstractFootControlState
    private final RigidBodyBasics pelvis;
 
    // Toe contact point loading time
-   private final boolean rampUpAllowableToeLoadAfterContact;
-   private final YoDouble toeLoadingDuration;
-   private final YoDouble fullyLoadedMagnitude;
+   private final SupportStateParameters supportStateParameters;
 
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
@@ -140,15 +127,9 @@ public class SupportState extends AbstractFootControlState
 
       footBarelyLoaded = new YoBoolean(prefix + "BarelyLoaded", registry);
       copOnEdge = new YoBoolean(prefix + "CopOnEdge", registry);
-      footLoadThreshold = new YoDouble(prefix + "LoadThreshold", registry);
-      footLoadThreshold.set(defaultFootLoadThreshold);
 
       WalkingControllerParameters walkingControllerParameters = footControlHelper.getWalkingControllerParameters();
-      rampUpAllowableToeLoadAfterContact = walkingControllerParameters.rampUpAllowableToeLoadAfterContact();
-      toeLoadingDuration = new YoDouble(prefix + "ToeContactPointLoadingTime", registry);
-      fullyLoadedMagnitude = new YoDouble(prefix + "FullyLoadedMagnitude", registry);
-      toeLoadingDuration.set(walkingControllerParameters.getToeLoadingDuration());
-      fullyLoadedMagnitude.set(walkingControllerParameters.getFullyLoadedToeForce());
+      supportStateParameters = footControlHelper.getSupportStateParameters();
 
       FullHumanoidRobotModel fullRobotModel = footControlHelper.getHighLevelHumanoidControllerToolbox().getFullRobotModel();
       pelvis = fullRobotModel.getPelvis();
@@ -165,12 +146,6 @@ public class SupportState extends AbstractFootControlState
       desiredAngularVelocity.setToZero(worldFrame);
       desiredLinearAcceleration.setToZero(worldFrame);
       desiredAngularAcceleration.setToZero(worldFrame);
-
-      assumeCopOnEdge = new BooleanParameter(prefix + "AssumeCopOnEdge", registry, false);
-      assumeFootBarelyLoaded = new BooleanParameter(prefix + "AssumeFootBarelyLoaded", registry, false);
-      neverHoldRotation = new BooleanParameter(prefix + "NeverHoldRotation", registry, false);
-      neverHoldPosition = new BooleanParameter(prefix + "NeverHoldPosition", registry, false);
-      holdFootOrientationFlat = new BooleanParameter(prefix + "HoldFlatOrientation", registry, false);
 
       explorationHelper = new ExplorationHelper(contactableFoot, footControlHelper, prefix, registry);
       partialFootholdControlModule = footControlHelper.getPartialFootholdControlModule();
@@ -290,20 +265,20 @@ public class SupportState extends AbstractFootControlState
       explorationHelper.compute(timeInState, contactStateHasChanged);
 
       // toe contact point loading //// TODO: 6/5/17
-      if (rampUpAllowableToeLoadAfterContact && timeInState < toeLoadingDuration.getDoubleValue())
+      if (supportStateParameters.rampUpAllowableToeLoadAfterContact() && timeInState < supportStateParameters.getToeLoadingDuration())
       {
          double maxContactPointX = footPolygon.getMaxX();
          double minContactPointX = footPolygon.getMinX();
 
-         double phaseInLoading = timeInState / toeLoadingDuration.getDoubleValue();
-         double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, fullyLoadedMagnitude.getDoubleValue(), phaseInLoading);
+         double phaseInLoading = timeInState / supportStateParameters.getToeLoadingDuration();
+         double leadingToeMagnitude = InterpolationTools.linearInterpolate(0.0, supportStateParameters.getFullyLoadedMagnitude(), phaseInLoading);
          YoPlaneContactState planeContactState = controllerToolbox.getFootContactState(robotSide);
 
          for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
          {
             YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
             double percentAlongFoot = (contactPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
-            double contactPointMagnitude = InterpolationTools.linearInterpolate(fullyLoadedMagnitude.getDoubleValue(), leadingToeMagnitude, percentAlongFoot);
+            double contactPointMagnitude = InterpolationTools.linearInterpolate(supportStateParameters.getFullyLoadedMagnitude(), leadingToeMagnitude, percentAlongFoot);
 
             planeContactState.setMaxContactPointNormalForce(contactPoint, contactPointMagnitude);
          }
@@ -320,15 +295,15 @@ public class SupportState extends AbstractFootControlState
 
       // determine foot state
       copOnEdge.set(footControlHelper.isCoPOnEdge() && !isInLiftOffOrTouchDown());
-      footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < footLoadThreshold.getDoubleValue());
+      footBarelyLoaded.set(footSwitch.computeFootLoadPercentage() < supportStateParameters.getFootLoadThreshold());
 
-      if (assumeCopOnEdge.getValue())
+      if (supportStateParameters.assumeCopOnEdge())
          copOnEdge.set(true);
-      if (assumeFootBarelyLoaded.getValue())
+      if (supportStateParameters.assumeFootBarelyLoaded())
          footBarelyLoaded.set(true);
-      if (neverHoldRotation.getValue())
+      if (supportStateParameters.neverHoldRotation())
          copOnEdge.set(false);
-      if (neverHoldPosition.getValue())
+      if (supportStateParameters.neverHoldPosition())
          footBarelyLoaded.set(false);
 
       updateHoldPositionSetpoints();
@@ -461,7 +436,7 @@ public class SupportState extends AbstractFootControlState
          desiredOrientation.set(footOrientation);
       }
 
-      if (holdFootOrientationFlat.getValue())
+      if (supportStateParameters.holdFootOrientationFlat())
          desiredOrientation.setYawPitchRoll(desiredOrientation.getYaw(), 0.0, 0.0);
 
       // If we are tracking a lift off trajectory set the pitch of the desired orientation and the angular velocity accordingly.

@@ -332,7 +332,7 @@ public class MPCContactPlane
       {
          MPCContactPoint contactPointHelper = contactPoints[contactPointIdx];
          contactPointHelper.computeContactForceCoefficientMatrix(solutionVector, startIdx);
-         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactWrenchCoefficientMatrix());
+         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactForceCoefficientMatrix());
          startIdx += contactPointHelper.getCoefficientsSize();
       }
    }
@@ -346,6 +346,22 @@ public class MPCContactPlane
    public DMatrixRMaj getContactWrenchCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
+   }
+
+   public void computeContactForce(double omega, double time)
+   {
+      for (MPCContactPoint contactPoint : contactPoints)
+      {
+         contactPoint.computeContactForce(omega, time);
+      }
+   }
+
+   public void clearViz()
+   {
+      for (MPCContactPoint contactPoint : contactPoints)
+      {
+         contactPoint.clearViz();
+      }
    }
 
    @Override

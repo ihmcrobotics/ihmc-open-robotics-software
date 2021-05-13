@@ -39,16 +39,19 @@ public class RosTools
 {
    public static final String MULTISENSE_VIDEO = "/multisense/left/image_rect_color/compressed";
    public static final String MULTISENSE_CAMERA_INFO = "/multisense/left/image_rect_color/camera_info";
-   public static final String D435_VIDEO = "/depthcam/color/image_raw/compressed";
-   public static final String D435_CAMERA_INFO = "/depthcam/color/camera_info";
-   public static final String D435_POINT_CLOUD = "/depthcam/depth/color/points";
-   public static final String L515_VIDEO = "/camera/color/image_raw/compressed";
-   public static final String L515_POINT_CLOUD = "/camera/depth/color/points";
-   public static final String L515_COLOR_CAMERA_INFO = "/camera/color/camera_info";
-   public static final String L515_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
-   public static final String MAPSENSE_DEPTH_IMAGE = "/camera/depth/image_rect_raw";
-   public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/camera/depth/camera_info";
+   public static final String MULTISENSE_PPS = "/multisense/stamped_pps";
+   public static final String D435_VIDEO = "/chest_d435/color/image_raw/compressed";
+   public static final String D435_CAMERA_INFO = "/chest_d435/color/camera_info";
+   public static final String D435_POINT_CLOUD = "/chest_d435/depth/color/points";
+   public static final String L515_VIDEO = "/chest_l515/color/image_raw";
+   public static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
+   public static final String L515_POINT_CLOUD = "/chest_l515/depth/color/points";
+   public static final String L515_COLOR_CAMERA_INFO = "/chest_l515/color/camera_info";
+   public static final String L515_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
+   public static final String MAPSENSE_DEPTH_IMAGE = "/chest_l515/depth/image_rect_raw";
+   public static final String MAPSENSE_DEPTH_CAMERA_INFO = "/chest_l515/depth/camera_info";
    public static final String MAPSENSE_REGIONS = "/map/regions/test";
+   public static final String MAPSENSE_CONFIGURATION = "/map/config";
 
    public static RosMainNode createRosNode(String uri, String name)
    {

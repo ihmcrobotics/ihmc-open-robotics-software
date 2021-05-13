@@ -1,14 +1,17 @@
 package us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.PointCloud2;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.IDLSequence.Float;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.ScanPointFilter;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber;
 import us.ihmc.utilities.ros.subscriber.RosPointCloudSubscriber.UnpackedPointCloud;
@@ -18,6 +21,7 @@ public class PointCloudData
    private final long timestamp;
    private final int numberOfPoints;
    private final Point3D[] pointCloud;
+   private final List<Point3D> filteredPointCloud = new ArrayList<>();
    private final int[] colors;
 
    public PointCloudData(long timestamp, Point3D[] scanPoints, int[] scanColors)
@@ -118,12 +122,12 @@ public class PointCloudData
       if (colors == null)
          throw new IllegalStateException("This pointcloud has no colors.");
 
-      return PointCloudCompression.compressPointCloud(timestamp, pointCloud, colors, numberOfPoints, minimumResolution, filter);
+      return StereoPointCloudCompression.compressPointCloud(timestamp, pointCloud, colors, numberOfPoints, minimumResolution, filter);
    }
 
    public LidarScanMessage toLidarScanMessage()
    {
-      return toLidarScanMessage((index, point) -> true);
+      return toLidarScanMessage(null);
    }
 
    public LidarScanMessage toLidarScanMessage(ScanPointFilter filter)
@@ -131,18 +135,25 @@ public class PointCloudData
       LidarScanMessage message = new LidarScanMessage();
       message.setRobotTimestamp(timestamp);
       message.setSensorPoseConfidence(1.0);
-      Float pointCloudBuffer = message.getScan();
 
-      for (int i = 0; i < numberOfPoints; i++)
+      if (filter == null)
       {
-         Point3D scanPoint = pointCloud[i];
-
-         if (filter.test(i, scanPoint))
+         LidarPointCloudCompression.compressPointCloud(pointCloud.length, message, (i, j) -> pointCloud[i].getElement32(j));
+      }
+      else
+      {
+         filteredPointCloud.clear();
+         for (int i = 0; i < numberOfPoints; i++)
          {
-            pointCloudBuffer.add(scanPoint.getX32());
-            pointCloudBuffer.add(scanPoint.getY32());
-            pointCloudBuffer.add(scanPoint.getZ32());
+            Point3D scanPoint = pointCloud[i];
+
+            if (filter.test(i, scanPoint))
+            {
+               filteredPointCloud.add(scanPoint);
+            }
          }
+
+         LidarPointCloudCompression.compressPointCloud(filteredPointCloud.size(), message, (i, j) -> filteredPointCloud.get(i).getElement32(j));
       }
 
       return message;

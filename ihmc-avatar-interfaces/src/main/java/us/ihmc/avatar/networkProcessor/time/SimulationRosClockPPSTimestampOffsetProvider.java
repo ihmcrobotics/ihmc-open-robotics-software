@@ -4,7 +4,7 @@ import org.ros.message.Time;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.publisher.RosClockPublisher;
 
 public class SimulationRosClockPPSTimestampOffsetProvider implements DRCROSPPSTimestampOffsetProvider
@@ -34,9 +34,9 @@ public class SimulationRosClockPPSTimestampOffsetProvider implements DRCROSPPSTi
    }
 
    @Override
-   public void attachToRosMainNode(RosMainNode rosMainNode)
+   public void subscribeToROS1Topics(RosNodeInterface ros1Node)
    {
-      rosMainNode.attachPublisher("/clock", clockPubisher);
+      ros1Node.attachPublisher("/clock", clockPubisher);
    }
 
    public boolean offsetIsDetermined()

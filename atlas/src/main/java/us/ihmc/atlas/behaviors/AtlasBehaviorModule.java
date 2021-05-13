@@ -6,8 +6,8 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 

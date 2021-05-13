@@ -9,6 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
@@ -33,7 +34,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    private final RemoteSyncedRobotModel syncedRobot;
    private final ReferenceFrame sensorBaseFrame;
    private final FramePose3D tempSensorFramePose = new FramePose3D();
-   private final RigidBodyTransform sensorTransform;
+   private final RigidBodyTransformReadOnly sensorTransform;
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private final Timer throttleTimer = new Timer();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
@@ -41,7 +42,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    public RealsensePointCloudROS1Bridge(DRCRobotModel robotModel,
                                         RosMainNode ros1Node,
                                         ROS2Node ros2Node,
-                                        RigidBodyTransform sensorTransform,
+                                        RigidBodyTransformReadOnly sensorTransform,
                                         String ros1InputTopic, ROS2Topic<StereoVisionPointCloudMessage> ros2OutputTopic)
    {
       super(sensor_msgs.PointCloud2._TYPE);

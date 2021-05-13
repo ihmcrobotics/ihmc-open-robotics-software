@@ -11,8 +11,10 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
+import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.matrixlib.NativeMatrix;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -27,7 +29,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
  */
 public class LinearMPCQPSolver
 {
-   private static  final boolean debug = false;
+   private static  final boolean debug = true;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -55,7 +57,7 @@ public class LinearMPCQPSolver
    public final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
 
-   private final DMatrixRMaj solverOutput;
+   protected final DMatrixRMaj solverOutput;
 
    private final YoInteger numberOfActiveVariables = new YoInteger("numberOfActiveMPCVariables", registry);
    private final YoInteger numberOfIterations = new YoInteger("numberOfMPCIterations", registry);
@@ -78,14 +80,20 @@ public class LinearMPCQPSolver
    private final LinearMPCIndexHandler indexHandler;
    private final MPCQPInputCalculator inputCalculator;
 
-   private final double dt;
+   protected final double dt;
 
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
-      this(indexHandler, dt, gravityZ, true, parentRegistry);
+      this(indexHandler,
+           dt,
+           gravityZ,
+           new BlockInverseCalculator(indexHandler,
+                                      indexHandler::getComCoefficientStartIndex,
+                                      i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
+           parentRegistry);
    }
 
-   public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, boolean useBlockInverse, YoRegistry parentRegistry)
+   public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, InverseMatrixCalculator<NativeMatrix> inverseMatrixCalculator, YoRegistry parentRegistry)
    {
       this.indexHandler = indexHandler;
       this.dt = dt;
@@ -97,8 +105,9 @@ public class LinearMPCQPSolver
       comRateCoefficientRegularization.set(1e-6);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
-      if (useBlockInverse)
-         qpSolver.setInverseHessianCalculator(new BlockInverseCalculator(indexHandler));
+      if (inverseMatrixCalculator != null)
+         qpSolver.setInverseHessianCalculator(inverseMatrixCalculator);
+
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
       int problemSize = 4 * 4 * 4 * 2 + 10;
@@ -325,7 +334,7 @@ public class LinearMPCQPSolver
             if (input.useWeightScalar())
                addObjective(input.taskJacobian, input.taskObjective, input.getWeightScalar(), offset);
             else
-               throw new IllegalArgumentException("Not yet implemented.");
+               addObjective(input.taskJacobian, input.taskObjective, input.getTaskWeightMatrix(), offset);
             break;
          case EQUALITY:
             addEqualityConstraint(input.taskJacobian, input.taskObjective, offset);
@@ -376,6 +385,46 @@ public class LinearMPCQPSolver
 
       // Compute: f += - J^T W Objective
       MatrixTools.multAddBlockTransA(-taskWeight, taskJacobian, taskObjective, solverInput_f, offset, 0);
+      if (debug && MatrixTools.containsNaN(solverInput_f))
+         throw new RuntimeException("error");
+   }
+
+   public void addObjective(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight, int offset)
+   {
+      addObjective(taskJacobian, taskObjective, taskWeight, taskJacobian.getNumCols(), offset, solverInput_H, solverInput_f);
+   }
+
+   private final DMatrixRMaj tempJtW = new DMatrixRMaj(0, 0);
+
+   private void addObjective(DMatrixRMaj taskJacobian,
+                             DMatrixRMaj taskObjective,
+                             DMatrixRMaj taskWeight,
+                             int problemSize,
+                             int offset,
+                             DMatrixRMaj solverInput_H,
+                             DMatrixRMaj solverInput_f)
+   {
+      int taskSize = taskJacobian.getNumRows();
+      int variables = taskJacobian.getNumCols();
+      if (offset + variables > problemSize)
+      {
+         throw new RuntimeException("This task does not fit.");
+      }
+
+      tempJtW.reshape(variables, taskSize);
+
+      // J^T W
+      CommonOps_DDRM.multTransA(taskJacobian, taskWeight, tempJtW);
+
+      // Compute: H += J^T W J
+      MatrixTools.multAddBlock(tempJtW, taskJacobian, solverInput_H, offset, offset);
+      if (debug && MatrixTools.containsNaN(solverInput_H))
+         throw new RuntimeException("error");
+
+      // Compute: f += - J^T W Objective
+      MatrixTools.multAddBlock(-1.0, tempJtW, taskObjective, solverInput_f, offset, 0);
+      if (debug && MatrixTools.containsNaN(solverInput_f))
+         throw new RuntimeException("error");
    }
 
    public void addEqualityConstraint(DMatrix taskJacobian, DMatrix taskObjective)
@@ -425,6 +474,11 @@ public class LinearMPCQPSolver
 
       CommonOps_DDRM.extract(taskJacobian, 0, taskJacobian.getNumRows(), 0, variables, solverInput_Aeq, previousSize, colOffset);
       CommonOps_DDRM.insert(taskObjective, solverInput_beq, previousSize, 0);
+
+      if (debug && MatrixTools.containsNaN(solverInput_Aeq))
+         throw new RuntimeException("error");
+      if (debug && MatrixTools.containsNaN(solverInput_beq))
+         throw new RuntimeException("error");
    }
 
 
@@ -516,6 +570,8 @@ public class LinearMPCQPSolver
       if (debug && MatrixTools.containsNaN(solverInput_H))
          throw new RuntimeException("error");
       MatrixTools.addMatrixBlock(solverInput_f, offset, 0, input.directCostGradient, 0, 0, size, 1, input.getWeightScalar());
+      if (debug && MatrixTools.containsNaN(input.getDirectCostGradient()))
+         throw new RuntimeException("Error");
    }
 
    public boolean solve()

@@ -149,19 +149,24 @@ public class PolygonizerParameters
             + ", cutNarrowPassage: " + cutNarrowPassage;
    }
 
-   public static PolygonizerParameters parse(String parametersAsString)
+   public void setFromString(String parametersAsString)
    {
       parametersAsString = parametersAsString.replace(",", "");
       Scanner scanner = new Scanner(parametersAsString);
-      PolygonizerParameters parameters = new PolygonizerParameters();
-      parameters.setConcaveHullThreshold(ScannerTools.readNextDouble(scanner, parameters.getConcaveHullThreshold()));
-      parameters.setMinNumberOfNodes(ScannerTools.readNextInt(scanner, parameters.getMinNumberOfNodes()));
-      parameters.setShallowAngleThreshold(ScannerTools.readNextDouble(scanner, parameters.getShallowAngleThreshold()));
-      parameters.setPeakAngleThreshold(ScannerTools.readNextDouble(scanner, parameters.getPeakAngleThreshold()));
-      parameters.setLengthThreshold(ScannerTools.readNextDouble(scanner, parameters.getLengthThreshold()));
-      parameters.setDepthThreshold(ScannerTools.readNextDouble(scanner, parameters.getDepthThreshold()));
-      parameters.setCutNarrowPassage(ScannerTools.readNextBoolean(scanner, parameters.getCutNarrowPassage()));
+      setConcaveHullThreshold(ScannerTools.readNextDouble(scanner, getConcaveHullThreshold()));
+      setMinNumberOfNodes(ScannerTools.readNextInt(scanner, getMinNumberOfNodes()));
+      setShallowAngleThreshold(ScannerTools.readNextDouble(scanner, getShallowAngleThreshold()));
+      setPeakAngleThreshold(ScannerTools.readNextDouble(scanner, getPeakAngleThreshold()));
+      setLengthThreshold(ScannerTools.readNextDouble(scanner, getLengthThreshold()));
+      setDepthThreshold(ScannerTools.readNextDouble(scanner, getDepthThreshold()));
+      setCutNarrowPassage(ScannerTools.readNextBoolean(scanner, getCutNarrowPassage()));
       scanner.close();
+   }
+
+   public static PolygonizerParameters parse(String parametersAsString)
+   {
+      PolygonizerParameters parameters = new PolygonizerParameters();
+      parameters.setFromString(parametersAsString);
       return parameters;
    }
 }

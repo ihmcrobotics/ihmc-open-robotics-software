@@ -9,16 +9,22 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import imgui.internal.ImGui;
+import imgui.type.ImFloat;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
+import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.imgui.ImGuiVideoWindow;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.UnitConversions;
 
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -27,8 +33,8 @@ import java.util.Random;
  */
 public class GDXLowLevelDepthSensorSimulator
 {
-   private final String depthWindowName = "Depth";
-   private final String colorWindowName = "Color";
+   private final String depthWindowName = ImGuiTools.uniqueLabel(this, "Depth");
+   private final String colorWindowName = ImGuiTools.uniqueLabel(this, "Color");
 
    private final Random random = new Random();
 
@@ -37,6 +43,8 @@ public class GDXLowLevelDepthSensorSimulator
    private final int imageHeight;
    private final float minRange;
    private final float maxRange;
+   private final double updatePeriod;
+   private final Timer throttleTimer = new Timer();
    private final Vector3 depthPoint = new Vector3();
    private final Vector3D32 noiseVector = new Vector3D32();
 
@@ -46,17 +54,23 @@ public class GDXLowLevelDepthSensorSimulator
    private SensorFrameBuffer frameBuffer;
    private RecyclingArrayList<Point3D32> points;
    private ArrayList<Integer> colors;
+   private boolean colorsAreBeingUsed = true;
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
+   private ImGuiVideoWindow depthWindow;
+   private ImGuiVideoWindow colorWindow;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
    private ByteBuffer rawDepthByteBuffer;
    private FloatBuffer rawDepthFloatBuffer;
    private FloatBuffer eyeDepthMetersBuffer;
+   private ByteBuffer rawColorByteBuffer;
+   private IntBuffer rawColorIntBuffer;
 
    private boolean depthWindowEnabledOptimization = true;
+   private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
 
    public GDXLowLevelDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
@@ -65,10 +79,13 @@ public class GDXLowLevelDepthSensorSimulator
       this.imageHeight = imageHeight;
       this.minRange = (float) minRange;
       this.maxRange = (float) maxRange;
+      this.updatePeriod = UnitConversions.hertzToSeconds(30.0);
    }
 
    public void create()
    {
+      throttleTimer.reset();
+
       camera = new PerspectiveCamera(fieldOfViewY, imageWidth, imageHeight);
       camera.near = minRange;
       camera.far = maxRange * 2.0f; // should render camera farther
@@ -84,10 +101,16 @@ public class GDXLowLevelDepthSensorSimulator
       rawDepthByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       rawDepthFloatBuffer = rawDepthByteBuffer.asFloatBuffer();
 
+      rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
+
       eyeDepthMetersBuffer = BufferUtils.newFloatBuffer(imageWidth * imageHeight);
 
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
+
+      depthWindow = new ImGuiVideoWindow(depthWindowName, depthWindowTexture, false);
+      colorWindow = new ImGuiVideoWindow(colorWindowName, frameBuffer.getColorTexture(), true);
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
       colors = new ArrayList<>(imageWidth * imageHeight);
@@ -95,6 +118,12 @@ public class GDXLowLevelDepthSensorSimulator
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      boolean updateThisTick = throttleTimer.isExpired(updatePeriod);
+      if (updateThisTick)
+         throttleTimer.reset();
+      else
+         return;
+
       frameBuffer.begin();
 
       float clear = 0.0f;
@@ -112,6 +141,8 @@ public class GDXLowLevelDepthSensorSimulator
       Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
       rawDepthByteBuffer.rewind();
       Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, rawDepthByteBuffer);
+      rawColorByteBuffer.rewind();
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_INT, rawColorByteBuffer);
 
       frameBuffer.end();
 
@@ -128,11 +159,13 @@ public class GDXLowLevelDepthSensorSimulator
          for (int x = 0; x < imageWidth; x++)
          {
             float rawDepthReading = rawDepthFloatBuffer.get(); // 0.0 to 1.0
+            float imageY = (2.0f * y) / imageHeight - 1.0f;
 
             // From "How to render depth linearly in modern OpenGL with gl_FragCoord.z in fragment shader?"
             // https://stackoverflow.com/a/45710371/1070333
             float normalizedDeviceCoordinateZ = 2.0f * rawDepthReading - 1.0f; // -1.0 to 1.0
-            float eyeDepth = twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear); // in meters
+            float eyeDepth = (twoXCameraFarNear / (farPlusNear - normalizedDeviceCoordinateZ * farMinusNear)); // in meters
+            eyeDepth += imageY * depthPitchTuner.get();
             eyeDepthMetersBuffer.put(eyeDepth);
 
             if (depthWindowEnabledOptimization)
@@ -152,7 +185,7 @@ public class GDXLowLevelDepthSensorSimulator
             if (eyeDepth > camera.near && eyeDepth < maxRange)
             {
                depthPoint.x = (2.0f * x) / imageWidth - 1.0f;
-               depthPoint.y = (2.0f * y) / imageHeight - 1.0f;
+               depthPoint.y = imageY;
                depthPoint.z = 2.0f * rawDepthReading - 1.0f;
                depthPoint.prj(camera.invProjectionView);
 
@@ -165,7 +198,8 @@ public class GDXLowLevelDepthSensorSimulator
                noiseVector.scale((random.nextDouble() - 0.5) * 0.007);
                point.add(noiseVector);
 
-               colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y));
+               if (colorsAreBeingUsed)
+                  colors.add(frameBuffer.getColorPixmap().getPixel(x, imageHeight - y)); // this is not working
             }
          }
       }
@@ -174,57 +208,23 @@ public class GDXLowLevelDepthSensorSimulator
          depthWindowTexture.draw(depthWindowPixmap, 0, 0);
 
       depthWindowEnabledOptimization = false;
+      colorsAreBeingUsed = false;
+   }
+
+   public void renderTuningSliders()
+   {
+      ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
    }
 
    public void renderImGuiDepthWindow()
    {
-      renderImGuiWindow(depthWindowName, depthWindowTexture.getTextureObjectHandle(), false);
+      depthWindow.render();
       depthWindowEnabledOptimization = true;
    }
 
    public void renderImGuiColorWindow()
    {
-      renderImGuiWindow(colorWindowName, frameBuffer.getColorTexture().getTextureObjectHandle(), true);
-   }
-
-   private void renderImGuiWindow(String name, int textureId, boolean flipY)
-   {
-      ImGui.begin(name);
-
-//      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
-//      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
-//      float sizeX = ImGui.getWindowContentRegionMaxX();
-//      float sizeY = ImGui.getWindowContentRegionMaxY();
-      float tableHeader = 22.0f;
-      float posX = ImGui.getWindowPosX();
-      float posY = ImGui.getWindowPosY() + tableHeader;
-      float sizeX = ImGui.getWindowSizeX();
-      float sizeY = ImGui.getWindowSizeY() - tableHeader;
-
-      float windowAspect = sizeX / sizeY;
-      float cameraAspect = (float) imageWidth / (float) imageHeight;
-      float drawSizeX = sizeX;
-      float drawSizeY = sizeY;
-      float centeringX = 0.0f;
-      float centeringY = 0.0f;
-      if (windowAspect > cameraAspect)
-      {
-         drawSizeX = drawSizeY * cameraAspect;
-         centeringX = (sizeX - drawSizeX) / 2.0f;
-      }
-      else
-      {
-         drawSizeY = drawSizeX / cameraAspect;
-         centeringY = (sizeY - drawSizeY) / 2.0f;
-      }
-      float startX = posX + centeringX;
-      float startY = flipY ? posY + centeringY + drawSizeY : posY + centeringY;
-      float endX = posX + centeringX + drawSizeX;
-      float endY = flipY ? posY + centeringY : posY + centeringY + drawSizeY;
-
-      ImGui.getWindowDrawList().addImage(textureId, startX, startY, endX, endY);
-
-      ImGui.end();
+      colorWindow.render();
    }
 
    public void dispose()
@@ -252,6 +252,21 @@ public class GDXLowLevelDepthSensorSimulator
       return eyeDepthMetersBuffer;
    }
 
+   public IntBuffer getColorRGB8Buffer()
+   {
+      return rawColorIntBuffer;
+   }
+
+   public ByteBuffer getRawColorByteBuffer()
+   {
+      return rawColorByteBuffer;
+   }
+
+   public Pixmap getColorPixmap()
+   {
+      return frameBuffer.getColorPixmap();
+   }
+
    public float getMaxRange()
    {
       return maxRange;
@@ -264,6 +279,7 @@ public class GDXLowLevelDepthSensorSimulator
 
    public ArrayList<Integer> getColors()
    {
+      colorsAreBeingUsed = true;
       return colors;
    }
 

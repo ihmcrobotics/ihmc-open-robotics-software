@@ -443,10 +443,11 @@ public class MPCContactPoint
     * where the rows match the corresponding Euclidean coordinate axis.
     * @return contact wrench matrix
     */
-   public DMatrixRMaj getContactWrenchCoefficientMatrix()
+   public DMatrixRMaj getContactForceCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
    }
+
 
    public void computeContactForce(double omega, double time)
    {
@@ -473,6 +474,12 @@ public class MPCContactPoint
 
       if (viewer != null)
          viewer.update(basisVectorOrigin, contactAcceleration, basisMagnitudes);
+   }
+
+   public void clearViz()
+   {
+      if (viewer != null)
+         viewer.reset();
    }
 
    public FrameVector3DReadOnly getContactAcceleration()

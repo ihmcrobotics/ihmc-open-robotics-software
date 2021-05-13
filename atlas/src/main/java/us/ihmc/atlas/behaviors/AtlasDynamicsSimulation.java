@@ -99,7 +99,8 @@ public class AtlasDynamicsSimulation
                                                                                                               .getWristForceSensorNames(),
                                                                                                     robotModel.getHighLevelControllerParameters(),
                                                                                                     robotModel.getWalkingControllerParameters(),
-                                                                                                    copTrajectoryParameters);
+                                                                                                    copTrajectoryParameters,
+                                                                                                    robotModel.getSplitFractionCalculatorParameters());
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
       controllerFactory.addRequestableTransition(DO_NOTHING_BEHAVIOR, WALKING);

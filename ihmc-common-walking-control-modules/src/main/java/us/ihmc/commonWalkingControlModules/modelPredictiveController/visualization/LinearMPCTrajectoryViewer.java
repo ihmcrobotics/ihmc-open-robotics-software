@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization;
 
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.CoMTrajectoryModelPredictiveController;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.BagOfVectors;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -38,7 +37,7 @@ public class LinearMPCTrajectoryViewer
       orientationAppearance.setTransparency(0.8);
    }
 
-   public void compute(CoMTrajectoryModelPredictiveController mpc, double currentTimeInState)
+   public void compute(EuclideanModelPredictiveController mpc, double currentTimeInState)
    {
       comTrajectoryVectors.reset();
       dcmTrajectoryVectors.reset();
