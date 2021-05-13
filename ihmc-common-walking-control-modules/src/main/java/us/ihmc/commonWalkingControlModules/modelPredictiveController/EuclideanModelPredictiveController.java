@@ -49,6 +49,7 @@ public abstract class EuclideanModelPredictiveController
    private static final boolean includeVelocityObjective = true;
    private static final boolean includeRhoMinInequality = true;
    private static final boolean includeRhoMaxInequality = false;
+   private static final boolean includeForceMinimization = false;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
@@ -61,11 +62,14 @@ public abstract class EuclideanModelPredictiveController
    protected final YoDouble comHeight = new YoDouble("comHeightForPlanning", registry);
    private final double gravityZ;
 
+   private static final double mu = 0.8;
+
    public static final double defaultInitialComWeight = 1e2;
    public static final double defaultInitialComVelocityWeight = 5e1;
    public static final double defaultFinalComWeight = 5e2;
    public static final double defaultFinalVRPWeight = 5e1;
    public static final double defaultVrpTrackingWeight = 5.0;
+   public static final double defaultForceMinimizationWeight = 1e-2;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -96,6 +100,7 @@ public abstract class EuclideanModelPredictiveController
    private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
    private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
+   private final YoDouble forceMinimizationWeight = new YoDouble("forceMinimizationWeight", registry);
 
    protected final MPCContactHandler contactHandler;
 
@@ -146,6 +151,7 @@ public abstract class EuclideanModelPredictiveController
       finalComWeight.set(defaultFinalComWeight);
       finalVRPWeight.set(defaultFinalVRPWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
+      forceMinimizationWeight.set(defaultForceMinimizationWeight);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
@@ -403,6 +409,8 @@ public abstract class EuclideanModelPredictiveController
                                                             0,
                                                             initialDuration,
                                                             null));
+         if (includeForceMinimization)
+            mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), 0));
          if (includeRhoMinInequality)
             mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), 0, initialDuration));
          if (includeRhoMaxInequality)
@@ -437,6 +445,8 @@ public abstract class EuclideanModelPredictiveController
                                                                nextSequence,
                                                                nextDuration,
                                                                null));
+            if (includeForceMinimization)
+               mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), nextSequence));
             if (includeRhoMinInequality)
                mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), nextSequence, nextDuration));
             if (includeRhoMaxInequality)
@@ -580,6 +590,20 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setCostToGoConsumer(costToGoConsumer);
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
          objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeForceMinimizationObjective(ForceMinimizationCommand objectiveToPack, int segmentNumber)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(forceMinimizationWeight.getDoubleValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+      }
 
       return objectiveToPack;
    }
