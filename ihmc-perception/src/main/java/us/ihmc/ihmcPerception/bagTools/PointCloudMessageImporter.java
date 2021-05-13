@@ -1,6 +1,7 @@
 package us.ihmc.ihmcPerception.bagTools;
 
 import controller_msgs.msg.dds.LidarScanMessage;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -69,7 +70,7 @@ public class PointCloudMessageImporter
             points[3 * i + 2] = z;
          }
 
-         lidarScanMessage.getScan().add(points);
+         LidarPointCloudCompression.compressPointCloud(points.length, lidarScanMessage, (i, j) -> points[3 * i + j]);
          break;
       }
 

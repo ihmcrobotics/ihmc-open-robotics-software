@@ -35,7 +35,7 @@ public class YoIMUMahonyFilterTest
       YoRegistry registry = new YoRegistry("test");
       Random random = new Random(3454);
       ReferenceFrame sensorFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame, registry);
+      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame.getRootFrame(), registry);
 
       YoFrameVector3D inputAngularVelocity = new YoFrameVector3D("angularVelocity", sensorFrame, registry);
       YoFrameVector3D inputLinearAcceleration = new YoFrameVector3D("linearAcceleration", sensorFrame, registry);
@@ -72,7 +72,7 @@ public class YoIMUMahonyFilterTest
       YoRegistry registry = new YoRegistry("test");
       Random random = new Random(3454);
       ReferenceFrame sensorFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame, registry);
+      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame.getRootFrame(), registry);
 
       YoFrameVector3D inputAngularVelocity = new YoFrameVector3D("angularVelocity", sensorFrame, registry);
       YoFrameVector3D inputLinearAcceleration = new YoFrameVector3D("linearAcceleration", sensorFrame, registry);
@@ -119,7 +119,7 @@ public class YoIMUMahonyFilterTest
       YoRegistry registry = new YoRegistry("test");
       Random random = new Random(3454);
       ReferenceFrame sensorFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame, registry);
+      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame.getRootFrame(), registry);
 
       YoFrameVector3D inputAngularVelocity = new YoFrameVector3D("angularVelocity", sensorFrame, registry);
       YoFrameVector3D inputLinearAcceleration = new YoFrameVector3D("linearAcceleration", sensorFrame, registry);

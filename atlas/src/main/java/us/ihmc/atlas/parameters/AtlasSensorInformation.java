@@ -8,6 +8,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -431,7 +432,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public RigidBodyTransform getSteppingCameraTransform()
+   public RigidBodyTransformReadOnly getSteppingCameraTransform()
    {
       return transformChestToL515DepthCamera;
    }

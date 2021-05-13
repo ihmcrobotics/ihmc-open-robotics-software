@@ -231,13 +231,6 @@
                            <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
                            <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
                         </registry>
-                        <registry name="leftFootSupportState">
-                           <parameter name="leftFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootNeverHoldRotation" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootNeverHoldPosition" type="BooleanParameter" value="false" />
-                           <parameter name="leftFootHoldFlatOrientation" type="BooleanParameter" value="false" />
-                        </registry>
                         <registry name="leftFootTaskspaceControlModule">
                            <parameter name="leftFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />
                         </registry>
@@ -254,13 +247,6 @@
                            <parameter name="leapOfFaithHorizontalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                            <parameter name="leapOfFaithVerticalFootWeightScaleFactor" type="DoubleParameter" min="0.0" max="1.0" value="100.0" />
                            <parameter name="leapOfFaithMinimumHorizontalFootWeight" type="DoubleParameter" min="0.0" max="1.0" value="2.5" />
-                        </registry>
-                        <registry name="rightFootSupportState">
-                           <parameter name="rightFootAssumeCopOnEdge" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootAssumeFootBarelyLoaded" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootNeverHoldRotation" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootNeverHoldPosition" type="BooleanParameter" value="false" />
-                           <parameter name="rightFootHoldFlatOrientation" type="BooleanParameter" value="false" />
                         </registry>
                         <registry name="rightFootTaskspaceControlModule">
                            <parameter name="rightFootTaskspaceUseBaseFrameForControl" type="BooleanParameter" value="false" />

@@ -1,8 +1,7 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-
-import java.nio.file.Path;
+import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
 {
@@ -13,6 +12,8 @@ public class HumanoidKinematicsSimulationParameters
    private double initialRobotYaw = 0.0;
    private double initialRobotX = 0.0;
    private double initialRobotY = 0.0;
+   private double playbackSpeedMultiplier = 10.0;
+   private double dt = UnitConversions.hertzToSeconds(70);
 
    public double getInitialGroundHeight()
    {
@@ -82,5 +83,25 @@ public class HumanoidKinematicsSimulationParameters
    public PubSubImplementation getPubSubImplementation()
    {
       return pubSubImplementation;
+   }
+
+   public void setPlaybackSpeedMultiplier(double playbackSpeedMultiplier)
+   {
+      this.playbackSpeedMultiplier = playbackSpeedMultiplier;
+   }
+
+   public void setUpdateFrequencyHz(double updateFrequencyHz)
+   {
+      this.dt = UnitConversions.hertzToSeconds(updateFrequencyHz);
+   }
+
+   public double getDt()
+   {
+      return dt;
+   }
+
+   public double getUpdatePeriod()
+   {
+      return dt / playbackSpeedMultiplier;
    }
 }

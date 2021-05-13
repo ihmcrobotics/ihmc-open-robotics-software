@@ -112,16 +112,23 @@ public class SplitFractionFromPositionCalculator
 
          nextFootPose.set(stepPoseGetter.apply(stepNumber));
 
-         // This step is a big step down.
-         double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();
+         double stepHeight = nextFootPose.getZ() - stanceFootPose.getZ();
+         boolean isABigStepDown = stepHeight < -splitFractionParameters.getStepHeightForLargeStepDown();
+         boolean isABigStepUp = stepHeight > splitFractionParameters.getStepHeightForLargeStepUp();
+         if (isABigStepDown || isABigStepUp)
+         {  // This step is either a big step up or a big step down.
+            double largeStepHeight = isABigStepDown ?
+                    splitFractionParameters.getStepHeightForLargeStepDown() : splitFractionParameters.getStepHeightForLargeStepUp();
+            double largestStepHeight = isABigStepDown ?
+                    splitFractionParameters.getLargestStepDownHeight() : splitFractionParameters.getLargestStepUpHeight();
 
-         if (stepDownHeight < -splitFractionParameters.getStepHeightForLargeStepDown())
-         {
-            double alpha = Math.min(1.0,
-                                    (Math.abs(stepDownHeight) - splitFractionParameters.getStepHeightForLargeStepDown()) / (
-                                          splitFractionParameters.getLargestStepDownHeight() - splitFractionParameters.getStepHeightForLargeStepDown()));
+            double alpha = Math.min(1.0, (Math.abs(stepHeight) - largeStepHeight) / (largestStepHeight - largeStepHeight));
+
+            double splitFractionAtFullDepth = isABigStepDown ?
+                    splitFractionParameters.getTransferSplitFractionAtFullDepth() : splitFractionParameters.getTransferSplitFractionForStepUpAtFullDepth();
+
             double transferSplitFraction = InterpolationTools.linearInterpolate(defaultTransferSplitFraction,
-                                                                                splitFractionParameters.getTransferSplitFractionAtFullDepth(),
+                                                                                splitFractionAtFullDepth,
                                                                                 alpha);
 
             if (stepNumber == numberOfStepsProvider.getAsInt() - 1)
@@ -129,8 +136,10 @@ public class SplitFractionFromPositionCalculator
                double currentSplitFraction = finalTransferSplitFractionProvider.getAsDouble();
                double currentWeightDistribution = finalTransferWeightDistributionProvider.getAsDouble();
 
+               double transferFinalWeightDistribution = isABigStepDown ?
+                       splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth() : splitFractionParameters.getTransferFinalWeightDistributionForStepUpAtFullDepth();
                double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferFinalWeightDistributionAtFullDepth(),
+                                                                                        transferFinalWeightDistribution,
                                                                                         alpha);
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
@@ -146,8 +155,10 @@ public class SplitFractionFromPositionCalculator
                double currentSplitFraction = transferSplitFractionProvider.applyAsDouble(stepNumber + 1);
                double currentWeightDistribution = transferWeightDistributionProvider.applyAsDouble(stepNumber + 1);
 
+               double splitFractionWeightDistributionAtFullDepth = isABigStepDown ?
+                     splitFractionParameters.getTransferWeightDistributionAtFullDepth() : splitFractionParameters.getTransferWeightDistributionForStepUpAtFullDepth();
                double transferWeightDistribution = InterpolationTools.linearInterpolate(defaultWeightDistribution,
-                                                                                        splitFractionParameters.getTransferWeightDistributionAtFullDepth(),
+                                                                                        splitFractionWeightDistributionAtFullDepth,
                                                                                         alpha);
 
                double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);

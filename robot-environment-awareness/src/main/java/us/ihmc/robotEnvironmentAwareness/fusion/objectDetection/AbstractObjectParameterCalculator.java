@@ -15,8 +15,8 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression.PointCoordinateConsumer;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression.PointCoordinateConsumer;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2TopicNameTools;
@@ -41,7 +41,7 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 
    public void trimPointCloudInROI(StereoVisionPointCloudMessage pointCloudMessage, RegionOfInterest roi)
    {
-      PointCloudCompression.decompressPointCloud(pointCloudMessage, new PointCoordinateConsumer()
+      StereoPointCloudCompression.decompressPointCloud(pointCloudMessage, new PointCoordinateConsumer()
       {
          @Override
          public void accept(double x, double y, double z)

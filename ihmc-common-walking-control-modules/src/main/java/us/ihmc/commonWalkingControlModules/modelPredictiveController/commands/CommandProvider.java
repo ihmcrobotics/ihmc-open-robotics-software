@@ -18,10 +18,14 @@ public class CommandProvider
    private final RecyclingArrayList<CoMVelocityContinuityCommand> comVelocityContinuityCommandPool = new RecyclingArrayList<>(CoMVelocityContinuityCommand::new);
    private final RecyclingArrayList<VRPPositionContinuityCommand> vrpPositionContinuityCommandPool = new RecyclingArrayList<>(VRPPositionContinuityCommand::new);
    private final RecyclingArrayList<RhoAccelerationObjectiveCommand> rhoAccelerationObjectiveCommandPool = new RecyclingArrayList<>(RhoAccelerationObjectiveCommand::new);
+   private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
+   private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
+   private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
+
 
    /**
-    * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
-    */
+          * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
+          */
    public void reset()
    {
       comPositionCommandPool.clear();
@@ -35,6 +39,9 @@ public class CommandProvider
       comVelocityContinuityCommandPool.clear();
       vrpPositionContinuityCommandPool.clear();
       rhoAccelerationObjectiveCommandPool.clear();
+      orientationValueCommandPool.clear();
+      directOrientationValueCommandPool.clear();
+      orientationContinuityCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -90,5 +97,20 @@ public class CommandProvider
    public RhoAccelerationObjectiveCommand getNextRhoAccelerationObjectiveCommand()
    {
       return rhoAccelerationObjectiveCommandPool.add();
+   }
+
+   public DirectOrientationValueCommand getNextDirectOrientationValueCommand()
+   {
+      return directOrientationValueCommandPool.add();
+   }
+
+   public OrientationValueCommand getNextOrientationValueCommand()
+   {
+      return orientationValueCommandPool.add();
+   }
+
+   public OrientationContinuityCommand getNextOrientationContinuityCommand()
+   {
+      return orientationContinuityCommandPool.add();
    }
 }

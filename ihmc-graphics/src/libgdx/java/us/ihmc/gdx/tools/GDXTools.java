@@ -2,6 +2,7 @@ package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
@@ -13,6 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
 
 public class GDXTools
@@ -69,9 +71,23 @@ public class GDXTools
       euclidAffine.getLinearTransform().setM20(gdxAffine.val[Matrix4.M20]);
       euclidAffine.getLinearTransform().setM21(gdxAffine.val[Matrix4.M21]);
       euclidAffine.getLinearTransform().setM22(gdxAffine.val[Matrix4.M22]);
+      euclidAffine.getLinearTransform().normalize();
       euclidAffine.getTranslation().setX(gdxAffine.val[Matrix4.M03]);
       euclidAffine.getTranslation().setY(gdxAffine.val[Matrix4.M13]);
       euclidAffine.getTranslation().setZ(gdxAffine.val[Matrix4.M23]);
+   }
+
+   public static void toEuclid(Matrix4 gdxAffine, RotationMatrix euclidRotationMatrix)
+   {
+      euclidRotationMatrix.setAndNormalize(gdxAffine.val[Matrix4.M00],
+                                           gdxAffine.val[Matrix4.M01],
+                                           gdxAffine.val[Matrix4.M02],
+                                           gdxAffine.val[Matrix4.M10],
+                                           gdxAffine.val[Matrix4.M11],
+                                           gdxAffine.val[Matrix4.M12],
+                                           gdxAffine.val[Matrix4.M20],
+                                           gdxAffine.val[Matrix4.M21],
+                                           gdxAffine.val[Matrix4.M22]);
    }
 
    public static void toGDX(RigidBodyTransform rigidBodyTransform, Matrix4 gdxAffineToPack)
@@ -92,15 +108,15 @@ public class GDXTools
 
    public static void toEuclid(Matrix4 gdxAffine, RigidBodyTransform rigidBodyTransform)
    {
-      rigidBodyTransform.getRotation().set(gdxAffine.val[Matrix4.M00],
-                                           gdxAffine.val[Matrix4.M01],
-                                           gdxAffine.val[Matrix4.M02],
-                                           gdxAffine.val[Matrix4.M10],
-                                           gdxAffine.val[Matrix4.M11],
-                                           gdxAffine.val[Matrix4.M12],
-                                           gdxAffine.val[Matrix4.M20],
-                                           gdxAffine.val[Matrix4.M21],
-                                           gdxAffine.val[Matrix4.M22]);
+      rigidBodyTransform.getRotation().setAndNormalize(gdxAffine.val[Matrix4.M00],
+                                                       gdxAffine.val[Matrix4.M01],
+                                                       gdxAffine.val[Matrix4.M02],
+                                                       gdxAffine.val[Matrix4.M10],
+                                                       gdxAffine.val[Matrix4.M11],
+                                                       gdxAffine.val[Matrix4.M12],
+                                                       gdxAffine.val[Matrix4.M20],
+                                                       gdxAffine.val[Matrix4.M21],
+                                                       gdxAffine.val[Matrix4.M22]);
       rigidBodyTransform.getTranslation().setX(gdxAffine.val[Matrix4.M03]);
       rigidBodyTransform.getTranslation().setY(gdxAffine.val[Matrix4.M13]);
       rigidBodyTransform.getTranslation().setZ(gdxAffine.val[Matrix4.M23]);
@@ -154,5 +170,32 @@ public class GDXTools
    public static void toGDX(Point3DBasics euclidPoint, Matrix4 gdxAffine)
    {
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
+   }
+
+   public static void toGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)
+   {
+      gdxColor.set((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
+   }
+
+   public static Color toGDX(javafx.scene.paint.Color javaFXColor)
+   {
+      return new Color((float) javaFXColor.getRed(), (float) javaFXColor.getGreen(), (float) javaFXColor.getBlue(), (float) javaFXColor.getOpacity());
+   }
+
+   /**
+    * JavaFX colors are immutable so we have to return a new one and there isn't a garbage free option
+    * unless we look em up.
+    */
+   public static javafx.scene.paint.Color toJavaFX(Color gdxColor)
+   {
+      return javafx.scene.paint.Color.color(gdxColor.r, gdxColor.g, gdxColor.b, gdxColor.a);
+   }
+
+   public static Color toGDX(AppearanceDefinition appearanceDefinition)
+   {
+      return new Color(appearanceDefinition.getColor().getX(),
+                       appearanceDefinition.getColor().getY(),
+                       appearanceDefinition.getColor().getZ(),
+                       1.0f - (float) appearanceDefinition.getTransparency());
    }
 }

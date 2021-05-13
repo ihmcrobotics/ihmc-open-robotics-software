@@ -735,7 +735,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
       JointLimitParameters parameters = new JointLimitParameters();
       parameters.setMaxAbsJointVelocity(1.5);

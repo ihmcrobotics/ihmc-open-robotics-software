@@ -152,20 +152,6 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
 
    /** {@inheritDoc} */
    @Override
-   public double getMinimumFootstepWeight()
-   {
-      return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
-   public double getMinimumFeedbackWeight()
-   {
-      return 0.0001;
-   }
-
-   /** {@inheritDoc} */
-   @Override
    public double getMinimumTimeRemaining()
    {
       return 0.0001;
@@ -176,6 +162,12 @@ public class AtlasICPOptimizationParameters extends ICPOptimizationParameters
    public double getAdjustmentDeadband()
    {
       return 0.02;
+   }
+
+   @Override
+   public double getFeedbackDirectionWeight()
+   {
+      return 1e6;
    }
 
    /** {@inheritDoc} */

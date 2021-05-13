@@ -64,7 +64,12 @@ public class GDXPointCloudRenderer implements RenderableProvider
       this.pointsToRender = pointsToRender;
    }
 
-   public void render()
+   public void updateMesh()
+   {
+      updateMesh(0.0f);
+   }
+
+   public void updateMesh(float alpha)
    {
       if (pointsToRender != null && !pointsToRender.isEmpty())
       {
@@ -81,9 +86,9 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 3] = 0.5f; // red (not working yet)
             vertices[offset + 4] = 0.7f; // blue
             vertices[offset + 5] = 0.5f; // green
-            vertices[offset + 6] = 0.0f; // alpha
+            vertices[offset + 6] = alpha; // alpha
 
-            vertices[offset + 7] = 0.01f; // size
+            vertices[offset + 7] = 0.11f; // size
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
          }

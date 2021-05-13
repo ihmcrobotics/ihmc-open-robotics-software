@@ -9,7 +9,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrameState;
 
 import java.util.List;
@@ -94,7 +94,7 @@ public class SLAMFrameStateViewer implements Runnable
          pointCloudBuffer[i] = new Point3D(correctedPointCloudBuffer.get(i - uncorrectedPointCloudBuffer.length - correspondingPointCloudBuffer.length));
          colorBuffer[i] = StereoVisionPointCloudViewer.colorToInt(LATEST_POINT_CLOUD_COLOR);
       }
-      return PointCloudCompression.compressPointCloud(19870612L, pointCloudBuffer, colorBuffer, numberOfPointsToPack, 0.001, null);
+      return StereoPointCloudCompression.compressPointCloud(19870612L, pointCloudBuffer, colorBuffer, numberOfPointsToPack, 0.001, null);
    }
 
    private void unpackPointCloud(SLAMFrameState message)

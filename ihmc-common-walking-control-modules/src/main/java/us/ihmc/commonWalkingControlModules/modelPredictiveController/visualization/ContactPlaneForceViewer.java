@@ -32,8 +32,8 @@ public class ContactPlaneForceViewer
       position = new YoFramePoint3D(prefix + "TotalContactPosition", ReferenceFrame.getWorldFrame(), registry);
       magnitude = new YoFrameVector3D(prefix + "TotalContactAcceleration", ReferenceFrame.getWorldFrame(), registry);
 
-      YoGraphicVector vis = new YoGraphicVector(prefix + "TotalContactForce", position, magnitude, scale, YoAppearance.Red());
-      graphicsListRegistry.registerYoGraphic("ContactForce", vis);
+//      YoGraphicVector vis = new YoGraphicVector(prefix + "TotalContactForce", position, magnitude, scale, YoAppearance.Red());
+//      graphicsListRegistry.registerYoGraphic("ContactForce", vis);
    }
 
    int pointNumber = 0;

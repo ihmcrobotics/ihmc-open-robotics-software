@@ -386,6 +386,36 @@ public class GDXMultiColorMeshBuilder
    }
 
    /**
+    * Accepts vertices to draw a box in the order given by Euclid Box3D.
+    *
+    * @param eightVertices
+    * @param lineWidth
+    * @param color
+    * @param close
+    */
+   public void addMultiLineBox(Point3DReadOnly[] eightVertices, double lineWidth, Color color)
+   {
+      if (eightVertices.length != 8)
+         throw new RuntimeException("There should be 8 vertices in this array");
+
+      addLine(eightVertices[0], eightVertices[1], lineWidth, color); // x+y+z+  draw top
+      addLine(eightVertices[1], eightVertices[3], lineWidth, color); // x-y-z+
+      addLine(eightVertices[3], eightVertices[2], lineWidth, color); // x-y+z+
+      addLine(eightVertices[2], eightVertices[0], lineWidth, color); // x+y-z+
+      addLine(eightVertices[0], eightVertices[4], lineWidth, color); // x+y+z+
+      addLine(eightVertices[4], eightVertices[5], lineWidth, color); // x+y+z-  go down
+      addLine(eightVertices[5], eightVertices[1], lineWidth, color); // x-y-z-  leg 1
+      addLine(eightVertices[1], eightVertices[5], lineWidth, color); // x-y-z+
+      addLine(eightVertices[5], eightVertices[7], lineWidth, color); // x-y-z-
+      addLine(eightVertices[7], eightVertices[3], lineWidth, color); // x-y+z-  leg 2
+      addLine(eightVertices[3], eightVertices[7], lineWidth, color); // x-y+z+
+      addLine(eightVertices[7], eightVertices[6], lineWidth, color); // x-y+z-
+      addLine(eightVertices[6], eightVertices[2], lineWidth, color); // x+y-z-  leg 3
+      addLine(eightVertices[2], eightVertices[6], lineWidth, color); // x+y-z+
+      addLine(eightVertices[6], eightVertices[4], lineWidth, color); // x+y-z-
+   }
+
+   /**
     * Add a series of connected 3D lines to this builder.
     *
     * @param points    coordinates of the line end points. Not modified.
@@ -561,6 +591,16 @@ public class GDXMultiColorMeshBuilder
    public void addTetrahedron(float edgeLength, Tuple3DReadOnly offset, Color color)
    {
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
+   }
+
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Color color)
+   {
+      addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 25), color);
+   }
+
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, int resolution, Color color)
+   {
+      addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, resolution), color);
    }
 
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3DReadOnly offset, AxisAngle orientation, Color color)

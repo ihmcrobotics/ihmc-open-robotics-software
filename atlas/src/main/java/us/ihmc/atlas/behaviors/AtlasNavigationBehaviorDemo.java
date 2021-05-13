@@ -6,12 +6,12 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
-import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.NavigationBehaviorUI;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.tools.PlanarRegionsMappingModule;
+import us.ihmc.behaviors.tools.perception.SimulatedREAModule;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.behaviors.NavigationBehaviorUI;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -47,12 +47,12 @@ public class AtlasNavigationBehaviorDemo
       ThreadTools.startAThread(this::planarRegionsMappingModule, "PlanarRegionsMappingModule");
       ThreadTools.startAThread(this::kinematicsSimulation, "KinematicsSimulation");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(NavigationBehaviorUI.DEFINITION);
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(NavigationBehaviorUI.DEFINITION);
 
       BehaviorModule behaviorModule = BehaviorModule.createIntraprocess(behaviorRegistry, createRobotModel());
 
       LogTools.info("Creating behavior user interface");
-      BehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
+      JavaFXBehaviorUI.createIntraprocess(behaviorRegistry, createRobotModel(), behaviorModule.getMessager());
    }
 
    private void simulatedREAModule()

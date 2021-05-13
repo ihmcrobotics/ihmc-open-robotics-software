@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.LidarImageFusionAPI;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.fusion.MultisenseInformation;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.ImageSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.fusion.parameters.SegmentationRawDataFilteringParameters;
@@ -55,8 +55,8 @@ public class LidarImageFusionDataBuffer
    {
       StereoVisionPointCloudMessage pointCloudMessage = latestStereoVisionPointCloudMessage.get();
 
-      Point3D[] pointCloudBuffer = PointCloudCompression.decompressPointCloudToArray(pointCloudMessage);
-      int[] colorBuffer = PointCloudCompression.decompressColorsToIntArray(pointCloudMessage);
+      Point3D[] pointCloudBuffer = StereoPointCloudCompression.decompressPointCloudToArray(pointCloudMessage);
+      int[] colorBuffer = StereoPointCloudCompression.decompressColorsToIntArray(pointCloudMessage);
       Random random = new Random();
       int numberOfPoints = pointCloudBuffer.length;
 

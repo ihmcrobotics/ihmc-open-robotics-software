@@ -56,7 +56,6 @@ import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -75,9 +74,6 @@ import java.util.stream.Collectors;
 
 public class HumanoidKinematicsSimulation
 {
-   private static final double PLAYBACK_SPEED_MULTIPLIER = 10.0;
-   private static final double DT = UnitConversions.hertzToSeconds(70);
-   private static final double UPDATE_PERIOD = DT / PLAYBACK_SPEED_MULTIPLIER;
    private static final double GRAVITY_Z = 9.81;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
@@ -184,7 +180,7 @@ public class HumanoidKinematicsSimulation
                                                                  GRAVITY_Z,
                                                                  robotModel.getWalkingControllerParameters().getOmega0(),
                                                                  feet,
-                                                                 DT,
+                                                                 kinematicsSimulationParameters.getDt(),
                                                                  Collections.emptyList(),
                                                                  allContactableBodies,
                                                                  yoGraphicsListRegistry,
@@ -251,7 +247,7 @@ public class HumanoidKinematicsSimulation
       controllerNetworkSubscriber.addMessageValidator(ControllerAPIDefinition.createDefaultMessageValidation());
       realtimeROS2Node.spin();
 
-      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(DT,
+      WholeBodyControlCoreToolbox controlCoreToolbox = new WholeBodyControlCoreToolbox(kinematicsSimulationParameters.getDt(),
                                                                                        GRAVITY_Z,
                                                                                        fullRobotModel.getRootJoint(),
                                                                                        controllerToolbox.getControlledJoints(),
@@ -312,7 +308,7 @@ public class HumanoidKinematicsSimulation
       initialize();
 
       monotonicTimer.start();
-      controlThread = new PausablePeriodicThread(getClass().getSimpleName(), UPDATE_PERIOD, 5, this::controllerTick);
+      controlThread = new PausablePeriodicThread(getClass().getSimpleName(), kinematicsSimulationParameters.getUpdatePeriod(), 5, this::controllerTick);
       controlThread.start();
    }
 
@@ -343,7 +339,7 @@ public class HumanoidKinematicsSimulation
 
    public void doControl()
    {
-      yoTime.add(DT);
+      yoTime.add(kinematicsSimulationParameters.getDt());
       fullRobotModel.updateFrames();
       referenceFrames.updateFrames();
       controllerToolbox.update();
@@ -389,7 +385,7 @@ public class HumanoidKinematicsSimulation
          joint.setQdd(jointDesiredOutput.getDesiredAcceleration());
       }
 
-      integrator.setIntegrationDT(DT);
+      integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);

@@ -41,7 +41,7 @@ public class AtlasNetworkProcessor
    {
       JSAP jsap = new JSAP();
 
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
       FlaggedOption modeOption = new FlaggedOption("mode").setLongFlag("mode").setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
@@ -87,7 +87,12 @@ public class AtlasNetworkProcessor
          {
             target = RobotTarget.SCS;
          }
-         model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
+         String robotVersionString = config.getString("robotModel");
+         if (robotVersionString == null)
+         {
+            robotVersionString = "ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ";
+         }
+         model = AtlasRobotModelFactory.createDRCRobotModel(robotVersionString, target, true);
       }
       catch (IllegalArgumentException e)
       {

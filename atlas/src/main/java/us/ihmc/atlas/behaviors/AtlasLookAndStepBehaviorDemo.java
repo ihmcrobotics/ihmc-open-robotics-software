@@ -5,11 +5,11 @@ import us.ihmc.atlas.behaviors.tools.AtlasSimulationBasics;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 
 import static us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments.TRIPLE_PLATFORM_HEIGHT;
@@ -44,7 +44,7 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
       selectEnvironment();
    }
 
-   private BehaviorUI behaviorUI;
+   private JavaFXBehaviorUI behaviorUI;
    private final BehaviorModule behaviorModule;
    private AtlasPerceptionSimulation perceptionStack;
 
@@ -63,12 +63,12 @@ public class AtlasLookAndStepBehaviorDemo extends AtlasSimulationBasics
       if (RUN_LIDAR_AND_CAMERA_SIMULATION)
          ThreadTools.startAsDaemon(this::lidarAndCameraSimulator, "LidarAndCamera");
 
-      BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
+      JavaFXBehaviorUIRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
 
       behaviorModule = new BehaviorModule(behaviorRegistry, createRobotModel(), COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER);
 
       LogTools.info("Creating behavior user interface");
-      behaviorUI = BehaviorUI.create(behaviorRegistry,
+      behaviorUI = JavaFXBehaviorUI.create(behaviorRegistry,
                                      createRobotModel(),
                                      COMMUNICATION_MODE_ROS2, COMMUNICATION_MODE_MESSAGER,
                                      "localhost",

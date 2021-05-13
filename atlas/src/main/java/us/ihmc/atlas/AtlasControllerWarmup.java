@@ -27,11 +27,8 @@ public class AtlasControllerWarmup extends HumanoidControllerWarmup
       HumanoidReferenceFrames referenceFrames = getReferenceFrames();
       FullHumanoidRobotModel fullRobotModel = getFullRobotModel();
 
-      for (RobotSide side : RobotSide.values)
-      {
-         getYoVariable(side.getLowerCaseName() + "FootAssumeFootBarelyLoaded").setValueFromDouble(1.0);
-         getYoVariable(side.getLowerCaseName() + "FootAssumeCopOnEdge").setValueFromDouble(1.0);
-      }
+      getYoVariable("FootAssumeFootBarelyLoaded").setValueFromDouble(1.0);
+      getYoVariable("FootAssumeCopOnEdge").setValueFromDouble(1.0);
       getYoVariable("maxICPErrorBeforeSingleSupportForwardX").setValueFromDouble(Double.POSITIVE_INFINITY);
       getYoVariable("maxICPErrorBeforeSingleSupportBackwardX").setValueFromDouble(Double.POSITIVE_INFINITY);
       getYoVariable("maxICPErrorBeforeSingleSupportInnerY").setValueFromDouble(Double.POSITIVE_INFINITY);

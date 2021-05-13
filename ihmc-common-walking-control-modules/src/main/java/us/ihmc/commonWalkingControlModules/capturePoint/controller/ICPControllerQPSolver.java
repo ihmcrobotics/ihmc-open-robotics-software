@@ -39,7 +39,7 @@ public class ICPControllerQPSolver
    private boolean previousTickFailed = false;
 
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   private final ICPControllerQPInputCalculator inputCalculator;
+   final ICPControllerQPInputCalculator inputCalculator;
 
    /**
     * Has the form 0.5 x<sup>T</sup> H x + h x
@@ -101,11 +101,14 @@ public class ICPControllerQPSolver
    /** Proportional gain on the ICP feedback controller. */
    private final DMatrixRMaj feedbackGain = new DMatrixRMaj(2, 2);
 
+   /** Desired feedback direction. We're going to try and minimize the difference from this. */
+   private final DMatrixRMaj desiredFeedbackDirection = new DMatrixRMaj(2, 1);
+
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
    private final AbstractSimpleActiveSetQPSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
-   private final DMatrixRMaj solution;
+   final DMatrixRMaj solution;
    /** CoP Feedback action solution to the quadratic program. */
    private final DMatrixRMaj copDeltaSolution;
    /** CMP different from the CoP solution to the quadratic program. */
@@ -135,6 +138,7 @@ public class ICPControllerQPSolver
 
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
+   private double feedbackDirectionWeight = 0.0;
 
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPControllerQPSolver}.
@@ -369,6 +373,12 @@ public class ICPControllerQPSolver
       useAngularMomentum.set(false);
    }
 
+   public void resetFeedbackDirection()
+   {
+      desiredFeedbackDirection.zero();
+      feedbackDirectionWeight = 0.0;
+   }
+
    /**
     * Sets the conditions for the minimization of the cmp feedback task. This includes whether or not to utilize angular momentum to help stabilize
     * the ICP dynamics, as well as the weight on its minimization.
@@ -464,6 +474,13 @@ public class ICPControllerQPSolver
       MatrixTools.setDiagonal(this.copCMPFeedbackRateWeight, copCMPFeedbackRateWeight);
    }
 
+   public void setDesiredFeedbackDirection(FrameVector2DReadOnly desiredFeedbackDirection, double directionWeight)
+   {
+      desiredFeedbackDirection.get(this.desiredFeedbackDirection);
+      CommonOps_DDRM.scale(1.0 / desiredFeedbackDirection.length(), this.desiredFeedbackDirection);
+      this.feedbackDirectionWeight = directionWeight;
+   }
+
    private final FrameVector2D cmpOffsetToThrowAway = new FrameVector2D();
 
    /**
@@ -522,6 +539,7 @@ public class ICPControllerQPSolver
       addFeedbackRateTask();
 
       addDynamicConstraintTask();
+      addFeedbackDirectionTask();
 
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
@@ -590,6 +608,7 @@ public class ICPControllerQPSolver
 
       ICPControllerQPInputCalculator.submitFeedbackRateMinimizationTask(feedbackRateMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
+
 
    /**
     * Adds the convex CoP location constraint that requires the CoP to be in the support polygon.
@@ -706,6 +725,26 @@ public class ICPControllerQPSolver
    private void addDynamicConstraintTask()
    {
       inputCalculator.computeDynamicsTask(dynamicsTaskInput, currentICPError, feedbackGain, dynamicsWeight, useAngularMomentum.getBooleanValue());
+      ICPControllerQPInputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+   }
+
+   /**
+    * Computes a task that minimizes the different from the resulting CMP feedback direction from the desired one. This computes the task input as trying to
+    * drive the cross product between the desired feedback and the actual feedback to zero.
+    *
+    * <p>
+    *    0 = &delta;<sub>d</sub> &times; &delta;<sub>p</sub>
+    * </p>
+    * where
+    * <li>&delta;<sub>d</sub> is the actual feedback computed by the output of this solver and </li>
+    * <li>&delta;<sub>p</sub> is the perfect desired feedback direction that the solver is trying to achieve</li>
+    */
+   private void addFeedbackDirectionTask()
+   {
+      if (feedbackDirectionWeight == 0.0)
+         return;
+
+      inputCalculator.computeFeedbackDirectionTask(dynamicsTaskInput, desiredFeedbackDirection, feedbackDirectionWeight, useAngularMomentum.getBooleanValue());
       ICPControllerQPInputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 

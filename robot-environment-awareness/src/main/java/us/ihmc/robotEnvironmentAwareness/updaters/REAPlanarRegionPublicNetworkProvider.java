@@ -23,6 +23,8 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 {
+   private static final boolean publishOctree = false;
+
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> lidarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> stereoRegionPublisher;
@@ -94,15 +96,15 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
             lastPlanarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(regionFeaturesProvider.getPlanarRegionsList());
 
          planarRegionPublisher.publish(lastPlanarRegionsListMessage);
-         if (isUsingLidar.get())
+         if (isUsingLidar != null && isUsingLidar.get())
             lidarRegionPublisher.publish(lastPlanarRegionsListMessage);
-         if (isUsingStereoVision.get())
+         if (isUsingStereoVision != null && isUsingStereoVision.get())
             stereoRegionPublisher.publish(lastPlanarRegionsListMessage);
-         if (isUsingDepthCloud.get())
+         if (isUsingDepthCloud != null && isUsingDepthCloud.get())
             depthRegionPublisher.publish(lastPlanarRegionsListMessage);
       }
 
-      if (ocTree != null && ocTree.getRoot() != null)
+      if (publishOctree && ocTree != null && ocTree.getRoot() != null)
       {
          OcTreeKeyListMessage ocTreeMessage = OcTreeMessageConverter.createOcTreeDataMessage(ocTree);
          ocTreePublisher.publish(ocTreeMessage);
