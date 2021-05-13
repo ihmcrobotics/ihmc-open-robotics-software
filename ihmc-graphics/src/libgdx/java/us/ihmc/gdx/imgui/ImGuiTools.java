@@ -2,6 +2,7 @@ package us.ihmc.gdx.imgui;
 
 import com.badlogic.gdx.Input;
 import imgui.*;
+import imgui.flag.ImGuiFreeTypeBuilderFlags;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -74,10 +75,11 @@ public class ImGuiTools
 //      fontConfig.setOversampleH(4);
 //      fontConfig.setOversampleV(4);
       int fontsFlags = 0;
-      fontsFlags += ImGuiFreeType.RasterizerFlags.LightHinting;
+      fontsFlags += ImGuiFreeTypeBuilderFlags.LightHinting;
 //      fontConfig.setRasterizerFlags(flags);
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
+      fontConfig.setFontBuilderFlags(fontsFlags);
 
       ImFont fontToReturn;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
@@ -100,8 +102,7 @@ public class ImGuiTools
 //      fontConfig.setName("Segoe UI"); // We can apply a new config value every time we add a new font
 //      fontToReturn = fontAtlas.addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", size, fontConfig);
 
-      ImGuiFreeType.buildFontAtlas(io.getFonts(), fontsFlags);
-
+      ImGui.getIO().getFonts().build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
 

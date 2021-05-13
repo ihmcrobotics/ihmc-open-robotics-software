@@ -152,7 +152,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
       int numLogEntriesToShow = 15;
       while (logArray.size() > numLogEntriesToShow)
          logArray.removeFirst();
-      ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), logArray.size(), numLogEntriesToShow);
+      ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), numLogEntriesToShow);
       ImGui.popItemWidth();
 
       ImGui.end();
