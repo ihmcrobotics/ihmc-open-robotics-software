@@ -1,7 +1,10 @@
 package us.ihmc.valkyrie.simulation;
 
 import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.MultiContactScriptReader;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
@@ -33,6 +36,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -40,6 +44,10 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.EnumMap;
 
 public class ValkyriePlanarRegionPositionControlSimulation
@@ -62,10 +70,11 @@ public class ValkyriePlanarRegionPositionControlSimulation
    public enum InitialPose
    {
       STANDING,
-      DOWN_ON_ALL_FOURS
+      DOWN_ON_ALL_FOURS,
+      FROM_SCRIPT
    }
 
-   public static InitialPose initialPose = InitialPose.DOWN_ON_ALL_FOURS;
+   public static InitialPose initialPose = InitialPose.FROM_SCRIPT;
 
    public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
@@ -96,18 +105,60 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setUsePerfectSensors(true);
+
       if (headless)
       {
          simulationStarter.getGuiInitialSetup().setGraphics3DAdapter(new NullGraphics3DAdapter());
          simulationStarter.getGuiInitialSetup().setShowWindow(false);
       }
-      if (initialPose == InitialPose.DOWN_ON_ALL_FOURS)
+
+      if (initialPose == InitialPose.FROM_SCRIPT)
+      {
+         MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+         Path currentDirectory = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software")
+                                                   .resolve("valkyrie/src/main/resources/multiContact/scripts")
+                                                   .toAbsolutePath()
+                                                   .normalize();
+         System.out.println(currentDirectory);
+         JFileChooser fileChooser = new JFileChooser(currentDirectory.toFile());
+         fileChooser.setFileFilter(new FileNameExtensionFilter("JSON log", "json"));
+
+         int chooserState = fileChooser.showOpenDialog(null);
+         if (chooserState != JFileChooser.APPROVE_OPTION)
+            return;
+
+         File selectedFile = fileChooser.getSelectedFile();
+         if (!scriptReader.loadScript(selectedFile))
+            return;
+
+         scriptReader.loadScript(selectedFile);
+         KinematicsToolboxSnapshotDescription initialSnapshot = scriptReader.getAllItems().get(0);
+         RobotConfigurationData robotConfigurationData = initialSnapshot.getControllerConfiguration();
+
+         ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+
+         // set root joint
+         initialSetup.getRootJointPosition().set(robotConfigurationData.getRootTranslation());
+         initialSetup.getRootJointOrientation().set(robotConfigurationData.getRootOrientation());
+         initialSetup.getRootJointOrientation().appendPitchRotation(Math.toRadians(1.0));
+
+         // set joint positions
+         OneDoFJointBasics[] oneDoFJoints = robotModel.createFullRobotModel().getControllableOneDoFJoints();
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            if (!oneDoFJoints[i].getName().contains("hokuyo"))
+               initialSetup.jointPositions.put(oneDoFJoints[i].getName(), (double) robotConfigurationData.getJointAngles().get(i));
+         }
+
+         simulationStarter.setRobotInitialSetup(initialSetup);
+      }
+      else if (initialPose == InitialPose.DOWN_ON_ALL_FOURS)
       {
          ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
          simulationStarter.setRobotInitialSetup(initialSetup);
       }
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
-      simulationStarter.getSCSInitialSetup().setRecordFrequency(10);
+      simulationStarter.getSCSInitialSetup().setRecordFrequency(50);
       simulationStarter.registerHighLevelControllerState(new HighLevelControllerStateFactory()
       {
          @Override
