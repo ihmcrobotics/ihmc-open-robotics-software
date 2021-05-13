@@ -306,6 +306,9 @@ public class LinearMPCQPSolver
          case NORMAL_FORCE_BOUND:
             submitNormalForceBoundCommand((NormalForceBoundCommand) command);
             break;
+         case FORCE_MINIMIZATION:
+            submitForceMinimizationCommand((ForceMinimizationCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -351,6 +354,13 @@ public class LinearMPCQPSolver
       int offset = inputCalculator.calculateNormalForceBoundCommandCompact(qpInputTypeA, command);
       if (offset != -1)
          addInput(qpInputTypeA, offset);
+   }
+
+   public void submitForceMinimizationCommand(ForceMinimizationCommand command)
+   {
+      boolean success = inputCalculator.calculateForceMinimizationObjective(qpInputTypeC, command);
+      if (success)
+         addInput(qpInputTypeC);
    }
 
    public void addInput(QPInputTypeA input)
