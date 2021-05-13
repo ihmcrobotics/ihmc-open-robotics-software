@@ -44,7 +44,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
     */
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.VALUE;
+      return MPCCommandType.FORCE_MINIMIZATION;
    }
 
    /**
