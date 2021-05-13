@@ -1,9 +1,9 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia
-# Current version: 0.3
+# Current version: 0.4
 # Refer to the NVIDIA/CUDA base image here: (https://hub.docker.com/r/nvidia/cuda/)
 # This is currently based on Ubuntu 20.04 Focal Fossa.
-FROM nvidia/cuda:11.3.0-base
+FROM nvidia/cuda:11.0-base
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -12,6 +12,10 @@ ARG DEBIAN_FRONTEND=noninteractive
 # compressed image size by about 25 MB.
 RUN apt-get --quiet 2 --yes update  \
  && apt-get --quiet 2 --yes install \
+    apt-utils \
+    tar \
+    xz-utils \
+    alien \
     nano \
     git \
     wget \
@@ -47,6 +51,33 @@ RUN apt-get --quiet 2 --yes update \
  && rm -rf /var/lib/apt/lists/*
 
 # Configure OpenCL (https://stackoverflow.com/questions/54243119/how-to-run-opencl-opengl-inside-a-docker-container)
+ARG INTEL_DRIVER=opencl_runtime_16.1.1_x64_ubuntu_6.4.0.25.tgz
+ARG INTEL_DRIVER_URL=http://registrationcenter-download.intel.com/akdlm/irc_nas/9019
+
+#ADD http://registrationcenter-download.intel.com/akdlm/irc_nas/11396/SRB5.0_linux64.zip /tmp/intel-opencl-driver
+RUN mkdir -p /tmp/opencl-driver-intel
+WORKDIR /tmp/opencl-driver-intel
+#COPY $INTEL_DRIVER /tmp/opencl-driver-intel/$INTEL_DRIVER
+#RUN curl -O $INTEL_DRIVER_URL/$INTEL_DRIVER 
+# SRB 5 uses a zip file; older drivers use .tgz
+RUN echo INTEL_DRIVER is $INTEL_DRIVER; \
+    curl -O $INTEL_DRIVER_URL/$INTEL_DRIVER; \
+    if echo $INTEL_DRIVER | grep -q "[.]zip$"; then \
+        unzip $INTEL_DRIVER; \
+        mkdir fakeroot; \
+        for f in intel-opencl-*.tar.xz; do tar -C fakeroot -Jxvf $f; done; \
+        cp -R fakeroot/* /; \
+        ldconfig; \
+    else \
+        tar -xzf $INTEL_DRIVER; \
+        for i in $(basename $INTEL_DRIVER .tgz)/rpm/*.rpm; do alien --to-deb $i; done; \
+        dpkg -i *.deb; \
+        rm -rf $INTEL_DRIVER $(basename $INTEL_DRIVER .tgz) *.deb; \
+        mkdir -p /etc/OpenCL/vendors; \
+        echo /opt/intel/*/lib64/libintelocl.so > /etc/OpenCL/vendors/intel.icd; \
+    fi; \
+    rm -rf /tmp/opencl-driver-intel;
+
 RUN apt-get --quiet 2 --yes update \
  && apt-get --quiet 2 --yes install clinfo > /dev/null \
  && rm -rf /var/lib/apt/lists/* \
