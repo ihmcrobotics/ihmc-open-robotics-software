@@ -6,7 +6,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 
 public class TransformReferenceFrame extends ReferenceFrame
 {
-   public final RigidBodyTransform transform3D = new RigidBodyTransform();
+   private final RigidBodyTransform transform3D = new RigidBodyTransform();
 
    public TransformReferenceFrame(String frameName, ReferenceFrame parentFrame)
    {

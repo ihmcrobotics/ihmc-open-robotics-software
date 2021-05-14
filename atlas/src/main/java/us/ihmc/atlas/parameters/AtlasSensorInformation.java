@@ -8,7 +8,6 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -184,7 +183,7 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       transformTrackingCameraToDepthCamera.invert();
    }
 
-   public static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
+   private static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
    static
    {
       // TODO: Move this stuff to a file so it can be tuned and saved
@@ -432,14 +431,13 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    }
 
    @Override
-   public RigidBodyTransformReadOnly getSteppingCameraTransform()
+   public RigidBodyTransform getSteppingCameraTransform()
    {
       return transformChestToL515DepthCamera;
    }
 
-
    @Override
-   public ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   public ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
       return referenceFrames.getChestFrame();
    }
