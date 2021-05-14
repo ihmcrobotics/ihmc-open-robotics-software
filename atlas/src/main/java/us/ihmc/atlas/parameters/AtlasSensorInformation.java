@@ -188,10 +188,16 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       // TODO: Move this stuff to a file so it can be tuned and saved
       Point3D chestToSensor = new Point3D(0.275, 0.052, 0.14);
-
       transformChestToL515DepthCamera.appendTranslation(chestToSensor);
       double pitch = Math.toRadians(90.0 - 24.0);
       transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
+   }
+
+   private static final RigidBodyTransform transformChestToD435DepthCamera = new RigidBodyTransform();
+   static
+   {
+      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.4);
+      transformChestToD435DepthCamera.appendTranslation(chestToSensor);
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
@@ -440,5 +446,11 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public ReferenceFrame getSteppingCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
    {
       return referenceFrames.getChestFrame();
+   }
+
+   @Override
+   public RigidBodyTransform getObjectDetectionCameraTransform()
+   {
+      return transformChestToD435DepthCamera;
    }
 }

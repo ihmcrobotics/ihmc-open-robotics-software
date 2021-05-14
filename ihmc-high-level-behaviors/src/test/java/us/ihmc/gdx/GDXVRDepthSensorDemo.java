@@ -25,7 +25,7 @@ public class GDXVRDepthSensorDemo
    public GDXVRDepthSensorDemo()
    {
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(90.0, 640, 480, 0.05, 10.0);
+      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor", 90.0, 640, 480, 0.05, 10.0);
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       GDXVRManager vrManager = new GDXVRManager();
       SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();

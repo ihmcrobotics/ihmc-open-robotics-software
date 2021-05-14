@@ -33,8 +33,8 @@ import java.util.Random;
  */
 public class GDXLowLevelDepthSensorSimulator
 {
-   private final String depthWindowName = ImGuiTools.uniqueLabel(this, "Depth");
-   private final String colorWindowName = ImGuiTools.uniqueLabel(this, "Color");
+   private final String depthWindowName;
+   private final String colorWindowName;
 
    private final Random random = new Random();
 
@@ -72,8 +72,10 @@ public class GDXLowLevelDepthSensorSimulator
    private boolean depthWindowEnabledOptimization = true;
    private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
 
-   public GDXLowLevelDepthSensorSimulator(double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
+   public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
    {
+      depthWindowName = ImGuiTools.uniqueLabel(sensorName + " Depth");
+      colorWindowName = ImGuiTools.uniqueLabel(sensorName + " Color");
       this.fieldOfViewY = (float) fieldOfViewY;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;

@@ -43,6 +43,8 @@ public class RosTools
    public static final String D435_VIDEO = "/chest_d435/color/image_raw/compressed";
    public static final String D435_CAMERA_INFO = "/chest_d435/color/camera_info";
    public static final String D435_POINT_CLOUD = "/chest_d435/depth/color/points";
+   public static final String D435_DEPTH = "/chest_d435/depth/image_rect_raw";
+   public static final String D435_DEPTH_CAMERA_INFO = "/chest_d435/depth/camera_info";
    public static final String L515_VIDEO = "/chest_l515/color/image_raw";
    public static final String L515_COMPRESSED_VIDEO = "/camera/color/image_raw/compressed";
    public static final String L515_DEPTH = "/chest_l515/depth/image_rect_raw";
