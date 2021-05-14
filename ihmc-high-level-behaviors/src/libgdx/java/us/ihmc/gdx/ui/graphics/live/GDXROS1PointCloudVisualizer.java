@@ -65,6 +65,11 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
       pointCloudRenderer.create(MAX_POINTS);
    }
 
+   public void setFrame(ReferenceFrame frame)
+   {
+      this.frame = frame;
+   }
+
    public void setFrame(ReferenceFrame frame, RigidBodyTransformReadOnly transformAfterFrame)
    {
       this.frame = frame;

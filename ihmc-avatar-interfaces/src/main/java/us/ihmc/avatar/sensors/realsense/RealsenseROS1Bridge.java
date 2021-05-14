@@ -3,7 +3,6 @@ package us.ihmc.avatar.sensors.realsense;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Node;
@@ -20,7 +19,7 @@ public class RealsenseROS1Bridge
    private final RealsensePointCloudROS1Bridge l515PointCloudBridge;
    private final MapSensePlanarRegionROS1Bridge l515PlanarRegionBridge;
 
-   public RealsenseROS1Bridge(DRCRobotModel robotModel, RigidBodyTransformReadOnly d435PelvisToSensorTransform, RigidBodyTransformReadOnly l515PelvisToSensorTransform)
+   public RealsenseROS1Bridge(DRCRobotModel robotModel)
    {
       URI masterURI = NetworkParameters.getROSURI();
       LogTools.info("Connecting to ROS 1 master URI: {}", masterURI);
@@ -33,13 +32,11 @@ public class RealsenseROS1Bridge
       d435PointCloudBridge = new RealsensePointCloudROS1Bridge(robotModel,
                                                                ros1Node,
                                                                ros2Node,
-                                                               d435PelvisToSensorTransform,
                                                                RosTools.D435_POINT_CLOUD,
                                                                ROS2Tools.D435_POINT_CLOUD);
       l515PointCloudBridge = new RealsensePointCloudROS1Bridge(robotModel,
                                                                ros1Node,
                                                                ros2Node,
-                                                               l515PelvisToSensorTransform,
                                                                RosTools.L515_POINT_CLOUD,
                                                                ROS2Tools.L515_POINT_CLOUD);
       l515PlanarRegionBridge = new MapSensePlanarRegionROS1Bridge(robotModel,

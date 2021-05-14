@@ -23,6 +23,7 @@ import us.ihmc.robotics.screwTheory.MovingMidFrameZUpFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.containers.ContainerTools;
 
 public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
@@ -53,8 +54,14 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame lidarSensorFrame;
+   private ReferenceFrame steppingCameraFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
+   {
+      this(fullRobotModel, null);
+   }
+
+   public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
       this.fullRobotModel = fullRobotModel;
 
@@ -182,6 +189,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       if (chest != null)
       {
          addDefaultIDToReferenceFrame(CommonReferenceFrameIds.CHEST_FRAME, chest.getBodyFixedFrame());
+      }
+
+      if (sensorInformation != null)
+      {
+         steppingCameraFrame = sensorInformation.getSteppingCameraFrame(this);
       }
    }
 
@@ -340,6 +352,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       midFeetUnderPelvisWalkDirectionFrame.update();
 
       centerOfMassFrame.update();
+
+      if (lidarSensorFrame != null)
+         lidarSensorFrame.update();
+      if (steppingCameraFrame != null)
+         steppingCameraFrame.update();
    }
 
    @Override
@@ -393,5 +410,10 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getLidarSensorFrame()
    {
       return lidarSensorFrame;
+   }
+
+   public ReferenceFrame getSteppingCameraFrame()
+   {
+      return steppingCameraFrame;
    }
 }
