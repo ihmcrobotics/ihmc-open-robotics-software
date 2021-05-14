@@ -3,27 +3,20 @@ package us.ihmc.footstepPlanning.polygonSnapping;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-
-import static us.ihmc.robotics.Assert.*;
 
 public class ConstructingGroundPlaneAroundFeetTest
 {
@@ -53,10 +46,10 @@ public class ConstructingGroundPlaneAroundFeetTest
       planarRegionsList.addPlanarRegion(planarRegion);
 
       double stepWidth = 0.2;
-      FootstepNode stanceFootNode = new FootstepNode(translation.getX(), translation.getY() + 0.5 * stepWidth, 0.0, RobotSide.LEFT);
+      DiscreteFootstep stanceFootNode = new DiscreteFootstep(translation.getX(), translation.getY() + 0.5 * stepWidth, 0.0, RobotSide.LEFT);
       RigidBodyTransform snapTransform = new RigidBodyTransform(new Quaternion(), new Vector3D(0.0, 0.0, translation.getZ()));
 
-      FootstepNodeSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, stanceFootNode, snapTransform, stepWidth, 0.3, 0.2, 0.4);
+      FootstepSnappingTools.constructGroundPlaneAroundFeet(planarRegionsList, stanceFootNode, snapTransform, stepWidth, 0.3, 0.2, 0.4);
 
       if(visualize)
       {

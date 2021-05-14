@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -17,7 +17,7 @@ public class TimestampedVelocityYoVariable extends YoDouble
    private final YoBoolean hasBeenUpdated;
    private final double epsilonChange;
 
-   public TimestampedVelocityYoVariable(String name, String description, YoDouble positionToReferenceOnUpdate, YoDouble timeToReferenceOnUpdate, YoVariableRegistry registry,
+   public TimestampedVelocityYoVariable(String name, String description, YoDouble positionToReferenceOnUpdate, YoDouble timeToReferenceOnUpdate, YoRegistry registry,
          double epsilonChange)
    {
       super(name, description, registry);

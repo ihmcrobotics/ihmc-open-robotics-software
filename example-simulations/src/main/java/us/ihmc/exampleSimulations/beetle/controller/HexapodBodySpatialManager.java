@@ -12,11 +12,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 
 /**
  * Controls the linear Velocity of the body in body z up frame Controls the angular velocity of the
@@ -25,7 +25,7 @@ import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 public class HexapodBodySpatialManager
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final RigidBodyBasics[] controlledBodies = new RigidBodyBasics[1];
    private final SpatialFeedbackControlCommand spatialFeedbackCommand = new SpatialFeedbackControlCommand();
    private final double controllerDt;
@@ -47,7 +47,7 @@ public class HexapodBodySpatialManager
    private final Vector3D angularWeight = new Vector3D();
 
    public HexapodBodySpatialManager(String prefix, FullRobotModel fullRobotModel, HexapodReferenceFrames referenceFrames, double controllerDt,
-                                    YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                    YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.controllerDt = controllerDt;
       body = fullRobotModel.getRootBody();
@@ -107,7 +107,7 @@ public class HexapodBodySpatialManager
 
       desiredPosition.setIncludingFrame(yoDesiredBodyPosition);
       desiredLinearVelocity.setIncludingFrame(yoDesiredBodyLinearVelocity);
-      yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(yoDesiredBodyOrientation);
       desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());

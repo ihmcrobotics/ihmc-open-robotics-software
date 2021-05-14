@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
@@ -14,22 +14,14 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -38,19 +30,19 @@ import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationController implements ICPOptimizationControllerInterface
@@ -64,7 +56,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final BooleanProvider allowStepAdjustment;
    private final YoBoolean includeFootsteps = new YoBoolean(yoNamePrefix + "IncludeFootsteps", registry);
@@ -101,6 +93,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoFramePoint2D yoPerfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
    private final YoFramePoint2D yoPerfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
    private final YoFramePoint2D predictedEndOfStateICP = new YoFramePoint2D(yoNamePrefix + "PredictedEndOfStateICP", worldFrame, registry);
+   private final YoDouble currentICPVelocityMagnitude = new YoDouble(yoNamePrefix + "ICPVelocityMagnitude", registry);
 
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
@@ -123,14 +116,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final DoubleProvider forwardFootstepWeight;
    private final DoubleProvider lateralFootstepWeight;
    private final YoMatrix yoFootstepWeights = new YoMatrix(yoNamePrefix + "FootstepWeights", 2, 2, registry);
-   private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj footstepWeights = new DMatrixRMaj(2, 2);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
    private final DoubleProvider cmpFeedbackWeight;
    private final YoMatrix yoScaledCoPFeedbackWeight = new YoMatrix(yoNamePrefix + "ScaledCoPFeedbackWeight", 2, 2, registry);
    private final YoDouble scaledCMPFeedbackWeight = new YoDouble(yoNamePrefix + "ScaledCMPFeedbackWeight", registry);
-   private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
 
    private final DoubleProvider maxAllowedDistanceCMPSupport;
    private final DoubleProvider safeCoPDistanceToEdge;
@@ -149,7 +142,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final boolean hasICPControlPolygons;
 
    private final ICPControlGainsReadOnly feedbackGains;
-   private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
    private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
@@ -200,7 +193,6 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    private final FramePoint2D desiredICP = new FramePoint2D();
    private final FrameVector2D desiredICPVelocity = new FrameVector2D();
-   private final FramePoint2D perfectCoP = new FramePoint2D();
    private final FrameVector2D perfectCMPOffset = new FrameVector2D();
    private final FramePoint2D currentICP = new FramePoint2D();
    private final FrameVector2D currentICPVelocity = new FrameVector2D();
@@ -218,7 +210,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, SideDependentList<ReferenceFrame> soleZUpFrames,
                                     BipedSupportPolygons bipedSupportPolygons, ICPControlPolygons icpControlPolygons,
-                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoVariableRegistry parentRegistry,
+                                    SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT, YoRegistry parentRegistry,
                                     YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters, walkingControllerParameters.getICPOptimizationParameters(), soleZUpFrames, bipedSupportPolygons, icpControlPolygons,
@@ -228,7 +220,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    public ICPOptimizationController(WalkingControllerParameters walkingControllerParameters, ICPOptimizationParameters icpOptimizationParameters,
                                     SideDependentList<ReferenceFrame> soleZUpFrames, BipedSupportPolygons bipedSupportPolygons,
                                     ICPControlPolygons icpControlPolygons, SideDependentList<? extends ContactablePlaneBody> contactableFeet, double controlDT,
-                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
@@ -411,7 +403,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    /** {@inheritDoc} */
    @Override
-   public void addFootstepToPlan(SimpleAdjustableFootstep footstep, double swingDuration, double transferDuration)
+   public void addFootstepToPlan(SimpleFootstep footstep, double swingDuration, double transferDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
       footstepPose.checkReferenceFrameMatch(worldFrame);
@@ -465,7 +457,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
 
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
       if (reachabilityConstraintHandler != null)
       {
          solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
@@ -507,7 +499,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
 
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
       if (reachabilityConstraintHandler != null)
       {
          solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
@@ -542,7 +534,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
 
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
       if (reachabilityConstraintHandler != null)
       {
          solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, upcomingFootstep));
@@ -679,20 +671,18 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       this.desiredICP.set(desiredICP);
       this.desiredICPVelocity.set(desiredICPVelocity);
-      this.perfectCoP.set(perfectCoP);
       this.perfectCMPOffset.set(perfectCMPOffset);
       this.currentICP.set(currentICP);
       this.currentICPVelocity.set(currentICPVelocity);
 
       this.desiredICP.changeFrame(worldFrame);
       this.desiredICPVelocity.changeFrame(worldFrame);
-      this.perfectCoP.changeFrame(worldFrame);
       this.perfectCMPOffset.changeFrame(worldFrame);
       this.currentICP.changeFrame(worldFrame);
       this.currentICPVelocity.changeFrame(worldFrame);
 
-      this.yoPerfectCoP.set(this.perfectCoP);
-      this.yoPerfectCMP.add(this.perfectCoP, this.perfectCMPOffset);
+      this.yoPerfectCoP.setMatchingFrame(perfectCoP);
+      this.yoPerfectCMP.add(yoPerfectCoP, this.perfectCMPOffset);
 
       this.icpError.sub(currentICP, desiredICP);
 
@@ -746,7 +736,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (isInDoubleSupport.getBooleanValue())
       {
          solver.resetCoPLocationConstraint();
-         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
 
          if (copConstraintHandler.hasSupportPolygonChanged())
             solver.notifyResetActiveSet();
@@ -754,7 +744,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       else
       {
          solver.resetCoPLocationConstraint();
-         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue()));
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
 
          boolean resetActiveSet = copConstraintHandler.hasSupportPolygonChanged();
 
@@ -857,6 +847,10 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          solver.setFootstepRateWeight(scaledFootstepRateWeight.getDoubleValue() / controlDTSquare);
    }
 
+   /**
+    * This computes the footstep adjustment multiplier. This means that ICP error that is not being compensated for via feedback because of feedback limits
+    * is compensated using some other term. That other term is equal to the adjustment multiplier times the total footstep adjustment.
+    */
    private double computeFootstepAdjustmentMultiplier(double omega0)
    {
       double timeInTransferForShifting = Math
@@ -864,16 +858,17 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       recursionTime.set(Math.max(timeRemainingInState.getDoubleValue(), 0.0) + timeInTransferForShifting);
       recursionMultiplier.set(Math.exp(-omega0 * recursionTime.getDoubleValue()));
 
+      // This is the maximum possible multiplier
       double finalRecursionMultiplier = Math.exp(-omega0 * timeInTransferForShifting);
 
+      // The recursion multiplier is guaranteed to be between the max and min values. This forces it to interpolate between those two.
       double minimumFootstepMultiplier = Math.min(this.minimumFootstepMultiplier.getValue(), finalRecursionMultiplier);
       return minimumFootstepMultiplier + (1.0 - minimumFootstepMultiplier / finalRecursionMultiplier) * recursionMultiplier.getDoubleValue();
    }
 
    private boolean solveQP()
    {
-      perfectCoP.set(yoPerfectCoP);
-      boolean converged = solver.compute(icpError, perfectCoP, perfectCMPOffset);
+      boolean converged = solver.compute(icpError, yoPerfectCoP, perfectCMPOffset);
       previousTickFailed.set(solver.previousTickFailed());
       if (!converged)
       {
@@ -996,7 +991,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          double parallel = feedbackGains.getKpParallelToMotion();
          double orthogonal = feedbackGains.getKpOrthogonalToMotion();
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
-         CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
+         CommonOps_DDRM.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
 
       yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);
@@ -1032,7 +1027,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (isICPStuck.getBooleanValue())
          return true;
 
-      if ((currentICPVelocity.length() < thresholdForStuck.getValue()) && (timeRemainingInState.getDoubleValue() <= minimumTimeRemaining.getValue()))
+      currentICPVelocityMagnitude.set(currentICPVelocity.length());
+      if ((currentICPVelocityMagnitude.getDoubleValue() < thresholdForStuck.getValue()) && (timeRemainingInState.getDoubleValue() <= minimumTimeRemaining.getValue()))
          return true;
 
       return false;

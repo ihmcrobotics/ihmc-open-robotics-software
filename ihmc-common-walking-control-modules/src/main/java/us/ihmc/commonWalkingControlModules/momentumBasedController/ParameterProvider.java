@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.parameters.LongParameter;
 import us.ihmc.yoVariables.parameters.YoParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterProvider
 {
@@ -46,9 +46,9 @@ public class ParameterProvider
     * @return the parameter
     */
    public static DoubleParameter getOrCreateParameter(String targetRegistryName, String parameterRegistryName, String parameterName,
-                                                      YoVariableRegistry downstreamRegistry, double initialValue)
+                                                      YoRegistry downstreamRegistry, double initialValue)
    {
-      YoVariableRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
+      YoRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
       DoubleParameter parameter = findParameter(registry, parameterName, DoubleParameter.class);
 
       if (parameter != null)
@@ -93,9 +93,9 @@ public class ParameterProvider
     * @return the parameter
     */
    public static BooleanParameter getOrCreateParameter(String targetRegistryName, String parameterRegistryName, String parameterName,
-                                                       YoVariableRegistry downstreamRegistry, boolean initialValue)
+                                                       YoRegistry downstreamRegistry, boolean initialValue)
    {
-      YoVariableRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
+      YoRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
       BooleanParameter parameter = findParameter(registry, parameterName, BooleanParameter.class);
 
       if (parameter != null)
@@ -140,9 +140,9 @@ public class ParameterProvider
     * @return the parameter
     */
    public static IntegerParameter getOrCreateParameter(String targetRegistryName, String parameterRegistryName, String parameterName,
-                                                       YoVariableRegistry downstreamRegistry, int initialValue)
+                                                       YoRegistry downstreamRegistry, int initialValue)
    {
-      YoVariableRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
+      YoRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
       IntegerParameter parameter = findParameter(registry, parameterName, IntegerParameter.class);
 
       if (parameter != null)
@@ -187,9 +187,9 @@ public class ParameterProvider
     * @return the parameter
     */
    public static LongParameter getOrCreateParameter(String targetRegistryName, String parameterRegistryName, String parameterName,
-                                                    YoVariableRegistry downstreamRegistry, long initialValue)
+                                                    YoRegistry downstreamRegistry, long initialValue)
    {
-      YoVariableRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
+      YoRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
       LongParameter parameter = findParameter(registry, parameterName, LongParameter.class);
 
       if (parameter != null)
@@ -240,10 +240,10 @@ public class ParameterProvider
     */
    @SuppressWarnings("unchecked")
    public static <E extends Enum<E>> EnumParameter<E> getOrCreateParameter(String targetRegistryName, String parameterRegistryName, String parameterName,
-                                                                           YoVariableRegistry downstreamRegistry, Class<E> enumClass, boolean allowNullValues,
+                                                                           YoRegistry downstreamRegistry, Class<E> enumClass, boolean allowNullValues,
                                                                            E initialValue)
    {
-      YoVariableRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
+      YoRegistry registry = findRegistry(targetRegistryName, parameterRegistryName, downstreamRegistry);
       EnumParameter<E> parameter = findParameter(registry, parameterName, EnumParameter.class);
 
       if (parameter != null)
@@ -254,9 +254,9 @@ public class ParameterProvider
       return new EnumParameter<E>(parameterName, registry, enumClass, allowNullValues, initialValue);
    }
 
-   private static <T extends YoParameter<?>> T findParameter(YoVariableRegistry registry, String parameterName, Class<T> clazz)
+   private static <T extends YoParameter> T findParameter(YoRegistry registry, String parameterName, Class<T> clazz)
    {
-      Optional<YoParameter<?>> parameter = registry.getAllParameters().stream().filter(p -> p.getName().equals(parameterName)).findFirst();
+      Optional<YoParameter> parameter = registry.collectSubtreeParameters().stream().filter(p -> p.getName().equals(parameterName)).findFirst();
 
       if (parameter.isPresent())
       {
@@ -274,9 +274,9 @@ public class ParameterProvider
       return null;
    }
 
-   private static YoVariableRegistry findRegistry(String targetRegistryName, String parameterRegistryName, YoVariableRegistry downstreamRegistry)
+   private static YoRegistry findRegistry(String targetRegistryName, String parameterRegistryName, YoRegistry downstreamRegistry)
    {
-      YoVariableRegistry registry = downstreamRegistry;
+      YoRegistry registry = downstreamRegistry;
       while (!registry.getName().equals(targetRegistryName))
       {
          registry = registry.getParent();
@@ -287,13 +287,13 @@ public class ParameterProvider
          }
       }
 
-      Optional<YoVariableRegistry> parameterRegistry = registry.getChildren().stream().filter(r -> r.getName().equals(parameterRegistryName)).findFirst();
+      Optional<YoRegistry> parameterRegistry = registry.getChildren().stream().filter(r -> r.getName().equals(parameterRegistryName)).findFirst();
       if (parameterRegistry.isPresent())
       {
          return parameterRegistry.get();
       }
 
-      YoVariableRegistry newParameterRegistry = new YoVariableRegistry(parameterRegistryName);
+      YoRegistry newParameterRegistry = new YoRegistry(parameterRegistryName);
       registry.addChild(newParameterRegistry);
       return newParameterRegistry;
    }

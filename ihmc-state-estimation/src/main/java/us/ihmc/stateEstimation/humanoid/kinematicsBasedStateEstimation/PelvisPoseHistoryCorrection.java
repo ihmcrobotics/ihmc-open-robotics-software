@@ -12,8 +12,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -37,7 +37,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
    private final FloatingJointBasics rootJoint;
    private final ReferenceFrame pelvisReferenceFrame;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private static final double DEFAULT_BREAK_FREQUENCY = 0.015;
 
    private final RigidBodyTransform pelvisPose = new RigidBodyTransform();
@@ -112,19 +112,19 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private final Quaternion seRotationInPast = new Quaternion();
    private final Quaternion localizationRotationInPast = new Quaternion();
 
-   public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoVariableRegistry parentRegistry,
+   public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure, final double dt, YoRegistry parentRegistry,
          int pelvisBufferSize)
    {
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, null);
    }
 
    public PelvisPoseHistoryCorrection(FullInverseDynamicsStructure inverseDynamicsStructure,
-         PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt, YoVariableRegistry parentRegistry, int pelvisBufferSize)
+         PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber, final double dt, YoRegistry parentRegistry, int pelvisBufferSize)
    {
       this(inverseDynamicsStructure.getRootJoint(), dt, parentRegistry, pelvisBufferSize, externalPelvisPoseSubscriber);
    }
 
-   public PelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoVariableRegistry parentRegistry, int pelvisBufferSize,
+   public PelvisPoseHistoryCorrection(FloatingJointBasics sixDofJoint, final double estimatorDT, YoRegistry parentRegistry, int pelvisBufferSize,
          PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber)
    {
       this.estimatorDT = estimatorDT;
@@ -132,7 +132,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       this.rootJoint = sixDofJoint;
       this.pelvisReferenceFrame = rootJoint.getFrameAfterJoint();
       this.pelvisPoseCorrectionCommunicator = externalPelvisPoseSubscriber;
-      this.registry = new YoVariableRegistry(getClass().getSimpleName());
+      this.registry = new YoRegistry(getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       stateEstimatorPelvisPoseBuffer = new TimeStampedTransformBuffer(pelvisBufferSize);
@@ -167,10 +167,10 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       interpolationRotationAlphaFilter = new AlphaFilteredYoVariable("PelvisRotationErrorCorrectionAlphaFilter", registry,
             interpolationRotationAlphaFilterAlphaValue);
 
-      interpolationTranslationAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
+      interpolationTranslationAlphaFilterBreakFrequency.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationTranslationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
@@ -179,11 +179,11 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       });
       interpolationTranslationAlphaFilterBreakFrequency.set(DEFAULT_BREAK_FREQUENCY);
 
-      interpolationRotationAlphaFilterBreakFrequency.addVariableChangedListener(new VariableChangedListener()
+      interpolationRotationAlphaFilterBreakFrequency.addListener(new YoVariableChangedListener()
       {
 
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(interpolationRotationAlphaFilterBreakFrequency.getDoubleValue(),
                   estimatorDT);
@@ -325,7 +325,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private void updateTranslationalMaxVelocityClip()
    {
       interpolatedTranslationCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, worldFrame);
-      errorBetweenCurrentPositionAndCorrected.getTranslation(distanceToTravelVector);
+      distanceToTravelVector.set(errorBetweenCurrentPositionAndCorrected.getTranslation());
       distanceToTravel.set(distanceToTravelVector.length());
       maxTranslationAlpha.set((estimatorDT * maxTranslationVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue())
             + previousTranslationClippedAlphaValue.getDoubleValue());
@@ -339,7 +339,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private void updateRotationalMaxVelocityClip()
    {
       interpolatedRotationCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, worldFrame);
-      errorBetweenCurrentPositionAndCorrected.getRotation(angleToTravelAxis4d);
+      angleToTravelAxis4d.set(errorBetweenCurrentPositionAndCorrected.getRotation());
       angleToTravel.set(angleToTravelAxis4d.getAngle());
       maxRotationAlpha.set((estimatorDT * maxRotationVelocityClip.getDoubleValue() / angleToTravel.getDoubleValue())
             + previousRotationClippedAlphaValue.getDoubleValue());
@@ -405,19 +405,19 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       long timeStamp = timestampedlocalizationPose.getTimeStamp();
       RigidBodyTransform localizationPose = timestampedlocalizationPose.getTransform3D();
 
-      localizationPose.getTranslation(localizationTranslationInPast);
+      localizationTranslationInPast.set(localizationPose.getTranslation());
       newLocalizationTranslationFrame.setAndUpdate(localizationTranslationInPast);
 
-      localizationPose.getRotation(localizationRotationInPast);
+      localizationRotationInPast.set(localizationPose.getRotation());
       newLocalizationRotationFrame.setAndUpdate(localizationRotationInPast);
 
       stateEstimatorPelvisPoseBuffer.findTransform(timeStamp, seTimeStampedPose);
       RigidBodyTransform sePose = seTimeStampedPose.getTransform3D();
 
-      sePose.getTranslation(seTranslationInPast);
+      seTranslationInPast.set(sePose.getTranslation());
       pelvisStateAtLocalizationTimeTranslationFrame.setAndUpdate(seTranslationInPast);
 
-      sePose.getRotation(seRotationInPast);
+      seRotationInPast.set(sePose.getRotation());
       pelvisStateAtLocalizationTimeRotationFrame.setAndUpdate(seRotationInPast);
 
       newLocalizationTranslationFrame.getTransformToDesiredFrame(translationErrorInPastTransform, pelvisStateAtLocalizationTimeTranslationFrame);
@@ -437,16 +437,16 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       RigidBodyTransform pelvisPose = new RigidBodyTransform();
 
       Quaternion rotation = new Quaternion();
-      pelvisPose.getRotation(rotation);
+      rotation.set(pelvisPose.getRotation());
       rotation.setYawPitchRoll(manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(), manualRotationOffsetInRadX.getDoubleValue());
-      pelvisPose.setRotation(rotation);
+      pelvisPose.getRotation().set(rotation);
 
       Vector3D translation = new Vector3D();
-      pelvisPose.getTranslation(translation);
+      translation.set(pelvisPose.getTranslation());
       translation.setX(manualTranslationOffsetX.getDoubleValue());
       translation.setY(manualTranslationOffsetY.getDoubleValue());
       translation.setZ(manualTranslationOffsetZ.getDoubleValue());
-      pelvisPose.setTranslation(translation);
+      pelvisPose.getTranslation().set(translation);
 
       TimeStampedTransform3D manualTimeStampedTransform3D = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
       addNewExternalPose(manualTimeStampedTransform3D);
@@ -462,11 +462,11 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
       
-      errorBetweenCurrentPositionAndCorrected.getTranslation(translationalResidualError);
+      translationalResidualError.set(errorBetweenCurrentPositionAndCorrected.getTranslation());
       
       double absoluteResidualError = translationalResidualError.length();
       
-      totalError.getTranslation(translationalTotalError);
+      translationalTotalError.set(totalError.getTranslation());
       
       double absoluteTotalError = translationalTotalError.length();
 

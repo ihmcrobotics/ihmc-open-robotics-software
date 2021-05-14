@@ -40,7 +40,7 @@ public class KryoAnnotationTest
          int packetLength = outStream.toByteArray().length;
          
          outStream.reset();
-         output.clear();
+         output.reset();
          
          AnnotatedTestPacket annotatedPacket = new AnnotatedTestPacket(random);
          
@@ -50,7 +50,7 @@ public class KryoAnnotationTest
          int annotatedPacketLength = outStream.toByteArray().length;
          
          outStream.reset();
-         output.clear();
+         output.reset();
          
          if(DEBUG)
          {

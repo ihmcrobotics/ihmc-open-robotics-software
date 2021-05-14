@@ -4,17 +4,18 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class MultipleWaypointsBlendedPoseTrajectoryGenerator extends BlendedPoseTrajectoryGenerator
 {
    private final MultipleWaypointsPoseTrajectoryGenerator trajectory;
 
    public MultipleWaypointsBlendedPoseTrajectoryGenerator(String prefix, MultipleWaypointsPoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
-                                                          YoVariableRegistry parentRegistry)
+                                                          YoRegistry parentRegistry)
    {
       super(prefix, trajectory, trajectoryFrame, parentRegistry);
 

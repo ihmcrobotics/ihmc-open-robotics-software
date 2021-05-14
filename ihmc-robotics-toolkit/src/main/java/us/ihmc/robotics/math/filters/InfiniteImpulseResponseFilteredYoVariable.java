@@ -1,8 +1,8 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -28,7 +28,7 @@ public class InfiniteImpulseResponseFilteredYoVariable extends YoDouble
    // @todo: YoVariablize these states to make rewindable.
    private final double[] previousX, previousY;
 
-   public InfiniteImpulseResponseFilteredYoVariable(String name, int numPoles, int numZeros, YoVariableRegistry registry)
+   public InfiniteImpulseResponseFilteredYoVariable(String name, int numPoles, int numZeros, YoRegistry registry)
    {
       super(name, registry);
 
@@ -108,8 +108,8 @@ public class InfiniteImpulseResponseFilteredYoVariable extends YoDouble
 
    public void setPolesAndZeros(double dcScale, double[] realPoles, ComplexNumber[] complexPairPoles, double[] realZeros, ComplexNumber[] complexPairZeros)
    {
-      Polynomial numeratorPolynomial = Polynomial.constructFromScaleFactorAndRoots(dcScale, realZeros, complexPairZeros);
-      Polynomial denominatorPolynomial = Polynomial.constructFromScaleFactorAndRoots(1.0, realPoles, complexPairPoles);
+      ObsoletePolynomial numeratorPolynomial = ObsoletePolynomial.constructFromScaleFactorAndRoots(dcScale, realZeros, complexPairZeros);
+      ObsoletePolynomial denominatorPolynomial = ObsoletePolynomial.constructFromScaleFactorAndRoots(1.0, realPoles, complexPairPoles);
 
       if (DEBUG)
       {

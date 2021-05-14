@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.whiteBoard;
 
 import java.io.IOException;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
@@ -17,7 +17,7 @@ public class YoWhiteBoardViewerGUI
       
       Robot robot = new Robot("YoWhiteBoardViewerGUI");
       
-      YoVariableRegistry registry = new YoVariableRegistry("YoWhiteBoardViewer");
+      YoRegistry registry = new YoRegistry("YoWhiteBoardViewer");
             
       whiteBoard = new UDPYoWhiteBoard("whiteBoardViewer", runThisOneFirst, ipAddress, sendPort, receivePort, false, createYoVariablesOnConnect, registry);
             
@@ -38,7 +38,7 @@ public class YoWhiteBoardViewerGUI
 
       
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       
 //      scs.addVarList(registry.createVarList());
       

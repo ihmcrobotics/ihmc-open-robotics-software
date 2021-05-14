@@ -18,13 +18,14 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLine2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 
 /**
  * This class computes whether a foot is rotating.</br>
@@ -35,12 +36,12 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
  * the angular velocity of the foot to be sufficiently large. A threshold determines if that is the case. The speed of
  * rotation is the integrated using a leak rate. If the integral which is a measure of absolute foot rotation exceeds
  * a second threshold the foot is assumed to rotate.]
- * 
+ *
  * @author Georg Wiedebach
  */
 public class FootRotationDetector
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoFramePoint2D linePointA;
    private final YoFramePoint2D linePointB;
@@ -61,13 +62,15 @@ public class FootRotationDetector
    private final DoubleProvider filterBreakFrequency;
    private final DoubleProvider rotationThreshold;
 
-   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
+   private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
+
+   public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoRegistry parentRegistry,
                                YoGraphicsListRegistry graphicsRegistry)
    {
       this.soleFrame = soleFrame;
       this.dt = dt;
 
-      registry = new YoVariableRegistry(getClass().getSimpleName() + side.getPascalCaseName());
+      registry = new YoRegistry(getClass().getSimpleName() + side.getPascalCaseName());
       linePointA = new YoFramePoint2D("FootRotationPointA", ReferenceFrame.getWorldFrame(), registry);
       linePointB = new YoFramePoint2D("FootRotationPointB", ReferenceFrame.getWorldFrame(), registry);
       parentRegistry.addChild(registry);
@@ -86,6 +89,8 @@ public class FootRotationDetector
       YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
       YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
       lineOfRotationInSole = new YoFrameLine2D(point, direction);
+
+      lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
@@ -117,7 +122,7 @@ public class FootRotationDetector
          lineOfRotationInSole.getPoint().set(tempPointOfRotation);
          lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
 
-         double omega = lineOfRotationInSole.getDirection().length();
+         double omega = soleFrameTwist.getAngularPart().length();
          integratedRotationAngle.add(dt * omega);
 
          lineOfRotationInSole.getDirection().scale(1.0 / omega);
@@ -132,12 +137,16 @@ public class FootRotationDetector
          filteredAxisOfRotation.update(lineOfRotationInSole.getDirection());
          lineOfRotationInSole.set(filteredPointOfRotation, filteredAxisOfRotation);
          lineOfRotationInSole.getDirection().normalize();
+
+         lineOfRotationStandardDeviation.update();
       }
       else if (!isRotating.getValue())
       {
          filteredPointOfRotation.reset();
          filteredAxisOfRotation.reset();
          lineOfRotationInSole.setToZero();
+
+         lineOfRotationStandardDeviation.reset();
       }
 
       if (!isRotating.getValue())

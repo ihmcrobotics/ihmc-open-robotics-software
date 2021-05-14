@@ -1,0 +1,24 @@
+#ifndef __controller_msgs__msg__ConcaveHullFactoryParametersStringMessage__idl__
+#define __controller_msgs__msg__ConcaveHullFactoryParametersStringMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * String serialized concave hull factory parameters
+       * Might be kinda long, so give it some space
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::ConcaveHullFactoryParametersStringMessage_")
+      struct ConcaveHullFactoryParametersStringMessage
+      {
+        sequence<string, 2056> parameters;
+      };
+    };
+  };
+};
+
+#endif

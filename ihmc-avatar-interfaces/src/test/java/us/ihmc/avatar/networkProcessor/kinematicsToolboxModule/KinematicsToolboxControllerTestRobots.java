@@ -3,7 +3,7 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -53,13 +53,13 @@ public class KinematicsToolboxControllerTestRobots
       {
          super("7DoFArm");
 
-         PinJointDescription scsShoulderYaw = new PinJointDescription("shoulderYaw", shoulderYawOffset, Axis.Z);
-         PinJointDescription scsShoulderRoll = new PinJointDescription("shoulderRoll", shoulderRollOffset, Axis.X);
-         PinJointDescription scsShoulderPitch = new PinJointDescription("shoulderPitch", shoulderPitchOffset, Axis.Y);
-         PinJointDescription scsElbowPitch = new PinJointDescription("elbowPitch", elbowPitchOffset, Axis.Y);
-         PinJointDescription scsWristPitch = new PinJointDescription("wristPitch", wristPitchOffset, Axis.Y);
-         PinJointDescription scsWristRoll = new PinJointDescription("wristRoll", wristRollOffset, Axis.X);
-         PinJointDescription scsWristYaw = new PinJointDescription("wristYaw", wristYawOffset, Axis.Z);
+         PinJointDescription scsShoulderYaw = new PinJointDescription("shoulderYaw", shoulderYawOffset, Axis3D.Z);
+         PinJointDescription scsShoulderRoll = new PinJointDescription("shoulderRoll", shoulderRollOffset, Axis3D.X);
+         PinJointDescription scsShoulderPitch = new PinJointDescription("shoulderPitch", shoulderPitchOffset, Axis3D.Y);
+         PinJointDescription scsElbowPitch = new PinJointDescription("elbowPitch", elbowPitchOffset, Axis3D.Y);
+         PinJointDescription scsWristPitch = new PinJointDescription("wristPitch", wristPitchOffset, Axis3D.Y);
+         PinJointDescription scsWristRoll = new PinJointDescription("wristRoll", wristRollOffset, Axis3D.X);
+         PinJointDescription scsWristYaw = new PinJointDescription("wristYaw", wristYawOffset, Axis3D.Z);
 
          scsShoulderYaw.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
          scsShoulderRoll.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
@@ -147,7 +147,7 @@ public class KinematicsToolboxControllerTestRobots
       {
          super("UpperBodyWithTwoManipulators");
 
-         PinJointDescription torsoYaw = new PinJointDescription("torsoYaw", torsoYawOffset, Axis.Z);
+         PinJointDescription torsoYaw = new PinJointDescription("torsoYaw", torsoYawOffset, Axis3D.Z);
          torsoYaw.setLimitStops(-Math.PI / 3.0, Math.PI / 3.0, 0.0, 0.0);
 
          LinkDescription torsoLink = new LinkDescription("torsoLink");
@@ -161,13 +161,13 @@ public class KinematicsToolboxControllerTestRobots
          for (RobotSide robotSide : RobotSide.values)
          {
             String sidePrefix = robotSide.getCamelCaseName();
-            PinJointDescription shoulderYaw = new PinJointDescription(sidePrefix + "ShoulderYaw", shoulderYawOffset.get(robotSide), Axis.Z);
-            PinJointDescription shoulderRoll = new PinJointDescription(sidePrefix + "ShoulderRoll", shoulderRollOffset.get(robotSide), Axis.X);
-            PinJointDescription shoulderPitch = new PinJointDescription(sidePrefix + "ShoulderPitch", shoulderPitchOffset.get(robotSide), Axis.Y);
-            PinJointDescription elbowPitch = new PinJointDescription(sidePrefix + "ElbowPitch", elbowPitchOffset.get(robotSide), Axis.Y);
-            PinJointDescription wristPitch = new PinJointDescription(sidePrefix + "WristPitch", wristPitchOffset.get(robotSide), Axis.Y);
-            PinJointDescription wristRoll = new PinJointDescription(sidePrefix + "WristRoll", wristRollOffset.get(robotSide), Axis.X);
-            PinJointDescription wristYaw = new PinJointDescription(sidePrefix + "WristYaw", wristYawOffset.get(robotSide), Axis.Z);
+            PinJointDescription shoulderYaw = new PinJointDescription(sidePrefix + "ShoulderYaw", shoulderYawOffset.get(robotSide), Axis3D.Z);
+            PinJointDescription shoulderRoll = new PinJointDescription(sidePrefix + "ShoulderRoll", shoulderRollOffset.get(robotSide), Axis3D.X);
+            PinJointDescription shoulderPitch = new PinJointDescription(sidePrefix + "ShoulderPitch", shoulderPitchOffset.get(robotSide), Axis3D.Y);
+            PinJointDescription elbowPitch = new PinJointDescription(sidePrefix + "ElbowPitch", elbowPitchOffset.get(robotSide), Axis3D.Y);
+            PinJointDescription wristPitch = new PinJointDescription(sidePrefix + "WristPitch", wristPitchOffset.get(robotSide), Axis3D.Y);
+            PinJointDescription wristRoll = new PinJointDescription(sidePrefix + "WristRoll", wristRollOffset.get(robotSide), Axis3D.X);
+            PinJointDescription wristYaw = new PinJointDescription(sidePrefix + "WristYaw", wristYawOffset.get(robotSide), Axis3D.Z);
 
             shoulderYaw.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);
             shoulderRoll.setLimitStops(-Math.PI, Math.PI, 0.0, 0.0);

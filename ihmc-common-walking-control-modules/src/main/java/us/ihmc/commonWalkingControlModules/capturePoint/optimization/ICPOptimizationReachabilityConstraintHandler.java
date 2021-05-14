@@ -6,11 +6,7 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -23,12 +19,12 @@ import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersecto
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPOptimizationReachabilityConstraintHandler
@@ -66,7 +62,7 @@ public class ICPOptimizationReachabilityConstraintHandler
 
    public ICPOptimizationReachabilityConstraintHandler(SideDependentList<ReferenceFrame> soleZUpFrames, ICPOptimizationParameters icpOptimizationParameters,
                                                        SteppingParameters steppingParameters, String yoNamePrefix, boolean visualize,
-                                                       YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                                       YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       lengthLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityLength", registry, steppingParameters.getMaxStepLength());
       lengthBackLimit = new DoubleParameter(yoNamePrefix + "MaxReachabilityBackwardLength", registry, steppingParameters.getMaxBackwardStepLength());
@@ -248,8 +244,8 @@ public class ICPOptimizationReachabilityConstraintHandler
       adjustmentDirection.sub(adjustedLocation, referenceLocation);
       EuclidGeometryTools.perpendicularVector2D(adjustmentDirection, adjustmentDirection);
 
-      motionLine.setPoint(adjustedLocation);
-      motionLine.setDirection(adjustmentDirection);
+      motionLine.getPoint().set(adjustedLocation);
+      motionLine.getDirection().set(adjustmentDirection);
 
       contractedReachabilityPolygon.update();
       ConvexPolygonTools.cutPolygonWithLine(motionLine, contractedReachabilityPolygon, lineIntersector2d, RobotSide.LEFT);

@@ -27,8 +27,8 @@ import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
 import us.ihmc.avatar.rosAPI.ThePeoplesGloriousNetworkProcessor;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.Conversions;
@@ -48,7 +48,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.simulationConstructionSetTools.robotController.AbstractThreadedRobotController;
@@ -64,29 +64,29 @@ import us.ihmc.utilities.ros.msgToPacket.converter.GenericROSTranslationTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.concurrent.SingleThreadedThreadDataSynchronizer;
 import us.ihmc.wholeBodyController.concurrent.ThreadDataSynchronizerInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 {
    private final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private BlockingSimulationRunner blockingSimulationRunner;
-   private RealtimeRos2Node realtimeRos2Node;
+   private RealtimeROS2Node realtimeROS2Node;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_ros_api_test");
+      realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(PubSubImplementation.INTRAPROCESS, "ihmc_ros_api_test");
    }
 
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
-         realtimeRos2Node.stopSpinning();
-         realtimeRos2Node = null;
+         realtimeROS2Node.stopSpinning();
+         realtimeROS2Node = null;
       }
 
       if (simulationTestingParameters.getKeepSCSUp())
@@ -319,7 +319,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                             HumanoidGlobalDataProducer dataProducer, DRCSimulationOutputWriterForControllerThread outputWriter,
                                                             FloatingRootJointRobot sdfRobot)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       double gravity = -9.7925;
 
       HighLevelHumanoidControllerFactory controllerFactory = createHighLevelHumanoidControllerFactory(robotModel, packetCommunicator);
@@ -337,7 +337,7 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
 
       DRCEstimatorThread estimatorThread = new DRCEstimatorThread(robotModel.getSimpleRobotName(), robotModel.getSensorInformation(),
                                                                   robotModel.getContactPointParameters(), robotModel, robotModel.getStateEstimatorParameters(),
-                                                                  sensorReaderFactory, threadDataSynchronizer, realtimeRos2Node, null, null, robotVisualizer,
+                                                                  sensorReaderFactory, threadDataSynchronizer, realtimeROS2Node, null, null, robotVisualizer,
                                                                   gravity);
 
 //      DRCControllerThread controllerThread = new DRCControllerThread(robotModel, robotModel.getSensorInformation(), controllerFactory, threadDataSynchronizer,
@@ -365,19 +365,23 @@ public abstract class IHMCROSAPIPacketTest implements MultiRobotTestInterface
                                                             additionalContactTransforms.get(i));
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
       HighLevelControllerParameters highLevelControllerParameters = robotModel.getHighLevelControllerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
       SideDependentList<String> feetForceSensorNames = sensorInformation.getFeetForceSensorNames();
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
-      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames,
-                                                                                                    feetContactSensorNames, wristForceSensorNames,
-                                                                                                    highLevelControllerParameters, walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters);
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+                                                                                                    feetForceSensorNames,
+                                                                                                    feetContactSensorNames,
+                                                                                                    wristForceSensorNames,
+                                                                                                    highLevelControllerParameters,
+                                                                                                    walkingControllerParameters,
+                                                                                                    copTrajectoryParameters,
+                                                                                                    robotModel.getSplitFractionCalculatorParameters());
 
-      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeRos2Node);
+      controllerFactory.createControllerNetworkSubscriber(robotModel.getSimpleRobotName(), realtimeROS2Node);
 
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();

@@ -5,22 +5,22 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.jMonkeyEngineToolkit.HeightMapWithNormals;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
@@ -33,7 +33,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
    {
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("PlanarRegionsListEnvironmentVisualizationRobot"));
       scs.setGroundVisible(false);
-      YoVariableRegistry robotsYoVariableRegistry = scs.getRobots()[0].getRobotsYoVariableRegistry();
+      YoRegistry robotsYoVariableRegistry = scs.getRobots()[0].getRobotsYoRegistry();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("ExamplePlanarRegionsListEnvironment", planarRegionsList, 1e-5,
                                                                                                 generateGroundPlane);
       TerrainObject3D terrainObject3D = environment.getTerrainObject3D();
@@ -50,7 +50,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             Point3D translation = new Point3D();
             planarRegion.getTransformToWorld(transformToWorld);
-            transformToWorld.getTranslation(translation);
+            translation.set(transformToWorld.getTranslation());
             planarRegionPointInWorld.set(translation);
 
             Vector3D normal = new Vector3D();
@@ -81,7 +81,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
             double ly = boundingBox3dInWorld.getMaxY() - boundingBox3dInWorld.getMinY();
             double lz = boundingBox3dInWorld.getMaxZ() - boundingBox3dInWorld.getMinZ();
 
-            transformToWorld.getTranslation(translation);
+            translation.set(transformToWorld.getTranslation());
             translation.setZ(translation.getZ() - (lz / 2.0));
             boundingBoxVisualization.translate(translation);
             boundingBoxVisualization.addCube(lx, ly, lz, YoAppearance.RGBColor(1.0, 0, 0, 0.5));

@@ -1,13 +1,13 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.fail;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +15,6 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
 import us.ihmc.robotics.dataStructures.DataGridTools;
 import us.ihmc.robotics.dataStructures.DoubleHashHeightMap;
 import us.ihmc.robotics.dataStructures.HeightMapWithPoints;
@@ -38,7 +37,7 @@ public class BestFitPlaneCalculatorTest
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
       FramePoint2D footCenterPoint = new FramePoint2D(ReferenceFrame.getWorldFrame(), 0.0, 0.0);
-      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      DMatrixRMaj matrix = new DMatrixRMaj(7, 7);
       matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
                                   0, 0, 8, 8, 0, 0, 0,
                                   0, 0, 0, 0, 0, 1, 0,
@@ -51,8 +50,8 @@ public class BestFitPlaneCalculatorTest
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
       Plane3D plane = calculator.calculatePlane(map, footCenterPoint, 2.0, 2.0);
       System.out.println("BestFitPlaneCalculatorTest: calculator.getPointList() = " + calculator.getPointList());
-      Point3D point = plane.getPointCopy();
-      Vector3D normal = plane.getNormalCopy();
+      Point3D point = new Point3D(plane.getPoint());
+      Vector3D normal = new Vector3D(plane.getNormal());
       assertEquals(1.0, point.getZ(), eps);
       assertEquals(footCenterPoint.getX(), point.getX(), eps);
       assertEquals(footCenterPoint.getY(), point.getY(), eps);
@@ -68,7 +67,7 @@ public class BestFitPlaneCalculatorTest
       double gridResolution = 1;
       HeightMapWithPoints map = new DoubleHashHeightMap(gridResolution);
       double n = Double.NaN;
-      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      DMatrixRMaj matrix = new DMatrixRMaj(7, 7);
       matrix.setData(new double[]{0, 0, 0, 0, 3, 0, 0,
                                   0, 0, 0, 0, 0, 0, 0,
                                   0, 0, 0, n, 0, 1, 0,
@@ -81,8 +80,8 @@ public class BestFitPlaneCalculatorTest
       HeightMapBestFitPlaneCalculator calculator = new HeightMapBestFitPlaneCalculator();
       double xyCenter = 3.0;
       Plane3D plane = calculator.calculatePlane(map, new Point2D(xyCenter, xyCenter), 2, 2);
-      Point3D point = plane.getPointCopy();
-      Vector3D normal = plane.getNormalCopy();
+      Point3D point = new Point3D(plane.getPoint());
+      Vector3D normal = new Vector3D(plane.getNormal());
       if (!(MathTools.epsilonEquals(normal.getX(), Math.sqrt(2) / 2.0, 1e-7) && MathTools.epsilonEquals(normal.getZ(), -Math.sqrt(2) / 2.0, 1e-7))
             && !(MathTools.epsilonEquals(normal.getX(), -Math.sqrt(2) / 2.0, 1e-7) && MathTools.epsilonEquals(normal.getZ(), Math.sqrt(2) / 2.0, 1e-7)))
       {

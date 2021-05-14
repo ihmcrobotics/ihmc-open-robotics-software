@@ -6,12 +6,11 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.math.trajectories.CubicPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.providers.YoVariableDoubleProvider;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MultipleWaypointsTrajectoryGeneratorTest
 {
@@ -21,24 +20,23 @@ public class MultipleWaypointsTrajectoryGeneratorTest
    @Test
    public void test()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       double trajectoryTime = 1.0;
       double dt = 0.001;
 
-      CubicPolynomialTrajectoryGenerator simpleTrajectory;
       MultipleWaypointsTrajectoryGenerator multipleWaypointsTrajectory;
 
-      YoVariableDoubleProvider trajectoryTimeProvider;
+      YoDouble trajectoryTimeProvider;
 
-      trajectoryTimeProvider = new YoVariableDoubleProvider("trajectoryTime", registry);
+      trajectoryTimeProvider = new YoDouble("trajectoryTime", registry);
       trajectoryTimeProvider.set(trajectoryTime);
 
-      DoubleProvider initialPositionProvider = new ConstantDoubleProvider(0.0);
-      DoubleProvider finalPositionProvider = new ConstantDoubleProvider(1.0);
+      DoubleProvider initialPositionProvider = () -> 0.0;
+      DoubleProvider finalPositionProvider = () -> 1.0;
 
-      simpleTrajectory = new CubicPolynomialTrajectoryGenerator("simpleTraj", initialPositionProvider, finalPositionProvider, trajectoryTimeProvider, registry);
-      simpleTrajectory.initialize();
+      YoPolynomial simpleTrajectory = new YoPolynomial("simpleTraj", 4, registry);
+      simpleTrajectory.setCubic(0.0, trajectoryTimeProvider.getDoubleValue(), initialPositionProvider.getValue(), finalPositionProvider.getValue());
 
       int numberOfWaypoints = 11;
 
@@ -73,7 +71,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
    @Test
    public void testPassingThroughWayPoints()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       int numberOfWaypoints = 11;
 
@@ -112,7 +110,7 @@ public class MultipleWaypointsTrajectoryGeneratorTest
    @Test
    public void testOneWaypoint()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       int maxNumberOfWaypoints = 5;
       MultipleWaypointsTrajectoryGenerator trajectory = new MultipleWaypointsTrajectoryGenerator("testedTraj", maxNumberOfWaypoints, registry);
@@ -138,5 +136,27 @@ public class MultipleWaypointsTrajectoryGeneratorTest
       assertEquals(positionAtWaypoint, trajectory.getValue());
       assertEquals(velocityAtWaypoint, trajectory.getVelocity());
       assertEquals(0.0, trajectory.getAcceleration());
+   }
+
+   @Test
+   public void testEdgeCase()
+   {
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+      int maxNumberOfWaypoints = 5;
+      MultipleWaypointsTrajectoryGenerator trajectory = new MultipleWaypointsTrajectoryGenerator("testedTraj", maxNumberOfWaypoints, registry);
+      trajectory.clear();
+
+      trajectory.appendWaypoint(0.0, 0.0, 0.0);
+      trajectory.appendWaypoint(0.5, 0.026337062843167836, 0.0);
+      trajectory.initialize();
+
+      trajectory.compute(0.0);
+      assertEquals(0.0, trajectory.getValue(), 1e-5);
+      assertEquals(0.0, trajectory.getVelocity(), 1e-5);
+
+      trajectory.compute(0.5);
+      assertEquals(0.026337062843167836, trajectory.getValue(), 1e-5);
+      assertEquals(0.0, trajectory.getVelocity(), 1e-5);
    }
 }

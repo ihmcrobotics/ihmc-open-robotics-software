@@ -1,29 +1,21 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.QRDecomposition;
-import org.ejml.interfaces.decomposition.QRPDecomposition;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class DampedNullspaceCalculatorTimingTest
 {
    @Test
    public void testTimings()
    {
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       ExecutionTimer svdTimer = new ExecutionTimer("svdTimer", registry);
       ExecutionTimer leastSquaresTimer = new ExecutionTimer("leastSquaresTimer", registry);
       ExecutionTimer qrTimer = new ExecutionTimer("qrTimer", registry);
@@ -50,12 +42,12 @@ public class DampedNullspaceCalculatorTimingTest
 
          for (int i = 0; i < 100; i++)
          {
-            DenseMatrix64F J = new DenseMatrix64F(Jrows, Jcolumns, false, Jvalues);
-            DenseMatrix64F A = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
+            DMatrixRMaj J = new DMatrixRMaj(Jrows, Jcolumns, false, Jvalues);
+            DMatrixRMaj A = new DMatrixRMaj(ARows, Jcolumns, false, Avalues);
 
-            DenseMatrix64F A_projected1 = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
-            DenseMatrix64F A_projected2 = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
-            DenseMatrix64F A_projected3 = new DenseMatrix64F(ARows, Jcolumns, false, Avalues);
+            DMatrixRMaj A_projected1 = new DMatrixRMaj(ARows, Jcolumns, false, Avalues);
+            DMatrixRMaj A_projected2 = new DMatrixRMaj(ARows, Jcolumns, false, Avalues);
+            DMatrixRMaj A_projected3 = new DMatrixRMaj(ARows, Jcolumns, false, Avalues);
 
             svdTimer.startMeasurement();
             svdCalculator.projectOntoNullspace(A, J, A_projected1);

@@ -4,14 +4,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.EjmlUnitTests;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -27,12 +25,12 @@ public class MatrixYoVariableConversionToolsTest
       List<YoDouble> yoArray = new ArrayList<YoDouble>();
       int size = 50;
       String prefix = "test";
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
-      DenseMatrix64F matrix = new DenseMatrix64F(size, 1);
+      DMatrixRMaj matrix = new DMatrixRMaj(size, 1);
       Random random = new Random(1235612L);
-      RandomMatrices.setRandom(matrix, random);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(size, 1);
+      RandomMatrices_DDRM.fillUniform(matrix, random);
+      DMatrixRMaj matrixBack = new DMatrixRMaj(size, 1);
 
       MatrixYoVariableConversionTools.populateYoVariablesVector(yoArray, size, prefix, registry);
       MatrixYoVariableConversionTools.storeInYoVariablesVector(matrix, yoArray);
@@ -48,12 +46,12 @@ public class MatrixYoVariableConversionToolsTest
       int nRows = 50;
       int nColumns = 60;
       String prefix = "test";
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
-      DenseMatrix64F matrix = new DenseMatrix64F(nRows, nColumns);
+      DMatrixRMaj matrix = new DMatrixRMaj(nRows, nColumns);
       Random random = new Random(1235612L);
-      RandomMatrices.setRandom(matrix, random);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(nRows, nColumns);
+      RandomMatrices_DDRM.fillUniform(matrix, random);
+      DMatrixRMaj matrixBack = new DMatrixRMaj(nRows, nColumns);
 
       MatrixYoVariableConversionTools.populateYoVariablesMatrix(yoArray, nRows, nColumns, prefix, registry);
       MatrixYoVariableConversionTools.storeInYoVariablesMatrix(matrix, yoArray);
@@ -68,11 +66,11 @@ public class MatrixYoVariableConversionToolsTest
       List<List<YoDouble>> yoArray = new ArrayList<List<YoDouble>>();
       int size = 50;
       String prefix = "test";
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       Random random = new Random(1235612L);
-      DenseMatrix64F matrix = RandomMatrices.createSymmPosDef(size, random);
-      DenseMatrix64F matrixBack = new DenseMatrix64F(size, size);
+      DMatrixRMaj matrix = RandomMatrices_DDRM.symmetricPosDef(size, random);
+      DMatrixRMaj matrixBack = new DMatrixRMaj(size, size);
 
       MatrixYoVariableConversionTools.populateYoVariablesSymmetricMatrix(yoArray, size, prefix, registry);
       MatrixYoVariableConversionTools.storeInYoVariablesSymmetric(matrix, yoArray);

@@ -4,16 +4,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.virtualModelControl.VirtualModelControllerTestHelper.RobotLegs;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -25,11 +23,10 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools.SCSRobotFromInverseDynamicsRobotModel;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class VirtualModelControllerTest
 {
@@ -60,12 +57,12 @@ public class VirtualModelControllerTest
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
-      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
+      DMatrixRMaj jacobianMatrix = jacobian.getJacobianMatrix();
+      DMatrixRMaj transposeJacobianMatrix = new DMatrixRMaj(jacobianMatrix.numCols, Wrench.SIZE);
+      CommonOps_DDRM.transpose(jacobianMatrix, transposeJacobianMatrix);
 
       wrench.changeFrame(pelvis.getBodyFixedFrame());
-      DenseMatrix64F wrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
+      DMatrixRMaj wrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
       wrenchMatrix.set(0, 0, wrench.getAngularPartX());
       wrenchMatrix.set(1, 0, wrench.getAngularPartY());
       wrenchMatrix.set(2, 0, wrench.getAngularPartZ());
@@ -73,15 +70,15 @@ public class VirtualModelControllerTest
       wrenchMatrix.set(4, 0, wrench.getLinearPartY());
       wrenchMatrix.set(5, 0, wrench.getLinearPartZ());
 
-      DenseMatrix64F jointEffort = new DenseMatrix64F(controlledJoints.length, 1);
-      CommonOps.multTransA(jacobianMatrix, wrenchMatrix, jointEffort);
+      DMatrixRMaj jointEffort = new DMatrixRMaj(controlledJoints.length, 1);
+      CommonOps_DDRM.multTransA(jacobianMatrix, wrenchMatrix, jointEffort);
 
       desiredForce.changeFrame(foot.getBodyFixedFrame());
       wrench.changeFrame(foot.getBodyFixedFrame());
 
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.invert(transposeJacobianMatrix);
-      CommonOps.mult(transposeJacobianMatrix, jointEffort, appliedWrenchMatrix);
+      DMatrixRMaj appliedWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      CommonOps_DDRM.invert(transposeJacobianMatrix);
+      CommonOps_DDRM.mult(transposeJacobianMatrix, jointEffort, appliedWrenchMatrix);
       Wrench appliedWrench = new Wrench(foot.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
       appliedWrench.changeFrame(foot.getBodyFixedFrame());
 
@@ -132,7 +129,7 @@ public class VirtualModelControllerTest
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
-      submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, CommonOps.identity(Wrench.SIZE, Wrench.SIZE));
+      submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, CommonOps_DDRM.identity(Wrench.SIZE, Wrench.SIZE));
    }
 
    @Test
@@ -157,7 +154,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only force
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 3, 1);
       selectionMatrix.set(1, 4, 1);
       selectionMatrix.set(2, 5, 1);
@@ -187,7 +184,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 0, 1);
       selectionMatrix.set(1, 1, 1);
       selectionMatrix.set(2, 2, 1);
@@ -216,7 +213,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 6);
       selectionMatrix.set(0, 3, 1);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, selectionMatrix);
@@ -243,7 +240,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 6);
       selectionMatrix.set(0, 4, 1);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, selectionMatrix);
@@ -270,7 +267,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 6);
       selectionMatrix.set(0, 5, 1);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, selectionMatrix);
@@ -297,7 +294,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 6);
       selectionMatrix.set(0, 0, 1);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, selectionMatrix);
@@ -324,7 +321,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 6);
       selectionMatrix.set(0, 1, 1);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, selectionMatrix);
@@ -351,7 +348,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(1, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(1, 6);
       selectionMatrix.set(0, 2, 1);
 
       submitAndCheckVMC(pelvis, foot, centerOfMassFrame, desiredWrench, selectionMatrix);
@@ -378,7 +375,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(2, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(2, 6);
       selectionMatrix.set(0, 1, 1);
       selectionMatrix.set(1, 4, 1);
 
@@ -406,7 +403,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 0, 1);
       selectionMatrix.set(1, 4, 1);
       selectionMatrix.set(2, 5, 1);
@@ -435,7 +432,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 0, 1);
       selectionMatrix.set(1, 2, 1);
       selectionMatrix.set(2, 3, 1);
@@ -464,7 +461,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 0, 1);
       selectionMatrix.set(1, 2, 1);
       selectionMatrix.set(2, 3, 1);
@@ -493,7 +490,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 0, 1);
       selectionMatrix.set(1, 2, 1);
       selectionMatrix.set(2, 3, 1);
@@ -519,7 +516,7 @@ public class VirtualModelControllerTest
       Wrench desiredWrench = new Wrench(pelvis.getBodyFixedFrame(), pelvis.getBodyFixedFrame(), desiredTorque, desiredForce);
 
       // select only torque
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 6);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 6);
       selectionMatrix.set(0, 0, 1);
       selectionMatrix.set(1, 2, 1);
       selectionMatrix.set(2, 3, 1);
@@ -547,18 +544,18 @@ public class VirtualModelControllerTest
       FrameVector3D desiredTorque = new FrameVector3D(foot.getBodyFixedFrame(), new Vector3D(bigRandom.nextDouble(), bigRandom.nextDouble(), bigRandom.nextDouble()));
       Wrench desiredWrench = new Wrench(foot.getBodyFixedFrame(), foot.getBodyFixedFrame(), desiredTorque, desiredForce);
 
-      DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
+      DMatrixRMaj selectionMatrix = CommonOps_DDRM.identity(Wrench.SIZE, Wrench.SIZE);
 
       JointBasics[] controlledJoints = MultiBodySystemTools.createJointPath(pelvis, endEffector);
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, pelvis.getBodyFixedFrame());
       jacobian.compute();
 
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
-      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
-      CommonOps.invert(transposeJacobianMatrix);
+      DMatrixRMaj jacobianMatrix = jacobian.getJacobianMatrix();
+      DMatrixRMaj transposeJacobianMatrix = new DMatrixRMaj(jacobianMatrix.numCols, Wrench.SIZE);
+      CommonOps_DDRM.transpose(jacobianMatrix, transposeJacobianMatrix);
+      CommonOps_DDRM.invert(transposeJacobianMatrix);
 
-      YoVariableRegistry registry = new YoVariableRegistry(this.getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(this.getClass().getSimpleName());
       VirtualModelController virtualModelController = new VirtualModelController(pelvis, centerOfMassFrame, registry, null);
       virtualModelController.registerControlledBody(endEffector, pelvis);
 
@@ -575,10 +572,10 @@ public class VirtualModelControllerTest
       desiredWrench.changeFrame(pelvis.getBodyFixedFrame());
 
       // compute end effector force from torques
-      DenseMatrix64F jointEffortMatrix = virtualModelControlSolution.getJointTorques();
+      DMatrixRMaj jointEffortMatrix = virtualModelControlSolution.getJointTorques();
 
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
+      DMatrixRMaj appliedWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      CommonOps_DDRM.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
       Wrench appliedWrench = new Wrench(endEffector.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
 
       VirtualModelControllerTestHelper.compareWrenches(desiredWrench, appliedWrench, selectionMatrix);
@@ -615,7 +612,7 @@ public class VirtualModelControllerTest
       List<ExternalForcePoint> externalForcePoints = new ArrayList<>();
       externalForcePoints.add(robotArm.getExternalForcePoint());
 
-      DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
+      DMatrixRMaj selectionMatrix = CommonOps_DDRM.identity(Wrench.SIZE, Wrench.SIZE);
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
             desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
@@ -650,7 +647,7 @@ public class VirtualModelControllerTest
       List<ExternalForcePoint> externalForcePoints = new ArrayList<>();
       externalForcePoints.add(robotArm.getExternalForcePoint());
 
-      DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
+      DMatrixRMaj selectionMatrix = CommonOps_DDRM.identity(Wrench.SIZE, Wrench.SIZE);
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces, desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
 
       simulationTestingParameters.setKeepSCSUp(false);
@@ -693,7 +690,7 @@ public class VirtualModelControllerTest
       externalForcePoints.add(sideDependentExternalForcePoints.get(RobotSide.LEFT));
       externalForcePoints.add(sideDependentExternalForcePoints.get(RobotSide.RIGHT));
 
-      DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
+      DMatrixRMaj selectionMatrix = CommonOps_DDRM.identity(Wrench.SIZE, Wrench.SIZE);
 
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
             desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
@@ -736,7 +733,7 @@ public class VirtualModelControllerTest
       externalForcePoints.add(sideDependentExternalForcePoints.get(RobotSide.LEFT));
       externalForcePoints.add(sideDependentExternalForcePoints.get(RobotSide.RIGHT));
 
-      DenseMatrix64F selectionMatrix = CommonOps.identity(Wrench.SIZE, Wrench.SIZE);
+      DMatrixRMaj selectionMatrix = CommonOps_DDRM.identity(Wrench.SIZE, Wrench.SIZE);
 
       VirtualModelControllerTestHelper.createVirtualModelControlTest(scsRobotArm, robotArm, robotArm.getCenterOfMassFrame(), endEffectors, desiredForces,
             desiredTorques, externalForcePoints, selectionMatrix, simulationTestingParameters);
@@ -755,9 +752,9 @@ public class VirtualModelControllerTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-   private void submitAndCheckVMC(RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DenseMatrix64F selectionMatrix)
+   private void submitAndCheckVMC(RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame centerOfMassFrame, Wrench desiredWrench, DMatrixRMaj selectionMatrix)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       simulationTestingParameters.setKeepSCSUp(false);
 
@@ -765,10 +762,10 @@ public class VirtualModelControllerTest
       GeometricJacobian jacobian = new GeometricJacobian(controlledJoints, base.getBodyFixedFrame());
       jacobian.compute();
 
-      DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
-      DenseMatrix64F transposeJacobianMatrix = new DenseMatrix64F(jacobianMatrix.numCols, Wrench.SIZE);
-      CommonOps.transpose(jacobianMatrix, transposeJacobianMatrix);
-      CommonOps.invert(transposeJacobianMatrix);
+      DMatrixRMaj jacobianMatrix = jacobian.getJacobianMatrix();
+      DMatrixRMaj transposeJacobianMatrix = new DMatrixRMaj(jacobianMatrix.numCols, Wrench.SIZE);
+      CommonOps_DDRM.transpose(jacobianMatrix, transposeJacobianMatrix);
+      CommonOps_DDRM.invert(transposeJacobianMatrix);
 
       VirtualModelController virtualModelController = new VirtualModelController(base, centerOfMassFrame, registry, null);
       virtualModelController.registerControlledBody(endEffector, base);
@@ -785,10 +782,10 @@ public class VirtualModelControllerTest
       virtualModelController.compute(virtualModelControlSolution);
 
       // compute end effector force from torques
-      DenseMatrix64F jointEffortMatrix = virtualModelControlSolution.getJointTorques();
+      DMatrixRMaj jointEffortMatrix = virtualModelControlSolution.getJointTorques();
 
-      DenseMatrix64F appliedWrenchMatrix = new DenseMatrix64F(Wrench.SIZE, 1);
-      CommonOps.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
+      DMatrixRMaj appliedWrenchMatrix = new DMatrixRMaj(Wrench.SIZE, 1);
+      CommonOps_DDRM.mult(transposeJacobianMatrix, jointEffortMatrix, appliedWrenchMatrix);
       Wrench appliedWrench = new Wrench(endEffector.getBodyFixedFrame(), jacobian.getJacobianFrame(), appliedWrenchMatrix);
 
       if (selectionMatrix == null)

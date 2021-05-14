@@ -7,9 +7,8 @@ import java.util.Map;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.PelvisOffsetWhileWalkingParameters;
@@ -19,7 +18,9 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -38,7 +39,7 @@ import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class HighLevelControlManagerFactory
@@ -49,12 +50,12 @@ public class HighLevelControlManagerFactory
    public static final String footGainRegistryName = "FootGains";
    public static final String comHeightGainRegistryName = "ComHeightGains";
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final YoVariableRegistry momentumRegistry = new YoVariableRegistry(weightRegistryName);
-   private final YoVariableRegistry jointGainRegistry = new YoVariableRegistry(jointspaceGainRegistryName);
-   private final YoVariableRegistry bodyGainRegistry = new YoVariableRegistry(rigidBodyGainRegistryName);
-   private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
-   private final YoVariableRegistry comHeightGainRegistry = new YoVariableRegistry(comHeightGainRegistryName);
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+   private final YoRegistry momentumRegistry = new YoRegistry(weightRegistryName);
+   private final YoRegistry jointGainRegistry = new YoRegistry(jointspaceGainRegistryName);
+   private final YoRegistry bodyGainRegistry = new YoRegistry(rigidBodyGainRegistryName);
+   private final YoRegistry footGainRegistry = new YoRegistry(footGainRegistryName);
+   private final YoRegistry comHeightGainRegistry = new YoRegistry(comHeightGainRegistryName);
 
    private BalanceManager balanceManager;
    private CenterOfMassHeightManager centerOfMassHeightManager;
@@ -66,8 +67,8 @@ public class HighLevelControlManagerFactory
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
-   private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
+   private CoPTrajectoryParameters copTrajectoryParameters;
+   private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -88,7 +89,7 @@ public class HighLevelControlManagerFactory
    private DoubleProvider walkingControllerMaxComHeightVelocity;
    private PIDGainsReadOnly userModeComHeightGains;
 
-   public HighLevelControlManagerFactory(YoVariableRegistry parentRegistry)
+   public HighLevelControlManagerFactory(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
       parentRegistry.addChild(momentumRegistry);
@@ -107,7 +108,6 @@ public class HighLevelControlManagerFactory
    {
       this.walkingControllerParameters = walkingControllerParameters;
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
       // Transform weights and gains to their parameterized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
@@ -130,9 +130,14 @@ public class HighLevelControlManagerFactory
       userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
-   public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
+   public void setCopTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
    {
-      this.capturePointPlannerParameters = capturePointPlannerParameters;
+      this.copTrajectoryParameters = copTrajectoryParameters;
+   }
+
+   public void setSplitFractionParameters(SplitFractionCalculatorParametersReadOnly splitFractionParameters)
+   {
+      this.splitFractionParameters = splitFractionParameters;
    }
 
    public BalanceManager getOrCreateBalanceManager()
@@ -144,12 +149,15 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
          return null;
-      if (!hasCapturePointPlannerParameters(BalanceManager.class))
+      if (!hasCoPTrajectoryParameters(BalanceManager.class))
          return null;
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
+      balanceManager = new BalanceManager(controllerToolbox,
+                                          walkingControllerParameters,
+                                          copTrajectoryParameters,
+                                          splitFractionParameters,
                                           registry);
       return balanceManager;
    }
@@ -191,6 +199,8 @@ public class HighLevelControlManagerFactory
          return null;
       if (!hasMomentumOptimizationSettings(RigidBodyControlManager.class))
          return null;
+      if (!hasHighLevelHumanoidControllerToolbox(RigidBodyControlManager.class))
+         return null;
 
       // Gains
       PID3DGainsReadOnly taskspaceOrientationGains = taskspaceOrientationGainMap.get(bodyName);
@@ -231,7 +241,13 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
-      feetManager = new FeetManager(controllerToolbox, walkingControllerParameters, swingFootGains, holdFootGains, toeOffFootGains, registry);
+      feetManager = new FeetManager(controllerToolbox,
+                                    walkingControllerParameters,
+                                    swingFootGains,
+                                    holdFootGains,
+                                    toeOffFootGains,
+                                    registry,
+                                    controllerToolbox.getYoGraphicsListRegistry());
 
       String footName = controllerToolbox.getFullRobotModel().getFoot(RobotSide.LEFT).getName();
       Vector3DReadOnly angularWeight = taskspaceAngularWeightMap.get(footName);
@@ -313,11 +329,11 @@ public class HighLevelControlManagerFactory
       return false;
    }
 
-   private boolean hasCapturePointPlannerParameters(Class<?> managerClass)
+   private boolean hasCoPTrajectoryParameters(Class<?> managerClass)
    {
-      if (capturePointPlannerParameters != null)
+      if (copTrajectoryParameters != null)
          return true;
-      missingObjectWarning(ICPTrajectoryPlannerParameters.class, managerClass);
+      missingObjectWarning(CoPTrajectoryParameters.class, managerClass);
       return false;
    }
 
@@ -351,7 +367,7 @@ public class HighLevelControlManagerFactory
       }
    }
 
-   public FeedbackControlCommandList createFeedbackControlTemplate()
+   public FeedbackControllerTemplate createFeedbackControlTemplate()
    {
       FeedbackControlCommandList ret = new FeedbackControlCommandList();
 
@@ -376,6 +392,6 @@ public class HighLevelControlManagerFactory
          ret.addCommand(pelvisOrientationManager.createFeedbackControlTemplate());
       }
 
-      return ret;
+      return new FeedbackControllerTemplate(ret);
    }
 }

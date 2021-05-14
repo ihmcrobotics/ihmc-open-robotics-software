@@ -19,7 +19,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.vision.shapes.HSVRange;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -55,7 +55,7 @@ public class KickBallBehavior extends AbstractBehavior
    private boolean pipelineSetUp = false;
 
 
-   public KickBallBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
+   public KickBallBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport,
                            FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(robotName, ros2Node);
@@ -86,7 +86,7 @@ public class KickBallBehavior extends AbstractBehavior
 
       for (AbstractBehavior behavior : behaviors)
       {
-         registry.addChild(behavior.getYoVariableRegistry());
+         registry.addChild(behavior.getYoRegistry());
       }
    }
 

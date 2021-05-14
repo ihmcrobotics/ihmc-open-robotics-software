@@ -84,6 +84,11 @@ public class ExampleOptimizationProblemOneTest
       {
          return new SimpleXSquaredCostFunction();
       }
+
+      @Override
+      public void replay()
+      {         
+      }
    }
 
 	@Test
@@ -187,6 +192,11 @@ public class ExampleOptimizationProblemOneTest
       public ListOfParametersToOptimize getControlParametersToOptimize()
       {
          return listOfParametersToOptimize;
+      }
+
+      @Override
+      public void replay()
+      {         
       }
    }
  

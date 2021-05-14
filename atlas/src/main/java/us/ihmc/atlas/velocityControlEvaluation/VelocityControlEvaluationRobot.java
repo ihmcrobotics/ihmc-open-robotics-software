@@ -1,6 +1,6 @@
 package us.ihmc.atlas.velocityControlEvaluation;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -20,7 +20,7 @@ public class VelocityControlEvaluationRobot extends Robot
    {
       super("VelocityControlEvaluationRobot");
       
-      rootJoint = new SliderJoint("x", new Vector3D(), this, Axis.X);
+      rootJoint = new SliderJoint("x", new Vector3D(), this, Axis3D.X);
       rootJoint.setStiction(STICTION);
       
       Link pointMass = new Link("pointMass");
@@ -32,7 +32,7 @@ public class VelocityControlEvaluationRobot extends Robot
       linkGraphics.addSphere(0.03);
       pointMass.setLinkGraphics(linkGraphics);
       
-      ExternalForcePoint externalForce = new ExternalForcePoint("externalForce", this.getRobotsYoVariableRegistry());
+      ExternalForcePoint externalForce = new ExternalForcePoint("externalForce", this.getRobotsYoRegistry());
       rootJoint.addExternalForcePoint(externalForce);
       
       rootJoint.setLink(pointMass);

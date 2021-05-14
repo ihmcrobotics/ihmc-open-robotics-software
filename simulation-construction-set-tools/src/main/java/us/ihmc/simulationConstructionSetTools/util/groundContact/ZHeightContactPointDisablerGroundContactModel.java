@@ -5,20 +5,20 @@ import java.util.ArrayList;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.simulationconstructionset.GroundContactModel;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ZHeightContactPointDisablerGroundContactModel implements GroundContactModel
 {
    private static final long serialVersionUID = -6870738695586772779L;
    
-   private final YoVariableRegistry registry = new YoVariableRegistry("contactPointDisabler");
+   private final YoRegistry registry = new YoRegistry("contactPointDisabler");
    private final YoDouble zHeightDisableThreshold = new YoDouble("zHeightDisableThreshold", registry);
    private final GroundContactModel baseModel;
 
    private ArrayList<GroundContactPoint> contactPoints;
    
-   public ZHeightContactPointDisablerGroundContactModel(GroundContactModel baseModel, ArrayList<GroundContactPoint> contactPoints, double zHeightDisableThreshold, YoVariableRegistry parentRegistry)
+   public ZHeightContactPointDisablerGroundContactModel(GroundContactModel baseModel, ArrayList<GroundContactPoint> contactPoints, double zHeightDisableThreshold, YoRegistry parentRegistry)
    {
       this.baseModel = baseModel;
       this.contactPoints = contactPoints;

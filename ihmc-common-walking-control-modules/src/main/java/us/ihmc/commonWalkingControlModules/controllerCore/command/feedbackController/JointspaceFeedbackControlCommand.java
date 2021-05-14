@@ -165,6 +165,7 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
    public void set(JointspaceFeedbackControlCommand other)
    {
       clear();
+      setCommandId(other.getCommandId());
       for (int jointIndex = 0; jointIndex < other.getNumberOfCommands(); jointIndex++)
       {
          addCommand(other.jointCommands.get(jointIndex));
@@ -213,6 +214,8 @@ public class JointspaceFeedbackControlCommand extends FeedbackControlCommandList
       {
          JointspaceFeedbackControlCommand other = (JointspaceFeedbackControlCommand) object;
 
+         if (getCommandId() != other.getCommandId())
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

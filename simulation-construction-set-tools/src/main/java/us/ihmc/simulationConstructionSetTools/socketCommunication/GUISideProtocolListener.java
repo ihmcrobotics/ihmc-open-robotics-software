@@ -4,7 +4,7 @@ import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.simulationconstructionset.NewDataListener;
 
@@ -13,7 +13,7 @@ public class GUISideProtocolListener implements UserCommandNetworkReader
    private final boolean DEBUG = false;
    
    private final DataInputStream dataInputStream;
-   private final ArrayList<NewDataListener> newDataListeners;
+   private final List<NewDataListener> newDataListeners;
    private final GUISideAbstractCommandListener guiSideCommandListener;
 
    private static final byte IN_SYNC_BYTE = (byte) 33;
@@ -24,7 +24,7 @@ public class GUISideProtocolListener implements UserCommandNetworkReader
       this(dataIn, commandListener, null);
    }
 
-   public GUISideProtocolListener(DataInputStream dataIn, GUISideAbstractCommandListener commandListener, ArrayList<NewDataListener> newDataListeners)
+   public GUISideProtocolListener(DataInputStream dataIn, GUISideAbstractCommandListener commandListener, List<NewDataListener> newDataListeners)
    {
       if (DEBUG) System.out.println("Creating RobotProtocolListener. This one Sends SYNC Bytes!!");
       this.newDataListeners = newDataListeners;

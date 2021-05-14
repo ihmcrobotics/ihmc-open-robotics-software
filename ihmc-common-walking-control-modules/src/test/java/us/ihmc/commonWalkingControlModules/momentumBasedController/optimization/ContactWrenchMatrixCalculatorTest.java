@@ -5,9 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.util.Collections;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.SimpleContactPointPlaneBody;
@@ -31,7 +31,7 @@ import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemRandomTools.RandomFloatingRevoluteJointChain;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ContactWrenchMatrixCalculatorTest
 {
@@ -62,17 +62,17 @@ public class ContactWrenchMatrixCalculatorTest
          InverseDynamicsCalculator inverseDynamicsCalculator = new InverseDynamicsCalculator(robot.getElevator());
 
          wrenchMatrixCalculator.computeMatrices();
-         DenseMatrix64F rho = RandomMatrices.createRandom(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 10000.0, random);
+         DMatrixRMaj rho = RandomMatrices_DDRM.rectangle(wrenchMatrixCalculator.getRhoSize(), 1, 0.0, 10000.0, random);
          Wrench externalWrench = wrenchMatrixCalculator.computeWrenchesFromRho(rho).get(contactablePlaneBody.getRigidBody());
          inverseDynamicsCalculator.getExternalWrench(contactablePlaneBody.getRigidBody()).setMatchingFrame(externalWrench);
          inverseDynamicsCalculator.compute();
-         DenseMatrix64F tau_expected = inverseDynamicsCalculator.getJointTauMatrix();
+         DMatrixRMaj tau_expected = inverseDynamicsCalculator.getJointTauMatrix();
 
          int numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
-         DenseMatrix64F contactForceJacobian = new DenseMatrix64F(wrenchMatrixCalculator.getRhoSize(), numberOfDoFs);
+         DMatrixRMaj contactForceJacobian = new DMatrixRMaj(wrenchMatrixCalculator.getRhoSize(), numberOfDoFs);
          contactWrenchMatrixCalculator.computeContactForceJacobian(contactForceJacobian);
-         DenseMatrix64F tau_actual = new DenseMatrix64F(numberOfDoFs, 1);
-         CommonOps.multTransA(contactForceJacobian, rho, tau_actual);
+         DMatrixRMaj tau_actual = new DMatrixRMaj(numberOfDoFs, 1);
+         CommonOps_DDRM.multTransA(contactForceJacobian, rho, tau_actual);
 
          boolean areEqual = true;
          for (int row = 0; row < numberOfDoFs; row++)
@@ -82,7 +82,7 @@ public class ContactWrenchMatrixCalculatorTest
          {
             System.out.println("iteration: " + i);
             double maxError = 0.0;
-            DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 3);
+            DMatrixRMaj output = new DMatrixRMaj(numberOfDoFs, 3);
             for (int row = 0; row < numberOfDoFs; row++)
             {
                output.set(row, 0, tau_expected.get(row, 0));
@@ -124,7 +124,7 @@ public class ContactWrenchMatrixCalculatorTest
       double gravityZ = 9.81;
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rootJoint.getPredecessor());
       ReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame(), rootBody);
-      YoVariableRegistry registry = new YoVariableRegistry("Dummy");
+      YoRegistry registry = new YoRegistry("Dummy");
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       return new WholeBodyControlCoreToolbox(controlDT,
                                              gravityZ,

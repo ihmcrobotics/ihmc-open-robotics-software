@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 @Deprecated
 public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>, C extends FiniteStateMachineState<E>>
@@ -13,13 +13,13 @@ public class FiniteStateMachineBuilder<S extends Enum<S>, E extends Enum<E>, C e
    private final Class<S> enumType;
    private final Class<E> standardEventType;
    private final String yoVariableName;
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final Map<S, C> states = new HashMap<>();
    private final Map<Class<?>, List<FiniteStateMachineTransition<S, ? extends Enum<?>>>> transitions = new HashMap<>();
    private final Map<Class<?>, List<FiniteStateMachineCallback<S, ? extends Enum<?>>>> callbacks = new HashMap<>();
 
-   public FiniteStateMachineBuilder(Class<S> enumType, Class<E> standardEventType, String yoVariableName, YoVariableRegistry registry)
+   public FiniteStateMachineBuilder(Class<S> enumType, Class<E> standardEventType, String yoVariableName, YoRegistry registry)
    {
       this.enumType = enumType;
       this.standardEventType = standardEventType;

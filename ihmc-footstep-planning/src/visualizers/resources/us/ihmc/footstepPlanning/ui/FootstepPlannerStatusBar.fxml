@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.control.Button?>
+
+<?import javafx.geometry.Insets?>
+
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.Region?>
+
+<?import javafx.scene.text.Text?>
+<?import javafx.scene.control.TableView?>
+
+<VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER"
+      fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController">
+
+    <padding>
+        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+    </padding>
+
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Planner Status" textAlignment="CENTER">
+        <font>
+            <Font size="16.0"/>
+        </font>
+    </Label>
+
+    <Region prefHeight="10"/>
+
+    <GridPane alignment="TOP_CENTER" hgap="10" vgap="5">
+        <children>
+            <!-- High level status -->
+            <Label text="Sent ID" GridPane.columnIndex="0" GridPane.rowIndex="0" GridPane.halignment="RIGHT"/>
+            <Text fx:id="sentRequestId" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+            <Label text="Received ID" GridPane.columnIndex="0" GridPane.rowIndex="1" GridPane.halignment="RIGHT"/>
+            <Text fx:id="receivedRequestId" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+
+            <Label text="Total time" GridPane.columnIndex="0" GridPane.rowIndex="2" GridPane.halignment="RIGHT"/>
+            <Text fx:id="totalPlanTime" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+
+            <Separator GridPane.columnIndex="0" GridPane.rowIndex="3" GridPane.columnSpan="2" prefHeight="10"/>
+
+            <!-- Body path plan status -->
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="4" GridPane.columnSpan="2" text="Body Path Plan" textAlignment="CENTER"/>
+
+            <Label text="Result" GridPane.columnIndex="0" GridPane.rowIndex="5" GridPane.halignment="RIGHT"/>
+            <Text fx:id="bodyPathPlanResult" GridPane.columnIndex="1" GridPane.rowIndex="5" />
+
+            <Label text="Plan time" GridPane.columnIndex="0" GridPane.rowIndex="6" GridPane.halignment="RIGHT"/>
+            <Text fx:id="bodyPathPlanTime" GridPane.columnIndex="1" GridPane.rowIndex="6" />
+
+            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="7" GridPane.columnSpan="2"/>
+
+            <!-- Footstep plan status -->
+            <Label GridPane.columnIndex="0" GridPane.rowIndex="8" GridPane.columnSpan="2" text="Footstep Plan" textAlignment="CENTER"/>
+
+            <Label text="Result" GridPane.columnIndex="0" GridPane.rowIndex="9" GridPane.halignment="RIGHT"/>
+            <Text fx:id="stepPlanResult" GridPane.columnIndex="1" GridPane.rowIndex="9" />
+
+            <Label text="Plan time" GridPane.columnIndex="0" GridPane.rowIndex="10" GridPane.halignment="RIGHT"/>
+            <Text fx:id="footstepPlanTime" GridPane.columnIndex="1" GridPane.rowIndex="10" />
+
+            <Label text="Iterations" GridPane.columnIndex="0" GridPane.rowIndex="11" GridPane.halignment="RIGHT"/>
+            <Text fx:id="iterationsTaken" GridPane.columnIndex="1" GridPane.rowIndex="11" />
+
+            <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"
+                    GridPane.halignment="CENTER"/>
+
+            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"/>
+
+            <!-- Add region to enlarge default width of status bar -->
+            <Region GridPane.columnIndex="1" GridPane.rowIndex="14" prefWidth="150"/>
+
+            <TableView fx:id="footstepPlanTable" GridPane.rowIndex="15" GridPane.columnSpan="2"/>
+        </children>
+    </GridPane>
+
+    <Region prefHeight="5"/>
+
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Manual Adjustment" textAlignment="CENTER">
+        <font>
+            <Font size="16.0"/>
+        </font>
+    </Label>
+
+    <Region prefHeight="5"/>
+
+    <GridPane alignment="TOP_CENTER" hgap="12" vgap="5">
+        <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="Frame (R)"/>
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="regionFrameLabel" text="Region"/>
+        <Label GridPane.columnIndex="2" GridPane.rowIndex="0" fx:id="worldFrameLabel" text="World"/>
+    </GridPane>
+
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Translate: Numpad 2/4/6/8"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Trans vertical: Ctrl"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Rotate: Numpad 7/9"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Fine adjust: Shift"/>
+</VBox>

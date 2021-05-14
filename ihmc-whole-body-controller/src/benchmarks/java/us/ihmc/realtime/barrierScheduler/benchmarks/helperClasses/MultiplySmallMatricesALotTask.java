@@ -1,10 +1,10 @@
 package us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
@@ -20,16 +20,16 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    private final Random random = new Random(1976L);
    private final BarrierSchedulerLoadTestData loadTestData = new BarrierSchedulerLoadTestData();
    private final TimingInformation timingInformation;
-   private final DenseMatrix64F matrixA;
-   private final DenseMatrix64F matrixB;
-   private final DenseMatrix64F matrixC;
+   private final DMatrixRMaj matrixA;
+   private final DMatrixRMaj matrixB;
+   private final DMatrixRMaj matrixC;
 
    private final YoDouble actualDTMillis;
    boolean useNativeCommonOps;
 
    private final ExecutionTimer executionTimer;
 
-   public MultiplySmallMatricesALotTask(YoDouble actualDTMillis, YoVariableRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
+   public MultiplySmallMatricesALotTask(YoDouble actualDTMillis, YoRegistry parentRegistry, long schedulerPeriodNanoseconds, long divisor, boolean useNativeCommonOps)
    {
       super(divisor);
       this.actualDTMillis = actualDTMillis;
@@ -37,9 +37,9 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
       this.useNativeCommonOps = useNativeCommonOps;
 
       timingInformation = new TimingInformation("MultiplySmallMatricesALotTask", schedulerPeriodNanoseconds * divisor);
-      matrixA = new DenseMatrix64F(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
-      matrixB = new DenseMatrix64F(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
-      matrixC = new DenseMatrix64F(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
+      matrixA = new DMatrixRMaj(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
+      matrixB = new DMatrixRMaj(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
+      matrixC = new DMatrixRMaj(MATRIX_ROW_DIMENSION, MATRIX_COLUMN_DIMENSION);
 
       executionTimer = new ExecutionTimer(getClass().getSimpleName() + "ExecutionTimer", parentRegistry);
    }
@@ -66,8 +66,8 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    protected boolean initialize()
    {
-      RandomMatrices.setRandom(matrixA, random);
-      RandomMatrices.setRandom(matrixB, random);
+      RandomMatrices_DDRM.fillUniform(matrixA, random);
+      RandomMatrices_DDRM.fillUniform(matrixB, random);
       timingInformation.initialize(System.nanoTime(), actualDTMillis);
       return true;
    }
@@ -80,13 +80,13 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
    @Override
    protected void execute()
    {
-      RandomMatrices.setRandom(matrixA, random);
-      RandomMatrices.setRandom(matrixB, random);
+      RandomMatrices_DDRM.fillUniform(matrixA, random);
+      RandomMatrices_DDRM.fillUniform(matrixB, random);
 
       executionTimer.startMeasurement();
 
-      CommonOps.add(matrixA, loadTestData.getSlowTaskFirstResult());
-      CommonOps.add(matrixB, loadTestData.getSlowTaskSecondResult());
+      CommonOps_DDRM.add(matrixA, loadTestData.getSlowTaskFirstResult());
+      CommonOps_DDRM.add(matrixB, loadTestData.getSlowTaskSecondResult());
 
       int numberOfMultiplications;
 
@@ -108,8 +108,8 @@ public class MultiplySmallMatricesALotTask extends BarrierSchedulerLoadTestTask
          BarrierSchedulerLoadTestHelper.doMatrixMultiplyOperationsEJMLCommonOps(matrixA, matrixB, matrixC, numberOfMultiplications);
       }
 
-      double elementSum = CommonOps.elementSum(matrixC);
-      //      double determinant = CommonOps.det(matrixC);
+      double elementSum = CommonOps_DDRM.elementSum(matrixC);
+      //      double determinant = CommonOps_DDRM.det(matrixC);
 
       loadTestData.setFastTaskFirstResult(elementSum);
       loadTestData.setFastTaskSecondResult(elementSum * -1.0);

@@ -106,7 +106,7 @@ public class ThePeoplesGloriousNetworkProcessor
       this.controllerCommunicationBridge = rosAPI_communicator;
       this.scsSensorCommunicationBridge = sensorCommunicator;
       this.rosClockCalculator = rosClockCalculator;
-      this.rosClockCalculator.setROSMainNode(rosMainNode);
+      this.rosClockCalculator.subscribeToROS1Topics(rosMainNode);
       this.subscribers = new ArrayList<AbstractRosTopicSubscriber<?>>();
       this.publishers = new ArrayList<RosTopicPublisher<?>>();
 
@@ -159,7 +159,7 @@ public class ThePeoplesGloriousNetworkProcessor
    {
       //      FullRobotModel fullRobotModel = robotModel.createFullRobotModel();
       //      HumanoidRobotSensorInformation sensorInformation = robotModel.getSensorInformation();
-      //      DRCRobotJointMap jointMap = robotModel.getJointMap();
+      //      HumanoidJointNameMap jointMap = robotModel.getJointMap();
       //
       //      RosTfPublisher tfPublisher = new RosTfPublisher(rosMainNode, tfPrefix);
       //

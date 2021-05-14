@@ -73,18 +73,18 @@ public class TransformInterpolationCalculatorTest
       RigidBodyTransform t3 =  new RigidBodyTransform();
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 0.0);
       Vector3D interpolatedVector = new Vector3D();
-      t3.getTranslation(interpolatedVector);
+      interpolatedVector.set(t3.getTranslation());
       assertTrue(vector1.epsilonEquals(interpolatedVector, 1e-8));
 
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 1.0);
       interpolatedVector = new Vector3D();
-      t3.getTranslation(interpolatedVector);
+      interpolatedVector.set(t3.getTranslation());
       assertTrue(vector2.epsilonEquals(interpolatedVector, 1e-8));
 
       double alpha = 0.25;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
       interpolatedVector = new Vector3D();
-      t3.getTranslation(interpolatedVector);
+      interpolatedVector.set(t3.getTranslation());
 
       Vector3D expectedVector = new Vector3D();
       expectedVector.scaleAdd((1- alpha), vector1, expectedVector);
@@ -329,13 +329,13 @@ public class TransformInterpolationCalculatorTest
 
       AxisAngle axist1 = new AxisAngle();
       RotationMatrix maxtrixt1 = new RotationMatrix();
-      t1.getRotation(maxtrixt1);
+      maxtrixt1.set(t1.getRotation());
 //      axist1.set(maxtrixt1);
       axist1.set(maxtrixt1);
 
       AxisAngle axist2 = new AxisAngle();
       RotationMatrix maxtrixt2 = new RotationMatrix();
-      t2.getRotation(maxtrixt2);
+      maxtrixt2.set(t2.getRotation());
 //      axist2.set(maxtrixt2);
       axist2.set(maxtrixt2);
       
@@ -348,7 +348,7 @@ public class TransformInterpolationCalculatorTest
 
       AxisAngle axist3 = new AxisAngle();
       RotationMatrix maxtrixt3 = new RotationMatrix();
-      t3.getRotation(maxtrixt3);
+      maxtrixt3.set(t3.getRotation());
       axist3.set(maxtrixt3);
 
       //Since t1 has no rotation, t3 rotation should be in the same direction as t2 with the angle controlled by alpha
@@ -374,7 +374,7 @@ public class TransformInterpolationCalculatorTest
    {
       // This seems to work much better than going to quaternions first, especially when yaw is large...
       RotationMatrix rotationMatrix = new RotationMatrix();
-      transform3D.getRotation(rotationMatrix);
+      rotationMatrix.set(transform3D.getRotation());
       yawPitchRoll[0] = Math.atan2(rotationMatrix.getM10(), rotationMatrix.getM00());
       yawPitchRoll[1] = Math.asin(-rotationMatrix.getM20());
       yawPitchRoll[2] = Math.atan2(rotationMatrix.getM21(), rotationMatrix.getM22());

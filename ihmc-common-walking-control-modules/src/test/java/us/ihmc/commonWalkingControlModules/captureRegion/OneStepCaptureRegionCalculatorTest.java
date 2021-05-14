@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -37,12 +38,12 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class OneStepCaptureRegionCalculatorTest
@@ -56,7 +57,7 @@ public class OneStepCaptureRegionCalculatorTest
    private final ReferenceFrame rightAnkleZUpFrame = new SimpleAnkleZUpReferenceFrame("rightAnkleZUp");
    private final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<ReferenceFrame>(leftAnkleZUpFrame, rightAnkleZUpFrame);
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("CaptureRegionCalculatorTest");
+   private final YoRegistry registry = new YoRegistry("CaptureRegionCalculatorTest");
 
    @AfterEach
    public void tearDown()
@@ -385,7 +386,7 @@ public class OneStepCaptureRegionCalculatorTest
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
          transformToParent.setIdentity();
-         transformToParent.setTranslation(offset);
+         transformToParent.getTranslation().set(offset);
       }
    }
 
@@ -420,7 +421,7 @@ public class OneStepCaptureRegionCalculatorTest
       final SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
       final SideDependentList<FrameConvexPolygon2D> footPolygons = new SideDependentList<>();
       final SideDependentList<YoFrameConvexPolygon2D> yoFootPolygons = new SideDependentList<>();
-      YoVariableRegistry registry = robot.getRobotsYoVariableRegistry();
+      YoRegistry registry = robot.getRobotsYoRegistry();
       final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       final SideDependentList<YoArtifactPolygon> footArtifacts = new SideDependentList<>();
       for (final RobotSide robotSide : RobotSide.values)
@@ -430,7 +431,7 @@ public class OneStepCaptureRegionCalculatorTest
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
-               transformToParent.setTranslation(new Vector3D(0.0, robotSide.negateIfRightSide(0.15), 0.0));
+               transformToParent.getTranslation().set(new Vector3D(0.0, robotSide.negateIfRightSide(0.15), 0.0));
             }
          };
          ankleZUpFrame.update();
@@ -472,10 +473,10 @@ public class OneStepCaptureRegionCalculatorTest
       final double omega0 = 3.4;
 
       final SimulationOverheadPlotter simulationOverheadPlotter = new SimulationOverheadPlotter();
-      VariableChangedListener variableChangedListener = new VariableChangedListener()
+      YoVariableChangedListener variableChangedListener = new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             FramePoint2D icp = new FramePoint2D(yoICP);
             RobotSide supportSide = yoSupportSide.getEnumValue();
@@ -494,13 +495,13 @@ public class OneStepCaptureRegionCalculatorTest
             simulationOverheadPlotter.update();
          }
       };
-      swingTimeRemaining.addVariableChangedListener(variableChangedListener);
+      swingTimeRemaining.addListener(variableChangedListener);
       yoICP.attachVariableChangedListener(variableChangedListener);
-      yoSupportSide.addVariableChangedListener(variableChangedListener);
+      yoSupportSide.addListener(variableChangedListener);
 
       swingTimeRemaining.set(0.3);
       yoICP.set(0.1, 0.2);
-      variableChangedListener.notifyOfVariableChange(null);
+      variableChangedListener.changed(null);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot);
 

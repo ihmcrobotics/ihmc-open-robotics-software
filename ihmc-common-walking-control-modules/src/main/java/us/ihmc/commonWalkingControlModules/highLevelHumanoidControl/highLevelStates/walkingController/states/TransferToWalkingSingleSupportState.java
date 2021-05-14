@@ -14,7 +14,6 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
@@ -23,17 +22,16 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToWalkingSingleSupportState extends TransferState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final int numberOfFootstepsToConsider = 3;
-   private final Footstep[] footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
-   private final FootstepTiming[] footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
-   private final FootstepShiftFractions[] footstepShiftFractions = FootstepShiftFractions.createShiftFractions(numberOfFootstepsToConsider);
+   private final int numberOfFootstepsToConsider;
+   private final Footstep[] footsteps;
+   private final FootstepTiming[] footstepTimings;
 
    private final DoubleProvider minimumTransferTime;
 
@@ -54,7 +52,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               TouchdownErrorCompensator touchdownErrorCompensator, HighLevelHumanoidControllerToolbox controllerToolbox,
                                               HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
-                                              DoubleProvider unloadFraction, DoubleProvider rhoMin, YoVariableRegistry parentRegistry)
+                                              DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
             rhoMin, parentRegistry);
@@ -67,6 +65,10 @@ public class TransferToWalkingSingleSupportState extends TransferState
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
+
+      numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
+      footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
+      footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
    }
 
    @Override
@@ -92,12 +94,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       }
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
 
       int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
       if (stepsToAdd < 1)
@@ -108,10 +106,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
       {
          Footstep footstep = footsteps[i];
          FootstepTiming timing = footstepTimings[i];
-         FootstepShiftFractions shiftFractions = footstepShiftFractions[i];
          walkingMessageHandler.peekFootstep(i, footstep);
          walkingMessageHandler.peekTiming(i, timing);
-         walkingMessageHandler.peekShiftFraction(i, shiftFractions);
 
          if (i == 0)
          {
@@ -119,20 +115,13 @@ public class TransferToWalkingSingleSupportState extends TransferState
             walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
          }
 
-         balanceManager.addFootstepToPlan(footstep, timing, shiftFractions);
+         balanceManager.addFootstepToPlan(footstep, timing);
       }
 
-      balanceManager.setICPPlanTransferToSide(transferToSide);
       FootstepTiming firstTiming = footstepTimings[0];
       currentTransferDuration.set(firstTiming.getTransferTime());
-      balanceManager.initializeICPPlanForTransfer(firstTiming.getSwingTime(), firstTiming.getTransferTime(), finalTransferTime);
-
-      if (balanceManager.wasTimingAdjustedForReachability())
-      {
-         double currentTransferDuration = balanceManager.getCurrentTransferDurationAdjustedForReachability();
-         double currentSwingDuration = balanceManager.getCurrentSwingDurationAdjustedForReachability();
-         firstTiming.setTimings(currentSwingDuration, currentTransferDuration);
-      }
+      balanceManager.setFinalTransferTime(finalTransferTime);
+      balanceManager.initializeICPPlanForTransfer();
 
       pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
       pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
@@ -144,8 +133,16 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      RobotSide swingSide = transferToSide.getOppositeSide();
+      feetManager.updateSwingTrajectoryPreview(swingSide);
+      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
+      balanceManager.computeICPPlan();
+
       if (!doManualLiftOff())
-         switchToToeOffIfPossible();
+      {
+         if (switchToToeOffIfPossible())
+            feetManager.initializeSwingTrajectoryPreview(swingSide, footsteps[0], footstepTimings[0].getSwingTime());
+      }
 
       super.doAction(timeInState);
 
@@ -184,6 +181,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    {
       super.onEntry();
 
+      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 
       updateFootPlanOffset();

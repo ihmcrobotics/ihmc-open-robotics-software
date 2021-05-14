@@ -1,14 +1,15 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoSE3OffsetFrame extends MovingReferenceFrame
 {
@@ -26,7 +27,7 @@ public class YoSE3OffsetFrame extends MovingReferenceFrame
     * @param parentFrame the frame to which this is attached.
     * @param registry the registry to which the internal {@code YoVariable}s are registered.
     */
-   public YoSE3OffsetFrame(String frameName, ReferenceFrame parentFrame, YoVariableRegistry registry)
+   public YoSE3OffsetFrame(String frameName, ReferenceFrame parentFrame, YoRegistry registry)
    {
       super(frameName, parentFrame);
 

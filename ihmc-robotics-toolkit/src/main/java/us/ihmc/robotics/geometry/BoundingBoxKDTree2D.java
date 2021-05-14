@@ -204,8 +204,8 @@ public class BoundingBoxKDTree2D
 
       for (int i = 0; i < boundingBoxes.size(); i++)
       {
-         boundingBoxes.get(i).getMinPoint(minPoint);
-         boundingBoxes.get(i).getMaxPoint(maxPoint);
+         minPoint.set(boundingBoxes.get(i).getMinPoint());
+         maxPoint.set(boundingBoxes.get(i).getMaxPoint());
 
          if (median <= minPoint.getX())
          {
@@ -262,8 +262,8 @@ public class BoundingBoxKDTree2D
 
       for (int i = 0; i < boundingBoxes.size(); i++)
       {
-         boundingBoxes.get(i).getMinPoint(minPoint);
-         boundingBoxes.get(i).getMaxPoint(maxPoint);
+         minPoint.set(boundingBoxes.get(i).getMinPoint());
+         maxPoint.set(boundingBoxes.get(i).getMaxPoint());
 
          if (median <= minPoint.getY())
          {

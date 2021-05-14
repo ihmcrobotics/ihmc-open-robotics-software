@@ -1,5 +1,11 @@
 package us.ihmc.avatar.networkProcessor;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.depthOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.lidarOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoInputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,8 +13,8 @@ import java.util.List;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingToolboxModule;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.directionalControlToolboxModule.DirectionalControlModule;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -18,8 +24,10 @@ import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
+import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarStereoREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.avatar.networkProcessor.walkingPreview.WalkingControllerPreviewToolboxModule;
 import us.ihmc.avatar.networkProcessor.wholeBodyTrajectoryToolboxModule.WholeBodyTrajectoryToolboxModule;
@@ -28,15 +36,17 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotBehaviors.watson.TextToSpeechNetworkModule;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.CloseableAndDisposable;
@@ -54,7 +64,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    private final DRCRobotModel robotModel;
    private final PubSubImplementation pubSubImplementation;
 
-   private Ros2Node ros2Node;
+   private RealtimeROS2Node realtimeROS2Node;
    private URI rosURI;
    private ObjectCommunicator simulatedSensorCommunicator;
 
@@ -65,8 +75,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       humanoidNetworkProcessor.setRosURI(parameters.getRosURI());
       humanoidNetworkProcessor.setSimulatedSensorCommunicator(parameters.getSimulatedSensorCommunicator());
 
-      if (parameters.isUseTextToSpeechEngine())
-         humanoidNetworkProcessor.setupTextToSpeechEngine();
       if (parameters.isUseZeroPoseRobotConfigurationPublisherModule())
          humanoidNetworkProcessor.setupZeroPoseRobotConfigurationPublisherModule();
       if (parameters.isUseWholeBodyTrajectoryToolboxModule())
@@ -75,14 +83,10 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupKinematicsToolboxModule(parameters.isVisualizeKinematicsToolboxModule());
       if (parameters.isUseKinematicsPlanningToolboxModule())
          humanoidNetworkProcessor.setupKinematicsPlanningToolboxModule(parameters.isVisualizeKinematicsPlanningToolboxModule());
-      if (parameters.isUseKinematicsPlanningToolboxModule())
-         humanoidNetworkProcessor.setupKinematicsPlanningToolboxModule(parameters.isVisualizeKinematicsPlanningToolboxModule());
       if (parameters.isUseKinematicsStreamingToolboxModule())
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
-         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule(null);
-      if (parameters.isUseFootstepPostProcessingToolboxModule())
-         humanoidNetworkProcessor.setupFootstepPostProcessingToolboxModule(parameters.isVisualizeFootstepPostProcessingToolboxModule());
+         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule();
       if (parameters.isUseMocapModule())
          humanoidNetworkProcessor.setupMocapModule();
       if (parameters.isUseBehaviorModule())
@@ -95,6 +99,10 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupSensorModule();
       if (parameters.isUseHeightQuadTreeToolboxModule())
          humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
+      if (parameters.isUseFiducialDetectorToolboxModule())
+         humanoidNetworkProcessor.setupFiducialDetectorToolboxModule();
+      if (parameters.isUseObjectDetectorToolboxModule())
+         humanoidNetworkProcessor.setupObjectDetectorToolboxModule();
       if (parameters.isUseRobotEnvironmentAwerenessModule())
          humanoidNetworkProcessor.setupRobotEnvironmentAwerenessModule(parameters.getREAConfigurationFilePath());
       if (parameters.isUseBipedalSupportPlanarRegionPublisherModule())
@@ -102,7 +110,9 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (parameters.isUseWalkingPreviewModule())
          humanoidNetworkProcessor.setupWalkingPreviewModule(parameters.isVisualizeWalkingPreviewModule());
       if (parameters.isUseHumanoidAvatarREAStateUpdater())
-         humanoidNetworkProcessor.setupHumanoidAvatarREAStateUpdater();
+         humanoidNetworkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      if (parameters.isUseDirectionalControlModule())
+    	 humanoidNetworkProcessor.setupDirectionalControlModule(false);
 
       return humanoidNetworkProcessor;
    }
@@ -128,7 +138,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          LogTools.info("Shutting down network processor modules.");
          closeAndDispose();
          ThreadTools.sleep(10);
-      }));
+      }, getClass().getSimpleName() + "Shutdown"));
    }
 
    public void setRosURI(URI rosURI)
@@ -145,14 +155,15 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
    }
 
-   public Ros2Node getOrCreateRos2Node()
+   public RealtimeROS2Node getOrCreateROS2Node()
    {
-      if (ros2Node == null)
+      if (realtimeROS2Node == null)
       {
-         ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
-         modulesToClose.add(ros2Node::destroy);
+         LogTools.info("Creating ROS 2 node in {} mode", pubSubImplementation.name());
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, NETWORK_PROCESSOR_ROS2_NODE_NAME);
+         modulesToClose.add(realtimeROS2Node::destroy);
       }
-      return ros2Node;
+      return realtimeROS2Node;
    }
 
    public URI getOrCreateRosURI()
@@ -167,23 +178,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (simulatedSensorCommunicator == null)
          throw new RuntimeException("Simulated sensor communicator has not been set.");
       return simulatedSensorCommunicator;
-   }
-
-   public TextToSpeechNetworkModule setupTextToSpeechEngine()
-   {
-      checkIfModuleCanBeCreated(TextToSpeechNetworkModule.class);
-
-      try
-      {
-         TextToSpeechNetworkModule module = new TextToSpeechNetworkModule(pubSubImplementation);
-         modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
    }
 
    public ZeroPoseMockRobotConfigurationDataPublisherModule setupZeroPoseRobotConfigurationPublisherModule()
@@ -226,7 +220,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         KinematicsToolboxModule module = new KinematicsToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
+         KinematicsToolboxModule module = new KinematicsToolboxModule(robotModel, enableYoVariableServer, getOrCreateROS2Node());
          modulesToClose.add(module);
          return module;
       }
@@ -282,34 +276,16 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public FootstepPlanningModule setupFootstepPlanningToolboxModule(AdaptiveSwingParameters adaptiveSwingParameters)
+   public FootstepPlanningModule setupFootstepPlanningToolboxModule()
    {
+
       checkIfModuleCanBeCreated(FootstepPlanningModule.class);
 
       try
       {
-         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS, adaptiveSwingParameters);
+         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(getOrCreateROS2Node(), robotModel);
          modulesToClose.add(module);
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
 
-   public FootstepPlanPostProcessingToolboxModule setupFootstepPostProcessingToolboxModule(boolean enableYoVariableServer)
-   {
-      checkIfModuleCanBeCreated(FootstepPlanPostProcessingToolboxModule.class);
-
-      try
-      {
-         FootstepPlanPostProcessingToolboxModule module = new FootstepPlanPostProcessingToolboxModule(robotModel,
-                                                                                                      null,
-                                                                                                      enableYoVariableServer,
-                                                                                                      pubSubImplementation);
-         modulesToClose.add(module);
          return module;
       }
       catch (Throwable e)
@@ -327,10 +303,10 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         ROS2Tools.createCallbackSubscription(getOrCreateRos2Node(),
-                                              PlanarRegionsListMessage.class,
-                                              REACommunicationProperties.publisherTopicNameGenerator,
-                                              s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
+         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateROS2Node(),
+                                                       PlanarRegionsListMessage.class,
+                                                       REACommunicationProperties.outputTopic,
+                                                       s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
          return new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
       }
       catch (Throwable e)
@@ -387,7 +363,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         RosModule rosModule = new RosModule(robotModel, getOrCreateRosURI(), simulatedSensorCommunicator, pubSubImplementation);
+         RosModule rosModule = new RosModule(robotModel, getOrCreateRosURI(), simulatedSensorCommunicator, getOrCreateROS2Node());
          modulesToClose.add(rosModule);
          return rosModule;
       }
@@ -400,9 +376,10 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public DRCSensorSuiteManager setupSensorModule()
    {
+      LogTools.info("Setting up sensor module...");
       try
       {
-         DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager();
+         DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(getOrCreateROS2Node());
 
          checkIfModuleCanBeCreated(sensorSuiteManager.getClass());
 
@@ -445,6 +422,47 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
+   public FiducialDetectorToolboxModule setupFiducialDetectorToolboxModule()
+   {
+      checkIfModuleCanBeCreated(FiducialDetectorToolboxModule.class);
+
+      try
+      {
+         FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                                  robotModel.getTarget(),
+                                                                                  robotModel.createFullRobotModel(),
+                                                                                  robotModel.getLogModelProvider(),
+                                                                                  pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+
+   public ObjectDetectorToolboxModule setupObjectDetectorToolboxModule()
+   {
+      checkIfModuleCanBeCreated(ObjectDetectorToolboxModule.class);
+
+      try
+      {
+         ObjectDetectorToolboxModule module = new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                              robotModel.createFullRobotModel(),
+                                                                              robotModel.getLogModelProvider(),
+                                                                              pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+
    public LIDARBasedREAModule setupRobotEnvironmentAwerenessModule(String reaConfigurationFilePath)
    {
       checkIfModuleCanBeCreated(LIDARBasedREAModule.class);
@@ -452,10 +470,14 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       try
       {
          LIDARBasedREAModule module;
-         if (reaConfigurationFilePath == null)
-            module = LIDARBasedREAModule.createRemoteModule(DEFAULT_REA_CONFIG_FILE_PATH);
+
+         REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(getOrCreateROS2Node(), outputTopic, lidarOutputTopic, stereoOutputTopic, depthOutputTopic);
+         FilePropertyHelper filePropertyHelper;
+         if (reaConfigurationFilePath != null)
+            filePropertyHelper = new FilePropertyHelper(reaConfigurationFilePath);
          else
-            module = LIDARBasedREAModule.createRemoteModule(reaConfigurationFilePath);
+            filePropertyHelper = new FilePropertyHelper(DEFAULT_REA_CONFIG_FILE_PATH);
+         module = LIDARBasedREAModule.createRemoteModule(filePropertyHelper, networkProvider);
          modulesToClose.add(module::stop);
          modulesToStart.add(module::start);
          return module;
@@ -473,7 +495,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel, pubSubImplementation);
+         BipedalSupportPlanarRegionPublisher module = new BipedalSupportPlanarRegionPublisher(robotModel, getOrCreateROS2Node());
          modulesToClose.add(module);
          modulesToStart.add(module::start);
          return module;
@@ -491,7 +513,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
       try
       {
-         WalkingControllerPreviewToolboxModule module = new WalkingControllerPreviewToolboxModule(robotModel, enableYoVariableServer, pubSubImplementation);
+         WalkingControllerPreviewToolboxModule module = new WalkingControllerPreviewToolboxModule(robotModel, enableYoVariableServer, getOrCreateROS2Node());
          modulesToClose.add(module);
          return module;
       }
@@ -502,13 +524,13 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public HumanoidAvatarREAStateUpdater setupHumanoidAvatarREAStateUpdater()
+   public HumanoidAvatarREAStateUpdater setupHumanoidAvatarLidarREAStateUpdater()
    {
       checkIfModuleCanBeCreated(HumanoidAvatarREAStateUpdater.class);
 
       try
       {
-         HumanoidAvatarREAStateUpdater module = new HumanoidAvatarREAStateUpdater(robotModel, pubSubImplementation);
+         HumanoidAvatarREAStateUpdater module = new HumanoidAvatarREAStateUpdater(robotModel, getOrCreateROS2Node());
          modulesToClose.add(module);
          return module;
       }
@@ -517,6 +539,39 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          reportFailure(e);
          return null;
       }
+   }
+
+   public HumanoidAvatarStereoREAStateUpdater setupHumanoidAvatarRealSenseREAStateUpdater()
+   {
+      checkIfModuleCanBeCreated(HumanoidAvatarStereoREAStateUpdater.class);
+
+      try
+      {
+         HumanoidAvatarStereoREAStateUpdater module = new HumanoidAvatarStereoREAStateUpdater(robotModel, pubSubImplementation, stereoInputTopic);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+   
+   public DirectionalControlModule setupDirectionalControlModule(boolean enableYoVariableServer)
+   {
+	  checkIfModuleCanBeCreated(DirectionalControlModule.class);
+	  
+	  try 
+	  {
+	     DirectionalControlModule module = new DirectionalControlModule(robotModel, enableYoVariableServer, getOrCreateROS2Node());
+		 return module;
+	  }
+	  catch (Throwable e)
+	  {
+	     reportFailure(e);
+	     return null;
+	  }	   
    }
 
    private static void reportFailure(Throwable e)
@@ -540,6 +595,15 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
    public void start()
    {
+      if (hasStarted)
+      {
+         LogTools.warn("Network is already running, ignoring request.");
+         return;
+      }
+
+      if (realtimeROS2Node != null)
+         realtimeROS2Node.spin();
+
       hasStarted = true;
 
       for (Runnable module : modulesToStart)
@@ -558,6 +622,12 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
    @Override
    public void closeAndDispose()
    {
+      if (!hasStarted)
+      {
+         LogTools.warn("Network was not running, ignoring request.");
+         return;
+      }
+
       for (CloseableAndDisposable module : modulesToClose)
       {
          try
@@ -571,5 +641,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
 
       modulesToClose.clear();
+      if (realtimeROS2Node != null)
+         realtimeROS2Node.destroy();
    }
 }

@@ -1,19 +1,20 @@
 package us.ihmc.simulationToolkit.visualizers;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotDataLogger.RobotVisualizer;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /*
  * Simple class that makes simpler to visualize a FullRobotModel inside the SimulationConstructionSet.
@@ -30,7 +31,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    private final FullRobotModel fullRobot;
 
    private SimulationConstructionSet scs;
-   private YoVariableRegistry robotRegistry;
+   private YoRegistry robotRegistry;
    private FloatingJointBasics rootJoint;
    private final ArrayList<ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics>> revoluteJoints = new ArrayList<ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>>();
   
@@ -43,7 +44,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
       robot = (FloatingRootJointRobot) scs.getRobots()[0];
       name = robot.getName() + "Simulated";    
       this.updateDT = updateDT;
-      robotRegistry = robot.getRobotsYoVariableRegistry();
+      robotRegistry = robot.getRobotsYoRegistry();
       rootJoint = fullRobotModel.getRootJoint();
       revoluteJoints.clear();
       OneDoFJointBasics[] revoluteJointsArray = fullRobotModel.getOneDoFJoints();
@@ -55,7 +56,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
          ImmutablePair<OneDegreeOfFreedomJoint,OneDoFJointBasics> jointPair = new ImmutablePair<OneDegreeOfFreedomJoint, OneDoFJointBasics>(oneDoFJoint, revoluteJoint);
          revoluteJoints.add(jointPair);
       }
-      setMainRegistry(robotRegistry, null, null);
+      setMainRegistry(robotRegistry, null);
    }
 
    public FloatingRootJointRobot getSDFRobot()
@@ -63,7 +64,7 @@ public class FullRobotModelVisualizer implements RobotVisualizer
       return robot;
    }
    
-   public YoVariableRegistry getRobotRegistry()
+   public YoRegistry getRobotRegistry()
    {
       return robotRegistry;
    }
@@ -73,18 +74,18 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    {
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return null;
    }
    
    @Override
-   public void setMainRegistry(YoVariableRegistry registry, RigidBodyBasics rootBody, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void setMainRegistry(YoRegistry registry, List<? extends JointBasics> jointsToPublish, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
             
-      if( robot.getRobotsYoVariableRegistry() != registry)
+      if( robot.getRobotsYoRegistry() != registry)
       {
-         robot.addYoVariableRegistry(registry); 
+         robot.addYoRegistry(registry); 
       }
    }
 
@@ -133,15 +134,15 @@ public class FullRobotModelVisualizer implements RobotVisualizer
    }
 
    @Override
-   public void update(long timestamp, YoVariableRegistry registry)
+   public void update(long timestamp, YoRegistry registry)
    {
       update(timestamp);
    }
 
    @Override
-   public void addRegistry(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public void addRegistry(YoRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      robot.addYoVariableRegistry(registry);
+      robot.addYoRegistry(registry);
    }
 
    @Override

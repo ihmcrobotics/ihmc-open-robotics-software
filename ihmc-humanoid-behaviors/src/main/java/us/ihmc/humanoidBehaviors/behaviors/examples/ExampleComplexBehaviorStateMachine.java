@@ -1,17 +1,13 @@
 package us.ihmc.humanoidBehaviors.behaviors.examples;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine.ExampleStates;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<ExampleStates>
@@ -27,7 +23,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
    private final SimpleArmMotionBehavior simpleArmMotionBehavior;
    private final ResetRobotBehavior resetRobotBehavior;
 
-   public ExampleComplexBehaviorStateMachine(String robotName, Ros2Node ros2Node, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
+   public ExampleComplexBehaviorStateMachine(String robotName, ROS2Node ros2Node, YoDouble yoTime, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "ExampleStateMachine", ExampleStates.class, yoTime, ros2Node);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
@@ -43,7 +39,7 @@ public class ExampleComplexBehaviorStateMachine extends StateMachineBehavior<Exa
       //      {
       //
       //         @Override
-      //         public void notifyOfVariableChange(YoVariable<?> v)
+      //         public void notifyOfVariableChange(YoVariable v)
       //         {
       //            System.out.println("ExampleComplexBehaviorStateMachine: Changing state to " + statemachine.getCurrentState());
       //         }

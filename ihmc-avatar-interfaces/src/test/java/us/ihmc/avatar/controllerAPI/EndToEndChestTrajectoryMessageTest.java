@@ -7,17 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryMessage;
-import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.StopAllTrajectoryMessage;
-import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
@@ -62,10 +58,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -184,7 +180,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       chestTrajectoryMessage.setSequenceId(random.nextLong());
       drcSimulationTestHelper.publishToController(chestTrajectoryMessage);
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0 * controllerDT));
 
       assertEquals(1, statusMessages.size());
       EndToEndTestTools.assertTaskspaceTrajectoryStatus(chestTrajectoryMessage.getSequenceId(),
@@ -266,14 +262,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Vector3D rotationVector = new Vector3D();
       desiredChestOrientation.getRotationVector(rotationVector);
-      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationVectorMatrix = new DMatrixRMaj(3, 1);
       rotationVector.get(rotationVectorMatrix);
 
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
       selectionMatrix3D.getFullSelectionMatrixInFrame(pelvisZUpFrame, selectionMatrix);
 
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
-      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(selectionMatrix, rotationVectorMatrix, result);
       rotationVector.set(result);
       desiredChestOrientation.setRotationVector(rotationVector);
 
@@ -382,12 +378,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    private void assertAngularWeightsMatchDefault(RigidBodyBasics rigidBody, SimulationConstructionSet scs)
    {
       String prefix = rigidBody.getName() + "TaskspaceOrientation";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentWeightX");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentWeightY");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentWeightZ");
-      YoDouble defaultAngularWeightX = (YoDouble) scs.getVariable("ChestAngularWeightX");
-      YoDouble defaultAngularWeightY = (YoDouble) scs.getVariable("ChestAngularWeightY");
-      YoDouble defaultAngularWeightZ = (YoDouble) scs.getVariable("ChestAngularWeightZ");
+      YoDouble angularWeightX = (YoDouble) scs.findVariable(prefix + "CurrentWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.findVariable(prefix + "CurrentWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.findVariable(prefix + "CurrentWeightZ");
+      YoDouble defaultAngularWeightX = (YoDouble) scs.findVariable("ChestAngularWeightX");
+      YoDouble defaultAngularWeightY = (YoDouble) scs.findVariable("ChestAngularWeightY");
+      YoDouble defaultAngularWeightZ = (YoDouble) scs.findVariable("ChestAngularWeightZ");
       assertEquals(defaultAngularWeightX.getDoubleValue(), angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(defaultAngularWeightY.getDoubleValue(), angularWeightY.getDoubleValue(), 1e-8);
       assertEquals(defaultAngularWeightZ.getDoubleValue(), angularWeightZ.getDoubleValue(), 1e-8);
@@ -397,9 +393,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    private void assertWeightsMatch(double xWeight, double yWeight, double zWeight, RigidBodyBasics rigidBody, SimulationConstructionSet scs)
    {
       String prefix = rigidBody.getName() + "TaskspaceOrientation";
-      YoDouble angularWeightX = (YoDouble) scs.getVariable(prefix + "CurrentWeightX");
-      YoDouble angularWeightY = (YoDouble) scs.getVariable(prefix + "CurrentWeightY");
-      YoDouble angularWeightZ = (YoDouble) scs.getVariable(prefix + "CurrentWeightZ");
+      YoDouble angularWeightX = (YoDouble) scs.findVariable(prefix + "CurrentWeightX");
+      YoDouble angularWeightY = (YoDouble) scs.findVariable(prefix + "CurrentWeightY");
+      YoDouble angularWeightZ = (YoDouble) scs.findVariable(prefix + "CurrentWeightZ");
 
       assertEquals(xWeight, angularWeightX.getDoubleValue(), 1e-8);
       assertEquals(yWeight, angularWeightY.getDoubleValue(), 1e-8);
@@ -457,14 +453,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Vector3D rotationVector = new Vector3D();
       desiredChestOrientation.getRotationVector(rotationVector);
-      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationVectorMatrix = new DMatrixRMaj(3, 1);
       rotationVector.get(rotationVectorMatrix);
 
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
       selectionMatrix3D.getFullSelectionMatrixInFrame(pelvisZUpFrame, selectionMatrix);
 
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
-      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(selectionMatrix, rotationVectorMatrix, result);
       rotationVector.set(result);
       desiredChestOrientation.setRotationVector(rotationVector);
 
@@ -1511,12 +1507,12 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
@@ -1577,7 +1573,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }
@@ -1619,9 +1615,9 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    public static Vector3D findControlErrorRotationVector(SimulationConstructionSet scs, RigidBodyBasics chest)
    {
       String chestPrefix = chest.getName();
-      String nameSpace = FeedbackControllerToolbox.class.getSimpleName();
+      String namespace = FeedbackControllerToolbox.class.getSimpleName();
       String varName = chestPrefix + "ErrorRotationVector";
-      return EndToEndTestTools.findVector3D(nameSpace, varName, scs);
+      return EndToEndTestTools.findVector3D(namespace, varName, scs);
    }
 
    public static SO3TrajectoryPoint findTrajectoryPoint(int trajectoryPointIndex, SimulationConstructionSet scs, RigidBodyBasics chestRigidBody)
@@ -1636,7 +1632,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       String angularVelocityName = chestPrefix + "AngularVelocity";
 
       SO3TrajectoryPoint simpleSO3TrajectoryPoint = new SO3TrajectoryPoint();
-      simpleSO3TrajectoryPoint.setTime(scs.getVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
+      simpleSO3TrajectoryPoint.setTime(scs.findVariable(orientationTrajectoryName, timeName + suffix).getValueAsDouble());
       simpleSO3TrajectoryPoint.setOrientation(EndToEndTestTools.findQuaternion(orientationTrajectoryName, orientationName, suffix, scs));
       simpleSO3TrajectoryPoint.setAngularVelocity(EndToEndTestTools.findVector3D(orientationTrajectoryName, angularVelocityName, suffix, scs));
       return simpleSO3TrajectoryPoint;
@@ -1698,19 +1694,19 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       RigidBodyTransform t1 = new RigidBodyTransform();
       Vector3D rotationVector = new Vector3D();
-      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationVectorMatrix = new DMatrixRMaj(3, 1);
 
       t1.appendYawRotation(Math.PI / 8.0);
-      t1.getRotation(rotationVector);
+      t1.getRotation().getRotationVector(rotationVector);
       rotationVector.get(rotationVectorMatrix);
 
       SelectionMatrix3D selectionMatrix3d = new SelectionMatrix3D();
       selectionMatrix3d.selectZAxis(false);
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
       selectionMatrix3d.getFullSelectionMatrixInFrame(null, selectionMatrix);
 
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
-      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(selectionMatrix, rotationVectorMatrix, result);
 
       System.out.println(result);
       rotationVector.set(result);

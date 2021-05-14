@@ -247,7 +247,7 @@ public class ConcaveHull implements Iterable<Point2D>
       if (getNumberOfVertices() != other.getNumberOfVertices())
          return false;
 
-      for (int vertexIndex = 0; vertexIndex <= getNumberOfVertices(); vertexIndex++)
+      for (int vertexIndex = 0; vertexIndex < getNumberOfVertices(); vertexIndex++)
       {
          if (!hullVertices.get(vertexIndex).equals(other.hullVertices.get(vertexIndex)))
             return false;

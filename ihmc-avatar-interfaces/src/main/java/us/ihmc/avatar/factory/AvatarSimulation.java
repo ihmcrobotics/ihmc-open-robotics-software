@@ -1,17 +1,23 @@
 package us.ihmc.avatar.factory;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.avatar.AvatarControllerThread;
 import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.kinematicsSimulation.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 
@@ -20,6 +26,7 @@ public class AvatarSimulation
    private SimulationConstructionSet simulationConstructionSet;
    private HighLevelHumanoidControllerFactory highLevelHumanoidControllerFactory;
    private YoVariableServer yoVariableServer;
+   private IntraprocessYoVariableLogger intraprocessYoVariableLogger;
    private DisposableRobotController robotController;
    private AvatarEstimatorThread stateEstimationThread;
    private AvatarControllerThread controllerThread;
@@ -31,6 +38,10 @@ public class AvatarSimulation
 
    public void start()
    {
+      if (intraprocessYoVariableLogger != null)
+      {
+         intraprocessYoVariableLogger.start();
+      }
       if (yoVariableServer != null)
       {
          yoVariableServer.start();
@@ -50,6 +61,15 @@ public class AvatarSimulation
       robotController = null;
    }
 
+   public void destroy()
+   {
+      dispose();
+      if (yoVariableServer != null)
+         yoVariableServer.close();
+      ThreadTools.startAsDaemon(() -> simulationConstructionSet.stopSimulationThread(), "WaitForSimulationThreadToStop");
+      simulationConstructionSet.closeAndDispose();
+   }
+
    public void resetRobot()
    {
       resetRobot(true);
@@ -61,6 +81,19 @@ public class AvatarSimulation
 
       // TODO: instead of sleeping wait for all tasks in the barrier scheduler to finish.
       ThreadTools.sleep(100);
+
+      List<OneDegreeOfFreedomJoint> joints = new ArrayList<>();
+      humanoidFloatingRootJointRobot.getAllOneDegreeOfFreedomJoints(joints);
+
+      for (OneDegreeOfFreedomJoint joint : joints)
+      {
+         joint.setQd(0.0);
+         joint.setQdd(0.0);
+         joint.setTau(0.0);
+      }
+
+      humanoidFloatingRootJointRobot.getRootJoint().setAngularVelocityInBody(new Vector3D());
+      humanoidFloatingRootJointRobot.getRootJoint().setVelocity(0, 0, 0);
 
       robotInitialSetup.initializeRobot(humanoidFloatingRootJointRobot, robotModel.getJointMap());
       AvatarSimulationFactory.initializeEstimator(humanoidFloatingRootJointRobot, stateEstimationThread);
@@ -134,6 +167,11 @@ public class AvatarSimulation
    public void setYoVariableServer(YoVariableServer yoVariableServer)
    {
       this.yoVariableServer = yoVariableServer;
+   }
+
+   public void setIntraprocessYoVariableLogger(IntraprocessYoVariableLogger intraprocessYoVariableLogger)
+   {
+      this.intraprocessYoVariableLogger = intraprocessYoVariableLogger;
    }
 
    public void setRobotController(DisposableRobotController robotController)

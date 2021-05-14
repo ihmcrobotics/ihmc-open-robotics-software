@@ -46,12 +46,12 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public int number_of_points_;
    /**
             * The compressed pointcloud.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+            * See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
             */
    public us.ihmc.idl.IDLSequence.Byte  point_cloud_;
    /**
             * The compressed colors.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+            * See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
             */
    public us.ihmc.idl.IDLSequence.Byte  colors_;
 
@@ -212,7 +212,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
    /**
             * The compressed pointcloud.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+            * See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
             */
    public us.ihmc.idl.IDLSequence.Byte  getPointCloud()
    {
@@ -222,7 +222,7 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
    /**
             * The compressed colors.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+            * See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
             */
    public us.ihmc.idl.IDLSequence.Byte  getColors()
    {

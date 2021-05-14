@@ -27,7 +27,7 @@ public class PlanarRegionMessageConverter
       planarRegion.getNormal(message.getRegionNormal());
       RigidBodyTransform transform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transform);
-      message.getRegionOrientation().set(transform.getRotationMatrix());
+      message.getRegionOrientation().set(transform.getRotation());
 
       message.setConcaveHullSize(planarRegion.getConcaveHullSize());
       message.setNumberOfConvexPolygons(planarRegion.getNumberOfConvexPolygons());
@@ -93,9 +93,16 @@ public class PlanarRegionMessageConverter
          convexPolygons.add(convexPolygon);
       }
 
-      PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullVertices.toArray(new Point2D[0]), convexPolygons);
+      PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullVertices, convexPolygons);
       planarRegion.setRegionId(message.getRegionId());
       return planarRegion;
+   }
+
+   public static PlanarRegionsListMessage convertToPlanarRegionsListMessage(PlanarRegion planarRegion)
+   {
+      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
+      planarRegionsList.addPlanarRegion(planarRegion);
+      return convertToPlanarRegionsListMessage(planarRegionsList);
    }
 
    public static PlanarRegionsListMessage convertToPlanarRegionsListMessage(PlanarRegionsList planarRegionsList)
@@ -186,7 +193,7 @@ public class PlanarRegionMessageConverter
          }
          convexPolygonIndexStart += polygonIndex;
 
-         PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullVertices.toArray(new Point2D[0]), convexPolygons);
+         PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullVertices, convexPolygons);
          planarRegion.setRegionId(message.getRegionId().get(regionIndex));
          planarRegions.add(planarRegion);
       }

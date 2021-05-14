@@ -5,8 +5,8 @@ import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.simulationconstructionset.NewDataListener;
 
@@ -18,7 +18,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
    private boolean stateChanged = false;
 
-   public YoVariableToggleButton(String outletName, YoBoolean currentStateVariable, YoVariableRegistry parent)
+   public YoVariableToggleButton(String outletName, YoBoolean currentStateVariable, YoRegistry parent)
    {
       buttonToggleState = new YoVariableToggler(outletName, parent, this, currentStateVariable);
       this.setText(buttonToggleState.getCurrentStateString());
@@ -88,7 +88,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
 
             setEnabled(true);
          }
-      }).start();
+      }, "SCSToggleButton").start();
    }
 
    public void setTrueString(String trueString)
@@ -106,7 +106,7 @@ public class YoVariableToggleButton extends JButton implements YoVariableToggleC
    }
 
    @Override
-   public void registerWithVariableChangedListener(VariableChangedListener changedListener)
+   public void registerWithVariableChangedListener(YoVariableChangedListener changedListener)
    {
       buttonToggleState.registerWithVariableChangedListener(changedListener);
    }

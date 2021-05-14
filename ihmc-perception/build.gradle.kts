@@ -1,5 +1,3 @@
-import org.apache.commons.lang3.SystemUtils
-
 buildscript {
    dependencies {
       classpath("org.apache.commons:commons-lang3:3.9")
@@ -7,10 +5,10 @@ buildscript {
 }
 
 plugins {
-   id("us.ihmc.ihmc-build") version "0.20.1"
-   id("us.ihmc.ihmc-ci") version "5.3"
-   id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.3.1"
+   id("us.ihmc.ihmc-build")
+   id("us.ihmc.ihmc-ci") version "7.4"
+   id("us.ihmc.ihmc-cd") version "1.20"
+   id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
 ihmc {
@@ -21,44 +19,29 @@ ihmc {
 }
 
 mainDependencies {
-   api("org.bytedeco:javacv-platform:1.5") {
-      exclude(group = "org.bytedeco", module = "opencv")
-   }
-   api("org.bytedeco:opencv:4.1.2-1.5.2:")
-   if (SystemUtils.IS_OS_UNIX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:linux-x86_64")
-   }
-   else if (SystemUtils.IS_OS_WINDOWS)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:windows-x86_64")
-   }
-   else if (SystemUtils.IS_OS_MAC_OSX)
-   {
-      api("org.bytedeco:opencv:4.1.2-1.5.2:macosx-x86_64")
-   }
-   api("org.apache.commons:commons-lang3:3.8.1")
-   api("us.ihmc:ihmc-native-library-loader:1.2.1")
-   api("org.georegression:georegression:0.11")
-   api("org.ejml:core:0.30")
-   api("org.ejml:dense64:0.30")
-   api("net.java.dev.jna:jna:4.1.0")
-   api("org.boofcv:geo:0.24.1")
-   api("org.boofcv:ip:0.24.1")
-   api("org.boofcv:visualize:0.24.1")
-   api("org.boofcv:io:0.24.1")
-   api("org.boofcv:recognition:0.24.1")
-   api("org.boofcv:calibration:0.24.1")
-   api("us.ihmc.ihmcPerception:valvenet:0.0.4")
-   api("us.ihmc.ihmcPerception:cuda:7.5")
-   api("org.ddogleg:ddogleg:0.7")
+   api(ihmc.sourceSetProject("javacv"))
+   // For experimenting with local OpenCV:
+   // api(files("/usr/local/share/OpenCV/java/opencv-310.jar"))
 
-   api("us.ihmc:euclid:0.12.2")
-   api("us.ihmc:ihmc-yovariables:0.4.0")
-   api("us.ihmc:ihmc-commons:0.26.6")
-   api("us.ihmc:simulation-construction-set:0.14.0")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.14.0")
-   api("us.ihmc:ihmc-graphics-description:0.14.1")
+   api("org.apache.commons:commons-lang3:3.8.1")
+   api("us.ihmc:ihmc-native-library-loader:1.3.1")
+   api("org.georegression:georegression:0.22")
+   api("org.ejml:ejml-core:0.39")
+   api("org.ejml:ejml-ddense:0.39")
+   api("net.java.dev.jna:jna:4.1.0")
+   api("org.boofcv:boofcv-geo:0.36")
+   api("org.boofcv:boofcv-ip:0.36")
+   api("org.boofcv:boofcv-swing:0.36")
+   api("org.boofcv:boofcv-io:0.36")
+   api("org.boofcv:boofcv-recognition:0.36")
+   api("org.boofcv:boofcv-calibration:0.36")
+   api("org.ddogleg:ddogleg:0.18")
+
+   api("us.ihmc:euclid:0.16.2")
+   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:simulation-construction-set:0.21.9")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
+   api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -69,11 +52,43 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
-testDependencies {
+openpnpDependencies {
+   api("org.openpnp:opencv:4.3.0-2")
+}
 
-   api("us.ihmc:ihmc-commons-testing:0.26.6")
-   api("us.ihmc:simulation-construction-set:0.14.0")
-   api("us.ihmc:simulation-construction-set-test:0.14.0")
+val javaCVVersion = "1.5.4"
+
+bytedecoDependencies {
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.10-")
+   apiBytedecoNatives("opencv", "4.4.0-")
+}
+
+javacvDependencies {
+   apiBytedecoSelective("org.bytedeco:javacv:$javaCVVersion")
+   apiBytedecoNatives("javacpp")
+   apiBytedecoNatives("openblas", "0.3.10-")
+   apiBytedecoNatives("opencv", "4.4.0-")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoNatives(name: String, versionPrefix: String = "")
+{
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:linux-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:windows-x86_64")
+   apiBytedecoSelective("org.bytedeco:$name:$versionPrefix$javaCVVersion:macosx-x86_64")
+}
+
+fun us.ihmc.build.IHMCDependenciesExtension.apiBytedecoSelective(dependencyNotation: String)
+{
+   api(dependencyNotation) {
+      exclude(group = "org.bytedeco")
+   }
+}
+
+testDependencies {
+   api("us.ihmc:ihmc-commons-testing:0.30.4")
+   api("us.ihmc:simulation-construction-set:0.21.9")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

@@ -18,7 +18,7 @@ public class BuildingPendulumSimulation
       sim.setCameraPosition(0, -40.0, 2.0);
 
       SliderBoardConfigurationManager sliderBoardConfigurationManager = new SliderBoardConfigurationManager(sim);
-      sliderBoardConfigurationManager.setSlider(1, BuildingPendulumController.variableName, controller.getYoVariableRegistry(), -1.0, 1.0);
+      sliderBoardConfigurationManager.setSlider(1, BuildingPendulumController.variableName, controller.getYoRegistry(), -1.0, 1.0);
 
       Thread myThread = new Thread(sim);
       myThread.start();

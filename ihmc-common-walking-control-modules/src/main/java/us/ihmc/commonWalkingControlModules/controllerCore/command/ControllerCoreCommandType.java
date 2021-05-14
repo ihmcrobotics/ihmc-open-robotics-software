@@ -72,6 +72,8 @@ public enum ControllerCoreCommandType
     */
    MOMENTUM,
 
+   MOMENTUM_COST,
+
    /**
     * Represents a command for the {@link WholeBodyControllerCore} to specify a convex set of bounds to
     * apply on the motion of the center of mass. This could be a

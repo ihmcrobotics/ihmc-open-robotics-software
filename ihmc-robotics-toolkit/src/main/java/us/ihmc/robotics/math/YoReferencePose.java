@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoReferencePose extends ReferenceFrame
 {
@@ -23,7 +23,7 @@ public class YoReferencePose extends ReferenceFrame
    private final Quaternion rotation = new Quaternion();
    private final Vector3D translation = new Vector3D();
 
-   public YoReferencePose(String frameName, ReferenceFrame parentFrame, YoVariableRegistry registry)
+   public YoReferencePose(String frameName, ReferenceFrame parentFrame, YoRegistry registry)
    {
       super(frameName, parentFrame);
       yoFramePose = new YoFramePoseUsingYawPitchRoll(frameName + "_", this, registry);
@@ -33,9 +33,9 @@ public class YoReferencePose extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       rotation.set(yoFramePose.getYawPitchRoll());
-      transformToParent.setRotation(rotation);
+      transformToParent.getRotation().set(rotation);
       YoFramePoint3D yoFramePoint = yoFramePose.getPosition();
-      transformToParent.setTranslation(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
+      transformToParent.getTranslation().set(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
    }
 
    public void setAndUpdate(RigidBodyTransform transform)
@@ -70,7 +70,7 @@ public class YoReferencePose extends ReferenceFrame
 
    private void set(Vector3D newTranslation)
    {
-      yoFramePose.setXYZ(newTranslation.getX(), newTranslation.getY(), newTranslation.getZ());
+      yoFramePose.setPosition(newTranslation.getX(), newTranslation.getY(), newTranslation.getZ());
    }
 
    public void interpolate(YoReferencePose start, YoReferencePose goal, double alpha)

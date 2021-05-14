@@ -3,15 +3,16 @@ package us.ihmc.robotics.math.functionGenerator;
 import java.util.ArrayList;
 import java.util.Random;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoVariable;
+import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 /**
@@ -32,7 +33,7 @@ public class YoFunctionGenerator
    private final double MIN_EXPONENTIAL_SWEEP_TIME = 1.0;
    private final double MIN_LINEAR_SWEEP_TIME = 0.001;
 
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
 
    private final Random random = new Random(1776L);
 
@@ -51,7 +52,7 @@ public class YoFunctionGenerator
    private final YoVariable[] createdVariables;
    private final YoSignalDerivative signalDerivative;
 
-   private final YoDouble time;
+   private final DoubleProvider time;
    private double sweepFrequencyLowHz = 0.001;
    private double previousResetTime, previousChirpFrequency;
    private boolean previousChirpUpAndDown;
@@ -63,26 +64,26 @@ public class YoFunctionGenerator
    private final YoDouble frequencyFiltered, phaseFiltered;
    private final YoDouble alphaFilter;
 
-   public YoFunctionGenerator(String name, YoVariableRegistry registry)
+   public YoFunctionGenerator(String name, YoRegistry registry)
    {
       this(name, null, registry, false, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoVariableRegistry registry, boolean smoothParameters)
+   public YoFunctionGenerator(String name, YoRegistry registry, boolean smoothParameters)
    {
       this(name, null, registry, smoothParameters, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry)
+   public YoFunctionGenerator(String name, DoubleProvider time, YoRegistry parentRegistry)
    {
       this(name, time, parentRegistry, false, -1.0);
    }
 
-   public YoFunctionGenerator(String name, YoDouble time, YoVariableRegistry parentRegistry, boolean smoothParameters, double dT)
+   public YoFunctionGenerator(String name, DoubleProvider time, YoRegistry parentRegistry, boolean smoothParameters, double dT)
    {
       this.smoothParameters = smoothParameters;
 
-      registry = new YoVariableRegistry(name + "YoFunGen");
+      registry = new YoRegistry(name + "YoFunGen");
 
       this.time = time;
 
@@ -99,7 +100,7 @@ public class YoFunctionGenerator
       frequency = new YoDouble(name + "Freq", registry);
       phase = new YoDouble(name + "Phase", registry);
 
-      alphaFilter = new YoDouble("alphaFilter", registry);
+      alphaFilter = new YoDouble(name + "SmoothingAlphaFilter", registry);
       if (!smoothParameters)
          alphaFilter.set(0.0);
       else
@@ -125,8 +126,8 @@ public class YoFunctionGenerator
       timeInCurrentMode = new YoDouble(name + "TimeInCurrentMode", registry);
       kRateForExponentialChirp = new YoDouble(name + "KRateForExponentialChirp", registry);
 
-      mode = YoEnum.create(name + "Mode", YoFunctionGeneratorMode.class, registry);
-      modePrevious = YoEnum.create(name + "ModePrevious", YoFunctionGeneratorMode.class, registry);
+      mode = new YoEnum<>(name + "Mode", registry, YoFunctionGeneratorMode.class);
+      modePrevious = new YoEnum<>(name + "ModePrevious", registry, YoFunctionGeneratorMode.class);
 
       // There is used to be no initialization. This makes it explicit
       mode.set(YoFunctionGeneratorMode.OFF);
@@ -201,6 +202,11 @@ public class YoFunctionGenerator
    {
       return frequency.getDoubleValue();
    }
+   
+   public double getFrequencyFiltered()
+   {
+      return frequencyFiltered.getDoubleValue();
+   }
 
    public void setChirpFrequencyMaxHz(double frequencyHz)
    {
@@ -210,6 +216,11 @@ public class YoFunctionGenerator
    public double getChirpFrequencyMax()
    {
       return chirpFrequencyMax.getDoubleValue();
+   }
+   
+   public double getChirpFrequency()
+   {
+      return chirpFrequency.getDoubleValue();
    }
 
    public void setPhase(double phase)
@@ -280,7 +291,7 @@ public class YoFunctionGenerator
                "Function Generator wasn't created with a time YoVariable. Need to create with a time variable or call getValue(double time) instead");
       }
 
-      return getValue(time.getDoubleValue());
+      return getValue(time.getValue());
    }
 
    public double getValueDot()
@@ -344,7 +355,7 @@ public class YoFunctionGenerator
                * Math.sin(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue() + phaseFiltered.getDoubleValue()));
 
          valueDot.set(amplitudeFiltered.getDoubleValue() * Math.PI * 2.0 * frequencyFiltered.getDoubleValue()
-               * Math.cos(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue()));
+                          * Math.cos(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue() + phaseFiltered.getDoubleValue()));
          if (valueDotFromFilter != null)
             valueDotFromFilter.update();
 

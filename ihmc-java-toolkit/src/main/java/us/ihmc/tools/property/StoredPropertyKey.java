@@ -74,4 +74,21 @@ public class StoredPropertyKey<T>
 
       return saveName;
    }
+
+   @Override
+   public int hashCode()
+   {
+      return index;
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (!(other instanceof StoredPropertyKey))
+         return false;
+      StoredPropertyKey otherStoredPropertyKey = (StoredPropertyKey) other;
+      return index == otherStoredPropertyKey.index;
+   }
 }

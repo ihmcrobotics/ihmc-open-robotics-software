@@ -1,15 +1,13 @@
 package us.ihmc.robotics.math.frames;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -18,11 +16,13 @@ import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.random.RandomGeometry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFrameQuaternionTest
 {
@@ -36,10 +36,10 @@ public class YoFrameQuaternionTest
       ReferenceFrameTools.clearWorldFrameTree();
    }
 
-	@Test
+   @Test
    public void testInitialization()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       yoFrameQuaternion.checkReferenceFrameMatch(worldFrame);
@@ -61,18 +61,17 @@ public class YoFrameQuaternionTest
       FrameQuaternion frameOrientationExpected = new FrameQuaternion(worldFrame);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
-      double[] yawPitchRollActual = new double[3];
-      yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);
-      double[] yawPitchRollExpected = new double[3];
-      assertArrayEquals(yawPitchRollExpected, yawPitchRollActual, EPS);
+      YawPitchRoll yawPitchRollActual = new YawPitchRoll(yoFrameQuaternion);
+      YawPitchRoll yawPitchRollExpected = new YawPitchRoll();
+      EuclidCoreTestTools.assertYawPitchRollEquals(yawPitchRollExpected, yawPitchRollActual, EPS);
    }
 
-	@Test
+   @Test
    public void testSetters()
    {
       Random random = new Random(1972L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       RotationMatrix matrix3dExpected = new RotationMatrix();
@@ -99,24 +98,24 @@ public class YoFrameQuaternionTest
       FrameQuaternion frameOrientationActual = new FrameQuaternion(yoFrameQuaternion);
       assertTrue(frameOrientationActual.epsilonEquals(frameOrientationExpected, EPS));
 
-      double[] yawPitchRollExpected = RandomNumbers.nextDoubleArray(random, 3, 2.0 * Math.PI);
-      yoFrameQuaternion.setYawPitchRoll(yawPitchRollExpected[0], yawPitchRollExpected[1], yawPitchRollExpected[2]);
-      double[] yawPitchRollActual = new double[3];
-      yoFrameQuaternion.getYawPitchRoll(yawPitchRollActual);
+      YawPitchRoll yawPitchRollExpected = EuclidCoreRandomTools.nextYawPitchRoll(random);
+      yoFrameQuaternion.set(yawPitchRollExpected);
+      YawPitchRoll yawPitchRollActual = new YawPitchRoll();
+      yawPitchRollActual.set(yoFrameQuaternion);
 
-      matrix3dActual.setYawPitchRoll(yawPitchRollActual);
-      matrix3dExpected.setYawPitchRoll(yawPitchRollExpected);
+      matrix3dActual.set(yawPitchRollActual);
+      matrix3dExpected.set(yawPitchRollExpected);
 
       assertTrue(matrix3dActual.epsilonEquals(matrix3dExpected, EPS));
    }
 
-	@Test
+   @Test
    public void testReferenceFramesMismatching()
    {
       Random random = new Random(1984L);
-      ReferenceFrame testFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
+      ReferenceFrame testFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("chou", worldFrame, EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       FrameQuaternion frameOrientation = new FrameQuaternion(testFrame);
@@ -144,12 +143,12 @@ public class YoFrameQuaternionTest
       assertFalse(hasReferenceFrameMismatchExceptionBeenThrown);
    }
 
-	@Test
+   @Test
    public void testMultiplication()
    {
       Random random = new Random(1776L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoFrameQuaternion yoFrameQuaternion = new YoFrameQuaternion("test", worldFrame, registry);
 
       Quaternion quat4dActual = new Quaternion(), quat4dExpected = new Quaternion();
@@ -177,12 +176,12 @@ public class YoFrameQuaternionTest
       }
    }
 
-	@Test
+   @Test
    public void testInterpolate()
    {
       Random random = new Random(1776L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
 
       FrameQuaternion initialFrameOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);
       FrameQuaternion finalFrameOrientation = EuclidFrameRandomTools.nextFrameQuaternion(random, worldFrame);

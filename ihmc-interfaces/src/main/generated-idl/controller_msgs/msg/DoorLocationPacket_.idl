@@ -8,6 +8,21 @@ module controller_msgs
   {
     module dds
     {
+      const octet UNKNOWN_TYPE =
+      0;
+
+      const octet PUSH_HANDLE_LEFT =
+      1;
+
+      const octet PUSH_HANDLE_RIGHT =
+      2;
+
+      const octet PULL_HANDLE_LEFT =
+      3;
+
+      const octet PULL_HANDLE_RIGHT =
+      4;
+
 
       /**
        * This message is part of the IHMC humanoid behavior module.
@@ -20,6 +35,14 @@ module controller_msgs
          */
         unsigned long sequence_id;
         geometry_msgs::msg::dds::Pose door_transform_to_world;
+        @defaultValue(value=255)
+        octet detected_door_type;
+        /**
+         * Some behaviors will average the door location to remove noise,
+         * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+         * this is useful for sending door locations manually from the ui*/
+         */
+        boolean trusted_position;
       };
     };
   };

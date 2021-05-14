@@ -5,7 +5,7 @@ import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -40,11 +40,12 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * beginning of the control.
     */
    private static final int initialCapacity = 15;
+   private int commandId;
    /** The list of joints for which desired velocities are assigned. */
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * The list of the desired velocities for each joint. The list follows the same ordering as the
-    * {@link #joints} list. Each {@link DenseMatrix64F} in this list, is a N-by-1 vector where N is
+    * {@link #joints} list. Each {@link DMatrixRMaj} in this list, is a N-by-1 vector where N is
     * equal to the number of degrees of freedom of the joint it is associated with.
     */
    private final DenseMatrixArrayList desiredVelocities = new DenseMatrixArrayList(initialCapacity);
@@ -71,6 +72,9 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    public void set(JointspaceVelocityCommand other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
@@ -85,6 +89,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     */
    public void clear()
    {
+      commandId = 0;
       joints.clear();
       desiredVelocities.clear();
       weights.reset();
@@ -120,7 +125,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    {
       joints.add(joint);
       weights.add(weight);
-      DenseMatrix64F jointDesiredVelocity = desiredVelocities.add();
+      DMatrixRMaj jointDesiredVelocity = desiredVelocities.add();
       jointDesiredVelocity.reshape(1, 1);
       jointDesiredVelocity.set(0, 0, desiredVelocity);
    }
@@ -139,7 +144,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     *           modified.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(JointBasics joint, DenseMatrix64F desiredVelocity)
+   public void addJoint(JointBasics joint, DMatrixRMaj desiredVelocity)
    {
       checkConsistency(joint, desiredVelocity);
       joints.add(joint);
@@ -159,7 +164,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * @param weight positive value that denotes the priority of the joint task.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(JointBasics joint, DenseMatrix64F desiredVelocity, double weight)
+   public void addJoint(JointBasics joint, DMatrixRMaj desiredVelocity, double weight)
    {
       checkConsistency(joint, desiredVelocity);
       joints.add(joint);
@@ -195,7 +200,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     *           modified.
     * @throws RuntimeException if the {@code desiredVelocity} is not a N-by-1 vector.
     */
-   public void setDesiredVelocity(int jointIndex, DenseMatrix64F desiredVelocity)
+   public void setDesiredVelocity(int jointIndex, DMatrixRMaj desiredVelocity)
    {
       checkConsistency(joints.get(jointIndex), desiredVelocity);
       desiredVelocities.get(jointIndex).set(desiredVelocity);
@@ -237,7 +242,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
          weights.set(jointIdx, weight);
    }
 
-   private void checkConsistency(JointBasics joint, DenseMatrix64F desiredVelocity)
+   private void checkConsistency(JointBasics joint, DMatrixRMaj desiredVelocity)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredVelocity.getNumRows());
    }
@@ -322,7 +327,7 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return the N-by-1 desired velocity where N is the joint number of degrees of freedom.
     */
-   public DenseMatrix64F getDesiredVelocity(int jointIndex)
+   public DMatrixRMaj getDesiredVelocity(int jointIndex)
    {
       return desiredVelocities.get(jointIndex);
    }
@@ -349,6 +354,18 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -359,6 +376,8 @@ public class JointspaceVelocityCommand implements InverseKinematicsCommand<Joint
       {
          JointspaceVelocityCommand other = (JointspaceVelocityCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

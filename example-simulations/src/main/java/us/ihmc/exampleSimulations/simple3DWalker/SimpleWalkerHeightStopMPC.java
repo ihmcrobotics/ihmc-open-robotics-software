@@ -1,18 +1,18 @@
 package us.ihmc.exampleSimulations.simple3DWalker;
 
-import org.ejml.alg.dense.linsol.LinearSolverSafe;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import static java.lang.Math.pow;
+
+import org.ejml.LinearSolverSafe;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+
 import us.ihmc.robotics.math.frames.YoMatrix;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoLong;
-
-import static java.lang.Math.pow;
 
 public class SimpleWalkerHeightStopMPC
 {
@@ -39,7 +39,7 @@ public class SimpleWalkerHeightStopMPC
     * debugging
     */
 
-   YoVariableRegistry registry = new YoVariableRegistry("childRegistry");
+   YoRegistry registry = new YoRegistry("childRegistry");
 
    YoLong AlgTimems = new YoLong("AlgTimems", registry);
    YoInteger AlgIters = new YoInteger("AlgIters", registry);
@@ -53,19 +53,19 @@ public class SimpleWalkerHeightStopMPC
 
 
 
-   LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.linear(4);
+   LinearSolverDense<DMatrixRMaj> linearSolver = LinearSolverFactory_DDRM.linear(4);
    LinearSolverSafe linearSolverSafe = new LinearSolverSafe(linearSolver);
 
    long startTime;
    int iter;
    long endTime;
 
-   DenseMatrix64F A = new DenseMatrix64F(4,4);
-   DenseMatrix64F Ainv = new DenseMatrix64F(4,4);
-   DenseMatrix64F b = new DenseMatrix64F(4,1);
-   DenseMatrix64F c = new DenseMatrix64F(4,1);
+   DMatrixRMaj A = new DMatrixRMaj(4,4);
+   DMatrixRMaj Ainv = new DMatrixRMaj(4,4);
+   DMatrixRMaj b = new DMatrixRMaj(4,1);
+   DMatrixRMaj c = new DMatrixRMaj(4,1);
 
-   public SimpleWalkerHeightStopMPC(double zmax, double zf,double umax, YoVariableRegistry registry)
+   public SimpleWalkerHeightStopMPC(double zmax, double zf,double umax, YoRegistry registry)
    {
       this.zmax = zmax;
       this.zf=zf;
@@ -111,7 +111,7 @@ public class SimpleWalkerHeightStopMPC
          double[] bData = new double[] {zf, z, dz / dx, k};
 
          b.set(4,1,true, bData);
-         CommonOps.mult(Ainv,b,c);
+         CommonOps_DDRM.mult(Ainv,b,c);
          Yob.set(b);
          Yoc.set(c);
          c0 = c.get(0, 0);

@@ -9,9 +9,15 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.MathTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 
+/**
+ * Use {@link us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters} in the
+ * {@link us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand} instead
+ */
+@Deprecated
 public class JointLimitReductionCommand implements InverseKinematicsCommand<JointLimitReductionCommand>, InverseDynamicsCommand<JointLimitReductionCommand>
 {
    private static final int initialCapacity = 40;
+   private int commandId;
    private final List<OneDoFJointBasics> joints = new ArrayList<>(initialCapacity);
    private final TDoubleArrayList jointReductionFactors = new TDoubleArrayList(initialCapacity);
 
@@ -21,6 +27,7 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
 
    public void clear()
    {
+      commandId = 0;
       joints.clear();
       jointReductionFactors.reset();
    }
@@ -36,6 +43,8 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
    public void set(JointLimitReductionCommand other)
    {
       clear();
+
+      commandId = other.commandId;
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
@@ -66,6 +75,18 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -76,6 +97,8 @@ public class JointLimitReductionCommand implements InverseKinematicsCommand<Join
       {
          JointLimitReductionCommand other = (JointLimitReductionCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

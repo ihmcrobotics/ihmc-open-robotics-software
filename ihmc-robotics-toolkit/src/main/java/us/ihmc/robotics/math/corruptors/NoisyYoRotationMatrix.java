@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.corruptors;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class NoisyYoRotationMatrix
@@ -32,7 +32,7 @@ public class NoisyYoRotationMatrix
    private final YoDouble noiseDirectionX, noiseDirectionY, noiseDirectionZ;
    private final YoDouble biasDirectionX, biasDirectionY, biasDirectionZ;
 
-   public NoisyYoRotationMatrix(String name, YoVariableRegistry registry)
+   public NoisyYoRotationMatrix(String name, YoRegistry registry)
    {
       noiseRotationAngle = new NoisyYoDouble(name + "_noise_rot_ang", registry);
       noiseDirectionHeight = new NoisyYoDouble(name + "_noise_dir_height", registry);

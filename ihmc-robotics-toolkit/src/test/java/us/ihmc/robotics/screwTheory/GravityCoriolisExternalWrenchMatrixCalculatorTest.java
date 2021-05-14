@@ -10,8 +10,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
@@ -241,18 +241,18 @@ public class GravityCoriolisExternalWrenchMatrixCalculatorTest
 
       externalWrenches.forEach(inverseDynamicsCalculator::setExternalWrench);
       inverseDynamicsCalculator.compute();
-      DenseMatrix64F tau_expected = inverseDynamicsCalculator.getJointTauMatrix();
+      DMatrixRMaj tau_expected = inverseDynamicsCalculator.getJointTauMatrix();
 
       externalWrenches.forEach(gcewmCalculator::setExternalWrench);
       gcewmCalculator.compute();
-      DenseMatrix64F tau_actual = gcewmCalculator.getJointTauMatrix();
+      DMatrixRMaj tau_actual = gcewmCalculator.getJointTauMatrix();
 
-      boolean areEqual = MatrixFeatures.isEquals(tau_expected, tau_actual, epsilon);
+      boolean areEqual = MatrixFeatures_DDRM.isEquals(tau_expected, tau_actual, epsilon);
       if (!areEqual)
       {
          System.out.println("iteration: " + iteration);
          double maxError = 0.0;
-         DenseMatrix64F output = new DenseMatrix64F(numberOfDoFs, 3);
+         DMatrixRMaj output = new DMatrixRMaj(numberOfDoFs, 3);
          for (int row = 0; row < numberOfDoFs; row++)
          {
             output.set(row, 0, tau_expected.get(row, 0));

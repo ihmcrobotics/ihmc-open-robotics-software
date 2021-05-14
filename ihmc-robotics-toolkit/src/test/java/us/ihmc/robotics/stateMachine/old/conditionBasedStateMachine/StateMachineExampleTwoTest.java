@@ -14,7 +14,7 @@ import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransition;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionAction;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateTransitionCondition;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -25,7 +25,7 @@ public class StateMachineExampleTwoTest
    @Test
    public void testComplexStateMachineExample()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       final YoInteger ticksInStateOne = new YoInteger("ticksInStateOne", registry);
       final YoInteger ticksInStateTwo = new YoInteger("ticksInStateTwo", registry);
       final YoInteger ticksInStateThree = new YoInteger("ticksInStateThree", registry);

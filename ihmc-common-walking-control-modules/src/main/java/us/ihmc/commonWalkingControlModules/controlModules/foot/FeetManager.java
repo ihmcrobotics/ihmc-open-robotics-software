@@ -5,7 +5,9 @@ import java.util.EnumMap;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.configurations.YoSwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ICPPlanToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.SimpleToeOffCalculator;
@@ -15,36 +17,41 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesDataBasics;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FeetManager
 {
-   private static final boolean USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED = true;
-
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+   private final BooleanParameter useWorldSurfaceNormalWhenFullyConstrained = new BooleanParameter("useWorldSurfaceNormalWhenFullyConstrained", registry, true);
 
    private final SideDependentList<FootControlModule> footControlModules = new SideDependentList<>();
 
@@ -63,9 +70,13 @@ public class FeetManager
    private final FramePoint3D tempSolePosition = new FramePoint3D();
    private final DoubleParameter blindFootstepsHeightOffset;
 
+   private final CoMHeightTimeDerivativesDataBasics leftLegCoMHeightData = new CoMHeightTimeDerivativesData();
+   private final CoMHeightTimeDerivativesDataBasics rightLegCoMHeightData = new CoMHeightTimeDerivativesData();
+   private final SideDependentList<CoMHeightTimeDerivativesDataBasics> legComHeightData = new SideDependentList<>(leftLegCoMHeightData, rightLegCoMHeightData);
+
    public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
-                      YoVariableRegistry parentRegistry)
+                      YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
       this.controllerToolbox = controllerToolbox;
       feet = controllerToolbox.getContactableFeet();
@@ -74,7 +85,11 @@ public class FeetManager
       for (RobotSide robotSide : RobotSide.values)
          contactStates.put(robotSide, controllerToolbox.getFootContactState(robotSide));
 
-      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates, feet, walkingControllerParameters.getToeOffParameters(), registry);
+      ToeOffCalculator centroidProjectionCalculator = new CentroidProjectionToeOffCalculator(contactStates,
+                                                                                             feet,
+                                                                                             walkingControllerParameters.getToeOffParameters(),
+                                                                                             registry,
+                                                                                             graphicsListRegistry);
       ToeOffCalculator icpPlanCalculator = new ICPPlanToeOffCalculator(contactStates, feet, registry);
       ToeOffCalculator simpleCalculator = new SimpleToeOffCalculator(feet, registry);
 
@@ -97,16 +112,34 @@ public class FeetManager
       {
          explorationParameters = new ExplorationParameters(registry);
       }
+      FootholdRotationParameters footholdRotationParameters = new FootholdRotationParameters(registry);
+      SupportStateParameters supportStateParameters = new SupportStateParameters(walkingControllerParameters, registry);
 
       boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
       DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
       DoubleProvider maxWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("maxWeightFractionPerFoot", registry, 2.0) : null;
 
+      WorkspaceLimiterParameters workspaceLimiterParameters = new WorkspaceLimiterParameters(registry);
+      YoSwingTrajectoryParameters swingTrajectoryParameters = new YoSwingTrajectoryParameters("FootSwing", walkingControllerParameters, registry);
+
+
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
-                                                                     toeOffFootGains, controllerToolbox, explorationParameters, minWeightFractionPerFoot,
-                                                                     maxWeightFractionPerFoot, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide,
+                                                                     toeOffCalculator,
+                                                                     walkingControllerParameters,
+                                                                     swingTrajectoryParameters,
+                                                                     workspaceLimiterParameters,
+                                                                     swingFootGains,
+                                                                     holdFootGains,
+                                                                     toeOffFootGains,
+                                                                     controllerToolbox,
+                                                                     explorationParameters,
+                                                                     footholdRotationParameters,
+                                                                     supportStateParameters,
+                                                                     minWeightFractionPerFoot,
+                                                                     maxWeightFractionPerFoot,
+                                                                     registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -158,9 +191,30 @@ public class FeetManager
 
    public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
    {
+      requestSwing(upcomingSwingSide, footstep, swingTime, null, null);
+   }
+
+   public void requestSwing(RobotSide upcomingSwingSide, Footstep footstep, double swingTime, FrameVector3DReadOnly finalCoMVelocity, FrameVector3DReadOnly finalCoMAcceleration)
+   {
       FootControlModule footControlModule = footControlModules.get(upcomingSwingSide);
-      footControlModule.setFootstep(footstep, swingTime);
+      footControlModule.setFootstep(footstep, swingTime, finalCoMVelocity, finalCoMAcceleration);
       setContactStateForSwing(upcomingSwingSide);
+   }
+
+   public void initializeSwingTrajectoryPreview(RobotSide upcomingSwingSide, Footstep footstep, double swingTime)
+   {
+      footControlModules.get(upcomingSwingSide).initializeSwingTrajectoryPreview(footstep, swingTime);
+   }
+
+   public void updateSwingTrajectoryPreview(RobotSide upcomingSwingSide)
+   {
+      footControlModules.get(upcomingSwingSide).updateSwingTrajectoryPreview();
+   }
+
+   public void saveCurrentPositionsAsLastFootstepPositions()
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         footControlModules.get(robotSide).saveCurrentPositionAsLastFootstepPosition();
    }
 
    public void handleFootTrajectoryCommand(FootTrajectoryCommand command)
@@ -200,27 +254,63 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeightForSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForSupportSingularityAvoidance(double zCurrent, CoMHeightTimeDerivativesDataBasics comHeightData)
    {
+      // Correct, if necessary, the CoM height trajectory to avoid straight knee
+      boolean leftCorrectionApplied = false, rightCorrectionApplied = false;
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlModules.get(robotSide).updateLegSingularityModule();
+         CoMHeightTimeDerivativesDataBasics sidedCoMHeightData = legComHeightData.get(robotSide);
+         sidedCoMHeightData.set(comHeightData);
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.updateLegSingularityModule();
+         boolean correctionApplied = footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(sidedCoMHeightData, zCurrent, pelvisZUpFrame);
+         if (robotSide == RobotSide.LEFT)
+            leftCorrectionApplied = correctionApplied;
+         else
+            rightCorrectionApplied = correctionApplied;
       }
 
-      // Correct, if necessary, the CoM height trajectory to avoid straight knee
-      for (RobotSide robotSide : RobotSide.values)
+      if (leftCorrectionApplied != rightCorrectionApplied)
       {
-         FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
+         if (leftCorrectionApplied)
+            comHeightData.set(leftLegCoMHeightData);
+         else
+            comHeightData.set(rightLegCoMHeightData);
+      }
+      else
+      {
+         WorkspaceLimiterReconciler.reconcileWorkspaceLimitedData(legComHeightData, comHeightData);
       }
    }
 
-   public void correctCoMHeightForUnreachableFootstep(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForUnreachableFootstep(CoMHeightTimeDerivativesDataBasics comHeightData)
    {
       // Do that after to make sure the swing foot will land
+      boolean leftCorrectionApplied = false, rightCorrectionApplied = false;
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+         CoMHeightTimeDerivativesDataBasics sidedCoMHeightData = legComHeightData.get(robotSide);
+         sidedCoMHeightData.set(comHeightData);
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.updateLegSingularityModule();
+         boolean correctionApplied = footControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(sidedCoMHeightData);
+         if (robotSide == RobotSide.LEFT)
+            leftCorrectionApplied = correctionApplied;
+         else
+            rightCorrectionApplied = correctionApplied;
+      }
+
+      if (leftCorrectionApplied != rightCorrectionApplied)
+      {
+         if (leftCorrectionApplied)
+            comHeightData.set(leftLegCoMHeightData);
+         else
+            comHeightData.set(rightLegCoMHeightData);
+      }
+      else
+      {
+         WorkspaceLimiterReconciler.reconcileWorkspaceLimitedData(legComHeightData, comHeightData);
       }
    }
 
@@ -280,7 +370,7 @@ public class FeetManager
 
    public void setFlatFootContactState(RobotSide robotSide)
    {
-      if (USE_WORLDFRAME_SURFACE_NORMAL_WHEN_FULLY_CONSTRAINED)
+      if (useWorldSurfaceNormalWhenFullyConstrained.getValue())
          footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
       else
          footNormalContactVector.setIncludingFrame(feet.get(robotSide).getSoleFrame(), 0.0, 0.0, 1.0);
@@ -307,100 +397,121 @@ public class FeetManager
       return toeOffManager;
    }
 
+
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(Footstep, RobotSide)}.
+    * Calls {@link ToeOffManager#canDoDoubleSupportToeOff(FramePoint3DReadOnly, RobotSide)}.
     *
     * @param nextFootstep footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoDoubleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   public boolean canDoDoubleSupportToeOff(FramePoint3DReadOnly nextFootstep, RobotSide transferToSide)
    {
       return toeOffManager.canDoDoubleSupportToeOff(nextFootstep, transferToSide);
    }
 
    /**
     * Checks whether or not the next footstep in {@param nextFootstep} is in correct location to achieve toe off.
-    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(Footstep, RobotSide)}.
+    * Calls {@link ToeOffManager#canDoSingleSupportToeOff(FramePoint3DReadOnly, RobotSide)}.
     *
     * @param nextFootstep footstep to consider.
     * @param transferToSide upcoming support side.
     * @return whether or not the footstep location is ok.
     */
-   public boolean canDoSingleSupportToeOff(Footstep nextFootstep, RobotSide transferToSide)
+   public boolean canDoSingleSupportToeOff(FramePoint3DReadOnly nextFootstep, RobotSide transferToSide)
    {
       return toeOffManager.canDoSingleSupportToeOff(nextFootstep, transferToSide);
    }
 
    /**
     * <p>
-    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff} variable accordingly.
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
+    * {@link ToeOffManager#doLineToeOff()} variable accordingly.
     * </p>
     * <p>
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
-    *   <li>desiredICP location being within the leading foot base of support.</li>
-    *   <li>currentICP location being within the leading foot base of support.</li>
-    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * <li>doToeOffIfPossibleInDoubleSupport</li>
+    * <li>desiredECMP location being within the support polygon account for toe-off, if
+    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    * <li>desiredICP location being within the leading foot base of support.</li>
+    * <li>currentICP location being within the leading foot base of support.</li>
+    * <li>needToSwitchToToeOffForAnkleLimit</li>
     * </ol>
     * <p>
-    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
-    * positioning of the leading leg to determine if it is acceptable.
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current
+    * state being with the base of support. Then checks the positioning of the leading leg to determine
+    * if it is acceptable.
     * </p>
     *
-    * @param nextFootstep next desired footstep to take.
-    * @param exitCMP exit CMP in the current foot
-    * @param desiredECMP current desired ECMP from ICP feedback.
-    * @param desiredICP current desired ICP from the reference trajectory.
-    * @param currentICP current ICP based on the robot state.
+    * @param nextFootstep    next desired footstep to take.
+    * @param exitCMP         exit CMP in the current foot
+    * @param desiredECMP     current desired ECMP from ICP feedback.
+    * @param desiredICP      current desired ICP from the reference trajectory.
+    * @param currentICP      current ICP based on the robot state.
+    * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
-   public void updateToeOffStatusSingleSupport(Footstep nextFootstep, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
-         FramePoint2D desiredICP, FramePoint2D currentICP)
+   public void updateToeOffStatusSingleSupport(Footstep nextFootstep,
+                                               FramePoint3DReadOnly exitCMP,
+                                               FramePoint2DReadOnly desiredECMP,
+                                               FramePoint2DReadOnly desiredCoP,
+                                               FramePoint2DReadOnly desiredICP,
+                                               FramePoint2DReadOnly currentICP,
+                                               FramePoint2DReadOnly finalDesiredICP)
    {
       toeOffManager.submitNextFootstep(nextFootstep);
-      toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
+      toeOffManager.updateToeOffStatusSingleSupport(exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
    /**
     * <p>
-    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the {@link ToeOffManager#doLineToeOff} variable accordingly.
+    * Checks whether or not the robot state is proper for toe-off when in double support, and sets the
+    * {@link ToeOffManager#doLineToeOff()} variable accordingly.
     * </p>
     * <p>
     * These checks include:
     * </p>
     * <ol>
-    *   <li>doToeOffIfPossibleInDoubleSupport</li>
-    *   <li>desiredECMP location being within the support polygon account for toe-off, if {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
-    *   <li>desiredICP location being within the leading foot base of support.</li>
-    *   <li>currentICP location being within the leading foot base of support.</li>
-    *   <li>needToSwitchToToeOffForAnkleLimit</li>
+    * <li>doToeOffIfPossibleInDoubleSupport</li>
+    * <li>desiredECMP location being within the support polygon account for toe-off, if
+    * {@link ToeOffParameters#checkECMPLocationToTriggerToeOff()} is true.</li>
+    * <li>desiredICP location being within the leading foot base of support.</li>
+    * <li>currentICP location being within the leading foot base of support.</li>
+    * <li>needToSwitchToToeOffForAnkleLimit</li>
     * </ol>
     * <p>
-    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current state being with the base of support. Then checks the
-    * positioning of the leading leg to determine if it is acceptable.
+    * If able and the ankles are at the joint limits, transitions to toe-off. Then checks the current
+    * state being with the base of support. Then checks the positioning of the leading leg to determine
+    * if it is acceptable.
     * </p>
     *
-    * @param trailingLeg robot side for the trailing leg
-    * @param desiredECMP current desired ECMP from ICP feedback.
-    * @param desiredICP current desired ICP from the reference trajectory.
-    * @param currentICP current ICP based on the robot state.
+    * @param trailingLeg     robot side for the trailing leg
+    * @param desiredECMP     current desired ECMP from ICP feedback.
+    * @param desiredICP      current desired ICP from the reference trajectory.
+    * @param currentICP      current ICP based on the robot state.
+    * @param finalDesiredICP the desired ICP location at the end of the current state.
     */
-   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg, Footstep nextFootstep, FramePoint3D exitCMP, FramePoint2D desiredECMP, FramePoint2D desiredCoP,
-         FramePoint2D desiredICP, FramePoint2D currentICP)
+   public void updateToeOffStatusDoubleSupport(RobotSide trailingLeg,
+                                               Footstep nextFootstep,
+                                               FramePoint3DReadOnly exitCMP,
+                                               FramePoint2DReadOnly desiredECMP,
+                                               FramePoint2DReadOnly desiredCoP,
+                                               FramePoint2DReadOnly desiredICP,
+                                               FramePoint2DReadOnly currentICP,
+                                               FramePoint2DReadOnly finalDesiredICP)
    {
       toeOffManager.submitNextFootstep(nextFootstep);
-      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP);
+      toeOffManager.updateToeOffStatusDoubleSupport(trailingLeg, exitCMP, desiredECMP, desiredCoP, desiredICP, currentICP, finalDesiredICP);
    }
 
    /**
     * Returns whether or not the current robot state is ok toe-off using a point toe contact.
-    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} or
-    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}, based on the walking state.
-    * Calls {@link ToeOffManager#doPointToeOff}.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly,
+    * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3DReadOnly,
+    * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
+    * Calls {@link ToeOffManager#doLineToeOff()}.
     */
    public boolean okForPointToeOff()
    {
@@ -409,13 +520,24 @@ public class FeetManager
 
    /**
     * Returns whether or not the current robot state is ok toe-off using a line toe contact.
-    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)} or
-    * {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3D, FramePoint2D, FramePoint2D, FramePoint2D, FramePoint2D)}, based on the walking state.
-    * Calls {@link ToeOffManager#doLineToeOff}.
+    * The checks for this are called in either {@link #updateToeOffStatusDoubleSupport(RobotSide, Footstep, FramePoint3DReadOnly, FramePoint2DReadOnly,
+    * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)} or {@link #updateToeOffStatusSingleSupport(Footstep, FramePoint3DReadOnly,
+    * FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly, FramePoint2DReadOnly)}, based on the walking state.
+    * Calls {@link ToeOffManager#doLineToeOff()}.
     */
    public boolean okForLineToeOff()
    {
       return toeOffManager.doLineToeOff();
+   }
+
+   public boolean useToeLineContactInTransfer()
+   {
+      return toeOffManager.useToeLineContactInTransfer();
+   }
+
+   public boolean isUsingPointContactInToeOff(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).isUsingPointContactInToeOff();
    }
 
    /**
@@ -425,7 +547,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
+   public void requestPointToeOff(RobotSide trailingLeg, FramePoint3DReadOnly exitCMP, FramePoint2DReadOnly desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactPoint(desiredCMP, trailingLeg);
@@ -441,7 +563,7 @@ public class FeetManager
     * @param exitCMP exit CMP from the ICP plan in the stance foot
     * @param desiredCMP current desired CMP location
     */
-   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3D exitCMP, FramePoint2D desiredCMP)
+   public void requestLineToeOff(RobotSide trailingLeg, FramePoint3DReadOnly exitCMP, FramePoint2DReadOnly desiredCMP)
    {
       toeOffCalculator.setExitCMP(exitCMP, trailingLeg);
       toeOffCalculator.computeToeOffContactLine(desiredCMP, trailingLeg);
@@ -550,9 +672,12 @@ public class FeetManager
 
    public void touchDown(RobotSide side, double initialPitch, double initialPitchVelocity, double pitch, double duration)
    {
-      footNormalContactVector.setIncludingFrame(worldFrame, 0.0, 0.0, 1.0);
-      footControlModules.get(side).setContactState(ConstraintType.FULL, footNormalContactVector);
+      setFlatFootContactState(side);
       footControlModules.get(side).touchDown(initialPitch, initialPitchVelocity, pitch, duration);
-      reset();
+   }
+
+   public MultipleWaypointsPoseTrajectoryGenerator getSwingTrajectory(RobotSide robotSide)
+   {
+      return footControlModules.get(robotSide).getSwingTrajectory();
    }
 }

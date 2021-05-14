@@ -1,11 +1,11 @@
 package us.ihmc.robotics.controllers.pidGains;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class DampingUpdater implements VariableChangedListener
+public class DampingUpdater implements YoVariableChangedListener
 {
    private final YoDouble kp;
    private final YoDouble kd;
@@ -19,11 +19,11 @@ public class DampingUpdater implements VariableChangedListener
       this.kd = kd;
       this.zeta = zeta;
       this.update = update;
-      update.addVariableChangedListener(this);
+      update.addListener(this);
    }
 
    @Override
-   public void notifyOfVariableChange(YoVariable<?> v)
+   public void changed(YoVariable v)
    {
       if (update.getBooleanValue())
       {

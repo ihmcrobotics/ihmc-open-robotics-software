@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.Random;
@@ -19,7 +19,7 @@ public class ConstantStictionModelTest
    @Test
    public void testGetStictionMagnitude()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble constantStictionProvider = new YoDouble("constantStictionProvider", registry);
       StictionModel stictionModel = new ConstantStictionModel(constantStictionProvider);
 

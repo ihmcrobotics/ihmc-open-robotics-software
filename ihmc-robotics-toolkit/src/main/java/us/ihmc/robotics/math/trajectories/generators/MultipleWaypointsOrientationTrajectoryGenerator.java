@@ -16,10 +16,11 @@ import us.ihmc.robotics.math.trajectories.OrientationTrajectoryGeneratorInMultip
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoFrameSO3TrajectoryPoint;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.SO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -29,7 +30,7 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
    private final int maximumNumberOfWaypoints;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble currentTrajectoryTime;
 
@@ -39,18 +40,18 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
 
    private final HermiteCurveBasedOrientationTrajectoryGenerator subTrajectory;
 
-   public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, ReferenceFrame referenceFrame, YoRegistry parentRegistry)
    {
       this(namePrefix, defaultMaximumNumberOfWaypoints, referenceFrame, parentRegistry);
    }
 
    public MultipleWaypointsOrientationTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, ReferenceFrame referenceFrame,
-                                                          YoVariableRegistry parentRegistry)
+                                                          YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       numberOfWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
       numberOfWaypoints.set(0);
@@ -279,27 +280,21 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
    }
 
    @Override
-   public void getOrientation(FrameQuaternion orientationToPack)
+   public FrameQuaternionReadOnly getOrientation()
    {
-      subTrajectory.getOrientation(orientationToPack);
+      return subTrajectory.getOrientation();
    }
 
    @Override
-   public void getAngularVelocity(FrameVector3D angularVelocityToPack)
+   public FrameVector3DReadOnly getAngularVelocity()
    {
-      subTrajectory.getAngularVelocity(angularVelocityToPack);
+      return subTrajectory.getAngularVelocity();
    }
 
    @Override
-   public void getAngularAcceleration(FrameVector3D angularAccelerationToPack)
+   public FrameVector3DReadOnly getAngularAcceleration()
    {
-      subTrajectory.getAngularAcceleration(angularAccelerationToPack);
-   }
-
-   @Override
-   public void getAngularData(FrameQuaternion orientationToPack, FrameVector3D angularVelocityToPack, FrameVector3D angularAccelerationToPack)
-   {
-      subTrajectory.getAngularData(orientationToPack, angularVelocityToPack, angularAccelerationToPack);
+      return subTrajectory.getAngularAcceleration();
    }
 
    public int getCurrentNumberOfWaypoints()
@@ -317,9 +312,20 @@ public class MultipleWaypointsOrientationTrajectoryGenerator extends Orientation
       return waypoints.get(numberOfWaypoints.getIntegerValue() - 1).getTime();
    }
 
-   public void getLastWaypoint(FrameSO3TrajectoryPoint pointToPack)
+   public void getLastWaypoint(FrameSO3TrajectoryPointBasics pointToPack)
    {
       pointToPack.set(waypoints.get(numberOfWaypoints.getIntegerValue() - 1));
+   }
+
+   public FrameSO3TrajectoryPointBasics getWaypoint(int index)
+   {
+      return waypoints.get(index);
+   }
+
+   public void removeLastWaypoint()
+   {
+      waypoints.get(numberOfWaypoints.getIntegerValue() - 1).setToNaN();
+      numberOfWaypoints.decrement();
    }
 
    @Override

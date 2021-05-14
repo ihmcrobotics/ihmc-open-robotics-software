@@ -6,10 +6,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.ejml.alg.dense.linsol.svd.SolvePseudoInverseSvd;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.linsol.svd.SolvePseudoInverseSvd_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Plane3D;
@@ -49,7 +49,7 @@ public class PlanarRegionSLAMTools
    {
       RigidBodyTransform bigT = new RigidBodyTransform();
 
-      SolvePseudoInverseSvd solver = new SolvePseudoInverseSvd();
+      SolvePseudoInverseSvd_DDRM solver = new SolvePseudoInverseSvd_DDRM();
 
       int numberOfMatches = 0;
       for (PairList<PlanarRegion, Point2D> newDataRegionWithReferencePoints : matchesWithReferencePoints.values())
@@ -60,8 +60,8 @@ public class PlanarRegionSLAMTools
       if (numberOfMatches == 0)
          return new RigidBodyTransform();
 
-      DenseMatrix64F A = new DenseMatrix64F(numberOfMatches, 6);
-      DenseMatrix64F b = new DenseMatrix64F(numberOfMatches, 1); // negative distance to planes
+      DMatrixRMaj A = new DMatrixRMaj(numberOfMatches, 6);
+      DMatrixRMaj b = new DMatrixRMaj(numberOfMatches, 1); // negative distance to planes
 
       int i = 0;
       for (PlanarRegion mapRegion : matchesWithReferencePoints.keySet())
@@ -142,21 +142,21 @@ public class PlanarRegionSLAMTools
          LogTools.info("b: {}", b);
       }
 
-      DenseMatrix64F x = new DenseMatrix64F(6, 1);
+      DMatrixRMaj x = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F ATransposeTimesA = new DenseMatrix64F(6, 6);
-      CommonOps.multInner(A, ATransposeTimesA);
+      DMatrixRMaj ATransposeTimesA = new DMatrixRMaj(6, 6);
+      CommonOps_DDRM.multInner(A, ATransposeTimesA);
 
-      DenseMatrix64F ATransposeB = new DenseMatrix64F(6, 1);
-      CommonOps.multTransA(A, b, ATransposeB);
+      DMatrixRMaj ATransposeB = new DMatrixRMaj(6, 1);
+      CommonOps_DDRM.multTransA(A, b, ATransposeB);
 
       // Use damped least squares (also called regularized least squares) to prevent blow up when data is sparse.
       // See https://www2.math.uconn.edu/~leykekhman/courses/MARN_5898/Lectures/Linear_least_squares_reg.pdf
-      DenseMatrix64F lambdaI = CommonOps.identity(6);
-      CommonOps.scale(parameters.getDampedLeastSquaresLambda(), lambdaI);
+      DMatrixRMaj lambdaI = CommonOps_DDRM.identity(6);
+      CommonOps_DDRM.scale(parameters.getDampedLeastSquaresLambda(), lambdaI);
 
-      DenseMatrix64F ATransposeTimesAPlusLambdaI = new DenseMatrix64F(6, 6);
-      CommonOps.add(ATransposeTimesA, lambdaI, ATransposeTimesAPlusLambdaI);
+      DMatrixRMaj ATransposeTimesAPlusLambdaI = new DMatrixRMaj(6, 6);
+      CommonOps_DDRM.add(ATransposeTimesA, lambdaI, ATransposeTimesAPlusLambdaI);
 
       solver.setA(ATransposeTimesAPlusLambdaI);
 
@@ -164,7 +164,7 @@ public class PlanarRegionSLAMTools
 
       if (verbose)
       {
-         SingularValueDecomposition<DenseMatrix64F> decomposition = solver.getDecomposition();
+         SingularValueDecomposition_F64<DMatrixRMaj> decomposition = solver.getDecomposition();
          double[] singularValues = decomposition.getSingularValues();
          LogTools.info("singularValues = " + doubleArrayToString(singularValues));
          LogTools.info("ATransposeTimesA: {}", ATransposeTimesA);
@@ -316,8 +316,8 @@ public class PlanarRegionSLAMTools
       Point2DBasics maxPoint = new Point2D();
 
       intersection.getCenterPoint(centerPoint);
-      intersection.getMinPoint(minPoint);
-      intersection.getMaxPoint(maxPoint);
+      minPoint.set(intersection.getMinPoint());
+      maxPoint.set(intersection.getMaxPoint());
 
       Point2D newCenterPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint,
                                                                                        transformFromWorldToMap,

@@ -3,10 +3,10 @@ package us.ihmc.avatar.polaris;
 import java.io.IOException;
 
 import net.java.games.input.Component;
-import us.ihmc.yoVariables.dataBuffer.YoVariableHolder;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationConstructionSetTools.joystick.DoubleYoVariableJoystickEventListener;
 import us.ihmc.tools.inputDevices.joystick.Joystick;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 
 public class DRCRobotSteeringWheelJoystickController
@@ -24,7 +24,7 @@ public class DRCRobotSteeringWheelJoystickController
       joystick = new Joystick();
       joystick.setPollInterval(pollIntervalMillis);
 
-      YoDouble desiredSteeringWheelAngle = (YoDouble) holder.getVariable("desiredSteeringWheelAngle");
+      YoDouble desiredSteeringWheelAngle = (YoDouble) holder.findVariable("desiredSteeringWheelAngle");
       joystick.addJoystickEventListener(new DoubleYoVariableJoystickEventListener(desiredSteeringWheelAngle, joystick.findComponent(Component.Identifier.Axis.X), -maxSteeringAngle, maxSteeringAngle,
               deadZone, false));
    }

@@ -6,12 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.buffer.YoBufferVariableEntry;
 
 public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreator
 {
@@ -19,7 +19,7 @@ public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreato
  //TODO: currently only does PinJoints
    private final List<PinJoint> pinJoints = new ArrayList<PinJoint>();
 
-   public TorqueSpeedDataExporterGraphCreator(Robot robot, DataBuffer dataBuffer)
+   public TorqueSpeedDataExporterGraphCreator(Robot robot, YoBuffer dataBuffer)
    {
       super(robot.getYoTime(), dataBuffer);
 
@@ -33,9 +33,9 @@ public class TorqueSpeedDataExporterGraphCreator extends DataExporterGraphCreato
    {
       for (PinJoint pinJoint : pinJoints)
       {
-         DataBufferEntry position = dataBuffer.getEntry(pinJoint.getQYoVariable());
-         DataBufferEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
-         DataBufferEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
+         YoBufferVariableEntry position = dataBuffer.getEntry(pinJoint.getQYoVariable());
+         YoBufferVariableEntry torque = dataBuffer.getEntry(pinJoint.getTauYoVariable());
+         YoBufferVariableEntry speed = dataBuffer.getEntry(pinJoint.getQDYoVariable());
 
          String timeLabel = "time [s]";
          String positionLabel = position.getVariableName() + " [rad]";

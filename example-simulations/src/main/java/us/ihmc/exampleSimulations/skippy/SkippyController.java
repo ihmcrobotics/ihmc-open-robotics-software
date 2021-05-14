@@ -32,11 +32,11 @@ import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.gui.EventDispatchThreadHelper;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class SkippyController implements RobotController
 {
@@ -73,7 +73,7 @@ public class SkippyController implements RobotController
 
    private StateMachine<States, State> stateMachine;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry("SkippyController");
+   private final YoRegistry registry = new YoRegistry("SkippyController");
 
    // tau_* is torque, q_* is position, qd_* is velocity for joint *
    // private YoDouble q_foot_X, q_hip, qHipIncludingOffset, qd_foot_X,
@@ -980,7 +980,7 @@ public class SkippyController implements RobotController
       // (joint.getQ().getDoubleValue() - desiredValue));
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

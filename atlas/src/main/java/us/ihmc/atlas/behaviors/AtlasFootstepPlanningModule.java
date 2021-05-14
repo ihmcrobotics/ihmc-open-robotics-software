@@ -4,6 +4,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.pubsub.DomainFactory;
 
 public class AtlasFootstepPlanningModule
@@ -15,5 +16,6 @@ public class AtlasFootstepPlanningModule
    {
       AtlasRobotModel robotModel = new AtlasRobotModel(ATLAS_VERSION, ATLAS_TARGET, false);
       FootstepPlanningModuleLauncher.createModule(robotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
+      ThreadTools.sleepForever();
    }
 }

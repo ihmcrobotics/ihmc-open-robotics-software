@@ -45,7 +45,7 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
 
       // Place this frame between the two frames.
       translation.interpolate(originOne, originTwo, 0.5);
-      transformToParent.setTranslation(translation);
+      transformToParent.getTranslation().set(translation);
 
       vectorBetweenFrames.setToZero(getParent());
       vectorBetweenFrames.sub(originTwo, originOne);
@@ -56,7 +56,7 @@ public class MovingMidFrameZUpFrame extends MovingReferenceFrame
          return;
 
       xAxis.normalize();
-      transformToParent.setRotationYaw(Math.atan2(xAxis.getY(), xAxis.getX()));
+      transformToParent.getRotation().setToYawOrientation(Math.atan2(xAxis.getY(), xAxis.getX()));
    }
 
    private final FrameVector3D linearVelocity = new FrameVector3D();

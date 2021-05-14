@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.springBall;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SpringBallController implements RobotController
@@ -14,7 +14,7 @@ public class SpringBallController implements RobotController
    private YoDouble[]
       pos = new YoDouble[SpringBallRobot.NUM_SPIKES], vel = new YoDouble[SpringBallRobot.NUM_SPIKES], tau = new YoDouble[SpringBallRobot.NUM_SPIKES];
 
-   private YoVariableRegistry registry = new YoVariableRegistry("SpringBallController");
+   private YoRegistry registry = new YoRegistry("SpringBallController");
 
    private YoDouble offset_spike = new YoDouble("offset_spike", registry), amp_spike = new YoDouble("amp_spike", registry),
                       freq_spike = new YoDouble("freq_spike", registry);
@@ -38,23 +38,23 @@ public class SpringBallController implements RobotController
 
    private void initControl()
    {
-      t = (YoDouble)rob.getVariable("t");
+      t = (YoDouble)rob.findVariable("t");
 
-      q_x = (YoDouble)rob.getVariable("q_x");
-      q_y = (YoDouble)rob.getVariable("q_y");
-      q_z = (YoDouble)rob.getVariable("q_z");
+      q_x = (YoDouble)rob.findVariable("q_x");
+      q_y = (YoDouble)rob.findVariable("q_y");
+      q_z = (YoDouble)rob.findVariable("q_z");
 
-      qd_wx = (YoDouble)rob.getVariable("qd_wx");
-      qd_wy = (YoDouble)rob.getVariable("qd_wy");
-      qd_wz = (YoDouble)rob.getVariable("qd_wz");
+      qd_wx = (YoDouble)rob.findVariable("qd_wx");
+      qd_wy = (YoDouble)rob.findVariable("qd_wy");
+      qd_wz = (YoDouble)rob.findVariable("qd_wz");
 
       q_z.set(1.0);
 
       for (int i = 0; i < SpringBallRobot.NUM_SPIKES; i++)
       {
-         pos[i] = (YoDouble)rob.getVariable("q_slider" + i);
-         vel[i] = (YoDouble)rob.getVariable("qd_slider" + i);
-         tau[i] = (YoDouble)rob.getVariable("tau_slider" + i);
+         pos[i] = (YoDouble)rob.findVariable("q_slider" + i);
+         vel[i] = (YoDouble)rob.findVariable("qd_slider" + i);
+         tau[i] = (YoDouble)rob.findVariable("tau_slider" + i);
       }
 
       q_d_spike.set(0.0);
@@ -87,7 +87,7 @@ public class SpringBallController implements RobotController
 
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
@@ -21,11 +20,12 @@ import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
@@ -55,18 +55,18 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
 
    private final MirroredYoVariableRegistry registry;
 
-   public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
-                                            MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
+   public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeROS2Node realtimeROS2Node, DRCRobotModel robotModel,
+                                            ROS2Topic outputTopic, ROS2Topic inputTopic)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       handControllerTime = new YoDouble("handControllerTime", registry);
 
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                         pubTopicNameGenerator);
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
+                                                                                                                  outputTopic);
          jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
@@ -133,12 +133,12 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
 
          ValkyrieHandFingerTrajectoryMessageSubscriber valkyrieHandFingerTrajectoryMessageSubscriber = new ValkyrieHandFingerTrajectoryMessageSubscriber(robotSide);
          valkyrieHandFingerTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
-         if (realtimeRos2Node != null)
+         if (realtimeROS2Node != null)
          {
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
-                                                 handDesiredConfigurationSubscriber);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node, ValkyrieHandFingerTrajectoryMessage.class, subTopicNameGenerator,
-                                                 valkyrieHandFingerTrajectoryMessageSubscriber);
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
+                                                          handDesiredConfigurationSubscriber);
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ValkyrieHandFingerTrajectoryMessage.class, inputTopic,
+                                                          valkyrieHandFingerTrajectoryMessageSubscriber);
          }
       }
 
@@ -212,7 +212,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    }
 
    @Override
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

@@ -20,7 +20,7 @@ public class QuaternionSerializer extends Serializer<Quaternion>
    }
 
    @Override
-   public Quaternion read(Kryo kryo, Input input, Class<Quaternion> type)
+   public Quaternion read(Kryo kryo, Input input, Class<? extends Quaternion> type)
    {
       return new Quaternion(input.readDouble(), input.readDouble(), input.readDouble(), input.readDouble());
    }

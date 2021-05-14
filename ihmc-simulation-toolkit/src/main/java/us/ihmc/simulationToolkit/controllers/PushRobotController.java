@@ -2,6 +2,7 @@ package us.ihmc.simulationToolkit.controllers;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.LinkedList;
 
 import javax.swing.JButton;
 
@@ -17,17 +18,17 @@ import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class PushRobotController implements RobotController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble pushDuration;
    private final YoDouble pushForceMagnitude;
    private final YoFrameVector3D pushDirection;
@@ -45,6 +46,8 @@ public class PushRobotController implements RobotController
 
    private final YoGraphicVector forceVisualizer;
 
+   private final LinkedList<DelayedPush> delayedPushs = new LinkedList<>();
+
    public PushRobotController(FloatingRootJointRobot pushableRobot, FullHumanoidRobotModel fullRobotModel)
    {
       this(pushableRobot, fullRobotModel.getChest().getParentJoint().getName(), new Vector3D(0, 0, 0.3), 0.005);
@@ -58,7 +61,7 @@ public class PushRobotController implements RobotController
    public PushRobotController(FloatingRootJointRobot pushableRobot, String jointNameToApplyForce, Vector3DReadOnly forcePointOffset, double visualScale)
    {
       yoTime = pushableRobot.getYoTime();
-      registry = new YoVariableRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
+      registry = new YoRegistry(jointNameToApplyForce + "_" + getClass().getSimpleName());
       forcePoint = new ExternalForcePoint(jointNameToApplyForce + "_externalForcePoint", forcePointOffset, pushableRobot);
 
       pushDuration = new YoDouble(jointNameToApplyForce + "_pushDuration", registry);
@@ -76,8 +79,8 @@ public class PushRobotController implements RobotController
       pushTimeSwitch.set(Double.NEGATIVE_INFINITY);
       pushForceMagnitude.set(0.0);
 
-      forceVisualizer = new YoGraphicVector(jointNameToApplyForce + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale,
-            YoAppearance.DarkBlue());
+      forceVisualizer = new YoGraphicVector(jointNameToApplyForce
+            + "_pushForce", forcePoint.getYoPosition(), forcePoint.getYoForce(), visualScale, YoAppearance.DarkBlue());
    }
 
    public YoGraphic getForceVisualizer()
@@ -147,6 +150,14 @@ public class PushRobotController implements RobotController
       applyForce();
    }
 
+   public void queueForceDelayed(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
+   {
+      if (delayedPushs.isEmpty())
+         applyForceDelayed(pushCondition, timeDelay, direction, magnitude, duration);
+      else
+         delayedPushs.add(new DelayedPush(pushCondition, timeDelay, direction, magnitude, duration));
+   }
+
    private void applyForce()
    {
       double length = pushDirection.length();
@@ -195,6 +206,12 @@ public class PushRobotController implements RobotController
       }
       else
       {
+         if (isBeingPushed.getValue() && !delayedPushs.isEmpty())
+         {
+            DelayedPush delayedPush = delayedPushs.pollFirst();
+            applyForceDelayed(delayedPush.pushCondition, delayedPush.timeDelay, delayedPush.direction, delayedPush.magnitude, delayedPush.duration);
+         }
+
          isBeingPushed.set(false);
          forceVector.set(0.0, 0.0, 0.0);
       }
@@ -203,7 +220,7 @@ public class PushRobotController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -218,5 +235,23 @@ public class PushRobotController implements RobotController
    public String getDescription()
    {
       return registry.getName();
+   }
+
+   private static class DelayedPush
+   {
+      private StateTransitionCondition pushCondition;
+      private double timeDelay;
+      private Vector3DReadOnly direction;
+      private double magnitude;
+      private double duration;
+
+      public DelayedPush(StateTransitionCondition pushCondition, double timeDelay, Vector3DReadOnly direction, double magnitude, double duration)
+      {
+         this.pushCondition = pushCondition;
+         this.timeDelay = timeDelay;
+         this.direction = direction;
+         this.magnitude = magnitude;
+         this.duration = duration;
+      }
    }
 }

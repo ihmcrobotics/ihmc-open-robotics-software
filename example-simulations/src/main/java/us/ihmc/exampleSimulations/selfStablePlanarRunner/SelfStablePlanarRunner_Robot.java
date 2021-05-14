@@ -1,10 +1,10 @@
 package us.ihmc.exampleSimulations.selfStablePlanarRunner;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
@@ -19,9 +19,9 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
     private static final long serialVersionUID = -7398771951537758129L;
 
-    private final YoVariableRegistry registry = new YoVariableRegistry("RobotRegistry");
+    private final YoRegistry registry = new YoRegistry("RobotRegistry");
     
-    private final YoVariableRegistry paramsReg  = new YoVariableRegistry("RobotParameters");
+    private final YoRegistry paramsReg  = new YoRegistry("RobotParameters");
     private final YoDouble thighLength  = new YoDouble("thighLength" , paramsReg);
     private final YoDouble shinLength   = new YoDouble("shinLength"  , paramsReg);
     private final YoDouble bodyToWheel  = new YoDouble("bodyToWheel" , paramsReg);
@@ -50,7 +50,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
     
     public SelfStablePlanarRunner_Robot(String name, double pendulumComZ, double q_y0) {
 	super(name);
-	this.getYoVariableRegistry().addChild(paramsReg);
+	this.getYoRegistry().addChild(paramsReg);
 	
 	this.pendulumComZ.set(pendulumComZ);
 	thighLength .set(  1.5);
@@ -64,28 +64,28 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	shinMass    .set(  2.0);
 	
 
-	bodyJoint_T1 = new SliderJoint("x"    , new Vector3D(0.0, q_y0, 0.0), this, Axis.X);
-	bodyJoint_T2 = new SliderJoint("z"    , new Vector3D(), this, Axis.Z);
-	bodyJoint_R  = new PinJoint   ("pitch", new Vector3D(), this, Axis.Y);
+	bodyJoint_T1 = new SliderJoint("x"    , new Vector3D(0.0, q_y0, 0.0), this, Axis3D.X);
+	bodyJoint_T2 = new SliderJoint("z"    , new Vector3D(), this, Axis3D.Z);
+	bodyJoint_R  = new PinJoint   ("pitch", new Vector3D(), this, Axis3D.Y);
 
-	pendulumJoint = new SliderJoint("pendulum", new Vector3D(), this, Axis.Z);
+	pendulumJoint = new SliderJoint("pendulum", new Vector3D(), this, Axis3D.Z);
 	
-	leftUpperHip  = new PinJoint("l_uhip", new Vector3D(0, 0.15, 0), this, Axis.Y);
-	rightUpperHip = new PinJoint("r_uhip", new Vector3D(0,-0.15, 0), this, Axis.Y);
+	leftUpperHip  = new PinJoint("l_uhip", new Vector3D(0, 0.15, 0), this, Axis3D.Y);
+	rightUpperHip = new PinJoint("r_uhip", new Vector3D(0,-0.15, 0), this, Axis3D.Y);
 
-	leftMidHip  = new SliderJoint("l_mhip", new Vector3D(), this, Axis.Z);
-	rightMidHip = new SliderJoint("r_mhip", new Vector3D(), this, Axis.Z);
+	leftMidHip  = new SliderJoint("l_mhip", new Vector3D(), this, Axis3D.Z);
+	rightMidHip = new SliderJoint("r_mhip", new Vector3D(), this, Axis3D.Z);
 
 	wheelOnLLeg = new ExternalForcePoint("efp_wheelOnLLeg", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this);
 	wheelOnRLeg = new ExternalForcePoint("efp_wheelOnRLeg", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this);
 
-	drivingWheel = new PinJoint("driving_wheel", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this, Axis.Y);
+	drivingWheel = new PinJoint("driving_wheel", new Vector3D(0, 0, -bodyToWheel.getDoubleValue()), this, Axis3D.Y);
 
 	lLegOnWheel = new ExternalForcePoint("efp_lLegOnWheel", new Vector3D(0, 0, -wheelR.getDoubleValue()), this);
 	rLegOnWheel = new ExternalForcePoint("efp_rLegOnWheel", new Vector3D(0, 0,  wheelR.getDoubleValue()), this);
 
-	leftKnee  = new SliderJoint("l_knee", new Vector3D(0, 0, -thighLength.getDoubleValue()), this, Axis.Z);
-	rightKnee = new SliderJoint("r_knee", new Vector3D(0, 0, -thighLength.getDoubleValue()), this, Axis.Z);
+	leftKnee  = new SliderJoint("l_knee", new Vector3D(0, 0, -thighLength.getDoubleValue()), this, Axis3D.Z);
+	rightKnee = new SliderJoint("r_knee", new Vector3D(0, 0, -thighLength.getDoubleValue()), this, Axis3D.Z);
 
 	leftGC  = new GroundContactPoint( "leftGC", new Vector3D(0, 0, -shinLength.getDoubleValue()), this);
 	rightGC = new GroundContactPoint("rightGC", new Vector3D(0, 0, -shinLength.getDoubleValue()), this);
@@ -139,14 +139,14 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
 	Graphics3DObject g = new Graphics3DObject();
 	g.translate(0, 0.25, 0);
-	g.rotate(Math.PI/2, Axis.X);
+	g.rotate(Math.PI/2, Axis3D.X);
 	g.addCylinder(0.5, 0.025, YoAppearance.Red());
-	g.rotate(-Math.PI/2, Axis.X);
+	g.rotate(-Math.PI/2, Axis3D.X);
 	g.translate(0,-0.25, 0);
 	g.translate(0, 0.099/2.0, 0);
-	g.rotate(Math.PI/2, Axis.X);
+	g.rotate(Math.PI/2, Axis3D.X);
 	g.addCylinder(0.099, 0.1, YoAppearance.DarkGreen());
-	g.rotate(-Math.PI/2, Axis.X);
+	g.rotate(-Math.PI/2, Axis3D.X);
 	g.translate(0, -0.099/2.0, 0);
 	g.addCube(0.2, 0.1, pendulumComZ.getDoubleValue(), YoAppearance.DarkGreen());
 
@@ -163,9 +163,9 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
 	Graphics3DObject g = new Graphics3DObject();
 	g.translate(0, 0.055, 0);
-	g.rotate(Math.PI/2, Axis.X);
+	g.rotate(Math.PI/2, Axis3D.X);
 	g.addCylinder(0.11, 0.3, YoAppearance.DarkKhaki());
-	g.rotate(-Math.PI/2, Axis.X);
+	g.rotate(-Math.PI/2, Axis3D.X);
 
 	ret.setLinkGraphics(g);
 
@@ -180,9 +180,9 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 
 	Graphics3DObject g = new Graphics3DObject();
 	g.translate(0, 0.0505, 0);
-	g.rotate(Math.PI/2, Axis.X);
+	g.rotate(Math.PI/2, Axis3D.X);
 	g.addArcTorus(0, 2.0*Math.PI, wheelR.getDoubleValue(), 0.025, YoAppearance.DarkCyan());
-	g.rotate(-Math.PI/2, Axis.X);
+	g.rotate(-Math.PI/2, Axis3D.X);
 	g.translate(0, 0, -wheelR.getDoubleValue());
 	g.addSphere(0.04);
 	g.translate(0, 0, 2.0*wheelR.getDoubleValue());
@@ -193,9 +193,9 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	g.addSphere(0.04);
 	g.translate(-wheelR.getDoubleValue(), 0, 0);
 	g.translate(0,-0.11, 0);
-	g.rotate(Math.PI/2, Axis.X);
+	g.rotate(Math.PI/2, Axis3D.X);
 	g.addArcTorus(0, 2.0*Math.PI, wheelR.getDoubleValue(), 0.025, YoAppearance.DarkCyan());
-	g.rotate(-Math.PI/2, Axis.X);
+	g.rotate(-Math.PI/2, Axis3D.X);
 	g.translate(0, 0, -wheelR.getDoubleValue());
 	g.addSphere(0.04);
 	g.translate(0, 0, 2.0*wheelR.getDoubleValue());
@@ -235,7 +235,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	Graphics3DObject g = new Graphics3DObject();
 	g.addCylinder(-shinLength.getDoubleValue()+0.04, 0.04, YoAppearance.DarkRed());
 	g.translate(0, 0, -shinLength.getDoubleValue()+0.04);
-	g.rotate(Math.PI,Axis.X);
+	g.rotate(Math.PI,Axis3D.X);
 	g.addHemiEllipsoid(0.04, 0.04, 0.04);
 
 	ret.setLinkGraphics(g);
@@ -282,10 +282,10 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
 	
     }
 
-    public double getFootForce (RobotSide rS, Axis axis) {
+    public double getFootForce (RobotSide rS, Axis3D axis) {
 	return footForces[rS.ordinal()][axis.ordinal()].getDoubleValue();
     }
-    public double getBodyVxWyVzInWorld (Axis axis) {
+    public double getBodyVxWyVzInWorld (Axis3D axis) {
 	return bodyVelocityInWorld[axis.ordinal()].getDoubleValue();
     }
     public double getBodyPitch () {
@@ -343,7 +343,7 @@ public class SelfStablePlanarRunner_Robot extends Robot implements RobotControll
     public void initialize() {
     }
 
-    public YoVariableRegistry getYoVariableRegistry() {
+    public YoRegistry getYoRegistry() {
 	return registry;
     }
 

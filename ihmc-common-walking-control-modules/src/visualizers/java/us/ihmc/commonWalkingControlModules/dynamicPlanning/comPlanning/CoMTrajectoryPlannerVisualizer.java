@@ -1,5 +1,8 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -14,13 +17,10 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class CoMTrajectoryPlannerVisualizer
 {
@@ -78,7 +78,7 @@ public class CoMTrajectoryPlannerVisualizer
 
    public CoMTrajectoryPlannerVisualizer()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("testJacobian");
+      YoRegistry registry = new YoRegistry("testJacobian");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
@@ -126,7 +126,7 @@ public class CoMTrajectoryPlannerVisualizer
 
       scs = new SimulationConstructionSet(robot, scsParameters);
       scs.setDT(simDt, 1);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(graphicsListRegistry);
       scs.setPlaybackRealTimeRate(0.75);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -152,8 +152,9 @@ public class CoMTrajectoryPlannerVisualizer
 
       SettableContactStateProvider initialContactStateProvider = new SettableContactStateProvider();
       initialContactStateProvider.getTimeInterval().setInterval(0.0, 0.5);
-      initialContactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
-      initialContactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, 0.0));
+      initialContactStateProvider.setLinearECMPVelocity();
       initialContactStateProvider.setContactState(ContactState.IN_CONTACT);
 
 
@@ -163,11 +164,13 @@ public class CoMTrajectoryPlannerVisualizer
       {
          SettableContactStateProvider contactStateProvider = new SettableContactStateProvider();
 
-         contactStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
+         contactStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -verticalOffset));
          if (includeFlight)
-            contactStateProvider.setEndCopPosition(contactStateProvider.getCopStartPosition());
+            contactStateProvider.setEndECMPPosition(contactStateProvider.getECMPStartPosition());
          else
-            contactStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
+            contactStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition + stepLength, 0.0, -verticalOffset));
+         initialContactStateProvider.setLinearECMPVelocity();
+
          contactStateProvider.getTimeInterval().setInterval(currentTime, currentTime + stepDuration);
          contactStateProvider.setContactState(ContactState.IN_CONTACT);
 
@@ -190,9 +193,10 @@ public class CoMTrajectoryPlannerVisualizer
       }
 
       SettableContactStateProvider finalStateProvider = new SettableContactStateProvider();
-      finalStateProvider.setStartCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
-      finalStateProvider.setEndCopPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.setStartECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
+      finalStateProvider.setEndECMPPosition(new FramePoint3D(worldFrame, contactPosition, 0.0, -finalVerticalOffsetBound));
       finalStateProvider.getTimeInterval().setInterval(currentTime, currentTime + finalTransferDuration);
+      finalStateProvider.setLinearECMPVelocity();
       finalStateProvider.setContactState(ContactState.IN_CONTACT);
 
       contacts.add(finalStateProvider);

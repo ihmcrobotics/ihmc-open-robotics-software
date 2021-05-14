@@ -1,5 +1,6 @@
 package us.ihmc.avatar.networkProcessor.modules;
 
+import java.net.BindException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,9 +37,10 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -54,17 +56,18 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    protected final String name = getClass().getSimpleName();
    protected final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-   protected final YoVariableRegistry registry = new YoVariableRegistry(name);
+   protected final YoRegistry registry = new YoRegistry(name);
    protected final YoDouble yoTime = new YoDouble("localTime", registry);
    protected final String robotName;
    protected final FullHumanoidRobotModel fullRobotModel;
 
-   protected final RealtimeRos2Node realtimeRos2Node;
+   private final boolean manageROS2Node;
+   protected final RealtimeROS2Node realtimeROS2Node;
    protected final CommandInputManager commandInputManager;
    protected final StatusMessageOutputManager statusOutputManager;
    protected final ControllerNetworkSubscriber controllerNetworkSubscriber;
 
-   protected final ThreadFactory threadFactory = ThreadTools.getNamedThreadFactory(name);
+   protected final ThreadFactory threadFactory = ThreadTools.createNamedThreadFactory(name);
    protected final ScheduledExecutorService executorService;
    protected ScheduledFuture<?> toolboxTaskScheduled = null;
    protected ScheduledFuture<?> yoVariableServerScheduled = null;
@@ -79,25 +82,33 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    private final boolean startYoVariableServer;
    protected YoVariableServer yoVariableServer;
 
-   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer)
+   public ToolboxModule(String robotName,
+                        FullHumanoidRobotModel fullRobotModelToLog,
+                        LogModelProvider modelProvider,
+                        boolean startYoVariableServer,
+                        int updatePeriodMilliseconds,
+                        RealtimeROS2Node realtimeROS2Node)
    {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS);
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, realtimeROS2Node, null);
    }
 
-   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                        int updatePeriodMilliseconds)
-   {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, PubSubImplementation.FAST_RTPS);
-   }
-
-   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
+   public ToolboxModule(String robotName,
+                        FullHumanoidRobotModel fullRobotModelToLog,
+                        LogModelProvider modelProvider,
+                        boolean startYoVariableServer,
+                        int updatePeriodMilliseconds,
                         PubSubImplementation pubSubImplementation)
    {
-      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, DEFAULT_UPDATE_PERIOD_MILLISECONDS, pubSubImplementation);
+      this(robotName, fullRobotModelToLog, modelProvider, startYoVariableServer, updatePeriodMilliseconds, null, pubSubImplementation);
    }
 
-   public ToolboxModule(String robotName, FullHumanoidRobotModel fullRobotModelToLog, LogModelProvider modelProvider, boolean startYoVariableServer,
-                        int updatePeriodMilliseconds, PubSubImplementation pubSubImplementation)
+   protected ToolboxModule(String robotName,
+                           FullHumanoidRobotModel fullRobotModelToLog,
+                           LogModelProvider modelProvider,
+                           boolean startYoVariableServer,
+                           int updatePeriodMilliseconds,
+                           RealtimeROS2Node realtimeROS2Node,
+                           PubSubImplementation pubSubImplementation)
    {
       this.robotName = robotName;
 
@@ -105,11 +116,19 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       this.startYoVariableServer = startYoVariableServer;
       this.fullRobotModel = fullRobotModelToLog;
       this.updatePeriodMilliseconds = updatePeriodMilliseconds;
-      realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+
+      // We're creating the ROS2 node here, so we need to manage it.
+      manageROS2Node = realtimeROS2Node == null;
+      if (realtimeROS2Node == null)
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
+      this.realtimeROS2Node = realtimeROS2Node;
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getSubscriberTopicNameGenerator(), commandInputManager, getPublisherTopicNameGenerator(),
-                                                                    statusOutputManager, realtimeRos2Node);
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopic(),
+                                                                    commandInputManager,
+                                                                    getOutputTopic(),
+                                                                    statusOutputManager,
+                                                                    realtimeROS2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
 
@@ -128,9 +147,10 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), new NewMessageListener<ToolboxStateMessage>()
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, ToolboxStateMessage.class, getInputTopic(), new NewMessageListener<ToolboxStateMessage>()
       {
          private final ToolboxStateMessage message = new ToolboxStateMessage();
+
          @Override
          public void onNewDataMessage(Subscriber<ToolboxStateMessage> s)
          {
@@ -138,11 +158,12 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             receivedPacket(message);
          }
       });
-      registerExtraPuSubs(realtimeRos2Node);
-      realtimeRos2Node.spin();
+      registerExtraPuSubs(realtimeROS2Node);
+      if (manageROS2Node)
+         realtimeROS2Node.spin();
    }
 
-   public void setRootRegistry(YoVariableRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
+   public void setRootRegistry(YoRegistry rootRegistry, YoGraphicsListRegistry rootGraphicsListRegistry)
    {
       rootRegistry.addChild(registry);
       if (rootGraphicsListRegistry != null)
@@ -170,22 +191,57 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       if (!startYoVariableServer)
          return;
 
-      yoVariableServer = new YoVariableServer(getClass(), modelProvider, getYoVariableServerSettings(), YO_VARIABLE_SERVER_DT);
-      yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
-      startYoVariableServerOnAThread(yoVariableServer);
+      DataServerSettings yoVariableServerSettings = getYoVariableServerSettings();
 
-      yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer), 0, updatePeriodMilliseconds,
-                                                                      TimeUnit.MILLISECONDS);
+      new Thread(() ->
+      {
+         for (int tentative = 0; tentative < 10; tentative++)
+         {
+            try
+            {
+               LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
+               yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
+               yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+               yoVariableServer.start();
+               break;
+            }
+            catch (RuntimeException e)
+            {
+               if (e.getCause() instanceof BindException)
+               {
+                  // There's another YoVariableServer running on the same port.
+                  // Trying the next port
+                  yoVariableServer = null;
+                  LogTools.warn("{}: Failed to start YoVariableServer, port {} is busy. Trying next port number", name, yoVariableServerSettings.getPort());
+                  yoVariableServerSettings.setPort(yoVariableServerSettings.getPort() + 1);
+               }
+               else
+               {
+                  throw e;
+               }
+            }
+         }
+
+         if (yoVariableServer == null)
+         {
+            LogTools.error("{}: Failed to start the YoVariableServer.", name);
+            return;
+         }
+         else
+         {
+            LogTools.info("{}: Successfully started YoVariableServer on port: {}.", name, yoVariableServerSettings.getPort());
+            yoVariableServerScheduled = executorService.scheduleAtFixedRate(createYoVariableServerRunnable(yoVariableServer),
+                                                                            0,
+                                                                            updatePeriodMilliseconds,
+                                                                            TimeUnit.MILLISECONDS);
+         }
+
+      }, name + "ToolboxYoVariableServer").start();
    }
 
    public DataServerSettings getYoVariableServerSettings()
    {
       return new DataServerSettings(false);
-   }
-
-   private void startYoVariableServerOnAThread(final YoVariableServer yoVariableServer)
-   {
-      new Thread(yoVariableServer::start).start();
    }
 
    private Runnable createYoVariableServerRunnable(final YoVariableServer yoVariableServer)
@@ -260,7 +316,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          LogTools.info("Received a state message.");
 
       ToolboxState requestedState = ToolboxState.fromByte(message.getRequestedToolboxState());
-      if(requestedState == null)
+      if (requestedState == null)
       {
          return;
       }
@@ -270,11 +326,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       {
          wakeUp();
       }
-      else if(requestedState == ToolboxState.REINITIALIZE && isAwake)
+      else if (requestedState == ToolboxState.REINITIALIZE && isAwake)
       {
          reinitialize();
       }
-      else if(requestedState == ToolboxState.SLEEP && isAwake)
+      else if (requestedState == ToolboxState.SLEEP && isAwake)
       {
          sleep();
       }
@@ -327,7 +383,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       toolboxTaskScheduled.cancel(true);
       toolboxTaskScheduled = null;
 
-      if(isLogging.getValue())
+      if (isLogging.getValue())
       {
          stopLogging();
       }
@@ -373,7 +429,9 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          yoVariableServer.close();
          yoVariableServer = null;
       }
-      realtimeRos2Node.destroy();
+
+      if (manageROS2Node)
+         realtimeROS2Node.destroy();
 
       if (DEBUG)
          LogTools.debug("Destroyed");
@@ -427,7 +485,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
    {
    }
 
-   abstract public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node);
+   abstract public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node);
 
    abstract public ToolboxController getToolboxController();
 
@@ -440,6 +498,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
    abstract public List<Class<? extends Settable<?>>> createListOfSupportedStatus();
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
+   }
 
    /**
     * @return the collection of commands that cannot wake up this module.
@@ -457,7 +520,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator();
+   public abstract ROS2Topic<?> getOutputTopic();
 
-   public abstract ROS2Tools.MessageTopicNameGenerator getSubscriberTopicNameGenerator();
+   public abstract ROS2Topic<?> getInputTopic();
 }

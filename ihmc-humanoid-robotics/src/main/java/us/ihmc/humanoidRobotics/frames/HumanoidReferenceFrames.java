@@ -4,6 +4,8 @@ import java.util.EnumMap;
 
 import gnu.trove.map.hash.TLongObjectHashMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -50,6 +52,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    private final MovingReferenceFrame midFeetUnderPelvisWalkDirectionFrame;
 
    private final ReferenceFrame centerOfMassFrame;
+   private final ReferenceFrame lidarSensorFrame;
 
    public HumanoidReferenceFrames(FullHumanoidRobotModel fullRobotModel)
    {
@@ -81,6 +84,27 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
          {
             this.neckReferenceFrames.put(neckJointName, fullRobotModel.getNeckJoint(neckJointName).getFrameAfterJoint());
          }
+      }
+
+      if (!fullRobotModel.getLidarSensorNames().isEmpty()
+          && fullRobotModel.getLidarSensorNames().get(0) != null &&
+            !fullRobotModel.getLidarSensorNames().get(0).isEmpty())
+      {
+         String lidarSensorName = fullRobotModel.getLidarSensorNames().get(0);
+         ReferenceFrame lidarBaseFrame = fullRobotModel.getLidarBaseFrame(lidarSensorName);
+         RigidBodyTransform lidarBaseToSensorTransform = fullRobotModel.getLidarBaseToSensorTransform(lidarSensorName);
+         if (lidarBaseFrame != null && lidarBaseToSensorTransform != null)
+         {
+            lidarSensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("lidarSensorFrame", lidarBaseFrame, lidarBaseToSensorTransform);
+         }
+         else
+         {
+            lidarSensorFrame = null;
+         }
+      }
+      else
+      {
+         lidarSensorFrame = null;
       }
 
       if (robotJointNames.getSpineJointNames() != null)
@@ -364,5 +388,10 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public TLongObjectHashMap<ReferenceFrame> getReferenceFrameDefaultHashIds()
    {
       return nameBasedHashCodeToReferenceFrameMap;
+   }
+
+   public ReferenceFrame getLidarSensorFrame()
+   {
+      return lidarSensorFrame;
    }
 }

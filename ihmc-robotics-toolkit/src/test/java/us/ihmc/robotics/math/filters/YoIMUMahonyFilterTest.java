@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -13,9 +13,9 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoIMUMahonyFilterTest
 {
@@ -32,10 +32,10 @@ public class YoIMUMahonyFilterTest
       String namePrefix = "q_est_";
       String nameSuffix = "";
       double updateDT = 1.0e-3;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       Random random = new Random(3454);
       ReferenceFrame sensorFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame, registry);
+      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame.getRootFrame(), registry);
 
       YoFrameVector3D inputAngularVelocity = new YoFrameVector3D("angularVelocity", sensorFrame, registry);
       YoFrameVector3D inputLinearAcceleration = new YoFrameVector3D("linearAcceleration", sensorFrame, registry);
@@ -69,10 +69,10 @@ public class YoIMUMahonyFilterTest
       String namePrefix = "q_est_";
       String nameSuffix = "";
       double updateDT = 1.0e-3;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       Random random = new Random(3454);
       ReferenceFrame sensorFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame, registry);
+      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame.getRootFrame(), registry);
 
       YoFrameVector3D inputAngularVelocity = new YoFrameVector3D("angularVelocity", sensorFrame, registry);
       YoFrameVector3D inputLinearAcceleration = new YoFrameVector3D("linearAcceleration", sensorFrame, registry);
@@ -116,10 +116,10 @@ public class YoIMUMahonyFilterTest
       String namePrefix = "q_est_";
       String nameSuffix = "";
       double updateDT = 1.0e-3;
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       Random random = new Random(3454);
       ReferenceFrame sensorFrame = EuclidFrameRandomTools.nextReferenceFrame(random);
-      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame, registry);
+      YoFrameQuaternion actualOrientation = new YoFrameQuaternion("q_act_", sensorFrame.getRootFrame(), registry);
 
       YoFrameVector3D inputAngularVelocity = new YoFrameVector3D("angularVelocity", sensorFrame, registry);
       YoFrameVector3D inputLinearAcceleration = new YoFrameVector3D("linearAcceleration", sensorFrame, registry);

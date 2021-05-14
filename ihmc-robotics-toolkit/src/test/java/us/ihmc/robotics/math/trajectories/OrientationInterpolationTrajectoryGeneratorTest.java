@@ -6,17 +6,14 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.robotics.trajectories.providers.ConstantOrientationProvider;
-import us.ihmc.robotics.trajectories.providers.OrientationProvider;
+import us.ihmc.robotics.trajectories.providers.FrameOrientationProvider;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class OrientationInterpolationTrajectoryGeneratorTest
 {
@@ -25,9 +22,9 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    
    private ReferenceFrame referenceFrame;
    private DoubleProvider trajectoryTimeProvider;
-   private OrientationProvider initialOrientationProvider;
-   private OrientationProvider finalOrientationProvider;
-   private YoVariableRegistry parentRegistry;
+   private FrameOrientationProvider initialOrientationProvider;
+   private FrameOrientationProvider finalOrientationProvider;
+   private YoRegistry parentRegistry;
    
 //   private static int globalCounter = 0;
    private static final double EPSILON = 1e-10;
@@ -38,13 +35,13 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrameTEST");
       orientation = new FrameQuaternion(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);
-      initialOrientationProvider = new ConstantOrientationProvider(orientation);
-      finalOrientationProvider = new ConstantOrientationProvider(orientation);
-      parentRegistry = new YoVariableRegistry("registry");
+      initialOrientationProvider = () -> orientation;
+      finalOrientationProvider = () -> orientation;
+      parentRegistry = new YoRegistry("registry");
    }
    
    @AfterEach
@@ -90,11 +87,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    public void testGet()
    {
       generator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, parentRegistry);
-      FrameQuaternion orientationToPack = new FrameQuaternion();
-
-      generator.getOrientation(orientationToPack);
-      
-      assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
+      assertEquals(referenceFrame, generator.getOrientation().getReferenceFrame());
    }
 
 	@Test
@@ -105,7 +98,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       
       assertFalse(referenceFrame.equals(angularVelocityToPack.getReferenceFrame()));
       
-      generator.getAngularVelocity(angularVelocityToPack);
+      angularVelocityToPack.setIncludingFrame(generator.getAngularVelocity());
       
      assertEquals(0.0, angularVelocityToPack.getX(), EPSILON);
      assertEquals(0.0, angularVelocityToPack.getY(), EPSILON);
@@ -121,7 +114,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       
       assertFalse(referenceFrame.equals(angularAccelerationToPack.getReferenceFrame()));
       
-      generator.getAngularAcceleration(angularAccelerationToPack);
+      angularAccelerationToPack.setIncludingFrame(generator.getAngularAcceleration());
       
       assertEquals(0.0, angularAccelerationToPack.getX(), EPSILON);
       assertEquals(0.0, angularAccelerationToPack.getY(), EPSILON);
@@ -136,12 +129,12 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       orientationToPack.setYawPitchRollIncludingFrame(referenceFrame, 4.4, 3.3, 1.4);
 
       generator = new OrientationInterpolationTrajectoryGenerator(namePrefix, referenceFrame, trajectoryTimeProvider, initialOrientationProvider, finalOrientationProvider, parentRegistry);
-      generator.getOrientation(orientationToPack);
+      orientationToPack.setIncludingFrame(generator.getOrientation());
       generator.setContinuouslyUpdateFinalOrientation(true);
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
 
-      generator.getOrientation(orientationToPack);
+      orientationToPack.setIncludingFrame(generator.getOrientation());
 
       assertEquals(referenceFrame, orientationToPack.getReferenceFrame());
          
@@ -172,9 +165,9 @@ public class OrientationInterpolationTrajectoryGeneratorTest
       assertSame(referenceFrame, angularAccelerationToPack.getReferenceFrame());
    }
    
-//   private YoVariableRegistry createRegistry()
+//   private YoRegistry createRegistry()
 //   {
-//      YoVariableRegistry registry = new YoVariableRegistry("registry" + globalCounter);
+//      YoRegistry registry = new YoRegistry("registry" + globalCounter);
 //      globalCounter++;
 //      return registry;
 //   }

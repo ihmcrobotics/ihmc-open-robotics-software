@@ -1,0 +1,4 @@
+start_position -0.52 0.55 -0.042
+goal_position -2.55 0.25 0.965
+start_yaw 3.14
+goal_yaw 3.14

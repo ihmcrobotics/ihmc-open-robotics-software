@@ -6,12 +6,12 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 import us.ihmc.robotics.linearDynamicSystems.LinearDynamicSystem;
 import us.ihmc.robotics.linearDynamicSystems.MatlabChart;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunction;
 import us.ihmc.robotics.linearDynamicSystems.TransferFunctionToStateSpaceConverter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 class YoLinearDynamicSystemTest
@@ -22,7 +22,7 @@ class YoLinearDynamicSystemTest
    {
       boolean displayChart = false;
 
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
 
       double zeta = 0.5;
       double wn = 2.0 * Math.PI * 1.0;
@@ -34,8 +34,8 @@ class YoLinearDynamicSystemTest
       double[] realPoles = new double[] {-2.0};
       ComplexNumber[] complexPairPoles = null;
 
-      Polynomial numeratorPolynomialTwo = Polynomial.constructFromScaleFactorAndRoots(dcScale, realZeros, complexPairZeros);
-      Polynomial denominatorPolynomialTwo = Polynomial.constructFromScaleFactorAndRoots(0.25, realPoles, complexPairPoles);
+      ObsoletePolynomial numeratorPolynomialTwo = ObsoletePolynomial.constructFromScaleFactorAndRoots(dcScale, realZeros, complexPairZeros);
+      ObsoletePolynomial denominatorPolynomialTwo = ObsoletePolynomial.constructFromScaleFactorAndRoots(0.25, realPoles, complexPairPoles);
       TransferFunction transferFunctionTwo = new TransferFunction(numeratorPolynomialTwo, denominatorPolynomialTwo);
 
       TransferFunction transferFunction = transferFunctionOne.times(transferFunctionTwo);

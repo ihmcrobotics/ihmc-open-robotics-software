@@ -1,7 +1,7 @@
 package us.ihmc.stateEstimation.humanoid.kinematicsBasedStateEstimation;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.matrixlib.NativeCommonOps;
@@ -14,7 +14,7 @@ import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MecanoFactories;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameWrench;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class EndEffectorWrenchEstimator
@@ -26,19 +26,19 @@ public class EndEffectorWrenchEstimator
    private final JointTorqueProvider jointTorqueProvider;
 
    private final GeometricJacobianCalculator geometricJacobianCalculator = new GeometricJacobianCalculator();
-   private final DenseMatrix64F jointTorqueMatrix;
-   private final DenseMatrix64F jacobianTranspose;
-   private final DenseMatrix64F wrenchMatrix = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj jointTorqueMatrix;
+   private final DMatrixRMaj jacobianTranspose;
+   private final DMatrixRMaj wrenchMatrix = new DMatrixRMaj(6, 1);
    private final OneDoFJointBasics[] joints;
 
    public EndEffectorWrenchEstimator(String prefix, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
-                                     YoVariableRegistry registry)
+                                     YoRegistry registry)
    {
       this(prefix, base, endEffector, wrenchMeasurementFrame, OneDoFJointReadOnly::getTau, registry);
    }
 
    public EndEffectorWrenchEstimator(String name, RigidBodyBasics base, RigidBodyBasics endEffector, ReferenceFrame wrenchMeasurementFrame,
-                                     JointTorqueProvider jointTorqueProvider, YoVariableRegistry registry)
+                                     JointTorqueProvider jointTorqueProvider, YoRegistry registry)
    {
       this.name = name;
       this.jointTorqueProvider = jointTorqueProvider;
@@ -60,8 +60,8 @@ public class EndEffectorWrenchEstimator
       if (dofs != Wrench.SIZE)
          throw new RuntimeException("This calculator only supports square Jacobian matrix for now.");
 
-      jointTorqueMatrix = new DenseMatrix64F(dofs, 1);
-      jacobianTranspose = new DenseMatrix64F(dofs, Wrench.SIZE);
+      jointTorqueMatrix = new DMatrixRMaj(dofs, 1);
+      jacobianTranspose = new DMatrixRMaj(dofs, Wrench.SIZE);
    }
 
    public void calculate()
@@ -71,8 +71,8 @@ public class EndEffectorWrenchEstimator
       for (int i = 0; i < joints.length; i++)
          jointTorqueMatrix.set(i, 0, jointTorqueProvider.getJointTorque(joints[i]));
 
-      CommonOps.transpose(geometricJacobianCalculator.getJacobianMatrix(), jacobianTranspose);
-      jacobianDeterminant.set(CommonOps.det(jacobianTranspose));
+      CommonOps_DDRM.transpose(geometricJacobianCalculator.getJacobianMatrix(), jacobianTranspose);
+      jacobianDeterminant.set(CommonOps_DDRM.det(jacobianTranspose));
       NativeCommonOps.solveCheck(jacobianTranspose, jointTorqueMatrix, wrenchMatrix);
 
       appliedWrench.set(wrenchMatrix);

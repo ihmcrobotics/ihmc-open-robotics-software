@@ -21,6 +21,7 @@ import us.ihmc.robotics.lists.FrameTupleArrayList;
 public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneContactStateCommand>, VirtualModelControlCommand<PlaneContactStateCommand>
 {
    private static final int initialSize = 8;
+   private int commandId;
    private RigidBodyBasics rigidBody;
    private double coefficientOfFriction = Double.NaN;
    private final FrameTupleArrayList<FramePoint3D> contactPoints = FrameTupleArrayList.createFramePointArrayList(initialSize);
@@ -52,6 +53,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    @Override
    public void set(PlaneContactStateCommand other)
    {
+      commandId = other.commandId;
       rigidBody = other.rigidBody;
       coefficientOfFriction = other.coefficientOfFriction;
       contactPoints.set(other.contactPoints);
@@ -101,7 +103,7 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
     * rigid-body.
     * 
     * @param contactFrame the reference frame to use for updating the contact frame used in the
-    *           controller core.
+    *                     controller core.
     */
    public void setContactFramePose(ReferenceFrame contactFrame)
    {
@@ -237,6 +239,18 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -247,6 +261,8 @@ public class PlaneContactStateCommand implements InverseDynamicsCommand<PlaneCon
       {
          PlaneContactStateCommand other = (PlaneContactStateCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (rigidBody != other.rigidBody)
             return false;
          if (Double.compare(coefficientOfFriction, other.coefficientOfFriction) != 0)

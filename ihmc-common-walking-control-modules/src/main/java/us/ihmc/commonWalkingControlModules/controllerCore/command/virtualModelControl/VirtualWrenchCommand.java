@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -35,10 +35,10 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
  * </p>
  * 
  * @author Robert Griffin
- *
  */
 public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -86,6 +86,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    @Override
    public void set(VirtualWrenchCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearForce.set(other.desiredLinearForce);
       desiredAngularTorque.set(other.desiredAngularTorque);
@@ -102,6 +103,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       command.getSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
@@ -117,8 +119,8 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * can be used to control the end-effector.
     * </p>
     * 
-    * @param base the rigid-body located right before the first joint to be used for controlling the
-    *           end-effector.
+    * @param base        the rigid-body located right before the first joint to be used for controlling
+    *                    the end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
    public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
@@ -144,7 +146,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * </p>
     * 
     * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    *                     end-effector.
     */
    public void setWrenchToZero(ReferenceFrame controlFrame)
    {
@@ -170,13 +172,14 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame  specifies the location and orientation of interest for controlling the
+    *                      end-effector.
     * @param desiredWrench the desired end-effector wrench with respect to the base and expressed in
-    *           the control frame.
+    *                      the control frame.
     * @throws ReferenceFrameMismatchException if the {@code desiredWrench} is not setup as follows:
-    *            {@code bodyFrame = endEffector.getBodyFixedFrame()},
-    *            {@code baseFrame = base.getBodyFixedFrame()}, {@code expressedInFrame = controlFrame}.
+    *                                         {@code bodyFrame = endEffector.getBodyFixedFrame()},
+    *                                         {@code baseFrame = base.getBodyFixedFrame()},
+    *                                         {@code expressedInFrame = controlFrame}.
     */
    public void setWrench(ReferenceFrame controlFrame, WrenchReadOnly desiredWrench)
    {
@@ -209,14 +212,15 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame         specifies the location and orientation of interest for controlling
+    *                             the end-effector.
     * @param desiredAngularTorque the desired angular torque of the end-effector with respect to the
-    *           base. Not modified.
-    * @param desiredLinearForce the desired linear force of the origin of the control frame with
-    *           respect to the base. Not modified.
+    *                             base. Not modified.
+    * @param desiredLinearForce   the desired linear force of the origin of the control frame with
+    *                             respect to the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredAngularTorque} or
-    *            {@code desiredLinearForce} is not expressed in control frame.
+    *                                         {@code desiredLinearForce} is not expressed in control
+    *                                         frame.
     */
    public void setWrench(ReferenceFrame controlFrame, FrameVector3D desiredAngularTorque, FrameVector3D desiredLinearForce)
    {
@@ -245,13 +249,12 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * If no particular location on the end-effector is to controlled, then simply provide
     * {@code endEffector.getBodyFixedFrame()}. </p*
     *
-    * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame         specifies the location and orientation of interest for controlling
+    *                             the end-effector.
     * @param desiredAngularTorque the desired angular torque of the end-effector with respect to the
-    *           base. Not modified.
+    *                             base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredAngularTorque} is not expressed in
-    *            control frame.
+    *                                         control frame.
     */
    public void setAngularTorque(ReferenceFrame controlFrame, FrameVector3D desiredAngularTorque)
    {
@@ -281,12 +284,12 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame       specifies the location and orientation of interest for controlling the
+    *                           end-effector.
     * @param desiredLinearForce the desired linear force of the origin of the control frame with
-    *           respect to the base. Not modified.
+    *                           respect to the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredLinearForce} is not expressed in control
-    *            frame.
+    *                                         frame.
     */
    public void setLinearForce(ReferenceFrame controlFrame, FrameVector3D desiredLinearForce)
    {
@@ -328,7 +331,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * </p>
     * 
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
-    *           Not modified.
+    *                              Not modified.
     */
    public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
    {
@@ -354,7 +357,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * </p>
     * 
     * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
-    *           Not modified.
+    *                               Not modified.
     */
    public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
    {
@@ -398,9 +401,9 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * {@code desiredWrenchToPack}. Indeed the desired wrench has to be expressed in the control frame.
     * </p>
     * 
-    * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
+    * @param controlFrameToPack  the frame of interest for controlling the end-effector. Modified.
     * @param desiredWrenchToPack the desired wrench of the end-effector with respect to the base,
-    *           expressed in the control frame. Modified.
+    *                            expressed in the control frame. Modified.
     */
    public void getDesiredWrench(PoseReferenceFrame controlFrameToPack, Wrench desiredWrenchToPack)
    {
@@ -418,9 +421,9 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * </p>
     * 
     * @param desiredWrenchToPack the 6-by-1 matrix in which the value of the desired wrench is stored.
-    *           The given matrix is reshaped to ensure proper size. Modified.
+    *                            The given matrix is reshaped to ensure proper size. Modified.
     */
-   public void getDesiredWrench(DenseMatrix64F desiredWrenchToPack)
+   public void getDesiredWrench(DMatrixRMaj desiredWrenchToPack)
    {
       desiredWrenchToPack.reshape(6, 1);
       desiredAngularTorque.get(0, desiredWrenchToPack);
@@ -429,7 +432,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredEffort(DenseMatrix64F desiredWrenchToPack)
+   public void getDesiredEffort(DMatrixRMaj desiredWrenchToPack)
    {
       getDesiredWrench(desiredWrenchToPack);
    }
@@ -449,7 +452,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * </p>
     * 
     * @param controlFrameToPack the {@code PoseReferenceFrame} used to clone the control frame.
-    *           Modified.
+    *                           Modified.
     */
    @Override
    public void getControlFrame(PoseReferenceFrame controlFrameToPack)
@@ -473,7 +476,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * Packs the position and orientation of the control frame expressed in
     * {@code endEffector.getBodyFixedFrame()}.
     * 
-    * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
+    * @param positionToPack    the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
    public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
@@ -486,12 +489,13 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with this
     * command.
     * 
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed in.
+    * @param destinationFrame      the reference frame in which the selection matrix should be
+    *                              expressed in.
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
-    *           stored in. Modified.
+    *                              stored in. Modified.
     */
    @Override
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
@@ -555,6 +559,18 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -565,6 +581,8 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
       {
          VirtualWrenchCommand other = (VirtualWrenchCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredLinearForce.equals(other.desiredLinearForce))

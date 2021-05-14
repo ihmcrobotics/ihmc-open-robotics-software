@@ -1,100 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.CheckBox?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.Spinner?>
-<?import javafx.scene.layout.AnchorPane?>
-<?import javafx.scene.layout.ColumnConstraints?>
-<?import javafx.scene.layout.GridPane?>
-<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController">
 
-<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController">
-    <children>
-        <GridPane layoutX="15.0" prefHeight="276.0" prefWidth="1653.0">
-            <columnConstraints>
-                <ColumnConstraints minWidth="20.0" prefWidth="200.0" />
-            <ColumnConstraints maxWidth="262.0" minWidth="210.0" prefWidth="210.0" />
-            <ColumnConstraints maxWidth="229.0" minWidth="111.0" prefWidth="111.0" />
-            <ColumnConstraints maxWidth="398.0" minWidth="190.0" prefWidth="213.0" />
-            <ColumnConstraints maxWidth="379.0" minWidth="130.0" prefWidth="130.0" />
-            <ColumnConstraints maxWidth="447.0" minWidth="224.0" prefWidth="224.0" />
-            <ColumnConstraints maxWidth="394.0" minWidth="110.0" prefWidth="111.0" />
-            <ColumnConstraints maxWidth="421.0" minWidth="0.0" prefWidth="169.0" />
-            <ColumnConstraints maxWidth="305.0" minWidth="34.0" prefWidth="285.0" />
-            </columnConstraints>
-            <rowConstraints>
-                <RowConstraints minHeight="10.0" prefHeight="40.0" />
-            <RowConstraints maxHeight="170.0" minHeight="43.0" prefHeight="43.0" />
-            <RowConstraints maxHeight="325.0" minHeight="38.0" prefHeight="38.0" />
-            <RowConstraints maxHeight="479.0" minHeight="34.0" prefHeight="34.0" />
-            <RowConstraints maxHeight="685.0" minHeight="33.0" prefHeight="33.0" />
-            <RowConstraints maxHeight="940.0" minHeight="45.0" prefHeight="45.0" />
-            <RowConstraints maxHeight="1199.0" minHeight="11.0" prefHeight="50.0" />
-            <RowConstraints maxHeight="1460.0" minHeight="9.0" prefHeight="9.0" />
-            </rowConstraints>
-            <children>
-                <CheckBox fx:id="performPostProcessingNodeShifting" mnemonicParsing="false" text="Perform node shifting" wrapText="true" GridPane.rowIndex="1" />
-                <CheckBox fx:id="introduceMidpointInPostProcessing" mnemonicParsing="false" text="Introduce midpoints when shifting" wrapText="true" GridPane.rowIndex="2" />
-                <CheckBox fx:id="computeOrientationsToAvoidObstacles" mnemonicParsing="false" text="Compute orientations from obstacles" wrapText="true" GridPane.rowIndex="3" />
-                <CheckBox fx:id="returnBestEffortSolution" mnemonicParsing="false" text="Return best effort solution" wrapText="true" GridPane.rowIndex="4" />
-                <CheckBox fx:id="includePreferredExtrusions" mnemonicParsing="false" text="Include preferred extrusions" wrapText="true" GridPane.rowIndex="5" />
+    <left>
+        <HBox alignment="CENTER" BorderPane.alignment="CENTER">
+            <Region prefWidth="5"/>
+            <VBox>
+                <Button onAction="#saveParameters" text="Save Parameters"/>
+                <Button onAction="#loadFile" text="Load File"/>
+            </VBox>
+            <Region prefWidth="5"/>
+        </HBox>
+    </left>
 
+    <center>
+        <TableView fx:id="parameterTable"/>
+    </center>
 
-                <!-- path tuning -->
-                <Label text="Cluster Resolution" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                <Label text="Max Inter Region Connection Length" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                <Label text="Length for long inter region edge" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                <Label text="Exploration Distance from Start and Goal" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="1" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-
-                <!-- obstacle -->
-                <Label text="Extrusion Distance For Regions" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                <Label text="Preferred Extrusion Distance For Regions" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                <Label text="Extrusion Distance For Obstacles" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                <Label text="Preferred Extrusion Distance For Obstacles" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                <Label text="Extrusion Distance For All Regions" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                <Label text="Obstacle Height Definition" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="3" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-
-                <!-- planar region -->
-                <Label text="Planar Region Min Area" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                <Label text="Planar Region Min Size" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                <Label text="Region Orthogonal Angle" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                <Label text="Search Host Region Epsilon" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                <Label text="Normal Z Threshold for Navigable" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="5" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-
-                <Label text="Heuristic weight" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-                <Label text="Distance weight" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="2" />
-                <Label text="Elevation weight" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="3" />
-                <Label text="Occluded Goal weight" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="4" />
-                <Label text="Inter Region Edge weight" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="5" />
-                <Label text="Non preferred edge weight" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="6" />
-                <Label text="Non preferred node cost" textAlignment="RIGHT" wrapText="true" GridPane.columnIndex="7" GridPane.halignment="RIGHT" GridPane.rowIndex="7" />
-
-                <Spinner fx:id="clusterResolution" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-                <Spinner fx:id="maxInterRegionConnectionLength" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-                <Spinner fx:id="lengthForLongInterRegionEdge" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="3" />
-                <Spinner fx:id="explorationDistanceFromStartGoal" editable="true" GridPane.columnIndex="2" GridPane.rowIndex="4" />
-
-                <Spinner fx:id="navigableExtrusionDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="1" />
-                <Spinner fx:id="preferredNavigableExtrusionDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="2" />
-                <Spinner fx:id="obstacleExtrusionDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="3" />
-                <Spinner fx:id="preferredObstacleExtrusionDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="4" />
-                <Spinner fx:id="obstacleExtrusionDistanceIfNotTooHighToStep" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="5" />
-                <Spinner fx:id="tooHighToStepDistance" editable="true" GridPane.columnIndex="4" GridPane.rowIndex="6" />
-
-                <Spinner fx:id="planarRegionMinArea" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="1" />
-                <Spinner fx:id="planarRegionMinSize" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="2" />
-                <Spinner fx:id="regionOrthogonalAngle" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="3" />
-                <Spinner fx:id="searchHostRegionEpsilon" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="4" />
-                <Spinner fx:id="normalZThresholdForAccessibleRegions" editable="true" GridPane.columnIndex="6" GridPane.rowIndex="5" />
-
-                <Spinner fx:id="heuristicWeight" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="1" />
-                <Spinner fx:id="distanceWeight" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="2" />
-                <Spinner fx:id="elevationWeight" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="3" />
-                <Spinner fx:id="occludedGoalEdgeWeight" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="4" />
-                <Spinner fx:id="weightForInterRegionEdge" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="5" />
-                <Spinner fx:id="weightForNonPreferredEdge" editable="true" GridPane.columnIndex="8" GridPane.rowIndex="6" />
-
-            </children>
-        </GridPane>
-    </children>
-</AnchorPane>
+</BorderPane>

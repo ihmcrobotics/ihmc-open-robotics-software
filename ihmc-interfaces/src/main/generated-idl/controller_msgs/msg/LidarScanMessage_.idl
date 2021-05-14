@@ -37,7 +37,14 @@ module controller_msgs
          */
         @defaultValue(value=1.0)
         double point_cloud_confidence;
-        sequence<float, 200000> scan;
+        /**
+         * Number of points in the pointcloud
+         */
+        long number_of_points;
+        /**
+         * Compressed pointcloud data. See us.ihmc.communication.packets.LidarPointCloudCompression for method to compress and decompress
+         */
+        sequence<octet, 2000000> scan;
       };
     };
   };

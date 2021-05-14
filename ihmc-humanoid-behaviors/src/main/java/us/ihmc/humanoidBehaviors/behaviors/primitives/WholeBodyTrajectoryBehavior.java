@@ -5,7 +5,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -23,12 +23,12 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<WholeBodyTrajectoryMessage> publisher;
 
-   public WholeBodyTrajectoryBehavior(String robotName, Ros2Node ros2Node, YoDouble yoTime)
+   public WholeBodyTrajectoryBehavior(String robotName, ROS2Node ros2Node, YoDouble yoTime)
    {
       this(robotName, null, ros2Node, yoTime);
    }
 
-   public WholeBodyTrajectoryBehavior(String robotName, String namePrefix, Ros2Node ros2Node, YoDouble yoTime)
+   public WholeBodyTrajectoryBehavior(String robotName, String namePrefix, ROS2Node ros2Node, YoDouble yoTime)
    {
       super(robotName, namePrefix, ros2Node);
 

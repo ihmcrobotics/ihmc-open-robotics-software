@@ -10,7 +10,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -33,7 +32,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ICPOptimizationControllerTest
 {
@@ -55,7 +54,7 @@ public class ICPOptimizationControllerTest
    @Test
    public void testStandingWithPerfectTracking() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -125,7 +124,7 @@ public class ICPOptimizationControllerTest
    @Test
    public void testTransferWithPerfectTracking() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -195,7 +194,7 @@ public class ICPOptimizationControllerTest
    @Test
    public void testStandingConstrained() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -276,7 +275,7 @@ public class ICPOptimizationControllerTest
    @Test
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
-      YoVariableRegistry registry = new YoVariableRegistry("robert");
+      YoRegistry registry = new YoRegistry("robert");
 
       double feedbackGain = 2.0;
       TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
@@ -382,7 +381,7 @@ public class ICPOptimizationControllerTest
       return contactableFeet;
    }
 
-   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry)
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoRegistry registry)
    {
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
       SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -514,19 +513,6 @@ public class ICPOptimizationControllerTest
       }
 
       @Override
-      public double getMinimumFootstepWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumFeedbackWeight()
-      {
-         return 0.0001;
-      }
-
-
-      @Override
       public double getMinimumTimeRemaining()
       {
          return 0.0001;
@@ -633,12 +619,6 @@ public class ICPOptimizationControllerTest
 
       @Override
       public MomentumOptimizationSettings getMomentumOptimizationSettings()
-      {
-         return null;
-      }
-
-      @Override
-      public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
       {
          return null;
       }

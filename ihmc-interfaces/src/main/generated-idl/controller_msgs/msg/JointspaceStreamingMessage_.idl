@@ -1,0 +1,25 @@
+#ifndef __controller_msgs__msg__JointspaceStreamingMessage__idl__
+#define __controller_msgs__msg__JointspaceStreamingMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This is a lightweight version of JointspaceTrajectoryMessage designed for streaming.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::JointspaceStreamingMessage_")
+      struct JointspaceStreamingMessage
+      {
+        sequence<float, 12> positions;
+        sequence<float, 12> velocities;
+      };
+    };
+  };
+};
+
+#endif

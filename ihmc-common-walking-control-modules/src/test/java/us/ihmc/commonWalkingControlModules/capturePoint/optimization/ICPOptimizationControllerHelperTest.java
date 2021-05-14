@@ -1,30 +1,21 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.robotics.Assert;
 
 public class ICPOptimizationControllerHelperTest
 {
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
-
    @Test
    public void testTransformFromDynamicsFrame()
    {
       ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
 
       FrameVector2D icpVelocity = new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.1, 0.1);
-      DenseMatrix64F gainsToPack = new DenseMatrix64F(2, 2);
+      DMatrixRMaj gainsToPack = new DMatrixRMaj(2, 2);
       helper.transformFromDynamicsFrame(gainsToPack, icpVelocity, 1.5, 2.5);
       double expectedX = 2.0;
       double expectedY = 2.0;

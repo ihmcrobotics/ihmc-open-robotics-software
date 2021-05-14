@@ -34,7 +34,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -48,7 +48,7 @@ public class VRCTask1InVehicleOnlyLHandAndLFootLoaded implements DRCRobotInitial
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       // Avoid singularities at startup
       robot.getOneDegreeOfFreedomJoint(jointNames[l_arm_shz]).setQ(-0.8528);

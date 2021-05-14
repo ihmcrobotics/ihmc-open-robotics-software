@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 
 import java.util.ArrayList;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.impl.Constants;
 import gnu.trove.map.hash.TObjectIntHashMap;
@@ -16,7 +16,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
  */
 public class JointPrivilegedConfigurationHandler
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isJointPrivilegedConfigurationEnabled = new YoBoolean("isJointPrivilegedConfigurationEnabled", registry);
    private boolean hasDefaultConfigurationWeightChanged = true;
@@ -44,19 +44,19 @@ public class JointPrivilegedConfigurationHandler
    private final YoDouble[] yoJointPrivilegedVelocities;
    private final YoDouble[] yoJointPrivilegedAccelerations;
 
-   private final DenseMatrix64F privilegedConfigurations;
-   private final DenseMatrix64F privilegedVelocities;
-   private final DenseMatrix64F privilegedAccelerations;
-   private final DenseMatrix64F selectionMatrix;
+   private final DMatrixRMaj privilegedConfigurations;
+   private final DMatrixRMaj privilegedVelocities;
+   private final DMatrixRMaj privilegedAccelerations;
+   private final DMatrixRMaj selectionMatrix;
 
-   private final DenseMatrix64F privilegedConfigurationWeights;
-   private final DenseMatrix64F privilegedConfigurationGains;
-   private final DenseMatrix64F privilegedVelocityGains;
-   private final DenseMatrix64F privilegedMaxVelocities;
-   private final DenseMatrix64F privilegedMaxAccelerations;
+   private final DMatrixRMaj privilegedConfigurationWeights;
+   private final DMatrixRMaj privilegedConfigurationGains;
+   private final DMatrixRMaj privilegedVelocityGains;
+   private final DMatrixRMaj privilegedMaxVelocities;
+   private final DMatrixRMaj privilegedMaxAccelerations;
 
-   private final DenseMatrix64F jointSquaredRangeOfMotions;
-   private final DenseMatrix64F positionsAtMidRangeOfMotion;
+   private final DMatrixRMaj jointSquaredRangeOfMotions;
+   private final DMatrixRMaj positionsAtMidRangeOfMotion;
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final TObjectIntHashMap<OneDoFJointBasics> jointIndices;
@@ -70,24 +70,24 @@ public class JointPrivilegedConfigurationHandler
 
    // TODO During toe off, this guy behaves differently and tends to corrupt the CMP. Worst part is that the achieved CMP appears to not show that. (Sylvain)
    public JointPrivilegedConfigurationHandler(OneDoFJointBasics[] oneDoFJoints, JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters,
-                                              YoVariableRegistry parentRegistry)
+                                              YoRegistry parentRegistry)
    {
       this.oneDoFJoints = oneDoFJoints;
       numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(oneDoFJoints); // note that this should be equal to oneDoFJoints.length
 
-      privilegedConfigurations = new DenseMatrix64F(numberOfDoFs, 1);
-      privilegedVelocities = new DenseMatrix64F(numberOfDoFs, 1);
-      privilegedAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
-      selectionMatrix = CommonOps.identity(numberOfDoFs);
+      privilegedConfigurations = new DMatrixRMaj(numberOfDoFs, 1);
+      privilegedVelocities = new DMatrixRMaj(numberOfDoFs, 1);
+      privilegedAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
+      selectionMatrix = CommonOps_DDRM.identity(numberOfDoFs);
 
-      privilegedConfigurationWeights = new DenseMatrix64F(numberOfDoFs, numberOfDoFs);
-      privilegedConfigurationGains = new DenseMatrix64F(numberOfDoFs, 1);
-      privilegedVelocityGains = new DenseMatrix64F(numberOfDoFs, 1);
-      privilegedMaxVelocities = new DenseMatrix64F(numberOfDoFs, 1);
-      privilegedMaxAccelerations = new DenseMatrix64F(numberOfDoFs, 1);
+      privilegedConfigurationWeights = new DMatrixRMaj(numberOfDoFs, numberOfDoFs);
+      privilegedConfigurationGains = new DMatrixRMaj(numberOfDoFs, 1);
+      privilegedVelocityGains = new DMatrixRMaj(numberOfDoFs, 1);
+      privilegedMaxVelocities = new DMatrixRMaj(numberOfDoFs, 1);
+      privilegedMaxAccelerations = new DMatrixRMaj(numberOfDoFs, 1);
 
-      jointSquaredRangeOfMotions = new DenseMatrix64F(numberOfDoFs, 1);
-      positionsAtMidRangeOfMotion = new DenseMatrix64F(numberOfDoFs, 1);
+      jointSquaredRangeOfMotions = new DMatrixRMaj(numberOfDoFs, 1);
+      positionsAtMidRangeOfMotion = new DMatrixRMaj(numberOfDoFs, 1);
       jointIndices = new TObjectIntHashMap<>(numberOfDoFs, Constants.DEFAULT_LOAD_FACTOR, -1);
 
       // FIXME: at 40.0 the robot sometimes get stuck at the end of transfer when taking one step at a time.
@@ -100,11 +100,11 @@ public class JointPrivilegedConfigurationHandler
       defaultMaxAcceleration.set(jointPrivilegedConfigurationParameters.getDefaultMaxAcceleration());
       defaultConfigurationWeight.set(jointPrivilegedConfigurationParameters.getDefaultWeight());
 
-      defaultConfigurationGain.addVariableChangedListener(v -> hasDefaultConfigurationGainChanged = true);
-      defaultVelocityGain.addVariableChangedListener(v -> hasDefaultVelocityGainChanged = true);
-      defaultMaxVelocity.addVariableChangedListener(v -> hasDefaultMaxVelocityChanged = true);
-      defaultMaxAcceleration.addVariableChangedListener(v -> hasDefaultMaxAccelerationChanged = true);
-      defaultConfigurationWeight.addVariableChangedListener(v -> hasDefaultConfigurationWeightChanged = true);
+      defaultConfigurationGain.addListener(v -> hasDefaultConfigurationGainChanged = true);
+      defaultVelocityGain.addListener(v -> hasDefaultVelocityGainChanged = true);
+      defaultMaxVelocity.addListener(v -> hasDefaultMaxVelocityChanged = true);
+      defaultMaxAcceleration.addListener(v -> hasDefaultMaxAccelerationChanged = true);
+      defaultConfigurationWeight.addListener(v -> hasDefaultConfigurationWeightChanged = true);
 
       yoJointPrivilegedConfigurations = new YoDouble[numberOfDoFs];
       yoJointPrivilegedVelocities = new YoDouble[numberOfDoFs];
@@ -453,7 +453,7 @@ public class JointPrivilegedConfigurationHandler
     * @return matrix of privileged joint velocities to be submitted to the inverse kinematics
     *         controller core.
     */
-   public DenseMatrix64F getPrivilegedJointVelocities()
+   public DMatrixRMaj getPrivilegedJointVelocities()
    {
       return privilegedVelocities;
    }
@@ -462,7 +462,7 @@ public class JointPrivilegedConfigurationHandler
     * @return matrix of privileged joint accelerations to be submitted ot the inverse dynamics
     *         controller core.
     */
-   public DenseMatrix64F getPrivilegedJointAccelerations()
+   public DMatrixRMaj getPrivilegedJointAccelerations()
    {
       return privilegedAccelerations;
    }
@@ -476,7 +476,7 @@ public class JointPrivilegedConfigurationHandler
       return privilegedAccelerations.get(jointIndices.get(joint), 0);
    }
 
-   public DenseMatrix64F getSelectionMatrix()
+   public DMatrixRMaj getSelectionMatrix()
    {
       return selectionMatrix;
    }
@@ -494,7 +494,7 @@ public class JointPrivilegedConfigurationHandler
     * 
     * @return matrix of weights for the privileged command in the optimization.
     */
-   public DenseMatrix64F getWeights()
+   public DMatrixRMaj getWeights()
    {
       return privilegedConfigurationWeights;
    }

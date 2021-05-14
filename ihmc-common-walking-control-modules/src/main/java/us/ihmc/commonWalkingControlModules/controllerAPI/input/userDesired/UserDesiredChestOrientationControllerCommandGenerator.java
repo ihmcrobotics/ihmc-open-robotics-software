@@ -5,16 +5,16 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class UserDesiredChestOrientationControllerCommandGenerator
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean userDesiredChestGoToHomeOrientation = new YoBoolean("userDesiredChestGoToHomeOrientation", registry);
    private final YoDouble userDesiredChestTrajectoryTime = new YoDouble("userDesiredChestTrajectoryTime", registry);
@@ -23,17 +23,17 @@ public class UserDesiredChestOrientationControllerCommandGenerator
 
    private final FrameQuaternion frameOrientation = new FrameQuaternion();
 
-   public UserDesiredChestOrientationControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, double defaultTrajectoryTime, YoVariableRegistry parentRegistry)
+   public UserDesiredChestOrientationControllerCommandGenerator(final CommandInputManager controllerCommandInputManager, double defaultTrajectoryTime, YoRegistry parentRegistry)
    {
       userDesiredChestOrientation = new YoFrameYawPitchRoll("userDesiredChest", ReferenceFrame.getWorldFrame(), registry);
 
-      userDoChestOrientation.addVariableChangedListener(new VariableChangedListener()
+      userDoChestOrientation.addListener(new YoVariableChangedListener()
       {
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userDoChestOrientation.getBooleanValue())
             {
-               userDesiredChestOrientation.getFrameOrientationIncludingFrame(frameOrientation);
+               frameOrientation.setIncludingFrame(userDesiredChestOrientation);
 
                ChestTrajectoryCommand chestTrajectoryControllerCommand = new ChestTrajectoryCommand();
                chestTrajectoryControllerCommand.getSO3Trajectory().addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation, new Vector3D());
@@ -44,10 +44,10 @@ public class UserDesiredChestOrientationControllerCommandGenerator
          }
       });
 
-      userDesiredChestGoToHomeOrientation.addVariableChangedListener(new VariableChangedListener()
+      userDesiredChestGoToHomeOrientation.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (userDesiredChestGoToHomeOrientation.getBooleanValue())
             {

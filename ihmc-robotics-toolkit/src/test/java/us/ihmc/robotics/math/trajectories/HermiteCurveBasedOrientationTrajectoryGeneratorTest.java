@@ -19,7 +19,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotics.geometry.RotationTools;
 import us.ihmc.robotics.math.QuaternionCalculus;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
 {
@@ -54,7 +54,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       Vector3D integratedAngularAcceleration = new Vector3D();
 
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
-                                                                                                                 new YoVariableRegistry("null"));
+                                                                                                                 new YoRegistry("null"));
       traj.setTrajectoryTime(trajectoryTime);
 
       for (int i = 0; i < 5; i++)
@@ -69,8 +69,8 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
          traj.initialize();
 
          traj.compute(startIntegrationTime - dt);
-         traj.getOrientation(orientationFromIntegration);
-         traj.getAngularVelocity(angularVelocityFromIntegration);
+         orientationFromIntegration.setIncludingFrame(traj.getOrientation());
+         angularVelocityFromIntegration.setIncludingFrame(traj.getAngularVelocity());
 
          for (double time = startIntegrationTime; time <= endIntegrationTime; time += dt)
          {
@@ -99,7 +99,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
-                                                                                                                 new YoVariableRegistry("null"));
+                                                                                                                 new YoRegistry("null"));
       double trajectoryTime = 5.0;
       traj.setTrajectoryTime(trajectoryTime);
 
@@ -199,7 +199,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
-                                                                                                                 new YoVariableRegistry("null"));
+                                                                                                                 new YoRegistry("null"));
       double trajectoryTime = 10.0;
 
       double maxVelocityRecorded = 0.0;
@@ -305,7 +305,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
       Random random = new Random(5165165161L);
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
-                                                                                                                 new YoVariableRegistry("null"));
+                                                                                                                 new YoRegistry("null"));
       double trajectoryTime = 2.0;
 
       double maxVelocityRecorded = 0.0;
@@ -426,7 +426,7 @@ public class HermiteCurveBasedOrientationTrajectoryGeneratorTest
       FrameVector3D currentAngularAcceleration = new FrameVector3D();
 
       HermiteCurveBasedOrientationTrajectoryGenerator traj = new HermiteCurveBasedOrientationTrajectoryGenerator("traj", worldFrame,
-                                                                                                                 new YoVariableRegistry("null"));
+                                                                                                                 new YoRegistry("null"));
       traj.setTrajectoryTime(trajectoryTime);
 
       for (int i = 0; i < 5; i++)

@@ -1,8 +1,9 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,11 +13,10 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -55,7 +55,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    private Link buttonLink, caseLink;
    private Graphics3DObject buttonLinkGraphics, caseLinkGraphics;
 
-   private FrameCylinder3d cylinderFrame;
+   private FrameCylinder3D cylinderFrame;
    private PoseReferenceFrame buttonFrame;
 
    private RigidBodyTransform originalButtonTransform;
@@ -70,7 +70,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    {
       super(name);
       this.name = name;
-      this.buttonStatus = new YoBoolean(this.name + "_Status", yoVariableRegistry);
+      this.buttonStatus = new YoBoolean(this.name + "_Status", yoRegistry);
       buttonStatus.set(true);
      
       this.name = name;
@@ -105,7 +105,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
 
       // Transform the button axis with the rootTransform
       buttonOffset = new Vector3D();
-      rootJointTransform.getTranslation(buttonOffset);
+      buttonOffset.set(rootJointTransform.getTranslation());
 
       // Create the buttonSliderJoint
       buttonSliderJoint = new SliderJoint("buttonSliderJoint", buttonOffset, this, buttonPushVector);
@@ -117,7 +117,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonLink = new Link("buttonLink");
       buttonLink.setMass(buttonMass);
 
-      Matrix3D buttonInertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(buttonMass, buttonRadius, buttonThickness, Axis.X);
+      Matrix3D buttonInertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(buttonMass, buttonRadius, buttonThickness, Axis3D.X);
       buttonLink.setMomentOfInertia(buttonInertiaMatrix);
 
       Vector3D buttonComOffset = new Vector3D();
@@ -127,13 +127,13 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonSliderJoint.setLink(buttonLink);
 
       this.addRootJoint(buttonSliderJoint);
-      cylinderFrame = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), buttonThickness, buttonRadius);
-      cylinderFrame.getCylinder3d().applyTransform(rootJointTransform);
+      cylinderFrame = new FrameCylinder3D(ReferenceFrame.getWorldFrame(), buttonThickness, buttonRadius);
+      cylinderFrame.applyTransform(rootJointTransform);
 
       // Create the Graphics
       buttonLinkGraphics = new Graphics3DObject();
       RotationMatrix rotationMatrix = new RotationMatrix();
-      rootJointTransform.getRotation(rotationMatrix);
+      rotationMatrix.set(rootJointTransform.getRotation());
 
       buttonLinkGraphics.rotate(rotationMatrix);
       buttonLinkGraphics.addCylinder(buttonThickness / 2.0, buttonRadius, YoAppearance.Red());
@@ -150,7 +150,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       Vector3D caseOffset = new Vector3D(buttonPushVector);
       caseOffset.scale(buttonThickness);
       caseOffset.add(buttonOffset);
-      rootJointTransform.getRotation(rotationMatrix);
+      rotationMatrix.set(rootJointTransform.getRotation());
 
       caseLinkGraphics = new Graphics3DObject();
       caseLinkGraphics.translate(caseOffset);
@@ -161,11 +161,11 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       this.addStaticLink(caseLink);
 
       // Add listener to the button
-      buttonSliderJoint.getQYoVariable().addVariableChangedListener(
-            new VariableChangedListener()
+      buttonSliderJoint.getQYoVariable().addListener(
+            new YoVariableChangedListener()
             {
                @Override
-               public void notifyOfVariableChange(YoVariable<?> v)
+               public void changed(YoVariable v)
                {
                   if (buttonIsSwitchable == true && buttonSliderJoint.getQYoVariable().getDoubleValue() > buttonLimit * buttonSwitchLimit)
                   {
@@ -222,7 +222,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    {
       FramePoint3D pointToCheck = new FramePoint3D(ReferenceFrame.getWorldFrame(), pointInWorldToCheck);
 
-      if (cylinderFrame.isInsideOrOnSurface(pointToCheck))
+      if (cylinderFrame.isPointInside(pointToCheck))
       {
          return true;
       }
@@ -232,7 +232,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
    @Override
    public void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      cylinderFrame.checkIfInside(pointInWorldToCheck, intersectionToPack, normalToPack);
+      cylinderFrame.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override

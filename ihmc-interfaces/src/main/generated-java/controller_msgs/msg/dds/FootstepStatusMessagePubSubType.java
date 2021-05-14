@@ -56,6 +56,8 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       return current_alignment - initial_alignment;
    }
@@ -89,6 +91,9 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getActualFootOrientationInWorld(), current_alignment);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -107,6 +112,8 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredFootOrientationInWorld(), cdr);
       geometry_msgs.msg.dds.PointPubSubType.write(data.getActualFootPositionInWorld(), cdr);
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getActualFootOrientationInWorld(), cdr);
+      cdr.write_type_6(data.getSwingDuration());
+
    }
 
    public static void read(controller_msgs.msg.dds.FootstepStatusMessage data, us.ihmc.idl.CDR cdr)
@@ -123,6 +130,8 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredFootOrientationInWorld(), cdr);	
       geometry_msgs.msg.dds.PointPubSubType.read(data.getActualFootPositionInWorld(), cdr);	
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getActualFootOrientationInWorld(), cdr);	
+      data.setSwingDuration(cdr.read_type_6());
+      	
 
    }
 
@@ -141,6 +150,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       ser.write_type_a("actual_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getActualFootOrientationInWorld());
 
+      ser.write_type_6("swing_duration", data.getSwingDuration());
    }
 
    @Override
@@ -158,6 +168,7 @@ public class FootstepStatusMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       ser.read_type_a("actual_foot_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getActualFootOrientationInWorld());
 
+      data.setSwingDuration(ser.read_type_6("swing_duration"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepStatusMessage src, controller_msgs.msg.dds.FootstepStatusMessage dest)

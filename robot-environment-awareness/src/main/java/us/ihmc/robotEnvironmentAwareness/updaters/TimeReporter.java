@@ -13,6 +13,7 @@ public class TimeReporter
    private final AtomicLong minimumNanoTimeToReport = new AtomicLong(Conversions.millisecondsToNanoseconds(100L));
    private final AtomicBoolean reportTimeEnabled = new AtomicBoolean(false);
    private final ThreadLocal<StopWatch> stopWatchLocal = ThreadLocal.withInitial(() -> new StopWatch());
+   private String stringToReport = "";
 
    public TimeReporter()
    {
@@ -28,6 +29,11 @@ public class TimeReporter
       minimumNanoTimeToReport.set(Conversions.millisecondsToNanoseconds(minTimeInMilliseconds));
    }
 
+   public String getStringToReport()
+   {
+      return stringToReport;
+   }
+
    public void run(Runnable command, String timeReportPrefix)
    {
       if (reportTimeEnabled.get())
@@ -37,8 +43,9 @@ public class TimeReporter
          stopWatch.start();
          command.run();
          long nanoTime = stopWatch.getNanoTime();
+         stringToReport = timeReportPrefix + Conversions.nanosecondsToSeconds(nanoTime);
          if (nanoTime > minimumNanoTimeToReport.get())
-            LogTools.info(timeReportPrefix + Conversions.nanosecondsToSeconds(nanoTime));
+            LogTools.info(stringToReport);
       }
       else
          command.run();

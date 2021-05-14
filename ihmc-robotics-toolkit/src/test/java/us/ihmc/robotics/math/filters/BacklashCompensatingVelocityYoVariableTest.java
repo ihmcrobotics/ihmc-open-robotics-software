@@ -8,13 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.robotics.math.trajectories.ConstantVelocityTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.trajectories.providers.ConstantDoubleProvider;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BacklashCompensatingVelocityYoVariableTest
@@ -26,7 +23,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       YoDouble slopTime = new YoDouble("slop", registry);
@@ -53,7 +50,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
       YoDouble slopTime = new YoDouble("slop", registry);
@@ -82,7 +79,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.1, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
@@ -110,7 +107,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
@@ -139,7 +136,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
@@ -169,7 +166,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       alphaVariable.set(RandomNumbers.nextDouble(rand, 0.0, 1.0));
       double dt = RandomNumbers.nextDouble(rand, 1e-8, 1.0);
@@ -199,7 +196,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = 0.001;
       YoDouble slopTime = new YoDouble("slop", registry);
@@ -263,7 +260,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random rand = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("blop");
+      YoRegistry registry = new YoRegistry("blop");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       double dt = 0.001; //1e-5; //RandomTools.generateRandomDouble(rand, 1e-8, 1.0);
       YoDouble slopTime = new YoDouble("slop", registry);
@@ -328,7 +325,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    {
       Random random = new Random(1798L);
 
-      YoVariableRegistry registry = new YoVariableRegistry("Registry");
+      YoRegistry registry = new YoRegistry("Registry");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       YoDouble slopTime = new YoDouble("slopTime", registry);
       YoDouble cleanPosition = new YoDouble("cleanPosition", registry);
@@ -399,7 +396,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    @Test
    public void testSignalWithBacklash()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Registry");
+      YoRegistry registry = new YoRegistry("Registry");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       YoDouble slopTime = new YoDouble("slopTime", registry);
       
@@ -473,7 +470,7 @@ public class BacklashCompensatingVelocityYoVariableTest
    @Test
    public void testRemoveSquareWaveBacklash()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("Registry");
+      YoRegistry registry = new YoRegistry("Registry");
       YoDouble alphaVariable = new YoDouble("alpha", registry);
       YoDouble slopTime = new YoDouble("slopTime", registry);
       
@@ -523,10 +520,10 @@ public class BacklashCompensatingVelocityYoVariableTest
          boolean positiveVelocity)
    {
       double initialPositionSign = positiveVelocity ? -1.0 : 1.0;
-      DoubleProvider initialPositionProvider = new ConstantDoubleProvider(initialPositionSign * RandomNumbers.nextDouble(rand, 0.1, 1000.0));
-      DoubleProvider velocityProvider = new ConstantDoubleProvider(-initialPositionProvider.getValue() / crossTime);
-      DoubleProvider trajectoryTimeProvider = new ConstantDoubleProvider(trajectoryTime);
-      YoVariableRegistry registry = new YoVariableRegistry("osenroi");
+      DoubleProvider initialPositionProvider = () -> initialPositionSign * RandomNumbers.nextDouble(rand, 0.1, 1000.0);
+      DoubleProvider velocityProvider = () -> -initialPositionProvider.getValue() / crossTime;
+      DoubleProvider trajectoryTimeProvider = () -> trajectoryTime;
+      YoRegistry registry = new YoRegistry("osenroi");
       ConstantVelocityTrajectoryGenerator trajectory = new ConstantVelocityTrajectoryGenerator("hihi", initialPositionProvider, velocityProvider,
             trajectoryTimeProvider, registry);
       trajectory.initialize();

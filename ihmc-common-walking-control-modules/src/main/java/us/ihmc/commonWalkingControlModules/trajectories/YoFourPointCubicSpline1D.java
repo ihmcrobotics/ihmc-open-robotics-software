@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 
 /**
  * Trajectory generator that generates a cubic spline in 2D space to go from one 2D point to another
@@ -19,7 +19,7 @@ public class YoFourPointCubicSpline1D
    private static final double EPS = 1e-3;
    private static final int numberOfCoefficients = 4;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    /** Internal solver used to compute the polynomial coefficients. */
    private final YoPolynomial spline;
    /** Current value of the trajectory. */
@@ -49,7 +49,7 @@ public class YoFourPointCubicSpline1D
     * @param parentRegistry registry to which the registry of this trajectory generator will be
     *           attached.
     */
-   public YoFourPointCubicSpline1D(String namePrefix, YoVariableRegistry parentRegistry)
+   public YoFourPointCubicSpline1D(String namePrefix, YoRegistry parentRegistry)
    {
       spline = new YoPolynomial(namePrefix + "CubicSpline", numberOfCoefficients, registry);
       y = new YoDouble(namePrefix + "Value", registry);
@@ -162,7 +162,7 @@ public class YoFourPointCubicSpline1D
       else
       {
          spline.compute(xQuery);
-         y.set(spline.getPosition());
+         y.set(spline.getValue());
          yDot.set(spline.getVelocity());
          yDDot.set(spline.getAcceleration());
       }

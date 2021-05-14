@@ -1,17 +1,19 @@
 package us.ihmc.communication.net;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import com.esotericsoftware.kryo.Kryo;
 import com.esotericsoftware.kryo.io.ByteBufferOutputStream;
 import com.esotericsoftware.kryo.io.Output;
 import com.esotericsoftware.kryonet.Connection;
-import com.esotericsoftware.kryonet.KryoSerialization;
 import com.esotericsoftware.kryonet.Listener;
-import com.esotericsoftware.kryonet.Serialization;
 import com.esotericsoftware.kryonet.Server;
 
+import com.esotericsoftware.kryonet.serialization.KryoSerialization;
+import com.esotericsoftware.kryonet.serialization.Serialization;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 public class KryoObjectServer extends KryoObjectCommunicator
 {
@@ -73,11 +75,10 @@ public class KryoObjectServer extends KryoObjectCommunicator
    protected int sendUDP(Object object)
    {
       int bytesSend = 0;
-      Connection[] connections = server.getConnections();
-      for (int i = 0, n = connections.length; i < n; i++)
+      for (Connection connection : server.getConnections())
       {
-         Connection connection = connections[i];
          bytesSend = connection.sendUDP(object);
+
       }
 
       return bytesSend;
@@ -111,15 +112,12 @@ public class KryoObjectServer extends KryoObjectCommunicator
          }
       }
 
-      Connection[] connections = server.getConnections();
-      for (int i = 0, n = connections.length; i < n; i++)
+      for (Connection connection : server.getConnections())
       {
-         Connection connection = connections[i];
-
          // Do not send if the write buffer > 90% full
          if (((double) connection.getTcpWriteBufferSize()) / ((double) writeBufferSize) > 0.9)
          {
-            PrintTools.error(this, "Dropping the object of " + object.getClass() + ", because the write buffer is > 90% full!");
+            LogTools.error(this, "Dropping the object of " + object.getClass() + ", because the write buffer is > 90% full!");
             continue;
          }
 

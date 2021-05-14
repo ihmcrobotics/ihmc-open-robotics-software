@@ -16,7 +16,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 // TODO: Temporary initial setup for testing the grasping control
 public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
@@ -44,7 +44,7 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
    }
 
    @Override
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -354,8 +354,8 @@ public class AtlasSquaredUpDRCRobotInitialSetupGettingIntoTheCar implements DRCR
          throw new RuntimeException("Not implemented yet!");
       }
 
-      pelvisInitialPose.setPosition(pelvisPosition);
-      pelvisInitialPose.setOrientation(pelvisOrientation);
+      pelvisInitialPose.getPosition().set(pelvisPosition);
+      pelvisInitialPose.getOrientation().set(pelvisOrientation);
 
       armInitialJointPositions.put(RobotSide.LEFT, leftArmInitialJointPositions);
       armInitialJointPositions.put(RobotSide.RIGHT, rightArmInitialJointPositions);

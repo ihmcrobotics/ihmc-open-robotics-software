@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandInterface;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.DesiredExternalWrenchHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
@@ -21,7 +22,7 @@ import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -29,7 +30,7 @@ public class WholeBodyControllerCore
 {
    private static final boolean DEBUG = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoEnum<WholeBodyControllerCoreMode> currentMode = new YoEnum<>("currentControllerCoreMode", registry, WholeBodyControllerCoreMode.class);
    private final YoInteger numberOfFBControllerEnabled = new YoInteger("numberOfFBControllerEnabled", registry);
 
@@ -46,15 +47,28 @@ public class WholeBodyControllerCore
    private final ExecutionTimer controllerCoreComputeTimer = new ExecutionTimer("controllerCoreComputeTimer", 1.0, registry);
    private final ExecutionTimer controllerCoreSubmitTimer = new ExecutionTimer("controllerCoreSubmitTimer", 1.0, registry);
 
-   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoVariableRegistry parentRegistry)
+   @Deprecated
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands, YoRegistry parentRegistry)
    {
       this(toolbox, allPossibleCommands, null, parentRegistry);
    }
 
+   @Deprecated
    public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControlCommandList allPossibleCommands,
-                                  JointDesiredOutputList lowLevelControllerOutput, YoVariableRegistry parentRegistry)
+                                  JointDesiredOutputList lowLevelControllerOutput, YoRegistry parentRegistry)
    {
-      feedbackController = new WholeBodyFeedbackController(toolbox, allPossibleCommands, registry);
+      this(toolbox, new FeedbackControllerTemplate(allPossibleCommands), lowLevelControllerOutput, parentRegistry);
+   }
+
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControllerTemplate feedbackControllerTemplate, YoRegistry parentRegistry)
+   {
+      this(toolbox, feedbackControllerTemplate, null, parentRegistry);
+   }
+
+   public WholeBodyControllerCore(WholeBodyControlCoreToolbox toolbox, FeedbackControllerTemplate feedbackControllerTemplate,
+                                  JointDesiredOutputList lowLevelControllerOutput, YoRegistry parentRegistry)
+   {
+      feedbackController = new WholeBodyFeedbackController(toolbox, feedbackControllerTemplate, registry);
 
       if (toolbox.isEnableInverseDynamicsModule())
          inverseDynamicsSolver = new WholeBodyInverseDynamicsSolver(toolbox, registry);
@@ -95,14 +109,21 @@ public class WholeBodyControllerCore
       }
 
       CenterOfPressureDataHolder desiredCenterOfPressureDataHolder;
+      DesiredExternalWrenchHolder desiredExternalWrenchHolder;
 
       // When running only the inverse kinematics solver, there is no notion of contact.
       if (inverseDynamicsSolver != null || virtualModelControlSolver != null)
+      {
          desiredCenterOfPressureDataHolder = toolbox.getDesiredCenterOfPressureDataHolder();
+         desiredExternalWrenchHolder = toolbox.getDesiredExternalWrenchHolder();
+      }
       else
+      {
          desiredCenterOfPressureDataHolder = null;
+         desiredExternalWrenchHolder = null;
+      }
 
-      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, controlledOneDoFJoints, lowLevelControllerOutput);
+      controllerCoreOutput = new ControllerCoreOutput(desiredCenterOfPressureDataHolder, desiredExternalWrenchHolder, controlledOneDoFJoints, lowLevelControllerOutput);
 
       parentRegistry.addChild(registry);
    }
@@ -319,7 +340,7 @@ public class WholeBodyControllerCore
       return rootJointDesiredConfigurationData;
    }
 
-   public FeedbackControllerDataReadOnly getWholeBodyFeedbackControllerDataHolder()
+   public FeedbackControllerDataHolderReadOnly getWholeBodyFeedbackControllerDataHolder()
    {
       return feedbackController.getWholeBodyFeedbackControllerDataHolder();
    }

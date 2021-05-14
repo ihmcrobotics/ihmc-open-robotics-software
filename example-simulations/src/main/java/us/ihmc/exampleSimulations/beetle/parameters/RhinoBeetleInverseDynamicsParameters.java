@@ -9,14 +9,14 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPID3DGains
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.SymmetricYoPIDSE3Gains;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerParameters
 {
 
    private final String name = "idParams_";
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final YoPIDSE3Gains footGains;
 
@@ -30,7 +30,7 @@ public class RhinoBeetleInverseDynamicsParameters implements HexapodControllerPa
    private final YoFrameVector3D bodySpatialAngularQPWeight;
    private final SelectionMatrix6D bodySpatialSelectionMatrix = new SelectionMatrix6D();
 
-   public RhinoBeetleInverseDynamicsParameters(YoVariableRegistry parentRegistry)
+   public RhinoBeetleInverseDynamicsParameters(YoRegistry parentRegistry)
    {
       bodySpatialGains = new SymmetricYoPIDSE3Gains("bodySpatialGains", registry);
       bodySpatialGains.setProportionalGains(bodyProportionalGains);

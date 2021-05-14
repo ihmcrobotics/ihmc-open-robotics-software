@@ -8,14 +8,14 @@ import optiTrack.MocapRigidBody;
 import optiTrack.MocapRigidbodiesListener;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.time.CallFrequencyCalculator;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.publisher.RosTf2Publisher;
 
 public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
 {
-      private YoVariableRegistry registry = new YoVariableRegistry("MOCAP");
+      private YoRegistry registry = new YoRegistry("MOCAP");
       private CallFrequencyCalculator frequencyCalculator = new CallFrequencyCalculator(registry, "");
       
       RosMainNode mainNode;
@@ -47,8 +47,8 @@ public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
          for (MocapRigidBody rigidBody : listOfRigidbodies)
          {
             RigidBodyTransform tmpTransform = new RigidBodyTransform();
-            tmpTransform.setTranslation(rigidBody.xPosition,rigidBody.yPosition,rigidBody.zPosition);
-            tmpTransform.setRotation(new Quaternion(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
+            tmpTransform.getTranslation().set((double) rigidBody.xPosition, (double) rigidBody.yPosition, (double) rigidBody.zPosition);
+            tmpTransform.getRotation().set(new Quaternion(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
             tfPublisher.publish(tmpTransform, mainNode.getCurrentTime().totalNsecs(), "/mocap_world", "mocap/rigidBody"+rigidBody.getId());
          }
 

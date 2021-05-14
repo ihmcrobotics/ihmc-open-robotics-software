@@ -26,7 +26,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.goalLocation.GoalDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ihmcPerception.objectDetector.ObjectDetectorFromCameraImages;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
@@ -47,11 +47,11 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
    private final YoBoolean shouldRecordVideoPackets;
    private final VideoPacketToImageFilesRecorder imageFilesRecorder = new VideoPacketToImageFilesRecorder(videoFilesRecordingLocation);
 
-   public ObjectDetectorBehaviorService(String robotName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
+   public ObjectDetectorBehaviorService(String robotName, ROS2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry) throws Exception
    {
       super(robotName, ObjectDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       objectDetectorFromCameraImages = new ObjectDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),
@@ -60,7 +60,7 @@ public class ObjectDetectorBehaviorService extends GoalDetectorBehaviorService
       objectDetectorFromCameraImages.setFieldOfView(DEFAULT_FIELD_OF_VIEW_X_IN_RADIANS, DEFAULT_FIELD_OF_VIEW_Y_IN_RADIANS);
       objectDetectorFromCameraImages.setExpectedObjectSize(DEFAULT_OBJECT_SIZE);
 
-      createSubscriber(ObjectDetectorResultPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), objectDetectorFromCameraImages);
+      createSubscriber(ObjectDetectorResultPacket.class, ROS2Tools.IHMC_ROOT, objectDetectorFromCameraImages);
 
       String prefix = "fiducial";
       locationEnabled = new YoBoolean(prefix + "LocationEnabled", getYoVariableRegistry());

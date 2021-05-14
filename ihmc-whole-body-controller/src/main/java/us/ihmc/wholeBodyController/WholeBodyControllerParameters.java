@@ -2,9 +2,10 @@ package us.ihmc.wholeBodyController;
 
 import java.io.InputStream;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
@@ -13,17 +14,14 @@ public interface WholeBodyControllerParameters<E extends Enum<E> & RobotSegment<
 {
    public double getControllerDT();
 
-   /**
-    * Returns the parameters used to create Footstep Plans.
-    */
-   default public QuadTreeFootstepPlanningParameters getQuadTreeFootstepPlanningParameters()
-   {
-      return null;
-   }
-
    public StateEstimatorParameters getStateEstimatorParameters();
 
-   public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters();
+   public CoPTrajectoryParameters getCoPTrajectoryParameters();
+
+   default SplitFractionCalculatorParametersReadOnly getSplitFractionCalculatorParameters()
+   {
+      return new DefaultSplitFractionCalculatorParameters();
+   }
 
 	public WalkingControllerParameters getWalkingControllerParameters();
 

@@ -10,6 +10,7 @@ import us.ihmc.robotics.kinematics.JointLimitData;
 
 public class JointLimitEnforcementCommand implements VirtualModelControlCommand<JointLimitEnforcementCommand>
 {
+   private int commandId;
    private final List<OneDoFJointBasics> joints;
    private final RecyclingArrayList<JointLimitData> jointLimitData;
 
@@ -26,6 +27,7 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
 
    public void clear()
    {
+      commandId = 0;
       joints.clear();
 
       for (int i = 0; i < jointLimitData.size(); i++)
@@ -37,6 +39,8 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
    public void set(JointLimitEnforcementCommand other)
    {
       clear();
+
+      commandId = other.commandId;
 
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
@@ -82,6 +86,18 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -92,6 +108,8 @@ public class JointLimitEnforcementCommand implements VirtualModelControlCommand<
       {
          JointLimitEnforcementCommand other = (JointLimitEnforcementCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

@@ -8,10 +8,11 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -34,7 +35,7 @@ import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SliderJoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class MovingBaseRobotArm extends Robot
@@ -61,7 +62,7 @@ public class MovingBaseRobotArm extends Robot
    private final double upperArmLength = 0.35;
    private final double upperArmRadius = 0.025;
    private final Matrix3D upperArmInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(upperArmMass, upperArmRadius, upperArmRadius,
-                                                                                                                  Axis.Z);
+                                                                                                                  Axis3D.Z);
    private final Vector3D upperArmCoM = new Vector3D(0.0, 0.0, upperArmLength / 2.0);
 
    private final Vector3D elbowPitchOffset = new Vector3D(0.0, 0.0, upperArmLength);
@@ -70,7 +71,7 @@ public class MovingBaseRobotArm extends Robot
    private final double lowerArmLength = 0.35;
    private final double lowerArmRadius = 0.025;
    private final Matrix3D lowerArmInertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(lowerArmMass, lowerArmRadius, lowerArmRadius,
-                                                                                                                  Axis.Z);
+                                                                                                                  Axis3D.Z);
    private final Vector3D lowerArmCoM = new Vector3D(0.0, 0.0, lowerArmLength / 2.0);
 
    private final Vector3D wristPitchOffset = new Vector3D(0.0, 0.0, lowerArmLength);
@@ -104,8 +105,8 @@ public class MovingBaseRobotArm extends Robot
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
-   private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslationVector(), this);
-   private final YoDouble dummyAlpha = new YoDouble("dummy", new YoVariableRegistry("dummy"));
+   private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslation(), this);
+   private final YoDouble dummyAlpha = new YoDouble("dummy", new YoRegistry("dummy"));
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;
 
@@ -147,11 +148,11 @@ public class MovingBaseRobotArm extends Robot
 
       hand = new RigidBody("hand", wristYaw, handInertia, handMass, handCoM);
 
-      handControlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
+      handControlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("handControlFrame", hand.getBodyFixedFrame(), controlFrameTransform);
 
-      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
+      controlFrameLinearAcceleration = createFilteredVelocityYoFrameVector("controlFrameLinearAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                            controlFrameTracker.getYoVelocity());
-      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoVariableRegistry,
+      controlFrameAngularAcceleration = createFilteredVelocityYoFrameVector("controlFrameAngularAcceleration", "", dummyAlpha, dt, yoRegistry,
                                                                             controlFrameTracker.getYoAngularVelocity());
 
       setJointLimits();
@@ -177,16 +178,16 @@ public class MovingBaseRobotArm extends Robot
 
    private void setupSCSRobot()
    {
-      SliderJoint scsBaseX = new SliderJoint("baseX", baseXOffset, this, Axis.X);
-      SliderJoint scsBaseY = new SliderJoint("baseY", new Vector3D(), this, Axis.Y);
-      SliderJoint scsBaseZ = new SliderJoint("baseZ", new Vector3D(), this, Axis.Z);
-      PinJoint scsShoulderYaw = new PinJoint("shoulderYaw", shoulderYawOffset, this, Axis.Z);
-      PinJoint scsShoulderRoll = new PinJoint("shoulderRoll", shoulderRollOffset, this, Axis.X);
-      PinJoint scsShoulderPitch = new PinJoint("shoulderPitch", shoulderPitchOffset, this, Axis.Y);
-      PinJoint scsElbowPitch = new PinJoint("elbowPitch", elbowPitchOffset, this, Axis.Y);
-      PinJoint scsWristPitch = new PinJoint("wristPitch", wristPitchOffset, this, Axis.Y);
-      PinJoint scsWristRoll = new PinJoint("wristRoll", wristRollOffset, this, Axis.X);
-      PinJoint scsWristYaw = new PinJoint("wristYaw", wristYawOffset, this, Axis.Z);
+      SliderJoint scsBaseX = new SliderJoint("baseX", baseXOffset, this, Axis3D.X);
+      SliderJoint scsBaseY = new SliderJoint("baseY", new Vector3D(), this, Axis3D.Y);
+      SliderJoint scsBaseZ = new SliderJoint("baseZ", new Vector3D(), this, Axis3D.Z);
+      PinJoint scsShoulderYaw = new PinJoint("shoulderYaw", shoulderYawOffset, this, Axis3D.Z);
+      PinJoint scsShoulderRoll = new PinJoint("shoulderRoll", shoulderRollOffset, this, Axis3D.X);
+      PinJoint scsShoulderPitch = new PinJoint("shoulderPitch", shoulderPitchOffset, this, Axis3D.Y);
+      PinJoint scsElbowPitch = new PinJoint("elbowPitch", elbowPitchOffset, this, Axis3D.Y);
+      PinJoint scsWristPitch = new PinJoint("wristPitch", wristPitchOffset, this, Axis3D.Y);
+      PinJoint scsWristRoll = new PinJoint("wristRoll", wristRollOffset, this, Axis3D.X);
+      PinJoint scsWristYaw = new PinJoint("wristYaw", wristYawOffset, this, Axis3D.Z);
 
       double b_damp = 0.0;
       scsBaseX.setDamping(b_damp);

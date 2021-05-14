@@ -1,0 +1,50 @@
+#ifndef __controller_msgs__msg__MultiContactBalanceStatus__idl__
+#define __controller_msgs__msg__MultiContactBalanceStatus__idl__
+
+#include "geometry_msgs/msg/./Point_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC multi-contact controller API.
+       * Published by the IHMC controller, this message carries minimal information relative
+       * to the balance status of the robot.
+       * All the information here is expressed in the world frame.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::MultiContactBalanceStatus_")
+      struct MultiContactBalanceStatus
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
+         */
+        geometry_msgs::msg::dds::Point capture_point_2d;
+        /**
+         * This is the measured position in world of the robot's center of mass.
+         */
+        geometry_msgs::msg::dds::Point center_of_mass_3d;
+        /**
+         * List of the active contact points expressed in world frame. Only x and y coordinates are relevant.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 16> support_polygon;
+        /**
+         * List of the active contact points expressed in local body-fixed frame.
+         */
+        sequence<geometry_msgs::msg::dds::Point, 16> contact_points_in_body;
+        /**
+         * List of the rigid-bodies in contact. This list's size and ordering corresponds to the support_polygon and contact_point_in_body lists.
+         */
+        sequence<long, 16> support_rigid_body_ids;
+      };
+    };
+  };
+};
+
+#endif

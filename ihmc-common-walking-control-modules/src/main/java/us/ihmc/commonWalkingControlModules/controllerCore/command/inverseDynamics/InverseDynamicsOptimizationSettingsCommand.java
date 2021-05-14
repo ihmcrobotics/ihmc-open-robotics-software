@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
  */
 public class InverseDynamicsOptimizationSettingsCommand implements InverseDynamicsCommand<InverseDynamicsOptimizationSettingsCommand>
 {
+   private int commandId;
    private double rhoMin = Double.NaN;
    private double jointAccelerationMax = Double.NaN;
    private double rhoWeight = Double.NaN;
@@ -425,6 +426,7 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    @Override
    public void set(InverseDynamicsOptimizationSettingsCommand other)
    {
+      commandId = other.commandId;
       rhoMin = other.rhoMin;
       jointAccelerationMax = other.jointAccelerationMax;
       rhoWeight = other.rhoWeight;
@@ -443,6 +445,18 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -452,6 +466,8 @@ public class InverseDynamicsOptimizationSettingsCommand implements InverseDynami
       else if (object instanceof InverseDynamicsOptimizationSettingsCommand)
       {
          InverseDynamicsOptimizationSettingsCommand other = (InverseDynamicsOptimizationSettingsCommand) object;
+         if (commandId != other.commandId)
+            return false;
          if (Double.compare(rhoMin, other.rhoMin) != 0)
             return false;
          if (Double.compare(jointAccelerationMax, other.jointAccelerationMax) != 0)

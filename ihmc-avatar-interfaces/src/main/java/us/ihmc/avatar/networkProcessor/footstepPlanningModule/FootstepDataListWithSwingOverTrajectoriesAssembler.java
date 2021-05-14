@@ -1,13 +1,10 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryExpansionStatus;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsStatus;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -17,16 +14,18 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepDataListWithSwingOverTrajectoriesAssembler
 {
@@ -41,7 +40,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
    private static final double maxSwingSpeed = 1.0;
 
    public FootstepDataListWithSwingOverTrajectoriesAssembler(HumanoidReferenceFrames humanoidReferenceFrames,
-                                                             WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry,
+                                                             WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry,
                                                              YoGraphicsListRegistry graphicsListRegistry)
    {
       this.humanoidReferenceFrames = humanoidReferenceFrames;
@@ -55,7 +54,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       partialFootholdPolygon = new ConvexPolygon2D();
    }
 
-   public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()
+   public SwingOverPlanarRegionsStatus getStatus()
    {
       return swingOverPlanarRegionsTrajectoryExpander.getStatus();
    }
@@ -75,11 +74,11 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
             stanceFootPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepPlan.getFootstep(0).getRobotSide().getOppositeSide()));
          }
 
-         SimpleFootstep simpleFootstep = footstepPlan.getFootstep(i);
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
 
-         simpleFootstep.getSoleFramePose(swingEndPose);
+         footstep.getFootstepPose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
@@ -88,10 +87,9 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (simpleFootstep.hasFoothold())
+         if (footstep.hasFoothold())
          {
-            simpleFootstep.getFoothold(partialFootholdPolygon);
-
+            partialFootholdPolygon.set(footstep.getFoothold());
             if (partialFootholdPolygon.getNumberOfVertices() != 4)
             {
                ConvexPolygonTools.limitVerticesConservative(partialFootholdPolygon, 4);
@@ -152,7 +150,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
+         if (footstep.hasPredictedContactPoints())
          {
             partialFootholdPolygon.clear();
             partialFootholdPolygon.addVertices(Vertex2DSupplier.asVertex2DSupplier(footstep.getPredictedContactPoints()));

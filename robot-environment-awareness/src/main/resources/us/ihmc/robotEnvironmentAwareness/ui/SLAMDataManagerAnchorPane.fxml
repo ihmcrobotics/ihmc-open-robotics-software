@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ToggleButton?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
+<?import javafx.scene.layout.VBox?>
+
+<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController">
+   <children>
+      <VBox layoutX="18.0" layoutY="16.0" prefHeight="150.0" prefWidth="700.0">
+         <children>
+            <GridPane prefHeight="67.0" prefWidth="534.0">
+               <columnConstraints>
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="10.0" prefWidth="250.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="550.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="0.0" prefWidth="50.0" />
+               </columnConstraints>
+               <rowConstraints>
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+               </rowConstraints>
+               <children>
+                  <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#exportSLAMData" text="Export SLAM Data" GridPane.rowIndex="1" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseRawDataOutputFolder" text="..." GridPane.columnIndex="2" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseSLAMDataOutputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="currentRawDataOutputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
+                  <TextField fx:id="currentSLAMDataOutputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <ToggleButton fx:id="exportRawData" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Export Raw Data" />
+               </children>
+            </GridPane>
+            <GridPane prefHeight="67.0" prefWidth="534.0">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="10.0" prefWidth="250.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="550.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="0.0" prefWidth="50.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importRawData" text="Import Raw Data" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseRawDataInputFolder" text="..." GridPane.columnIndex="2" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browsePlanarRegionsInputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                  <TextField fx:id="currentRawDataInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
+                  <TextField fx:id="currentPlanarRegionsInputFolderTextField" editable="true" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+               </children>
+            </GridPane>
+         </children>
+      </VBox>
+   </children>
+</AnchorPane>

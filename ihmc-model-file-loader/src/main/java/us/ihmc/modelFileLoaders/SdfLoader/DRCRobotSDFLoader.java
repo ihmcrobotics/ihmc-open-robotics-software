@@ -1,5 +1,7 @@
 package us.ihmc.modelFileLoaders.SdfLoader;
 
+import us.ihmc.log.LogTools;
+
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -8,19 +10,18 @@ import javax.xml.bind.JAXBException;
 
 public class DRCRobotSDFLoader
 {
-     
    public static JaxbSDFLoader loadDRCRobot(String[] resourceDirectories, InputStream sdfFile, SDFDescriptionMutator descriptionMutator)
    {
       ArrayList<String> resources = new ArrayList<String>();
 
-      for(String resource : resourceDirectories)
+      for (String resource : resourceDirectories)
       {
          resources.add(resource);
       }
 
-      if(sdfFile==null)
+      if (sdfFile == null)
       {
-        System.err.println("failed to load sdf file");
+         LogTools.error("Failed to load sdf file: null");
       }
 
       JaxbSDFLoader jaxbSDFLoader;
@@ -41,5 +42,4 @@ public class DRCRobotSDFLoader
 
       return jaxbSDFLoader;
    }
-
 }

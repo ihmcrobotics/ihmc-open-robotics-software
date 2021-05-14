@@ -5,9 +5,9 @@ import java.util.Random;
 import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ParameterPolynomialTest
 {
@@ -18,7 +18,7 @@ public class ParameterPolynomialTest
 
       for (int test = 0; test < 1000; test++)
       {
-         YoVariableRegistry registry = new YoVariableRegistry("Test");
+         YoRegistry registry = new YoRegistry("Test");
          double[] coefficients = new double[random.nextInt(10) + 1];
          for (int i = 0; i < coefficients.length; i++)
          {
@@ -37,10 +37,10 @@ public class ParameterPolynomialTest
             double x = 100.0 * (random.nextDouble() - 0.5);
 
             yoPolynomial.compute(x);
-            double yoResult = yoPolynomial.getPosition();
+            double yoResult = yoPolynomial.getValue();
 
             parameterPolynomial.compute(x);
-            double parameterResult = parameterPolynomial.getPosition();
+            double parameterResult = parameterPolynomial.getValue();
 
             Assert.assertEquals(yoResult, parameterResult, Double.MIN_VALUE);
          }

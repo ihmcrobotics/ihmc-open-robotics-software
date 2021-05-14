@@ -2,10 +2,8 @@ package us.ihmc.footstepPlanning.messager;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -15,14 +13,26 @@ import java.util.List;
 public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
-   public FootstepPlannerType getPlannerType()
+   protected boolean getPlanBodyPath()
    {
-      return FootstepPlannerType.VIS_GRAPH_WITH_A_STAR;
+      return true;
+   }
+
+   @Override
+   protected boolean getPerformAStarSearch()
+   {
+      return true;
+   }
+
+   @Override
+   protected String getTestNamePrefix()
+   {
+      return "vis_graph_with_a_star";
    }
 
    @Override
    @Test
-   public void testDatasetsWithoutOcclusion()
+   public void testDataSets()
    {
       List<DataSet> dataSets = DataSetIOTools.loadDataSets(dataSet ->
                                                            {
@@ -32,7 +42,7 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
                                                                  return false;
                                                               if (dataSet.getPlannerInput().getVisGraphIsInDevelopment())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getPlannerType().toString().toLowerCase());
+                                                              return dataSet.getPlannerInput().containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
                                                            });
       super.runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -40,9 +50,9 @@ public class MessagerVisGraphAStarDataSetTest extends FootstepPlannerDataSetTest
    @Override
    @Test
    @Disabled
-   public void testDatasetsWithoutOcclusionInDevelopment()
+   public void testDatasetsInDevelopment()
    {
-      super.testDatasetsWithoutOcclusionInDevelopment();
+      super.testDatasetsInDevelopment();
    }
 
    public static void main(String[] args) throws Exception

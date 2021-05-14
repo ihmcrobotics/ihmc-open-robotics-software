@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoStopwatchTest
@@ -15,7 +15,7 @@ public class YoStopwatchTest
    @Test
    public void testStopwatch()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("test");
+      YoRegistry registry = new YoRegistry("test");
       YoDouble yoTime = new YoDouble("t", registry);
       
       testStopwatch(yoTime, new YoStopwatch(yoTime));

@@ -1,20 +1,18 @@
 package us.ihmc.robotics.math.frames;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
- * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound.
- * Has a maximum number of rows and columns and an actual number of rows and columns.
- * If you set with a smaller matrix, then the actual size will be the size of the
- * passed in matrix.  extra
- * entries will be set to NaN. If you get the contents the matrix you pack must be the
- * correct size.
+ * YoMatrix. Object for holding a matrix of YoVariables so that Matrices can be rewound. Has a
+ * maximum number of rows and columns and an actual number of rows and columns. If you set with a
+ * smaller matrix, then the actual size will be the size of the passed in matrix. extra entries will
+ * be set to NaN. If you get the contents the matrix you pack must be the correct size.
+ * 
  * @author JerryPratt
- *
  */
 public class YoMatrix
 {
@@ -23,7 +21,7 @@ public class YoMatrix
    private final YoInteger numberOfRows, numberOfColumns;
    private final YoDouble[][] variables;
 
-   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoVariableRegistry registry)
+   public YoMatrix(String name, int maxNumberOfRows, int maxNumberOfColumns, YoRegistry registry)
    {
       this.maxNumberOfRows = maxNumberOfRows;
       this.maxNumberOfColumns = maxNumberOfColumns;
@@ -45,7 +43,7 @@ public class YoMatrix
       }
    }
 
-   public void set(DenseMatrix64F matrix)
+   public void set(DMatrixRMaj matrix)
    {
       int numRows = matrix.getNumRows();
       int numCols = matrix.getNumCols();
@@ -72,13 +70,13 @@ public class YoMatrix
       }
    }
 
-   public void getAndReshape(DenseMatrix64F matrixToPack)
+   public void getAndReshape(DMatrixRMaj matrixToPack)
    {
       matrixToPack.reshape(getNumberOfRows(), getNumberOfColumns());
       get(matrixToPack);
    }
 
-   public void get(DenseMatrix64F matrixToPack)
+   public void get(DMatrixRMaj matrixToPack)
    {
       int numRows = matrixToPack.getNumRows();
       int numCols = matrixToPack.getNumCols();
@@ -129,6 +127,22 @@ public class YoMatrix
             }
          }
       }
+   }
 
+   public void setToNaN(int numberOfRows, int numberOfColumns)
+   {
+      if (((numberOfRows > maxNumberOfRows) || (numberOfColumns > maxNumberOfColumns)) && (numberOfRows > 0) && (numberOfColumns > 0))
+         throw new RuntimeException("Not enough rows or columns: " + numberOfRows + " by " + numberOfColumns);
+
+      this.numberOfRows.set(numberOfRows);
+      this.numberOfColumns.set(numberOfColumns);
+
+      for (int row = 0; row < maxNumberOfRows; row++)
+      {
+         for (int column = 0; column < maxNumberOfColumns; column++)
+         {
+            variables[row][column].set(Double.NaN);
+         }
+      }
    }
 }

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.SimpleState;
 import us.ihmc.robotics.stateMachine.old.conditionBasedStateMachine.StateMachine;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
@@ -17,7 +17,7 @@ public class SimpleStateTest
    public void testSimpleStateMachine()
    {
       SettableDoubleProvider timeProvider = new SettableDoubleProvider();
-      YoVariableRegistry registry = new YoVariableRegistry("SimpleStateMachine");
+      YoRegistry registry = new YoRegistry("SimpleStateMachine");
 
       StateMachine<StateList> stateMachine = new StateMachine<StateList>("SimpleStateMachine", "switchTime", StateList.class, timeProvider, registry);
 

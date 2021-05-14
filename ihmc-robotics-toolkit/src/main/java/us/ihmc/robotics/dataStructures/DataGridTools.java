@@ -1,10 +1,10 @@
 package us.ihmc.robotics.dataStructures;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public class DataGridTools
 {
-   public static void fillMapWithMatrix(HeightMapWithPoints map, DenseMatrix64F matrix, double gridSize)
+   public static void fillMapWithMatrix(HeightMapWithPoints map, DMatrixRMaj matrix, double gridSize)
    {
       for (int i = 0; i < matrix.getNumRows(); i++)
       {
@@ -15,7 +15,7 @@ public class DataGridTools
       }
    }
    
-   public static void fillMapWithMatrixCentered(HeightMapWithPoints map, DenseMatrix64F matrix, double gridSize)
+   public static void fillMapWithMatrixCentered(HeightMapWithPoints map, DMatrixRMaj matrix, double gridSize)
    {
       for (int i = 0; i < matrix.getNumRows(); i++)
       {

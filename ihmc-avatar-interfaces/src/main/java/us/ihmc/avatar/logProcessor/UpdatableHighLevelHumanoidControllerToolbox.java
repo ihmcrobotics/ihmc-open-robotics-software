@@ -18,9 +18,9 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumanoidControllerToolbox
 {
@@ -42,10 +42,10 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
 
       if (UPDATE_CAPTURE_POINT_FROM_SCS)
       {
-         String capturePointNameSpace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
-         YoDouble capturePointX = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointX");
-         YoDouble capturePointY = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointY");
-         YoDouble capturePointZ = (YoDouble) scs.getVariable(capturePointNameSpace, "capturePointZ");
+         String capturePointNamespace = HighLevelHumanoidControllerToolbox.class.getSimpleName();
+         YoDouble capturePointX = (YoDouble) scs.findVariable(capturePointNamespace, "capturePointX");
+         YoDouble capturePointY = (YoDouble) scs.findVariable(capturePointNamespace, "capturePointY");
+         YoDouble capturePointZ = (YoDouble) scs.findVariable(capturePointNamespace, "capturePointZ");
          capturePointUpdatedFromSCS = new YoFramePoint3D(capturePointX, capturePointY, capturePointZ, worldFrame);
       }
       else
@@ -56,10 +56,10 @@ public class UpdatableHighLevelHumanoidControllerToolbox extends HighLevelHumano
       for (RobotSide robotSide : RobotSide.values)
       {
          String side = robotSide.getCamelCaseNameForMiddleOfExpression();
-         String desiredCoPNameSpace = PlaneContactWrenchProcessor.class.getSimpleName();
+         String desiredCoPNamespace = PlaneContactWrenchProcessor.class.getSimpleName();
          String desiredCoPName = side + "SoleCoP2d";
-         YoDouble desiredCoPx = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "X");
-         YoDouble desiredCoPy = (YoDouble) scs.getVariable(desiredCoPNameSpace, desiredCoPName + "Y");
+         YoDouble desiredCoPx = (YoDouble) scs.findVariable(desiredCoPNamespace, desiredCoPName + "X");
+         YoDouble desiredCoPy = (YoDouble) scs.findVariable(desiredCoPNamespace, desiredCoPName + "Y");
          ReferenceFrame soleFrame = referenceFrames.getSoleFrame(robotSide);
          YoFramePoint2D desiredCoP = new YoFramePoint2D(desiredCoPx, desiredCoPy, soleFrame);
          desiredCoPsUpdatedFromSCS.put(robotSide, desiredCoP);

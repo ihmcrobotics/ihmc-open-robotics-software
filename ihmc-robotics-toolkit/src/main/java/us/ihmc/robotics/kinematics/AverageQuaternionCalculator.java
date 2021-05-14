@@ -1,7 +1,7 @@
 package us.ihmc.robotics.kinematics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -18,8 +18,8 @@ import us.ihmc.robotics.math.SymmetricQRAlgorithmDecomposition_D64GCFree;
 public class AverageQuaternionCalculator
 {
    private final SymmetricQRAlgorithmDecomposition_D64GCFree eigenDecomposition;
-   private final DenseMatrix64F quaternions = new DenseMatrix64F(0, 4);
-   private final DenseMatrix64F outerProduct = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj quaternions = new DMatrixRMaj(0, 4);
+   private final DMatrixRMaj outerProduct = new DMatrixRMaj(0, 0);
    private final Quaternion averageQuaternion = new Quaternion();
    private final Quaternion tempQuaternion = new Quaternion();
 
@@ -71,11 +71,11 @@ public class AverageQuaternionCalculator
    {
       double weight = 1.0 / quaternions.getNumRows();
       outerProduct.reshape(4, 4);
-      CommonOps.multAddTransA(weight, quaternions, quaternions, outerProduct);
+      CommonOps_DDRM.multAddTransA(weight, quaternions, quaternions, outerProduct);
       eigenDecomposition.decompose(outerProduct);
       
       double maxEigenValue = Double.NEGATIVE_INFINITY;
-      DenseMatrix64F eigenVectorAssociatedWithMaxEigenValue = null;
+      DMatrixRMaj eigenVectorAssociatedWithMaxEigenValue = null;
 
       for (int i = 0; i < eigenDecomposition.getNumberOfEigenvalues(); i++)
       {

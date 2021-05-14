@@ -3,7 +3,7 @@ package us.ihmc.avatar.sensors.microphone;
 import java.util.ArrayList;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.simulationconstructionset.gui.BodePlotConstructor;
@@ -20,7 +20,7 @@ public class DrillDetectionCalibrationHelper extends DrillDetectionAlgorithm
    private static final double upperFrequencyBound = 8000;
    private static final double frequencyBandRange = 1000;
 
-   private YoVariableRegistry registry = new YoVariableRegistry("DrillRegistry");
+   private YoRegistry registry = new YoRegistry("DrillRegistry");
    private ArrayList<YoDouble> rawBandMagnitudes = new ArrayList<>();
    private ArrayList<AlphaFilteredYoVariable> filteredBandMagnitudes = new ArrayList<>();
 

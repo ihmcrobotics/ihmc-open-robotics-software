@@ -19,6 +19,8 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -114,8 +116,9 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       for (int i = 0; i < numberOfSteps; i++)
       {
          xLocation += length;
-         FootstepDataMessage dataMessage = HumanoidMessageTools
-               .createFootstepDataMessage(robotSide, new Point3D(xLocation, robotSide.negateIfRightSide(width / 2.0), 0.0), new Quaternion());
+         FootstepDataMessage dataMessage = HumanoidMessageTools.createFootstepDataMessage(robotSide,
+                                                                                          new Point3D(xLocation, robotSide.negateIfRightSide(width / 2.0), 0.0),
+                                                                                          new Quaternion());
          dataMessage.setSwingDuration(swingDuration);
          if (i > 0)
             dataMessage.setTransferDuration(transferDuration);
@@ -140,7 +143,9 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
    public void testWalkingOverCinderBlockField() throws Exception
    {
       CinderBlockFieldEnvironment cinderBlockFieldEnvironment = new CinderBlockFieldEnvironment();
-      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockFieldEnvironment.getCinderBlockPoses());
+      cinderBlockFieldEnvironment.addFlatGround();
+      List<List<Pose3D>> cinderBlockPoses = cinderBlockFieldEnvironment.addDRCCinderBlockField();
+      FootstepDataListMessage footsteps = generateFootstepsForCinderBlockField(cinderBlockPoses);
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), cinderBlockFieldEnvironment);
       drcSimulationTestHelper.createSimulation("EndToEndCinderBlockFieldTest");
@@ -536,7 +541,7 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       return footstepData;
    }
 
-   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<List<FramePose3D>> cinderBlockPoses)
+   private static FootstepDataListMessage generateFootstepsForCinderBlockField(List<? extends List<? extends Pose3DBasics>> cinderBlockPoses)
    {
       FootstepDataListMessage footsteps = new FootstepDataListMessage();
       footsteps.setOffsetFootstepsHeightWithExecutionError(true);
@@ -545,13 +550,13 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
 
       int indexForLeftSide = (numberOfColumns - 1) / 2;
       int indexForRightSide = indexForLeftSide + 1;
-      SideDependentList<List<FramePose3D>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
+      SideDependentList<List<Pose3DBasics>> columns = extractColumns(cinderBlockPoses, indexForLeftSide, indexForRightSide);
 
       for (int row = 0; row < cinderBlockPoses.size(); row++)
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            FramePose3D cinderBlockPose = columns.get(robotSide).get(row);
+            Pose3DBasics cinderBlockPose = columns.get(robotSide).get(row);
             Point3D location = new Point3D();
             Quaternion orientation = new Quaternion();
             cinderBlockPose.get(location, orientation);
@@ -728,11 +733,11 @@ public abstract class AvatarStraightLegWalkingTest implements MultiRobotTestInte
       return footsteps;
    }
 
-   private static SideDependentList<List<FramePose3D>> extractColumns(List<List<FramePose3D>> cinderBlockPoses, int indexForLeftSide, int indexForRightSide)
+   private static SideDependentList<List<Pose3DBasics>> extractColumns(List<? extends List<? extends Pose3DBasics>> cinderBlockPoses, int indexForLeftSide,
+                                                                       int indexForRightSide)
    {
       SideDependentList<Integer> columnIndices = new SideDependentList<Integer>(indexForLeftSide, indexForRightSide);
-      SideDependentList<List<FramePose3D>> sideDependentColumns = new SideDependentList<List<FramePose3D>>(new ArrayList<FramePose3D>(),
-                                                                                                           new ArrayList<FramePose3D>());
+      SideDependentList<List<Pose3DBasics>> sideDependentColumns = new SideDependentList<>(new ArrayList<>(), new ArrayList<>());
 
       for (RobotSide robotSide : RobotSide.values)
       {

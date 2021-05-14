@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -21,7 +22,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.converter.CommandCon
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -51,7 +52,7 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
 
    public RigidBodyPoseController(RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator, ReferenceFrame controlFrame,
                                   ReferenceFrame baseFrame, YoDouble yoTime, RigidBodyJointControlHelper jointControlHelper,
-                                  YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry parentRegistry)
+                                  YoGraphicsListRegistry graphicsListRegistry, YoRegistry parentRegistry)
    {
       super(RigidBodyControlMode.TASKSPACE, bodyToControl.getName(), yoTime, parentRegistry);
       String bodyName = bodyToControl.getName();
@@ -210,7 +211,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          usingWeightFromMessage.set(orienationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
-         statusHelper.registerNewTrajectory(command);
+         if (command.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(command);
          return true;
       }
 
@@ -240,7 +242,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orienationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
-         statusHelper.registerNewTrajectory(command);
+         if (command.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(command);
          return true;
       }
 

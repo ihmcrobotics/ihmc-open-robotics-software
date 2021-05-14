@@ -3,7 +3,7 @@ package us.ihmc.robotics.screwTheory;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -44,13 +44,13 @@ public class MassMatrixCalculatorComparer
       massMatrixCalculators.add(new MassMatrixCalculator()
       {
          @Override
-         public void getMassMatrix(DenseMatrix64F massMatrixToPack)
+         public void getMassMatrix(DMatrixRMaj massMatrixToPack)
          {
             massMatrixToPack.set(compositeMassMatricCalculator.getMassMatrix());
          }
          
          @Override
-         public DenseMatrix64F getMassMatrix()
+         public DMatrixRMaj getMassMatrix()
          {
             return compositeMassMatricCalculator.getMassMatrix();
          }

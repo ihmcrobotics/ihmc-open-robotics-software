@@ -1,9 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
@@ -19,26 +20,26 @@ import us.ihmc.matrixlib.MatrixTools;
  */
 public class LyapunovEquationSolver
       {
-   private final DenseMatrix64F A = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F aTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F Q = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj A = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj aTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj Q = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F qVector = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F xVector = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F X = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj qVector = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj xVector = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj X = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F X1 = new  DenseMatrix64F(0, 0);
-   private final DenseMatrix64F eyeX = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj X1 = new  DMatrixRMaj(0, 0);
+   private final DMatrixRMaj eyeX = new DMatrixRMaj(0, 0);
 
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.lu(0);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.lu(0);
 
    private int n;
 
    private boolean isUpToDate = false;
 
-   public void setMatrices(DenseMatrix64F A, DenseMatrix64F Q)
+   public void setMatrices(DMatrixRMaj A, DMatrixRMaj Q)
    {
       isUpToDate = false;
 
@@ -51,22 +52,22 @@ public class LyapunovEquationSolver
       n = this.A.getNumRows();
    }
 
-   public DenseMatrix64F solve()
+   public DMatrixRMaj solve()
    {
       aTranspose.reshape(n, n);
       eyeX.reshape(n, n);
       X1.reshape(n * n, n * n);
       tempMatrix.reshape(n * n, n * n);
 
-      CommonOps.transpose(A, aTranspose);
-      CommonOps.setIdentity(eyeX);
-      CommonOps.kron(aTranspose, eyeX, X1);
-      CommonOps.kron(eyeX, aTranspose, tempMatrix);
-      CommonOps.addEquals(X1, tempMatrix);
+      CommonOps_DDRM.transpose(A, aTranspose);
+      CommonOps_DDRM.setIdentity(eyeX);
+      CommonOps_DDRM.kron(aTranspose, eyeX, X1);
+      CommonOps_DDRM.kron(eyeX, aTranspose, tempMatrix);
+      CommonOps_DDRM.addEquals(X1, tempMatrix);
 
       // stack all of Q into a vector
       stack(Q, qVector);
-      CommonOps.scale(-1.0, qVector);
+      CommonOps_DDRM.scale(-1.0, qVector);
 
       xVector.reshape(X1.getNumRows(), 1);
       solver.setA(X1);
@@ -78,12 +79,12 @@ public class LyapunovEquationSolver
       return X;
    }
 
-   public DenseMatrix64F getX()
+   public DMatrixRMaj getX()
    {
       return isUpToDate ? X : solve();
    }
 
-   private static void stack(DenseMatrix64F QMatrix, DenseMatrix64F qVector)
+   private static void stack(DMatrixRMaj QMatrix, DMatrixRMaj qVector)
    {
       int rows = QMatrix.getNumRows();
       qVector.reshape(rows * rows, 1);
@@ -91,7 +92,7 @@ public class LyapunovEquationSolver
          MatrixTools.setMatrixBlock(qVector, i * rows, 0, QMatrix, 0, i, rows, 1, 1.0);
    }
 
-   private static void toSquareMatrix(DenseMatrix64F xVector, DenseMatrix64F xMatrix)
+   private static void toSquareMatrix(DMatrixRMaj xVector, DMatrixRMaj xMatrix)
    {
       int rows = (int) Math.sqrt(xVector.getNumRows());
       xMatrix.reshape(rows, rows);

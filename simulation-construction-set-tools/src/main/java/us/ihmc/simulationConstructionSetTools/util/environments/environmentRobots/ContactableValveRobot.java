@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -19,7 +20,6 @@ import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.geometry.shapes.FrameTorus3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
@@ -28,7 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.ValveType;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -48,12 +48,12 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private double valveNumberOfPossibleTurns;
 
    private final YoDouble valveClosePercentage;
-   
+
    private double valveMass;
    private Matrix3D inertiaMatrix;
 
    private FrameTorus3d valveTorus;
-   protected ArrayList<FrameCylinder3d> spokesCylinders = new ArrayList<FrameCylinder3d>();
+   protected ArrayList<FrameCylinder3D> spokesCylinders = new ArrayList<>();
 
    protected Link valveLink;
    private PinJoint valvePinJoint;
@@ -65,33 +65,33 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    private final RigidBodyTransform originalValvePose = new RigidBodyTransform();
 
    public ContactableValveRobot(String name, double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
-         FramePose3D valvePoseInWorld, double valveNumberOfPossibleTurns, double valveMass)
+                                FramePose3D valvePoseInWorld, double valveNumberOfPossibleTurns, double valveMass)
    {
       super(name);
       setValveProperties(valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, valveNumberOfPossibleTurns, valveMass);
       setPoseInWorld(valvePoseInWorld);
       setMass(valveMass);
-      valveDamping = new YoDouble(getName() + "ValveDamping", yoVariableRegistry);
+      valveDamping = new YoDouble(getName() + "ValveDamping", yoRegistry);
       valveDamping.set(DEFAULT_DAMPING);
-      valveClosePercentage = new YoDouble("valveClosePercentage", yoVariableRegistry);
+      valveClosePercentage = new YoDouble("valveClosePercentage", yoRegistry);
       valveClosePercentage.set(0.0);
    }
 
    public ContactableValveRobot(String name, double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
-         Point3D valvePosition, Quaternion valveOrientation, double valveNumberOfPossibleTurns, double valveMass)
+                                Point3D valvePosition, Quaternion valveOrientation, double valveNumberOfPossibleTurns, double valveMass)
    {
-      this(name, valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness, new FramePose3D(ReferenceFrame.getWorldFrame(),
-            valvePosition, valveOrientation), valveNumberOfPossibleTurns, valveMass);
+      this(name, valveRadius, valveOffsetFromWall, valveThickness, numberOfSpokes, spokesThickness,
+           new FramePose3D(ReferenceFrame.getWorldFrame(), valvePosition, valveOrientation), valveNumberOfPossibleTurns, valveMass);
    }
 
    public ContactableValveRobot(String name, ValveType valveType, double valveNumberOfPossibleTurns, FramePose3D valvePoseInWorld)
    {
-      this(name, valveType.getValveRadius(), valveType.getValveOffsetFromWall(), valveType.getValveThickness(), valveType.getNumberOfSpokes(), valveType
-            .getSpokesThickness(), valvePoseInWorld, valveNumberOfPossibleTurns, valveType.getValveMass());
+      this(name, valveType.getValveRadius(), valveType.getValveOffsetFromWall(), valveType.getValveThickness(), valveType.getNumberOfSpokes(),
+           valveType.getSpokesThickness(), valvePoseInWorld, valveNumberOfPossibleTurns, valveType.getValveMass());
    }
 
    public void setValveProperties(double valveRadius, double valveOffsetFromWall, double valveThickness, int numberOfSpokes, double spokesThickness,
-         double valveNumberOfPossibleTurns, double valveMass)
+                                  double valveNumberOfPossibleTurns, double valveMass)
    {
       this.valveRadius = valveRadius;
       this.valveOffsetFromWall = valveOffsetFromWall;
@@ -117,17 +117,17 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RigidBodyTransform valveTransformToWorld = new RigidBodyTransform();
       valveFrame.getTransformToDesiredFrame(valveTransformToWorld, ReferenceFrame.getWorldFrame());
       valveTransformToWorld.transform(jointAxisVector);
-            
+
       Vector3D valvePositionInWorld = new Vector3D(valvePoseInWorld.getPosition());
       valvePinJoint = new PinJoint("valvePinJoint", valvePositionInWorld, this, jointAxisVector);
       valvePinJoint.setLimitStops(0.0, valveNumberOfPossibleTurns * 2 * Math.PI, 1000, 100);
       valvePinJoint.setDamping(valveDamping.getDoubleValue());
-      
+
       //put the graphics frame in the proper orientation
       RotationMatrix rotationMatrix = new RotationMatrix(valvePoseInWorld.getOrientation());
       valveLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      rotationTransform.setRotation(rotationMatrix);
+      rotationTransform.getRotation().set(rotationMatrix);
 
       //Creating the physical link for the simulation
       valveLink = new Link("valveLink");
@@ -138,12 +138,12 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       valveLink.setMomentOfInertia(inertiaMatrix);
       valvePinJoint.setLink(valveLink);
       this.addRootJoint(valvePinJoint);
-      
+
       //torus and offsetCylinder
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform invertTransform = new RigidBodyTransform();
 
-      transform.setRotationYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
+      transform.getRotation().setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       invertTransform.set(transform);
       invertTransform.invert();
 
@@ -166,8 +166,8 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
          RigidBodyTransform yoGraphicTransform = new RigidBodyTransform(rotationTransform);
          yoGraphicTransform.multiply(transform);
 
-         FrameCylinder3d spokeCylinder = new FrameCylinder3d(valveFrame, spokeLength, spokesThickness / 2.0);
-         spokeCylinder.getCylinder3d().applyTransform(transform);
+         FrameCylinder3D spokeCylinder = new FrameCylinder3D(valveFrame, spokeLength, spokesThickness / 2.0);
+         spokeCylinder.applyTransform(transform);
          spokesCylinders.add(spokeCylinder);
 
          valveLinkGraphics.transform(transform);
@@ -179,14 +179,14 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       valveLink.setLinkGraphics(valveLinkGraphics);
 
       yoGraphicsListRegistries.add(graphListRegistry);
-      
-      valvePinJoint.getQYoVariable().addVariableChangedListener(new VariableChangedListener()
+
+      valvePinJoint.getQYoVariable().addListener(new YoVariableChangedListener()
       {
-         
+
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
-            valveClosePercentage.set(valvePinJoint.getQYoVariable().getDoubleValue()/(2*Math.PI)*100/valveNumberOfPossibleTurns);
+            valveClosePercentage.set(valvePinJoint.getQYoVariable().getDoubleValue() / (2 * Math.PI) * 100 / valveNumberOfPossibleTurns);
          }
       });
    }
@@ -205,6 +205,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    }
 
    private final FramePoint3D pointToCheck = new FramePoint3D();
+
    @Override
    public boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
@@ -215,7 +216,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
          return true;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).isInsideOrOnSurface(pointToCheck))
+         if (spokesCylinders.get(i).isPointInside(pointToCheck))
             return true;
       }
       return false;
@@ -237,14 +238,14 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
          return;
       for (int i = 0; i < spokesCylinders.size(); i++)
       {
-         if (spokesCylinders.get(i).checkIfInside(pointToCheck, intersectionToPack, normalToPack))
+         if (spokesCylinders.get(i).evaluatePoint3DCollision(pointToCheck, intersectionToPack, normalToPack))
             return;
       }
    }
 
    @Override
    public void selected(Graphics3DNode graphics3dNode, ModifierKeyInterface modifierKeyInterface, Point3DReadOnly location, Point3DReadOnly cameraLocation,
-         QuaternionReadOnly cameraRotation)
+                        QuaternionReadOnly cameraRotation)
    {
 
    }
@@ -266,13 +267,13 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    {
 
    }
-   
+
    @Override
    public PinJoint getPinJoint()
    {
       return valvePinJoint;
    }
-   
+
    @Override
    public void getBodyTransformToWorld(RigidBodyTransform transformToWorld)
    {
@@ -283,17 +284,17 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    {
       return valveRadius;
    }
-   
+
    public double getClosePercentage()
    {
       return valveClosePercentage.getDoubleValue();
    }
-   
+
    public double getNumberOfPossibleTurns()
    {
       return valveNumberOfPossibleTurns;
    }
-   
+
    @Override
    public void setMass(double mass)
    {
@@ -332,6 +333,6 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
    public void setClosePercentage(double percentage)
    {
       valveClosePercentage.set(percentage);
-      valvePinJoint.setQ(valveNumberOfPossibleTurns* 2 * Math.PI * percentage/100 );
+      valvePinJoint.setQ(valveNumberOfPossibleTurns * 2 * Math.PI * percentage / 100);
    }
 }

@@ -16,7 +16,7 @@ import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.SmoothCMPBasedICPPlanner;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
@@ -44,7 +44,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -54,7 +54,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
    protected final static SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
-   private static final double swingStartTimeEpsilon = 0.005;
+   private static final double swingStartTimeEpsilon = 0.0075;
 
    @Test
    public void testTakingStepsWithAbsoluteTimings() throws SimulationExceededMaximumTimeException
@@ -142,10 +142,12 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
             footstepMessage2.getFootstepDataList().add().set(footstepData);
          }
       }
+      footstepMessage1.setOffsetFootstepsHeightWithExecutionError(true);
+      footstepMessage2.setOffsetFootstepsHeightWithExecutionError(true);
 
-      YoVariable<?> yoTime = drcSimulationTestHelper.getSimulationConstructionSet().getVariable("t");
+      YoVariable yoTime = drcSimulationTestHelper.getSimulationConstructionSet().findVariable("t");
       TimingChecker timingChecker1 = new TimingChecker(scs, footstepMessage1, footstepMessage2);
-      yoTime.addVariableChangedListener(timingChecker1);
+      yoTime.addListener(timingChecker1);
 
       drcSimulationTestHelper.publishToController(footstepMessage1);
 
@@ -157,11 +159,14 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
             drcSimulationTestHelper.publishToController(footstepMessage2);
             hasMessageBeenSent = true;
          }
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2));
+         boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.2);
+         if (!success)
+            timingChecker1.setEnable(false);
+         assertTrue(success);
       }
    }
 
-   private class TimingChecker implements VariableChangedListener
+   private class TimingChecker implements YoVariableChangedListener
    {
       private static final String failMessage = "Swing did not start at expected time.";
 
@@ -174,6 +179,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       private final FootstepDataListMessage footstepMessage2;
 
       private boolean isDone = false;
+      private boolean enable = true;
 
       public TimingChecker(SimulationConstructionSet scs, FootstepDataListMessage footstepMessage1, FootstepDataListMessage footstepMessage2)
       {
@@ -182,9 +188,18 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
          this.footstepMessage2 = footstepMessage2;
       }
 
-      @Override
-      public void notifyOfVariableChange(YoVariable<?> v)
+      public void setEnable(boolean enable)
       {
+         this.enable = enable;
+      }
+
+      @Override
+      public void changed(YoVariable v)
+      {
+         if (!enable)
+         {
+            return;
+         }
          if (isDone)
          {
             return;
@@ -349,7 +364,7 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
 
    private void checkTransferTimes(SimulationConstructionSet scs, double minimumTransferTime)
    {
-      YoDouble firstTransferTime = getDoubleYoVariable(scs, "icpPlannerTransferDuration0", SmoothCMPBasedICPPlanner.class.getSimpleName());
+      YoDouble firstTransferTime = getDoubleYoVariable(scs, "transferTime0", BalanceManager.class.getSimpleName());
       assertTrue("Executing transfer that is faster then allowed.", firstTransferTime.getDoubleValue() >= minimumTransferTime);
    }
 
@@ -358,16 +373,15 @@ public abstract class AvatarAbsoluteStepTimingsTest implements MultiRobotTestInt
       return getYoVariable(scs, name, namespace, YoDouble.class);
    }
 
-   @SuppressWarnings("unchecked")
    private static WalkingStateEnum getWalkingState(SimulationConstructionSet scs)
    {
       return (WalkingStateEnum) getYoVariable(scs, "WalkingCurrentState", WalkingHighLevelHumanoidController.class.getSimpleName(),
                                               YoEnum.class).getEnumValue();
    }
 
-   private static <T extends YoVariable<T>> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
+   private static <T extends YoVariable> T getYoVariable(SimulationConstructionSet scs, String name, String namespace, Class<T> clazz)
    {
-      YoVariable<?> uncheckedVariable = scs.getVariable(namespace, name);
+      YoVariable uncheckedVariable = scs.findVariable(namespace, name);
       if (uncheckedVariable == null)
          throw new RuntimeException("Could not find yo variable: " + namespace + "/" + name + ".");
       if (!clazz.isInstance(uncheckedVariable))

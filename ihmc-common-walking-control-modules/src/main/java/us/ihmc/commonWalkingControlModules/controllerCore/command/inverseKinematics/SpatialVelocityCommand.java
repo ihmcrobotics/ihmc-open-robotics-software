@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
@@ -42,10 +42,10 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  */
 public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialVelocityCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -126,6 +126,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    @Override
    public void set(SpatialVelocityCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
       desiredLinearVelocity.set(other.desiredLinearVelocity);
       desiredAngularVelocity.set(other.desiredAngularVelocity);
@@ -166,6 +167,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       setWeightMatrix(command.getWeightMatrix());
 
       command.getSelectionMatrix(selectionMatrix);
@@ -181,8 +183,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * can be used to control the end-effector.
     * </p>
     * 
-    * @param base the rigid-body located right before the first joint to be used for controlling the
-    *           end-effector.
+    * @param base        the rigid-body located right before the first joint to be used for controlling
+    *                    the end-effector.
     * @param endEffector the rigid-body to be controlled.
     */
    public void set(RigidBodyBasics base, RigidBodyBasics endEffector)
@@ -220,9 +222,9 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * below the {@code primaryBase} when controlling the {@code endEffector}.
     *
     * @param scaleSecondaryTaskJointWeight whether or not to use a custom scaling factor on the joints
-    *           below the primary base. Optional.
+    *                                      below the primary base. Optional.
     * @param secondaryTaskJointWeightScale custom scaling factor for the joints below the primary base.
-    *           Optional.
+    *                                      Optional.
     */
    public void setScaleSecondaryTaskJointWeight(boolean scaleSecondaryTaskJointWeight, double secondaryTaskJointWeightScale)
    {
@@ -243,7 +245,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    *                     end-effector.
     */
    public void setSpatialVelocityToZero(ReferenceFrame controlFrame)
    {
@@ -269,13 +271,15 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame           specifies the location and orientation of interest for controlling
+    *                               the end-effector.
     * @param desiredSpatialVelocity the desired end-effector velocity with respect to the base and
-    *           expressed in the control frame.
+    *                               expressed in the control frame.
     * @throws ReferenceFrameMismatchException if the {@code desiredSpatialVelocity} is not setup as
-    *            follows: {@code bodyFrame = endEffector.getBodyFixedFrame()},
-    *            {@code baseFrame = base.getBodyFixedFrame()}, {@code expressedInFrame = controlFrame}.
+    *                                         follows:
+    *                                         {@code bodyFrame = endEffector.getBodyFixedFrame()},
+    *                                         {@code baseFrame = base.getBodyFixedFrame()},
+    *                                         {@code expressedInFrame = controlFrame}.
     */
    public void setSpatialVelocity(ReferenceFrame controlFrame, TwistReadOnly desiredSpatialVelocity)
    {
@@ -309,14 +313,15 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame           specifies the location and orientation of interest for controlling
+    *                               the end-effector.
     * @param desiredAngularVelocity the desired angular velocity of the end-effector with respect to
-    *           the base. Not modified.
-    * @param desiredLinearVelocity the desired linear velocity of the origin of the control frame with
-    *           respect to the base. Not modified.
+    *                               the base. Not modified.
+    * @param desiredLinearVelocity  the desired linear velocity of the origin of the control frame with
+    *                               respect to the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredAngularVelocity} or
-    *            {@code desiredLineaerVelocitys} is not expressed in control frame.
+    *                                         {@code desiredLineaerVelocitys} is not expressed in
+    *                                         control frame.
     */
    public void setSpatialVelocity(ReferenceFrame controlFrame, FrameVector3D desiredAngularVelocity, FrameVector3D desiredLinearVelocity)
    {
@@ -346,12 +351,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame           specifies the location and orientation of interest for controlling
+    *                               the end-effector.
     * @param desiredAngularVelocity the desired angular velocity of the end-effector with respect to
-    *           the base. Not modified.
+    *                               the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredAngularVelocity} is not expressed in
-    *            control frame.
+    *                                         control frame.
     */
    public void setAngularVelocity(ReferenceFrame controlFrame, FrameVector3D desiredAngularVelocity)
    {
@@ -381,12 +386,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * {@code endEffector.getBodyFixedFrame()}.
     * </p>
     * 
-    * @param controlFrame specifies the location and orientation of interest for controlling the
-    *           end-effector.
+    * @param controlFrame          specifies the location and orientation of interest for controlling
+    *                              the end-effector.
     * @param desiredLinearVelocity the desired linear velocity of the origin of the control frame with
-    *           respect to the base. Not modified.
+    *                              respect to the base. Not modified.
     * @throws ReferenceFrameMismatchException if {@code desiredLinearVelocity} is not expressed in
-    *            control frame.
+    *                                         control frame.
     */
    public void setLinearVelocity(ReferenceFrame controlFrame, FrameVector3D desiredLinearVelocity)
    {
@@ -428,7 +433,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param linearSelectionMatrix the selection matrix to apply to the linear part of this command.
-    *           Not modified.
+    *                              Not modified.
     */
    public void setSelectionMatrixForLinearControl(SelectionMatrix3D linearSelectionMatrix)
    {
@@ -454,7 +459,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param angularSelectionMatrix the selection matrix to apply to the angular part of this command.
-    *           Not modified.
+    *                               Not modified.
     */
    public void setSelectionMatrixForAngularControl(SelectionMatrix3D angularSelectionMatrix)
    {
@@ -468,7 +473,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * <p>
     * This configuration is useful especially when dealing with planar robots evolving in the XZ-plane.
     * </p>
-    * 
     */
    public void setSelectionMatrixForPlanarControl()
    {
@@ -579,7 +583,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param angular the weight to use for the angular part of this command. Not modified.
-    * @param linear the weight to use for the linear part of this command. Not modified.
+    * @param linear  the weight to use for the linear part of this command. Not modified.
     */
    public void setWeight(double angular, double linear)
    {
@@ -604,7 +608,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param weightMatrix weight matrix holding the weights to use for each component of the desired
-    *           velocity. Not modified.
+    *                     velocity. Not modified.
     */
    public void setWeightMatrix(WeightMatrix6D weightMatrix)
    {
@@ -664,7 +668,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param angular the weights to use for the angular part of this command. Not modified.
-    * @param linear the weights to use for the linear part of this command. Not modified.
+    * @param linear  the weights to use for the linear part of this command. Not modified.
     */
    public void setWeights(Tuple3DReadOnly angular, Tuple3DReadOnly linear)
    {
@@ -703,11 +707,11 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * Gets the 6-by-6 weight matrix expressed in the given {@code destinationFrame} to use with this
     * command.
     * 
-    * @param destinationFrame the reference frame in which the weight matrix should be expressed in.
+    * @param destinationFrame   the reference frame in which the weight matrix should be expressed in.
     * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is stored
-    *           in. Modified.
+    *                           in. Modified.
     */
-   public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       weightMatrix.getFullWeightMatrixInFrame(destinationFrame, weightMatrixToPack);
    }
@@ -750,14 +754,18 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * the control frame.
     * </p>
     * 
-    * @param controlFrameToPack the frame of interest for controlling the end-effector. Modified.
+    * @param controlFrameToPack           the frame of interest for controlling the end-effector.
+    *                                     Modified.
     * @param desiredSpatialVelocityToPack the desired spatial velocity of the end-effector with respect
-    *           to the base, expressed in the control frame. Modified.
+    *                                     to the base, expressed in the control frame. Modified.
     */
    public void getDesiredSpatialVelocity(PoseReferenceFrame controlFrameToPack, Twist desiredSpatialVelocityToPack)
    {
       getControlFrame(controlFrameToPack);
-      desiredSpatialVelocityToPack.setIncludingFrame(endEffector.getBodyFixedFrame(), base.getBodyFixedFrame(), controlFrameToPack, desiredAngularVelocity,
+      desiredSpatialVelocityToPack.setIncludingFrame(endEffector.getBodyFixedFrame(),
+                                                     base.getBodyFixedFrame(),
+                                                     controlFrameToPack,
+                                                     desiredAngularVelocity,
                                                      desiredLinearVelocity);
    }
 
@@ -769,9 +777,10 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param desiredSpatialVelocityToPack the 6-by-1 matrix in which the value of the desired spatial
-    *           velocity is stored. The given matrix is reshaped to ensure proper size. Modified.
+    *                                     velocity is stored. The given matrix is reshaped to ensure
+    *                                     proper size. Modified.
     */
-   public void getDesiredSpatialVelocity(DenseMatrix64F desiredSpatialVelocityToPack)
+   public void getDesiredSpatialVelocity(DMatrixRMaj desiredSpatialVelocityToPack)
    {
       desiredSpatialVelocityToPack.reshape(6, 1);
       desiredAngularVelocity.get(0, desiredSpatialVelocityToPack);
@@ -793,7 +802,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * </p>
     * 
     * @param controlFrameToPack the {@code PoseReferenceFrame} used to clone the control frame.
-    *           Modified.
+    *                           Modified.
     */
    public void getControlFrame(PoseReferenceFrame controlFrameToPack)
    {
@@ -816,7 +825,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * Packs the position and orientation of the control frame expressed in
     * {@code endEffector.getBodyFixedFrame()}.
     * 
-    * @param positionToPack the position of the {@code controlFrame}'s origin. Modified.
+    * @param positionToPack    the position of the {@code controlFrame}'s origin. Modified.
     * @param orientationToPack the orientation of the {@code controlFrame}. Modified.
     */
    public void getControlFramePoseIncludingFrame(FramePoint3D positionToPack, FrameQuaternion orientationToPack)
@@ -834,11 +843,12 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * Gets the 6-by-6 selection matrix expressed in the given {@code destinationFrame} to use with this
     * command.
     * 
-    * @param destinationFrame the reference frame in which the selection matrix should be expressed in.
+    * @param destinationFrame      the reference frame in which the selection matrix should be
+    *                              expressed in.
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
-    *           stored in. Modified.
+    *                              stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
@@ -905,7 +915,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use the
     * joints before the {@code primaryBase} (such as the floating base) to control the
     * {@code endEffector}.
-    *
     * <p>
     * This parameter is optional. If provided, it will scale the weights before the {@code primaryBase}
     * by the factor defined in {@code secondaryTaskJointWeightScale} to control the
@@ -927,7 +936,6 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * control the {@code endEffector}, while a factor larger than 1.0 makes it more likely to use the
     * joints before the {@code primaryBase} (such as the floating base) to control the
     * {@code endEffector}.
-    *
     * <p>
     * This parameter is optional. If provided, it will be used to scale the weights before the
     * {@code primaryBase} to control the {@code endEffector}.
@@ -950,6 +958,14 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
    }
 
    /**
+    * Get the type of spatial velocity constraint that should be imposed
+    */
+   public ConstraintType getConstraintType()
+   {
+      return constraintType;
+   }
+
+   /**
     * {@inheritDoc}
     * 
     * @return {@link ControllerCoreCommandType#TASKSPACE}.
@@ -960,12 +976,16 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       return ControllerCoreCommandType.TASKSPACE;
    }
 
-   /**
-    * Get the type of spatial velocity constraint that should be imposed
-    */
-   public ConstraintType getConstraintType()
+   @Override
+   public void setCommandId(int id)
    {
-      return constraintType;
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
    }
 
    @Override
@@ -979,6 +999,8 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
       {
          SpatialVelocityCommand other = (SpatialVelocityCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (constraintType != other.constraintType)
             return false;
          if (!controlFramePose.equals(other.controlFramePose))

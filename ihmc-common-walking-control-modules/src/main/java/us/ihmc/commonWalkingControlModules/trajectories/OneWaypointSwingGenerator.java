@@ -15,7 +15,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -46,6 +46,9 @@ public class OneWaypointSwingGenerator implements SwingGenerator
    private final FrameVector3D finalVelocity = new FrameVector3D();
    private final ArrayList<FramePoint3D> waypointPositions = new ArrayList<>();
 
+   private final FrameVector3D desiredVelocity = new FrameVector3D();
+   private final FrameVector3D desiredAcceleration = new FrameVector3D();
+
    private final FrameVector3D initialVelocityNoTimeDimension = new FrameVector3D();
    private final FrameVector3D finalVelocityNoTimeDimension = new FrameVector3D();
    private final FrameVector3D tempWaypointVelocity = new FrameVector3D();
@@ -53,9 +56,9 @@ public class OneWaypointSwingGenerator implements SwingGenerator
    private final BagOfBalls waypointViz;
 
    public OneWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight,
-                                    YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
       timeIntoStep = new YoDouble(namePrefix + "TimeIntoStep", registry);
@@ -252,32 +255,27 @@ public class OneWaypointSwingGenerator implements SwingGenerator
    }
 
    @Override
-   public void getPosition(FramePoint3D positionToPack)
+   public FramePoint3DReadOnly getPosition()
    {
-      trajectory.getPosition(positionToPack);
+      return trajectory.getPosition();
    }
 
    @Override
-   public void getVelocity(FrameVector3D velocityToPack)
+   public FrameVector3DReadOnly getVelocity()
    {
-      trajectory.getVelocity(velocityToPack);
-      velocityToPack.scale(1.0 / stepTime.getDoubleValue());
+      desiredVelocity.set(trajectory.getVelocity());
+      desiredVelocity.scale(1.0 / stepTime.getDoubleValue());
+
+      return desiredVelocity;
    }
 
    @Override
-   public void getAcceleration(FrameVector3D accelerationToPack)
+   public FrameVector3DReadOnly getAcceleration()
    {
-      trajectory.getAcceleration(accelerationToPack);
-      accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
-      accelerationToPack.scale(1.0 / stepTime.getDoubleValue());
-   }
+      desiredAcceleration.set(trajectory.getAcceleration());
+      desiredAcceleration.scale(1.0 / (stepTime.getDoubleValue() * stepTime.getDoubleValue()));
 
-   @Override
-   public void getLinearData(FramePoint3D positionToPack, FrameVector3D velocityToPack, FrameVector3D accelerationToPack)
-   {
-      getPosition(positionToPack);
-      getVelocity(velocityToPack);
-      getAcceleration(accelerationToPack);
+      return desiredAcceleration;
    }
 
    @Override

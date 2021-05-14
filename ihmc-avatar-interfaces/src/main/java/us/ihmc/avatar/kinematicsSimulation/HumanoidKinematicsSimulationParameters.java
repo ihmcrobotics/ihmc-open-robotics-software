@@ -1,12 +1,59 @@
 package us.ihmc.avatar.kinematicsSimulation;
 
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.tools.UnitConversions;
 
 public class HumanoidKinematicsSimulationParameters
 {
    private boolean createYoVariableServer = false;
    private boolean logToFile = false;
    private PubSubImplementation pubSubImplementation = PubSubImplementation.INTRAPROCESS;
+   private double initialGroundHeight = 0.0;
+   private double initialRobotYaw = 0.0;
+   private double initialRobotX = 0.0;
+   private double initialRobotY = 0.0;
+   private double playbackSpeedMultiplier = 10.0;
+   private double dt = UnitConversions.hertzToSeconds(70);
+
+   public double getInitialGroundHeight()
+   {
+      return initialGroundHeight;
+   }
+
+   public void setInitialGroundHeight(double initialGroundHeight)
+   {
+      this.initialGroundHeight = initialGroundHeight;
+   }
+
+   public double getInitialRobotYaw()
+   {
+      return initialRobotYaw;
+   }
+
+   public void setInitialRobotYaw(double initialRobotYaw)
+   {
+      this.initialRobotYaw = initialRobotYaw;
+   }
+
+   public double getInitialRobotX()
+   {
+      return initialRobotX;
+   }
+
+   public void setInitialRobotX(double initialRobotX)
+   {
+      this.initialRobotX = initialRobotX;
+   }
+
+   public double getInitialRobotY()
+   {
+      return initialRobotY;
+   }
+
+   public void setInitialRobotY(double initialRobotY)
+   {
+      this.initialRobotY = initialRobotY;
+   }
 
    public void setCreateYoVariableServer(boolean createYoVariableServer)
    {
@@ -36,5 +83,25 @@ public class HumanoidKinematicsSimulationParameters
    public PubSubImplementation getPubSubImplementation()
    {
       return pubSubImplementation;
+   }
+
+   public void setPlaybackSpeedMultiplier(double playbackSpeedMultiplier)
+   {
+      this.playbackSpeedMultiplier = playbackSpeedMultiplier;
+   }
+
+   public void setUpdateFrequencyHz(double updateFrequencyHz)
+   {
+      this.dt = UnitConversions.hertzToSeconds(updateFrequencyHz);
+   }
+
+   public double getDt()
+   {
+      return dt;
+   }
+
+   public double getUpdatePeriod()
+   {
+      return dt / playbackSpeedMultiplier;
    }
 }

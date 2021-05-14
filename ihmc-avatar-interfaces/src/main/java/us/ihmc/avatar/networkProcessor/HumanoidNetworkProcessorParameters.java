@@ -10,21 +10,24 @@ public class HumanoidNetworkProcessorParameters
    private URI rosURI;
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
-   private boolean useTextToSpeechEngine;
    private boolean useZeroPoseRobotConfigurationPublisherModule;
    private boolean useWholeBodyTrajectoryToolboxModule, visualizeWholeBodyTrajectoryToolboxModule;
    private boolean useKinematicsToolboxModule, visualizeKinematicsToolboxModule;
    private boolean useKinematicsPlanningToolboxModule, visualizeKinematicsPlanningToolboxModule;
    private boolean useKinematicsStreamingToolboxModule, visualizeKinematicsStreamingToolboxModule;
    private boolean useFootstepPlanningToolboxModule, visualizeFootstepPlanningToolboxModule;
-   private boolean useFootstepPostProcessingToolboxModule, visualizeFootstepPostProcessingToolboxModule;
    private boolean useMocapModule;
+   private boolean useDirectionalControlModule;
    private boolean useBehaviorModule, visualizeBehaviorModule;
    private boolean useAutomaticDiagnostic;
    private double automatedDiagnosticInitialDelay;
    private boolean useROSModule;
    private boolean useSensorModule;
    private boolean useHeightQuadTreeToolboxModule;
+   private boolean useFiducialDetectorToolboxModule;
+   private boolean useObjectDetectorToolboxModule;
+
+
    private boolean useRobotEnvironmentAwerenessModule;
    private String reaConfigurationFilePath;
    private boolean useBipedalSupportPlanarRegionPublisherModule;
@@ -51,11 +54,6 @@ public class HumanoidNetworkProcessorParameters
    public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
-   }
-
-   public void setUseTextToSpeechEngine(boolean enable)
-   {
-      this.useTextToSpeechEngine = enable;
    }
 
    public void setUseZeroPoseRobotConfigurationPublisherModule(boolean enable)
@@ -118,20 +116,14 @@ public class HumanoidNetworkProcessorParameters
       this.visualizeFootstepPlanningToolboxModule = visualize;
    }
 
-   public void setUseFootstepPostProcessingToolboxModule(boolean enable)
-   {
-      setUseFootstepPostProcessingToolboxModule(enable, false);
-   }
-
-   public void setUseFootstepPostProcessingToolboxModule(boolean enable, boolean visualize)
-   {
-      this.useFootstepPostProcessingToolboxModule = enable;
-      this.visualizeFootstepPostProcessingToolboxModule = visualize;
-   }
-
    public void setUseMocapModule(boolean enable)
    {
       this.useMocapModule = enable;
+   }
+   
+   public void setUseDirectionalControlModule(boolean enable)
+   {
+	   this.useDirectionalControlModule = enable;
    }
 
    public void setUseBehaviorModule(boolean enable)
@@ -216,11 +208,6 @@ public class HumanoidNetworkProcessorParameters
       return simulatedSensorCommunicator;
    }
 
-   public boolean isUseTextToSpeechEngine()
-   {
-      return useTextToSpeechEngine;
-   }
-
    public boolean isUseZeroPoseRobotConfigurationPublisherModule()
    {
       return useZeroPoseRobotConfigurationPublisherModule;
@@ -276,19 +263,14 @@ public class HumanoidNetworkProcessorParameters
       return visualizeFootstepPlanningToolboxModule;
    }
 
-   public boolean isUseFootstepPostProcessingToolboxModule()
-   {
-      return useFootstepPostProcessingToolboxModule;
-   }
-
-   public boolean isVisualizeFootstepPostProcessingToolboxModule()
-   {
-      return visualizeFootstepPostProcessingToolboxModule;
-   }
-
    public boolean isUseMocapModule()
    {
       return useMocapModule;
+   }
+   
+   public boolean isUseDirectionalControlModule()
+   {
+	   return useDirectionalControlModule;
    }
 
    public boolean isUseBehaviorModule()
@@ -325,6 +307,27 @@ public class HumanoidNetworkProcessorParameters
    {
       return useHeightQuadTreeToolboxModule;
    }
+   
+   
+   public void setUseFiducialDetectorToolboxModule(boolean enable)
+   {
+      this.useFiducialDetectorToolboxModule = enable;
+   }
+   
+   public boolean isUseFiducialDetectorToolboxModule()
+   {
+      return useFiducialDetectorToolboxModule;
+   }
+   public void setUseObjectDetectorToolboxModule(boolean enable)
+   {
+      this.useObjectDetectorToolboxModule = enable;
+   }
+   
+   public boolean isUseObjectDetectorToolboxModule()
+   {
+      return useObjectDetectorToolboxModule;
+   }
+
 
    public boolean isUseRobotEnvironmentAwerenessModule()
    {

@@ -27,7 +27,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.frames.YoFrameVariableNameTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
@@ -36,11 +35,12 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.scripts.Script;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTestInterface
 {
@@ -136,10 +136,10 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
          String sidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
          String footPrefix = sidePrefix + "Foot";
          @SuppressWarnings("unchecked")
-         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.getVariable(sidePrefix + "FootControlModule",
+         final YoEnum<ConstraintType> footConstraintType = (YoEnum<ConstraintType>) scs.findVariable(sidePrefix + "FootControlModule",
                footPrefix + "CurrentState");
          @SuppressWarnings("unchecked")
-         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.getVariable("WalkingHighLevelHumanoidController",
+         final YoEnum<WalkingStateEnum> walkingState = (YoEnum<WalkingStateEnum>) scs.findVariable("WalkingHighLevelHumanoidController",
                "walkingCurrentState");
          singleSupportStartConditions.put(robotSide, new SingleSupportStartCondition(footConstraintType));
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
@@ -181,25 +181,25 @@ public abstract class EndToEndAdjustFootstepMessageTest implements MultiRobotTes
    @SuppressWarnings("unchecked")
    private static RobotSide findUpcomingFootstepSide(int index, SimulationConstructionSet scs)
    {
-      return ((YoEnum<RobotSide>)scs.getVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
+      return ((YoEnum<RobotSide>)scs.findVariable(WalkingMessageHandler.class.getSimpleName(), "upcomingFoostepSide" + index)).getEnumValue();
    }
 
-   private static YoFramePose3D findYoFramePose(String nameSpace, String namePrefix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose(String namespace, String namePrefix, SimulationConstructionSet scs)
    {
-      return findYoFramePose3D(nameSpace, namePrefix, "", scs);
+      return findYoFramePose3D(namespace, namePrefix, "", scs);
    }
 
-   private static YoFramePose3D findYoFramePose3D(String nameSpace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
+   private static YoFramePose3D findYoFramePose3D(String namespace, String namePrefix, String nameSuffix, SimulationConstructionSet scs)
    {
-      YoDouble x = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createXName(namePrefix, nameSuffix));
-      YoDouble y = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createYName(namePrefix, nameSuffix));
-      YoDouble z = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createZName(namePrefix, nameSuffix));
+      YoDouble x = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createXName(namePrefix, nameSuffix));
+      YoDouble y = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createYName(namePrefix, nameSuffix));
+      YoDouble z = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createZName(namePrefix, nameSuffix));
       YoFramePoint3D position = new YoFramePoint3D(x, y, z, ReferenceFrame.getWorldFrame());
 
-      YoDouble qx = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQxName(namePrefix, nameSuffix));
-      YoDouble qy = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQyName(namePrefix, nameSuffix));
-      YoDouble qz = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQzName(namePrefix, nameSuffix));
-      YoDouble qs = (YoDouble) scs.getVariable(nameSpace, YoFrameVariableNameTools.createQsName(namePrefix, nameSuffix));
+      YoDouble qx = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQxName(namePrefix, nameSuffix));
+      YoDouble qy = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQyName(namePrefix, nameSuffix));
+      YoDouble qz = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQzName(namePrefix, nameSuffix));
+      YoDouble qs = (YoDouble) scs.findVariable(namespace, YoGeometryNameTools.createQsName(namePrefix, nameSuffix));
       YoFrameQuaternion orientation = new YoFrameQuaternion(qx, qy, qz, qs, ReferenceFrame.getWorldFrame());
       return new YoFramePose3D(position, orientation);
    }

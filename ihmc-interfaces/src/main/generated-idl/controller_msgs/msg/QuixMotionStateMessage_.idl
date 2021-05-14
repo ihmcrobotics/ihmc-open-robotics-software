@@ -16,16 +16,25 @@ module controller_msgs
       const octet STAND_UP =
       2;
 
-      const octet MOVE_TO_START =
+      const octet MOVE_TO_FLAT_GROUND =
       3;
 
       const octet FLAT_GROUND_WALKING =
       4;
 
+      const octet MOVE_TO_SLOPE =
+      5;
+
+      const octet SLOPE_WALKING =
+      6;
+
+      const octet OLD_FLAT_GROUND_WALKING =
+      7;
+
 
       /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is used to switch the control scheme between different control mode.
+       * This message is part of the Quix controller API.
+       * This message is used to notify the crutch display of the current motion state and allow the crutch to communicate a desired change in state.
        */
       @TypeCode(type="controller_msgs::msg::dds_::QuixMotionStateMessage_")
       struct QuixMotionStateMessage
@@ -34,9 +43,6 @@ module controller_msgs
          * Unique ID used to identify this message, should preferably be consecutively increasing.
          */
         unsigned long sequence_id;
-        /**
-         * Specifies the which state the controller should transition into.
-         */
         @defaultValue(value=255)
         octet motion_state_name;
       };

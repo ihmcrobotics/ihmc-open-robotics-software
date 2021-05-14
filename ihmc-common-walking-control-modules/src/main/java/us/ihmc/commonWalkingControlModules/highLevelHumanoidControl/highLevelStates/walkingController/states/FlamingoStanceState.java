@@ -14,10 +14,11 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -38,12 +39,11 @@ public class FlamingoStanceState extends SingleSupportState
    private final LegConfigurationManager legConfigurationManager;
 
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private final FootstepShiftFractions footstepShiftFractions = new FootstepShiftFractions();
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    public FlamingoStanceState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler, HighLevelHumanoidControllerToolbox controllerToolbox,
                               HighLevelControlManagerFactory managerFactory, WalkingFailureDetectionControlModule failureDetectionControlModule,
-                              YoVariableRegistry parentRegistry)
+                              YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
       this.controllerToolbox = controllerToolbox;
@@ -70,6 +70,8 @@ public class FlamingoStanceState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
+      balanceManager.computeFlamingoStateICPPlan();
+
       super.doAction(timeInState);
 
       if (loadFoot.getBooleanValue() && loadFootStartTime.isNaN())
@@ -81,7 +83,7 @@ public class FlamingoStanceState extends SingleSupportState
             feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
       }
 
-      balanceManager.getCapturePoint(capturePoint2d);
+      capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
 
       boolean icpErrorIsTooLarge = balanceManager.getICPErrorMagnitude() > 0.05;
 
@@ -133,27 +135,18 @@ public class FlamingoStanceState extends SingleSupportState
       super.onEntry();
 
       balanceManager.enablePelvisXYControl();
-      balanceManager.setNextFootstep(null);
       feetManager.handleFootTrajectoryCommand(walkingMessageHandler.pollFootTrajectoryForFlamingoStance(swingSide));
 
       double swingTime = Double.POSITIVE_INFINITY;
       double initialTransferTime = walkingMessageHandler.getInitialTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
       footstepTiming.setTimings(swingTime, initialTransferTime);
 
-      double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
-      double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
-      double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
-      footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
-
+      Footstep footstep = walkingMessageHandler.getFootstepAtCurrentLocation(swingSide);
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);
+      balanceManager.addFootstepToPlan(footstep, footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-      balanceManager.initializeICPPlanForSingleSupport(swingTime, initialTransferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport();
 
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(supportSide);
       comHeightManager.setSupportLeg(getSupportSide());
@@ -203,20 +196,10 @@ public class FlamingoStanceState extends SingleSupportState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       footstepTiming.setTimings(swingTime, transferTime);
 
-      double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
-      double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
-      double swingDurationShiftFraction = walkingMessageHandler.getDefaultSwingDurationShiftFraction();
-      double swingSplitFraction = walkingMessageHandler.getDefaultSwingSplitFraction();
-      double transferSplitFraction = walkingMessageHandler.getDefaultTransferSplitFraction();
-      footstepShiftFractions.setShiftFractions(swingDurationShiftFraction, swingSplitFraction, transferSplitFraction);
-
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.setFinalTransferSplitFraction(finalTransferSplitFraction);
-      balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
-      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming, footstepShiftFractions);
-      balanceManager.setUpcomingFootstep(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide));
+      balanceManager.addFootstepToPlan(walkingMessageHandler.getFootstepAtCurrentLocation(swingSide), footstepTiming);
       balanceManager.setICPPlanSupportSide(supportSide);
-      balanceManager.initializeICPPlanForSingleSupport(swingTime, transferTime, finalTransferTime);
+      balanceManager.initializeICPPlanForSingleSupport();
 
       balanceManager.freezePelvisXYControl();
    }

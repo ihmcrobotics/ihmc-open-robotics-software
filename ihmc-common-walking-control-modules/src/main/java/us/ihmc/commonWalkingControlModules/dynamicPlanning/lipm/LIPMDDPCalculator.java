@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.robotics.math.trajectories.SegmentedFrameTrajectory3D;
+import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTrajectoryGenerator;
 import us.ihmc.trajectoryOptimization.*;
 import us.ihmc.trajectoryOptimization.SimpleDDPSolver;
 import us.ihmc.trajectoryOptimization.DiscreteTimeVaryingTrackingLQRSolver;
@@ -60,20 +60,23 @@ public class LIPMDDPCalculator
    private final FramePoint3D tempPoint = new FramePoint3D();
    private final FrameVector3D tempVector = new FrameVector3D();
 
-   public void initialize(DenseMatrix64F currentState, SegmentedFrameTrajectory3D copDesiredPlan)
+   public void initialize(DMatrixRMaj currentState, MultipleWaypointsPositionTrajectoryGenerator copDesiredPlan)
    {
-      modifiedDeltaT = computeDeltaT(copDesiredPlan.getFinalTime());
+      modifiedDeltaT = computeDeltaT(copDesiredPlan.getLastWaypointTime());
       dynamics.setTimeStepSize(modifiedDeltaT);
-      desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
-      optimalTrajectory.setTrajectoryDuration(0, copDesiredPlan.getFinalTime(), deltaT);
+      desiredTrajectory.setTrajectoryDuration(0, copDesiredPlan.getLastWaypointTime(), deltaT);
+      optimalTrajectory.setTrajectoryDuration(0, copDesiredPlan.getLastWaypointTime(), deltaT);
       constantSequence.setLength(desiredTrajectory.size());
 
       double height = currentState.get(2);
 
       double time = 0.0;
 
-      copDesiredPlan.update(time, tempPoint, tempVector);
-      DenseMatrix64F desiredState = desiredTrajectory.getState(0);
+      copDesiredPlan.compute(time);
+      tempPoint.setIncludingFrame(copDesiredPlan.getPosition());
+      tempVector.setIncludingFrame(copDesiredPlan.getVelocity());
+
+      DMatrixRMaj desiredState = desiredTrajectory.getState(0);
 
       desiredState.set(0, tempPoint.getX());
       desiredState.set(1, tempPoint.getY());
@@ -82,7 +85,7 @@ public class LIPMDDPCalculator
       desiredState.set(4, tempVector.getY());
       desiredState.set(5, tempVector.getZ());
 
-      DenseMatrix64F desiredControl = desiredTrajectory.getControl(0);
+      DMatrixRMaj desiredControl = desiredTrajectory.getControl(0);
       desiredControl.set(0, tempPoint.getX());
       desiredControl.set(1, tempPoint.getY());
       desiredControl.set(2, mass * gravityZ);
@@ -91,7 +94,9 @@ public class LIPMDDPCalculator
 
       for (int i = 1; i < numberOfTimeSteps; i++)
       {
-         copDesiredPlan.update(time, tempPoint, tempVector);
+         copDesiredPlan.compute(time);
+         tempPoint.setIncludingFrame(copDesiredPlan.getPosition());
+         tempVector.setIncludingFrame(copDesiredPlan.getVelocity());
          desiredState = desiredTrajectory.getState(i);
 
          desiredState.set(0, tempPoint.getX());
