@@ -7,9 +7,9 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -20,11 +20,12 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -62,7 +63,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    public KinematicsStreamingToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
                                                FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
                                                double walkingControllerPeriod, double toolboxControllerPeriod, YoGraphicsListRegistry yoGraphicsListRegistry,
-                                               YoVariableRegistry parentRegistry)
+                                               YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -93,7 +94,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       tools.getIKController().setInitialRobotConfigurationNamedMap(initialConfiguration);
    }
 
-   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       tools.getIKController().setCollisionModel(collisionModel);
    }
@@ -111,15 +112,21 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return factory.build(KSTState.SLEEP);
    }
 
-   public void setOutputPublisher(OutputPublisher outputPublisher)
+   public void setTrajectoryMessagePublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
    {
-      streamingState.setOutputPublisher(outputPublisher);
+      streamingState.setTrajectoryMessagerPublisher(outputPublisher);
+   }
+
+   public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher outputPublisher)
+   {
+      streamingState.setStreamingMessagePublisher(outputPublisher);
    }
 
    @Override
    public boolean initialize()
    {
       isDone.set(false);
+      initialTimestamp = System.nanoTime();
       return true;
    }
 
@@ -130,8 +137,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    {
       try
       {
-         if (initialTimestamp == -1L)
-            initialTimestamp = System.nanoTime();
          time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
 
          if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
@@ -171,9 +176,14 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return isDone.getValue();
    }
 
-   public static interface OutputPublisher
+   public static interface WholeBodyTrajectoryMessagePublisher
    {
       void publish(WholeBodyTrajectoryMessage messageToPublish);
+   }
+
+   public static interface WholeBodyStreamingMessagePublisher
+   {
+      void publish(WholeBodyStreamingMessage messageToPublish);
    }
 
    KSTState getCurrentStateKey()

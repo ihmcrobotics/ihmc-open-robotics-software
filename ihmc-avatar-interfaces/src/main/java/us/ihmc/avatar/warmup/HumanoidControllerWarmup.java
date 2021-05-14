@@ -3,14 +3,14 @@ package us.ihmc.avatar.warmup;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
@@ -48,7 +48,7 @@ import us.ihmc.wholeBodyController.DRCControllerThread;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.wholeBodyController.parameters.ParameterLoaderHelper;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -62,7 +62,7 @@ public abstract class HumanoidControllerWarmup
    private final DRCRobotModel robotModel;
    private final double controlDT;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private final YoDouble yoTime = new YoDouble("time", registry);
 
@@ -124,9 +124,9 @@ public abstract class HumanoidControllerWarmup
       return referenceFrames;
    }
 
-   public YoVariable<?> getYoVariable(String name)
+   public YoVariable getYoVariable(String name)
    {
-      return registry.getVariable(name);
+      return registry.findVariable(name);
    }
 
    private void doSingleTimeUpdate()
@@ -187,7 +187,7 @@ public abstract class HumanoidControllerWarmup
       }
 
       RootJointDesiredConfigurationDataReadOnly rootJointOutput = walkingControllerState.getOutputForRootJoint();
-      DenseMatrix64F desiredAcceleration = rootJointOutput.getDesiredAcceleration();
+      DMatrixRMaj desiredAcceleration = rootJointOutput.getDesiredAcceleration();
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
@@ -224,10 +224,10 @@ public abstract class HumanoidControllerWarmup
       rootJoint.setJointTwist(rootJointTwist);
    }
 
-   private void createWalkingControllerAndSetUpManagerFactory(YoVariableRegistry managerFactoryParent)
+   private void createWalkingControllerAndSetUpManagerFactory(YoRegistry managerFactoryParent)
    {
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = robotModel.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = robotModel.getCoPTrajectoryParameters();
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = new ReferenceFrameHashCodeResolver(fullRobotModel, referenceFrames);
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
@@ -268,20 +268,16 @@ public abstract class HumanoidControllerWarmup
       double defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       double defaultInitialTransferTime = walkingControllerParameters.getDefaultInitialTransferTime();
       double defaultFinalTransferTime = walkingControllerParameters.getDefaultFinalTransferTime();
-      double defaultSwingDurationShiftFraction = capturePointPlannerParameters.getSwingDurationShiftFraction();
-      double defaultSwingSplitFraction = capturePointPlannerParameters.getSwingSplitFraction();
-      double defaultTransferSplitFraction = capturePointPlannerParameters.getTransferSplitFraction();
       WalkingMessageHandler walkingMessageHandler = new WalkingMessageHandler(defaultTransferTime, defaultSwingTime, defaultInitialTransferTime,
-                                                                              defaultFinalTransferTime, defaultSwingDurationShiftFraction,
-                                                                              defaultSwingSplitFraction, defaultTransferSplitFraction,
-                                                                              defaultTransferSplitFraction, feet, statusOutputManager,
+                                                                              defaultFinalTransferTime, feet, statusOutputManager,
                                                                               yoTime, yoGraphicsListRegistry, controllerToolbox.getYoVariableRegistry());
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory = new HighLevelControlManagerFactory(managerFactoryParent);
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      managerFactory.setCapturePointPlannerParameters(capturePointPlannerParameters);
+      managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
+
 
       walkingControllerState = new WalkingControllerState(commandInputManager, statusOutputManager, managerFactory, controllerToolbox,
                                                           robotModel.getHighLevelControllerParameters(), robotModel.getWalkingControllerParameters());
@@ -295,37 +291,37 @@ public abstract class HumanoidControllerWarmup
       oneDoFJoints = fullRobotModel.getOneDoFJoints();
 
       // Create registries to match controller so the XML gets loaded properly.
-      YoVariableRegistry drcControllerThread = new YoVariableRegistry("DRCControllerThread");
-      YoVariableRegistry drcMomentumBasedController = new YoVariableRegistry("DRCMomentumBasedController");
-      YoVariableRegistry humanoidHighLevelControllerManager = new YoVariableRegistry("HumanoidHighLevelControllerManager");
-      YoVariableRegistry highLevelHumanoidControllerFactory = new YoVariableRegistry("HighLevelHumanoidControllerFactory");
+      YoRegistry drcControllerThread = new YoRegistry("DRCControllerThread");
+      YoRegistry drcMomentumBasedController = new YoRegistry("DRCMomentumBasedController");
+      YoRegistry humanoidHighLevelControllerManager = new YoRegistry("HumanoidHighLevelControllerManager");
+      YoRegistry highLevelHumanoidControllerFactory = new YoRegistry("HighLevelHumanoidControllerFactory");
       registry.addChild(drcControllerThread);
       drcControllerThread.addChild(drcMomentumBasedController);
       drcMomentumBasedController.addChild(humanoidHighLevelControllerManager);
       humanoidHighLevelControllerManager.addChild(highLevelHumanoidControllerFactory);
 
       createWalkingControllerAndSetUpManagerFactory(highLevelHumanoidControllerFactory);
-      humanoidHighLevelControllerManager.addChild(walkingControllerState.getYoVariableRegistry());
+      humanoidHighLevelControllerManager.addChild(walkingControllerState.getYoRegistry());
       humanoidHighLevelControllerManager.addChild(controllerToolbox.getYoVariableRegistry());
+
+      String name = "FootAssumeCopOnEdge";
+      YoBoolean variable = (YoBoolean) registry.findVariable(name);
+      variable.set(true);
+
+      name = "FootAssumeFootBarelyLoaded";
+      variable = (YoBoolean) registry.findVariable(name);
+      variable.set(true);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         String name = robotSide.getLowerCaseName() + "FootAssumeCopOnEdge";
-         YoBoolean variable = (YoBoolean) registry.getVariable(name);
-         variable.set(true);
-
-         name = robotSide.getLowerCaseName() + "FootAssumeFootBarelyLoaded";
-         variable = (YoBoolean) registry.getVariable(name);
-         variable.set(true);
-
          name = robotSide.getCamelCaseNameForStartOfExpression() + "FootCurrentState";
-         YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.getVariable(name);
+         YoEnum<ConstraintType> footState = (YoEnum<ConstraintType>) registry.findVariable(name);
          footStates.put(robotSide, footState);
       }
 
       ParameterLoaderHelper.loadParameters(this, robotModel.getWholeBodyControllerParametersFile(), drcControllerThread);
 
-      YoVariable<?> defaultHeight = registry.getVariable(PelvisHeightControlState.class.getSimpleName(),
+      YoVariable defaultHeight = registry.findVariable(PelvisHeightControlState.class.getSimpleName(),
                                                          PelvisHeightControlState.class.getSimpleName() + "DefaultHeight");
       if (Double.isNaN(defaultHeight.getValueAsDouble()))
       {
@@ -360,7 +356,7 @@ public abstract class HumanoidControllerWarmup
       return yoGraphicsListRegistry;
    }
 
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

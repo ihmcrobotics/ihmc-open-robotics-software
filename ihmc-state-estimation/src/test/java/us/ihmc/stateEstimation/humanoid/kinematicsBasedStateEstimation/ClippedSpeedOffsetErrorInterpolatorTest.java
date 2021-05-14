@@ -7,7 +7,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -17,7 +16,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -29,7 +27,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class ClippedSpeedOffsetErrorInterpolatorTest
 {
@@ -51,7 +49,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       }
    };
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final double dt = 0.001;
 
@@ -73,7 +71,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       boolean visualize = false;
 
       double dt = 0.001;
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
       RigidBodyTransform referenceFrameToBeCorrectedTransform = new RigidBodyTransform();
 
       ReferenceFrame referenceFrameToBeCorrected = new ReferenceFrame("referenceFrameToBeCorrected", worldFrame)
@@ -115,22 +113,22 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       // Simple test with some error:
 
-      startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
-      startOffsetError.setOrientationYawPitchRoll(-0.023, 0.179, 0.11);
-      goalOffsetError.setPosition(new Point3D(0.02, 0.037, -0.04));
-      goalOffsetError.setOrientationYawPitchRoll(0.17, 0.114, -0.005);
+      startOffsetError.getPosition().set(new Point3D(0.01, 0.02, 0.03));
+      startOffsetError.getOrientation().setYawPitchRoll(-0.023, 0.179, 0.11);
+      goalOffsetError.getPosition().set(new Point3D(0.02, 0.037, -0.04));
+      goalOffsetError.getOrientation().setYawPitchRoll(0.17, 0.114, -0.005);
 
       clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
 
       FramePose3D expectedPose = new FramePose3D(worldFrame);
       expectedPose.set(startOffsetError);
-      expectedPose.setOrientationYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
+      expectedPose.getOrientation().setYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
 
       assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
       expectedPose.set(goalOffsetError);
-      expectedPose.setOrientationYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
+      expectedPose.getOrientation().setYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
       assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
 
       SimulationConstructionSet scs = null;
@@ -139,16 +137,16 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          Robot robot = new Robot(getClass().getSimpleName());
          scs = new SimulationConstructionSet(robot, parameters);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
       
       // With some speed limits, should follow those speed limits:
 
-      startOffsetError.setPosition(new Point3D(0.01, 0.001, 0.0));
-      startOffsetError.setOrientationYawPitchRoll(0.1, 0.2, 0.3);
-      goalOffsetError.setPosition(new Point3D(0.02, 0.002, 0.0));
-      goalOffsetError.setOrientationYawPitchRoll(0.1, 0.2, 0.3);
+      startOffsetError.getPosition().set(new Point3D(0.01, 0.001, 0.0));
+      startOffsetError.getOrientation().setYawPitchRoll(0.1, 0.2, 0.3);
+      goalOffsetError.getPosition().set(new Point3D(0.02, 0.002, 0.0));
+      goalOffsetError.getOrientation().setYawPitchRoll(0.1, 0.2, 0.3);
       
       double distanceFromStartToGoal = startOffsetError.getPosition().distance(goalOffsetError.getPosition());
       clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(distanceFromStartToGoal, 1.0);
@@ -180,10 +178,10 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       double startYaw = 0.01;
       double endYaw = 0.02;
       
-      startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
-      startOffsetError.setOrientationYawPitchRoll(startYaw, 0.02, 0.03);
-      goalOffsetError.setPosition(new Point3D(0.02, -0.01, 0.0378));
-      goalOffsetError.setOrientationYawPitchRoll(endYaw, 0.014, -0.045);
+      startOffsetError.getPosition().set(new Point3D(0.01, 0.02, 0.03));
+      startOffsetError.getOrientation().setYawPitchRoll(startYaw, 0.02, 0.03);
+      goalOffsetError.getPosition().set(new Point3D(0.02, -0.01, 0.0378));
+      goalOffsetError.getOrientation().setYawPitchRoll(endYaw, 0.014, -0.045);
 
       double rotationFromStartToGoal = endYaw - startYaw;
 
@@ -224,7 +222,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       boolean visualize = false;
 
-      YoVariableRegistry registry = new YoVariableRegistry("Test");
+      YoRegistry registry = new YoRegistry("Test");
 
       int numberOfTicks = 10000;
       double dt = 0.001;
@@ -243,7 +241,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          parameters.setDataBufferSize(12000);
          Robot robot = new Robot(getClass().getSimpleName());
          scs = new SimulationConstructionSet(robot, parameters);
-         scs.addYoVariableRegistry(registry);
+         scs.addYoRegistry(registry);
          scs.startOnAThread();
       }
 
@@ -252,8 +250,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
       referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-      referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
-      referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
+      referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
+      referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
       referenceFrameToBeCorrected.update();
 
       RigidBodyTransform startPoseTransform = new RigidBodyTransform();
@@ -344,8 +342,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
       referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-      referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
-      referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
+      referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
+      referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
       referenceFrameToBeCorrected.update();
 
       RigidBodyTransform startPoseTransform = new RigidBodyTransform();
@@ -428,8 +426,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
       referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-      referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
-      referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
+      referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
+      referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
       referenceFrameToBeCorrected.update();
 
       //test when rotation is bigger than translation
@@ -579,8 +577,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       {
          referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
          referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-         referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
-         referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
+         referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
+         referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
          referenceFrameToBeCorrected.update();
 
          RigidBodyTransform startPoseTransform = new RigidBodyTransform();
@@ -623,8 +621,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          }
 
          ////////////////update startPose for asserts////
-         referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
-         referenceFrameToBeCorrectedTransform.getRotation(referenceFrameToBeCorrectedTransform_Rotation);
+         referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
+         referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
 
          startPoseTransform.setIdentity();
          startPoseTransform.multiply(new RigidBodyTransform(new Quaternion(0.0, 0.0, 0.0, 1.0), referenceFrameToBeCorrectedTransform_Translation));
@@ -729,8 +727,8 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
    private void putReferenceFrameToBeCorrectedWaypointInTransformBuffer(long timeStamp, Vector3D translation, Quaternion rotation)
    {
       RigidBodyTransform temporaryReferenceFrameToBeCorrectedTransformInWorldFrame = new RigidBodyTransform();
-      temporaryReferenceFrameToBeCorrectedTransformInWorldFrame.setTranslation(translation);
-      temporaryReferenceFrameToBeCorrectedTransformInWorldFrame.setRotation(rotation);
+      temporaryReferenceFrameToBeCorrectedTransformInWorldFrame.getTranslation().set(translation);
+      temporaryReferenceFrameToBeCorrectedTransformInWorldFrame.getRotation().set(rotation);
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.put(temporaryReferenceFrameToBeCorrectedTransformInWorldFrame, timeStamp);
    }
 

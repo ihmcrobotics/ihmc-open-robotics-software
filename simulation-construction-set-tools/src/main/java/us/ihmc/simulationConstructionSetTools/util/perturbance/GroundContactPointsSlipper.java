@@ -10,19 +10,19 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameYawPitchRoll;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 //Used to make ground contact points slip a delta.
 public class GroundContactPointsSlipper implements RobotController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final ArrayList<GroundContactPoint> groundContactPointsToSlip;
    private final YoFrameVector3D slipAmount;
@@ -34,7 +34,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    public GroundContactPointsSlipper(String registryPrefix)
    {
-      registry = new YoVariableRegistry(registryPrefix + getClass().getSimpleName());
+      registry = new YoRegistry(registryPrefix + getClass().getSimpleName());
 
       groundContactPointsToSlip = new ArrayList<GroundContactPoint>();
       slipAmount = new YoFrameVector3D("slipAmount", ReferenceFrame.getWorldFrame(), registry);
@@ -69,7 +69,7 @@ public class GroundContactPointsSlipper implements RobotController
 
    public void addGroundContactPoint(Robot robot, String groundContactPointName)
    {
-      ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
       for (GroundContactPoint groundContactPoint : allGroundContactPoints)
       {
@@ -109,7 +109,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    public void setSlipRotationEulerAngles(Vector3DReadOnly eulerAngles)
    {
-      this.slipRotation.setEulerAngles(eulerAngles);
+      this.slipRotation.setEuler(eulerAngles);
    }
    
    public boolean isDoneSlipping()
@@ -117,7 +117,7 @@ public class GroundContactPointsSlipper implements RobotController
       boolean translationalSlipDone = slipAmount.lengthSquared() < 0.0001 * 0.0001;
       
       Vector3D eulerAngles = new Vector3D();
-      slipRotation.getEulerAngles(eulerAngles);
+      slipRotation.getEuler(eulerAngles);
       boolean rotationalSlipDone = eulerAngles.lengthSquared() < 0.001 * 0.001;
       
       return translationalSlipDone & rotationalSlipDone;
@@ -160,7 +160,7 @@ public class GroundContactPointsSlipper implements RobotController
    private void applyRotationalSlip(double percentOfDelta)
    {
       FrameQuaternion identity = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-      FrameQuaternion desired = slipRotation.getFrameOrientationCopy();
+      FrameQuaternion desired = new FrameQuaternion(slipRotation);
       FrameQuaternion delta = new FrameQuaternion();
 
       delta.interpolate(identity, desired, percentOfDelta);
@@ -219,7 +219,7 @@ public class GroundContactPointsSlipper implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

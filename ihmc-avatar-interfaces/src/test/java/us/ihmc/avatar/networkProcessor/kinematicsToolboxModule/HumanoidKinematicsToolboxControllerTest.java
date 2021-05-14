@@ -18,8 +18,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
+import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.MultiRobotTestInterface;
@@ -81,7 +81,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -101,7 +101,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    }
 
    private CommandInputManager commandInputManager;
-   private YoVariableRegistry mainRegistry;
+   private YoRegistry mainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private HumanoidKinematicsToolboxController toolboxController;
 
@@ -125,7 +125,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
    @BeforeEach
    public void setup()
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
@@ -193,7 +193,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       if (mainRegistry != null)
       {
-         mainRegistry.closeAndDispose();
+         mainRegistry.clear();
          mainRegistry = null;
       }
 
@@ -282,8 +282,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          // Disable the support polygon constraint, the randomized model isn't constrained.
-         HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
-         configurationMessage.setEnableSupportPolygonConstraint(false);
+         KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+         configurationMessage.setDisableSupportPolygonConstraint(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -342,8 +342,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          // Disable the support polygon constraint, the randomized model isn't constrained.
-         HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
-         configurationMessage.setEnableSupportPolygonConstraint(false);
+         KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+         configurationMessage.setDisableSupportPolygonConstraint(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -425,8 +425,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          // Disable the support polygon constraint, the randomized model isn't constrained.
-         HumanoidKinematicsToolboxConfigurationMessage configurationMessage = new HumanoidKinematicsToolboxConfigurationMessage();
-         configurationMessage.setEnableSupportPolygonConstraint(false);
+         KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+         configurationMessage.setDisableSupportPolygonConstraint(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -628,7 +628,7 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return mainRegistry;
          }
@@ -786,8 +786,8 @@ public abstract class HumanoidKinematicsToolboxControllerTest implements MultiRo
 
       SideDependentList<ContactablePlaneBody> contactableFeet = extractContactableFeet(currentRobotModel, contactPointParameters);
 
-      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon2d();
-      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon2d();
+      Object<Point3D> leftFootSupportPolygon2d = capturabilityBasedStatus.getLeftFootSupportPolygon3d();
+      Object<Point3D> rightFootSupportPolygon2d = capturabilityBasedStatus.getRightFootSupportPolygon3d();
       if (isLeftFootInSupport)
          contactableFeet.get(RobotSide.LEFT).getContactPointsCopy().stream().peek(cp -> cp.changeFrame(worldFrame))
                         .forEach(cp -> leftFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));

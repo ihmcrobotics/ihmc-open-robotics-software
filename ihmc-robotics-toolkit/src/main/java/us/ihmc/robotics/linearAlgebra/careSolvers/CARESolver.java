@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
  * This solver computes the solution to the algebraic Riccati equation
@@ -88,7 +88,7 @@ public interface CARESolver
     * @param R control cost matrix
     * @param S cross cost matrix
     */
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F S);
+   void setMatrices(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj E, DMatrixRMaj Q, DMatrixRMaj R, DMatrixRMaj S);
 
    /**
     * Setter of the solver.
@@ -116,17 +116,17 @@ public interface CARESolver
     * @param Q state cost matrix
     * @param R control cost matrix
     */
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F E, DenseMatrix64F Q, DenseMatrix64F R);
+   void setMatrices(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj E, DMatrixRMaj Q, DMatrixRMaj R);
 
-   void setMatrices(DenseMatrix64F A, DenseMatrix64F E, DenseMatrix64F M, DenseMatrix64F Q);
+   void setMatrices(DMatrixRMaj A, DMatrixRMaj E, DMatrixRMaj M, DMatrixRMaj Q);
 
    /**
     * Computes and returns the P matrix, which is the solution to the Algebraic Riccati equation.
     */
-   DenseMatrix64F computeP();
+   DMatrixRMaj computeP();
 
    /**
     * Returns the P matrix, which is the solution to the Algebraic Riccati equation.
     */
-   DenseMatrix64F getP();
+   DMatrixRMaj getP();
 }

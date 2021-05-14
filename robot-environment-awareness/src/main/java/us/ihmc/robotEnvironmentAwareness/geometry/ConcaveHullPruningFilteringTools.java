@@ -1,49 +1,77 @@
 package us.ihmc.robotEnvironmentAwareness.geometry;
 
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.*;
-import static us.ihmc.commons.lists.ListWrappingIndexTools.*;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.getNext;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.getPrevious;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.previous;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.removeAllExclusive;
+import static us.ihmc.commons.lists.ListWrappingIndexTools.subLengthInclusive;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.computeConcaveHullPocket;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.isConvexAtVertex;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.isVertexPreventingKink;
 
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
- * This class gathers different filters on a concave hull.
- * The filters aim to reduce the hull complexity by removing less significant vertices.
- * The filters gathered here only tend to reduce the area of the concave hull.
+ * This class gathers different filters on a concave hull. The filters aim to reduce the hull
+ * complexity by removing less significant vertices. The filters gathered here only tend to reduce
+ * the area of the concave hull.
  * 
  * @author Sylvain
- *
  */
 public class ConcaveHullPruningFilteringTools
 {
-
    /**
-    * Filter out vertices that create "peaks" or barely stick out the line described by the previous and next vertices.
-    * Peaks are identified by a threshold on the angle between two consecutive edges.
-    * Only convex peaks or shallow angles are removed, meaning this filter only reduces the area of the concave hull.
-    * @param shallowAngleThreshold should be a small positive angle in radians. 0 will not remove any vertex.
-    * @param peakAngleThreshold should be close to {@link Math#PI}.
-    * @param concaveHullCollectionToFilter the collection of concave hulls to filter. 
+    * Filter out vertices that create "peaks" or barely stick out the line described by the previous
+    * and next vertices. Peaks are identified by a threshold on the angle between two consecutive
+    * edges. Only convex peaks or shallow angles are removed, meaning this filter only reduces the area
+    * of the concave hull.
+    * 
+    * @param shallowAngleThreshold         should be a small positive angle in radians. 0 will not
+    *                                      remove any vertex.
+    * @param peakAngleThreshold            should be close to {@link Math#PI}.
+    * @param concaveHullCollectionToFilter the collection of concave hulls to filter.
     * @return the number of vertices removed.
     */
-   public static int filterOutPeaksAndShallowAngles(double shallowAngleThreshold, double peakAngleThreshold, ConcaveHullCollection concaveHullCollectionToFilter)
+   public static int filterOutPeaksAndShallowAngles(double shallowAngleThreshold, double peakAngleThreshold,
+                                                    ConcaveHullCollection concaveHullCollectionToFilter)
    {
-      int numberOfVerticesRemoved = 0;
-      for (ConcaveHull concaveHullToFilter : concaveHullCollectionToFilter)
-         numberOfVerticesRemoved += filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullToFilter.getConcaveHullVertices());
-      return numberOfVerticesRemoved;
+      int totalNumberOfVerticesRemoved = 0;
+      int vertexRemoved = 0;
+
+      do
+      {
+         vertexRemoved = 0;
+         for (ConcaveHull concaveHullToFilter : concaveHullCollectionToFilter)
+            vertexRemoved += filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullToFilter.getConcaveHullVertices());
+
+         totalNumberOfVerticesRemoved += vertexRemoved;
+      }
+      while (vertexRemoved != 0);
+
+      return totalNumberOfVerticesRemoved;
    }
 
    /**
-    * Filter out vertices that create "peaks" or barely stick out the line described by the previous and next vertices.
-    * Peaks are identified by a threshold on the angle between two consecutive edges.
-    * Only convex peaks or shallow angles are removed, meaning this filter only reduces the area of the concave hull.
-    * @param shallowAngleThreshold should be a small positive angle in radians. 0 will not remove any vertex.
-    * @param peakAngleThreshold should be close to {@link Math#PI}.
-    * @param concaveHullToFilter the concave hull to filter. 
+    * Filter out vertices that create "peaks" or barely stick out the line described by the previous
+    * and next vertices. Peaks are identified by a threshold on the angle between two consecutive
+    * edges. Only convex peaks or shallow angles are removed, meaning this filter only reduces the area
+    * of the concave hull.
+    * 
+    * @param shallowAngleThreshold should be a small positive angle in radians. 0 will not remove any
+    *                              vertex.
+    * @param peakAngleThreshold    should be close to {@link Math#PI}.
+    * @param concaveHullToFilter   the concave hull to filter.
     * @return the number of vertices removed.
     */
    public static int filterOutPeaksAndShallowAngles(double shallowAngleThreshold, double peakAngleThreshold, ConcaveHull concaveHullToFilter)
@@ -52,19 +80,22 @@ public class ConcaveHullPruningFilteringTools
    }
 
    /**
-    * Filter out vertices that create "peaks" or barely stick out the line described by the previous and next vertices.
-    * Peaks are identified by a threshold on the angle between two consecutive edges.
-    * Only convex peaks or shallow angles are removed, meaning this filter only reduces the area of the concave hull.
-    * @param shallowAngleThreshold should be a small positive angle in radians. 0 will not remove any vertex.
-    * @param peakAngleThreshold should be close to {@link Math#PI}.
-    * @param concaveHullVerticesToFilter the vertices of the concave hull to filter. 
+    * Filter out vertices that create "peaks" or barely stick out the line described by the previous
+    * and next vertices. Peaks are identified by a threshold on the angle between two consecutive
+    * edges. Only convex peaks or shallow angles are removed, meaning this filter only reduces the area
+    * of the concave hull.
+    * 
+    * @param shallowAngleThreshold       should be a small positive angle in radians. 0 will not remove
+    *                                    any vertex.
+    * @param peakAngleThreshold          should be close to {@link Math#PI}.
+    * @param concaveHullVerticesToFilter the vertices of the concave hull to filter.
     * @return the number of vertices removed.
     */
    public static int filterOutPeaksAndShallowAngles(double shallowAngleThreshold, double peakAngleThreshold, List<Point2D> concaveHullVerticesToFilter)
    {
       int numberOfVerticesRemoved = 0;
-      shallowAngleThreshold = - Math.abs(shallowAngleThreshold);
-      peakAngleThreshold = - Math.abs(peakAngleThreshold);
+      shallowAngleThreshold = -Math.abs(shallowAngleThreshold);
+      peakAngleThreshold = -Math.abs(peakAngleThreshold);
 
       for (int currentIndex = 0; currentIndex < concaveHullVerticesToFilter.size();)
       {
@@ -106,7 +137,8 @@ public class ConcaveHullPruningFilteringTools
          boolean isConvex = EuclidGeometryTools.isPoint2DOnLeftSideOfLine2D(b, a, c);
 
          int nextIndex = next(currentIndex, concaveHullVerticesToFilter);
-         if (isConvex && a.distance(c) / (a.distance(b) + b.distance(c)) > percentageThreshold && !isVertexPreventingKink(nextIndex, concaveHullVerticesToFilter))
+         if (isConvex && a.distance(c) / (a.distance(b) + b.distance(c)) > percentageThreshold
+               && !isVertexPreventingKink(nextIndex, concaveHullVerticesToFilter))
          {
             concaveHullVerticesToFilter.remove(nextIndex);
             b = c;
@@ -212,10 +244,12 @@ public class ConcaveHullPruningFilteringTools
    }
 
    /**
-    * By looking at each triplet of successive vertices, a triangle is formed.
-    * The area of the triangle is computed and if below the given threshold, the middle vertex is removed.
-    * @param areaThreshold a vertex forming a triangle with an area smaller than that parameter will be removed, if possible.
-    * @param concaveHullVerticesToFilter the vertices of the concave hull to filter. 
+    * By looking at each triplet of successive vertices, a triangle is formed. The area of the triangle
+    * is computed and if below the given threshold, the middle vertex is removed.
+    * 
+    * @param areaThreshold               a vertex forming a triangle with an area smaller than that
+    *                                    parameter will be removed, if possible.
+    * @param concaveHullVerticesToFilter the vertices of the concave hull to filter.
     * @return the number of vertices removed.
     */
    public static int filterOutSmallTriangles(double areaThreshold, List<Point2D> concaveHullVerticesToFilter)
@@ -272,7 +306,6 @@ public class ConcaveHullPruningFilteringTools
          if (maxDepth > depthThreshold)
             continue;
 
-
          Point2D startBridgeVertex = new Point2D(pocket.getStartBridgeVertex());
          Point2D endBridgeVertex = new Point2D(pocket.getEndBridgeVertex());
          shift.sub(endBridgeVertex, startBridgeVertex);
@@ -293,9 +326,12 @@ public class ConcaveHullPruningFilteringTools
    }
 
    /**
-    * Removes vertices to filter short edges. Only convex vertices are removed, meaning the polygon area can only decrease when calling this method.
-    * @param concaveAngleLimit threshold to define a concavity. 0 rad being flat, negative convex, positive concave.
-    * @param lengthThreshold any edge shorter than that will be removed, if possible.
+    * Removes vertices to filter short edges. Only convex vertices are removed, meaning the polygon
+    * area can only decrease when calling this method.
+    * 
+    * @param concaveAngleLimit           threshold to define a concavity. 0 rad being flat, negative
+    *                                    convex, positive concave.
+    * @param lengthThreshold             any edge shorter than that will be removed, if possible.
     * @param concaveHullVerticesToFilter the vertices of the concave hull to filter.
     * @return the number of vertices removed.
     */
@@ -308,9 +344,12 @@ public class ConcaveHullPruningFilteringTools
    }
 
    /**
-    * Removes vertices to filter short edges. Only convex vertices are removed, meaning the polygon area can only decrease when calling this method.
-    * @param concaveAngleLimit threshold to define a concavity. 0 rad being flat, negative convex, positive concave.
-    * @param lengthThreshold any edge shorter than that will be removed, if possible.
+    * Removes vertices to filter short edges. Only convex vertices are removed, meaning the polygon
+    * area can only decrease when calling this method.
+    * 
+    * @param concaveAngleLimit           threshold to define a concavity. 0 rad being flat, negative
+    *                                    convex, positive concave.
+    * @param lengthThreshold             any edge shorter than that will be removed, if possible.
     * @param concaveHullVerticesToFilter the vertices of the concave hull to filter.
     * @return the number of vertices removed.
     */
@@ -320,9 +359,12 @@ public class ConcaveHullPruningFilteringTools
    }
 
    /**
-    * Removes vertices to filter short edges. Only convex vertices are removed, meaning the polygon area can only decrease when calling this method.
-    * @param concaveAngleLimit threshold to define a concavity. 0 rad being flat, negative convex, positive concave.
-    * @param lengthThreshold any edge shorter than that will be removed, if possible.
+    * Removes vertices to filter short edges. Only convex vertices are removed, meaning the polygon
+    * area can only decrease when calling this method.
+    * 
+    * @param concaveAngleLimit           threshold to define a concavity. 0 rad being flat, negative
+    *                                    convex, positive concave.
+    * @param lengthThreshold             any edge shorter than that will be removed, if possible.
     * @param concaveHullVerticesToFilter the vertices of the concave hull to filter.
     * @return the number of vertices removed.
     */
@@ -471,7 +513,12 @@ public class ConcaveHullPruningFilteringTools
 
          int startSearchIndex = next(currentIndex, concaveHullVerticesToFilter);
          int endSearchIndex = previous(currentIndex, concaveHullVerticesToFilter);
-         int edgeFirstVertexIndex = findClosestIntersectionWithRay(rayOrigin, rayDirection, startSearchIndex, endSearchIndex, concaveHullVerticesToFilter, intersection);
+         int edgeFirstVertexIndex = findClosestIntersectionWithRay(rayOrigin,
+                                                                   rayDirection,
+                                                                   startSearchIndex,
+                                                                   endSearchIndex,
+                                                                   concaveHullVerticesToFilter,
+                                                                   intersection);
 
          if (rayOrigin.distanceSquared(intersection) < thresholdSquared)
          {
@@ -494,41 +541,186 @@ public class ConcaveHullPruningFilteringTools
       return numberOfVerticesRemoved;
    }
 
-   public static int innerAlphaShapeFiltering(double alpha, int deadIndexRegion, List<Point2D> concaveHullVerticesToFilter)
+   /**
+    * This filter searches for narrow passage(s) in each concave hull in the given collection and for
+    * each narrow passage it finds, the concave hull is split into 2 concave hulls.
+    * <p>
+    * Cuts only occurs at a concave vertex meaning that when a cut occurs the resulting 2 concave hulls
+    * are closer to a convex hull than the original concave hull.
+    * </p>
+    * 
+    * @param alphaRadius                   distance threshold used to determine if a passage is narrow
+    *                                      enough to be cut. It represents radius of a circle that
+    *                                      should fit all the way through a narrow passage to preserve
+    *                                      it.
+    * @param concaveHullCollectionToFilter the collection of concave hulls to be filtered. Not
+    *                                      modified.
+    * @return the filtered collection of concave hulls.
+    */
+   public static ConcaveHullCollection concaveHullNarrowPassageCutter(double alphaRadius, ConcaveHullCollection concaveHullCollectionToFilter)
    {
-      int numberOfVerticesRemoved = 0;
-      Point2D closestPoint = new Point2D();
-      double alphaSquared = alpha * alpha;
+      ConcaveHullCollection filteredConcaveHullCollection = new ConcaveHullCollection();
 
-      for (int currentIndex = 0; currentIndex < concaveHullVerticesToFilter.size(); currentIndex++)
+      for (ConcaveHull concaveHull : concaveHullCollectionToFilter)
       {
-         Point2D currentVertex = concaveHullVerticesToFilter.get(currentIndex);
-         int closestEdgeFirstVertexIndex = findInnerClosestEdgeToVertex(currentIndex, deadIndexRegion, concaveHullVerticesToFilter, closestPoint);
 
-         if (closestPoint.distanceSquared(currentVertex) < alphaSquared)
+         filteredConcaveHullCollection.addAll(concaveHullNarrowPassageCutter(alphaRadius, concaveHull));
+      }
+
+      return filteredConcaveHullCollection;
+   }
+
+   /**
+    * This filter searches for narrow passage(s) in a concave hull and for each narrow passage it
+    * finds, the concave hull is split into 2 concave hulls.
+    * <p>
+    * Cuts only occurs at a concave vertex meaning that when a cut occurs the resulting 2 concave hulls
+    * are closer to a convex hull than the original concave hull.
+    * </p>
+    * 
+    * @param alphaRadius         distance threshold used to determine if a passage is narrow enough to
+    *                            be cut. It represents radius of a circle that should fit all the way
+    *                            through a narrow passage to preserve it.
+    * @param concaveHullToFilter the concave hull to be filtered. Not modified.
+    * @return the resulting collection of concave hulls after applying the filter on the input.
+    */
+   public static ConcaveHullCollection concaveHullNarrowPassageCutter(double alphaRadius, ConcaveHull concaveHullToFilter)
+   {
+      /*
+       * This algorithm is not optimized at all, but should be ok when the concave hull has already been
+       * filtered beforehand so it does not contain a large number of vertices. Invocations to
+       * perimeterDistanceBetweenVertices(...) are costly, and could be avoided by keeping track of the
+       * traveling as we iterate through the vertices. The recursion may also not be the most efficient
+       * approach, but it definitely simplifies the scope of the method.
+       */
+
+      // Degenerate concave hull, let's remove it.
+      if (concaveHullToFilter.getNumberOfVertices() <= 2)
+         return null;
+
+      double perimeter = concaveHullToFilter.computePerimeter();
+
+      if (0.5 * perimeter <= 2.0 * alphaRadius)
+         return null;
+
+      if (concaveHullToFilter.getNumberOfVertices() == 3)
+      {
+         for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++)
          {
-            int closestEdgeSecondVertexIndex = next(closestEdgeFirstVertexIndex, concaveHullVerticesToFilter);
-            int firstSubLength = subLengthInclusive(currentIndex, closestEdgeFirstVertexIndex, concaveHullVerticesToFilter);
-            int secondSubLength = subLengthInclusive(closestEdgeSecondVertexIndex, currentIndex, concaveHullVerticesToFilter);
+            Point2D vertex = concaveHullToFilter.getConcaveHullVertices().get(vertexIndex);
+            Point2D nextVertex = getNext(vertexIndex, concaveHullToFilter.getConcaveHullVertices());
 
-            if (firstSubLength <= 1 || secondSubLength <= 1)
+            if (vertex.distanceSquared(nextVertex) <= MathTools.square(2.0 * alphaRadius))
             {
-               continue;
-            }
-
-            if (firstSubLength <= secondSubLength)
-            {
-               concaveHullVerticesToFilter.get(closestEdgeFirstVertexIndex).set(closestPoint);
-               numberOfVerticesRemoved += removeAllExclusive(currentIndex, closestEdgeFirstVertexIndex, concaveHullVerticesToFilter);
-            }
-            else
-            {
-               concaveHullVerticesToFilter.get(closestEdgeSecondVertexIndex).set(closestPoint);
-               numberOfVerticesRemoved += removeAllExclusive(closestEdgeSecondVertexIndex, currentIndex, concaveHullVerticesToFilter);
+               return null;
             }
          }
       }
 
-      return numberOfVerticesRemoved;
+      // Dispose of small hulls that are the result of a narrow passage that has been cut at both ends.
+      if (concaveHullToFilter.getNumberOfVertices() <= 6)
+      {
+         double area = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullToFilter.getConcaveHullVertices())).getArea();
+         if (area <= Math.PI * MathTools.square(alphaRadius))
+            return null;
+      }
+
+      int numberOfVertices = concaveHullToFilter.getNumberOfVertices();
+
+      for (int iEdgeStartA = 0, iEdgeEndA = 1; iEdgeStartA < numberOfVertices - 1; iEdgeStartA++, iEdgeEndA++)
+      {
+         if (ConcaveHullTools.isConvexAtVertex(iEdgeStartA, concaveHullToFilter.getConcaveHullVertices()))
+         {
+            // We're looking at a local minimum which we'll only find at concave vertex.
+            continue;
+         }
+
+         Point2D edgeStartA = concaveHullToFilter.getVertex(iEdgeStartA);
+         Point2D edgeEndA = concaveHullToFilter.getVertex(iEdgeEndA);
+
+         for (int iEdgeStartB = iEdgeEndA, iEdgeEndB = iEdgeStartB + 1; iEdgeStartB < numberOfVertices; iEdgeStartB++, iEdgeEndB++)
+         {
+            if (ConcaveHullTools.isConvexAtVertex(iEdgeStartB, concaveHullToFilter.getConcaveHullVertices()))
+            {
+               // We're looking at a local minimum which we'll only find at concave vertex.
+               continue;
+            }
+
+            iEdgeEndB %= numberOfVertices;
+
+            Point2D edgeStartB = concaveHullToFilter.getVertex(iEdgeStartB);
+            Point2D edgeEndB = concaveHullToFilter.getVertex(iEdgeEndB);
+
+            if (perimeterDistanceBetweenVertices(iEdgeEndA, iEdgeStartB, concaveHullToFilter) <= 2.0 * alphaRadius)
+               continue;
+            if (perimeterDistanceBetweenVertices(iEdgeEndB, iEdgeStartA, concaveHullToFilter) <= 2.0 * alphaRadius)
+               continue;
+
+            double distance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(edgeStartA, edgeEndA, edgeStartB, edgeEndB);
+
+            if (distance > 2.0 * alphaRadius)
+               continue;
+
+            Point2D closestPointOnEdgeA = new Point2D();
+            Point2D closestPointOnEdgeB = new Point2D();
+            EuclidCoreMissingTools.closestPoint2DsBetweenTwoLineSegment2Ds(edgeStartA,
+                                                                           edgeEndA,
+                                                                           edgeStartB,
+                                                                           edgeEndB,
+                                                                           closestPointOnEdgeA,
+                                                                           closestPointOnEdgeB);
+
+            // Splitting the hull into 2:
+            List<Point2D> concaveHullVertices = concaveHullToFilter.getConcaveHullVertices();
+            ConcaveHull subConcaveHullA = new ConcaveHull(ListWrappingIndexTools.subListInclusive(iEdgeEndA, iEdgeStartB, concaveHullVertices));
+            ConcaveHull subConcaveHullB = new ConcaveHull(ListWrappingIndexTools.subListInclusive(iEdgeEndB, iEdgeStartA, concaveHullVertices));
+
+            // The closest point has to either be edgeStartA or edgeEndA
+            if (EuclidGeometryTools.percentageAlongLineSegment2D(closestPointOnEdgeA, edgeStartA, edgeEndA) < 0.5)
+            { // Closest is edgeStartA
+               subConcaveHullA.getConcaveHullVertices().add(0, edgeStartA);
+            }
+            else
+            { // Closest is edgeEndA
+               subConcaveHullB.addVertex(edgeEndA);
+            }
+
+            if (EuclidGeometryTools.percentageAlongLineSegment2D(closestPointOnEdgeB, edgeStartB, edgeEndB) < 0.5)
+            { // Closest is edgeStartB
+               subConcaveHullB.getConcaveHullVertices().add(0, edgeStartB);
+            }
+            else
+            { // Closest is edgeEndB
+               subConcaveHullA.addVertex(edgeEndB);
+            }
+
+            if (subConcaveHullA.getNumberOfVertices() == 2)
+               return new ConcaveHullCollection(subConcaveHullB);
+            if (subConcaveHullB.getNumberOfVertices() == 2)
+               return new ConcaveHullCollection(subConcaveHullA);
+
+            ConcaveHullCollection output = new ConcaveHullCollection();
+            output.addAll(concaveHullNarrowPassageCutter(alphaRadius, subConcaveHullA));
+            output.addAll(concaveHullNarrowPassageCutter(alphaRadius, subConcaveHullB));
+            return output;
+         }
+      }
+
+      // If we reached here, this indicates that the concave hull was not filtered.
+      return new ConcaveHullCollection(concaveHullToFilter);
+   }
+
+   private static double perimeterDistanceBetweenVertices(int firstVertexIndex, int secondVertexIndex, ConcaveHull concaveHull)
+   {
+      List<Point2D> pathToWalk = ListWrappingIndexTools.subListInclusive(firstVertexIndex, secondVertexIndex, concaveHull.getConcaveHullVertices());
+
+      double perimeterDistance = 0.0;
+
+      for (int vertexIndex = 0; vertexIndex < pathToWalk.size() - 1; vertexIndex++)
+      {
+         perimeterDistance += pathToWalk.get(vertexIndex).distance(pathToWalk.get(vertexIndex + 1));
+      }
+
+      return perimeterDistance;
    }
 }

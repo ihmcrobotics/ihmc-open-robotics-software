@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl;
 import java.util.EnumMap;
 
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPTrajectoryPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
@@ -23,7 +22,6 @@ public class HighLevelControllerFactoryHelper
    private HighLevelControlManagerFactory managerFactory;
    private HighLevelControllerParameters highLevelControllerParameters;
    private WalkingControllerParameters walkingControllerParameters;
-   private ICPTrajectoryPlannerParameters icpPlannerParameters;
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
    private JointDesiredOutputListBasics lowLevelControllerOutput;
@@ -45,12 +43,10 @@ public class HighLevelControllerFactoryHelper
       this.controllerToolbox = controllerToolbox;
    }
 
-   public void setParameters(HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters,
-                             ICPTrajectoryPlannerParameters icpPlannerParameters)
+   public void setParameters(HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.icpPlannerParameters = icpPlannerParameters;
    }
 
    public void setHighLevelControlManagerFactory(HighLevelControlManagerFactory managerFactory)
@@ -101,11 +97,6 @@ public class HighLevelControllerFactoryHelper
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
-   }
-
-   public ICPTrajectoryPlannerParameters getIcpPlannerParameters()
-   {
-      return icpPlannerParameters;
    }
 
    public CommandInputManager getCommandInputManager()

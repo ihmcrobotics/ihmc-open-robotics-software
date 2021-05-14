@@ -38,6 +38,7 @@ public class HumanoidControllerWarumupTools
       catch (Exception e)
       {
          PrintTools.info("Warmup failed with an exception.");
+         e.printStackTrace();
       }
       double duration = 0.001 * (System.currentTimeMillis() - startTime);
       PrintTools.info("Warmup took " + duration + "s.");
@@ -56,7 +57,7 @@ public class HumanoidControllerWarumupTools
          footPose.setX(0.1);
          footPose.changeFrame(ReferenceFrame.getWorldFrame());
          double yaw = footPose.getYaw();
-         footPose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+         footPose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          footPose.setZ(z);
          step.getLocation().set(footPose.getPosition());
          step.getOrientation().set(footPose.getOrientation());

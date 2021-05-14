@@ -17,7 +17,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -37,7 +37,7 @@ public class BasicPipeLineBehavior extends AbstractBehavior
 
    private BasicStates currentState = BasicStates.ENABLE_LIDAR;
 
-   public BasicPipeLineBehavior(String robotName, String name, YoDouble yoTime, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
+   public BasicPipeLineBehavior(String robotName, String name, YoDouble yoTime, ROS2Node ros2Node, FullHumanoidRobotModel fullRobotModel,
                                 HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters)
    {
       super(robotName, ros2Node);

@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +39,7 @@ public class WalkToPickObjectOffGroundLocationBehavior extends StateMachineBehav
    private final AtlasPrimitiveActions atlasPrimitiveActions;
 
    public WalkToPickObjectOffGroundLocationBehavior(String robotName, YoDouble yoTime, HumanoidReferenceFrames referenceFrames,
-                                                    Ros2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                                    ROS2Node ros2Node, WholeBodyControllerParameters wholeBodyControllerParameters,
                                                     FullHumanoidRobotModel fullRobotModel, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, "WalkState", WalkState.class, yoTime, ros2Node);

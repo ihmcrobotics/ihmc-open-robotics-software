@@ -1,7 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -9,16 +7,17 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.Image32;
 import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.VideoPacket;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.robotEnvironmentAwareness.updaters.REANetworkProvider;
+import us.ihmc.robotEnvironmentAwareness.updaters.REAPlanarRegionPublicNetworkProvider;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
@@ -33,15 +32,16 @@ import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.FusionSensorObje
 import us.ihmc.robotEnvironmentAwareness.fusion.objectDetection.ObjectType;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.ImageVisualizationHelper;
 import us.ihmc.robotEnvironmentAwareness.updaters.REAModuleStateReporter;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class LidarImageFusionProcessorCommunicationModule
 {
    private final Messager messager;
 
-   private final Ros2Node ros2Node;
+   private final ROS2Node ros2Node;
    private final REAModuleStateReporter moduleStateReporter;
    private final StereoREAModule stereoREAModule;
 
@@ -56,22 +56,21 @@ public class LidarImageFusionProcessorCommunicationModule
    private final ExceptionHandlingThreadScheduler scheduler;
    private static final int BUFFER_THREAD_PERIOD_MILLISECONDS = 1500;
 
-   private LidarImageFusionProcessorCommunicationModule(Ros2Node ros2Node, Messager reaMessager, SharedMemoryJavaFXMessager messager)
+   private LidarImageFusionProcessorCommunicationModule(ROS2Node ros2Node, REANetworkProvider networkProvider, Messager reaMessager, SharedMemoryJavaFXMessager messager)
    {
       this.messager = messager;
       this.ros2Node = ros2Node;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
-      stereoREAModule = new StereoREAModule(ros2Node, reaMessager, messager);
+      stereoREAModule = new StereoREAModule(networkProvider, reaMessager, messager);
 
-      new ROS2Callback<>(ros2Node, LidarScanMessage.class, this::dispatchLidarScanMessage);
-      new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);
-      new ROS2Callback<>(ros2Node, Image32.class, this::dispatchImage32);
-      new ROS2Callback<>(ros2Node, VideoPacket.class, this::dispatchVideoPacket);
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, this::dispatchCustomPlanarRegion);
+      networkProvider.registerMessager(reaMessager);
+      networkProvider.registerLidarScanHandler(this::dispatchLidarScanMessage);
+      networkProvider.registerStereoVisionPointCloudHandler(this::dispatchStereoVisionPointCloudMessage);
+      networkProvider.registerCustomRegionsHandler(this::dispatchCustomPlanarRegion);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
-                                           this::dispatchCustomPlanarRegion);
+      new ROS2Callback<>(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT, this::dispatchImage32);
+      new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::dispatchVideoPacket);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 
@@ -102,22 +101,17 @@ public class LidarImageFusionProcessorCommunicationModule
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
    {
       PlanarRegionsListMessage message = subscriber.takeNextData();
-      PlanarRegionsList customPlanarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
-      customPlanarRegions.getPlanarRegionsAsList().forEach(stereoREAModule::registerCustomPlanarRegion);
-   }
-
-   private void dispatchCustomPlanarRegion(PlanarRegionsListMessage message)
-   {
       stereoREAModule.dispatchCustomPlanarRegion(message);
    }
 
-   private void dispatchLidarScanMessage(LidarScanMessage message)
+   private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> message)
    {
-      moduleStateReporter.registerLidarScanMessage(message);
+      moduleStateReporter.registerLidarScanMessage(message.takeNextData());
    }
 
-   private void dispatchStereoVisionPointCloudMessage(StereoVisionPointCloudMessage message)
+   private void dispatchStereoVisionPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
+      StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       objectDetectionManager.updateLatestStereoVisionPointCloudMessage(message);
       stereoREAModule.updateLatestStereoVisionPointCloudMessage(message);
@@ -155,7 +149,7 @@ public class LidarImageFusionProcessorCommunicationModule
       scheduler.shutdown();
    }
 
-   public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(Ros2Node ros2Node, SharedMemoryJavaFXMessager messager)
+   public static LidarImageFusionProcessorCommunicationModule createIntraprocessModule(ROS2Node ros2Node, SharedMemoryJavaFXMessager messager)
          throws IOException
    {
       KryoMessager kryoMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
@@ -163,12 +157,17 @@ public class LidarImageFusionProcessorCommunicationModule
       kryoMessager.setAllowSelfSubmit(true);
       kryoMessager.startMessager();
 
-      return new LidarImageFusionProcessorCommunicationModule(ros2Node, kryoMessager, messager);
+      REANetworkProvider networkProvider = new REAPlanarRegionPublicNetworkProvider(ros2Node,
+                                                                                    outputTopic,
+                                                                                    lidarOutputTopic,
+                                                                                    stereoOutputTopic,
+                                                                                    depthOutputTopic);
+      return new LidarImageFusionProcessorCommunicationModule(ros2Node, networkProvider, kryoMessager, messager);
    }
 
-   private static IntrinsicParameters toIntrinsicParameters(IntrinsicParametersMessage message)
+   private static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
       intrinsicParameters.width = message.getWidth();
       intrinsicParameters.height = message.getHeight();
       intrinsicParameters.fx = message.getFx();

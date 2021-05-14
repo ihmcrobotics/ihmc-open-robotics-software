@@ -81,7 +81,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
          newBox.setController(controller);
 
          GroundContactModel linearGroundModel = new LinearStickSlipGroundContactModel(newBox, 40000.0, 10.0, 80.0, 500.0, 1.2, 1.2,
-                                                   newBox.getRobotsYoVariableRegistry());    // 0.9,0.9);
+                                                   newBox.getRobotsYoRegistry());    // 0.9,0.9);
 
          linearGroundModel.setGroundProfile3D(combinedEnvironment);
          newBox.setGroundContactModel(linearGroundModel);
@@ -107,7 +107,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
 
 
          GroundContactModel linearGroundModel = new LinearStickSlipGroundContactModel(newBox, 40000.0, 10.0, 80.0, 500.0, 1.2, 1.2,
-                                                   newBox.getRobotsYoVariableRegistry());    // 0.9,0.9);
+                                                   newBox.getRobotsYoRegistry());    // 0.9,0.9);
 
          linearGroundModel.setGroundProfile3D(combinedEnvironment);
          newBox.setGroundContactModel(linearGroundModel);
@@ -133,7 +133,7 @@ public class SimpleCombinedTerrainObjectEnvinronmentTest
          newBox.setController(controller);
 
          GroundContactModel linearGroundModel = new LinearStickSlipGroundContactModel(newBox, 40000.0, 10.0, 80.0, 500.0, 1.2, 1.2,
-                                                   newBox.getRobotsYoVariableRegistry());    // 0.9,0.9);
+                                                   newBox.getRobotsYoRegistry());    // 0.9,0.9);
          linearGroundModel.setGroundProfile3D(combinedEnvironment);
          newBox.setGroundContactModel(linearGroundModel);
          newBox.setGravity(-9.81);

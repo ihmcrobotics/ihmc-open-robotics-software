@@ -3,6 +3,7 @@ package us.ihmc.avatar.obstacleCourseTests;
 import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import org.junit.jupiter.api.AfterEach;
@@ -214,6 +215,16 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0); //2.0);
 
+      FramePoint3D desiredPosition = new FramePoint3D(drcSimulationTestHelper.getControllerFullRobotModel().getPelvis().getBodyFixedFrame());
+      desiredPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      desiredPosition.subZ(0.05);
+      double trajectoryTime = 1.0;
+      PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(trajectoryTime,
+                                                                                                                             desiredPosition.getZ());
+      success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
+
+      drcSimulationTestHelper.publishToController(pelvisHeightTrajectoryMessage);
+
       FootstepDataListMessage footstepDataList = createFootstepsForSideSteppingOverSmallPlatform();
       drcSimulationTestHelper.publishToController(footstepDataList);
 
@@ -375,9 +386,6 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       FootstepDataListMessage footstepDataList = createFootstepsForSteppingOffOfMediumPlatform(scriptedFootstepGenerator);
       footstepDataList.setDefaultSwingDuration(1.1);
       footstepDataList.setDefaultTransferDuration(0.5);
-      footstepDataList.getFootstepDataList().get(1).setTransferSplitFraction(0.01);
-      footstepDataList.getFootstepDataList().get(0).setSwingDurationShiftFraction(0.999);
-      footstepDataList.getFootstepDataList().get(0).setSwingSplitFraction(0.75);
       drcSimulationTestHelper.publishToController(footstepDataList);
 
       success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
@@ -463,10 +471,10 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.ON_LARGE_PLATFORM;
-      
+
       System.out.println(selectedLocation.getStartingLocationOffset().getAdditionalOffset());
 
-      
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
       drcSimulationTestHelper.createSimulation("DRCWalkingOffOfLargePlatformTest");
@@ -490,6 +498,47 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
       assertTrue(success);
 
       Point3D center = new Point3D(-5.8, -7.5, 0.87);
+      Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.2);
+      BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
+      drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
+
+      BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
+   }
+
+   @Test
+   public void testWalkingOntoLargePlatform() throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.LARGE_PLATFORM;
+
+      System.out.println(selectedLocation.getStartingLocationOffset().getAdditionalOffset());
+
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation("DRCWalkingOntoLargePlatformTest");
+
+      SimulationConstructionSet simulationConstructionSet = drcSimulationTestHelper.getSimulationConstructionSet();
+      ScriptedFootstepGenerator scriptedFootstepGenerator = drcSimulationTestHelper.createScriptedFootstepGenerator();
+
+      setupCameraForWalkingOffOfLargePlatform(simulationConstructionSet);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0);
+
+      FootstepDataListMessage footstepDataList = createFootstepsForSteppingOntoLargePlatform(scriptedFootstepGenerator);
+      drcSimulationTestHelper.publishToController(footstepDataList);
+
+      success = success && drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0);
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 1);
+      drcSimulationTestHelper.checkNothingChanged();
+
+      assertTrue(success);
+
+      Point3D center = new Point3D(-5.45, -7.14, 1.17);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.2);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
@@ -638,10 +687,22 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
    private FootstepDataListMessage createFootstepsForSteppingOffOfLargePlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
    {
-//      -5.500, -7.171,  0.300
+      //      -5.500, -7.171,  0.300
       double[][][] footstepLocationsAndOrientations = new double[][][]
             {{{-5.5 - 0.3 + 0.15, -7.171 - 0.3 - 0.15, 0.08716704456087025}, {-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456}},
-            {{-5.5 - 0.3 - 0.15, -7.171 - 0.3 + 0.15, 0.08586305720146342}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
+             {{-5.5 - 0.3 - 0.15, -7.171 - 0.3 + 0.15, 0.08586305720146342}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
+             };
+
+      RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);
+      return scriptedFootstepGenerator.generateFootstepsFromLocationsAndOrientations(robotSides, footstepLocationsAndOrientations);
+   }
+
+   private FootstepDataListMessage createFootstepsForSteppingOntoLargePlatform(ScriptedFootstepGenerator scriptedFootstepGenerator)
+   {
+//      -5.500, -7.171,  0.300
+      double[][][] footstepLocationsAndOrientations = new double[][][]
+            {{{-5.5 + 0.15, -7.171 - 0.15, 0.4}, {-0.0042976203878775715, -0.010722204803598987, 0.9248070170408506, -0.38026115501738456}},
+            {{-5.5 - 0.15, -7.171 + 0.15, 0.4}, {-8.975861226689934E-4, 0.002016837110644428, 0.9248918980282926, -0.380223754740342}},
             };
 
       RobotSide[] robotSides = drcSimulationTestHelper.createRobotSidesStartingFrom(RobotSide.LEFT, footstepLocationsAndOrientations.length);

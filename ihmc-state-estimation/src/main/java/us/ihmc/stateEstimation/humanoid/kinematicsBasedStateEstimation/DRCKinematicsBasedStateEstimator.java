@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import gnu.trove.map.TObjectDoubleMap;
-import us.ihmc.commonWalkingControlModules.visualizer.EstimatedFromTorquesWrenchVisualizer;
+import us.ihmc.commonWalkingControlModules.visualizer.ExternalWrenchJointTorqueBasedEstimatorVisualizer;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
@@ -31,7 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsSt
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
@@ -43,7 +43,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private static final boolean ENABLE_ESTIMATED_WRENCH_VISUALIZER = false;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoDouble yoTime = new YoDouble("t_stateEstimator", registry);
    private final AtomicReference<StateEstimatorMode> atomicOperationMode = new AtomicReference<>(null);
    private final YoEnum<StateEstimatorMode> operatingMode = new YoEnum<>("stateEstimatorOperatingMode", registry, StateEstimatorMode.class, false);
@@ -55,7 +55,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final IMUBiasStateEstimator imuBiasStateEstimator;
    private final IMUYawDriftEstimator imuYawDriftEstimator;
 
-   private final EstimatedFromTorquesWrenchVisualizer estimatedWrenchVisualizer;
+   private final ExternalWrenchJointTorqueBasedEstimatorVisualizer estimatedWrenchVisualizer;
 
    private final PelvisPoseHistoryCorrectionInterface pelvisPoseHistoryCorrection;
 
@@ -78,12 +78,16 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    private final FloatingJointBasics rootJoint;
    private final YoFixedFrameTwist yoRootTwist;
 
-   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure, StateEstimatorParameters stateEstimatorParameters,
-                                           SensorOutputMapReadOnly sensorOutputMap, CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
-                                           String[] imuSensorsToUseInStateEstimator, double gravitationalAcceleration,
+   public DRCKinematicsBasedStateEstimator(FullInverseDynamicsStructure inverseDynamicsStructure,
+                                           StateEstimatorParameters stateEstimatorParameters,
+                                           SensorOutputMapReadOnly sensorOutputMap,
+                                           CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate,
+                                           String[] imuSensorsToUseInStateEstimator,
+                                           double gravitationalAcceleration,
                                            Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
                                            CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
-                                           RobotMotionStatusHolder robotMotionStatusFromController, Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
+                                           RobotMotionStatusHolder robotMotionStatusFromController,
+                                           Map<RigidBodyBasics, ? extends ContactablePlaneBody> feet,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       estimatorDT = stateEstimatorParameters.getEstimatorDT();
@@ -224,13 +228,13 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
             ContactablePlaneBody contactableBody = feet.get(rigidBody);
             contactablePlaneBodies.add(contactableBody);
          }
-         estimatedWrenchVisualizer = EstimatedFromTorquesWrenchVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
-                                                                                                                      inverseDynamicsStructure.getRootJoint()
-                                                                                                                                              .getSuccessor(),
-                                                                                                                      contactablePlaneBodies,
-                                                                                                                      1.0,
-                                                                                                                      yoGraphicsListRegistry,
-                                                                                                                      registry);
+         estimatedWrenchVisualizer = ExternalWrenchJointTorqueBasedEstimatorVisualizer.createWrenchVisualizerWithContactableBodies("EstimatedExternalWrenches",
+                                                                                                                                   inverseDynamicsStructure.getRootJoint()
+                                                                                                                                                           .getSuccessor(),
+                                                                                                                                   contactablePlaneBodies,
+                                                                                                                                   1.0,
+                                                                                                                                   yoGraphicsListRegistry,
+                                                                                                                                   registry);
       }
       else
       {
@@ -355,7 +359,7 @@ public class DRCKinematicsBasedStateEstimator implements StateEstimatorControlle
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

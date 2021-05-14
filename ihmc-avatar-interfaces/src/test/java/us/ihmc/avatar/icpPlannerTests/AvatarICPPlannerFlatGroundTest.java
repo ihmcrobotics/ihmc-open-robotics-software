@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -43,7 +44,7 @@ import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -119,10 +120,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
       YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
 
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      desiredICPX.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -130,10 +131,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
             }
          }
       });
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      desiredICPY.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -224,10 +225,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
       YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
 
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      desiredICPX.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -235,10 +236,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
             }
          }
       });
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      desiredICPY.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -293,10 +294,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
       YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
 
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      desiredICPX.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -304,10 +305,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
             }
          }
       });
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      desiredICPY.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -362,10 +363,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       YoDouble desiredICPX = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPX");
       YoDouble desiredICPY = (YoDouble) drcSimulationTestHelper.getYoVariable("desiredICPY");
 
-      desiredICPX.addVariableChangedListener(new VariableChangedListener()
+      desiredICPX.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -373,10 +374,10 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
             }
          }
       });
-      desiredICPY.addVariableChangedListener(new VariableChangedListener()
+      desiredICPY.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             if (Double.isNaN(v.getValueAsDouble()))
             {
@@ -591,7 +592,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       System.out.println("Changing contact points at time " + time);
 
       int pointIndex = 0;
-      ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
       for (GroundContactPoint point : allGroundContactPoints)
       {

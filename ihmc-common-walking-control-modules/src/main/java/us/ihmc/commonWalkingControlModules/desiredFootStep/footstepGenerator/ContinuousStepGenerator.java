@@ -35,14 +35,14 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -113,7 +113,7 @@ public class ContinuousStepGenerator implements Updatable
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final String variableNameSuffix = "CSG";
 
@@ -168,7 +168,7 @@ public class ContinuousStepGenerator implements Updatable
     * 
     * @param parentRegistry the registry to attach this generator's registry.
     */
-   public ContinuousStepGenerator(YoVariableRegistry parentRegistry)
+   public ContinuousStepGenerator(YoRegistry parentRegistry)
    {
       if (parentRegistry != null)
          parentRegistry.addChild(registry);
@@ -613,11 +613,11 @@ public class ContinuousStepGenerator implements Updatable
             {
                yawPitchRoll.set(currentSupportFootPose.getOrientation());
                yawPitchRoll.setYaw(footstepPose.getYaw());
-               adjustedPose.setOrientation(yawPitchRoll);
+               adjustedPose.getOrientation().set(yawPitchRoll);
             }
             else
             {
-               adjustedPose.setOrientation(footstepPose.getOrientation());
+               adjustedPose.getOrientation().set(footstepPose.getOrientation());
             }
             return adjustedPose;
          }
@@ -644,7 +644,7 @@ public class ContinuousStepGenerator implements Updatable
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
             yawPitchRoll.set(currentSupportFootPose.getOrientation());
             yawPitchRoll.setYaw(footstepPose.getYaw());
-            adjustedPose.setOrientation(yawPitchRoll);
+            adjustedPose.getOrientation().set(yawPitchRoll);
             return adjustedPose;
          }
       });

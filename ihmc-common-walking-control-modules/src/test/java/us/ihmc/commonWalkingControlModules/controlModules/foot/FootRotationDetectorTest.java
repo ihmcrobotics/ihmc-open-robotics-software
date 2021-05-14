@@ -4,8 +4,6 @@ import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.referenceFrame.FrameLine2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -20,7 +18,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.parameters.DefaultParameterReader;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class FootRotationDetectorTest
 {
@@ -28,7 +26,7 @@ public class FootRotationDetectorTest
    public void testRotationDetectionMath()
    {
       Random random = new Random(429L);
-      YoVariableRegistry registry = new YoVariableRegistry(FeetManager.class.getSimpleName());
+      YoRegistry registry = new YoRegistry(FeetManager.class.getSimpleName());
       double dt = 0.001;
       RobotSide side = RobotSide.LEFT;
       Twist soleTwist = new Twist();

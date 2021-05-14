@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -22,11 +21,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.dataBuffer.MirroredYoVariableRegistry;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -58,22 +58,22 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
    private final MirroredYoVariableRegistry registry;
 
-   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
-                                          MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
+   public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node,
+                                          ROS2Topic outputTopic, ROS2Topic inputTopic)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
-      YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
       handControllerTime = new YoDouble("handControllerTime", registry);
       sendFingerJointGains = new YoBoolean("sendFingerJointGains", registry);
       fingerTrajectoryTime = new YoDouble("FingerTrajectoryTime", registry);
 
       sendFingerJointGains.set(true);
 
-      if (realtimeRos2Node != null)
+      if (realtimeROS2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                         pubTopicNameGenerator);
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, HandJointAnglePacket.class,
+                                                                                                                  outputTopic);
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
@@ -105,10 +105,10 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
          {
             HandDesiredConfigurationMessageSubscriber handDesiredConfigurationSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
-            if (realtimeRos2Node != null)
+            if (realtimeROS2Node != null)
             {
-               ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
-                                                    handDesiredConfigurationSubscriber);
+               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HandDesiredConfigurationMessage.class, inputTopic,
+                                                             handDesiredConfigurationSubscriber);
             }
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,
@@ -121,7 +121,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
    }
 
    private void setupGains(EnumMap<RobotiqHandJointNameMinimal, YoDouble> kpEnumMap, EnumMap<RobotiqHandJointNameMinimal, YoDouble> kdEnumMap,
-                           YoVariableRegistry registry)
+                           YoRegistry registry)
    {
       YoDouble kpFingerJoint1 = new YoDouble("kpFingerJoint1", registry);
       YoDouble kpFingerJoint2 = new YoDouble("kpFingerJoint2", registry);
@@ -325,7 +325,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
    }
 
    @Override
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }

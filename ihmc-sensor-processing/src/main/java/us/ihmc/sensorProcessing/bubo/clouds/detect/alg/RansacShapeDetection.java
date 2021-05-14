@@ -22,76 +22,83 @@ import java.util.List;
 
 import org.ddogleg.fitting.modelset.DistanceFromModel;
 import org.ddogleg.fitting.modelset.ransac.RansacMulti;
-import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.FastArray;
 
 /**
- * Customized version of {@link RansacMulti}.  Instead of finding the inlier set using the sampling set it uses the
- * global set.  This is done by traversing through the nearest-neighbor graph, starting with the
- * points used to generate the model, and finding points which are close to the shape.
+ * Customized version of {@link RansacMulti}. Instead of finding the inlier set using the sampling
+ * set it uses the global set. This is done by traversing through the nearest-neighbor graph,
+ * starting with the points used to generate the model, and finding points which are close to the
+ * shape.
  * <p/>
  * Deviations from paper:
  * <ul>
- * <li>connected components:  Does not use bitmap technique.  Uses nearest neighbor information instead.</li>
+ * <li>connected components: Does not use bitmap technique. Uses nearest neighbor information
+ * instead.</li>
  * <li>exit iteration: When no better model has been found after N iterations</li>
  * <ul>
  *
  * @author Peter Abeles
  */
-public class RansacShapeDetection extends RansacMulti<PointVectorNN> {
+public class RansacShapeDetection extends RansacMulti<PointVectorNN>
+{
 
-	// finds the set of points which match the model
-	private FindMatchSetPointVectorNN matchFinder;
+   // finds the set of points which match the model
+   private FindMatchSetPointVectorNN matchFinder;
 
-	// The maximum number of iterations is set to the current number of iterations plus this number when
-	// a better model is found
-	private int maxExtension;
+   // The maximum number of iterations is set to the current number of iterations plus this number when
+   // a better model is found
+   private int maxExtension;
 
-	public RansacShapeDetection(long randSeed, int maxExtension,
-								FindMatchSetPointVectorNN matchFinder,
-								List<ObjectType> objectTypes) {
-		super(randSeed, -1, objectTypes, PointVectorNN.class);
-		this.maxExtension = maxExtension;
-		this.matchFinder = matchFinder;
-	}
+   public RansacShapeDetection(long randSeed, int maxExtension, FindMatchSetPointVectorNN matchFinder, List<ObjectType> objectTypes)
+   {
+      super(randSeed, -1, objectTypes, PointVectorNN.class);
+      this.maxExtension = maxExtension;
+      this.matchFinder = matchFinder;
+   }
 
-	public void reset() {
-	}
+   public void reset()
+   {
+   }
 
-	@Override
-	protected void initialize(List<PointVectorNN> dataSet) {
-		super.initialize(dataSet);
-		maxIterations = maxExtension * 2;
-	}
+   @Override
+   protected void initialize(List<PointVectorNN> dataSet)
+   {
+      super.initialize(dataSet);
+      maxIterations = maxExtension * 2;
+   }
 
-	/**
-	 * Finds the match set by searching the nearest-neighbor graph of the initialSample set.  Points
-	 * are marked with a unique ID for this function call so that it knows which ones it has examined.
-	 */
-	@Override
-	protected <Model> void selectMatchSet(DistanceFromModel<Model, PointVectorNN> modelDistance,
-										  double threshold, Model param) {
-		candidatePoints.clear();
-		matchFinder.setModelDistance(modelDistance);
-		matchFinder.selectMatchSet(initialSample.toList(), param, threshold, false, candidatePoints);
-	}
+   /**
+    * Finds the match set by searching the nearest-neighbor graph of the initialSample set. Points are
+    * marked with a unique ID for this function call so that it knows which ones it has examined.
+    */
+   @Override
+   protected <Model> void selectMatchSet(List<PointVectorNN> dataSet, DistanceFromModel<Model, PointVectorNN> modelDistance, double threshold, Model param)
+   {
+      candidatePoints.clear();
+      matchFinder.setModelDistance(modelDistance);
+      matchFinder.selectMatchSet(initialSample.toList(), param, threshold, false, candidatePoints);
+   }
 
-	@Override
-	protected void setBestModel(Object param) {
-		super.setBestModel(param);
-		// extend how long it can run for
-		maxIterations = Math.max(maxIterations, iteration + maxExtension);
-	}
+   @Override
+   protected void setBestModel(Object param)
+   {
+      super.setBestModel(param);
+      // extend how long it can run for
+      maxIterations = Math.max(maxIterations, iteration + maxExtension);
+   }
 
-	/**
-	 * Provided for testing purposes
-	 */
-	@Override
-	protected List<PointVectorNN> getCandidatePoints() {
-		return super.getCandidatePoints();
-	}
+   /**
+    * Provided for testing purposes
+    */
+   @Override
+   protected List<PointVectorNN> getCandidatePoints()
+   {
+      return super.getCandidatePoints();
+   }
 
-	@Override
-	protected FastQueue<PointVectorNN> getInitialSample() {
-		return initialSample;
-	}
+   @Override
+   protected FastArray<PointVectorNN> getInitialSample()
+   {
+      return initialSample;
+   }
 }

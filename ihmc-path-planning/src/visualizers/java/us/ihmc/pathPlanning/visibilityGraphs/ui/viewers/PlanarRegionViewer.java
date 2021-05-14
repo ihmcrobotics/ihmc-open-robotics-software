@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs.ui.viewers;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -13,14 +12,13 @@ import com.google.common.util.concurrent.AtomicDouble;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import javafx.scene.paint.Color;
 import javafx.scene.paint.PhongMaterial;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
-import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
+import us.ihmc.javafx.IdMappedColorFunction;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -31,7 +29,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class PlanarRegionViewer
 {
    private static final boolean VERBOSE = false;
-   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private final Group root = new Group();
 
@@ -119,7 +117,7 @@ public class PlanarRegionViewer
          int regionId = planarRegion.getRegionId();
          planarRegion.getTransformToWorld(transformToWorld);
 
-         meshBuilder.addMultiLine(transformToWorld, Arrays.asList(planarRegion.getConcaveHull()), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
+         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfConvexPolygons(); polygonIndex++)
          {

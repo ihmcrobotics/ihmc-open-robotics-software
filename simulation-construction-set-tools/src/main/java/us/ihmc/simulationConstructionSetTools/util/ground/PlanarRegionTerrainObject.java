@@ -1,8 +1,14 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -11,8 +17,16 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Doug Stephen <a href="mailto:dstephen@ihmc.us">(dstephen@ihmc.us)</a>
+ *
+ * Note: The bahvior of contacts occuring at the intersection of multiple planar regions (e.g.,
+ *       when stepping with partial footholds) might not be as accurate. In these cases, the
+ *       @p thickness by which the convex polytopes are extruded ends up affecting the response
+ *       of the physics engine at the time of collision.
  */
 public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWithNormals
 {
@@ -20,6 +34,8 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    private final double allowablePenetrationThickness;
    private final Graphics3DObject linkGraphics;
    private final AppearanceDefinition appearance;
+
+   private final ArrayList<ConvexPolytope3D> planarCollisionShape = new ArrayList<>();
 
    private final Point3D tempPoint3dForCheckInside = new Point3D(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY);
    private final Vector3D terrainNormal = new Vector3D();
@@ -36,12 +52,39 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
       this.appearance = appearance;
       this.linkGraphics = setupLinkGraphics();
 
+      createCollisionShapeForPlanarRegion(planarRegion, 0.005);
+
       this.planarRegion.setBoundingBoxEpsilon(allowablePenetrationThickness);
 
       planarRegion.getNormal(terrainNormal);
 
       if(terrainNormal.getZ() < 0.0)
          terrainNormal.negate();
+   }
+
+   private void createCollisionShapeForPlanarRegion(PlanarRegion planarRegion, double thickness)
+   {
+      ConvexPolytope3D extrudedPolygon = new ConvexPolytope3D();
+      Point3D tmpVertex = new Point3D();
+      Point2DReadOnly tmpVertex2D;
+
+      List<ConvexPolygon2D> planarPolygons = planarRegion.getConvexPolygons();
+      int numberOfVertices;
+      for (ConvexPolygon2D planarPolygon : planarPolygons)
+      {
+         extrudedPolygon.clear();
+         numberOfVertices = planarPolygon.getNumberOfVertices();
+         for (int vertex = 0; vertex < numberOfVertices; vertex++)
+         {
+            tmpVertex2D = planarPolygon.getVertex(vertex);
+            tmpVertex.set(tmpVertex2D.getX(), tmpVertex2D.getY(), 0.0);
+            extrudedPolygon.addVertex(tmpVertex);
+            tmpVertex.setZ(-thickness);
+            extrudedPolygon.addVertex(tmpVertex);
+         }
+         extrudedPolygon.applyTransform(planarRegion.getTransformToWorld());
+         planarCollisionShape.add(extrudedPolygon.copy());
+      }
    }
 
    @Override
@@ -58,7 +101,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public double heightAndNormalAt(double x, double y, double z, Vector3D normalToPack)
+   public double heightAndNormalAt(double x, double y, double z, Vector3DBasics normalToPack)
    {
       if (planarRegion.isPointInsideByProjectionOntoXYPlane(x, y))
       {
@@ -98,7 +141,7 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    }
 
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
       tempPoint3dForCheckInside.setX(x);
       tempPoint3dForCheckInside.setY(y);
@@ -134,6 +177,12 @@ public class PlanarRegionTerrainObject implements TerrainObject3D, HeightMapWith
    public HeightMapWithNormals getHeightMapIfAvailable()
    {
       return this;
+   }
+
+   @Override
+   public List<? extends Shape3DReadOnly> getTerrainCollisionShapes()
+   {
+      return planarCollisionShape;
    }
 
    private Graphics3DObject setupLinkGraphics()

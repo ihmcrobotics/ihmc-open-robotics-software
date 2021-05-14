@@ -13,7 +13,7 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.Collision;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry.Sphere;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.wholeBodyController.FootContactPoints;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
@@ -21,10 +21,10 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
 {
    private final SideDependentList<ArrayList<Point2D>> footGroundContactPoints = new SideDependentList<>();
 
-   private final DRCRobotJointMap jointMap;
+   private final HumanoidJointNameMap jointMap;
    private final ValkyriePhysicalProperties physicalProperties;
 
-   public ValkyrieContactPointParameters(DRCRobotJointMap jointMap, ValkyriePhysicalProperties physicalProperties,
+   public ValkyrieContactPointParameters(HumanoidJointNameMap jointMap, ValkyriePhysicalProperties physicalProperties,
                                          FootContactPoints<RobotSide> footContactPoints)
    {
       super(jointMap, physicalProperties.getFootWidth(), physicalProperties.getFootLength(), physicalProperties.getSoleToAnkleFrameTransforms());
@@ -73,7 +73,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
             System.out.println("Simulation contact '" + name + "'");
             Vector3D gcOffset = new Vector3D();
 
-            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            gcOffset.set(ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation());
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             addSimulationContactPoint(joint.getName(), gcOffset);
          }
@@ -83,7 +83,7 @@ public class ValkyrieContactPointParameters extends RobotContactPointParameters<
             System.out.println("Controller contact '" + name + "'");
             Vector3D gcOffset = new Vector3D();
 
-            ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation(gcOffset);
+            gcOffset.set(ModelFileLoaderConversionsHelper.poseToTransform(collision.getPose()).getTranslation());
             link.getTransformFromModelReferenceFrame().transform(gcOffset);
             boolean assigned = false;
 

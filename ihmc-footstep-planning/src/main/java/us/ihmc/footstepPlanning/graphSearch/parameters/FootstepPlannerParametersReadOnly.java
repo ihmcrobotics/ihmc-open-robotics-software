@@ -1,40 +1,54 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
+/**
+ * Parameters for {@link FootstepPlanningModule}.
+ * Parameter sets are saved as .ini files, see atlasFootstepPlannerParameters.ini for an example.
+ * For an example of instantiating a java parameters object from an ini file, see AtlasFootstepPlannerParameters(projectName, pathToResources, fileNameSuffix).
+ */
 public interface FootstepPlannerParametersReadOnly extends StoredPropertySetReadOnly
 {
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////////////         Algorithm parameters       //////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
    /**
-    * Sets whether or not the search should check if a bounding box approximation of the robot collides with the world.
-    * This may cause the planner to run slower.
+    * Heuristic inflation weight, used to speed up the planner at the expense of optimality
+    * Should not be less than 1.0
     */
-   default boolean checkForBodyBoxCollisions()
+   default DoubleProvider getAStarHeuristicsWeight()
    {
-      return get(checkForBodyBoxCollisions);
+      return () -> get(aStarHeuristicsWeight);
    }
 
    /**
-    * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
-    * between consecutive steps and invalidates steps with collisions, see: {@link us.ihmc.footstepPlanning.graphSearch.nodeChecking.ObstacleBetweenNodesChecker}
+    * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+    * ideal step are considered and the others are ignored. Set to non-positive number to disable
     */
-   default boolean checkForPathCollisions()
+   default int getMaximumBranchFactor()
    {
-      return get(checkForPathCollisions);
+      return get(maximumBranchFactor);
    }
 
    /**
-    * Sets whether or not to perform the defined heuristic search policies.
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step. See {@link ParameterBasedStepExpansion} for more information.
     */
-   default boolean performHeuristicSearchPolicies()
+   default boolean getEnabledExpansionMask()
    {
-      return get(performHeuristicSearchPolicies);
+      return get(enableExpansionMask);
    }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////         Ideal footstep parameters       ///////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
    /**
     * Returns the ideal step width for walking on flat ground.
@@ -53,76 +67,38 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If the planner in use utilized footstep wiggling (see {@link us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler}) to move footholds onto planer
-    * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
-    * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
-    * to allowing footsteps that partially intersect planar regions.
-    *
-    * <p>
-    * If this value is too high, the planner will not put footsteps on small planar regions. At zero, the planner might
-    * choose a footstep with an edge along a planar region. This value should roughly be set to the sum of two values:
-    * <ul>
-    *    <li>The smallest acceptable distance to the edge of a cliff</li>
-    *    <li>The maximum error between desired and actual foot placement</li>
-    * </ul>
-    * </p>
+    * Returns the ideal step width when "shuffling" sideways.
     */
-   default double getWiggleInsideDelta()
+   default double getIdealSideStepWidth()
    {
-      return get(wiggleInsideDelta);
+      return get(idealSideStepWidth);
    }
 
    /**
-    * Maximum xy-distance the planner will consider for candidate steps.
-    *
-    * <p>
-    * Step reach refers to the magnitude of the xy-position of a footstep expressed in its parent's z-up sole frame,
-    * where the parent is the last footstep taken on the other foot.
-    * </p>
-    *
-    * <p>
-    * This parameter is intended to prevent accepting candidate footsteps that are near both the maximum step length and step width.
-    * </p>
+    * Returns the ideal length when walking backwards. This value is positive.
     */
-   default double getMaximumStepReach()
+   default double getIdealBackStepLength()
    {
-      return get(maxStepReach);
+      return get(idealBackStepLength);
    }
 
    /**
-    * Maximum yaw between consecutive footsteps
-    *
-    * <p>
-    * A candidate footstep will be rejected if the yaw between it and its parent is greater than this value.
-    * </p>
-    *
-    * <p>
-    * This restricts the planner from planning kinematically infeasible footsteps. It is constant through the
-    * space of potential steps, so the robot should be able to achieve this yaw, for example, when stepping at
-    * its maximum reach.
-    * </p>
+    * Returns ideal step length when the vertical height between the start-of-swing and stance feet are at maximum allowed height.
+    * Ideal step length is linearly interpolated between {@link #getIdealFootstepLength} on flat ground and this value at max stance height
     */
-   default double getMaximumStepYaw()
+   default double getIdealStepLengthAtMaxStepZ()
    {
-      return get(maxStepYaw);
+      return get(idealStepLengthAtMaxStepZ);
    }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////         Footstep restriction parameters       ////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
    /**
     * Minimum step width the planner will consider for candidate steps.
-    *
-    * <p>
-    * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
-    * where the parent is the last footstep taken on the other foot.
-    * </p>
-    *
-    * <p>
     * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
-    * </p>
-    *
-    * <p>
-    *    The {@link GoodFootstepPositionChecker} will reject a node if it is not wide enough using this parameter.
-    * </p>
     */
    default double getMinimumStepWidth()
    {
@@ -131,16 +107,8 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
 
    /**
     * Minimum step length the planner will consider for candidate steps.
-    *
-    * <p>
-    * Step length refers to the x-position of a footstep expressed in its parent's sole frame,
-    * where the parent is the last footstep taken on the other foot.
-    * </p>
-    *
-    * <p>
     * If this value is too low, for example below the foot's length, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.
-    * </p>
     */
    default double getMinimumStepLength()
    {
@@ -148,7 +116,16 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Minimum step yaw.
+    * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
+    * then the value specified here. This value is in radians relative to vertical, so an incline of 0.0 means a flat surface.
+    */
+   default double getMinimumSurfaceInclineRadians()
+   {
+      return get(minSurfaceIncline);
+   }
+
+   /**
+    * Minimum step yaw relative to previous step, where positive yaw is defined as rotating away from the other foot and zero yaw means the feet are parallel.
     */
    default double getMinimumStepYaw()
    {
@@ -156,78 +133,71 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Maximum step reach when stepping up.
-    *
-    * <p>
-    * Long steps forward are rejected by the planner if one of two criteria are met:
-    * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()} ()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
-    * </ul>
-    * </p>
-    *
-    * <p>
-    *    Large steps forward and up can cause the robot to surpass its torque limits.
-    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
-    *    it's very close to saturating its torque limits.
-    * </p>
+    * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+    * The maximum depth is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
+    * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
     */
-   default double getMaximumStepReachWhenSteppingUp()
+   default double getMinimumStepZWhenFullyPitched()
    {
-      return get(maximumStepReachWhenSteppingUp);
+      return get(minStepZWhenFullyPitched);
    }
 
    /**
-    * Maximum step width when stepping up.
-    *
-    * <p>
-    * Long steps forward are rejected by the planner if one of two criteria are met:
-    * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
-    * </ul>
-    * </p>
-    *
-    * <p>
-    *    Large steps forward and up can cause the robot to surpass its torque limits.
-    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
-    *    it's very close to saturating its torque limits.
-    * </p>
+    * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
+    * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
     */
-   default double getMaximumStepWidthWhenSteppingUp()
+   default double getMinimumFootholdPercent()
    {
-      return get(maximumStepWidthWhenSteppingUp);
+      return get(minFootholdPercent);
    }
 
    /**
-    * Step height for considering stepping up.
-    *
-    * <p>
-    * Long steps forward are rejected by the planner if one of two criteria are met:
-    * <ul>
-    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - OR - </li>
-    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
-    *    <li> - AND - </li>
-    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
-    * </ul>
-    * </p>
-    *
-    * <p>
-    *    Large steps forward and up can cause the robot to surpass its torque limits.
-    *    These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
-    *    it's very close to saturating its torque limits.
-    * </p>
+    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
+    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
+    * this parameter.
     */
-   default double getMaximumStepZWhenSteppingUp()
+   default double getMinClearanceFromStance()
    {
-      return get(maximumStepZWhenSteppingUp);
+      return get(minClearanceFromStance);
+   }
+
+
+   /**
+    * Maximum step width the planner will consider for candidate steps.
+    * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
+    * where the parent is the last footstep taken on the other foot.
+    * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
+    */
+   default double getMaximumStepWidth()
+   {
+      return get(maxStepWidth);
+   }
+
+   /**
+    * Maximum xy-distance the planner will consider for candidate steps relative to a squared-up step.
+    * A squared-up step is defined by offseting the parent step by the ideal step width.
+    */
+   default double getMaximumStepReach()
+   {
+      return get(maxStepReach);
+   }
+
+   /**
+    * Maximum step yaw relative to previous step, where positive yaw is defined as rotating away from the other foot and zero yaw means the feet are parallel.
+    */
+   default double getMaximumStepYaw()
+   {
+      return get(maxStepYaw);
+   }
+
+   /**
+    * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
+    * The maximum distance is determined by linearly interpolating between a step's maximum z value and this value, based on the fraction the foot is pitched by.
+    * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
+    */
+   default double getMaximumStepXWhenFullyPitched()
+   {
+      return get(maxStepXWhenFullyPitched);
    }
 
    /**
@@ -244,11 +214,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </ul>
     * </p>
     *
-    * <p>
     * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
     * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
     * it's very close to hitting it's ankle pitch joint limit
-    * </p>
     */
    default double getMaximumStepXWhenForwardAndDown()
    {
@@ -269,11 +237,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </ul>
     * </p>
     *
-    * <p>
     * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
     * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
     * it's very close to hitting it's ankle pitch joint limit
-    * </p>
     */
    default double getMaximumStepYWhenForwardAndDown()
    {
@@ -294,11 +260,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * </ul>
     * </p>
     *
-    * <p>
     * Large steps forward and down usually cause the robot to hit it's ankle pitch joint limit.
     * These parameters should be tuned so that when the robot takes a step of length maximumStepXWhenForwardAndDown and height maximumStepZWhenForwardAndDown,
     * it's very close to hitting it's ankle pitch joint limit
-    * </p>
     */
    default double getMaximumStepZWhenForwardAndDown()
    {
@@ -306,55 +270,96 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Scale factor for checking 2D step limitations when changing height from the grandparent node.
-    * This is used if the height change from the grandparent node is more than {@link #getMaximumStepZWhenSteppingUp()} or less than
-    * {@link #getMaximumStepZWhenForwardAndDown()}.
+    * Maximum step reach when stepping up.
     *
-    * If that is the case, it checks to see if the reach is greater than the values returned by {@link #getMaximumStepReachWhenSteppingUp()} for going
-    * up or {@link #getMaximumStepXWhenForwardAndDown()} for going down scaled up by the value returned by {@link #getTranslationScaleFromGrandparentNode()}.
+    * <p>
+    * Long steps forward are rejected by the planner if one of two criteria are met:
+    * <ul>
+    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - OR - </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()} ()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - AND - </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
+    * </p>
+    *
+    * Large steps forward and up can cause the robot to surpass its torque limits.
+    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    * it's very close to saturating its torque limits.
     */
-   default double getTranslationScaleFromGrandparentNode()
+   default double getMaximumStepReachWhenSteppingUp()
    {
-      return get(translationScaleFromGrandparentNode);
+      return get(maximumStepReachWhenSteppingUp);
    }
 
    /**
-    * Maximum vertical distance between consecutive footsteps
+    * Maximum step width when stepping up.
     *
     * <p>
-    * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
-    * z-up sole frame.
+    * Long steps forward are rejected by the planner if one of two criteria are met:
+    * <ul>
+    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - OR - </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - AND - </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
     * </p>
+    *
+    * Large steps forward and up can cause the robot to surpass its torque limits.
+    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    * it's very close to saturating its torque limits.
     */
-   default double getMaximumStepZ()
+   default double getMaximumStepWidthWhenSteppingUp()
+   {
+      return get(maximumStepWidthWhenSteppingUp);
+   }
+
+   /**
+    * Step height for considering stepping up.
+    *
+    * <p>
+    * Long steps forward are rejected by the planner if one of two criteria are met:
+    * <ul>
+    *    <li> The total length of the footstep exceeds {@link #getMaximumStepReachWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - OR - </li>
+    *    <li> The y-position of the value of the footstep exceeds {@link #getMaximumStepWidthWhenSteppingUp()}, when expressed in its parent's z-up sole frame </li>
+    *    <li> - AND - </li>
+    *    <li> The z-position of the value of the footstep is greater than {@link #getMaximumStepZWhenSteppingUp()}, when expressed in its parent's z-up sole frame. </li>
+    * </ul>
+    * </p>
+    *
+    * Large steps forward and up can cause the robot to surpass its torque limits.
+    * These parameters should be tuned so that when the robot takes a step of length {@link #getMaximumStepReachWhenSteppingUp()} and {@link #getMaximumStepZWhenSteppingUp()},
+    * it's very close to saturating its torque limits.
+    */
+   default double getMaximumStepZWhenSteppingUp()
+   {
+      return get(maximumStepZWhenSteppingUp);
+   }
+
+   /**
+    * Maximum vertical distance between consecutive footsteps, applies for both stepping up and down.
+    */
+   default double getMaxStepZ()
    {
       return get(maxStepZ);
    }
 
    /**
-    * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
-    *
-    * <p>
-    *    The maximum depth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
-    * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
-    * </p>
+    * Maximum vertical distance between start-of-swing and touchdown, applies for both stepping up and down.
     */
-   default double getMinimumStepZWhenFullyPitched()
+   default double getMaxSwingZ()
    {
-      return get(minStepZWhenFullyPitched);
+      return get(maxSwingZ);
    }
 
    /**
-    * Maximum forward distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
-    *
-    * <p>
-    *    The maximum depdistanceth is determined by linearly interpolating between {@link #getMaximumStepZ()} and this value, based on the fraction the foot is pitched by.
-    * A candidate footstep will be rejected if its z-value is less than this value, when expressed its parent's z-up sole frame.
-    * </p>
+    * Maximum xy distance between start-of-swing and touchdown.
     */
-   default double getMaximumStepXWhenFullyPitched()
+   default double getMaxSwingReach()
    {
-      return get(maxStepXWhenFullyPitched);
+      return get(maxSwingReach);
    }
 
    /**
@@ -373,45 +378,127 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
       return get(stepYawReductionFactorAtMaxReach);
    }
 
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   ///////////////////////////         Footstep cost parameters       ////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
    /**
-    * Minimum percentage that a candidate footstep needs to overlap with its associated planar region in order to be accepted.
-    * <p>
-    * If this parameter is set to 1.0 only full footsteps are allowed. A value less then 1.0 will allow partial footholds.
-    * </p>
+    * Scale factor for cost of deviating from the ideal footstep by rotating.
+    * The cost is c*yaw, where c is this weight
     */
-   default double getMinimumFootholdPercent()
+   default double getYawWeight()
    {
-      return get(minFootholdPercent);
+      return get(yawWeight);
    }
 
    /**
-    * The planner will ignore candidate footsteps if they are on a planar region with an incline that is higher
-    * then the value specified here.
-    *
-    * <p>
-    * More specifically, if a footstep has an associated planar region and that regions surface normal has a
-    * z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
-    * </p>
+    * Scale factor for cost of deviating from the ideal footstep by shifting along X, i.e. forwards/backwards
+    * The cost is c*stepLength, where c is this weight
     */
-   default double getMinimumSurfaceInclineRadians()
+   default double getForwardWeight()
    {
-      return get(minSurfaceIncline);
+      return get(forwardWeight);
    }
 
    /**
-    * There are two methods of wiggling a polygon into a planar region:
-    * <ul>
-    *    <li>Wiggle the polygon into the planar region itself, which isn't necessarily convex</li>
-    *    <li>Wiggle the polygon into the convex hull of the planar region</li>
-    * </ul>
-    * The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-    * has the biggest overlap with the foothold.
-    *
-    * If this parameter is set to true (recommended), the second wiggle method will be used.
+    * Scale factor for cost associated with deviating from the ideal footstep by shifting along Y, i.e. side to side
+    * The cost is c*stepWidth, where c is this weight
     */
-   default boolean getWiggleIntoConvexHullOfPlanarRegions()
+   default double getLateralWeight()
    {
-      return get(wiggleIntoConvexHullOfPlanarRegions);
+      return get(lateralWeight);
+   }
+
+   /**
+    * Constant cost per step to punish to avoid plans with extra steps.
+    */
+   default double getCostPerStep()
+   {
+      return get(costPerStep);
+   }
+
+   /**
+    * Scale factor for cost associated stepping up.
+    * The cost is c*stepHeight, where c is this weight
+    */
+   default double getStepUpWeight()
+   {
+      return get(stepUpWeight);
+   }
+
+   /**
+    * Scale factor for cost associated stepping down.
+    * The cost is c*abs(stepHeight), where c is this weight
+    */
+   default double getStepDownWeight()
+   {
+      return get(stepDownWeight);
+   }
+
+   /**
+    * Scale factor for cost associated with step rotation.
+    * The cost is c*abs(stepRoll), where c is this weight and stepRoll is the step's roll rotation in the parent step's z-up frame
+    */
+   default double getRollWeight()
+   {
+      return get(rollWeight);
+   }
+
+   /**
+    * Scale factor for cost associated with step rotation.
+    * The cost is c*abs(stepPitch), where c is this weight and stepPitch is the step's pitch rotation in the parent step's z-up frame
+    */
+   default double getPitchWeight()
+   {
+      return get(pitchWeight);
+   }
+
+   /**
+    * The cost of having a partial foothold.
+    * The cost is c * (1 - p)/(1 - p_min), where c is this weight, p is the foothold percentage and p_min is the minimum foothold percentage
+    */
+   default double getFootholdAreaWeight()
+   {
+      return get(footholdAreaWeight);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////         Footstep snapping and wiggling       /////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * The planner will try to shift footsteps inside of a region so that this value is the minimum distance from the step
+    * to the edge. A negative value means the footstep can overhang a region.
+    */
+   default double getWiggleInsideDeltaTarget()
+   {
+      return get(wiggleInsideDeltaTarget);
+   }
+
+   /**
+    * This parameter only is used if {@link #getWiggleWhilePlanning} is true. If a step cannot be wiggled inside by this amount or more,
+    * it will be rejected. Note that if {@link #getWiggleWhilePlanning} if false, it's always best effort on the final plan.
+    */
+   default double getWiggleInsideDeltaMinimum()
+   {
+      return get(wiggleInsideDeltaMinimum);
+   }
+
+   /**
+    * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
+    * this toggles between them.
+    */
+   default boolean getEnableConcaveHullWiggler()
+   {
+      return get(enableConcaveHullWiggler);
+   }
+
+   /**
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+    */
+   default boolean getWiggleWhilePlanning()
+   {
+      return get(wiggleWhilePlanning);
    }
 
    /**
@@ -444,25 +531,172 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Maximum step width the planner will consider for candidate steps.
-    *
-    * <p>
-    * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
-    * where the parent is the last footstep taken on the other foot.
-    * </p>
-    *
-    * <p>
-    * If this value is too low, the planner will unnecessarily reject footsteps. If too high, footsteps might not be kinematically feasible.
-    * </p>
-    *
-    * <p>
-    *   The {@link GoodFootstepPositionChecker} will reject a node if it is too wide using this parameter.
-    * </p>
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
     */
-   default double getMaximumStepWidth()
+   default double getMaximumSnapHeight()
    {
-      return get(maxStepWidth);
+      return get(maximumSnapHeight);
    }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////////////         Body path parameters       //////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Radius around the goal inside which the planner should start to turn to match the goal's orientation
+    */
+   default double getFinalTurnProximity()
+   {
+      return get(finalTurnProximity);
+   }
+
+   /**
+    * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+    * Otherwise, it will turn towards the body path
+    */
+   default double getDistanceFromPathTolerance()
+   {
+      return get(distanceFromPathTolerance);
+   }
+
+   /**
+    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+    * Otherwise, it will turn in plance towards the body path
+    */
+   default double getDeltaYawFromReferenceTolerance()
+   {
+      return get(deltaYawFromReferenceTolerance);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////////         Bounding box collision check       //////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Sets whether or not the search should check if a bounding box approximation of the robot collides with the world.
+    */
+   default boolean checkForBodyBoxCollisions()
+   {
+      return get(checkForBodyBoxCollisions);
+   }
+
+   /**
+    * Height of body collision box
+    */
+   default double getBodyBoxHeight()
+   {
+      return get(bodyBoxHeight);
+   }
+
+   /**
+    * Depth (along X) of body collision box
+    */
+   default double getBodyBoxDepth()
+   {
+      return get(bodyBoxDepth);
+   }
+
+   /**
+    * Width (along Y) of body collision box
+    */
+   default double getBodyBoxWidth()
+   {
+      return get(bodyBoxWidth);
+   }
+
+   /**
+    * X-offset of collision box relative to a step
+    */
+   default double getBodyBoxBaseX()
+   {
+      return get(bodyBoxBaseX);
+   }
+
+   /**
+    * Y-offset of collision box relative to a step. This centers the collision box and should be roughly half the nominal stance width.
+    */
+   default double getBodyBoxBaseY()
+   {
+      return get(bodyBoxBaseY);
+   }
+
+   /**
+    * Z-offset of collision box relative to a step. If too low the collision box might intersect normal terrain, recommended >50cm
+    */
+   default double getBodyBoxBaseZ()
+   {
+      return get(bodyBoxBaseZ);
+   }
+
+   /**
+    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
+    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
+    * between the start and end steps.
+    */
+   default int getIntermediateBodyBoxChecks()
+   {
+      return get(intermediateBodyBoxChecks);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   /////////////////////////////         Shin collision check       //////////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+    */
+   default boolean getEnableShinCollisionCheck()
+   {
+      return get(enableShinCollisionCheck);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the toe
+    */
+   default double getShinToeClearance()
+   {
+      return get(shinToeClearance);
+   }
+
+   /**
+    * How far the shin collision cylinder extends from the heel
+    */
+   default double getShinHeelClearance()
+   {
+      return get(shinHeelClearance);
+   }
+
+   /**
+    * Length of the shin collidable cylinder
+    */
+   default double getShinLength()
+   {
+      return get(shinLength);
+   }
+
+   /**
+    * Height offset of shin collidable cylinder
+    */
+   default double getShinHeightOffset()
+   {
+      return get(shinHeightOffet);
+   }
+
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+   ////////////////////////         Other collision-related checks       /////////////////////////////
+   ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * Enables a collision check that is lighter-weight than a bounding box. Draws a planar region by vertically extruding the line
+    * between consecutive steps and invalidates steps with collisions, see: {@link ObstacleBetweenStepsChecker}
+    */
+   default boolean checkForPathCollisions()
+   {
+      return get(checkForPathCollisions);
+   }
+
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
@@ -475,14 +709,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getCliffHeightToAvoid()
+   default double getCliffBaseHeightToAvoid()
    {
-      return get(cliffHeightToAvoid);
+      return get(cliffBaseHeightToAvoid);
    }
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>
@@ -497,329 +731,35 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-    * planner should return the best plan that it found. If this value is false, the planner will return
-    * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-    * the "best" effort plan, where the plan is at least {@link #getMinimumStepsForBestEffortPlan()} steps long
-    * "best" is determined by the planner.
-    */
-   default boolean getReturnBestEffortPlan()
-   {
-      return get(returnBestEffortPlan);
-   }
-
-   /**
-    * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-    * contains at least this many footsteps.
-    */
-   default int getMinimumStepsForBestEffortPlan()
-   {
-      return get(minimumStepsForBestEffortPlan);
-   }
-
-   /**
-    * Some node checkers will check if a bounding box that describes the body of the robot will move
-    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the box height. Note that this box will go from {@code getBodyBoxBaseZ}
-    * to {@code getBodyBoxBaseHeight + getBodyBoxHeight}
-    */
-   default double getBodyBoxHeight()
-   {
-      return get(bodyBoxHeight);
-   }
-
-   /**
-    * Some node checkers will check if a bounding box that describes the body of the robot will move
-    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the box depth.
-    */
-   default double getBodyBoxDepth()
-   {
-      return get(bodyBoxDepth);
-   }
-
-   /**
-    * Some node checkers will check if a bounding box that describes the body of the robot will move
-    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the box width.
-    */
-   default double getBodyBoxWidth()
-   {
-      return get(bodyBoxWidth);
-   }
-
-   /**
-    * Some node checkers will check if a bounding box that describes the body of the robot will move
-    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the x-offset of a bounding box relative to the average frame between sequential footsteps.
-    */
-   default double getBodyBoxBaseX()
-   {
-      return get(bodyBoxBaseX);
-   }
-
-   /**
-    * Some node checkers will check if a bounding box that describes the body of the robot will move
-    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the y-offset of a bounding box relative to the average frame between sequential footsteps.
-    */
-   default double getBodyBoxBaseY()
-   {
-      return get(bodyBoxBaseY);
-   }
-
-   /**
-    * Some node checkers will check if a bounding box that describes the body of the robot will move
-    * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
-    * collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
-    */
-   default double getBodyBoxBaseZ()
-   {
-      return get(bodyBoxBaseZ);
-   }
-
-   /**
-    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-    * this parameter.
-    */
-   default double getMinXClearanceFromStance()
-   {
-      return get(minXClearanceFromStance);
-   }
-
-   /**
-    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-    * this parameter.
-    */
-   default double getMinYClearanceFromStance()
-   {
-      return get(minYClearanceFromStance);
-   }
-
-   /**
-    * Radius around the goal inside which the planner should start to turn to match the goal's orientation
-    */
-   default double getFinalTurnProximity()
-   {
-      return get(finalTurnProximity);
-   }
-
-   /**
-    * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-    */
-   default double getFinalTurnBodyPathProximity()
-   {
-      return get(finalTurnBodyPathProximity);
-   }
-
-   /**
-    * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the final orientation should occur.
-    * That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the desired heading,
-    * and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()}, the desired orientation is the final orientation.
-    */
-   default double getFinalTurnProximityBlendFactor()
-   {
-      return get(finalTurnProximityBlendFactor);
-   }
-
-   /**
-    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-    */
-   default boolean useQuadraticDistanceCost()
-   {
-      return get(useQuadraticDistanceCost);
-   }
-
-   /**
-    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-    */
-   default boolean useQuadraticHeightCost()
-   {
-      return get(useQuadraticHeightCost);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the A Star planner.
-    */
-   default DoubleProvider getAStarHeuristicsWeight()
-   {
-      return () -> get(aStarHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Visibility graph with A star planner.
-    */
-   default DoubleProvider getVisGraphWithAStarHeuristicsWeight()
-   {
-      return () -> get(visGraphWithAStarHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Depth First planner.
-    */
-   default DoubleProvider getDepthFirstHeuristicsWeight()
-   {
-      return () -> get(depthFirstHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Body path based planner.
-    */
-   default DoubleProvider getBodyPathBasedHeuristicsWeight()
-   {
-      return () -> get(bodyPathBasedHeuristicsWeight);
-   }
-
-   /**
-    * When using a cost based planning approach this value defined how the yaw of a footstep will be
-    * weighted in comparison to its position.
-    */
-   default double getYawWeight()
-   {
-      return get(yawWeight);
-   }
-
-   /**
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+    * nearby that is cliffTopHeightToAvoid higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffTops away from it.
+    *
     * <p>
-    * This value defined how the forward (or backward) displacement of a footstep will be weighted in
-    * comparison to its position.
-    * </p>
-    * <p>
-    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
-    *    {@link #getLateralWeight()}
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
     * </p>
     */
-   default double getForwardWeight()
+   default double getCliffTopHeightToAvoid()
    {
-      return get(forwardWeight);
+      return get(cliffTopHeightToAvoid);
    }
 
    /**
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffBottoms away from it.
+    *
     * <p>
-    * This value defined how the lateral displacement of a footstep will be weighted in comparison to
-    * its position.
-    * </p>
-    * <p>
-    *    Note that when using a Euclidean distance, this weight is averaged with the value returned by
-    *    {@link #getForwardWeight()}
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
     * </p>
     */
-   default double getLateralWeight()
+   default double getMinimumDistanceFromCliffTops()
    {
-      return get(lateralWeight);
+      return get(minimumDistanceFromCliffTops);
    }
 
-   /**
-    * When using a cost based planning approach this value defines the cost that is added for each step
-    * taken. Setting this value to a high number will favor plans with less steps.
-    */
-   default double getCostPerStep()
-   {
-      return get(costPerStep);
-   }
-
-   /**
-    * When using a cost based planning approach this value defines how the height change when stepping
-    * up will be weighted.
-    */
-   default double getStepUpWeight()
-   {
-      return get(stepUpWeight);
-   }
-
-   /**
-    * When using a cost based planning approach this value defines how the height change when stepping
-    * down will be weighted.
-    */
-   default double getStepDownWeight()
-   {
-      return get(stepDownWeight);
-   }
-
-   /**
-    * When using a cost based planning approach this value defines how the roll will be weighted.
-    */
-   default double getRollWeight()
-   {
-      return get(rollWeight);
-   }
-
-   /**
-    * When using a cost based planning approach this value defines how the pitch will be weighted.
-    */
-   default double getPitchWeight()
-   {
-      return get(pitchWeight);
-   }
-
-   /**
-    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
-    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
-    * between the start and end steps.
-    */
-   default int getNumberOfBoundingBoxChecks()
-   {
-      return get(numberOfBoundingBoxChecks);
-   }
-
-   /**
-    * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
-    * @see FootstepPlannerCostParameters#getBoundingBoxCost
-    */
-   default double getMaximum2dDistanceFromBoundingBoxToPenalize()
-   {
-      return get(maximum2dDistanceFromBoundingBoxToPenalize);
-
-   }
-
-   /**
-    * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-    * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-    * {@code c * (1 - d / d_max)}, where d_max is this value.
-    */
-   default double getBoundingBoxCost()
-   {
-      return get(boundingBoxCost);
-   }
-
-   /**
-    * When using a cost based planning approach this value defines how the a missing foothold area will be weighted.
-    */
-   default double getFootholdAreaWeight()
-   {
-      return get(footholdAreaWeight);
-   }
-
-   /**
-    * When using a cost based planning approach this value defines the weight of the step distance of a step longer than {@link FootstepPlannerParameters#getIdealFootstepLength()} .
-    */
-   default double getLongStepWeight()
-   {
-      return get(longStepWeight);
-   }
-
-   default double getBodyPathViolationWeight()
-   {
-      return get(bodyPathViolationWeight);
-   }
-
-   default double getDistanceFromPathTolerance()
-   {
-      return get(distanceFromPathTolerance);
-   }
-
-   default double getDeltaYawFromReferenceTolerance()
-   {
-      return get(deltaYawFromReferenceTolerance);
-   }
-
-   /**
-    * Parameters for setting swing trajectories from footstep poses. Will use default values if this returns null
-    */
-   default AdaptiveSwingParameters getAdaptiveSwingParameters()
-   {
-      return null;
-   }
 }

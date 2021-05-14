@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelC
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -35,11 +35,12 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * beginning of the control.
     */
    private static final int initialCapacity = 15;
+   private int commandId;
    /** The list of joints for which desired torques are assigned. */
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * The list of the desired torques for each joint. The list follows the same ordering as the
-    * {@link #joints} list. Each {@link DenseMatrix64F} in this list, is a N-by-1 vector where N is
+    * {@link #joints} list. Each {@link DMatrixRMaj} in this list, is a N-by-1 vector where N is
     * equal to the number of degrees of freedom of the joint it is associated with.
     */
    private final DenseMatrixArrayList desiredTorques = new DenseMatrixArrayList(initialCapacity);
@@ -60,6 +61,9 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    public void set(JointTorqueCommand other)
    {
       clear();
+
+      commandId = other.commandId;
+
       for (int i = 0; i < other.getNumberOfJoints(); i++)
       {
          joints.add(other.joints.get(i));
@@ -73,6 +77,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     */
    public void clear()
    {
+      commandId = 0;
       joints.clear();
       desiredTorques.clear();
    }
@@ -89,7 +94,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    public void addJoint(OneDoFJointBasics joint, double desiredTorque)
    {
       joints.add(joint);
-      DenseMatrix64F jointDesiredTorque = desiredTorques.add();
+      DMatrixRMaj jointDesiredTorque = desiredTorques.add();
       jointDesiredTorque.reshape(1, 1);
       jointDesiredTorque.set(0, 0, desiredTorque);
    }
@@ -105,7 +110,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     *           be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}. Not modified.
     * @throws RuntimeException if the {@code desiredTorque} is not a N-by-1 vector.
     */
-   public void addJoint(JointBasics joint, DenseMatrix64F desiredTorque)
+   public void addJoint(JointBasics joint, DMatrixRMaj desiredTorque)
    {
       checkConsistency(joint, desiredTorque);
       joints.add(joint);
@@ -139,13 +144,13 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     *           be a N-by-1 vector with N equal to {@code joint.getDegreesOfFreedom()}. Not modified.
     * @throws RuntimeException if the {@code desiredTorque} is not a N-by-1 vector.
     */
-   public void setDesiredTorque(int jointIndex, DenseMatrix64F desiredTorque)
+   public void setDesiredTorque(int jointIndex, DMatrixRMaj desiredTorque)
    {
       checkConsistency(joints.get(jointIndex), desiredTorque);
       desiredTorques.get(jointIndex).set(desiredTorque);
    }
 
-   private void checkConsistency(JointBasics joint, DenseMatrix64F desiredTorque)
+   private void checkConsistency(JointBasics joint, DMatrixRMaj desiredTorque)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredTorque.getNumRows());
    }
@@ -188,7 +193,7 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return the N-by-1 desired torque where N is the joint number of degrees of freedom.
     */
-   public DenseMatrix64F getDesiredTorque(int jointIndex)
+   public DMatrixRMaj getDesiredTorque(int jointIndex)
    {
       return desiredTorques.get(jointIndex);
    }
@@ -215,6 +220,18 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -225,6 +242,8 @@ public class JointTorqueCommand implements VirtualModelControlCommand<JointTorqu
       {
          JointTorqueCommand other = (JointTorqueCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfJoints() != other.getNumberOfJoints())
             return false;
          for (int jointIndex = 0; jointIndex < getNumberOfJoints(); jointIndex++)

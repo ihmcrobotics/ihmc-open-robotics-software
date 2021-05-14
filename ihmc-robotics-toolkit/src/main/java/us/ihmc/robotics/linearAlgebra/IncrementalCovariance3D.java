@@ -2,8 +2,8 @@ package us.ihmc.robotics.linearAlgebra;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -37,7 +37,7 @@ public class IncrementalCovariance3D
 {
    private int sampleSize = 0;
    private final Point3D mean = new Point3D();
-   private final DenseMatrix64F secondMoment = new DenseMatrix64F(3, 3);
+   private final DMatrixRMaj secondMoment = new DMatrixRMaj(3, 3);
 
    public IncrementalCovariance3D()
    {
@@ -64,7 +64,7 @@ public class IncrementalCovariance3D
          addDataPoint(tuples.get(i));
    }
 
-   public void addAllDataPoint(DenseMatrix64F dataPoints)
+   public void addAllDataPoint(DMatrixRMaj dataPoints)
    {
       if (dataPoints.getNumRows() == 3)
       {
@@ -151,22 +151,22 @@ public class IncrementalCovariance3D
     * Get the covariance matrix corresponding to the dataset added beforehand.
     * @param covarianceToPack the 3-by-3 covariance matrix.
     */
-   public void getCovariance(DenseMatrix64F covarianceToPack)
+   public void getCovariance(DMatrixRMaj covarianceToPack)
    {
       double div = 1.0 / (double) (sampleSize);
       covarianceToPack.set(secondMoment);
-      CommonOps.scale(div, covarianceToPack);
+      CommonOps_DDRM.scale(div, covarianceToPack);
    }
 
    /**
     * Get the covariance matrix corresponding to the dataset added beforehand using <a href="https://en.wikipedia.org/wiki/Bessel%27s_correction"> Bessel's Correction </a>.
     * @param covarianceToPack the 3-by-3 covariance matrix.
     */
-   public void getCovarianceCorrected(DenseMatrix64F covarianceToPack)
+   public void getCovarianceCorrected(DMatrixRMaj covarianceToPack)
    {
       double div = 1.0 / (double) (sampleSize - 1.0);
       covarianceToPack.set(secondMoment);
-      CommonOps.scale(div, covarianceToPack);
+      CommonOps_DDRM.scale(div, covarianceToPack);
    }
 
    /**

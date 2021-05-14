@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -36,7 +36,6 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
  * </p>
  *
  * @author Sylvain Bertrand
- *
  */
 public class CenterOfMassFeedbackControlCommand implements FeedbackControlCommand<CenterOfMassFeedbackControlCommand>
 {
@@ -128,9 +127,9 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * The reference linear acceleration is set to zero.
     * </p>
     *
-    * @param desiredPosition the position that the center of mass should reach. Not modified.
+    * @param desiredPosition           the position that the center of mass should reach. Not modified.
     * @param feedForwardLinearVelocity the feed-forward linear velocity with respect to root frame. Not
-    *           modified.
+    *                                  modified.
     */
    public void setInverseKinematics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly feedForwardLinearVelocity)
    {
@@ -150,11 +149,12 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * the control for inverse dynamics.
     * </p>
     *
-    * @param desiredPosition the position that the center of mass should reach. Not modified.
-    * @param desiredLinearVelocity the desired center of mass linear velocity with respect to root
-    *           frame. Not modified.
+    * @param desiredPosition               the position that the center of mass should reach. Not
+    *                                      modified.
+    * @param desiredLinearVelocity         the desired center of mass linear velocity with respect to
+    *                                      root frame. Not modified.
     * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
-    *           Not modified.
+    *                                      Not modified.
     */
    public void setInverseDynamics(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
                                   FrameVector3DReadOnly feedForwardLinearAcceleration)
@@ -176,11 +176,12 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * the control mode for virtual model control.
     * </p>
     *
-    * @param desiredPosition the position that the center of mass should reach. Not modified.
-    * @param desiredLinearVelocity the desired center of mass linear velocity with respect to root
-    *           frame. Not modified.
+    * @param desiredPosition               the position that the center of mass should reach. Not
+    *                                      modified.
+    * @param desiredLinearVelocity         the desired center of mass linear velocity with respect to
+    *                                      root frame. Not modified.
     * @param feedForwardLinearAcceleration feed-forward linear acceleration with respect to root frame.
-    *           Not modified.
+    *                                      Not modified.
     */
    public void setVirtualModelControl(FramePoint3DReadOnly desiredPosition, FrameVector3DReadOnly desiredLinearVelocity,
                                       FrameVector3DReadOnly feedForwardLinearAcceleration)
@@ -250,10 +251,10 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     * </p>
     *
     * @param weightVector dense matrix holding the weights to use for each component of the desired
-    *           center of mass position. It is expected to be a 3-by-1 vector ordered as:
-    *           {@code linearX}, {@code linearY}, {@code linearZ}. Not modified.
+    *                     center of mass position. It is expected to be a 3-by-1 vector ordered as:
+    *                     {@code linearX}, {@code linearY}, {@code linearZ}. Not modified.
     */
-   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   public void setWeightsForSolver(DMatrixRMaj weightVector)
    {
       if (weightVector.getNumRows() != 3)
          throw new RuntimeException("Unexpected number of rows for the given weight vector. Expected 3 but was: " + weightVector.getNumRows());
@@ -341,6 +342,18 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
    public ControllerCoreCommandType getCommandType()
    {
       return ControllerCoreCommandType.MOMENTUM;
+   }
+
+   @Override
+   public void setCommandId(int id)
+   {
+      momentumRateCommand.setCommandId(id);
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return momentumRateCommand.getCommandId();
    }
 
    @Override

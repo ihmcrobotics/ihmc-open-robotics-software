@@ -7,7 +7,7 @@ import optiTrack.MocapRigidBody;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,7 +17,7 @@ public class ScsMocapRigidBody
    private int id;
 
    private ArrayList<MocapMarker> listOfAssociatedMarkers;
-   private YoVariableRegistry registry;
+   private YoRegistry registry;
    private YoDouble xPos;
    private YoDouble yPos;
    private YoDouble zPos;
@@ -39,7 +39,7 @@ public class ScsMocapRigidBody
 
    public ScsMocapRigidBody(int id, Vector3D position, Quaternion orientation, ArrayList<MocapMarker> listOfAssociatedMarkers, boolean isTracked)
    {
-      registry = new YoVariableRegistry("rb_" + id);
+      registry = new YoRegistry("rb_" + id);
       xPos = new YoDouble("xPos", registry);
       yPos = new YoDouble("yPos", registry);
       zPos = new YoDouble("zPos", registry);
@@ -79,7 +79,7 @@ public class ScsMocapRigidBody
       return id;
    }
    
-   public YoVariableRegistry getRegistry()
+   public YoRegistry getRegistry()
    {
       return registry;
    }
@@ -144,8 +144,8 @@ public class ScsMocapRigidBody
    public void getPose(RigidBodyTransform pose)
    {
       quaternion.set(qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue(), qw.getDoubleValue());
-      pose.setRotation(quaternion);
-      pose.setTranslation(xPos.getDoubleValue(), yPos.getDoubleValue(), zPos.getDoubleValue());
+      pose.getRotation().set(quaternion);
+      pose.getTranslation().set(xPos.getDoubleValue(), yPos.getDoubleValue(), zPos.getDoubleValue());
    }
 }
 

@@ -3,7 +3,8 @@ package us.ihmc.simulationToolkit.comparators;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.sensorProcessing.encoder.SimulatedEncoder;
@@ -25,14 +26,13 @@ import us.ihmc.sensorProcessing.encoder.processors.PolynomialFittingEncoderProce
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineSimpleEncoderProcessor;
 import us.ihmc.sensorProcessing.encoder.processors.StateMachineTwoEncoderProcessor;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
 public class EncoderProcessorComparer
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final LinkedHashMap<EncoderProcessor, String> encoderProcessors = new LinkedHashMap<EncoderProcessor, String>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedPositions = new LinkedHashMap<EncoderProcessor, YoDouble>();
    private final LinkedHashMap<EncoderProcessor, YoDouble> processedRates = new LinkedHashMap<EncoderProcessor, YoDouble>();
@@ -41,7 +41,7 @@ public class EncoderProcessorComparer
    private final YoDouble time;
    private final YoDouble actualPosition;
    private final YoDouble actualRate, actualRateInTicksPerSecond;
-   private final DataBuffer dataBuffer;
+   private final YoBuffer dataBuffer;
 
    private final ArrayList<EncoderProcessorEvaluationTrajectory> jointTrajectories;
    private final double maxTime;
@@ -53,7 +53,7 @@ public class EncoderProcessorComparer
                                    double encoderTicksPerUnitOfPosition)
    {
       Robot nullRobot = new Robot("nullRobot");
-      registry = nullRobot.getRobotsYoVariableRegistry();
+      registry = nullRobot.getRobotsYoRegistry();
       rawTicks = new YoInteger("rawTicks", registry);
       rawPosition = new YoDouble("rawPosition", registry);
       time = nullRobot.getYoTime();
@@ -91,7 +91,6 @@ public class EncoderProcessorComparer
       SimulationConstructionSet scs = new SimulationConstructionSet(nullRobot, parameters);
       scs.hideViewport();
       dataBuffer = scs.getDataBuffer();
-      dataBuffer.setWrapBuffer(false);
       simThread = new Thread(scs, "R2Simulation sim thread");
    }
 
@@ -134,7 +133,7 @@ public class EncoderProcessorComparer
                processedRates.get(processor).set(processor.getQd());
             }
 
-            dataBuffer.tickAndUpdate();
+            dataBuffer.tickAndWriteIntoBuffer();
 
             int numJointUpdatesPerEncoderEvent = 20;
             for (int k = 0; k < numJointUpdatesPerEncoderEvent; k++)

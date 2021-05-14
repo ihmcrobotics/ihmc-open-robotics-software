@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.simpleArm;
 import java.util.EnumMap;
 import java.util.Random;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -84,13 +84,13 @@ public class SimpleArmRobot extends Robot
       bodyMap.put(ArmBody.ELEVATOR, elevator);
 
       RevoluteJoint idYawJoint = new RevoluteJoint("idYawJoint", elevator, new Vector3D(0.0, 0.0, baseHeight), new Vector3D(0.0, 0.0, 1.0));
-      Matrix3D inertiaArm1 = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(arm1_mass, arm1_radius, arm1_length, Axis.Z);
+      Matrix3D inertiaArm1 = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(arm1_mass, arm1_radius, arm1_length, Axis3D.Z);
       RigidBodyBasics arm1 = new RigidBody("arm1", idYawJoint, inertiaArm1, arm1_mass, new Vector3D(0.0, 0.0, arm1_length/2.0));
       jointMap.put(ArmJoint.YAW, idYawJoint);
       bodyMap.put(ArmBody.ARM_1, arm1);
 
       RevoluteJoint idPitch1Joint = new RevoluteJoint("idPitch1Joint", arm1, new Vector3D(0.0, 0.0, arm1_length), new Vector3D(1.0, 0.0, 0.0));
-      Matrix3D inertiaArm2 = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(arm2_mass, arm2_radius, arm2_length, Axis.X);
+      Matrix3D inertiaArm2 = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(arm2_mass, arm2_radius, arm2_length, Axis3D.X);
       RigidBodyBasics arm2 = new RigidBody("arm2", idPitch1Joint, inertiaArm2, arm2_mass, new Vector3D(0.0, 0.0, arm2_length/2.0));
       jointMap.put(ArmJoint.PITCH_1, idPitch1Joint);
       bodyMap.put(ArmBody.ARM_2, arm2);
@@ -103,25 +103,25 @@ public class SimpleArmRobot extends Robot
       // --- scs robot ---
       makeBase();
 
-      PinJoint yawJoint = new PinJoint("yaw", new Vector3D(0.0, 0.0, baseHeight), this, Axis.Z);
+      PinJoint yawJoint = new PinJoint("yaw", new Vector3D(0.0, 0.0, baseHeight), this, Axis3D.Z);
       yawJoint.setDamping(jointDamping);
       yawJoint.setLink(makeArm1());
       this.addRootJoint(yawJoint);
       scsJointMap.put(ArmJoint.YAW, yawJoint);
 
-      PinJoint pitch1Joint = new PinJoint("pitch1", new Vector3D(0.0, 0.0, arm1_length), this, Axis.X);
+      PinJoint pitch1Joint = new PinJoint("pitch1", new Vector3D(0.0, 0.0, arm1_length), this, Axis3D.X);
       pitch1Joint.setDamping(jointDamping);
       pitch1Joint.setLink(makeArm2());
       yawJoint.addJoint(pitch1Joint);
       scsJointMap.put(ArmJoint.PITCH_1, pitch1Joint);
 
-      PinJoint pitch2Joint = new PinJoint("pitch2", new Vector3D(0.0, 0.0, arm2_length), this, Axis.X);
+      PinJoint pitch2Joint = new PinJoint("pitch2", new Vector3D(0.0, 0.0, arm2_length), this, Axis3D.X);
       pitch2Joint.setDamping(jointDamping);
       pitch2Joint.setLink(makeArm2());
       pitch1Joint.addJoint(pitch2Joint);
       scsJointMap.put(ArmJoint.PITCH_2, pitch2Joint);
 
-      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoVariableRegistry());
+      GroundContactModel groundContactModel = new LinearGroundContactModel(this, this.getRobotsYoRegistry());
       this.setGroundContactModel(groundContactModel);
 
       showCoordinatesRecursively(yawJoint, false);
@@ -166,8 +166,8 @@ public class SimpleArmRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.addCylinder(arm2_length, arm2_radius, red);
 
-      linkGraphics.rotate(Math.PI/2.0, Axis.Z);
-      linkGraphics.rotate(Math.PI/2.0, Axis.X);
+      linkGraphics.rotate(Math.PI/2.0, Axis3D.Z);
+      linkGraphics.rotate(Math.PI/2.0, Axis3D.X);
       linkGraphics.translate(0.0, 0.0, -actuator_length/2.0);
       linkGraphics.addCylinder(actuator_length, actuator_radius, black);
 

@@ -39,7 +39,7 @@ public class IMUPacketSerializer extends Serializer<IMUPacket>
    }
 
    @Override
-   public IMUPacket read(Kryo kryo, Input input, Class<IMUPacket> type)
+   public IMUPacket read(Kryo kryo, Input input, Class<? extends IMUPacket> type)
    {
       IMUPacket message = new IMUPacket();
 

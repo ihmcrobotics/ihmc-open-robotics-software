@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -39,6 +39,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
  */
 public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueCommand>
 {
+   private int commandId;
    /** Defines the reference frame of interest. It is attached to the end-effector. */
    private final FramePose3D controlFramePose = new FramePose3D();
 
@@ -81,6 +82,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    @Override
    public void set(VirtualTorqueCommand other)
    {
+      commandId = other.commandId;
       controlFramePose.setIncludingFrame(other.controlFramePose);
 
       desiredAngularTorque.set(other.desiredAngularTorque);
@@ -99,6 +101,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     */
    public void setProperties(SpatialAccelerationCommand command)
    {
+      commandId = command.getCommandId();
       command.getAngularSelectionMatrix(selectionMatrix);
       base = command.getBase();
       endEffector = command.getEndEffector();
@@ -293,7 +296,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     * @param desiredAngularTorqueToPack the 3-by-1 matrix in which the value of the desired angular
     *           torque is stored. The given matrix is reshaped to ensure proper size. Modified.
     */
-   public void getDesiredAngularTorque(DenseMatrix64F desiredAngularTorqueToPack)
+   public void getDesiredAngularTorque(DMatrixRMaj desiredAngularTorqueToPack)
    {
       desiredAngularTorqueToPack.reshape(6, 1);
       desiredAngularTorqueToPack.zero();
@@ -320,7 +323,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredEffort(DenseMatrix64F desiredEffortToPack)
+   public void getDesiredEffort(DMatrixRMaj desiredEffortToPack)
    {
       getDesiredAngularTorque(desiredEffortToPack);
    }
@@ -380,7 +383,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
 
    /** {@inheritDoc} */
    @Override
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(3, 6);
       selectionMatrixToPack.zero();
@@ -425,6 +428,18 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -435,6 +450,8 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
       {
          VirtualTorqueCommand other = (VirtualTorqueCommand) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (!controlFramePose.equals(other.controlFramePose))
             return false;
          if (!desiredAngularTorque.equals(other.desiredAngularTorque))

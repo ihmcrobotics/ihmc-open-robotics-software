@@ -2,7 +2,7 @@ package us.ihmc.robotics.math.filters;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
@@ -22,7 +22,7 @@ public class AlphaFilteredWrappingYoVariable extends AlphaFilteredYoVariable
    
    //wrap the values in [lowerLimit ; upperLimit[
    
-   public AlphaFilteredWrappingYoVariable(String name, String description, YoVariableRegistry registry, final YoDouble unfilteredVariable, DoubleProvider alphaVariable, double lowerLimit, double upperLimit)
+   public AlphaFilteredWrappingYoVariable(String name, String description, YoRegistry registry, final YoDouble unfilteredVariable, DoubleProvider alphaVariable, double lowerLimit, double upperLimit)
    {
       super(name, description, registry, alphaVariable);
       this.alphaVariable = alphaVariable;

@@ -2,34 +2,27 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
 import java.awt.Color;
 
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d;
-import us.ihmc.robotics.geometry.algorithms.FrameConvexPolygonWithLineIntersector2d.IntersectionResult;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 /**
  * This class can detect if the foot is on partial support. The idea is to keep track of where the
@@ -42,8 +35,6 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class GeometricFootRotationCalculator implements FootRotationCalculator
 {
    private final static boolean VISUALIZE = false;
-   private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
 
    private static final Vector3D zero = new Vector3D(0.0, 0.0, 0.0);
    private final static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -51,178 +42,129 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    private final ReferenceFrame soleFrame;
    private final FrameConvexPolygon2D defaultFootPolygon;
 
-   private final FramePoint3D groundPlanePoint = new FramePoint3D();
-   private final FrameVector3D groundPlaneNormal = new FrameVector3D();
    private final FrameLine2D lineOfRotationInSoleFrame = new FrameLine2D();
    private final FrameLine2D lineOfRotationInWorldFrame = new FrameLine2D();
    private final FrameConvexPolygon2D footPolygonInWorld = new FrameConvexPolygon2D();
    private final FrameConvexPolygonWithLineIntersector2d frameConvexPolygonWithLineIntersector2d = new FrameConvexPolygonWithLineIntersector2d();
 
-   private final FramePoint3D cop = new FramePoint3D();
-   private final YoDouble copAlpha;
-   private final AlphaFilteredYoFramePoint copFiltered;
-   private final FrameLineSegment2D lineSegmentOfRotation = new FrameLineSegment2D();
+   private final FramePoint3D measuredCoPInWorld = new FramePoint3D();
+   private final AlphaFilteredYoFramePoint measuredCoPFiltered;
 
-   private final YoFrameLineSegment2D yoLineOfRotation;
-   private final YoFramePoint3D yoPlanePoint;
-   private final YoFrameVector3D yoPlaneNormal;
+   private final YoFrameLineSegment2D lineSegmentOfRotation;
+   private final YoFrameVector3D groundPlaneNormal;
 
    private final YoDouble angleFootGround;
-   private final YoDouble angleTreshold;
+   private final YoDouble angleThreshold;
    private final YoBoolean footRotating;
 
    public GeometricFootRotationCalculator(String namePrefix, ContactablePlaneBody contactableFoot, ExplorationParameters explorationParameters,
-                                          YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+                                          YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
-      registry = new YoVariableRegistry(namePrefix + name);
+      YoRegistry registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       soleFrame = contactableFoot.getSoleFrame();
       defaultFootPolygon = new FrameConvexPolygon2D(FrameVertex2DSupplier.asFrameVertex2DSupplier(contactableFoot.getContactPoints2d()));
 
       angleFootGround = new YoDouble(namePrefix + "AngleToGround", registry);
-      angleTreshold = explorationParameters.getGeometricDetectionAngleThreshold();
+      angleThreshold = explorationParameters.getGeometricDetectionAngleThreshold();
       footRotating = new YoBoolean(namePrefix + "RotatingGeometry", registry);
 
-      copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
-      copFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered", "", registry, copAlpha, worldFrame);
+      YoDouble copAlpha = explorationParameters.getGeometricDetectionPlanePointAlpha();
+      measuredCoPFiltered = AlphaFilteredYoFramePoint.createAlphaFilteredYoFramePoint(namePrefix + "CoPFiltered", "", registry, copAlpha, worldFrame);
+
+      groundPlaneNormal = new YoFrameVector3D(namePrefix + "PlaneNormal", worldFrame, registry);
+      lineSegmentOfRotation = new YoFrameLineSegment2D(namePrefix + "LineOfRotationGeometric", "", worldFrame, registry);
 
       if (yoGraphicsListRegistry != null)
       {
          String listName = getClass().getSimpleName();
-         String caption = "";
+         ArtifactList artifactList = new ArtifactList(listName);
+         YoGraphicsList graphicsList = new YoGraphicsList(listName);
 
-         caption = namePrefix + "PlanePoint";
-         yoPlanePoint = new YoFramePoint3D(caption, worldFrame, registry);
-         YoGraphicPosition planePointViz = new YoGraphicPosition(caption, yoPlanePoint, 0.005, YoAppearance.Blue(), GraphicType.SOLID_BALL);
-         YoArtifactPosition planePointArtifact = planePointViz.createArtifact();
-         planePointArtifact.setVisible(VISUALIZE);
-         yoGraphicsListRegistry.registerArtifact(listName, planePointArtifact);
+         YoGraphicPosition planePointViz = new YoGraphicPosition(namePrefix + "PlanePoint", measuredCoPFiltered, 0.005, YoAppearance.Blue(),
+                                                                 GraphicType.SOLID_BALL);
 
-         caption = namePrefix + "PlaneNormal";
-         yoPlaneNormal = new YoFrameVector3D(caption, worldFrame, registry);
-         YoGraphicVector planeNormalViz = new YoGraphicVector(caption, yoPlanePoint, yoPlaneNormal, YoAppearance.Blue());
-         planeNormalViz.setVisible(VISUALIZE);
-         yoGraphicsListRegistry.registerYoGraphic(listName, planeNormalViz);
+         YoGraphicVector planeNormalViz = new YoGraphicVector(namePrefix + "PlaneNormal", measuredCoPFiltered, groundPlaneNormal, YoAppearance.Blue());
 
-         caption = namePrefix + "LineOfRotationGeometric";
-         yoLineOfRotation = new YoFrameLineSegment2D(caption, "", worldFrame, registry);
-         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(caption, yoLineOfRotation, Color.GREEN, 0.01, 0.01);
-         lineOfRotationArtifact.setVisible(VISUALIZE);
-         yoGraphicsListRegistry.registerArtifact(listName, lineOfRotationArtifact);
-      }
-      else
-      {
-         yoPlanePoint = null;
-         yoPlaneNormal = null;
-         yoLineOfRotation = null;
+         YoArtifactLineSegment2d lineOfRotationArtifact = new YoArtifactLineSegment2d(namePrefix + "LineOfRotationGeometric", lineSegmentOfRotation, Color.GREEN,
+                                                                                      0.01, 0.01);
+
+         graphicsList.add(planeNormalViz);
+         artifactList.add(planePointViz.createArtifact());
+         artifactList.add(lineOfRotationArtifact);
+
+         graphicsList.setVisible(VISUALIZE);
+         artifactList.setVisible(VISUALIZE);
+
+         yoGraphicsListRegistry.registerYoGraphicsList(graphicsList);
+         yoGraphicsListRegistry.registerArtifactList(artifactList);
       }
    }
 
-   private final Point3D planePoint = new Point3D();
-   private final Vector3D normal = new Vector3D();
-
-   private final Vector3D lineOfContactVector = new Vector3D();
    private final FrameVector3D lineOfContact = new FrameVector3D();
    private final FrameVector3D footNormal = new FrameVector3D();
-   private final Vector3D footNormalVector = new Vector3D();
-
-   private final FramePoint2D centerOfRotation2d = new FramePoint2D();
-   private final FrameVector2D lineOfRotation2d = new FrameVector2D();
 
    @Override
-   public void compute(FramePoint2D desiredCoP, FramePoint2D centerOfPressure)
+   public void compute(FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly measuredCoP)
    {
-      centerOfPressure.checkReferenceFrameMatch(soleFrame);
-      cop.setIncludingFrame(centerOfPressure, 0.0);
-      cop.changeFrame(worldFrame);
+      measuredCoPInWorld.setMatchingFrame(measuredCoP, 0.0);
 
       // assuming flat ground:
       // This can be updated to do some least square best fit for a plane through all
       // measured cops. For now assume that the surface normal is [0.0, 0.0, 1.0] in world
-      copFiltered.update(cop);
-      planePoint.set(copFiltered);
-      normal.set(0.0, 0.0, 1.0);
-
-      normal.normalize();
-      groundPlanePoint.set(planePoint);
-      groundPlaneNormal.setIncludingFrame(worldFrame, normal);
+      measuredCoPFiltered.update(measuredCoPInWorld);
+      groundPlaneNormal.set(worldFrame, 0.0, 0.0, 1.0);
 
       // intersect the foot plane and the ground plane
       footNormal.setIncludingFrame(soleFrame, 0.0, 0.0, 1.0);
+      footNormal.normalize();
       footNormal.changeFrame(worldFrame);
-      footNormalVector.set(footNormal);
-      footNormalVector.normalize();
-      lineOfContactVector.cross(normal, footNormalVector);
-      if (lineOfContactVector.epsilonEquals(zero, 10E-12))
+      lineOfContact.cross(groundPlaneNormal, footNormal);
+      if (lineOfContact.epsilonEquals(zero, 1E-11))
          return;
-      lineOfContact.setIncludingFrame(worldFrame, lineOfContactVector);
 
       // compute the angle between ground plane and foot plane
-      double cosAlpha = normal.dot(footNormalVector);
-      cosAlpha = Math.abs(cosAlpha);
+      double cosAlpha = Math.abs(groundPlaneNormal.dot(footNormal));
       double alpha = Math.acos(cosAlpha);
       angleFootGround.set(alpha);
-      footRotating.set(alpha > angleTreshold.getDoubleValue());
+      footRotating.set(alpha > angleThreshold.getDoubleValue());
 
-      centerOfRotation2d.set(cop);
-      lineOfRotation2d.set(lineOfContact);
-      lineOfRotationInWorldFrame.set(centerOfRotation2d, lineOfRotation2d);
+      lineOfRotationInWorldFrame.set(measuredCoPInWorld, lineOfContact);
 
       lineOfRotationInSoleFrame.setIncludingFrame(lineOfRotationInWorldFrame);
       lineOfRotationInSoleFrame.changeFrameAndProjectToXYPlane(soleFrame);
-      lineOfRotationInSoleFrame.setPoint(centerOfPressure);
 
-      if (yoLineOfRotation != null)
+      intersectLineOfRotationWithFootPolygon();
+   }
+
+   private void intersectLineOfRotationWithFootPolygon()
+   {
+      footPolygonInWorld.setIncludingFrame(defaultFootPolygon);
+      footPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+
+      frameConvexPolygonWithLineIntersector2d.intersectWithLine(footPolygonInWorld, lineOfRotationInWorldFrame);
+
+      if (FootRotationCalculator.isIntersectionValid(frameConvexPolygonWithLineIntersector2d))
       {
-         footPolygonInWorld.setIncludingFrame(defaultFootPolygon);
-         footPolygonInWorld.changeFrameAndProjectToXYPlane(worldFrame);
-
-         frameConvexPolygonWithLineIntersector2d.intersectWithLine(footPolygonInWorld, lineOfRotationInWorldFrame);
-         if (frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.NO_INTERSECTION
-               || frameConvexPolygonWithLineIntersector2d.getIntersectionResult() == IntersectionResult.POINT_INTERSECTION
-               || frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne()
-                                                         .epsilonEquals(frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo(), 1e-3))
-         {
-            yoLineOfRotation.setToNaN();
-         }
-         else
-         {
-            lineSegmentOfRotation.setIncludingFrame(frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne(),
-                                                    frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo());
-            yoLineOfRotation.set(lineSegmentOfRotation);
-         }
+         lineSegmentOfRotation.set(frameConvexPolygonWithLineIntersector2d.getIntersectionPointOne(),
+                                   frameConvexPolygonWithLineIntersector2d.getIntersectionPointTwo());
       }
-
-      if (yoPlanePoint != null)
+      else
       {
-         yoPlanePoint.set(groundPlanePoint);
-      }
-
-      if (yoPlaneNormal != null)
-      {
-         yoPlaneNormal.set(groundPlaneNormal);
+         lineSegmentOfRotation.setToNaN();
       }
    }
+
 
    @Override
    public void reset()
    {
-      copFiltered.reset();
+      measuredCoPFiltered.reset();
       footRotating.set(false);
 
-      if (yoLineOfRotation != null)
-      {
-         yoLineOfRotation.setToNaN();
-      }
-      if (yoPlanePoint != null)
-      {
-         yoPlanePoint.setToNaN();
-      }
-      if (yoPlaneNormal != null)
-      {
-         yoPlaneNormal.setToNaN();
-      }
+      lineSegmentOfRotation.setToNaN();
+      groundPlaneNormal.setToNaN();
    }
 
    @Override
@@ -232,7 +174,7 @@ public class GeometricFootRotationCalculator implements FootRotationCalculator
    }
 
    @Override
-   public void getLineOfRotation(FrameLine2D lineOfRotationToPack)
+   public void getLineOfRotation(FrameLine2DBasics lineOfRotationToPack)
    {
       lineOfRotationToPack.setIncludingFrame(lineOfRotationInSoleFrame);
    }

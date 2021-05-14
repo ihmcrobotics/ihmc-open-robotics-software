@@ -21,9 +21,8 @@ import java.util.Map;
  * </p>
  * 
  * @author Sylvain
- *
  * @param <K> Type of {@link Enum} that lists the potential states and that is used by the state
- *           machine this listener is to be added to.
+ *            machine this listener is to be added to.
  */
 public final class StateTransition<K extends Enum<K>> implements Iterable<K>
 {
@@ -37,7 +36,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * </p>
     * 
     * @param keyType the type of the key to use, it is only used to create an {@code EnumMap} which
-    *           requires it.
+    *                requires it.
     */
    public StateTransition(Class<K> keyType)
    {
@@ -47,9 +46,9 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
    /**
     * Creates a state transition and initializes it with a target state and a condition.
     * 
-    * @param to key of the target state.
+    * @param to        key of the target state.
     * @param condition the condition that when fulfilled, the state machine will trigger a transition
-    *           to the target state.
+    *                  to the target state.
     */
    public StateTransition(K to, StateTransitionCondition condition)
    {
@@ -75,7 +74,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * transition to the target state.
     * </p>
     * 
-    * @param to key of the target state.
+    * @param to         key of the target state.
     * @param conditions the different conditions to reach the target state.
     */
    public void addConditions(K to, Iterable<? extends StateTransitionCondition> conditions)
@@ -90,7 +89,7 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * to trigger a transition.
     * </p>
     * 
-    * @param to key of the target state.
+    * @param to        key of the target state.
     * @param condition the new condition to reach the target state.
     */
    public void addCondition(K to, StateTransitionCondition condition)
@@ -108,21 +107,22 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
     * Invoked by the state machine to identify when to trigger a transition and to which state.
     * 
     * @param timeInCurrentState the time spent in the current state or {@link Double#NaN} if the time
-    *           information is unavailable.
+    *                           information is unavailable.
     * @return {@code null} is no transition is requested, or the key of the state to transition to.
     */
-   K isTransitionRequested(double timeInCurrentState)
+   TransitionRequest isTransitionRequested(double timeInCurrentState)
    {
       for (int i = 0; i < toStateKeys.size(); i++)
       {
          K to = toStateKeys.get(i);
-       
+
          List<StateTransitionCondition> toStateConditions = allConditions.get(to);
 
          for (int j = 0; j < toStateConditions.size(); j++)
          {
-            if (toStateConditions.get(j).testCondition(timeInCurrentState))
-               return to;
+            StateTransitionCondition toStateCondition = toStateConditions.get(j);
+            if (toStateCondition.testCondition(timeInCurrentState))
+               return new TransitionRequest(to, toStateCondition.performOnExit(), toStateCondition.performOnEntry());
          }
       }
 
@@ -151,5 +151,34 @@ public final class StateTransition<K extends Enum<K>> implements Iterable<K>
    public Iterator<K> iterator()
    {
       return toStateKeys.iterator();
+   }
+
+   class TransitionRequest
+   {
+      private final K destinationKey;
+      private final boolean performOnExit;
+      private final boolean performOnEntry;
+
+      public TransitionRequest(K destinationKey, boolean performOnExit, boolean performOnEntry)
+      {
+         this.destinationKey = destinationKey;
+         this.performOnExit = performOnExit;
+         this.performOnEntry = performOnEntry;
+      }
+
+      public K getDestinationKey()
+      {
+         return destinationKey;
+      }
+
+      public boolean isPerformOnExit()
+      {
+         return performOnExit;
+      }
+
+      public boolean isPerformOnEntry()
+      {
+         return performOnEntry;
+      }
    }
 }

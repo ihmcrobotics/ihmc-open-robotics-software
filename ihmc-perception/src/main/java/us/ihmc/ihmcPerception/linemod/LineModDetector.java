@@ -209,7 +209,7 @@ public class LineModDetector
       LineModTemplate template = LineModInterface.trainTemplateBytes(cloud, mask);
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationEulerAndZeroTranslation(roll, pitch, yaw);
-      transform.setTranslation(0, 0, distance);
+      transform.getTranslation().set((double) 0, (double) 0, distance);
       template.transform = transform;
       byteFeatures.add(template);
    }
@@ -266,7 +266,7 @@ public class LineModDetector
    void drawDetectionOnImage(LineModDetection bestDetection, BufferedImage image)
    {
       Vector3D rollPatchYaw = new Vector3D();
-      bestDetection.template.transform.getRotationEuler(rollPatchYaw);
+      bestDetection.template.transform.getRotation().getEuler(rollPatchYaw);
    
       //draw border
       Graphics2D g2 = image.createGraphics();
@@ -277,7 +277,7 @@ public class LineModDetector
    
       //
       Vector3D rollPitchYaw=  new Vector3D();
-      bestDetection.template.transform.getRotationEuler(rollPatchYaw);
+      bestDetection.template.transform.getRotation().getEuler(rollPatchYaw);
       rollPatchYaw.scale(1/UnitConversions.DEG_TO_RAD);
       System.out.println("orientation="+rollPatchYaw);
    
@@ -344,12 +344,12 @@ public class LineModDetector
          if(bestDetection!=null)
          {
             Vector3D rollPitchYaw = new Vector3D();
-            bestDetection.template.transform.getRotationEuler(rollPitchYaw);
+            bestDetection.template.transform.getRotation().getEuler(rollPitchYaw);
             System.out.println("estimated " + rollPitchYaw.getZ()/UnitConversions.DEG_TO_RAD + " groundtruth " + groundTruthAngle/UnitConversions.DEG_TO_RAD);
             
             BufferedImage image = testCloud.getRGBImage();
             detector.drawDetectionOnImage(bestDetection, image);
-            imagePanel.setBufferedImageSafe(image);
+            imagePanel.setImageUI(image);
          }
          else
          {

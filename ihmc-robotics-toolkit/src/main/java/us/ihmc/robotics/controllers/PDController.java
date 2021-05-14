@@ -2,7 +2,7 @@ package us.ihmc.robotics.controllers;
 
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class PDController extends AbstractPDController
@@ -11,7 +11,7 @@ public class PDController extends AbstractPDController
    private final YoDouble derivativeGain;
    private final YoDouble positionDeadband;
 
-   public PDController(String suffix, YoVariableRegistry registry)
+   public PDController(String suffix, YoRegistry registry)
    {
       super(suffix, registry);
       proportionalGain = new YoDouble("kp_" + suffix, registry);
@@ -24,7 +24,7 @@ public class PDController extends AbstractPDController
       positionDeadband.set(0.0);
    }
 
-   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, String suffix, YoVariableRegistry registry)
+   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, String suffix, YoRegistry registry)
    {
       super(suffix, registry);
       this.proportionalGain = proportionalGain;
@@ -34,7 +34,7 @@ public class PDController extends AbstractPDController
       positionDeadband.set(0.0);
    }
 
-   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, YoDouble positionDeadband, String suffix, YoVariableRegistry registry)
+   public PDController(YoDouble proportionalGain, YoDouble derivativeGain, YoDouble positionDeadband, String suffix, YoRegistry registry)
    {
       super(suffix, registry);
       this.proportionalGain = proportionalGain;
@@ -42,7 +42,7 @@ public class PDController extends AbstractPDController
       this.positionDeadband = positionDeadband;
    }
 
-   public PDController(YoPDGains pdGains, String suffix, YoVariableRegistry registry)
+   public PDController(YoPDGains pdGains, String suffix, YoRegistry registry)
    {
       super(suffix, registry);
       this.proportionalGain = pdGains.getYoKp();

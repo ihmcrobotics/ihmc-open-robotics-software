@@ -9,7 +9,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -49,7 +48,7 @@ import us.ihmc.simulationconstructionset.gui.SimulationOverheadPlotter;
 import us.ihmc.simulationconstructionset.gui.config.VarGroup;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.AdditionalPanelTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class LogVisualizer
@@ -81,7 +80,7 @@ public class LogVisualizer
 
       if (logFile != null)
       {
-         System.out.println("loading log from folder:" + logFile);
+         LogTools.info("Loading log from folder: " + logFile);
 
          SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
          parameters.setCreateGUI(true);
@@ -103,10 +102,10 @@ public class LogVisualizer
 
    private void printOutYoVariableNames()
    {
-      YoVariableRegistry rootRegistry = scs.getRootRegistry();
-      ArrayList<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
+      YoRegistry rootRegistry = scs.getRootRegistry();
+      List<YoVariable> allVariablesIncludingDescendants = rootRegistry.collectSubtreeVariables();
 
-      for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
+      for (YoVariable yoVariable : allVariablesIncludingDescendants)
       {
          System.out.println(yoVariable.getName());
       }
@@ -131,7 +130,7 @@ public class LogVisualizer
       YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
 
-      System.out.println("This log contains " + parser.getNumberOfVariables() + " YoVariables");
+      LogTools.info("This log contains " + parser.getNumberOfVariables() + " YoVariables");
 
       GeneralizedSDFRobotModel generalizedSDFRobotModel = null;
       List<JointState> jointStates = parser.getJointStates();
@@ -188,10 +187,10 @@ public class LogVisualizer
       }
 
       robot = new YoVariableLogPlaybackRobot(selectedFile, robotDescription, jointStates, parser.getYoVariablesList(), logProperties, scs);
-      scs.setTimeVariableName(robot.getRobotsYoVariableRegistry().getName() + ".robotTime");
+      scs.setTimeVariableName(robot.getRobotsYoRegistry().getName() + ".robotTime");
 
       double dt = parser.getDt();
-      System.out.println(getClass().getSimpleName() + ": dt set to " + dt);
+      LogTools.info("DT set to " + dt);
       scs.setDT(dt, 1);
       scs.setPlaybackDesiredFrameRate(0.04);
 
@@ -217,7 +216,7 @@ public class LogVisualizer
       }
       catch (Exception e)
       {
-         System.err.println("Couldn't load video file!");
+         LogTools.error("Couldn't load video file!");
          e.printStackTrace();
       }
 
@@ -314,7 +313,7 @@ public class LogVisualizer
       return new PlaybackListener()
       {
          @Override
-         public void notifyOfIndexChange(int newIndex)
+         public void indexChanged(int newIndex)
          {
             updateYoGraphics(yoGraphicsListRegistry);
          }
@@ -339,7 +338,7 @@ public class LogVisualizer
       List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
       for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
       {
-         ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+         List<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
          for (YoGraphic yoGraphic : yoGraphics)
             yoGraphic.update();
       }

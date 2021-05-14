@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
@@ -29,7 +28,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CentroidProjectionToeOffCalculatorTest
 {
@@ -40,7 +39,7 @@ public class CentroidProjectionToeOffCalculatorTest
    private static final double toeWidthForControl = 0.0825;
 
    private ToeOffCalculator toeOffCalculator;
-   private YoVariableRegistry parentRegistry;
+   private YoRegistry parentRegistry;
 
    private final SideDependentList<FootSpoof> contactableFeet = new SideDependentList<>();
    private final SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
@@ -48,7 +47,7 @@ public class CentroidProjectionToeOffCalculatorTest
    @BeforeEach
    public void setUp()
    {
-      parentRegistry = new YoVariableRegistry("parentRegistryTEST");
+      parentRegistry = new YoRegistry("parentRegistryTEST");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -276,12 +275,6 @@ public class CentroidProjectionToeOffCalculatorTest
 
          @Override
          public MomentumOptimizationSettings getMomentumOptimizationSettings()
-         {
-            return null;
-         }
-
-         @Override
-         public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
          {
             return null;
          }

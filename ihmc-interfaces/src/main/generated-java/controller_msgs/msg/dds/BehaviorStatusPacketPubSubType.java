@@ -44,6 +44,8 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       return current_alignment - initial_alignment;
    }
@@ -63,6 +65,9 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
 
       return current_alignment - initial_alignment;
    }
@@ -73,6 +78,8 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
       cdr.write_type_9(data.getCurrentBehaviorStatus());
 
+      cdr.write_type_9(data.getHumanoidBehaviorType());
+
    }
 
    public static void read(controller_msgs.msg.dds.BehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
@@ -80,6 +87,8 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
       data.setSequenceId(cdr.read_type_4());
       	
       data.setCurrentBehaviorStatus(cdr.read_type_9());
+      	
+      data.setHumanoidBehaviorType(cdr.read_type_9());
       	
 
    }
@@ -89,6 +98,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_9("current_behavior_status", data.getCurrentBehaviorStatus());
+      ser.write_type_9("humanoid_behavior_type", data.getHumanoidBehaviorType());
    }
 
    @Override
@@ -96,6 +106,7 @@ public class BehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setCurrentBehaviorStatus(ser.read_type_9("current_behavior_status"));
+      data.setHumanoidBehaviorType(ser.read_type_9("humanoid_behavior_type"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.BehaviorStatusPacket src, controller_msgs.msg.dds.BehaviorStatusPacket dest)

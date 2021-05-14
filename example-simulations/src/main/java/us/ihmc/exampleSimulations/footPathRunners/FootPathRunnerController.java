@@ -4,7 +4,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -12,7 +12,7 @@ public class FootPathRunnerController implements RobotController
 {
    private final FootPathRunnerRobot robot;
    private final double dt;
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble metaCenterRadius = new YoDouble("metaCenterRadius", registry);
    private final YoDouble comBelowMetaCenterDistance = new YoDouble("comBelowMetaCenterDistance", registry);
@@ -70,7 +70,7 @@ public class FootPathRunnerController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -125,8 +125,8 @@ public class FootPathRunnerController implements RobotController
          double pitch = theta;
          double roll = 0.0;
 
-         desiredFootInBodyFrame.setPosition(x, y, z);
-         desiredFootInBodyFrame.setOrientationYawPitchRoll(0.0, pitch, roll);
+         desiredFootInBodyFrame.getPosition().set(x, y, z);
+         desiredFootInBodyFrame.getOrientation().setYawPitchRoll(0.0, pitch, roll);
       }
       else
       {
@@ -142,8 +142,8 @@ public class FootPathRunnerController implements RobotController
          double pitch = theta;
          double roll = 0.0;
 
-         desiredFootInBodyFrame.setPosition(x, y, z);
-         desiredFootInBodyFrame.setOrientationYawPitchRoll(0.0, pitch, roll);
+         desiredFootInBodyFrame.getPosition().set(x, y, z);
+         desiredFootInBodyFrame.getOrientation().setYawPitchRoll(0.0, pitch, roll);
       }
       return desiredFootInBodyFrame;
    }

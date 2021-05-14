@@ -6,6 +6,7 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointVisualizer;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ListOfPointsContactablePlaneBody;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
+import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -36,7 +37,7 @@ import us.ihmc.simulationToolkit.outputWriters.PerfectSimulatedOutputWriter;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoLong;
@@ -48,7 +49,7 @@ public class HexapodSimulationController implements RobotController
    private final double controllerDt;
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final YoBoolean useInverseDynamics = new YoBoolean("useInverseDynamics", registry);
 
@@ -84,7 +85,7 @@ public class HexapodSimulationController implements RobotController
 
       FeedbackControlCommandList feedbackControlCommandList = createFeedbackControlTemplate();
       WholeBodyControlCoreToolbox toolbox = makeControllerToolbox();
-      this.controllerCore = new WholeBodyControllerCore(toolbox, feedbackControlCommandList, lowLevelControllerCoreOutput, registry);
+      this.controllerCore = new WholeBodyControllerCore(toolbox, new FeedbackControllerTemplate(feedbackControlCommandList), lowLevelControllerCoreOutput, registry);
 
       for (OneDoFJointBasics joint : fullRobotModel.getOneDoFJoints())
       {
@@ -96,7 +97,7 @@ public class HexapodSimulationController implements RobotController
 
    private void setupPlaneContactStateUpdaters(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot)
    {
-      ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
       ArrayList<SimulatedPlaneContactStateUpdater> contactStateUpdatersList = new ArrayList<>();
       RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
       for (RobotSextant robotSextant : RobotSextant.values)
@@ -182,7 +183,7 @@ public class HexapodSimulationController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

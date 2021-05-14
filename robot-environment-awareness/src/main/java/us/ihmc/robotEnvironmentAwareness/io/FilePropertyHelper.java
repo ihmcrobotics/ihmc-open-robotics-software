@@ -1,5 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.io;
 
+import us.ihmc.log.LogTools;
+
+import java.io.Closeable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -13,9 +16,37 @@ public final class FilePropertyHelper
 {
    private final File configurationFile;
 
+   public FilePropertyHelper(String configurationFilePath)
+   {
+      this(new File(configurationFilePath), 2);
+   }
+
    public FilePropertyHelper(File configurationFile)
    {
-      this.configurationFile = configurationFile;
+      this(configurationFile, 2);
+   }
+
+   private FilePropertyHelper(File configurationFile, int stackHeightForPrintout)
+   {
+      this.configurationFile = ensureFileExists(configurationFile);
+
+      LogTools.debug(stackHeightForPrintout, "Using configuration file: " + configurationFile.toPath().toAbsolutePath().normalize().toString());
+   }
+
+   private File ensureFileExists(File file)
+   {
+      try
+      {
+         file.getParentFile().mkdirs();
+         file.createNewFile();
+         return file;
+      }
+      catch (IOException e)
+      {
+         System.out.println(file.getAbsolutePath());
+         e.printStackTrace();
+         return null;
+      }
    }
 
    public void saveProperty(String propertyName, double propertyValue)
@@ -28,6 +59,11 @@ public final class FilePropertyHelper
       saveProperty(propertyName, Integer.toString(propertyValue));
    }
 
+   public void saveProperty(String propertyName, long propertyValue)
+   {
+      saveProperty(propertyName, Long.toString(propertyValue));
+   }
+
    public void saveProperty(String propertyName, boolean propertyValue)
    {
       saveProperty(propertyName, Boolean.toString(propertyValue));
@@ -35,23 +71,25 @@ public final class FilePropertyHelper
 
    public void saveProperty(String propertyName, String propertyValue)
    {
-      FileOutputStream fileOut = null;
+      if (configurationFile == null)
+         return;
+
+      Properties properties = new Properties()
+      {
+         private static final long serialVersionUID = -8814683165980261816L;
+
+         @Override
+         public synchronized Enumeration<Object> keys()
+         {
+            return Collections.enumeration(new TreeSet<Object>(super.keySet()));
+         }
+      };
+
       FileInputStream fileIn = null;
+      FileOutputStream fileOut = null;
 
       try
       {
-         Properties properties = new Properties()
-         {
-            private static final long serialVersionUID = -8814683165980261816L;
-
-            @Override
-            public synchronized Enumeration<Object> keys()
-            {
-               return Collections.enumeration(new TreeSet<Object>(super.keySet()));
-            }
-         };
-
-
          if (configurationFile.exists() && configurationFile.isFile())
          {
             fileIn = new FileInputStream(configurationFile);
@@ -61,7 +99,6 @@ public final class FilePropertyHelper
          properties.setProperty(propertyName, propertyValue);
          fileOut = new FileOutputStream(configurationFile);
          properties.store(fileOut, "");
-         fileOut.close();
       }
       catch (Exception ex)
       {
@@ -69,23 +106,8 @@ public final class FilePropertyHelper
       }
       finally
       {
-         try
-         {
-            if (fileIn != null)
-               fileIn.close();
-         }
-         catch (Exception e)
-         {
-         }
-
-         try
-         {
-            if (fileOut != null)
-               fileOut.close();
-         }
-         catch (IOException e)
-         {
-         }
+         closeStreamSilently(fileIn);
+         closeStreamSilently(fileOut);
       }
    }
 
@@ -116,7 +138,7 @@ public final class FilePropertyHelper
       else
          return defaultValue;
    }
-   
+
    public Integer loadIntegerProperty(String propertyName)
    {
       return loadIntegerProperty(propertyName, null);
@@ -131,13 +153,27 @@ public final class FilePropertyHelper
          return defaultValue;
    }
 
+   public Long loadLongProperty(String propertyName)
+   {
+      return loadLongProperty(propertyName, null);
+   }
+
+   public Long loadLongProperty(String propertyName, Long defaultValue)
+   {
+      String loadedProperty = loadProperty(propertyName);
+      if (loadedProperty != null)
+         return Long.parseLong(loadedProperty);
+      else
+         return defaultValue;
+   }
+
    public String loadProperty(String propertyName)
    {
+      if (configurationFile == null || !configurationFile.exists() || !configurationFile.isFile())
+         return null;
+
       FileInputStream fileIn = null;
       String propertyValue = null;
-
-      if (!configurationFile.exists() || !configurationFile.isFile())
-         return null;
 
       try
       {
@@ -153,16 +189,21 @@ public final class FilePropertyHelper
       }
       finally
       {
-         try
-         {
-            fileIn.close();
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
+         closeStreamSilently(fileIn);
       }
 
       return propertyValue;
+   }
+
+   private static void closeStreamSilently(Closeable streamToClose)
+   {
+      try
+      {
+         if (streamToClose != null)
+            streamToClose.close();
+      }
+      catch (Exception e)
+      {
+      }
    }
 }

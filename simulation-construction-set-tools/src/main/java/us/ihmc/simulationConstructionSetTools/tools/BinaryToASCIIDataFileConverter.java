@@ -2,14 +2,14 @@ package us.ihmc.simulationConstructionSetTools.tools;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.DataFileReader;
 import us.ihmc.simulationconstructionset.DataFileWriter;
+import us.ihmc.yoVariables.buffer.YoBuffer;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableList;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class BinaryToASCIIDataFileConverter
 {
@@ -33,9 +33,9 @@ public class BinaryToASCIIDataFileConverter
 
       YoVariableList newVars = new YoVariableList("Converter");
 
-      DataBuffer dataBuffer = new DataBuffer(bufferSize);
+      YoBuffer dataBuffer = new YoBuffer(bufferSize);
 
-      YoVariableRegistry rootRegistry = new YoVariableRegistry("root");
+      YoRegistry rootRegistry = new YoRegistry("root");
 
       reader.readData(newVars, rootRegistry, dataBuffer);
 
@@ -44,7 +44,7 @@ public class BinaryToASCIIDataFileConverter
       boolean binary = false;
       boolean compress = false;
 
-      ArrayList<YoVariable<?>> varsToWrite = newVars.getVariables();
+      List<YoVariable> varsToWrite = newVars.getVariables();
 
       dataFileWriter.writeData("ConvertedData", 0.001, dataBuffer, varsToWrite, binary, compress);
    }

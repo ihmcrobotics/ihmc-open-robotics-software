@@ -16,22 +16,15 @@ import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.referenceFrames.CommonHumanoidReferenceFramesVisualizer;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -58,20 +51,21 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class HighLevelHumanoidControllerToolbox
 {
    protected static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final ReferenceFrame centerOfMassFrame;
    private final FullHumanoidRobotModel fullRobotModel;
@@ -118,10 +112,8 @@ public class HighLevelHumanoidControllerToolbox
    private final double minZForceForCoPControlScaling;
 
    private final SideDependentList<YoFrameVector2D> yoCoPError;
-   private final SideDependentList<YoDouble> yoCoPErrorMagnitude = new SideDependentList<YoDouble>(new YoDouble("leftFootCoPErrorMagnitude",
-                                                                                                                                        registry),
-                                                                                                                   new YoDouble("rightFootCoPErrorMagnitude",
-                                                                                                                                        registry));
+   private final SideDependentList<YoDouble> yoCoPErrorMagnitude = new SideDependentList<YoDouble>(new YoDouble("leftFootCoPErrorMagnitude", registry),
+                                                                                                   new YoDouble("rightFootCoPErrorMagnitude", registry));
    private final SideDependentList<YoDouble> copControlScales;
 
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
@@ -187,7 +179,9 @@ public class HighLevelHumanoidControllerToolbox
 
       if (yoGraphicsListRegistry != null)
       {
-         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames, yoGraphicsListRegistry, registry, fullRobotModel.getHead().getBodyFixedFrame());
+         referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames,
+                                                                                 yoGraphicsListRegistry,
+                                                                                 registry);
       }
       else
       {
@@ -209,7 +203,7 @@ public class HighLevelHumanoidControllerToolbox
          ReferenceFrame soleFrame = contactableFoot.getSoleFrame();
          String namePrefix = soleFrame.getName() + "DesiredCoP";
          YoFramePoint2D yoDesiredCenterOfPressure = new YoFramePoint2D(namePrefix, soleFrame, registry);
-         AlphaFilteredYoFramePoint2d yoFilteredDesiredCenterOfPressure = AlphaFilteredYoFramePoint2d.createAlphaFilteredYoFramePoint2d("filtered"
+         AlphaFilteredYoFramePoint2d yoFilteredDesiredCenterOfPressure = new AlphaFilteredYoFramePoint2d("filtered"
                + namePrefix, "", registry, desiredCoPAlpha, yoDesiredCenterOfPressure);
          footDesiredCenterOfPressures.put(contactableFoot, yoDesiredCenterOfPressure);
          filteredFootDesiredCenterOfPressures.put(contactableFoot, yoFilteredDesiredCenterOfPressure);
@@ -226,8 +220,12 @@ public class HighLevelHumanoidControllerToolbox
       {
          ContactableFoot contactableFoot = feet.get(robotSide);
          RigidBodyBasics rigidBody = contactableFoot.getRigidBody();
-         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(), rigidBody, contactableFoot.getSoleFrame(),
-                                                                    contactableFoot.getContactPoints2d(), coefficientOfFriction, registry);
+         YoPlaneContactState contactState = new YoPlaneContactState(contactableFoot.getSoleFrame().getName(),
+                                                                    rigidBody,
+                                                                    contactableFoot.getSoleFrame(),
+                                                                    contactableFoot.getContactPoints2d(),
+                                                                    coefficientOfFriction,
+                                                                    registry);
 
          footContactStates.put(robotSide, contactState);
          previousFootContactPoints.get(robotSide).copyFromListAndTrimSize(contactableFoot.getContactPoints2d());
@@ -344,8 +342,12 @@ public class HighLevelHumanoidControllerToolbox
       String graphicListName = getClass().getSimpleName();
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPosition copViz = new YoArtifactPosition("Controller CoP", yoCenterOfPressure.getYoX(), yoCenterOfPressure.getYoY(), GraphicType.DIAMOND,
-                                                            Color.BLACK, 0.005);
+         YoArtifactPosition copViz = new YoArtifactPosition("Controller CoP",
+                                                            yoCenterOfPressure.getYoX(),
+                                                            yoCenterOfPressure.getYoY(),
+                                                            GraphicType.DIAMOND,
+                                                            Color.BLACK,
+                                                            0.005);
          yoGraphicsListRegistry.registerArtifact(graphicListName, copViz);
       }
       yoCenterOfPressure.setToNaN();
@@ -355,8 +357,7 @@ public class HighLevelHumanoidControllerToolbox
       yoAngularMomentum = new YoFrameVector3D("AngularMomentum", centerOfMassFrame, registry);
       YoDouble alpha = new YoDouble("filteredAngularMomentumAlpha", registry);
       alpha.set(0.95); // switch to break frequency and move to walking parameters
-      filteredYoAngularMomentum = AlphaFilteredYoFrameVector.createAlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha,
-                                                                                              yoAngularMomentum);
+      filteredYoAngularMomentum = new AlphaFilteredYoFrameVector("filteredAngularMomentum", "", registry, alpha, yoAngularMomentum);
       momentumGain.set(0.0);
 
       attachControllerFailureListener(fallingDirection -> controllerFailed.set(true));
@@ -454,6 +455,11 @@ public class HighLevelHumanoidControllerToolbox
       yoCapturePoint.set(capturePoint2d, 0.0);
    }
 
+   public CenterOfMassJacobian getCenterOfMassJacobian()
+   {
+      return capturePointCalculator.getCenterOfMassJacobian();
+   }
+
    private final FrameVector3D angularMomentum = new FrameVector3D();
    private final Momentum robotMomentum = new Momentum();
 
@@ -469,7 +475,7 @@ public class HighLevelHumanoidControllerToolbox
    private final FramePoint2D localDesiredCapturePoint = new FramePoint2D();
    private final YoDouble momentumGain = new YoDouble("MomentumGain", registry);
 
-   public void getAdjustedDesiredCapturePoint(FramePoint2D desiredCapturePoint, FramePoint2D adjustedDesiredCapturePoint)
+   public void getAdjustedDesiredCapturePoint(FramePoint2DReadOnly desiredCapturePoint, FramePoint2DBasics adjustedDesiredCapturePointToPack)
    {
       angularMomentum.set(filteredYoAngularMomentum);
       ReferenceFrame comFrame = angularMomentum.getReferenceFrame();
@@ -478,20 +484,25 @@ public class HighLevelHumanoidControllerToolbox
 
       double scaleFactor = momentumGain.getDoubleValue() * omega0.getDoubleValue() / (totalMass.getDoubleValue() * gravity);
 
-      adjustedDesiredCapturePoint.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
-      adjustedDesiredCapturePoint.scale(scaleFactor);
-      adjustedDesiredCapturePoint.add(localDesiredCapturePoint);
-      adjustedDesiredCapturePoint.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
+      adjustedDesiredCapturePointToPack.setIncludingFrame(comFrame, -angularMomentum.getY(), angularMomentum.getX());
+      adjustedDesiredCapturePointToPack.scale(scaleFactor);
+      adjustedDesiredCapturePointToPack.add(localDesiredCapturePoint);
+      adjustedDesiredCapturePointToPack.changeFrameAndProjectToXYPlane(desiredCapturePoint.getReferenceFrame());
    }
 
-   public void getCapturePoint(FramePoint2D capturePointToPack)
+   public void getCapturePoint(FixedFramePoint2DBasics capturePointToPack)
    {
-      capturePointToPack.setIncludingFrame(yoCapturePoint);
+      capturePointToPack.set(yoCapturePoint);
    }
 
-   public void getCapturePoint(FramePoint3D capturePointToPack)
+   public FramePoint3DReadOnly getCapturePoint()
    {
-      capturePointToPack.setIncludingFrame(yoCapturePoint);
+      return yoCapturePoint;
+   }
+
+   public void getCapturePoint(FixedFramePoint3DBasics capturePointToPack)
+   {
+      capturePointToPack.setMatchingFrame(yoCapturePoint);
    }
 
    private final FramePoint2D copDesired = new FramePoint2D();
@@ -634,7 +645,7 @@ public class HighLevelHumanoidControllerToolbox
       wrenchToSubstractHandWeightTo.sub(wristWrenchDueToGravity);
    }
 
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoVariableRegistry()
    {
       return registry;
    }
@@ -951,7 +962,7 @@ public class HighLevelHumanoidControllerToolbox
       for (int i = 0; i < defaultSupportPolygon.getNumberOfVertices(); i++)
       {
          tempPosition.setIncludingFrame(defaultSupportPolygon.getVertex(i), 0.0);
-         contactPoints.get(i).setPosition(tempPosition);
+         contactPoints.get(i).setMatchingFrame(tempPosition);
       }
       contactState.notifyContactStateHasChanged();
    }
@@ -959,6 +970,11 @@ public class HighLevelHumanoidControllerToolbox
    public double getOmega0()
    {
       return omega0.getDoubleValue();
+   }
+   
+   public YoDouble getOmega0Provider()
+   {
+      return omega0;
    }
 
    public void getCoP(FramePoint3D copToPack)

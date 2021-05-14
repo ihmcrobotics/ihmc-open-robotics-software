@@ -1,11 +1,11 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class SimpleDoNothingBehavior extends AbstractBehavior
 {
-   public SimpleDoNothingBehavior(String robotName, Ros2Node ros2Node)
+   public SimpleDoNothingBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
    }

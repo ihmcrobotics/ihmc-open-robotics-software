@@ -6,11 +6,11 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.robotics.time.ThreadTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class BarrierScheduledRobotController implements DisposableRobotController
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final BarrierScheduler<HumanoidRobotContextData> barrierScheduler;
    private final HumanoidRobotContextData masterContext;
 
@@ -22,7 +22,7 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
       this.masterContext = masterContext;
 
       barrierScheduler = new BarrierScheduler<>(tasks, masterContext, overrunBehavior);
-      registry = new YoVariableRegistry(name);
+      registry = new YoRegistry(name);
 
       timer = new ThreadTimer("Scheduler", schedulerDt, registry);
    }
@@ -35,7 +35,7 @@ public class BarrierScheduledRobotController implements DisposableRobotControlle
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

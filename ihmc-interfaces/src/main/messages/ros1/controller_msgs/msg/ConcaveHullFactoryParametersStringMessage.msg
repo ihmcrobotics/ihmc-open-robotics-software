@@ -1,0 +1,6 @@
+# String serialized concave hull factory parameters
+# Might be kinda long, so give it some space
+
+string[] parameters
+
+

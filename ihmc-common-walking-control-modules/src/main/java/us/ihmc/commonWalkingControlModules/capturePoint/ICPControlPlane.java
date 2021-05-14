@@ -1,63 +1,58 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoVariable;
+
+import java.util.List;
 
 public class ICPControlPlane
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble controlPlaneHeight;
    private final ReferenceFrame centerOfMassFrame;
 
+   private final RecyclingArrayList<Point3D> vertexInWorldProvider = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Point2DBasics> pointsInPlane = new RecyclingArrayList<>(Point2D::new);
+
    private final FramePoint3D tempFramePoint = new FramePoint3D();
-   private final RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-   private final ReferenceFrame planarRegionFrame;
    private final FramePoint3D tempProjectedFramePoint = new FramePoint3D();
-   private final FramePoint2D tempFramePoint2D = new FramePoint2D();
+
+   private final FramePoint3D planeOrigin = new FramePoint3D();
+   private final FrameVector3D planeNormal = new FrameVector3D();
 
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D rayDirection = new FrameVector3D();
-   private final FramePoint3D intersectionToThrowAway = new FramePoint3D();
-
-   private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
-
-   private final ConvexPolygon2D scaledConvexHull = new ConvexPolygon2D();
 
    private final double gravityZ;
 
-   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoVariableRegistry parentRegistry)
+   public ICPControlPlane(ReferenceFrame centerOfMassFrame, double gravityZ, YoRegistry parentRegistry)
    {
       this.centerOfMassFrame = centerOfMassFrame;
       this.gravityZ = gravityZ;
 
       controlPlaneHeight = new YoDouble("controlPlaneHeight", registry);
       parentRegistry.addChild(registry);
-
-      planarRegionFrame = new ReferenceFrame("planarRegionFrame", worldFrame)
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            transformToParent.set(planarRegionTransformToWorld);
-         }
-      };
    }
 
    public void setOmega0(double omega0)
@@ -73,36 +68,65 @@ public class ICPControlPlane
 
    public void projectPointOntoControlPlane(ReferenceFrame desiredReferenceFrame, FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack)
    {
-      tempFramePoint.setIncludingFrame(pointToProject);
-      tempFramePoint.changeFrame(centerOfMassFrame);
-
-      projectPointOntoControlPlane(tempFramePoint, projectionToPack, controlPlaneHeight.getDoubleValue());
+      projectPointThroughReferenceFrame(centerOfMassFrame, pointToProject, projectionToPack, controlPlaneHeight.getDoubleValue());
 
       projectionToPack.changeFrame(desiredReferenceFrame);
    }
 
-
-   public void projectPointFromPlaneOntoSurface(ReferenceFrame desiredReferenceFrame, FramePoint2DReadOnly pointToProject, FramePoint3D projectionToPack, double surfaceHeightInWorld)
+   // FIXME clean up?
+   public void projectPointFromControlPlaneOntoSurface(ReferenceFrame desiredReferenceFrame,
+                                                       FramePoint2DReadOnly pointToProject,
+                                                       FramePoint3DBasics projectionToPack,
+                                                       double surfaceHeightInWorld)
    {
-      tempFramePoint2D.setIncludingFrame(pointToProject);
-      tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
+      tempFramePoint.setIncludingFrame(pointToProject, 0.0);
+      tempFramePoint.changeFrame(worldFrame);
 
-      tempFramePoint.setIncludingFrame(tempFramePoint2D, surfaceHeightInWorld);
+      tempFramePoint.setZ(surfaceHeightInWorld);
       tempFramePoint.changeFrame(centerOfMassFrame);
 
       double surfaceHeightInCoMFrame = tempFramePoint.getZ();
-      projectPointFromControlPlaneOntoSurface(tempFramePoint, projectionToPack, controlPlaneHeight.getDoubleValue(), surfaceHeightInCoMFrame);
+      tempFramePoint.setZ(controlPlaneHeight.getDoubleValue());
+
+      projectPointThroughReferenceFrame(centerOfMassFrame, tempFramePoint, projectionToPack, surfaceHeightInCoMFrame);
 
       projectionToPack.changeFrame(desiredReferenceFrame);
    }
 
-
-   public void projectPointFromPlaneOntoPlanarRegion(ReferenceFrame desiredReferenceFrame, FramePoint2DReadOnly pointToProject, FramePoint3D projectionToPack, PlanarRegion planarRegion)
+   /**
+    * Projects a point that is in the control plane to a point in the world that is on the planar region.
+    */
+   public void projectPointFromControlPlaneOntoPlanarRegion(ReferenceFrame desiredReferenceFrame,
+                                                            FramePoint2DReadOnly pointToProject,
+                                                            FramePoint3D projectionToPack,
+                                                            PlanarRegion planarRegion)
    {
-      tempFramePoint2D.setIncludingFrame(pointToProject);
-      tempFramePoint2D.changeFrameAndProjectToXYPlane(centerOfMassFrame);
+      planarRegion.getOrigin(planeOrigin);
+      planarRegion.getNormal(planeNormal);
 
-      tempFramePoint.setIncludingFrame(tempFramePoint2D, controlPlaneHeight.getDoubleValue());
+      projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
+   }
+
+   public void projectPointFromControlPlaneOntoConstraintRegion(ReferenceFrame desiredReferenceFrame,
+                                                                FramePoint2DReadOnly pointToProject,
+                                                                FramePoint3D projectionToPack,
+                                                                StepConstraintRegion stepConstraintRegion)
+   {
+      stepConstraintRegion.getNormal(planeNormal);
+      stepConstraintRegion.getRegionOriginInWorld(planeOrigin);
+
+      projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
+   }
+
+   public void projectPointFromControlPlaneOntoRegion(ReferenceFrame desiredReferenceFrame,
+                                                                FramePoint2DReadOnly pointToProject,
+                                                                FramePoint3D projectionToPack,
+                                                                Point3DReadOnly regionOrigin,
+                                                                FrameVector3DReadOnly regionNormal)
+   {
+      tempFramePoint.setIncludingFrame(pointToProject, 0.0);
+      tempFramePoint.changeFrame(centerOfMassFrame);
+      tempFramePoint.setZ(controlPlaneHeight.getDoubleValue());
       tempFramePoint.changeFrame(worldFrame);
 
       centerOfMassPosition.setToZero(centerOfMassFrame);
@@ -113,121 +137,79 @@ public class ICPControlPlane
 
       projectionToPack.setToZero(worldFrame);
 
-      BoundingBox3D boundingBoxInWorld = planarRegion.getBoundingBox3dInWorld();
-      boundingBoxInWorld.intersectionWithRay3D(centerOfMassPosition, rayDirection, projectionToPack, intersectionToThrowAway);
+      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(regionOrigin, regionNormal, centerOfMassPosition, rayDirection, projectionToPack);
 
       projectionToPack.changeFrame(desiredReferenceFrame);
    }
 
-   public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D convexPolygonInControlPlaneToPack)
+   public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      convexPolygonInControlPlaneToPack.clear();
+      projectVerticesOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+   }
 
-      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
-      planarRegionFrame.update();
-
-      for (int vertexIndex = 0; vertexIndex < convexHull.getNumberOfVertices(); vertexIndex++)
+   public void projectPlanarRegionConvexHullInWorldOntoControlPlane(ConvexPolygon2DReadOnly convexHullInWorld, PlanarRegion heightProvider,
+                                                                    ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
+   {
+      vertexInWorldProvider.clear();
+      for (int i = 0; i < convexHullInWorld.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly vertex = convexHull.getVertex(vertexIndex);
-         tempFramePoint2D.setToZero(planarRegionFrame);
-         tempFramePoint2D.set(vertex);
-         tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-
-         double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint.getY());
-
-         tempFramePoint.setToZero(worldFrame);
-         tempFramePoint.set(tempFramePoint2D, vertexZ);
-         tempFramePoint.changeFrame(centerOfMassFrame);
-
-         projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
-
-         tempProjectedFramePoint.changeFrame(worldFrame);
-
-         convexPolygonInControlPlaneToPack.addVertex(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
+         Point3D vertexInWorld = vertexInWorldProvider.add();
+         Point2DReadOnly vertex = convexHullInWorld.getVertex(i);
+         vertexInWorld.set(vertex, heightProvider.getPlaneZGivenXY(vertex.getX(), vertex.getY()));
       }
+
+      projectPointsInWorldOntoControlPlane(vertexInWorldProvider, pointsInPlane);
+
+      convexPolygonInControlPlaneToPack.clear();
+      for (int i = 0; i < pointsInPlane.size(); i++)
+         convexPolygonInControlPlaneToPack.addVertex(pointsInPlane.get(i));
       convexPolygonInControlPlaneToPack.update();
    }
 
-   public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D convexPolygonInControlPlaneToPack, double distanceInside)
+   public void projectVerticesOntoControlPlane(Vertex2DSupplier convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
+                                               ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      convexPolygonInControlPlaneToPack.clear();
-
-      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
-      planarRegionFrame.update();
-
-      scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexHull);
-
-      for (int vertexIndex = 0; vertexIndex < scaledConvexHull.getNumberOfVertices(); vertexIndex++)
+      vertexInWorldProvider.clear();
+      for (int i = 0; i < convexHullInLocal.getNumberOfVertices(); i++)
       {
-         Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
-         tempFramePoint2D.setToZero(planarRegionFrame);
-         tempFramePoint2D.set(vertex);
-         tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
-
-         double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint2D.getY());
-
-         tempFramePoint.setToZero(worldFrame);
-         tempFramePoint.set(tempFramePoint2D, vertexZ);
-         tempFramePoint.changeFrame(centerOfMassFrame);
-
-         projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
-
-         tempProjectedFramePoint.changeFrame(worldFrame);
-
-         convexPolygonInControlPlaneToPack.addVertex(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
+         Point3D vertexInWorld = vertexInWorldProvider.add();
+         vertexInWorld.set(convexHullInLocal.getVertex(i), 0.0);
+         transformFromLocalToWorld.transform(vertexInWorld);
       }
+
+      projectPointsInWorldOntoControlPlane(vertexInWorldProvider, pointsInPlane);
+
+      convexPolygonInControlPlaneToPack.clear();
+      for (int i = 0; i < pointsInPlane.size(); i++)
+         convexPolygonInControlPlaneToPack.addVertex(pointsInPlane.get(i));
       convexPolygonInControlPlaneToPack.update();
    }
 
-   public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D footstepPolygon,
-         ConvexPolygon2D convexPolygonInControlPlaneToPack, double distanceInside)
+   public void projectPointsInWorldOntoControlPlane(List<? extends Point3DReadOnly> convexHullInWorld, RecyclingArrayList<? extends Point2DBasics> pointsInControlPlane)
    {
-      ConvexPolygon2D convexHull = planarRegion.getConvexHull();
-      convexPolygonInControlPlaneToPack.clear();
+      pointsInControlPlane.clear();
 
-      planarRegion.getTransformToWorld(planarRegionTransformToWorld);
-      planarRegionFrame.update();
-
-      scaler.scaleConvexPolygonToContainInteriorPolygon(convexHull, footstepPolygon, distanceInside, scaledConvexHull);
-
-      for (int vertexIndex = 0; vertexIndex < scaledConvexHull.getNumberOfVertices(); vertexIndex++)
+      for (int vertexIndex = 0; vertexIndex < convexHullInWorld.size(); vertexIndex++)
       {
-         Point2DReadOnly vertex = scaledConvexHull.getVertex(vertexIndex);
-         tempFramePoint2D.setToZero(planarRegionFrame);
-         tempFramePoint2D.set(vertex);
-         tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
+         tempFramePoint.setIncludingFrame(worldFrame, convexHullInWorld.get(vertexIndex));
 
-         double vertexZ = planarRegion.getPlaneZGivenXY(tempFramePoint2D.getX(), tempFramePoint2D.getY());
-
-         tempFramePoint.setToZero(worldFrame);
-         tempFramePoint.set(tempFramePoint2D, vertexZ);
-         tempFramePoint.changeFrame(centerOfMassFrame);
-
-         projectPoint(tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue(), tempFramePoint.getZ());
+         projectPointThroughReferenceFrame(centerOfMassFrame, tempFramePoint, tempProjectedFramePoint, controlPlaneHeight.getDoubleValue());
 
          tempProjectedFramePoint.changeFrame(worldFrame);
 
-         convexPolygonInControlPlaneToPack.addVertex(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
+         pointsInControlPlane.add().set(tempProjectedFramePoint.getX(), tempProjectedFramePoint.getY());
       }
-      convexPolygonInControlPlaneToPack.update();
    }
 
-   private static void projectPointOntoControlPlane(FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack, double planeHeight)
-   {
-      double unprojectedHeight = pointToProject.getZ();
-      projectPoint(pointToProject, projectionToPack, planeHeight, unprojectedHeight);
-   }
-
-   private static void projectPointFromControlPlaneOntoSurface(FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack, double planeHeight, double surfaceHeight)
-   {
-      projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
-   }
-
-   private static void projectPoint(FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack, double projectedHeight, double unprojectedHeight)
+   private static void projectPointThroughReferenceFrame(ReferenceFrame frameOfProjection,
+                                                         FramePoint3DReadOnly pointToProject,
+                                                         FramePoint3DBasics projectionToPack,
+                                                         double projectedHeight)
    {
       projectionToPack.setIncludingFrame(pointToProject);
+      projectionToPack.changeFrame(frameOfProjection);
+
+      double unprojectedHeight = projectionToPack.getZ();
       projectionToPack.scale(projectedHeight / unprojectedHeight);
       projectionToPack.setZ(projectedHeight);
    }

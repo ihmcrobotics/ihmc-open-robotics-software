@@ -11,7 +11,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LeapOfFaithParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
@@ -34,6 +33,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -54,7 +54,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
    private final AtlasJointMap jointMap;
    private final AtlasMomentumOptimizationSettings momentumOptimizationSettings;
-   private final ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private final double massScale;
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
@@ -68,6 +67,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    private AtlasSteppingParameters steppingParameters;
    private LeapOfFaithParameters leapOfFaithParameters;
 
+   private final JointLimitParameters spineJointLimitParameters;
+   private final JointLimitParameters kneeJointLimitParameters;
+   private final JointLimitParameters ankleJointLimitParameters;
+
    public AtlasWalkingControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
       this.target = target;
@@ -75,11 +78,10 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
       this.massScale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
 
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
-      angularMomentumModifierParameters = new ICPAngularMomentumModifierParameters();
 
       minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
       nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.845 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.736 + 0.08);
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -92,6 +94,27 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       icpOptimizationParameters = new AtlasICPOptimizationParameters(runningOnRealRobot);
 
+      spineJointLimitParameters = new JointLimitParameters();
+      spineJointLimitParameters.setMaxAbsJointVelocity(9.0);
+      spineJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
+      spineJointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
+      spineJointLimitParameters.setVelocityControlGain(30.0);
+
+      kneeJointLimitParameters = new JointLimitParameters();
+      kneeJointLimitParameters.setMaxAbsJointVelocity(5.0);
+      kneeJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(30.0));
+      kneeJointLimitParameters.setJointLimitFilterBreakFrequency(15.0);
+      kneeJointLimitParameters.setVelocityControlGain(60.0);
+      kneeJointLimitParameters.setVelocityDeadbandSize(0.6);
+
+      ankleJointLimitParameters = new JointLimitParameters();
+      ankleJointLimitParameters.setMaxAbsJointVelocity(5.0);
+      ankleJointLimitParameters.setJointLimitDistanceForMaxVelocity(Math.toRadians(20.0));
+      ankleJointLimitParameters.setJointLimitFilterBreakFrequency(10.0);
+      ankleJointLimitParameters.setVelocityControlGain(90.0);
+      ankleJointLimitParameters.setVelocityDeadbandSize(0.6);
+      ankleJointLimitParameters.setRangeOfMotionMarginFraction(0.02);
+
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
@@ -101,14 +124,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          double z = -0.40;
          Vector3D translation = new Vector3D(x, y, z);
          translation.scale(jointMap.getModelScale());
-         transform.setTranslation(translation);
+         transform.getTranslation().set(translation);
 
          RotationMatrix rotation = new RotationMatrix();
          double yaw = 0.0; // robotSide.negateIfRightSide(-1.7);
          double pitch = 0.7;
          double roll = 0.0; // robotSide.negateIfRightSide(-0.8);
          rotation.setYawPitchRoll(yaw, pitch, roll);
-         transform.setRotation(rotation);
+         transform.getRotation().set(rotation);
 
          handPosesWithRespectToChestFrame.put(robotSide, transform);
       }
@@ -406,7 +429,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       footSwitchFactory.setDefaultContactThresholdForce(massScale * contactThresholdForce);
       footSwitchFactory.setDefaultCoPThresholdFraction(0.02);
-      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(massScale * 220.0);
+      footSwitchFactory.setDefaultSecondContactThresholdForceIgnoringCoP(massScale * (runningOnRealRobot ? 220.0 : 180.0));
       return footSwitchFactory;
    }
 
@@ -420,12 +443,6 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
-   }
-
-   @Override
-   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
-   {
-      return angularMomentumModifierParameters;
    }
 
    @Override
@@ -487,20 +504,29 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
-      String[] joints = {bkxName, bkyName};
+      String leftKnyName = jointMap.getLegJointName(RobotSide.LEFT, LegJointName.KNEE_PITCH);
+      String rightKnyName = jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.KNEE_PITCH);
+      String leftAkyName = jointMap.getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_PITCH);
+      String rightAkyName = jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_PITCH);
+      String[] joints = {bkxName, bkyName, leftKnyName, rightKnyName, leftAkyName, rightAkyName};
       return joints;
    }
 
    /** {@inheritDoc} */
    @Override
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
-      JointLimitParameters parameters = new JointLimitParameters();
-      parameters.setMaxAbsJointVelocity(9.0);
-      parameters.setJointLimitDistanceForMaxVelocity(30.0 * Math.PI / 180.0);
-      parameters.setJointLimitFilterBreakFrequency(15.0);
-      parameters.setVelocityControlGain(30.0);
-      return parameters;
+      if (jointMap.getSpineJointName(jointName) == SpineJointName.SPINE_ROLL || jointMap.getSpineJointName(jointName) == SpineJointName.SPINE_PITCH)
+         return spineJointLimitParameters;
+      else if (jointMap.getLegJointName(jointName) != null)
+      {
+         if (jointMap.getLegJointName(jointName).getRight() == LegJointName.KNEE_PITCH)
+            return kneeJointLimitParameters;
+         else if (jointMap.getLegJointName(jointName).getRight() == LegJointName.ANKLE_PITCH)
+            return ankleJointLimitParameters;
+      }
+
+      return null;
    }
 
    /** {@inheritDoc} */
@@ -607,5 +633,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
    {
       this.leapOfFaithParameters = leapOfFaithParameters;
+   }
+
+   /**
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
+    * Not a very clean variable and probably should not be here, but here it is...
+    */
+   @Override
+   public double getMaximumVelocityCoMHeight()
+   {
+      return 0.5;
    }
 }

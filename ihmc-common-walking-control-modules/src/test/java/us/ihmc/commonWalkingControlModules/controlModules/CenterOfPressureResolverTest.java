@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controlModules;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -9,8 +10,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -206,7 +205,7 @@ public class CenterOfPressureResolverTest
    {
       PoseReferenceFrame translatedZUpFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
       RigidBodyTransform transform3D = new RigidBodyTransform();
-      transform3D.setTranslation(new Vector3D(frameCenterPoint));
+      transform3D.getTranslation().set(new Vector3D(frameCenterPoint));
 
       FramePose3D framePose = new FramePose3D(ReferenceFrame.getWorldFrame(), transform3D);
       translatedZUpFrame.setPoseAndUpdate(framePose);

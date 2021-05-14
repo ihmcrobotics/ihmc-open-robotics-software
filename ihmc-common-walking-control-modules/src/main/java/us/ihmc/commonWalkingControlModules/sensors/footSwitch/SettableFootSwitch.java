@@ -5,9 +5,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
 
 public class SettableFootSwitch implements FootSwitchInterface
 {
@@ -17,7 +17,7 @@ public class SettableFootSwitch implements FootSwitchInterface
    private final YoFramePoint2D yoResolvedCoP;
    private final int totalNumberOfFeet;
 
-   public SettableFootSwitch(ContactablePlaneBody foot, double totalRobotWeight, int totalNumberOfFeet, YoVariableRegistry registry)
+   public SettableFootSwitch(ContactablePlaneBody foot, double totalRobotWeight, int totalNumberOfFeet, YoRegistry registry)
    {
       this.totalNumberOfFeet = totalNumberOfFeet;
       this.hasFootHitGround = new YoBoolean(foot.getName() + "_SettableFootSwitch", registry);

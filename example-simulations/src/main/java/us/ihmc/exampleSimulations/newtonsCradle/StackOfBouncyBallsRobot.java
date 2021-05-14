@@ -3,13 +3,13 @@ package us.ihmc.exampleSimulations.newtonsCradle;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class StackOfBouncyBallsRobot extends Robot
 {
@@ -25,10 +25,10 @@ public class StackOfBouncyBallsRobot extends Robot
       double gravity = -9.81;
       this.setGravity(gravity);
 
-      final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", null, this.getRobotsYoVariableRegistry());
-      final YoDouble potentialEnergy = new YoDouble("potentialEnergy", this.getRobotsYoVariableRegistry());
-      final YoDouble kineticEnergy = new YoDouble("kineticEnergy", this.getRobotsYoVariableRegistry());
-      final YoDouble totalEnergy = new YoDouble("totalEnergy", this.getRobotsYoVariableRegistry());
+      final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", null, this.getRobotsYoRegistry());
+      final YoDouble potentialEnergy = new YoDouble("potentialEnergy", this.getRobotsYoRegistry());
+      final YoDouble kineticEnergy = new YoDouble("kineticEnergy", this.getRobotsYoRegistry());
+      final YoDouble totalEnergy = new YoDouble("totalEnergy", this.getRobotsYoRegistry());
 
       double largestBallRadius = 0.25;
       double largestBallMass = 2000.0;

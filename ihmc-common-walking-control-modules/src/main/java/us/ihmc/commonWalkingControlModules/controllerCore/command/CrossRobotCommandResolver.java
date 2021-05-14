@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
@@ -50,7 +51,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelCo
 import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -60,7 +60,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -139,6 +139,7 @@ public class CrossRobotCommandResolver
    {
       resolveFrameTuple3D(in.getLinearMomentumRate(), out.getLinearMomentumRate());
       resolveCenterOfPressureDataHolder(in.getCenterOfPressureData(), out.getCenterOfPressureData());
+      resolveDesiredExternalWrenchHolder(in.getDesiredExternalWrenchData(), out.getDesiredExternalWrenchData());
       out.setRootJointDesiredConfigurationData(in.getRootJointDesiredConfigurationData());
       resolveLowLevelOneDoFJointDesiredDataHolder(in.getLowLevelOneDoFJointDesiredDataHolderPreferred(), out.getLowLevelOneDoFJointDesiredDataHolderPreferred());
    }
@@ -150,6 +151,16 @@ public class CrossRobotCommandResolver
       {
          out.registerRigidBody(resolveRigidBody(in.getRigidBody(i)));
          resolveFrameTuple2D(in.getCenterOfPressure(i), out.getCenterOfPressure(i));
+      }
+   }
+
+   public void resolveDesiredExternalWrenchHolder(DesiredExternalWrenchHolder in, DesiredExternalWrenchHolder out)
+   {
+      out.clear();
+      for (int i = 0; i < in.getNumberOfBodiesWithDesiredExternalWrench(); i++)
+      {
+         out.registerRigidBody(resolveRigidBody(in.getRigidBody(i)));
+         resolveWrench(in.getDesiredExternalWrench(i), out.getDesiredExternalWrench(i));
       }
    }
 
@@ -282,6 +293,8 @@ public class CrossRobotCommandResolver
 
    private void resolveInverseDynamicsCommandListInternal(InverseDynamicsCommandList in, InverseDynamicsCommandBuffer out)
    {
+      out.setCommandId(in.getCommandId());
+
       for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
       {
          InverseDynamicsCommand<?> commandToResolve = in.getCommand(commandIndex);
@@ -312,6 +325,9 @@ public class CrossRobotCommandResolver
          case MOMENTUM:
             resolveMomentumRateCommand((MomentumRateCommand) commandToResolve, out.addMomentumRateCommand());
             break;
+         case MOMENTUM_COST:
+            resolveLinearMomentumRateCostCommand((LinearMomentumRateCostCommand) commandToResolve, out.addLinearMomentumRateCostCommand());
+            break;
          case PLANE_CONTACT_STATE:
             resolvePlaneContactStateCommand((PlaneContactStateCommand) commandToResolve, out.addPlaneContactStateCommand());
             break;
@@ -338,6 +354,8 @@ public class CrossRobotCommandResolver
 
    private void resolveInverseKinematicsCommandListInternal(InverseKinematicsCommandList in, InverseKinematicsCommandBuffer out)
    {
+      out.setCommandId(in.getCommandId());
+
       for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
       {
          InverseKinematicsCommand<?> commandToResolve = in.getCommand(commandIndex);
@@ -382,6 +400,8 @@ public class CrossRobotCommandResolver
 
    private void resolveVirtualModelControlCommandListInternal(VirtualModelControlCommandList in, VirtualModelControlCommandBuffer out)
    {
+      out.setCommandId(in.getCommandId());
+
       for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
       {
          VirtualModelControlCommand<?> commandToResolve = in.getCommand(commandIndex);
@@ -435,6 +455,8 @@ public class CrossRobotCommandResolver
 
    private void resolveFeedbackControlCommandListInternal(FeedbackControlCommandList in, FeedbackControlCommandBuffer out)
    {
+      out.setCommandId(in.getCommandId());
+
       for (int commandIndex = 0; commandIndex < in.getNumberOfCommands(); commandIndex++)
       {
          FeedbackControlCommand<?> commandToResolve = in.getCommand(commandIndex);
@@ -476,6 +498,7 @@ public class CrossRobotCommandResolver
 
    public void resolveCenterOfPressureCommand(CenterOfPressureCommand in, CenterOfPressureCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.setConstraintType(in.getConstraintType());
       out.setContactingRigidBody(resolveRigidBody(in.getContactingRigidBody()));
       resolveFrameTuple2D(in.getWeight(), out.getWeight());
@@ -484,6 +507,7 @@ public class CrossRobotCommandResolver
 
    public void resolveContactWrenchCommand(ContactWrenchCommand in, ContactWrenchCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.setConstraintType(in.getConstraintType());
       out.setRigidBody(resolveRigidBody(in.getRigidBody()));
       resolveWrench(in.getWrench(), out.getWrench());
@@ -493,6 +517,7 @@ public class CrossRobotCommandResolver
 
    public void resolveExternalWrenchCommand(ExternalWrenchCommand in, ExternalWrenchCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.setRigidBody(resolveRigidBody(in.getRigidBody()));
       resolveWrench(in.getExternalWrench(), out.getExternalWrench());
    }
@@ -506,6 +531,7 @@ public class CrossRobotCommandResolver
    public void resolveJointAccelerationIntegrationCommand(JointAccelerationIntegrationCommand in, JointAccelerationIntegrationCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJointsToComputeDesiredPositionFor(); jointIndex++)
       {
@@ -518,6 +544,7 @@ public class CrossRobotCommandResolver
    public void resolveJointLimitEnforcementMethodCommand(JointLimitEnforcementMethodCommand in, JointLimitEnforcementMethodCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -531,6 +558,7 @@ public class CrossRobotCommandResolver
    public void resolveJointspaceAccelerationCommand(JointspaceAccelerationCommand in, JointspaceAccelerationCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -539,15 +567,25 @@ public class CrossRobotCommandResolver
    }
 
    public void resolveMomentumRateCommand(MomentumRateCommand in, MomentumRateCommand out)
-
    {
+      out.setCommandId(in.getCommandId());
       out.setMomentumRate(in.getMomentumRate());
+      resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
+      resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
+   }
+
+   public void resolveLinearMomentumRateCostCommand(LinearMomentumRateCostCommand in, LinearMomentumRateCostCommand out)
+   {
+      out.setCommandId(in.getCommandId());
+      out.setMomentumRateHessian(in.getMomentumRateHessian());
+      out.setMomentumRateGradient(in.getMomentumRateGradient());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
    }
 
    public void resolvePlaneContactStateCommand(PlaneContactStateCommand in, PlaneContactStateCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.clearContactPoints();
       out.setContactingRigidBody(resolveRigidBody(in.getContactingRigidBody()));
       out.setCoefficientOfFriction(in.getCoefficientOfFriction());
@@ -566,6 +604,7 @@ public class CrossRobotCommandResolver
 
    public void resolveSpatialAccelerationCommand(SpatialAccelerationCommand in, SpatialAccelerationCommand out)
    {
+      out.setCommandId(in.getCommandId());
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearAcceleration().set(in.getDesiredLinearAcceleration());
       out.getDesiredAngularAcceleration().set(in.getDesiredAngularAcceleration());
@@ -586,6 +625,7 @@ public class CrossRobotCommandResolver
    public void resolveJointLimitReductionCommand(JointLimitReductionCommand in, JointLimitReductionCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -596,6 +636,7 @@ public class CrossRobotCommandResolver
    public void resolveJointspaceVelocityCommand(JointspaceVelocityCommand in, JointspaceVelocityCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -605,6 +646,7 @@ public class CrossRobotCommandResolver
 
    public void resolveMomentumCommand(MomentumCommand in, MomentumCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.setMomentum(in.getMomentum());
       resolveWeightMatrix6D(in.getWeightMatrix(), out.getWeightMatrix());
       resolveSelectionMatrix6D(in.getSelectionMatrix(), out.getSelectionMatrix());
@@ -618,6 +660,7 @@ public class CrossRobotCommandResolver
    public void resolvePrivilegedConfigurationCommand(PrivilegedConfigurationCommand in, PrivilegedConfigurationCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
       out.setDefaultParameters(in.getDefaultParameters());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
@@ -634,6 +677,7 @@ public class CrossRobotCommandResolver
    public void resolvePrivilegedJointSpaceCommand(PrivilegedJointSpaceCommand in, PrivilegedJointSpaceCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -650,6 +694,7 @@ public class CrossRobotCommandResolver
    public void resolveJointLimitEnforcementCommand(JointLimitEnforcementCommand in, JointLimitEnforcementCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -659,6 +704,7 @@ public class CrossRobotCommandResolver
 
    public void resolveSpatialVelocityCommand(SpatialVelocityCommand in, SpatialVelocityCommand out)
    {
+      out.setCommandId(in.getCommandId());
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearVelocity().set(in.getDesiredLinearVelocity());
       out.getDesiredAngularVelocity().set(in.getDesiredAngularVelocity());
@@ -673,6 +719,7 @@ public class CrossRobotCommandResolver
    public void resolveJointTorqueCommand(JointTorqueCommand in, JointTorqueCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -682,6 +729,7 @@ public class CrossRobotCommandResolver
 
    public void resolveVirtualForceCommand(VirtualForceCommand in, VirtualForceCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearForce().set(in.getDesiredLinearForce());
@@ -697,6 +745,7 @@ public class CrossRobotCommandResolver
 
    public void resolveVirtualTorqueCommand(VirtualTorqueCommand in, VirtualTorqueCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredAngularTorque().set(in.getDesiredAngularTorque());
@@ -705,6 +754,7 @@ public class CrossRobotCommandResolver
 
    public void resolveVirtualWrenchCommand(VirtualWrenchCommand in, VirtualWrenchCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.set(resolveRigidBody(in.getBase()), resolveRigidBody(in.getEndEffector()));
       resolveFramePose3D(in.getControlFramePose(), out.getControlFramePose());
       out.getDesiredLinearForce().set(in.getDesiredLinearForce());
@@ -714,6 +764,7 @@ public class CrossRobotCommandResolver
 
    public void resolveCenterOfMassFeedbackControlCommand(CenterOfMassFeedbackControlCommand in, CenterOfMassFeedbackControlCommand out)
    {
+      out.setCommandId(in.getCommandId());
       out.setControlMode(in.getControlMode());
       out.getReferencePosition().set(in.getReferencePosition());
       out.getReferenceLinearVelocity().set(in.getReferenceLinearVelocity());
@@ -725,6 +776,7 @@ public class CrossRobotCommandResolver
    public void resolveJointspaceFeedbackControlCommand(JointspaceFeedbackControlCommand in, JointspaceFeedbackControlCommand out)
    {
       out.clear();
+      out.setCommandId(in.getCommandId());
 
       for (int jointIndex = 0; jointIndex < in.getNumberOfJoints(); jointIndex++)
       {
@@ -793,23 +845,12 @@ public class CrossRobotCommandResolver
       resolveFrameTuple2D(in.getPerfectCMP(), out.getPerfectCMP());
       resolveFrameTuple2D(in.getPerfectCoP(), out.getPerfectCoP());
       out.setControlHeightWithMomentum(in.getControlHeightWithMomentum());
-      out.setDesiredCenterOfMassHeightAcceleration(in.getDesiredCoMHeightAcceleration());
-      out.setSupportSide(in.getSupportSide());
-      out.setTransferToSide(in.getTransferToSide());
-      out.setInitializeForStanding(in.getInitializeForStanding());
-      out.setInitializeForSingleSupport(in.getInitializeForSingleSupport());
-      out.setInitializeForTransfer(in.getInitializeForTransfer());
+      out.setUsePelvisHeightCommand(in.getUsePelvisHeightCommand());
+      resolvePointFeedbackControlCommand(in.getPelvisHeightControlCommand(), out.getPelvisHeightControlCommand());
+      resolveCenterOfMassFeedbackControlCommand(in.getCenterOfMassHeightControlCommand(), out.getCenterOfMassHeightControlCommand());
+      out.setInitializeOnStateChange(in.getInitializeOnStateChange());
       out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
-      RecyclingArrayList<SimpleAdjustableFootstep> outFootsteps = out.getFootsteps();
-      RecyclingArrayList<SimpleAdjustableFootstep> inFootsteps = in.getFootsteps();
-      outFootsteps.clear();
-      for (int i = 0; i < inFootsteps.size(); i++)
-         resolveSimpleAdjustableFootstep(inFootsteps.get(i), outFootsteps.add());
-      out.setSwingDurations(in.getSwingDurations());
-      out.setTransferDurations(in.getTransferDurations());
-      out.setFinalTransferDuration(in.getFinalTransferDuration());
-      out.setRemainingTimeInSwingUnderDisturbance(in.getRemainingTimeInSwingUnderDisturbance());
       for (RobotSide robotSide : RobotSide.values)
          resolvePlaneContactStateCommand(in.getContactStateCommands().get(robotSide), out.getContactStateCommands().get(robotSide));
    }
@@ -817,13 +858,10 @@ public class CrossRobotCommandResolver
    public void resolveLinearMomentumRateControlModuleOutput(LinearMomentumRateControlModuleOutput in, LinearMomentumRateControlModuleOutput out)
    {
       resolveFrameTuple2D(in.getDesiredCMP(), out.getDesiredCMP());
-      resolveFrameTuple3D(in.getEffectiveICPAdjustment(), out.getEffectiveICPAdjustment());
-      out.setUsingStepAdjustment(in.getUsingStepAdjustment());
-      out.setFootstepWasAdjusted(in.getFootstepWasAdjusted());
-      resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
+      resolveFrameTuple2D(in.getResidualICPErrorForStepAdjustment(), out.getResidualICPErrorForStepAdjustment());
    }
 
-   public void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
+   public void resolveSimpleAdjustableFootstep(SimpleFootstep in, SimpleFootstep out)
    {
       out.setIsAdjustable(in.getIsAdjustable());
       out.setRobotSide(in.getRobotSide());

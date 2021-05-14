@@ -1,5 +1,6 @@
 package us.ihmc.tools.property;
 
+import java.nio.file.Path;
 import java.util.List;
 
 public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
@@ -25,5 +26,11 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    void load();
 
+   void load(String file);
+
    void save();
+
+   StoredPropertyKeyListReadOnly getKeyList();
+
+   Path findSaveFileDirectory();
 }

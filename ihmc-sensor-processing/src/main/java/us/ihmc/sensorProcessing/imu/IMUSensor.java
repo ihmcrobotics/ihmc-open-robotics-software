@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.imu;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -26,11 +26,11 @@ public class IMUSensor implements IMUSensorReadOnly
    private final Vector3D angularVelocityMeasurement = new Vector3D();
    private final Vector3D linearAccelerationMeasurement = new Vector3D();
 
-   private final DenseMatrix64F orientationNoiseCovariance;
-   private final DenseMatrix64F angularVelocityNoiseCovariance;
-   private final DenseMatrix64F angularVelocityBiasProcessNoiseCovariance;
-   private final DenseMatrix64F linearAccelerationNoiseCovariance;
-   private final DenseMatrix64F linearAccelerationBiasProcessNoiseCovariance;
+   private final DMatrixRMaj orientationNoiseCovariance;
+   private final DMatrixRMaj angularVelocityNoiseCovariance;
+   private final DMatrixRMaj angularVelocityBiasProcessNoiseCovariance;
+   private final DMatrixRMaj linearAccelerationNoiseCovariance;
+   private final DMatrixRMaj linearAccelerationBiasProcessNoiseCovariance;
 
    public IMUSensor(IMUDefinition imuDefinition, SensorNoiseParameters sensorNoiseParameters)
    {
@@ -123,40 +123,40 @@ public class IMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getOrientationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       noiseCovarianceToPack.set(orientationNoiseCovariance);
    }
 
    @Override
-   public void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       noiseCovarianceToPack.set(angularVelocityNoiseCovariance);
    }
 
    @Override
-   public void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getAngularVelocityBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       biasProcessNoiseCovarianceToPack.set(angularVelocityBiasProcessNoiseCovariance);
    }
 
    @Override
-   public void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getLinearAccelerationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       noiseCovarianceToPack.set(linearAccelerationNoiseCovariance);
    }
 
    @Override
-   public void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getLinearAccelerationBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       biasProcessNoiseCovarianceToPack.set(linearAccelerationBiasProcessNoiseCovariance);
    }
 
-   private static DenseMatrix64F createDiagonalCovarianceMatrix(double standardDeviation)
+   private static DMatrixRMaj createDiagonalCovarianceMatrix(double standardDeviation)
    {
-      DenseMatrix64F orientationCovarianceMatrix = new DenseMatrix64F(3, 3);
-      CommonOps.setIdentity(orientationCovarianceMatrix);
-      CommonOps.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
+      DMatrixRMaj orientationCovarianceMatrix = new DMatrixRMaj(3, 3);
+      CommonOps_DDRM.setIdentity(orientationCovarianceMatrix);
+      CommonOps_DDRM.scale(MathTools.square(standardDeviation), orientationCovarianceMatrix);
 
       return orientationCovarianceMatrix;
    }

@@ -247,7 +247,7 @@ public class VehicleModelObjects
          transform3D.multiply(finalAdjustment);
 
          RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
-         adjustmentForSwitch.setTranslation(new Vector3D(0.0, 0.025, 0.0));
+         adjustmentForSwitch.getTranslation().set(new Vector3D(0.0, 0.025, 0.0));
          transform3D.multiply(adjustmentForSwitch);
 
          objectTransforms.put(VehicleObject.FNR_SWITCH_F, transform3D);
@@ -275,7 +275,7 @@ public class VehicleModelObjects
          transform3D.multiply(finalAdjustment);
 
          RigidBodyTransform adjustmentForSwitch = new RigidBodyTransform();
-         adjustmentForSwitch.setTranslation(new Vector3D(0.0, -0.025, 0.0));
+         adjustmentForSwitch.getTranslation().set(new Vector3D(0.0, -0.025, 0.0));
          transform3D.multiply(adjustmentForSwitch);
 
          objectTransforms.put(VehicleObject.FNR_SWITCH_R, transform3D);

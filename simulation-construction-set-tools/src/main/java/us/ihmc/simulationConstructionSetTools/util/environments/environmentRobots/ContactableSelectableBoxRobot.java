@@ -3,8 +3,8 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 import java.awt.Color;
 import java.util.ArrayList;
 
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,7 +19,6 @@ import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -37,7 +36,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
 
    private static final double DEFAULT_MASS = 10.0;
 
-   private final FrameBox3d frameBox;
+   private final FrameBox3D frameBox;
 
    private final FloatingJoint floatingJoint;
    private final Link boxLink;
@@ -64,10 +63,9 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       floatingJoint.setLink(boxLink);
       this.addRootJoint(floatingJoint);
 
-      frameBox = new FrameBox3d(ReferenceFrame.getWorldFrame(), length, width, height);
+      frameBox = new FrameBox3D(ReferenceFrame.getWorldFrame(), length, width, height);
 
-      Box3D box = frameBox.getBox3d();
-      boxGraphics = linkGraphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ());
+      boxGraphics = linkGraphics.addCube(frameBox.getSizeX(), frameBox.getSizeY(), frameBox.getSizeZ());
       setUpGroundContactPoints(frameBox);
 
       unSelect(true);
@@ -146,15 +144,15 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
       }
    }
 
-   private void setUpGroundContactPoints(FrameBox3d frameBox)
+   private void setUpGroundContactPoints(FrameBox3D frameBox)
    {
       String name = this.getName();
 
       for (int i = 0; i < 8; i++)
       {
          Point3D vertex = new Point3D();
-         frameBox.getBox3d().getVertex(i, vertex);
-         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3D(vertex), this.getRobotsYoVariableRegistry());
+         frameBox.getVertex(i, vertex);
+         GroundContactPoint groundContactPoint = new GroundContactPoint("gc_" + name + i, new Vector3D(vertex), this.getRobotsYoRegistry());
 
          floatingJoint.addGroundContactPoint(groundContactPoint);
       }
@@ -185,10 +183,10 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return frameBox.getBox3d().isPointInside(pointInWorldToCheck);
+      return frameBox.isPointInside(pointInWorldToCheck);
    }
 
-   public synchronized void getCurrentBox3d(FrameBox3d frameBoxToPack)
+   public synchronized void getCurrentBox3d(FrameBox3D frameBoxToPack)
    {
       frameBoxToPack.setIncludingFrame(frameBox);
    }
@@ -202,7 +200,7 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      frameBox.getBox3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
+      frameBox.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
    @Override
@@ -284,12 +282,12 @@ public class ContactableSelectableBoxRobot extends ContactableRobot implements S
    private synchronized void updateCurrentBox3d()
    {
       floatingJoint.getTransformToWorld(temporaryTransform3D);
-      frameBox.setTransform(temporaryTransform3D);
+      frameBox.getPose().set(temporaryTransform3D);
    }
 
    public double getHalfHeight()
    {
-      return frameBox.getBox3d().getSizeX() * 0.5;
+      return frameBox.getSizeX() * 0.5;
    }
 
    @Override

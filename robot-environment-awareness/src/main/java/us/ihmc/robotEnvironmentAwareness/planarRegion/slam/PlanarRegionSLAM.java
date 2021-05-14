@@ -26,13 +26,18 @@ public class PlanarRegionSLAM
       return slam(map, newDataIn, parameters, null, null);
    }
 
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters,
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map,
+                                             PlanarRegionsList newDataIn,
+                                             PlanarRegionSLAMParameters parameters,
                                              ConcaveHullMergerListener listener)
    {
       return slam(map, newDataIn, parameters, null, listener);
    }
 
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters, RigidBodyTransform referenceTransform)
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map,
+                                             PlanarRegionsList newDataIn,
+                                             PlanarRegionSLAMParameters parameters,
+                                             RigidBodyTransform referenceTransform)
    {
       return slam(map, newDataIn, parameters, referenceTransform, null);
    }
@@ -45,7 +50,10 @@ public class PlanarRegionSLAM
     * @param parameters
     * @return Merged PlanarRegionsList and drift transform
     */
-   public static PlanarRegionSLAMResult slam(PlanarRegionsList map, PlanarRegionsList newDataIn, PlanarRegionSLAMParameters parameters, RigidBodyTransform referenceTransform,
+   public static PlanarRegionSLAMResult slam(PlanarRegionsList map,
+                                             PlanarRegionsList newDataIn,
+                                             PlanarRegionSLAMParameters parameters,
+                                             RigidBodyTransform referenceTransform,
                                              ConcaveHullMergerListener listener)
    {
       PlanarRegionsList transformedNewData = newDataIn;
@@ -53,15 +61,15 @@ public class PlanarRegionSLAM
 
       for (int i = 0; i < parameters.getIterationsForMatching(); i++)
       {
-         Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
-                                                                                                                                           transformedNewData,
-                                                                                                                                           parameters);
+         Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints
+               = findHighConfidenceRegionMatchesAndReferencePoints(map, transformedNewData, parameters);
 
-         RigidBodyTransform driftCorrectionTransform = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints, parameters, referenceTransform);
+         RigidBodyTransform driftCorrectionTransform
+               = PlanarRegionSLAMTools.findDriftCorrectionTransform(matchesWithReferencePoints, parameters, referenceTransform);
          totalDriftCorrectionTransform.preMultiply(driftCorrectionTransform);
 
          transformedNewData = transformedNewData.copy();
-         transformedNewData.transformByPreMultiply(driftCorrectionTransform);
+         transformedNewData.applyTransform(driftCorrectionTransform);
       }
 
       PlanarRegionsList mergedMap = generateMergedMapByMergingAllPlanarRegionsMatches(map, transformedNewData, parameters, listener);
@@ -69,8 +77,10 @@ public class PlanarRegionSLAM
       return result;
    }
 
-   private static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map, PlanarRegionsList transformedNewData,
-                                                                                      PlanarRegionSLAMParameters parameters, ConcaveHullMergerListener listener)
+   public static PlanarRegionsList generateMergedMapByMergingAllPlanarRegionsMatches(PlanarRegionsList map,
+                                                                                     PlanarRegionsList transformedNewData,
+                                                                                     PlanarRegionSLAMParameters parameters,
+                                                                                     ConcaveHullMergerListener listener)
    {
       Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = findHighConfidenceRegionMatchesAndReferencePoints(map,
                                                                                                                                         transformedNewData,
@@ -138,26 +148,26 @@ public class PlanarRegionSLAM
    /**
     * Looks through two PlanarRegionsLists and finds PlanarRegion pairs that are good potential
     * matches.
-    * 
+    *
     * @param map     The map that you are building.
     * @param newData The newData that you are adding to the map.
     * @return A Map from PlanarRegions in the map to matching regions in the new data, and matching
-    *         reference points in the new Data.
+    *       reference points in the new Data.
     */
    public static Map<PlanarRegion, PairList<PlanarRegion, Point2D>> findHighConfidenceRegionMatchesAndReferencePoints(PlanarRegionsList map,
                                                                                                                       PlanarRegionsList newData,
                                                                                                                       PlanarRegionSLAMParameters parameters)
    {
-      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map,
-                                                                                                                               newData,
-                                                                                                                               parameters.getBoundingBoxHeight());
+      Map<PlanarRegion, List<PlanarRegion>> boundingBox3DCollisions
+            = PlanarRegionSLAMTools.detectLocalBoundingBox3DCollisions(map, newData, parameters.getBoundingBoxHeight());
 
-      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions,
-                                                                                                                                  parameters.getMinimumNormalDotProduct());
+      Map<PlanarRegion, List<PlanarRegion>> normalSimilarityFiltered
+            = PlanarRegionSLAMTools.filterMatchesBasedOnNormalSimilarity(boundingBox3DCollisions, parameters.getMinimumNormalDotProduct());
 
-      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(parameters.getMinimumRegionOverlapDistance(),
-                                                                                                                                                    parameters.getMaximumPointProjectionDistance(),
-                                                                                                                                                    normalSimilarityFiltered);
+      Map<PlanarRegion, PairList<PlanarRegion, Point2D>> matchesWithReferencePoints
+            = PlanarRegionSLAMTools.filterMatchesBasedOn2DBoundingBoxShadow(parameters.getMinimumRegionOverlapDistance(),
+                                                                            parameters.getMaximumPointProjectionDistance(),
+                                                                            normalSimilarityFiltered);
       return matchesWithReferencePoints;
    }
 
@@ -167,7 +177,7 @@ public class PlanarRegionSLAM
       Vector3D smallTranslation = new Vector3D((random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1, (random.nextDouble() - 0.5) % 0.1);
       RigidBodyTransform smallTransform = new RigidBodyTransform(smallRotation, smallTranslation);
       PlanarRegionsList transformedNewData = newData.copy();
-      transformedNewData.transformByPreMultiply(smallTransform);
+      transformedNewData.applyTransform(smallTransform);
 
       PlanarRegionSLAMResult result = new PlanarRegionSLAMResult(smallTransform, transformedNewData);
       return result;

@@ -16,11 +16,11 @@ module controller_msgs
       struct FootstepPlannerCellMessage
       {
         /**
-         * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+         * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep for more information
          */
         long x_index;
         /**
-         * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+         * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep for more information
          */
         long y_index;
       };

@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 
 public class CountByNumberBehavior extends AbstractBehavior
 {
@@ -13,12 +13,12 @@ public class CountByNumberBehavior extends AbstractBehavior
    int timeToCount;
    double result = 0;
 
-   public CountByNumberBehavior(String robotName, Ros2Node ros2Node)
+   public CountByNumberBehavior(String robotName, ROS2Node ros2Node)
    {
       super(robotName, ros2Node);
    }
 
-   public CountByNumberBehavior(String robotName, Ros2Node ros2Node, double numberToCountBy, int timeToCount)
+   public CountByNumberBehavior(String robotName, ROS2Node ros2Node, double numberToCountBy, int timeToCount)
    {
       super(robotName, ros2Node);
 

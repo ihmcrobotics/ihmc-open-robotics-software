@@ -8,7 +8,7 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -21,9 +21,9 @@ public class DoorTimingBehaviorAutomated extends AbstractBehavior
    private final DoorTimingBehavior doorTimingBehavior;
 
 
-   public DoorTimingBehaviorAutomated(String robotName, Ros2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
-                                            HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
-                                            AtlasPrimitiveActions atlasPrimitiveActions, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public DoorTimingBehaviorAutomated(String robotName, ROS2Node ros2Node, YoDouble yoTime, YoBoolean yoDoubleSupport, FullHumanoidRobotModel fullRobotModel,
+                                      HumanoidReferenceFrames referenceFrames, WholeBodyControllerParameters wholeBodyControllerParameters,
+                                      AtlasPrimitiveActions atlasPrimitiveActions, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);

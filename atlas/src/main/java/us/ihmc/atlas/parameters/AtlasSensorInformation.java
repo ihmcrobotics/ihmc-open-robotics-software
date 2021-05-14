@@ -6,9 +6,14 @@ import org.apache.commons.lang3.tuple.ImmutableTriple;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.parameters.*;
 
 public class AtlasSensorInformation implements HumanoidRobotSensorInformation
@@ -121,28 +126,30 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    public static final String depthCameraTopic = depth_camera_namespace + "/depth/color/points";
    public static final String trackingCameraTopic = tracking_camera_namespace + "/odom/sample";
 
-   private static final double depthOffsetX = 0.058611;
-   private static final double depthOffsetZ = 0.01;
-   private static final double depthPitchingAngle = 70.0 / 180.0 * Math.PI;
-   private static final double depthThickness = 0.0245;
+   private static final double d435DepthOffsetX = 0.058611;
+   private static final double d435DepthOffsetZ = 0.01;
+   private static final double d435DepthPitchingAngle = 70.0 / 180.0 * Math.PI;
+   private static final double d435DepthRollOffset = Math.toRadians(-0.5);
+   private static final double d435DepthThickness = 0.0245;
 
    private static final double trackingOffsetX = 0.0358;
    private static final double trackingOffsetZ = 0.0994;
    private static final double trackingPitchingAngle = 0.0 / 180.0 * Math.PI;
-   private static final double trackingThickness = 0.0125; 
+   private static final double trackingThickness = 0.0125;
 
-   private static final double pelvisToMountOrigin = 0.19;
+   private static final double pelvisToMountD435Origin = 0.19;
 
-   public static final RigidBodyTransform transformPelvisToDepthCamera = new RigidBodyTransform();
+   public static final RigidBodyTransform transformPelvisToD435DepthCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToDepthCamera.appendTranslation(pelvisToMountOrigin, 0.0, 0.0);
-      transformPelvisToDepthCamera.appendTranslation(depthOffsetX, 0.0, depthOffsetZ);
-      transformPelvisToDepthCamera.appendPitchRotation(depthPitchingAngle);
-      transformPelvisToDepthCamera.appendTranslation(depthThickness, 0.0, 0.0);
+      transformPelvisToD435DepthCamera.appendTranslation(pelvisToMountD435Origin, 0.0, 0.0);
+      transformPelvisToD435DepthCamera.appendTranslation(d435DepthOffsetX, 0.0, d435DepthOffsetZ);
+      transformPelvisToD435DepthCamera.appendRollRotation(d435DepthRollOffset);
+      transformPelvisToD435DepthCamera.appendPitchRotation(d435DepthPitchingAngle);
+      transformPelvisToD435DepthCamera.appendTranslation(d435DepthThickness, 0.0, 0.0);
 
-      transformPelvisToDepthCamera.appendYawRotation(-Math.PI / 2);
-      transformPelvisToDepthCamera.appendRollRotation(-Math.PI / 2);
+      transformPelvisToD435DepthCamera.appendYawRotation(-Math.PI / 2);
+      transformPelvisToD435DepthCamera.appendRollRotation(-Math.PI / 2);
    }
 
    /**
@@ -153,19 +160,20 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       transformDepthCameraToTrackingCamera.appendRollRotation(Math.PI / 2);
       transformDepthCameraToTrackingCamera.appendYawRotation(Math.PI / 2);
-      transformDepthCameraToTrackingCamera.appendTranslation(-depthThickness, 0.0, 0.0);
-      transformDepthCameraToTrackingCamera.appendPitchRotation(-depthPitchingAngle);
-      transformDepthCameraToTrackingCamera.appendTranslation(-depthOffsetX, 0.0, -depthOffsetZ);
+      transformDepthCameraToTrackingCamera.appendTranslation(-d435DepthThickness, 0.0, 0.0);
+      transformDepthCameraToTrackingCamera.appendPitchRotation(-d435DepthPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendTranslation(-d435DepthOffsetX, 0.0, -d435DepthOffsetZ);
 
       transformDepthCameraToTrackingCamera.appendTranslation(trackingOffsetX, 0.0, trackingOffsetZ);
       transformDepthCameraToTrackingCamera.appendPitchRotation(trackingPitchingAngle);
+      transformDepthCameraToTrackingCamera.appendRollRotation(-d435DepthRollOffset);
       transformDepthCameraToTrackingCamera.appendTranslation(trackingThickness, 0.0, 0.0);
    }
 
    public static final RigidBodyTransform transformPelvisToTrackingCamera = new RigidBodyTransform();
    static
    {
-      transformPelvisToTrackingCamera.multiply(transformPelvisToDepthCamera);
+      transformPelvisToTrackingCamera.multiply(transformPelvisToD435DepthCamera);
       transformPelvisToTrackingCamera.multiply(transformDepthCameraToTrackingCamera);
    }
 
@@ -174,6 +182,17 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       transformTrackingCameraToDepthCamera.multiply(transformDepthCameraToTrackingCamera);
       transformTrackingCameraToDepthCamera.invert();
+   }
+
+   public static final RigidBodyTransform transformChestToL515DepthCamera = new RigidBodyTransform();
+   static
+   {
+      // TODO: Move this stuff to a file so it can be tuned and saved
+      Point3D chestToSensor = new Point3D(0.275, 0.052, 0.14);
+
+      transformChestToL515DepthCamera.appendTranslation(chestToSensor);
+      double pitch = Math.toRadians(90.0 - 24.0);
+      transformChestToL515DepthCamera.appendOrientation(new YawPitchRoll(0.01, pitch, -0.045));
    }
 
    public AtlasSensorInformation(AtlasRobotVersion atlasRobotVersion, RobotTarget target)
@@ -412,4 +431,16 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
       return staticTranformsForRos;
    }
 
+   @Override
+   public RigidBodyTransformReadOnly getSteppingCameraTransform()
+   {
+      return transformChestToL515DepthCamera;
+   }
+
+
+   @Override
+   public ReferenceFrame getSteppingCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
 }

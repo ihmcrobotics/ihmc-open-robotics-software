@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
@@ -14,12 +14,10 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
 /**
@@ -33,7 +31,6 @@ public class ICPOptimizationQPSolver
 
    private static final boolean useWarmStart = true;
    private static final int maxNumberOfIterations = 100;
-   private static final double convergenceThreshold = 1.0e-20;
 
    private boolean resetActiveSet;
    private boolean previousTickFailed = false;
@@ -49,27 +46,27 @@ public class ICPOptimizationQPSolver
     * Has the form 0.5 x<sup>T</sup> H x + h x
     */
    /** Total quadratic cost matrix for the quadratic program. */
-   private final DenseMatrix64F solverInput_H;
+   private final DMatrixRMaj solverInput_H;
    /** Total linear cost vector for the quadratic program. */
-   private final DenseMatrix64F solverInput_h;
+   private final DMatrixRMaj solverInput_h;
    /** Total scalar cost for the quadratic program. */
-   private final DenseMatrix64F solverInputResidualCost;
+   private final DMatrixRMaj solverInputResidualCost;
 
    /**
     * Has the form A<sub>eq</sub> x = b<sub>eq</sub>
     */
    /** Total linear equality constraint matrix for the quadratic program. */
-   //private final DenseMatrix64F solverInput_Aeq;
+   //private final DMatrixRMaj solverInput_Aeq;
    /** Total linear equality constraint objective vector for the quadratic program. */
-   //private final DenseMatrix64F solverInput_beq;
+   //private final DMatrixRMaj solverInput_beq;
 
    /**
     * Has the form A<sub>ineq</sub> x >= b<sub>ineq</sub>
     */
    /** Total linear inequality constraint matrix for the quadratic program. */
-   private final DenseMatrix64F solverInput_Aineq;
+   private final DMatrixRMaj solverInput_Aineq;
    /** Total linear inequality constraint objective vector for the quadratic program. */
-   private final DenseMatrix64F solverInput_bineq;
+   private final DMatrixRMaj solverInput_bineq;
 
    /** QP Objective to minimize the amount of feedback action. Also contains feedback rate. */
    private final ICPQPInput copFeedbackTaskInput;
@@ -104,59 +101,59 @@ public class ICPOptimizationQPSolver
    private double footstepRecursionMultiplier;
    private double footstepAdjustmentSafetyFactor;
    /** Location of the desired footsteps from a high level footstep planner. */
-   private final DenseMatrix64F referenceFootstepLocation = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj referenceFootstepLocation = new DMatrixRMaj(2, 1);
 
-   private final DenseMatrix64F desiredCoP = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F desiredCMP = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F desiredCMPOffset = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj desiredCoP = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj desiredCMP = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj desiredCMPOffset = new DMatrixRMaj(2, 1);
    /** Current ICP Error location. */
-   private final DenseMatrix64F currentICPError = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj currentICPError = new DMatrixRMaj(2, 1);
 
    /** List of weights for tracking the different footsteps. */
-   private final DenseMatrix64F footstepWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj footstepWeight = new DMatrixRMaj(2, 2);
    /** Weight for the footstep rate task. */
-   private final DenseMatrix64F footstepRateWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj footstepRateWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the CoP feedback action. */
-   private final DenseMatrix64F copFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj copFeedbackWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the feedback rate. */
-   private final DenseMatrix64F feedbackRateWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj feedbackRateWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the CoP and CMP feedback rate. */
-   private final DenseMatrix64F copCMPFeedbackRateWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj copCMPFeedbackRateWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the CMP feedback action. */
-   private final DenseMatrix64F cmpFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj cmpFeedbackWeight = new DMatrixRMaj(2, 2);
    /** Weight minimizing the dynamic relaxation magnitude. */
-   private final DenseMatrix64F dynamicsWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj dynamicsWeight = new DMatrixRMaj(2, 2);
    /** Proportional gain on the ICP feedback controller. */
-   private final DenseMatrix64F feedbackGain = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj feedbackGain = new DMatrixRMaj(2, 2);
 
    /** Flag to use the quad prog QP solver vs. the active set QP solver. **/
    private final AbstractSimpleActiveSetQPSolver solver = new JavaQuadProgSolver();
 
    /** Full solution vector to the quadratic program. */
-   private final DenseMatrix64F solution;
+   private final DMatrixRMaj solution;
    /** Footstep location solution vector to the quadratic program. */
-   private final DenseMatrix64F footstepLocationSolution;
+   private final DMatrixRMaj footstepLocationSolution;
    /** CoP Feedback action solution to the quadratic program. */
-   private final DenseMatrix64F copDeltaSolution;
+   private final DMatrixRMaj copDeltaSolution;
    /** CMP different from the CoP solution to the quadratic program. */
-   private final DenseMatrix64F cmpDeltaSolution;
-   private final DenseMatrix64F dynamicsError;
+   private final DMatrixRMaj cmpDeltaSolution;
+   private final DMatrixRMaj dynamicsError;
 
    /** Previous solution for the feedback action, used in the feedback rate objective. */
-   private final DenseMatrix64F previousFeedbackDeltaSolution;
-   private final DenseMatrix64F previousCMPFeedbackDeltaSolution;
-   private final DenseMatrix64F previousCoPFeedbackDeltaSolution;
-   private final DenseMatrix64F previousFootstepLocation = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj previousFeedbackDeltaSolution;
+   private final DMatrixRMaj previousCMPFeedbackDeltaSolution;
+   private final DMatrixRMaj previousCoPFeedbackDeltaSolution;
+   private final DMatrixRMaj previousFootstepLocation = new DMatrixRMaj(2, 1);
 
    /** Cost to go for the entire quadratic program. */
-   private final DenseMatrix64F costToGo;
+   private final DMatrixRMaj costToGo;
    /** Cost to go for the step adjustment minimization objective. */
-   private final DenseMatrix64F footstepCostToGo;
+   private final DMatrixRMaj footstepCostToGo;
    /** Cost to go for the cop feedback minimization objective. */
-   private final DenseMatrix64F copFeedbackCostToGo;
+   private final DMatrixRMaj copFeedbackCostToGo;
    /** Cost to go for the cmp feedback minimization objective. */
-   private final DenseMatrix64F cmpFeedbackCostToGo;
-   private final DenseMatrix64F dynamicsCostToGo;
+   private final DMatrixRMaj cmpFeedbackCostToGo;
+   private final DMatrixRMaj dynamicsCostToGo;
 
    /** Maximum number of vertices in the reachability polygon that the quadratic program will ever consider. Used for clearing and storing data. */
    private static final int maximumNumberOfReachabilityVertices = 4;
@@ -180,15 +177,14 @@ public class ICPOptimizationQPSolver
    private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
    private double controlDT = Double.POSITIVE_INFINITY;
 
-   private final DenseMatrix64F tmpCost;
-   private final DenseMatrix64F tmpFootstepCost;
-   private final DenseMatrix64F tmpFeedbackCost;
+   private final DMatrixRMaj tmpCost;
+   private final DMatrixRMaj tmpFootstepCost;
+   private final DMatrixRMaj tmpFeedbackCost;
 
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
    private boolean hasPlanarRegionConstraint = false;
-   private double planarRegionDistanceFromEdge = 0.0;
 
    /**
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPOptimizationQPSolver}.
@@ -201,7 +197,7 @@ public class ICPOptimizationQPSolver
       this(maximumNumberOfCMPVertices, computeCostToGo, true, null);
    }
 
-   public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo, boolean autoSetPreviousSolution, YoVariableRegistry registry)
+   public ICPOptimizationQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo, boolean autoSetPreviousSolution, YoRegistry registry)
    {
       this.computeCostToGo = computeCostToGo;
       this.autoSetPreviousSolution = autoSetPreviousSolution;
@@ -218,9 +214,9 @@ public class ICPOptimizationQPSolver
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
 
-      solverInput_H = new DenseMatrix64F(maximumNumberOfFreeVariables, maximumNumberOfFreeVariables);
-      solverInput_h = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
-      solverInputResidualCost = new DenseMatrix64F(1, 1);
+      solverInput_H = new DMatrixRMaj(maximumNumberOfFreeVariables, maximumNumberOfFreeVariables);
+      solverInput_h = new DMatrixRMaj(maximumNumberOfFreeVariables, 1);
+      solverInputResidualCost = new DMatrixRMaj(1, 1);
 
       copFeedbackTaskInput = new ICPQPInput(2);
       cmpFeedbackTaskInput = new ICPQPInput(2);
@@ -245,28 +241,28 @@ public class ICPOptimizationQPSolver
       reachabilityConstraint = new ConstraintToConvexRegion(maximumNumberOfReachabilityVertices);
       planarRegionConstraint = new ConstraintToConvexRegion(20);
 
-      solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices,
+      solverInput_Aineq = new DMatrixRMaj(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices,
                                              maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices);
-      solverInput_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, 1);
+      solverInput_bineq = new DMatrixRMaj(maximumNumberOfCMPVertices + maximumNumberOfReachabilityVertices, 1);
 
-      solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      footstepLocationSolution = new DenseMatrix64F(2, 1);
-      copDeltaSolution = new DenseMatrix64F(2, 1);
-      cmpDeltaSolution = new DenseMatrix64F(2, 1);
-      dynamicsError = new DenseMatrix64F(2, 1);
+      solution = new DMatrixRMaj(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
+      footstepLocationSolution = new DMatrixRMaj(2, 1);
+      copDeltaSolution = new DMatrixRMaj(2, 1);
+      cmpDeltaSolution = new DMatrixRMaj(2, 1);
+      dynamicsError = new DMatrixRMaj(2, 1);
 
-      previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-      previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
+      previousFeedbackDeltaSolution = new DMatrixRMaj(2, 1);
+      previousCoPFeedbackDeltaSolution = new DMatrixRMaj(2, 1);
+      previousCMPFeedbackDeltaSolution = new DMatrixRMaj(2, 1);
 
-      tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      tmpFootstepCost = new DenseMatrix64F(2, 1);
-      tmpFeedbackCost = new DenseMatrix64F(2, 1);
-      costToGo = new DenseMatrix64F(1, 1);
-      footstepCostToGo = new DenseMatrix64F(1, 1);
-      copFeedbackCostToGo = new DenseMatrix64F(1, 1);
-      cmpFeedbackCostToGo = new DenseMatrix64F(1, 1);
-      dynamicsCostToGo = new DenseMatrix64F(1, 1);
+      tmpCost = new DMatrixRMaj(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
+      tmpFootstepCost = new DMatrixRMaj(2, 1);
+      tmpFeedbackCost = new DMatrixRMaj(2, 1);
+      costToGo = new DMatrixRMaj(1, 1);
+      footstepCostToGo = new DMatrixRMaj(1, 1);
+      copFeedbackCostToGo = new DMatrixRMaj(1, 1);
+      cmpFeedbackCostToGo = new DMatrixRMaj(1, 1);
+      dynamicsCostToGo = new DMatrixRMaj(1, 1);
 
 //      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
@@ -554,7 +550,7 @@ public class ICPOptimizationQPSolver
       hasFootstepRateTerm.set(false);
    }
 
-   private final DenseMatrix64F tempFootstepWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj tempFootstepWeight = new DMatrixRMaj(2, 2);
    /**
     * Sets the conditions for the footstep adjustment task. This includes the weight of tracking the specified footstep by the optimization algorithm,
     * the reference location of the footstep, and the recursion multiplier of that footstep for the ICP dynamics.
@@ -582,7 +578,7 @@ public class ICPOptimizationQPSolver
     * @param footstepWeights weight on tracking the reference footstep location in the solver in the world frame.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, DenseMatrix64F footstepWeights, double safetyFactor,
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, DMatrixRMaj footstepWeights, double safetyFactor,
                                                FramePoint3D referenceFootstepLocation)
    {
       referenceFootstepLocation.changeFrame(worldFrame);
@@ -597,14 +593,14 @@ public class ICPOptimizationQPSolver
     * @param footstepWeights weight on tracking the reference footstep location in the solver in the world frame.
     * @param referenceFootstepLocation location of the desired reference footstep.
     */
-   public void setFootstepAdjustmentConditions(double recursionMultiplier, DenseMatrix64F footstepWeights, double safetyFactor,
+   public void setFootstepAdjustmentConditions(double recursionMultiplier, DMatrixRMaj footstepWeights, double safetyFactor,
                                                FramePoint2D referenceFootstepLocation)
    {
       referenceFootstepLocation.changeFrame(worldFrame);
       setFootstepAdjustmentConditions(recursionMultiplier, footstepWeights, safetyFactor, referenceFootstepLocation.getX(), referenceFootstepLocation.getY());
    }
 
-   private void setFootstepAdjustmentConditions(double recursionMultiplier, DenseMatrix64F footstepWeights, double safetyFactor,
+   private void setFootstepAdjustmentConditions(double recursionMultiplier, DMatrixRMaj footstepWeights, double safetyFactor,
                                                 double referenceXPositionInWorld, double referenceYPositionInWorld)
    {
       footstepRecursionMultiplier = recursionMultiplier;
@@ -697,8 +693,8 @@ public class ICPOptimizationQPSolver
    }
 
 
-   private final DenseMatrix64F tempCoPFeedbackWeight = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F tempFeedbackGains = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj tempCoPFeedbackWeight = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj tempFeedbackGains = new DMatrixRMaj(2, 2);
 
    /**
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
@@ -732,7 +728,7 @@ public class ICPOptimizationQPSolver
     * @param feedbackGains ICP controller proportional gain in the world frame.
     * @param dynamicsWeight weight on the minimization of the dynamic relaxation for the solver.
     */
-   public void setFeedbackConditions(DenseMatrix64F copFeedbackWeights, DenseMatrix64F feedbackGains, double dynamicsWeight)
+   public void setFeedbackConditions(DMatrixRMaj copFeedbackWeights, DMatrixRMaj feedbackGains, double dynamicsWeight)
    {
       this.copFeedbackWeight.set(copFeedbackWeights);
       this.feedbackGain.set(feedbackGains);
@@ -767,7 +763,7 @@ public class ICPOptimizationQPSolver
     * @param desiredCoP current desired value of the CMP based on the nominal ICP location.
     * @return whether a new solution was found if this is false the last valid solution will be used.
     */
-   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP)
+   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2DReadOnly desiredCoP)
    {
       cmpOffsetToThrowAway.setToZero(worldFrame);
       return compute(currentICPError, desiredCoP, cmpOffsetToThrowAway);
@@ -784,7 +780,7 @@ public class ICPOptimizationQPSolver
     * @param desiredCMPOffset current desired distance from the CoP to the CMP.
     * @return whether a new solution was found if this is false the last valid solution will be used.
     */
-   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2D desiredCoP, FrameVector2D desiredCMPOffset)
+   public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2DReadOnly desiredCoP, FrameVector2DReadOnly desiredCMPOffset)
    {
       indexHandler.computeProblemSize();
 
@@ -792,16 +788,13 @@ public class ICPOptimizationQPSolver
       reshape();
 
       currentICPError.checkReferenceFrameMatch(worldFrame);
-      desiredCoP.changeFrame(worldFrame);
-      desiredCMPOffset.changeFrame(worldFrame);
+      desiredCoP.checkReferenceFrameMatch(worldFrame);
+      desiredCMPOffset.checkReferenceFrameMatch(worldFrame);
 
-      this.currentICPError.set(0, 0, currentICPError.getX());
-      this.currentICPError.set(1, 0, currentICPError.getY());
-      this.desiredCoP.set(0, 0, desiredCoP.getX());
-      this.desiredCoP.set(1, 0, desiredCoP.getY());
-      this.desiredCMPOffset.set(0, 0, desiredCMPOffset.getX());
-      this.desiredCMPOffset.set(1, 0, desiredCMPOffset.getY());
-      CommonOps.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
+      currentICPError.get(this.currentICPError);
+      desiredCoP.get(this.desiredCoP);
+      desiredCMPOffset.get(this.desiredCMPOffset);
+      CommonOps_DDRM.add(this.desiredCoP, this.desiredCMPOffset, desiredCMP);
 
       addCoPFeedbackTask();
 
@@ -1077,9 +1070,9 @@ public class ICPOptimizationQPSolver
     * @param solutionToPack solution of the QP.
     * @return whether a solution was found.
     */
-   private boolean solve(DenseMatrix64F solutionToPack)
+   private boolean solve(DMatrixRMaj solutionToPack)
    {
-      CommonOps.scale(-1.0, solverInput_h);
+      CommonOps_DDRM.scale(-1.0, solverInput_h);
 
       for (int i = 0; i < solverInput_H.numCols; i++)
       {
@@ -1090,7 +1083,7 @@ public class ICPOptimizationQPSolver
       solver.clear();
 
       if (useWarmStart && pollResetActiveSet() || previousTickFailed)
-         solver.resetActiveConstraints();
+         solver.resetActiveSet();
 
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
       solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
@@ -1117,7 +1110,7 @@ public class ICPOptimizationQPSolver
     *
     * @param footstepLocationSolutionToPack 2d footstep location. Modified.
     */
-   private void extractFootstepSolutions(DenseMatrix64F footstepLocationSolutionToPack)
+   private void extractFootstepSolutions(DMatrixRMaj footstepLocationSolutionToPack)
    {
       MatrixTools.setMatrixBlock(footstepLocationSolutionToPack, 0, 0, solution, indexHandler.getFootstepStartIndex(), 0,
                                  indexHandler.getNumberOfFootstepVariables(), 1, 1.0);
@@ -1128,7 +1121,7 @@ public class ICPOptimizationQPSolver
     *
     * @param copFeedbackSolutionToPack 2d feedback solution. Modified.
     */
-   private void extractCoPFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolutionToPack)
+   private void extractCoPFeedbackDeltaSolution(DMatrixRMaj copFeedbackSolutionToPack)
    {
       MatrixTools.setMatrixBlock(copFeedbackSolutionToPack, 0, 0, solution, indexHandler.getCoPFeedbackIndex(), 0, 2, 1, 1.0);
    }
@@ -1138,7 +1131,7 @@ public class ICPOptimizationQPSolver
     *
     * @param cmpDeltaSolutionToPack difference between the CMP and CoP. Modified.
     */
-   private void extractCMPFeedbackDeltaSolution(DenseMatrix64F cmpDeltaSolutionToPack)
+   private void extractCMPFeedbackDeltaSolution(DMatrixRMaj cmpDeltaSolutionToPack)
    {
       if (indexHandler.hasCMPFeedbackTask())
          MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, indexHandler.getCMPFeedbackIndex(), 0, 2, 1, 1.0);
@@ -1151,7 +1144,7 @@ public class ICPOptimizationQPSolver
     *
     * @param footstepLocationSolution location of the footstep solution.
     */
-   private void setPreviousFootstepSolution(DenseMatrix64F footstepLocationSolution)
+   private void setPreviousFootstepSolution(DMatrixRMaj footstepLocationSolution)
    {
       int stepIndex = 0;
       MatrixTools.setMatrixBlock(previousFootstepLocation, 0, 0, footstepLocationSolution, 2 * stepIndex, 0, 2, 1, 1.0);
@@ -1162,11 +1155,11 @@ public class ICPOptimizationQPSolver
     *
     * @param copFeedbackSolution amount of CoP feedback.
     */
-   private void setPreviousFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolution, DenseMatrix64F cmpFeedbackSolution)
+   private void setPreviousFeedbackDeltaSolution(DMatrixRMaj copFeedbackSolution, DMatrixRMaj cmpFeedbackSolution)
    {
       previousCoPFeedbackDeltaSolution.set(copFeedbackSolution);
       previousCMPFeedbackDeltaSolution.set(cmpFeedbackSolution);
-      CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
+      CommonOps_DDRM.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
    /**
@@ -1179,11 +1172,11 @@ public class ICPOptimizationQPSolver
 
       costToGo.zero();
 
-      CommonOps.mult(solverInput_H, solution, tmpCost);
-      CommonOps.multTransA(0.5, solution, tmpCost, costToGo);
+      CommonOps_DDRM.mult(solverInput_H, solution, tmpCost);
+      CommonOps_DDRM.multTransA(0.5, solution, tmpCost, costToGo);
 
-      CommonOps.multAddTransA(solverInput_h, solution, costToGo); // already scaled by -1.0
-      CommonOps.addEquals(costToGo, solverInputResidualCost);
+      CommonOps_DDRM.multAddTransA(solverInput_h, solution, costToGo); // already scaled by -1.0
+      CommonOps_DDRM.addEquals(costToGo, solverInputResidualCost);
    }
 
    /**
@@ -1204,35 +1197,35 @@ public class ICPOptimizationQPSolver
       dynamicsCostToGo.zero();
 
       // feedback cost:
-      CommonOps.mult(copFeedbackTaskInput.quadraticTerm, copDeltaSolution, tmpFeedbackCost);
-      CommonOps.multTransA(0.5, copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
+      CommonOps_DDRM.mult(copFeedbackTaskInput.quadraticTerm, copDeltaSolution, tmpFeedbackCost);
+      CommonOps_DDRM.multTransA(0.5, copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
 
-      CommonOps.multAddTransA(-1.0, copFeedbackTaskInput.linearTerm, copDeltaSolution, copFeedbackCostToGo);
-      CommonOps.addEquals(copFeedbackCostToGo, copFeedbackTaskInput.residualCost);
+      CommonOps_DDRM.multAddTransA(-1.0, copFeedbackTaskInput.linearTerm, copDeltaSolution, copFeedbackCostToGo);
+      CommonOps_DDRM.addEquals(copFeedbackCostToGo, copFeedbackTaskInput.residualCost);
 
       // dynamics cost:
-      CommonOps.mult(dynamicsTaskInput.quadraticTerm, solution, tmpCost);
-      CommonOps.multTransA(0.5, solution, tmpCost, dynamicsCostToGo);
+      CommonOps_DDRM.mult(dynamicsTaskInput.quadraticTerm, solution, tmpCost);
+      CommonOps_DDRM.multTransA(0.5, solution, tmpCost, dynamicsCostToGo);
 
-      CommonOps.multAddTransA(-1.0, dynamicsTaskInput.linearTerm, solution, dynamicsCostToGo);
-      CommonOps.addEquals(dynamicsCostToGo, dynamicsTaskInput.residualCost);
+      CommonOps_DDRM.multAddTransA(-1.0, dynamicsTaskInput.linearTerm, solution, dynamicsCostToGo);
+      CommonOps_DDRM.addEquals(dynamicsCostToGo, dynamicsTaskInput.residualCost);
 
       if (indexHandler.useStepAdjustment())
       { // footstep cost:
-         CommonOps.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
-         CommonOps.multTransA(0.5, footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
+         CommonOps_DDRM.mult(footstepTaskInput.quadraticTerm, footstepLocationSolution, tmpFootstepCost);
+         CommonOps_DDRM.multTransA(0.5, footstepLocationSolution, tmpFootstepCost, footstepCostToGo);
 
-         CommonOps.multAddTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, footstepCostToGo);
-         CommonOps.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
+         CommonOps_DDRM.multAddTransA(-1.0, footstepTaskInput.linearTerm, footstepLocationSolution, footstepCostToGo);
+         CommonOps_DDRM.addEquals(footstepCostToGo, footstepTaskInput.residualCost);
       }
 
       if (indexHandler.hasCMPFeedbackTask())
       { // cmp feedback cost:
-         CommonOps.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
-         CommonOps.multTransA(0.5, cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
+         CommonOps_DDRM.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
+         CommonOps_DDRM.multTransA(0.5, cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
 
-         CommonOps.multAddTransA(-1.0, cmpFeedbackTaskInput.linearTerm, cmpDeltaSolution, cmpFeedbackCostToGo);
-         CommonOps.addEquals(cmpFeedbackCostToGo, cmpFeedbackTaskInput.residualCost);
+         CommonOps_DDRM.multAddTransA(-1.0, cmpFeedbackTaskInput.linearTerm, cmpDeltaSolution, cmpFeedbackCostToGo);
+         CommonOps_DDRM.addEquals(cmpFeedbackCostToGo, cmpFeedbackTaskInput.residualCost);
       }
    }
 
@@ -1242,9 +1235,9 @@ public class ICPOptimizationQPSolver
     * @param footstepIndex index of footstep to get.
     * @param footstepLocationToPack location of the footstep in the world frame.
     */
-   public void getFootstepSolutionLocation(int footstepIndex, FramePoint2D footstepLocationToPack)
+   public void getFootstepSolutionLocation(int footstepIndex, FixedFramePoint2DBasics footstepLocationToPack)
    {
-      footstepLocationToPack.setToZero(worldFrame);
+      footstepLocationToPack.checkReferenceFrameMatch(worldFrame);
       footstepLocationToPack.setX(footstepLocationSolution.get(2 * footstepIndex, 0));
       footstepLocationToPack.setY(footstepLocationSolution.get(2 * footstepIndex + 1, 0));
    }
@@ -1349,5 +1342,15 @@ public class ICPOptimizationQPSolver
    ConstraintToConvexRegion getCMPLocationConstraint()
    {
       return cmpLocationConstraint;
+   }
+
+   public double getFootstepRecursionMultiplier()
+   {
+      return footstepRecursionMultiplier;
+   }
+
+   public double getFootstepAdjustmentSafetyFactor()
+   {
+      return footstepAdjustmentSafetyFactor;
    }
 }

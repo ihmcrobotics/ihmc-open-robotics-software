@@ -213,7 +213,7 @@ public class WholeBodyTrajectoryToolboxData
 
                Pose3D closestPose = null;//manifold.computeClosestPoseOnManifold(currentSpatial);
 
-               distance = currentSpatial.getPositionDistance(closestPose);
+               distance = currentSpatial.getPosition().distance(closestPose.getPosition());
             }
          }
       }

@@ -16,6 +16,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    private boolean calculateRootJointWrench = false;
    private final TIntArrayList rigidBodyHashCodes = new TIntArrayList(10);
    private final RecyclingArrayList<Point3D> contactPointPositions = new RecyclingArrayList<>(10, Point3D::new);
+   private boolean estimateContactLocation = false;
 
    @Override
    public void clear()
@@ -26,6 +27,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
       calculateRootJointWrench = false;
       rigidBodyHashCodes.reset();
       contactPointPositions.clear();
+      estimateContactLocation = false;
    }
 
    @Override
@@ -43,6 +45,8 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
          this.rigidBodyHashCodes.add(message.getRigidBodyHashCodes().get(i));
          this.contactPointPositions.add().set(message.getContactPointPositions().get(i));
       }
+
+      this.estimateContactLocation = message.getEstimateContactLocation();
    }
 
    @Override
@@ -78,6 +82,7 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
          this.rigidBodyHashCodes.add(other.rigidBodyHashCodes.get(i));
          this.contactPointPositions.add().set(other.contactPointPositions.get(i));
       }
+      this.estimateContactLocation = other.estimateContactLocation;
    }
 
    public double getEstimatorGain()
@@ -108,5 +113,10 @@ public class ExternalForceEstimationToolboxConfigurationCommand implements Comma
    public int getNumberOfContactPoints()
    {
       return rigidBodyHashCodes.size();
+   }
+
+   public boolean getEstimateContactLocation()
+   {
+      return estimateContactLocation;
    }
 }

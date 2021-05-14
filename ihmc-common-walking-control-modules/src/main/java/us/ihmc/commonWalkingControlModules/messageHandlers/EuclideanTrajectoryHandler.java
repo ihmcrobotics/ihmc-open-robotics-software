@@ -7,13 +7,13 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -26,7 +26,7 @@ public class EuclideanTrajectoryHandler
 {
    private static final int defaultMaxNumberOfPoints = 1000;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final EuclideanTrajectoryPointBasics lastPoint = new EuclideanTrajectoryPoint();
    private final EuclideanTrajectoryPointBasics firstPoint = new EuclideanTrajectoryPoint();
@@ -54,11 +54,11 @@ public class EuclideanTrajectoryHandler
     * @param yoTime provider of the current time.
     * @param parentRegistry registry that the registry of this class will be attached to.
     */
-   public EuclideanTrajectoryHandler(String name, DoubleProvider yoTime, YoVariableRegistry parentRegistry)
+   public EuclideanTrajectoryHandler(String name, DoubleProvider yoTime, YoRegistry parentRegistry)
    {
       this.yoTime = yoTime;
 
-      registry = new YoVariableRegistry(name + "TrajectoryHandler");
+      registry = new YoRegistry(name + "TrajectoryHandler");
       polynomial = new YoPolynomial(name + "CubicPolynomial", 4, registry);
       position = new YoFramePoint3D(name + "Position", ReferenceFrame.getWorldFrame(), registry);
       velocity = new YoFrameVector3D(name + "Velocity", ReferenceFrame.getWorldFrame(), registry);
@@ -231,7 +231,7 @@ public class EuclideanTrajectoryHandler
          polynomial.setCubic(t0, t1, p0, v0, p1, v1);
          polynomial.compute(time);
 
-         position.setElement(i, polynomial.getPosition());
+         position.setElement(i, polynomial.getValue());
          velocity.setElement(i, polynomial.getVelocity());
          acceleration.setElement(i, polynomial.getAcceleration());
       }

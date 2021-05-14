@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.encoder.processors;
 
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -9,7 +9,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 public abstract class AbstractEncoderProcessor implements EncoderProcessor
 {
-   protected final YoVariableRegistry registry;
+   protected final YoRegistry registry;
    protected final YoInteger rawTicks;
    protected final YoDouble time;
 
@@ -21,7 +21,7 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
 
    private final String name;
    
-   public AbstractEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoVariableRegistry registry)
+   public AbstractEncoderProcessor(String name, YoInteger rawTicks, YoDouble time, double distancePerTick, YoRegistry registry)
    {
       this.name = name;
       
@@ -33,8 +33,8 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
       this.processedPosition = new YoDouble(name + "ProcPos", registry);
       this.processedVelocity = new YoDouble(name + "ProcVel", registry);
 
-      processedTicks.addVariableChangedListener(new MultiplicationVariableChangedListener(processedPosition, distancePerTick));
-      processedTickRate.addVariableChangedListener(new MultiplicationVariableChangedListener(processedVelocity, distancePerTick));
+      processedTicks.addListener(new MultiplicationVariableChangedListener(processedPosition, distancePerTick));
+      processedTickRate.addListener(new MultiplicationVariableChangedListener(processedVelocity, distancePerTick));
    }
 
    public final double getQ()
@@ -51,7 +51,7 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
 
    public abstract void update();
 
-   private static final class MultiplicationVariableChangedListener implements VariableChangedListener
+   private static final class MultiplicationVariableChangedListener implements YoVariableChangedListener
    {
       private final YoVariable output;
       private final double multiplicationFactor;
@@ -62,13 +62,13 @@ public abstract class AbstractEncoderProcessor implements EncoderProcessor
          this.multiplicationFactor = multiplicationFactor;
       }
 
-      public void notifyOfVariableChange(YoVariable variable)
+      public void changed(YoVariable variable)
       {
          output.setValueFromDouble(variable.getValueAsDouble() * multiplicationFactor);
       }
    }
    
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return null;
    }

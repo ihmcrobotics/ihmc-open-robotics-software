@@ -1,10 +1,6 @@
 package us.ihmc.atlas;
 
-import com.martiansoftware.jsap.FlaggedOption;
-import com.martiansoftware.jsap.JSAP;
-import com.martiansoftware.jsap.JSAPException;
-import com.martiansoftware.jsap.JSAPResult;
-import com.martiansoftware.jsap.Switch;
+import com.martiansoftware.jsap.*;
 
 import us.ihmc.atlas.sensors.AtlasSensorSuiteManager;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -13,20 +9,40 @@ import us.ihmc.communication.producers.VideoControlSettings;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
+import static us.ihmc.atlas.AtlasNetworkProcessor.NetworkProcessorMode.VR;
+
 public class AtlasNetworkProcessor
 {
-   private enum Application
+   public enum NetworkProcessorMode
    {
-      DEFAULT, VR
-   };
+      DEFAULT(AtlasNetworkProcessor::defaultNetworkProcessor),
+      VR(AtlasNetworkProcessor::vrNetworkProcessor),
+      BEHAVIOR(AtlasNetworkProcessor::behaviorNetworkProcessor),
+      MINIMAL(AtlasNetworkProcessor::minimalNetworkProcessor),
+      STAIRS(AtlasNetworkProcessor::stairsNetworkProcessor),
+      ;
 
-   private static final Application APPLICATION = Application.DEFAULT;
+      private Application application;
+
+      NetworkProcessorMode(Application application)
+      {
+         this.application = application;
+      }
+
+      public Application getApplication()
+      {
+         return application;
+      }
+   }
+
+   private static final NetworkProcessorMode DEAFULT_MODE = VR;
 
    public static void main(String[] args) throws JSAPException
    {
       JSAP jsap = new JSAP();
 
-      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(true).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption robotModel = new FlaggedOption("robotModel").setLongFlag("model").setShortFlag('m').setRequired(false).setStringParser(JSAP.STRING_PARSER);
+      FlaggedOption modeOption = new FlaggedOption("mode").setLongFlag("mode").setRequired(false).setStringParser(JSAP.STRING_PARSER);
 
       Switch runningOnRealRobot = new Switch("runningOnRealRobot").setLongFlag("realRobot");
       Switch runningOnGazebo = new Switch("runningOnGazebo").setLongFlag("gazebo");
@@ -40,6 +56,7 @@ public class AtlasNetworkProcessor
       jsap.registerParameter(robotModel);
 
       jsap.registerParameter(runningOnRealRobot);
+      jsap.registerParameter(modeOption);
       jsap.registerParameter(runningOnGazebo);
       jsap.registerParameter(leftHandHost);
       jsap.registerParameter(rightHandHost);
@@ -70,7 +87,12 @@ public class AtlasNetworkProcessor
          {
             target = RobotTarget.SCS;
          }
-         model = AtlasRobotModelFactory.createDRCRobotModel(config.getString("robotModel"), target, true);
+         String robotVersionString = config.getString("robotModel");
+         if (robotVersionString == null)
+         {
+            robotVersionString = "ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ";
+         }
+         model = AtlasRobotModelFactory.createDRCRobotModel(robotVersionString, target, true);
       }
       catch (IllegalArgumentException e)
       {
@@ -81,39 +103,76 @@ public class AtlasNetworkProcessor
 
       LogTools.info("Selected model: {}", model);
 
-      switch (APPLICATION)
-      {
-         case VR:
-            vrNetworkProcessor(args, model);
-            break;
-         case DEFAULT:
-         default:
-            defaultNetworkProcessor(args, model);
-            break;
-      }
-   }
-
-   private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel)
-   {
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
+      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(model, PubSubImplementation.FAST_RTPS);
       LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
-      networkProcessor.setupRosModule();
-      networkProcessor.setupSensorModule();
-      networkProcessor.setupBehaviorModule(false, false, 0);
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
-      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
+
+      LogTools.info("Setting up network processor modules...");
+      NetworkProcessorMode mode = DEAFULT_MODE;
+      if (config.userSpecified(modeOption.getID()))
+      {
+         String userSpecifiedMode = config.getString(modeOption.getID());
+         LogTools.info("User specified mode: {}", userSpecifiedMode);
+         mode = NetworkProcessorMode.valueOf(userSpecifiedMode);
+      }
+      mode.getApplication().setup(args, model, networkProcessor);
+
       networkProcessor.setupShutdownHook();
+
+      LogTools.info("Starting modules!");
       networkProcessor.start();
    }
 
-   private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel)
+   private interface Application
    {
-      HumanoidNetworkProcessor networkProcessor = new HumanoidNetworkProcessor(robotModel, PubSubImplementation.FAST_RTPS);
-      LogTools.info("ROS_MASTER_URI = " + networkProcessor.getOrCreateRosURI());
+      void setup(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor);
+   }
+
+   private static void defaultNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
       networkProcessor.setupRosModule();
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
+//      networkProcessor.setupKinematicsToolboxModule(false);
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(networkProcessor.getOrCreateROS2Node());
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
+      
+//      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+      networkProcessor.setupBehaviorModule(false, false, 0);
+   }
+
+   private static void behaviorNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
+      networkProcessor.setupFiducialDetectorToolboxModule();
+      networkProcessor.setupObjectDetectorToolboxModule();
+      networkProcessor.setupFootstepPlanningToolboxModule();
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
+   }
+
+   private static void vrNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupFiducialDetectorToolboxModule();
+      networkProcessor.setupObjectDetectorToolboxModule();
+      networkProcessor.setupFootstepPlanningToolboxModule();
+
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(networkProcessor.getOrCreateROS2Node());
       sensorModule.setEnableDepthPointCloudPublisher(false);
       sensorModule.setEnableFisheyeCameraPublishers(false);
       sensorModule.setEnableLidarScanPublisher(true);
@@ -127,10 +186,28 @@ public class AtlasNetworkProcessor
       sensorModule.getMultisenseStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(200000);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
 
-      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
-      networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
-      networkProcessor.setupHumanoidAvatarREAStateUpdater();
-      networkProcessor.setupShutdownHook();
-      networkProcessor.start();
+//      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
+      networkProcessor.setupBehaviorModule(false, false, 0);
+   }
+
+   private static void stairsNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+
+      networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
+      networkProcessor.setupKinematicsToolboxModule(false);
+
+      AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager(networkProcessor.getOrCreateROS2Node());
+      networkProcessor.setupSensorModule();
+      sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
+      sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
+      sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(35, 15));
+   }
+
+
+   private static void minimalNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
+   {
+      networkProcessor.setupRosModule();
+      networkProcessor.setupSensorModule();
    }
 }

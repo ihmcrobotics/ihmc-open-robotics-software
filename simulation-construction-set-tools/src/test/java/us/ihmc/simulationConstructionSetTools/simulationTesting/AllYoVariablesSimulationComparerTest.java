@@ -1,16 +1,16 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -18,7 +18,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -27,8 +27,8 @@ public class AllYoVariablesSimulationComparerTest
 	Robot robot1;
 	Robot robot2;
 	
-	YoVariableRegistry rootRegistry1;
-	YoVariableRegistry rootRegistry2;
+	YoRegistry rootRegistry1;
+	YoRegistry rootRegistry2;
 	
 	YoDouble yoDouble1;
 	YoDouble yoDouble2;
@@ -55,8 +55,8 @@ public class AllYoVariablesSimulationComparerTest
 		robot1 = createSimpleRobotOne("robot"); 
 		robot2 = createSimpleRobotTwo("robot");
 
-		rootRegistry1 = new YoVariableRegistry("rootRegistry");
-		rootRegistry2 = new YoVariableRegistry("rootRegistry");
+		rootRegistry1 = new YoRegistry("rootRegistry");
+		rootRegistry2 = new YoRegistry("rootRegistry");
 
 		yoDouble1 = new YoDouble("doubleYoVariableA1", rootRegistry1);
 		yoDouble2 = new YoDouble("doubleYoVariableA2", rootRegistry1);
@@ -76,7 +76,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint1 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis.Y);
+		PinJoint joint1 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis3D.Y);
 		Link link1 = link1();
 		joint1.setLink(link1);
 		robot.addRootJoint(joint1);
@@ -90,7 +90,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint2 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis.Y);
+		PinJoint joint2 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis3D.Y);
 		Link link2 = link2();
 		joint2.setLink(link2);
 		robot.addRootJoint(joint2);
@@ -148,7 +148,7 @@ public class AllYoVariablesSimulationComparerTest
 		yoDouble3.set(1.0);
 		yoDouble4.set(2.0);
 		assertFalse(comparerWithZeroEpsilon.compare(scs1, scs2));
-		ArrayList<YoVariable<?>[]> differences = comparerWithZeroEpsilon.getDifferences();
+		List<YoVariable[]> differences = comparerWithZeroEpsilon.getDifferences();
 		assertEquals(1, differences.size());
 		assertEquals(yoDouble2, differences.get(0)[0]);
 		assertEquals(yoDouble4, differences.get(0)[1]);

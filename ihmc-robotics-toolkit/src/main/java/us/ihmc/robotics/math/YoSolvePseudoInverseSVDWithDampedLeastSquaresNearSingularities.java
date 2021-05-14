@@ -1,21 +1,21 @@
 package us.ihmc.robotics.math;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities implements LinearSolver<DenseMatrix64F>
+public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities implements LinearSolverDense<DMatrixRMaj>
 {
-   private final SingularValueDecomposition<DenseMatrix64F> svd;
-   private final DenseMatrix64F pseudoInverse = new DenseMatrix64F(1, 1);
+   private final SingularValueDecomposition_F64<DMatrixRMaj> svd;
+   private final DMatrixRMaj pseudoInverse = new DMatrixRMaj(1, 1);
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final YoDouble mu;
    private final YoDouble firstSingularValueThreshold;
    private final YoDouble secondSingularValueThreshold;
@@ -24,14 +24,14 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    private final YoDouble[] yoSingularValues;
    private final YoDouble[] yoSingularValuesInverse;
 
-   private final DenseMatrix64F tempV;
+   private final DMatrixRMaj tempV;
    
-   public YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(String namePrefix, int maxRows, int maxCols, YoVariableRegistry parentRegistry)
+   public YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities(String namePrefix, int maxRows, int maxCols, YoRegistry parentRegistry)
    {
-      svd = DecompositionFactory.svd(maxRows, maxCols, true, true, true);
-      tempV = new DenseMatrix64F(maxCols, maxCols);
+      svd = DecompositionFactory_DDRM.svd(maxRows, maxCols, true, true, true);
+      tempV = new DMatrixRMaj(maxCols, maxCols);
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
 
       mu = new YoDouble(namePrefix + "Mu", registry);
       firstSingularValueThreshold = new YoDouble(namePrefix + "FirstSingularValueThreshold", registry);
@@ -76,7 +76,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    private double alpha = 1.0;
 
    @Override
-   public boolean setA(DenseMatrix64F A)
+   public boolean setA(DMatrixRMaj A)
    {
       pseudoInverse.reshape(A.numCols, A.numRows, false);
       tempV.reshape(A.numCols, A.numRows, false);
@@ -84,8 +84,8 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       if (!svd.decompose(A))
          return false;
 
-      DenseMatrix64F U_t = svd.getU(null, true);
-      DenseMatrix64F V = svd.getV(tempV, false);
+      DMatrixRMaj U_t = svd.getU(null, true);
+      DMatrixRMaj V = svd.getV(tempV, false);
       double[] S = svd.getSingularValues();
       int N = Math.min(A.numRows, A.numCols);
 
@@ -144,7 +144,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
       }
 
       // V*W*U^T
-      CommonOps.mult(V, U_t, pseudoInverse);
+      CommonOps_DDRM.mult(V, U_t, pseudoInverse);
 
       return true;
    }
@@ -156,13 +156,13 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    }
 
    @Override
-   public void solve(DenseMatrix64F b, DenseMatrix64F x)
+   public void solve(DMatrixRMaj b, DMatrixRMaj x)
    {
-      CommonOps.mult(pseudoInverse, b, x);
+      CommonOps_DDRM.mult(pseudoInverse, b, x);
    }
 
    @Override
-   public void invert(DenseMatrix64F A_inv)
+   public void invert(DMatrixRMaj A_inv)
    {
       A_inv.set(pseudoInverse);
    }
@@ -180,7 +180,7 @@ public class YoSolvePseudoInverseSVDWithDampedLeastSquaresNearSingularities impl
    }
 
    @Override
-   public SingularValueDecomposition<DenseMatrix64F> getDecomposition()
+   public SingularValueDecomposition_F64<DMatrixRMaj> getDecomposition()
    {
       return svd;
    }

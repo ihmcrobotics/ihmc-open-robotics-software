@@ -11,6 +11,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -65,8 +66,8 @@ public class SimulatedIMURawSensorReaderTest
    @BeforeEach
    public void setUp() throws Exception
    {
-      transformIMUToJoint.setRotation(jointToIMURotation);
-      transformIMUToJoint.setTranslation(jointToIMUOffset);
+      transformIMUToJoint.getRotation().set(jointToIMURotation);
+      transformIMUToJoint.getTranslation().set(jointToIMUOffset);
       transformJointToIMU.setAndInvert(transformIMUToJoint);
 
       imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
@@ -144,8 +145,8 @@ public class SimulatedIMURawSensorReaderTest
    {
       RotationMatrix randomTransformBodyToWorldMatrix = new RotationMatrix();
       RotationMatrix transformIMUToJointMatrix = new RotationMatrix();
-      randomTransformBodyToWorld.getRotation(randomTransformBodyToWorldMatrix);
-      transformIMUToJoint.getRotation(transformIMUToJointMatrix);
+      randomTransformBodyToWorldMatrix.set(randomTransformBodyToWorld.getRotation());
+      transformIMUToJointMatrix.set(transformIMUToJoint.getRotation());
 
       expectedIMUOrientation.set(randomTransformBodyToWorldMatrix);
       expectedIMUOrientation.multiply(transformIMUToJointMatrix);
@@ -379,7 +380,7 @@ public class SimulatedIMURawSensorReaderTest
       public FrameVector3D getReferenceFrameTransInWorldFrame(ReferenceFrame frame)
       {
          Vector3D trans = new Vector3D();
-         frame.getTransformToDesiredFrame(worldFrame).getTranslation(trans);
+         trans.set(frame.getTransformToDesiredFrame(worldFrame).getTranslation());
          FrameVector3D ret = new FrameVector3D(worldFrame, trans);
          return ret;
       }
@@ -387,7 +388,7 @@ public class SimulatedIMURawSensorReaderTest
       private ReferenceFrame createOffsetFrame(JointBasics previousJoint, RigidBodyTransform transformToParent, String frameName)
       {
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
-         ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
+         ReferenceFrame beforeJointFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
          return beforeJointFrame;
       }
    }

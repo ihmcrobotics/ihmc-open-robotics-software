@@ -1,15 +1,15 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final OneDoFJointBasics joint;
    private final JointDesiredOutputReadOnly output;
@@ -23,22 +23,22 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
    private final YoDouble tau;
    private final YoDouble tauDesired;
 
-   public OneDoFJointFourierAnalysis(OneDoFJointBasics joint, JointDesiredOutputReadOnly outputDataToCheck, double estimationWindow, double dt, YoVariableRegistry parentRegistry)
+   public OneDoFJointFourierAnalysis(OneDoFJointBasics joint, JointDesiredOutputReadOnly outputDataToCheck, double estimationWindow, double dt, YoRegistry parentRegistry)
    {
       this(joint, outputDataToCheck, estimationWindow, dt, null, null, null, parentRegistry);
    }
 
-   public OneDoFJointFourierAnalysis(OneDoFJointBasics joint, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoVariableRegistry parentRegistry)
+   public OneDoFJointFourierAnalysis(OneDoFJointBasics joint, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoRegistry parentRegistry)
    {
       this(joint, null, estimationWindow, dt, velocity, tau, tauDesired, parentRegistry);
    }
-   private OneDoFJointFourierAnalysis(OneDoFJointBasics joint, JointDesiredOutputReadOnly outputDataToCheck, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoVariableRegistry parentRegistry)
+   private OneDoFJointFourierAnalysis(OneDoFJointBasics joint, JointDesiredOutputReadOnly outputDataToCheck, double estimationWindow, double dt, YoDouble velocity, YoDouble tau, YoDouble tauDesired, YoRegistry parentRegistry)
    {
       this.joint = joint;
       this.output = outputDataToCheck;
       String jointName = joint.getName();
 
-      registry = new YoVariableRegistry(jointName + "FourierAnalysis");
+      registry = new YoRegistry(jointName + "FourierAnalysis");
       parentRegistry.addChild(registry);
 
       velocityFourierAnalysis = new Online1DSignalFourierAnalysis(jointName + "Velocity", estimationWindow, dt, registry);
@@ -141,17 +141,17 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       tauDesiredFourierAnalysis.getMagnitudes(magnitudesToPack);
    }
 
-   public void getVelocityOutput(DenseMatrix64F outputToPack)
+   public void getVelocityOutput(DMatrixRMaj outputToPack)
    {
       velocityFourierAnalysis.getOutput(outputToPack);
    }
 
-   public void getTauOutput(DenseMatrix64F outputToPack)
+   public void getTauOutput(DMatrixRMaj outputToPack)
    {
       tauFourierAnalysis.getOutput(outputToPack);
    }
 
-   public void getTauDesiredOutput(DenseMatrix64F outputToPack)
+   public void getTauDesiredOutput(DMatrixRMaj outputToPack)
    {
       tauDesiredFourierAnalysis.getOutput(outputToPack);
    }

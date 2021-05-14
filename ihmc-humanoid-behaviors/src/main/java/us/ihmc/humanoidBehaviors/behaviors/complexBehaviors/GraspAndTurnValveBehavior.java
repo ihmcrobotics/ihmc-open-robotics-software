@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.frames.CommonReferenceFrameIds;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -47,7 +47,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
 
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
 
-   public GraspAndTurnValveBehavior(String robotName, YoDouble yoTime, Ros2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
+   public GraspAndTurnValveBehavior(String robotName, YoDouble yoTime, ROS2Node ros2Node, AtlasPrimitiveActions atlasPrimitiveActions)
    {
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
@@ -172,7 +172,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
             publishTextToSpeech("rotate Valve");
             FramePose3D point = offsetPointFromValveInWorldFrame(0.0, valveRadius + valveRadiusfinalOffset, distanceFromValve, 1.5708, 1.5708, -3.14159);
 
-            GeometryTools.rotatePoseAboutAxis(valvePose, Axis.Z, degrees, point);
+            GeometryTools.rotatePoseAboutAxis(valvePose, Axis3D.Z, degrees, point);
 
             uiPositionCheckerPacketpublisher.publish(MessageTools.createUIPositionCheckerPacket(point.getPosition()));
 

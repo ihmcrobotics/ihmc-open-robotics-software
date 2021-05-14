@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
@@ -181,9 +181,9 @@ public class WeightMatrix6DTest
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
-      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
+      referenceFrames.add(ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
-      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
+      referenceFrames.add(ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -191,8 +191,8 @@ public class WeightMatrix6DTest
          {
             for (ReferenceFrame destinationFrame : referenceFrames.subList(1, referenceFrames.size()))
             {
-               DenseMatrix64F actualSelectionMatrix = RandomMatrices.createRandom(6, 6, -1.0, 1.0, random);
-               DenseMatrix64F expectedSelectionMatrix = RandomMatrices.createRandom(6, 6, -1.0, 1.0, random);
+               DMatrixRMaj actualSelectionMatrix = RandomMatrices_DDRM.rectangle(6, 6, -1.0, 1.0, random);
+               DMatrixRMaj expectedSelectionMatrix = RandomMatrices_DDRM.rectangle(6, 6, -1.0, 1.0, random);
 
                double angularXWeight = random.nextDouble();
                double angularYWeight = random.nextDouble();
@@ -219,16 +219,16 @@ public class WeightMatrix6DTest
                assertMatrixEquals(expectedSelectionMatrix, actualSelectionMatrix, 1.0e-12);
 
                // Verifies that it has the intended application: Being able to apply the selection to any frame
-//               DenseMatrix64F expectedSubspaceVector = new DenseMatrix64F(6, 1);
-//               DenseMatrix64F actualSubspaceVector = new DenseMatrix64F(6, 1);
+//               DMatrixRMaj expectedSubspaceVector = new DMatrixRMaj(6, 1);
+//               DMatrixRMaj actualSubspaceVector = new DMatrixRMaj(6, 1);
 //
 //               FrameVector randomAngularVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
 //               FrameVector randomLinearVector = FrameVector.generateRandomFrameVector(random, destinationFrame);
-//               DenseMatrix64F originalVector = new DenseMatrix64F(6, 1);
+//               DMatrixRMaj originalVector = new DMatrixRMaj(6, 1);
 //               randomAngularVector.get(0, originalVector);
 //               randomLinearVector.get(3, originalVector);
 //               weightMatrix6D.getFullWeightMatrixInFrame(destinationFrame, expectedSelectionMatrix);
-//               CommonOps.mult(expectedSelectionMatrix, originalVector, actualSubspaceVector);
+//               CommonOps_DDRM.mult(expectedSelectionMatrix, originalVector, actualSubspaceVector);
 //
 //               if (selectionFrame != null)
 //               {
@@ -274,9 +274,9 @@ public class WeightMatrix6DTest
       List<ReferenceFrame> referenceFrames = new ArrayList<>();
       referenceFrames.add(null);
       referenceFrames.add(ReferenceFrame.getWorldFrame());
-      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
+      referenceFrames.add(ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop1", ReferenceFrame.getWorldFrame(), randomTransform));
       referenceFrames.add(EuclidFrameRandomTools.nextReferenceFrame("blop2", random, ReferenceFrame.getWorldFrame()));
-      referenceFrames.add(ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
+      referenceFrames.add(ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop1Bis", ReferenceFrame.getWorldFrame(), randomTransform));
 
       for (int i = 0; i < ITERATIONS; i++)
       {
@@ -284,8 +284,8 @@ public class WeightMatrix6DTest
          {
             for (ReferenceFrame destinationFrame : referenceFrames.subList(1, referenceFrames.size()))
             {
-               DenseMatrix64F actualSelectionMatrix = RandomMatrices.createRandom(6, 6, -1.0, 1.0, random);
-               DenseMatrix64F expectedSelectionMatrix = RandomMatrices.createRandom(6, 6, -1.0, 1.0, random);
+               DMatrixRMaj actualSelectionMatrix = RandomMatrices_DDRM.rectangle(6, 6, -1.0, 1.0, random);
+               DMatrixRMaj expectedSelectionMatrix = RandomMatrices_DDRM.rectangle(6, 6, -1.0, 1.0, random);
 
                double angularXWeight = random.nextDouble();
                double angularYWeight = random.nextDouble();
@@ -309,12 +309,12 @@ public class WeightMatrix6DTest
       }
    }
 
-   private static void assertMatrixEquals(DenseMatrix64F expected, DenseMatrix64F actual, double epsilon)
+   private static void assertMatrixEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)
    {
-      assertTrue(assertErrorMessage(expected, actual), MatrixFeatures.isEquals(expected, actual, epsilon));
+      assertTrue(assertErrorMessage(expected, actual), MatrixFeatures_DDRM.isEquals(expected, actual, epsilon));
    }
 
-   private static String assertErrorMessage(DenseMatrix64F expected, DenseMatrix64F actual)
+   private static String assertErrorMessage(DMatrixRMaj expected, DMatrixRMaj actual)
    {
       return "Expected:\n" + expected + "\nActual:\n" + actual;
    }

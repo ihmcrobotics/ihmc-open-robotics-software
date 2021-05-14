@@ -5,7 +5,6 @@ import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandType;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 
 /**
  * A {@code InverseDynamicsCommandList} gathers several commands to be submitted to the controller
@@ -24,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
  */
 public class InverseDynamicsCommandList implements InverseDynamicsCommand<InverseDynamicsCommandList>
 {
+   private int commandId;
    /**
     * Internal storage of the commands.
     */
@@ -77,6 +77,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
     */
    public void clear()
    {
+      commandId = 0;
       commandList.clear();
    }
 
@@ -106,7 +107,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    }
 
    /**
-    * Gets the number of {@link FeedbackControlCommand}s contained in this list.
+    * Gets the number of {@link InverseDynamicsCommand}s contained in this list.
     * 
     * @return the number of commands.
     */
@@ -116,7 +117,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    }
 
    /**
-    * Tests if this list of {@link FeedbackControlCommand}s is empty.
+    * Tests if this list of {@link InverseDynamicsCommand}s is empty.
     * 
     * @return {@code true} if this command is empty, {@code false} otherwise.
     */
@@ -132,6 +133,7 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    public void set(InverseDynamicsCommandList other)
    {
       clear();
+      setCommandId(other.getCommandId());
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
    }
@@ -148,6 +150,18 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -158,6 +172,8 @@ public class InverseDynamicsCommandList implements InverseDynamicsCommand<Invers
       {
          InverseDynamicsCommandList other = (InverseDynamicsCommandList) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfCommands() != other.getNumberOfCommands())
             return false;
          for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)

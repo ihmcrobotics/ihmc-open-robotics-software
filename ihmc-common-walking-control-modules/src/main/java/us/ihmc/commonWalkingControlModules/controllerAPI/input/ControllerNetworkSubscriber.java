@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -20,7 +19,11 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2QosProfile;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2TopicNameTools;
+import us.ihmc.ros2.RealtimeROS2Node;
 
 /**
  * The ControllerNetworkSubscriber is meant to used as a generic interface between a network packet
@@ -57,27 +60,29 @@ public class ControllerNetworkSubscriber
     */
    private final Map<Class<? extends Settable<?>>, IHMCRealtimeROS2Publisher<?>> statusMessagePublisherMap = new HashMap<>();
 
-   private final RealtimeRos2Node realtimeRos2Node;
+   private final RealtimeROS2Node realtimeROS2Node;
 
-   private final ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator;
-   private final ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator;
+   private final ROS2Topic<?> inputTopic;
+   private final ROS2Topic<?> outputTopic;
 
-   public ControllerNetworkSubscriber(ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
-                                      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator, StatusMessageOutputManager controllerStatusOutputManager,
-                                      RealtimeRos2Node realtimeRos2Node)
+   public ControllerNetworkSubscriber(ROS2Topic<?> inputTopic,
+                                      CommandInputManager controllerCommandInputManager,
+                                      ROS2Topic<?> outputTopic,
+                                      StatusMessageOutputManager controllerStatusOutputManager,
+                                      RealtimeROS2Node realtimeROS2Node)
    {
-      this.subscriberTopicNameGenerator = subscriberTopicNameGenerator;
+      this.inputTopic = inputTopic;
       this.controllerCommandInputManager = controllerCommandInputManager;
-      this.publisherTopicNameGenerator = publisherTopicNameGenerator;
+      this.outputTopic = outputTopic;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
-      this.realtimeRos2Node = realtimeRos2Node;
+      this.realtimeROS2Node = realtimeROS2Node;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
       listOfSupportedControlMessages = controllerCommandInputManager.getListOfSupportedMessages();
 
       messageFilter = new AtomicReference<>(message -> true);
       messageValidator = new AtomicReference<>(message -> null);
 
-      if (realtimeRos2Node == null)
+      if (realtimeROS2Node == null)
          LogTools.error("No ROS2 node, {} cannot be created.", getClass().getSimpleName());
 
       listOfSupportedStatusMessages.add(InvalidPacketNotificationPacket.class);
@@ -86,27 +91,62 @@ public class ControllerNetworkSubscriber
       createGlobalStatusMessageListener();
    }
 
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
-                                                                            MessageUnpacker<T> messageUnpacker)
+   public ROS2Topic<?> getInputTopic()
    {
-      registerSubcriberWithMessageUnpacker(multipleMessageType, subscriberTopicNameGenerator, expectedMessageSize, messageUnpacker);
+      return inputTopic;
+   }
+
+   public ROS2Topic<?> getOutputTopic()
+   {
+      return outputTopic;
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            MessageTopicNameGenerator subscriberTopicNameGenerator, int expectedMessageSize,
+                                                                            int expectedMessageSize,
+                                                                            MessageUnpacker<T> messageUnpacker)
+   {
+      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, expectedMessageSize, messageUnpacker);
+   }
+
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                            ROS2Topic<?> inputTopic,
+                                                                            int expectedMessageSize,
+                                                                            MessageUnpacker<T> messageUnpacker)
+   {
+      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, null, expectedMessageSize, messageUnpacker);
+   }
+
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                            ROS2Topic<?> inputTopic,
+                                                                            ROS2QosProfile qosProfile,
+                                                                            int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      String topicName = subscriberTopicNameGenerator.generateTopicName(multipleMessageType);
+      ROS2Topic<T> topicName = inputTopic.withTypeName(multipleMessageType);
       try
       {
          T localInstance = multipleMessageType.newInstance();
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageType, topicName, s ->
+         NewMessageListener<T> messageListener = s ->
          {
             s.takeNextData(localInstance, null);
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
-         });
+         };
+
+         if (qosProfile == null)
+         {
+            ROS2Tools.createCallbackSubscription(realtimeROS2Node, multipleMessageType, topicName, messageListener);
+         }
+         else
+         {
+            ROS2Tools.createCallbackSubscription(realtimeROS2Node,
+                                                 multipleMessageType,
+                                                 topicName.toString(),
+                                                 messageListener,
+                                                 qosProfile,
+                                                 ROS2Tools.RUNTIME_EXCEPTION);
+         }
       }
       catch (InstantiationException | IllegalAccessException e)
       {
@@ -114,8 +154,10 @@ public class ControllerNetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
-                                                           List<Settable<?>> unpackedMessages, T multipleMessageHolder)
+   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
+                                                           MessageUnpacker<T> messageUnpacker,
+                                                           List<Settable<?>> unpackedMessages,
+                                                           T multipleMessageHolder)
    {
       if (DEBUG)
          LogTools.debug("Received message: {}, {}.", multipleMessageHolder.getClass().getSimpleName(), multipleMessageHolder);
@@ -157,8 +199,8 @@ public class ControllerNetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      String topicName = subscriberTopicNameGenerator.generateTopicName(MessageCollection.class);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, MessageCollection.class, topicName, s ->
+      ROS2Topic<MessageCollection> topicName = inputTopic.withTypeName(MessageCollection.class);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, MessageCollection.class, topicName, s ->
       {
          s.takeNextData(messageCollection, null);
 
@@ -209,10 +251,10 @@ public class ControllerNetworkSubscriber
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         T messageLocalInstance = ROS2Tools.newMessageInstance(messageClass);
-         String topicName = subscriberTopicNameGenerator.generateTopicName(messageClass);
+         T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
+         ROS2Topic<?> topicName = inputTopic.withTypeName(messageClass);
 
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, messageClass, topicName, s ->
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, messageClass, topicName, s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
@@ -222,8 +264,8 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
-      String topicName = publisherTopicNameGenerator.generateTopicName(messageClass);
-      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, messageClass, topicName);
+      ROS2Topic<T> topicName = outputTopic.withTypeName(messageClass);
+      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, messageClass, topicName);
       return publisher;
    }
 

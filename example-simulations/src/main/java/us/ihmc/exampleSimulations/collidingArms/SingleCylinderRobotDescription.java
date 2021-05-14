@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.collidingArms;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
@@ -99,7 +99,7 @@ public class SingleCylinderRobotDescription
          double stripePercent = 0.05;
          linkGraphics.translate(0.0, 0.0, -height * 0.01);
          linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height * 1.02, stripeAppearance);
-         linkGraphics.rotate(Math.PI / 2.0, Axis.Z);
+         linkGraphics.rotate(Math.PI / 2.0, Axis3D.Z);
          linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height * 1.02, stripeAppearance);
       }
 

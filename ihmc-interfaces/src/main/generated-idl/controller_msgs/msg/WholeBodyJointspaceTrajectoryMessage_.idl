@@ -1,0 +1,43 @@
+#ifndef __controller_msgs__msg__WholeBodyJointspaceTrajectoryMessage__idl__
+#define __controller_msgs__msg__WholeBodyJointspaceTrajectoryMessage__idl__
+
+#include "controller_msgs/msg/./OneDoFJointTrajectoryMessage_.idl"
+#include "controller_msgs/msg/./QueueableMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * Allows to send joint-space trajectory to either part of the joints or for all the joints.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyJointspaceTrajectoryMessage_")
+      struct WholeBodyJointspaceTrajectoryMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * The is the unique hash code of each of the joints to be controlled.
+         * It is used on the controller side to retrieve the desired joint to be controlled.
+         * See Joint.hashCode() for the computation of a joint hash code.
+         */
+        sequence<long> joint_hash_codes;
+        /**
+         * Trajectory for each joint.
+         */
+        sequence<controller_msgs::msg::dds::OneDoFJointTrajectoryMessage> joint_trajectory_messages;
+        /**
+         * Properties for queueing trajectories.
+         */
+        controller_msgs::msg::dds::QueueableMessage queueing_properties;
+      };
+    };
+  };
+};
+
+#endif

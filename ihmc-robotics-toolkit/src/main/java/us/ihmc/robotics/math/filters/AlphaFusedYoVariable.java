@@ -1,7 +1,7 @@
 package us.ihmc.robotics.math.filters;
 
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -39,7 +39,7 @@ public class AlphaFusedYoVariable extends YoDouble
 
    private final YoBoolean hasBeenCalled;
 
-   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha)
+   public AlphaFusedYoVariable(String name, YoRegistry yoVariableRegistry, double alpha)
    {
       super(name, yoVariableRegistry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
@@ -55,7 +55,7 @@ public class AlphaFusedYoVariable extends YoDouble
       reset();
    }
 
-   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, double alpha, YoDouble slowSignal, YoDouble fastSignal)
+   public AlphaFusedYoVariable(String name, YoRegistry yoVariableRegistry, double alpha, YoDouble slowSignal, YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);
       this.hasBeenCalled = new YoBoolean(name + "HasBeenCalled", yoVariableRegistry);
@@ -71,7 +71,7 @@ public class AlphaFusedYoVariable extends YoDouble
       reset();
    }
 
-   public AlphaFusedYoVariable(String name, YoVariableRegistry yoVariableRegistry, DoubleProvider alphaVariable, YoDouble slowSignal,
+   public AlphaFusedYoVariable(String name, YoRegistry yoVariableRegistry, DoubleProvider alphaVariable, YoDouble slowSignal,
          YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);

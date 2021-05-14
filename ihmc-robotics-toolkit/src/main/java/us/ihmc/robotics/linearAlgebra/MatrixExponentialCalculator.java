@@ -1,24 +1,27 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
-import org.ejml.ops.SpecializedOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
+import org.ejml.dense.row.SpecializedOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixExponentialCalculator
 {
-   private final int size;
-   private final DenseMatrix64F As, As_2, As_4, As_6;
-   private final DenseMatrix64F U;
-   private final DenseMatrix64F V;
-   private final DenseMatrix64F AV;
-   private final DenseMatrix64F N, D;
-   private final DenseMatrix64F temp;
-   private final LinearSolver<DenseMatrix64F> solver;
+   private int size;
+   private final DMatrixRMaj As = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj As_2 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj As_4 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj As_6 = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj V = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj AV = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj N = new DMatrixRMaj(0, 0), D = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj temp = new DMatrixRMaj(0, 0);
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
    // constants for pade approximation
    private static final double c0 = 1.0;
@@ -38,22 +41,28 @@ public class MatrixExponentialCalculator
 
    public MatrixExponentialCalculator(int size)
    {
+      reshape(size);
+
+      solver = LinearSolverFactory_DDRM.linear(size);
+   }
+
+   public void reshape(int size)
+   {
       this.size = size;
-      this.As = new DenseMatrix64F(size, size);
-      this.As_2 = new DenseMatrix64F(size, size);
-      this.As_4 = new DenseMatrix64F(size, size);
-      this.As_6 = new DenseMatrix64F(size, size);
 
-      this.U = new DenseMatrix64F(size, size);
-      this.V = new DenseMatrix64F(size, size);
+      As.reshape(size, size);
+      As_2.reshape(size, size);
+      As_4.reshape(size, size);
+      As_6.reshape(size, size);
 
-      this.AV = new DenseMatrix64F(size, size);
-      this.N = new DenseMatrix64F(size, size);
-      this.D = new DenseMatrix64F(size, size);
+      U.reshape(size, size);
+      V.reshape(size, size);
 
-      this.temp = new DenseMatrix64F(size, size);
+      AV.reshape(size, size);
+      N.reshape(size, size);
+      D.reshape(size, size);
 
-      solver = LinearSolverFactory.linear(size);
+      temp.reshape(size, size);
    }
 
    /**
@@ -70,51 +79,47 @@ public class MatrixExponentialCalculator
     * @param A square matrix
     * @return matrix exponential of A
     */
-   public void compute(DenseMatrix64F result, DenseMatrix64F A)
+   public void compute(DMatrixRMaj result, DMatrixRMaj A)
    {
       MatrixTools.checkMatrixDimensions(A, size, size);
 
-      int j = Math.max(0, 1 + (int) Math.floor(Math.log(NormOps.normPInf(A)) / Math.log(2)));
+      int j = Math.max(0, 1 + (int) Math.floor(Math.log(NormOps_DDRM.normPInf(A)) / Math.log(2)));
 
       As.set(A);
-      CommonOps.scale(1.0 / Math.pow(2, j), As);    // scaled version of A
+      CommonOps_DDRM.scale(1.0 / Math.pow(2, j), As);    // scaled version of A
 
       // calculate D and N using special Horner techniques
-      CommonOps.mult(As, As, As_2);
-      CommonOps.mult(As_2, As_2, As_4);
-      CommonOps.mult(As_4, As_2, As_6);
+      CommonOps_DDRM.mult(As, As, As_2);
+      CommonOps_DDRM.mult(As_2, As_2, As_4);
+      CommonOps_DDRM.mult(As_4, As_2, As_6);
 
       // U = c0*I + c2*A^2 + c4*A^4 + (c6*I + c8*A^2 + c10*A^4 + c12*A^6)*A^6
-      CommonOps.fill(U, 0.0);
-      SpecializedOps.addIdentity(U, U, c0);
-      CommonOps.addEquals(U, c2, As_2);
-      CommonOps.addEquals(U, c4, As_4);
+      MatrixTools.setDiagonal(U, c0);
+      CommonOps_DDRM.addEquals(U, c2, As_2);
+      CommonOps_DDRM.addEquals(U, c4, As_4);
 
-      CommonOps.fill(temp, 0.0);
-      SpecializedOps.addIdentity(temp, temp, c6);
-      CommonOps.addEquals(temp, c8, As_2);
-      CommonOps.addEquals(temp, c10, As_4);
-      CommonOps.addEquals(temp, c12, As_6);
+      MatrixTools.setDiagonal(temp, c6);
+      CommonOps_DDRM.addEquals(temp, c8, As_2);
+      CommonOps_DDRM.addEquals(temp, c10, As_4);
+      CommonOps_DDRM.addEquals(temp, c12, As_6);
 
-      CommonOps.multAdd(temp, As_6, U);
+      CommonOps_DDRM.multAdd(temp, As_6, U);
 
       // V = c1*I + c3*A^2 + c5*A^4 + (c7*I + c9*A^2 + c11*A^4 + c13*A^6)*A^6
-      CommonOps.fill(V, 0.0);
-      SpecializedOps.addIdentity(V, V, c1);
-      CommonOps.addEquals(V, c3, As_2);
-      CommonOps.addEquals(V, c5, As_4);
+      MatrixTools.setDiagonal(V, c1);
+      CommonOps_DDRM.addEquals(V, c3, As_2);
+      CommonOps_DDRM.addEquals(V, c5, As_4);
 
-      CommonOps.fill(temp, 0.0);
-      SpecializedOps.addIdentity(temp, temp, c7);
-      CommonOps.addEquals(temp, c9, As_2);
-      CommonOps.addEquals(temp, c11, As_4);
-      CommonOps.addEquals(temp, c13, As_6);
+      MatrixTools.setDiagonal(temp, c7);
+      CommonOps_DDRM.addEquals(temp, c9, As_2);
+      CommonOps_DDRM.addEquals(temp, c11, As_4);
+      CommonOps_DDRM.addEquals(temp, c13, As_6);
 
-      CommonOps.multAdd(temp, As_6, V);
+      CommonOps_DDRM.multAdd(temp, As_6, V);
 
-      CommonOps.mult(As, V, AV);
-      CommonOps.add(U, AV, N);
-      CommonOps.subtract(U, AV, D);
+      CommonOps_DDRM.mult(As, V, AV);
+      CommonOps_DDRM.add(U, AV, N);
+      CommonOps_DDRM.subtract(U, AV, D);
 
       // solve DF = N for F
       solver.setA(D);
@@ -124,7 +129,7 @@ public class MatrixExponentialCalculator
       for (int k = 0; k < j; k++)
       {
          temp.set(result);
-         CommonOps.mult(temp, temp, result);
+         CommonOps_DDRM.mult(temp, temp, result);
       }
    }
 }

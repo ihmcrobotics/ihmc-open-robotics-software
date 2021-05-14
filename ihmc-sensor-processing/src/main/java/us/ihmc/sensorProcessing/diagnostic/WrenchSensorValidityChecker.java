@@ -1,20 +1,20 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class WrenchSensorValidityChecker implements DiagnosticUpdatable
 {
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoFrameTupleValidityChecker forceChecker;
    private final YoFrameTupleValidityChecker torqueChecker;
 
-   public WrenchSensorValidityChecker(ForceSensorDefinition forceSensorDefinition, YoFrameVector3D forceMeasurement, YoFrameVector3D torqueMeasurement, YoVariableRegistry parentRegistry)
+   public WrenchSensorValidityChecker(ForceSensorDefinition forceSensorDefinition, YoFrameVector3D forceMeasurement, YoFrameVector3D torqueMeasurement, YoRegistry parentRegistry)
    {
       String wrenchSensorName = forceSensorDefinition.getSensorName();
-      registry = new YoVariableRegistry(wrenchSensorName + "WrenchSensorValidityChecker");
+      registry = new YoRegistry(wrenchSensorName + "WrenchSensorValidityChecker");
       parentRegistry.addChild(registry);
 
       verifyYoVariableNames(wrenchSensorName, forceMeasurement, torqueMeasurement);

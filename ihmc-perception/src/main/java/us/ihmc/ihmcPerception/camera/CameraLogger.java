@@ -1,18 +1,19 @@
 package us.ihmc.ihmcPerception.camera;
 
-import boofcv.io.UtilIO;
-import boofcv.io.image.UtilImageIO;
-import boofcv.struct.calib.IntrinsicParameters;
-import georegression.geometry.ConvertRotation3D_F64;
-import georegression.struct.so.Quaternion_F64;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-
-import us.ihmc.euclid.tuple3D.Vector3D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.PrintStream;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
+import boofcv.io.UtilIO;
+import boofcv.io.image.UtilImageIO;
+import boofcv.struct.calib.CameraPinholeBrown;
+import georegression.geometry.ConvertRotation3D_F64;
+import georegression.struct.so.Quaternion_F64;
+import us.ihmc.euclid.tuple3D.Vector3D;
 
 /**
  * Grabs camera images, camera location, and intrinsic parameters and saves them to a log file
@@ -54,7 +55,7 @@ public class CameraLogger
 
    public void log( BufferedImage image , long timeStamp )
    {
-      DenseMatrix64F R = CommonOps.identity(3, 3);
+      DMatrixRMaj R = CommonOps_DDRM.identity(3, 3);
       Vector3D T = new Vector3D();
 //            Matrix3d Rm = new Matrix3d();
 //            rosTransformFromHeadBaseToCamera.get(Rm);
@@ -69,8 +70,8 @@ public class CameraLogger
       tick++;
    }
 
-   public void log( IntrinsicParameters parameters )
+   public void log( CameraPinholeBrown parameters )
    {
-      UtilIO.saveXML(parameters, outputDir.getAbsolutePath() + "/intrinsic.xml");
+      UtilIO.save(parameters, outputDir.getAbsolutePath() + "/intrinsic.xml");
    }
 }

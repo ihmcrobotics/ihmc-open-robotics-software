@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.sensors.footSwitch;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -17,10 +17,9 @@ import us.ihmc.robotModels.FullLeggedRobotModel;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSegment;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -32,13 +31,13 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> implements FootSwitchInterface
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
    private final GeometricJacobian jacobian;
    private final OneDoFJointBasics[] jointsFromRootToSole;
 
-   private final DenseMatrix64F jacobianInverse;
-   private final DenseMatrix64F footWrench = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F jointTorques;
+   private final DMatrixRMaj jacobianInverse;
+   private final DMatrixRMaj footWrench = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj jointTorques;
    
    private final GlitchFilteredYoBoolean isInContact;
    
@@ -48,14 +47,14 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
    private final FrameVector3D footForce = new FrameVector3D();
    private final Wrench wrench = new Wrench();
    
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.pseudoInverse(true);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.pseudoInverse(true);
    private final double standingZForce;
    private MovingReferenceFrame soleFrame;
    
-   public ComputedForceBasedFootSwitch(FullLeggedRobotModel<E> robotModel, E robotSegment, DoubleProvider contactThresholdForce, YoVariableRegistry parentRegistry)
+   public ComputedForceBasedFootSwitch(FullLeggedRobotModel<E> robotModel, E robotSegment, DoubleProvider contactThresholdForce, YoRegistry parentRegistry)
    {
       String prefix = robotSegment.toString() + name;
-      registry = new YoVariableRegistry(prefix);
+      registry = new YoRegistry(prefix);
       
       int filterWindowSize = 3;
       
@@ -72,8 +71,8 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       
       jointsFromRootToSole = MultiBodySystemTools.createOneDoFJointPath(body, foot);
       
-      jointTorques = new DenseMatrix64F(jointsFromRootToSole.length, 1);
-      jacobianInverse = new DenseMatrix64F(jointsFromRootToSole.length, 3);
+      jointTorques = new DMatrixRMaj(jointsFromRootToSole.length, 1);
+      jacobianInverse = new DMatrixRMaj(jointsFromRootToSole.length, 3);
       
       parentRegistry.addChild(registry);
       
@@ -94,7 +93,7 @@ public class ComputedForceBasedFootSwitch<E extends Enum<E> & RobotSegment<E>> i
       solver.setA(jacobian.getJacobianMatrix());
       solver.invert(jacobianInverse);
       
-      CommonOps.multTransA(jacobianInverse, jointTorques, footWrench);
+      CommonOps_DDRM.multTransA(jacobianInverse, jointTorques, footWrench);
       wrench.setIncludingFrame(jacobian.getJacobianFrame(), footWrench);
       
       footForce.setToZero(jacobian.getJacobianFrame());

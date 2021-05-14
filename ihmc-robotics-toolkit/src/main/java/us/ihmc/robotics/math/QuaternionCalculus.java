@@ -106,9 +106,15 @@ public class QuaternionCalculus
       angularVelocityToPack.scale(2.0);
    }
 
-   public void computeQDot(QuaternionReadOnly q, Vector3DReadOnly angularVelocity, Vector4DBasics qDotToPack)
+   public void computeQDotInWorldFrame(QuaternionReadOnly q, Vector3DReadOnly angularVelocityInWorld, Vector4DBasics qDotToPack)
    {
-      multiply(angularVelocity, q, qDotToPack);
+      multiply(angularVelocityInWorld, q, qDotToPack);
+      qDotToPack.scale(0.5);
+   }
+
+   public void computeQDotInBodyFixedFrame(QuaternionReadOnly q, Vector3DReadOnly angularVelocityInBody, Vector4DBasics qDotToPack)
+   {
+      multiply(q, angularVelocityInBody, qDotToPack);
       qDotToPack.scale(0.5);
    }
 
@@ -118,19 +124,19 @@ public class QuaternionCalculus
    private final Vector3D intermediateAngularVelocity = new Vector3D();
    private final Vector4D intermediateQDDot = new Vector4D();
 
-   public void computeQDDot(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector3DReadOnly angularAcceleration, Vector4DBasics qDDotToPack)
+   public void computeQDDotInWorldFrame(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector3DReadOnly angularAcceleration, Vector4DBasics qDDotToPack)
    {
       computeAngularVelocityInWorldFrame(q, qDot, intermediateAngularVelocity);
-      computeQDDot(q, qDot, intermediateAngularVelocity, angularAcceleration, qDDotToPack);
+      computeQDDotInWorldFrame(q, qDot, intermediateAngularVelocity, angularAcceleration, qDDotToPack);
    }
 
-   public void computeQDDot(QuaternionReadOnly q, Vector3DReadOnly angularVelocity, Vector3DReadOnly angularAcceleration, Vector4DBasics qDDotToPack)
+   public void computeQDDotInWorldFrame(QuaternionReadOnly q, Vector3DReadOnly angularVelocityInWorld, Vector3DReadOnly angularAccelerationInWorld, Vector4DBasics qDDotToPack)
    {
-      computeQDot(q, angularVelocity, intermediateQDot);
-      computeQDDot(q, intermediateQDot, angularVelocity, angularAcceleration, qDDotToPack);
+      computeQDotInWorldFrame(q, angularVelocityInWorld, intermediateQDot);
+      computeQDDotInWorldFrame(q, intermediateQDot, angularVelocityInWorld, angularAccelerationInWorld, qDDotToPack);
    }
 
-   public void computeQDDot(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector3DReadOnly angularVelocity, Vector3DReadOnly angularAcceleration, Vector4DBasics qDDotToPack)
+   public void computeQDDotInWorldFrame(QuaternionReadOnly q, Vector4DReadOnly qDot, Vector3DReadOnly angularVelocity, Vector3DReadOnly angularAcceleration, Vector4DBasics qDDotToPack)
    {
       multiply(angularAcceleration, q, intermediateQDDot);
       multiply(angularVelocity, qDot, qDDotToPack);
@@ -138,9 +144,9 @@ public class QuaternionCalculus
       qDDotToPack.scale(0.5);
    }
 
-   public void computeAngularAcceleration(QuaternionReadOnly q, Vector4DReadOnly qDDot, Vector3DReadOnly angularVelocity, Vector3DBasics angularAccelerationToPack)
+   public void computeAngularAccelerationInWorldFrame(QuaternionReadOnly q, Vector4DReadOnly qDDot, Vector3DReadOnly angularVelocityInWorld, Vector3DBasics angularAccelerationToPack)
    {
-      computeQDot(q, angularVelocity, intermediateQDot);
+      computeQDotInWorldFrame(q, angularVelocityInWorld, intermediateQDot);
       computeAngularAcceleration(q, intermediateQDot, qDDot, angularAccelerationToPack);
    }
 

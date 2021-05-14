@@ -1,13 +1,12 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
-
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.YoOneDoFWaypoint;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
@@ -18,12 +17,12 @@ public class YoOneDoFTrajectoryPoint implements OneDoFTrajectoryPointBasics
    private final YoOneDoFWaypoint waypoint;
    private final YoDouble time;
 
-   public YoOneDoFTrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoOneDoFTrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
 
-      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       waypoint = new YoOneDoFWaypoint(namePrefix, nameSuffix, registry);
    }
 

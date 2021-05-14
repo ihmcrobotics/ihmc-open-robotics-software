@@ -1,9 +1,10 @@
 package us.ihmc.robotics.weightMatrices;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixDimensionException;
+import org.ejml.MatrixDimensionException;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
@@ -188,6 +189,29 @@ public class WeightMatrix3D implements Tuple3DReadOnly
    }
 
    /**
+    * Applies this weight matrix on the given vector:<br>
+    * v' = W * v<br>
+    * where v is the given vector, W this weight matrix, and v' the result of the selection.
+    * 
+    * @param vectorToBeModified the vector on which this weight matrix to be applied. Modified.
+    */
+   public void applyWeight(FrameVector3D vectorToBeModified)
+   {
+      ReferenceFrame vectorFrame = vectorToBeModified.getReferenceFrame();
+      boolean canIgnoreSelectionFrame = canIgnoreWeightFrame(vectorFrame);
+
+      if (!canIgnoreSelectionFrame)
+         vectorToBeModified.changeFrame(weightFrame);
+
+      vectorToBeModified.setX(xWeight * vectorToBeModified.getX());
+      vectorToBeModified.setY(yWeight * vectorToBeModified.getY());
+      vectorToBeModified.setZ(zWeight * vectorToBeModified.getZ());
+
+      if (!canIgnoreSelectionFrame)
+         vectorToBeModified.changeFrame(vectorFrame);
+   }
+
+   /**
     * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
     * {@code destinationFrame}.
     * <p>
@@ -200,7 +224,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     *                           Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       getFullWeightMatrixInFrame(destinationFrame, 0, 0, weightMatrixToPack);
    }
@@ -221,7 +245,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     *                           Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F weightMatrixToPack)
+   public void getFullWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DMatrixRMaj weightMatrixToPack)
    {
       int numRows = weightMatrixToPack.getNumRows();
       int numCols = weightMatrixToPack.getNumCols();
@@ -258,8 +282,8 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
     * {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DenseMatrix64F)} does,
-    * this method also removes the zero-rows of the given weight matrix.
+    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, DMatrixRMaj)} does, this
+    * method also removes the zero-rows of the given weight matrix.
     * </p>
     * <p>
     * Only the block (row=0, column=0) to (row=2, column=2) of {@code weightMatrixToPack} is edited to
@@ -270,7 +294,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getEfficientWeightMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getEfficientWeightMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       getCompactWeightMatrixInFrame(destinationFrame, 0, 0, weightMatrixToPack);
    }
@@ -279,7 +303,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * Converts this into an actual 3-by-3 weight matrix that is to be used with data expressed in the
     * {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, int, int, DenseMatrix64F)}
+    * In addition to what {@link #getFullWeightMatrixInFrame(ReferenceFrame, int, int, DMatrixRMaj)}
     * does, this method also removes the zero-rows of the given weight matrix.
     * </p>
     * <p>
@@ -294,7 +318,7 @@ public class WeightMatrix3D implements Tuple3DReadOnly
     * @param weightMatrixToPack the dense-matrix into which the 3-by-3 weight matrix is to be inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F weightMatrixToPack)
+   public void getCompactWeightMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DMatrixRMaj weightMatrixToPack)
    {
       int numRows = weightMatrixToPack.getNumRows();
       int numCols = weightMatrixToPack.getNumCols();

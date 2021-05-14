@@ -34,18 +34,18 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.evaluation.FullInverseDynamicsStructure;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
@@ -61,7 +61,7 @@ public class PelvisLinearStateUpdater
 
    private static boolean VISUALIZE = false;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -156,7 +156,7 @@ public class PelvisLinearStateUpdater
          IMUBiasProvider imuBiasProvider, BooleanProvider cancelGravityFromAccelerationMeasurement, Map<RigidBodyBasics, FootSwitchInterface> footSwitches,
          CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate, CenterOfPressureDataHolder centerOfPressureDataHolderFromController,
          Map<RigidBodyBasics, ? extends ContactablePlaneBody> feetContactablePlaneBodies, double gravitationalAcceleration, StateEstimatorParameters stateEstimatorParameters,
-         YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
+         YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
    {
       this.estimatorDT = stateEstimatorParameters.getEstimatorDT();
       this.footSwitches = footSwitches;
@@ -303,12 +303,15 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.updateKinematics();
       kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(yoRootJointPosition);
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityToZero();
+      // Reset the IMU updater
+      imuBasedLinearStateCalculator.initialize();
 
       // Set the rootJoint twist to zero.
       rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       rootJointTwist.setToZero();
       rootJoint.setJointTwist(rootJointTwist);
       rootJoint.updateFramesRecursively();
+      yoRootJointVelocity.setToZero();
 
       updateCoMState();
    }

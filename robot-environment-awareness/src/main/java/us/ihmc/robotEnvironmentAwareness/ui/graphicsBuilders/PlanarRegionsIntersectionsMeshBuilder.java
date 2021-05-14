@@ -9,6 +9,7 @@ import javafx.scene.shape.Mesh;
 import javafx.util.Pair;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.LineSegment3DMessage;
@@ -27,14 +28,26 @@ public class PlanarRegionsIntersectionsMeshBuilder implements Runnable
 
    private final AtomicReference<Pair<Mesh, Material>> meshAndMaterialToRender = new AtomicReference<>(null);
 
+   private final Topic<Boolean> requestPlanarRegionsIntersectionsTopic;
+
    public PlanarRegionsIntersectionsMeshBuilder(REAUIMessager uiMessager)
    {
-      this.uiMessager = uiMessager;
-      enable = uiMessager.createInput(REAModuleAPI.OcTreeEnable, false);
-      clear = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
-      clearOcTree = uiMessager.createInput(REAModuleAPI.OcTreeClear, false);
+      this(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeClear, REAModuleAPI.RequestPlanarRegionsIntersections, REAModuleAPI.PlanarRegionsIntersectionState);
+   }
 
-      intersectionsMessage = uiMessager.createInput(REAModuleAPI.PlanarRegionsIntersectionState);
+   public PlanarRegionsIntersectionsMeshBuilder(REAUIMessager uiMessager,
+                                                Topic<Boolean> ocTreeEnableTopic,
+                                                Topic<Boolean> ocTreeClearTopic,
+                                                Topic<Boolean> requestPlanarRegionsIntersectionsTopic,
+                                                Topic<LineSegment3DMessage[]> planarRegionsIntersectionStateTopic)
+   {
+      this.uiMessager = uiMessager;
+      this.requestPlanarRegionsIntersectionsTopic = requestPlanarRegionsIntersectionsTopic;
+      enable = uiMessager.createInput(ocTreeEnableTopic, false);
+      clear = uiMessager.createInput(ocTreeClearTopic, false);
+      clearOcTree = uiMessager.createInput(ocTreeClearTopic, false);
+
+      intersectionsMessage = uiMessager.createInput(planarRegionsIntersectionStateTopic);
    }
 
    @Override
@@ -52,7 +65,7 @@ public class PlanarRegionsIntersectionsMeshBuilder implements Runnable
       if (!enable.get())
          return;
 
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegionsIntersections);
+      uiMessager.submitStateRequestToModule(requestPlanarRegionsIntersectionsTopic);
 
       if (newMessage == null)
          return;

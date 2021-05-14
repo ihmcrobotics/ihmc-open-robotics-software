@@ -10,6 +10,8 @@ public class NormalEstimationParametersProperty extends ParametersProperty<Norma
    private final DoubleField minConsensusRatio = new DoubleField(NormalEstimationParameters::getMinConsensusRatio, (p, v) -> p.setMinConsensusRatio(v));
    private final DoubleField maxAverageDeviationRatio = new DoubleField(NormalEstimationParameters::getMaxAverageDeviationRatio, (p, v) -> p.setMaxAverageDeviationRatio(v));
    private final IntegerField numberOfIterations = new IntegerField(NormalEstimationParameters::getNumberOfIterations, (p, v) -> p.setNumberOfIterations(v));
+   private final BooleanField weightNumberOfHits = new BooleanField(NormalEstimationParameters::isWeightByNumberOfHits, (p, v) -> p.weightByNumberOfHits(v));
+   private final BooleanField enableLeastSquaresEstimation = new BooleanField(NormalEstimationParameters::isLeastSquaresEstimationEnabled, (p, v) -> p.enableLeastSquaresEstimation(v));
 
    public NormalEstimationParametersProperty(Object bean, String name)
    {
@@ -39,6 +41,16 @@ public class NormalEstimationParametersProperty extends ParametersProperty<Norma
    public void bindBidirectionalNumberOfIterations(Property<? extends Number> property)
    {
       bindFieldBidirectionalToNumberProperty(property, numberOfIterations);
+   }
+
+   public void bindBidrectionalWeightByNumberOfHits(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, weightNumberOfHits);
+   }
+
+   public void bindBidirectionalEnableLeastSquaresEstimation(Property<Boolean> property)
+   {
+      bindFieldBidirectionalToBooleanProperty(property, enableLeastSquaresEstimation);
    }
 
    @Override

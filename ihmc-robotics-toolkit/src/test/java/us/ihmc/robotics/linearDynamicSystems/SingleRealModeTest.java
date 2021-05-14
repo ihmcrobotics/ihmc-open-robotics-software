@@ -6,9 +6,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.dataStructures.Polynomial;
+import us.ihmc.robotics.dataStructures.ObsoletePolynomial;
 
 public class SingleRealModeTest
 {
@@ -74,8 +72,8 @@ public class SingleRealModeTest
 
       TransferFunction transferFunction = transferFunctionMatrix.get(0, 0);
 
-      Polynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
-      Polynomial denominatorPolynomial = transferFunction.getDenominatorPolynomial();
+      ObsoletePolynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
+      ObsoletePolynomial denominatorPolynomial = transferFunction.getDenominatorPolynomial();
 
       double[] numeratorCoefficients = numeratorPolynomial.getCoefficients();
       double[] denominatorCoefficients = denominatorPolynomial.getCoefficients();
@@ -111,8 +109,8 @@ public class SingleRealModeTest
          {
             TransferFunction transferFunction = transferFunctionMatrix.get(i, j);
 
-            Polynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
-            Polynomial denominatorPolynomial = transferFunction.getDenominatorPolynomial();
+            ObsoletePolynomial numeratorPolynomial = transferFunction.getNumeratorPolynomial();
+            ObsoletePolynomial denominatorPolynomial = transferFunction.getDenominatorPolynomial();
 
             double[] numeratorCoefficients = numeratorPolynomial.getCoefficients();
             double[] denominatorCoefficients = denominatorPolynomial.getCoefficients();

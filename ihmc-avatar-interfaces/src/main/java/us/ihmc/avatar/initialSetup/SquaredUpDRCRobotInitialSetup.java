@@ -6,7 +6,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
@@ -24,7 +24,7 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Human
       this.groundZ = groundZ;
    }
 
-   public void initializeRobot(HumanoidFloatingRootJointRobot robot, DRCRobotJointMap jointMap)
+   public void initializeRobot(HumanoidFloatingRootJointRobot robot, HumanoidJointNameMap jointMap)
    {
       setArmJointPositions(robot);
       setLegJointPositions(robot);
@@ -35,13 +35,13 @@ public class SquaredUpDRCRobotInitialSetup implements DRCRobotInitialSetup<Human
    {
       robot.update();
       robot.getRootJointToWorldTransform(rootToWorld);
-      rootToWorld.getTranslation(offset);
+      offset.set(rootToWorld.getTranslation());
       Vector3D positionInWorld = new Vector3D();
       
-      rootToWorld.getTranslation(positionInWorld);
+      positionInWorld.set(rootToWorld.getTranslation());
       
       GroundContactPoint gc1 = robot.getFootGroundContactPoints(RobotSide.LEFT).get(0);
-      double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionPoint().getZ();
+      double pelvisToFoot = positionInWorld.getZ() - gc1.getPositionCopy().getZ();
       
       offset.setZ(groundZ + pelvisToFoot);
       robot.setPositionInWorld(offset);

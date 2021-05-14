@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.GroupParameter;
-import us.ihmc.commonWalkingControlModules.configurations.ICPAngularMomentumModifierParameters;
 import us.ihmc.commonWalkingControlModules.configurations.LegConfigurationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
@@ -41,7 +40,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 {
    private final RobotTarget target;
 
-   private final ValkyrieJointMap jointMap;
+   protected final ValkyrieJointMap jointMap;
 
    private TObjectDoubleHashMap<String> jointHomeConfiguration = null;
    private Map<String, Pose3D> bodyHomeConfiguration = null;
@@ -89,6 +88,12 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    }
 
    @Override
+   public double getMaxAllowedDistanceCMPSupport()
+   {
+      return target == RobotTarget.REAL_ROBOT ? 0.0 : 0.04;
+   }
+
+   @Override
    public boolean allowDisturbanceRecoveryBySpeedingUpSwing()
    {
       return true;
@@ -109,13 +114,19 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public boolean allowUpperBodyMotionDuringLocomotion()
    {
-      return true;
+      if (target == RobotTarget.SCS)
+         return false;
+      else
+         return true;
    }
 
    @Override
    public boolean doPrepareManipulationForLocomotion()
    {
-      return false;
+      if (target == RobotTarget.SCS)
+         return true;
+      else
+         return false;
    }
 
    @Override
@@ -572,7 +583,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultInitialTransferTime()
    {
-      return (target == RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
+      return 1.0;
    }
 
    @Override
@@ -621,12 +632,6 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    public FeedbackControllerSettings getFeedbackControllerSettings()
    {
       return new ValkyrieFeedbackControllerSettings(jointMap, target);
-   }
-
-   @Override
-   public ICPAngularMomentumModifierParameters getICPAngularMomentumModifierParameters()
-   {
-      return new ICPAngularMomentumModifierParameters();
    }
 
    @Override
@@ -730,7 +735,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
       JointLimitParameters parameters = new JointLimitParameters();
       parameters.setMaxAbsJointVelocity(1.5);

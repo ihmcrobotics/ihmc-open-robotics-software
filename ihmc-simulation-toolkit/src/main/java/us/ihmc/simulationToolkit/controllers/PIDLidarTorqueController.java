@@ -1,7 +1,7 @@
 package us.ihmc.simulationToolkit.controllers;
 
 import us.ihmc.robotics.controllers.PIDController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -10,7 +10,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 public class PIDLidarTorqueController implements RobotController
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
    private final PIDController lidarJointController = new PIDController("lidar", registry);
    
    private final YoDouble desiredLidarAngle = new YoDouble("desiredLidarAngle", registry);
@@ -45,7 +45,7 @@ public class PIDLidarTorqueController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

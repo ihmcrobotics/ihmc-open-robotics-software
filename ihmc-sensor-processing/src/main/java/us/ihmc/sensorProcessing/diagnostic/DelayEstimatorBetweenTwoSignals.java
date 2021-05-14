@@ -1,9 +1,9 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -29,8 +29,8 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
 
    private final YoBoolean enabled;
 
-   private final DenseMatrix64F referenceSignalBuffer;
-   private final DenseMatrix64F delayedSignalBuffer;
+   private final DMatrixRMaj referenceSignalBuffer;
+   private final DMatrixRMaj delayedSignalBuffer;
    private final SimpleRegression correlationCalculator = new SimpleRegression();
    private final YoDouble correlationForDelay;
    private final YoDouble maxCorrelation;
@@ -41,15 +41,15 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
    private final YoInteger numberOfObservations;
 
    private final YoDouble correlationAlpha;
-   private final DenseMatrix64F correlationBuffer;
-   private final DenseMatrix64F filteredCorrelationBuffer;
+   private final DMatrixRMaj correlationBuffer;
+   private final DMatrixRMaj filteredCorrelationBuffer;
 
    private int bufferPosition = 0;
    private boolean hasBufferBeenFilled = false;
 
    private final double dt;
 
-   public DelayEstimatorBetweenTwoSignals(String namePrefix, double dt, YoVariableRegistry registry)
+   public DelayEstimatorBetweenTwoSignals(String namePrefix, double dt, YoRegistry registry)
    {
       this(namePrefix, null, null, dt, registry);
    }
@@ -58,7 +58,7 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
     * @param referenceSignal is the signal used as ground truth to estimate the delay of {@code delayedSignal}.
     * @param delayedSignal is the signal for which the delay is estimated.
     */
-   public DelayEstimatorBetweenTwoSignals(String namePrefix, YoDouble referenceSignal, YoDouble delayedSignal, double dt, YoVariableRegistry registry)
+   public DelayEstimatorBetweenTwoSignals(String namePrefix, YoDouble referenceSignal, YoDouble delayedSignal, double dt, YoRegistry registry)
    {
       this.dt = dt;
       this.referenceSignal = referenceSignal;
@@ -78,13 +78,13 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       numberOfObservations.set(DEFAULT_NUMBER_OF_OBSERVATIONS);
 
       int bufferSize = numberOfObservations.getIntegerValue() + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue();
-      referenceSignalBuffer = new DenseMatrix64F(bufferSize, 1);
-      delayedSignalBuffer = new DenseMatrix64F(bufferSize, 1);
+      referenceSignalBuffer = new DMatrixRMaj(bufferSize, 1);
+      delayedSignalBuffer = new DMatrixRMaj(bufferSize, 1);
 
       correlationAlpha = new YoDouble(namePrefix + "CorrelationApha", registry);
       correlationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.16, dt));
-      correlationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
-      filteredCorrelationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
+      correlationBuffer = new DMatrixRMaj(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
+      filteredCorrelationBuffer = new DMatrixRMaj(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
    }
 
    @Override

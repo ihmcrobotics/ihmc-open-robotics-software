@@ -1,6 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.ArrayList;
 import java.util.Random;
@@ -9,14 +13,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.Assertions;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.commons.RunnableThatThrows;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -27,6 +27,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -59,49 +60,49 @@ public class GeometryToolsTest
       FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 3);
       double actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       double expected = 3.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
 
       pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 3, 3, -3);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
 
       pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, -3);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
 
       pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 3);
       planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 0, 1);
       point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, -3);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 6.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
 
       pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 1, 0, 0);
       point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 3, 0, 0);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
 
       pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
       planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 3, 0);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 3.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
 
       pointOnPlane = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1, 1, 1);
       planeNormal = new FrameVector3D(pointOnPlane.getReferenceFrame(), 0, 1, 0);
       point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 3, 0);
       actual = GeometryTools.distanceFromPointToPlane(point, pointOnPlane, planeNormal);
       expected = 2.0;
-      assertEquals("FAILED: Distance from point to plane", expected, actual, EPSILON);
+      assertEquals(expected, actual, EPSILON, "FAILED: Distance from point to plane");
    }
 
    @Test
@@ -150,7 +151,7 @@ public class GeometryToolsTest
       FrameVector3D expectedReturn0 = x0;
       FrameVector3D actualReturn0 = GeometryTools.getPerpendicularVectorFromLineToPoint(point0, lineStart0, lineEnd0, intersectionPoint0);
 
-      assertTrue("Test Failed", expectedReturn0.epsilonEquals(actualReturn0, EPSILON));
+      assertTrue(expectedReturn0.epsilonEquals(actualReturn0, EPSILON), "Test Failed");
 
       FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 4, 2, 0);
       FramePoint3D lineStart = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -160,7 +161,7 @@ public class GeometryToolsTest
       x.sub(point, intersectionPoint);
       FrameVector3D expectedReturn = x;
       FrameVector3D actualReturn = GeometryTools.getPerpendicularVectorFromLineToPoint(point, lineStart, lineEnd, intersectionPoint);
-      assertTrue("Test Failed", expectedReturn.epsilonEquals(actualReturn, EPSILON));
+      assertTrue(expectedReturn.epsilonEquals(actualReturn, EPSILON), "Test Failed");
 
       FramePoint3D point1 = new FramePoint3D(ReferenceFrame.getWorldFrame(), -2.5, 1.5, 0);
       FramePoint3D lineStart1 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 0);
@@ -173,7 +174,7 @@ public class GeometryToolsTest
       FrameVector3D expectedReturn1 = x1;
       FrameVector3D actualReturn1 = GeometryTools.getPerpendicularVectorFromLineToPoint(point1, lineStart1, lineEnd1, intersectionPoint1);
 
-      assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
+      assertTrue(expectedReturn1.epsilonEquals(actualReturn1, EPSILON), "Test Failed");
    }
 
    @Test
@@ -184,28 +185,28 @@ public class GeometryToolsTest
       FramePoint3D point3 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 5, 0);
       FrameVector3D expectedReturn = null;
       FrameVector3D actualReturn = GeometryTools.getPlaneNormalGivenThreePoints(point1, point2, point3);
-      assertEquals("test failed", expectedReturn, actualReturn);
+      assertEquals(expectedReturn, actualReturn, "test failed");
 
       FramePoint3D point91 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 3, 0);
       FramePoint3D point92 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 5, 0);
       FramePoint3D point93 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 1, 0);
       FrameVector3D expectedReturn9 = null;
       FrameVector3D actualReturn9 = GeometryTools.getPlaneNormalGivenThreePoints(point91, point92, point93);
-      assertEquals("test failed", expectedReturn9, actualReturn9);
+      assertEquals(expectedReturn9, actualReturn9, "test failed");
 
       FramePoint3D point81 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 9, 0, 0);
       FramePoint3D point82 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 7, 0, 0);
       FramePoint3D point83 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 4, 0, 0);
       FrameVector3D expectedReturn8 = null;
       FrameVector3D actualReturn8 = GeometryTools.getPlaneNormalGivenThreePoints(point81, point82, point83);
-      assertEquals("test failed", expectedReturn8, actualReturn8);
+      assertEquals(expectedReturn8, actualReturn8, "test failed");
 
       FramePoint3D point71 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 4);
       FramePoint3D point72 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 6);
       FramePoint3D point73 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 0, 7);
       FrameVector3D expectedReturn7 = null;
       FrameVector3D actualReturn7 = GeometryTools.getPlaneNormalGivenThreePoints(point71, point72, point73);
-      assertEquals("test failed", expectedReturn7, actualReturn7);
+      assertEquals(expectedReturn7, actualReturn7, "test failed");
 
       FramePoint3D point11 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 5, 46);
       FramePoint3D point12 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0, 587, 3);
@@ -215,7 +216,7 @@ public class GeometryToolsTest
       FrameVector3D expectedReturn1 = new FrameVector3D(p1.getReferenceFrame());
       expectedReturn1.sub(p1, v1);
       FrameVector3D actualReturn1 = GeometryTools.getPlaneNormalGivenThreePoints(point11, point12, point13);
-      assertTrue("Test Failed", expectedReturn1.epsilonEquals(actualReturn1, EPSILON));
+      assertTrue(expectedReturn1.epsilonEquals(actualReturn1, EPSILON), "Test Failed");
 
       FramePoint3D point21 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 65, 0, 46);
       FramePoint3D point22 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 43, 0, 3);
@@ -225,7 +226,7 @@ public class GeometryToolsTest
       FrameVector3D expectedReturn2 = new FrameVector3D(p2.getReferenceFrame());
       expectedReturn2.sub(p2, v2);
       FrameVector3D actualReturn2 = GeometryTools.getPlaneNormalGivenThreePoints(point21, point22, point23);
-      assertTrue("Test Failed", expectedReturn2.epsilonEquals(actualReturn2, EPSILON));
+      assertTrue(expectedReturn2.epsilonEquals(actualReturn2, EPSILON), "Test Failed");
 
       FramePoint3D point31 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 65, 56, 0);
       FramePoint3D point32 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 43, 3, 0);
@@ -235,7 +236,7 @@ public class GeometryToolsTest
       FrameVector3D expectedReturn3 = new FrameVector3D(p3.getReferenceFrame());
       expectedReturn3.sub(p3, v3);
       FrameVector3D actualReturn3 = GeometryTools.getPlaneNormalGivenThreePoints(point31, point32, point33);
-      assertTrue("Test Failed", expectedReturn3.epsilonEquals(actualReturn3, EPSILON));
+      assertTrue(expectedReturn3.epsilonEquals(actualReturn3, EPSILON), "Test Failed");
    }
 
    @Test
@@ -248,7 +249,7 @@ public class GeometryToolsTest
 
       boolean expectedReturn = false;
       boolean actualReturn = GeometryTools.isPointOnLeftSideOfLine(point, lineStart, lineEnd);
-      assertEquals("return value", expectedReturn, actualReturn);
+      assertEquals(expectedReturn, actualReturn, "return value");
 
       /** @todo fill in the test code */
    }
@@ -406,7 +407,7 @@ public class GeometryToolsTest
          randomVector.setIncludingFrame(EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
 
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
-         ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
+         ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis3D.Z, randomVector);
 
          EuclidCoreTestTools.assertRigidBodyTransformEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
       }
@@ -432,9 +433,9 @@ public class GeometryToolsTest
       result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
       System.out.println(result);
-      assertEquals("not equal", -2681.624165883151, result.getX(), epsilon);
-      assertEquals("not equal", -1528.2007328131492, result.getY(), epsilon);
-      assertEquals("not equal", 2998.298763316407, result.getZ(), epsilon);
+      assertEquals(-2681.624165883151, result.getX(), epsilon, "not equal");
+      assertEquals(-1528.2007328131492, result.getY(), epsilon, "not equal");
+      assertEquals(2998.298763316407, result.getZ(), epsilon, "not equal");
 
       referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
@@ -443,9 +444,9 @@ public class GeometryToolsTest
       result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
       System.out.println(result);
-      assertEquals("not equal", 2868.1077772133904, result.getX(), epsilon);
-      assertEquals("not equal", -3773.703916968001, result.getY(), epsilon);
-      assertEquals("not equal", -3313.247345650209, result.getZ(), epsilon);
+      assertEquals(2868.1077772133904, result.getX(), epsilon, "not equal");
+      assertEquals(-3773.703916968001, result.getY(), epsilon, "not equal");
+      assertEquals(-3313.247345650209, result.getZ(), epsilon, "not equal");
 
       referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToYawAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
@@ -454,9 +455,9 @@ public class GeometryToolsTest
       result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
       System.out.println(result);
-      assertEquals("not equal", 9865.290784196699, result.getX(), epsilon);
-      assertEquals("not equal", 1276.040690119471, result.getY(), epsilon);
-      assertEquals("not equal", -3096.5574256022164, result.getZ(), epsilon);
+      assertEquals(9865.290784196699, result.getX(), epsilon, "not equal");
+      assertEquals(1276.040690119471, result.getY(), epsilon, "not equal");
+      assertEquals(-3096.5574256022164, result.getZ(), epsilon, "not equal");
    }
 
    @Test
@@ -479,9 +480,9 @@ public class GeometryToolsTest
       result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       System.out.println(result);
-      assertEquals("not equal", -256.24551976827297, result.getX(), epsilon);
-      assertEquals("not equal", 1443.7013411938358, result.getY(), epsilon);
-      assertEquals("not equal", 11103.259343203952, result.getZ(), epsilon);
+      assertEquals(-256.24551976827297, result.getX(), epsilon, "not equal");
+      assertEquals(1443.7013411938358, result.getY(), epsilon, "not equal");
+      assertEquals(11103.259343203952, result.getZ(), epsilon, "not equal");
 
       referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
@@ -490,9 +491,9 @@ public class GeometryToolsTest
       result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       System.out.println(result);
-      assertEquals("not equal", -2273.346187036131, result.getX(), epsilon);
-      assertEquals("not equal", 3010.5651766598717, result.getY(), epsilon);
-      assertEquals("not equal", -3513.344540982049, result.getZ(), epsilon);
+      assertEquals(-2273.346187036131, result.getX(), epsilon, "not equal");
+      assertEquals(3010.5651766598717, result.getY(), epsilon, "not equal");
+      assertEquals(-3513.344540982049, result.getZ(), epsilon, "not equal");
 
       referenceFrame = EuclidFrameRandomTools.nextReferenceFrame("randomFrame", r, ReferenceFrame.getWorldFrame());
       pointToPitchAbout = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
@@ -501,28 +502,22 @@ public class GeometryToolsTest
       result = new FramePoint3D(referenceFrame, randomScalar(r), randomScalar(r), randomScalar(r));
       GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       System.out.println(result);
-      assertEquals("not equal", 3978.4131392851787, result.getX(), epsilon);
-      assertEquals("not equal", 682.5708442089929, result.getY(), epsilon);
-      assertEquals("not equal", 8214.605434738955, result.getZ(), epsilon);
+      assertEquals(3978.4131392851787, result.getX(), epsilon, "not equal");
+      assertEquals(682.5708442089929, result.getY(), epsilon, "not equal");
+      assertEquals(8214.605434738955, result.getZ(), epsilon, "not equal");
    }
 
    @Test
    public void testYawAboutPoint()
    {
-      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
       double epsilon = 1e-10;
       final FramePoint3D pointToYawAboutException = new FramePoint3D(theFrame, 0.0, 0.0, 0.0);
       final FramePoint3D pointException = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
       final FramePoint3D resultException = new FramePoint3D();
       final double yawException = Math.PI;
-      Assertions.assertExceptionThrown(ReferenceFrameMismatchException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            GeometryTools.yawAboutPoint(pointException, pointToYawAboutException, yawException, resultException);
-         }
-      });
+      assertThrows(ReferenceFrameMismatchException.class,
+                   () -> GeometryTools.yawAboutPoint(pointException, pointToYawAboutException, yawException, resultException));
 
       FramePoint3D pointToYawAbout = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.0);
       FramePoint3D point = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
@@ -531,9 +526,9 @@ public class GeometryToolsTest
       FramePoint3D result = new FramePoint3D();
       GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
       //      System.out.println(result);
-      assertEquals("These should be equal", -1.0, result.getX(), epsilon);
-      assertEquals("These should be equal", -1.0, result.getY(), epsilon);
-      assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
+      assertEquals(-1.0, result.getX(), epsilon, "These should be equal");
+      assertEquals(-1.0, result.getY(), epsilon, "These should be equal");
+      assertEquals(1.0, result.getZ(), epsilon, "These should be equal");
 
       //Check for reference frame mismatch
       FramePoint3D point2 = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
@@ -546,28 +541,22 @@ public class GeometryToolsTest
       result = new FramePoint3D();
       GeometryTools.yawAboutPoint(point, pointToYawAbout, yaw, result);
       //      System.out.println(result);
-      assertEquals("These should be equal", 0.0, result.getX(), epsilon);
-      assertEquals("These should be equal", 1.0, result.getY(), epsilon);
-      assertEquals("These should be equal", 1.0, result.getZ(), epsilon);
+      assertEquals(0.0, result.getX(), epsilon, "These should be equal");
+      assertEquals(1.0, result.getY(), epsilon, "These should be equal");
+      assertEquals(1.0, result.getZ(), epsilon, "These should be equal");
    }
 
    @Test
    public void testPitchAboutPoint()
    {
-      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
       double epsilon = 1e-10;
       final FramePoint3D pointToPitchAboutException = new FramePoint3D(theFrame, 0.0, 0.0, 0.0);
       final FramePoint3D pointException = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
       final FramePoint3D resultException = new FramePoint3D();
       final double pitchException = Math.PI;
-      Assertions.assertExceptionThrown(ReferenceFrameMismatchException.class, new RunnableThatThrows()
-      {
-         @Override
-         public void run() throws Throwable
-         {
-            GeometryTools.yawAboutPoint(pointException, pointToPitchAboutException, pitchException, resultException);
-         }
-      });
+      assertThrows(ReferenceFrameMismatchException.class,
+                   () -> GeometryTools.yawAboutPoint(pointException, pointToPitchAboutException, pitchException, resultException));
 
       FramePoint3D pointToPitchAbout = new FramePoint3D(theFrame, 0, 0, 0);
       FramePoint3D point = new FramePoint3D(theFrame, 1, 1, 1);
@@ -576,9 +565,9 @@ public class GeometryToolsTest
       FramePoint3D result = new FramePoint3D();
       GeometryTools.pitchAboutPoint(point, pointToPitchAbout, pitch, result);
       //      System.out.println(result);
-      assertEquals("These should be equal", -1.0, result.getX(), epsilon);
-      assertEquals("These should be equal", 1.0, result.getY(), epsilon);
-      assertEquals("These should be equal", -1.0, result.getZ(), epsilon);
+      assertEquals(-1.0, result.getX(), epsilon, "These should be equal");
+      assertEquals(1.0, result.getY(), epsilon, "These should be equal");
+      assertEquals(-1.0, result.getZ(), epsilon, "These should be equal");
    }
 
    private double randomScalar(Random random)
@@ -594,8 +583,8 @@ public class GeometryToolsTest
    @Test
    public void testYawAboutPoint_FramePoint2d_double()
    {
-      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
-      ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
+      ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
+      ReferenceFrame aFrame = ReferenceFrameTools.constructARootFrame("aFrame");
       double epsilon = 1e-10;
 
       FramePoint2D original = new FramePoint2D(theFrame, 5.0, 7.0);
@@ -604,8 +593,8 @@ public class GeometryToolsTest
 
       FramePoint2D result = new FramePoint2D(theFrame);
       GeometryTools.yawAboutPoint(original, pointToYawAbout, yaw, result);
-      assertEquals("Should be equal", result.getX(), -original.getX(), epsilon);
-      assertEquals("Should be equal", result.getY(), -original.getY(), epsilon);
+      assertEquals(result.getX(), -original.getX(), epsilon, "Should be equal");
+      assertEquals(result.getY(), -original.getY(), epsilon, "Should be equal");
       try
       {
          FramePoint2D pointToYawAbout2 = new FramePoint2D(aFrame);
@@ -615,6 +604,75 @@ public class GeometryToolsTest
       catch (ReferenceFrameMismatchException rfme)
       {
          //Good
+      }
+   }
+
+   @Test
+   public void testArePoint3DsSameSideOfPlane3D()
+   {
+      Random random = new Random(435234657);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Create the queries such that they're on the same side of the plane.
+         Point3D firstPointOnPlane = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+         Vector3D firstPlaneTangent = EuclidCoreRandomTools.nextOrthogonalVector3D(random, planeNormal, true);
+         Vector3D secondPlaneTangent = new Vector3D();
+         secondPlaneTangent.cross(planeNormal, firstPlaneTangent);
+
+         Point3D secondPointOnPlane = EuclidGeometryTools.orthogonalProjectionOnPlane3D(EuclidCoreRandomTools.nextPoint3D(random, 10.0),
+                                                                                        firstPointOnPlane,
+                                                                                        planeNormal);
+
+         // Used to determine the side of the plane
+         double sign = random.nextBoolean() ? -1.0 : 1.0;
+
+         Point3D firstQuery = new Point3D(firstPointOnPlane);
+         // Shifting the query to the side of the plane
+         firstQuery.scaleAdd(sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, firstQuery);
+         // Shifting the query without changing side w.r.t. the plane
+         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, firstQuery);
+         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, firstQuery);
+
+         Point3D secondQuery = new Point3D(firstPointOnPlane);
+         // Shifting the query to the side of the plane
+         secondQuery.scaleAdd(sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, secondQuery);
+         // Shifting the query without changing side w.r.t. the plane
+         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, secondQuery);
+         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, secondQuery);
+
+         assertTrue(GeometryTools.arePoint3DsSameSideOfPlane3D(firstQuery, secondQuery, firstPointOnPlane, secondPointOnPlane, firstPlaneTangent));
+      }
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Create the queries such that they're each side of the plane.
+         Point3D firstPointOnPlane = EuclidCoreRandomTools.nextPoint3D(random, 10.0);
+         Vector3D planeNormal = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+         Vector3D firstPlaneTangent = EuclidCoreRandomTools.nextOrthogonalVector3D(random, planeNormal, true);
+         Vector3D secondPlaneTangent = new Vector3D();
+         secondPlaneTangent.cross(planeNormal, firstPlaneTangent);
+
+         Point3D secondPointOnPlane = EuclidGeometryTools.orthogonalProjectionOnPlane3D(EuclidCoreRandomTools.nextPoint3D(random, 10.0),
+                                                                                        firstPointOnPlane,
+                                                                                        planeNormal);
+
+         // Used to determine the side of the plane
+         double sign = random.nextBoolean() ? -1.0 : 1.0;
+
+         Point3D firstQuery = new Point3D(firstPointOnPlane);
+         // Shifting the query to the side of the plane
+         firstQuery.scaleAdd(sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, firstQuery);
+         // Shifting the query without changing side w.r.t. the plane
+         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, firstQuery);
+         firstQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, firstQuery);
+
+         Point3D secondQuery = new Point3D(firstPointOnPlane);
+         // Shifting the query to the other side of the plane
+         secondQuery.scaleAdd(-sign * EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), planeNormal, secondQuery);
+         // Shifting the query without changing side w.r.t. the plane
+         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), firstPlaneTangent, secondQuery);
+         secondQuery.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 10.0), secondPlaneTangent, secondQuery);
+
+         assertFalse(GeometryTools.arePoint3DsSameSideOfPlane3D(firstQuery, secondQuery, firstPointOnPlane, secondPointOnPlane, firstPlaneTangent));
       }
    }
 

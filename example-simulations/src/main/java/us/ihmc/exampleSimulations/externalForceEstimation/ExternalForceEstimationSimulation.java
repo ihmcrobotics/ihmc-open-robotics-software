@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.ForceEstimatorDynamicMatrixUpdater;
+import us.ihmc.commonWalkingControlModules.contact.particleFilter.PredefinedContactExternalForceSolver;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -20,36 +20,32 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.simulationconstructionset.*;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /*package private*/ class ExternalForceEstimationSimulation
 {
    private static double controlDT = 5.0e-5;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
    private Robot robot;
    private OneDoFJointBasics[] joints;
    private ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", registry);
    private final Vector3D externalForcePointOffset = new Vector3D();
 
-   private BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
+   private ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater;
 
    public ExternalForceEstimationSimulation()
    {
 //      robot = setupFixedBaseArmRobot();
       robot = setupMovingBaseRobotArm();
 
-      Consumer<DenseMatrix64F> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();
-      ExternalWrenchEstimator externalWrenchEstimator = new ExternalWrenchEstimator(joints, controlDT, dynamicMatrixSetter, tauSetter, yoGraphicsListRegistry, null);
-      externalWrenchEstimator.addContactPoint(endEffector, externalForcePointOffset, true);
-      robot.setController(externalWrenchEstimator);
+      PredefinedContactExternalForceSolver externalForceSolver = new PredefinedContactExternalForceSolver(joints, controlDT, dynamicMatrixUpdater, yoGraphicsListRegistry, null);
+      externalForceSolver.addContactPoint(endEffector, externalForcePointOffset, true);
+      robot.setController(externalForceSolver);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setDataBufferSize(64000);
@@ -61,7 +57,7 @@ import java.util.function.Consumer;
       yoGraphicsListRegistry.registerYoGraphic("externalForcePointGraphic", forcePoint);
 
       scs.setFastSimulate(true, 15);
-      scs.addYoVariableRegistry(registry);
+      scs.addYoRegistry(registry);
       scs.addYoGraphicsListRegistry(yoGraphicsListRegistry, true);
       scs.setDT(controlDT, 10);
       scs.setGroundVisible(false);
@@ -79,11 +75,12 @@ import java.util.function.Consumer;
    private void setupDynamicMatrixSolverWithControllerCoreToolbox(WholeBodyControlCoreToolbox toolbox)
    {
       DynamicsMatrixCalculator dynamicsMatrixCalculator = new DynamicsMatrixCalculator(toolbox);
-      this.dynamicMatrixSetter = (m, c) ->
+      this.dynamicMatrixUpdater = (m, cqg, tau) ->
       {
          dynamicsMatrixCalculator.compute();
          dynamicsMatrixCalculator.getBodyMassMatrix(m);
-         dynamicsMatrixCalculator.getBodyCoriolisMatrix(c);
+         dynamicsMatrixCalculator.getBodyCoriolisMatrix(cqg);
+         MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       };
    }
 

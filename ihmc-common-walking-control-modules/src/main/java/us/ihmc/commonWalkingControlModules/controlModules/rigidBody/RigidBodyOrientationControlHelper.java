@@ -24,11 +24,11 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSO3TrajectoryPoi
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameSO3TrajectoryPointList;
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class RigidBodyOrientationControlHelper
 {
@@ -44,6 +44,7 @@ public class RigidBodyOrientationControlHelper
     * over the network.
     */
    private final YoDouble streamTimestampOffset;
+   private final YoDouble streamTimestampSource;
 
    private boolean messageWeightValid = false;
    private final BooleanProvider useWeightFromMessage;
@@ -79,7 +80,7 @@ public class RigidBodyOrientationControlHelper
 
    public RigidBodyOrientationControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                             ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                            BooleanProvider useWeightFromMessage, DoubleProvider time, YoVariableRegistry registry)
+                                            BooleanProvider useWeightFromMessage, DoubleProvider time, YoRegistry registry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
@@ -109,6 +110,8 @@ public class RigidBodyOrientationControlHelper
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
+      streamTimestampSource.setToNaN();
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -191,7 +194,7 @@ public class RigidBodyOrientationControlHelper
       }
       else
       {
-         trajectoryGenerator.getOrientation(orientationToPack);
+         orientationToPack.setIncludingFrame(trajectoryGenerator.getOrientation());
       }
    }
 
@@ -204,7 +207,10 @@ public class RigidBodyOrientationControlHelper
       }
 
       if (done)
+      {
          streamTimestampOffset.setToNaN();
+         streamTimestampSource.setToNaN();
+      }
 
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getAngularData(desiredOrientation, desiredVelocity, feedForwardAcceleration);
@@ -270,8 +276,49 @@ public class RigidBodyOrientationControlHelper
 
    public boolean handleTrajectoryCommand(SO3TrajectoryControllerCommand command)
    {
-      // The timestamp is being cleared in the clear method, need to save it to use it further down.
-      double previousStreamTimestampOffset = streamTimestampOffset.getValue();
+      double streamTimeOffset = 0.0;
+      double streamTimestampOffset = this.streamTimestampOffset.getValue();
+      double streamTimestampSource = this.streamTimestampSource.getValue();
+
+      if (command.getExecutionMode() == ExecutionMode.STREAM)
+      { // Need to do time checks before moving on.
+         if (command.getTimestamp() <= 0)
+         {
+            streamTimestampOffset = Double.NaN;
+            streamTimestampSource = Double.NaN;
+         }
+         else
+         {
+            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
+
+            if (!Double.isNaN(streamTimestampSource) && senderTime < streamTimestampSource)
+            {
+               // Messages are out of order which is fine, we just don't want to handle the new message.
+               return true;
+            }
+
+            streamTimestampSource = senderTime;
+
+            streamTimeOffset = time.getValue() - senderTime;
+
+            if (Double.isNaN(streamTimestampOffset))
+            {
+               streamTimestampOffset = streamTimeOffset;
+            }
+            else
+            {
+               /*
+                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
+                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
+                * for safety.
+                */
+               if (Math.abs(streamTimeOffset - streamTimestampOffset) > 0.5)
+                  streamTimestampOffset = streamTimeOffset;
+               else
+                  streamTimestampOffset = Math.min(streamTimeOffset, streamTimestampOffset);
+            }
+         }
+      }
 
       // Both OVERRIDE and STREAM clear the current trajectory.
       if (command.getExecutionMode() != ExecutionMode.QUEUE || isEmpty())
@@ -324,34 +371,9 @@ public class RigidBodyOrientationControlHelper
 
       if (command.getExecutionMode() == ExecutionMode.STREAM)
       {
-         double timeOffset = 0.0;
-
-         if (command.getTimestamp() <= 0)
-         {
-            streamTimestampOffset.setToNaN();
-         }
-         else
-         {
-            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
-            timeOffset = time.getValue() - senderTime;
-            if (Double.isNaN(previousStreamTimestampOffset))
-            {
-               streamTimestampOffset.set(timeOffset);
-            }
-            else
-            {
-               /*
-                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
-                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
-                * for safety.
-                */
-               if (Math.abs(timeOffset - previousStreamTimestampOffset) > 0.5)
-                  streamTimestampOffset.set(timeOffset);
-               else
-                  streamTimestampOffset.set(Math.min(timeOffset, previousStreamTimestampOffset));
-            }
-         }
-
+         this.streamTimestampOffset.set(streamTimestampOffset);
+         this.streamTimestampSource.set(streamTimestampSource);
+      
          if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
          {
             LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
@@ -372,8 +394,8 @@ public class RigidBodyOrientationControlHelper
             return false;
 
          initialPoint.setIncludingFrame(trajectoryPoint);
-         if (!streamTimestampOffset.isNaN())
-            initialPoint.setTime(streamTimestampOffset.getValue() - timeOffset);
+         if (!Double.isNaN(streamTimestampOffset))
+            initialPoint.setTime(streamTimestampOffset - streamTimeOffset);
 
          FrameSO3TrajectoryPoint integratedPoint = addPoint();
 
@@ -498,6 +520,7 @@ public class RigidBodyOrientationControlHelper
       setDefaultControlFrame();
       pointQueue.clear();
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    public void disable()

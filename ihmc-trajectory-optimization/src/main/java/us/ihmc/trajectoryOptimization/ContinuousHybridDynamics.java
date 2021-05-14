@@ -1,6 +1,6 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface ContinuousHybridDynamics<E extends Enum>
 {
@@ -8,9 +8,9 @@ public interface ContinuousHybridDynamics<E extends Enum>
    int getControlVectorSize();
 
    /** f */
-   void getDynamics(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamics(E hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_x */
-   void getDynamicsStateGradient(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsStateGradient(E hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
    /** f_u */
-   void getDynamicsControlGradient(E hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack);
+   void getDynamicsControlGradient(E hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack);
 }

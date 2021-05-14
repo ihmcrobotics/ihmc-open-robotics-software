@@ -101,7 +101,7 @@ public class XStreamTest
       
       Packet<?>[] packets = new Packet<?>[10];
       
-      packets[0] = RandomHumanoidMessages.nextFootstepPlanRequestPacket(random);
+//      packets[0] = RandomHumanoidMessages.nextFootstepPlanRequestPacket(random);
 //      packets[1] = new HandTrajectoryMessage(random);
 //      packets[2] = new FootTrajectoryMessage(random);
       packets[3] = new FootLoadBearingMessage();

@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.fallingBox;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,13 +13,13 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.GroundContactPointBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class GroundContactPointBasedEstimator implements RobotController
 {
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final GroundContactPointBasedWrenchCalculator wrenchCalculator;
 
@@ -27,10 +27,10 @@ public class GroundContactPointBasedEstimator implements RobotController
 
    public GroundContactPointBasedEstimator(Robot robot)
    {
-      registry = new YoVariableRegistry(robot.getName() + "_registry");
+      registry = new YoRegistry(robot.getName() + "_registry");
 
       Joint joint = robot.getJoint("bodyJoint");
-      ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
       wrenchCalculator = new GroundContactPointBasedWrenchCalculator(robot.getName() + "_ft", groundContactPoints, joint, new RigidBodyTransform(), registry);
 
       wrench = new YoFixedFrameWrench(robot.getName() + "_wrench", worldFrame, worldFrame, registry);
@@ -43,7 +43,7 @@ public class GroundContactPointBasedEstimator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -65,7 +65,7 @@ public class GroundContactPointBasedEstimator implements RobotController
    {
       wrenchCalculator.calculate();
 
-      DenseMatrix64F wrenchMatrix = wrenchCalculator.getWrench();
+      DMatrixRMaj wrenchMatrix = wrenchCalculator.getWrench();
       Wrench wrench = new Wrench(worldFrame, worldFrame, wrenchMatrix);
 
       this.wrench.set(wrench);

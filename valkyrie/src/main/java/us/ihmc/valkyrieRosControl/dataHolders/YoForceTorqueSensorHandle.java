@@ -1,8 +1,8 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.rosControl.wholeRobot.ForceTorqueSensorHandle;
@@ -15,13 +15,13 @@ public class YoForceTorqueSensorHandle
    private final YoDouble tx, ty, tz;
    private final YoDouble fx, fy, fz;
 
-   public YoForceTorqueSensorHandle(ForceTorqueSensorHandle handle, ForceSensorDefinition forceSensorDefinition, YoVariableRegistry parentRegistry)
+   public YoForceTorqueSensorHandle(ForceTorqueSensorHandle handle, ForceSensorDefinition forceSensorDefinition, YoRegistry parentRegistry)
    {
       this.handle = handle;
       this.forceSensorDefinition = forceSensorDefinition;
 
       String name = forceSensorDefinition.getSensorName();
-      YoVariableRegistry registry = new YoVariableRegistry(name);
+      YoRegistry registry = new YoRegistry(name);
 
       this.tx = new YoDouble(name + "_tx", registry);
       this.ty = new YoDouble(name + "_ty", registry);
@@ -49,7 +49,7 @@ public class YoForceTorqueSensorHandle
    }
 
    
-   public void packWrench(DenseMatrix64F torqueForce)
+   public void packWrench(DMatrixRMaj torqueForce)
    {
       torqueForce.set(0, tx.getDoubleValue());
       torqueForce.set(1, ty.getDoubleValue());

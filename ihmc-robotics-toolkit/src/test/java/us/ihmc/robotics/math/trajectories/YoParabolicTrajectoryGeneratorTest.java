@@ -11,7 +11,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoParabolicTrajectoryGenerator;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class YoParabolicTrajectoryGeneratorTest
@@ -25,7 +26,7 @@ public class YoParabolicTrajectoryGeneratorTest
 	@Test
    public void testConditions()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
@@ -58,7 +59,7 @@ public class YoParabolicTrajectoryGeneratorTest
       FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
       FramePoint3D intermediatePosition = new FramePoint3D(referenceFrame, 0.5, 0.5, 2.5);
       FramePoint3D finalPosition = new FramePoint3D(referenceFrame, 1.0, 1.0, 1.0);
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
       });
@@ -73,7 +74,7 @@ public class YoParabolicTrajectoryGeneratorTest
       FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
       FramePoint3D intermediatePosition = new FramePoint3D(referenceFrame, 0.5, 0.5, 2.5);
       FramePoint3D finalPosition = new FramePoint3D(referenceFrame, 1.0, 1.0, 1.0);
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
       trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
       });
@@ -92,7 +93,7 @@ public class YoParabolicTrajectoryGeneratorTest
          FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
          FramePoint3D intermediatePosition = new FramePoint3D(referenceFrame, 0.5, 0.5, 2.5);
          FramePoint3D finalPosition = new FramePoint3D(referenceFrame, 1.0, 1.0, 1.0);
-         YoVariableRegistry registry = new YoVariableRegistry("registry");
+         YoRegistry registry = new YoRegistry("registry");
          trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
          trajectoryGenerator.initialize(initialPosition, intermediatePosition, finalPosition, intermediateParameter);
       }
@@ -109,7 +110,7 @@ public class YoParabolicTrajectoryGeneratorTest
 	@Test
    public void testApex()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
 
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       FramePoint3D initialPosition = new FramePoint3D(referenceFrame, 0.0, 0.0, 0.0);
@@ -141,7 +142,7 @@ public class YoParabolicTrajectoryGeneratorTest
 	@Test
    public void testVelocity()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       Random random = new Random(186L);
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);
@@ -179,7 +180,7 @@ public class YoParabolicTrajectoryGeneratorTest
 	@Test
    public void testInitialVelocity()
    {
-      YoVariableRegistry registry = new YoVariableRegistry("registry");
+      YoRegistry registry = new YoRegistry("registry");
       Random random = new Random(186L);
       ReferenceFrame referenceFrame = ReferenceFrame.getWorldFrame();
       YoParabolicTrajectoryGenerator trajectoryGenerator = new YoParabolicTrajectoryGenerator("test", referenceFrame, registry);

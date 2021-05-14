@@ -12,14 +12,14 @@ import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFGeometry;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFSensor;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFVisual;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class ValkyrieSDFDescriptionMutator implements SDFDescriptionMutator
 {
-   private DRCRobotJointMap jointMap;
+   private HumanoidJointNameMap jointMap;
    private boolean useOBJGraphics;
 
-   public ValkyrieSDFDescriptionMutator(DRCRobotJointMap jointMap, boolean useOBJGraphics)
+   public ValkyrieSDFDescriptionMutator(HumanoidJointNameMap jointMap, boolean useOBJGraphics)
    {
       this.jointMap = jointMap;
       this.useOBJGraphics = useOBJGraphics;

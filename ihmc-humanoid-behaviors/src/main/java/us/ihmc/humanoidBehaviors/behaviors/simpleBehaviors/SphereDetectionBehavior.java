@@ -26,7 +26,7 @@ import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.bubo.clouds.FactoryPointCloudShape;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.CloudShapeTypes;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.PointCloudShapeFinder;
@@ -62,10 +62,10 @@ public class SphereDetectionBehavior extends AbstractBehavior
 
    private IHMCROS2Publisher<DetectedObjectPacket> detectedObjectPublisher;
 
-   public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
+   public SphereDetectionBehavior(String robotName, ROS2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
-      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.IHMC_ROOT, pointCloudQueue::put);
       detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class);
 
       this.humanoidReferenceFrames = referenceFrames;
@@ -112,7 +112,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       {
          id++;
          Pose3D t = new Pose3D();
-         t.setPosition(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+         t.getPosition().set(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
          detectedObjectPublisher.publish(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 
@@ -184,7 +184,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       }
 
       // sort large to small
-      humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation(chestPosition);
+      chestPosition.set(humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation());
 
       final List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()
@@ -224,7 +224,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
             PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
 
             RigidBodyTransform t = new RigidBodyTransform();
-            t.setTranslation(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
+            t.getTranslation().set(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
          }
 
       }

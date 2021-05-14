@@ -11,11 +11,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxOutputStatus;
-import controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -55,7 +51,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -72,7 +68,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    }
 
    private CommandInputManager commandInputManager;
-   private YoVariableRegistry mainRegistry;
+   private YoRegistry mainRegistry;
    private YoGraphicsListRegistry yoGraphicsListRegistry;
    private KinematicsPlanningToolboxController toolboxController;
 
@@ -95,7 +91,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
    @BeforeEach
    public void setup()
    {
-      mainRegistry = new YoVariableRegistry("main");
+      mainRegistry = new YoRegistry("main");
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -155,7 +151,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
 
       if (mainRegistry != null)
       {
-         mainRegistry.closeAndDispose();
+         mainRegistry.clear();
          mainRegistry = null;
       }
 
@@ -313,7 +309,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       double trajectoryTime = 5.0;
 
       Pose3D desiredPose = new Pose3D();
-      desiredPose.setPosition(0.5, 0.3, 1.0);
+      desiredPose.getPosition().set(0.5, 0.3, 1.0);
       desiredPose.appendYawRotation(-0.5 * Math.PI);
       desiredPose.appendPitchRotation(0.5 * Math.PI);
       desiredPose.appendYawRotation(0.2 * Math.PI);
@@ -542,7 +538,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return mainRegistry;
          }

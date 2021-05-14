@@ -1,7 +1,8 @@
 package us.ihmc.stateEstimation.head;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.ekf.filter.FilterTools;
 import us.ihmc.ekf.filter.RobotState;
@@ -9,7 +10,7 @@ import us.ihmc.ekf.filter.sensor.Sensor;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
  * A simple implementation of a body position sensor for the EKF framework.
@@ -28,10 +29,10 @@ public class PositionSensor extends Sensor
    private final double sqrtHz;
    private final DoubleProvider variance;
 
-   private final DenseMatrix64F stateVector = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj stateVector = new DMatrixRMaj(0, 0);
    private final Point3D measurement = new Point3D();
 
-   public PositionSensor(String sensorName, double dt, YoVariableRegistry registry)
+   public PositionSensor(String sensorName, double dt, YoRegistry registry)
    {
       this.sensorName = sensorName;
       sqrtHz = 1.0 / Math.sqrt(dt);
@@ -56,14 +57,14 @@ public class PositionSensor extends Sensor
    }
 
    @Override
-   public void getMeasurementJacobian(DenseMatrix64F jacobianToPack, RobotState robotState)
+   public void getMeasurementJacobian(DMatrix1Row jacobianToPack, RobotState robotState)
    {
       // Could use this to also correct the joint angles. For now only use for base orientation.
       if (!robotState.isFloating())
          throw new RuntimeException("This sensor is currently only supported for floating robots.");
 
       jacobianToPack.reshape(getMeasurementSize(), robotState.getSize());
-      CommonOps.fill(jacobianToPack, 0.0);
+      CommonOps_DDRM.fill(jacobianToPack, 0.0);
 
       jacobianToPack.set(0, robotState.findPositionIndex() + 0, 1.0);
       jacobianToPack.set(1, robotState.findPositionIndex() + 1, 1.0);
@@ -71,7 +72,7 @@ public class PositionSensor extends Sensor
    }
 
    @Override
-   public void getResidual(DenseMatrix64F residualToPack, RobotState robotState)
+   public void getResidual(DMatrix1Row residualToPack, RobotState robotState)
    {
       robotState.getStateVector(stateVector);
       residualToPack.reshape(getMeasurementSize(), 1);
@@ -81,10 +82,10 @@ public class PositionSensor extends Sensor
    }
 
    @Override
-   public void getRMatrix(DenseMatrix64F noiseCovarianceToPack)
+   public void getRMatrix(DMatrix1Row noiseCovarianceToPack)
    {
       noiseCovarianceToPack.reshape(getMeasurementSize(), getMeasurementSize());
-      CommonOps.setIdentity(noiseCovarianceToPack);
-      CommonOps.scale(variance.getValue() * sqrtHz, noiseCovarianceToPack);
+      CommonOps_DDRM.setIdentity(noiseCovarianceToPack);
+      CommonOps_DDRM.scale(variance.getValue() * sqrtHz, noiseCovarianceToPack);
    }
 }

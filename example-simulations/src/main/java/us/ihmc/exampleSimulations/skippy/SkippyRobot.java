@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.skippy;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -116,7 +116,7 @@ public class SkippyRobot extends Robot
 
    private final KinematicPoint bodyPoint;
 
-   private final YoDouble yaw = new YoDouble("yaw", this.getRobotsYoVariableRegistry());
+   private final YoDouble yaw = new YoDouble("yaw", this.getRobotsYoRegistry());
 
    public static final double LEG_LENGTH = 1.0, LEG_MASS = 1.5, LEG_CUBE_LENGTH = 0.1, LEG_MOI = (1.0 / 4.0) * LEG_MASS * Math.pow(LEG_LENGTH, 2), // Leg
          TORSO_LENGTH = 2.0, TORSO_MASS = 1.0, TORSO_RADIUS = 0.05, TORSO_MOI = (1.0 / 4.0) * TORSO_MASS * Math.pow(TORSO_LENGTH, 2), // Torso
@@ -135,7 +135,7 @@ public class SkippyRobot extends Robot
       super("Skippy");
       robotType = typeOfRobot;
 
-      t = (YoDouble)getVariable("t");
+      t = (YoDouble)findVariable("t");
 
       this.setGravity(0.0, 0.0, -9.81); // m/s^2
 
@@ -159,7 +159,7 @@ public class SkippyRobot extends Robot
          groundContactPoints.add(rightContact);
 
          // Create joints and assign links. Each joint should be placed L* distance away from its previous joint.
-         footJointIfTippy = new UniversalJoint("foot_X", "foot_Y", new Vector3D(0.0, 0.0, 0.0), this, Axis.X, Axis.Y);
+         footJointIfTippy = new UniversalJoint("foot_X", "foot_Y", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.X, Axis3D.Y);
          footJointIfTippy.setInitialState(-Math.PI / 7.0, 0.0, initialBodySidewaysLean, 0.0); // initial position "q" of foot
          Link leg = createLegTippy();
          footJointIfTippy.setLink(leg);
@@ -178,7 +178,7 @@ public class SkippyRobot extends Robot
          this.footJointIfTippy.addJoint(hipJoint);
          //hip.addGroundContactPoint(hipContact);
 
-         shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH), this, Axis.Y);
+         shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH), this, Axis3D.Y);
          Link arms = createArmsTippy();
          shoulderJoint.setLink(arms);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
@@ -207,10 +207,10 @@ public class SkippyRobot extends Robot
 
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationEulerAndZeroTranslation(/*0.0*/Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
-         transform.setTranslation(new Vector3D(0.0, 0.0, /*2.0*/2.0-0.15975+0.0032));
+         transform.getTranslation().set(new Vector3D(0.0, 0.0, /*2.0*/2.0-0.15975+0.0032));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
-         shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
+         shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2), this, Axis3D.Y);
          shoulderJoint.setDamping(0.0);
          shoulderJoint.setInitialState(initialShoulderJointAngle, 0.0);
          Link arms = createArmsTippy();
@@ -223,7 +223,7 @@ public class SkippyRobot extends Robot
          shoulderContactPointRight.disable();
          rootJointIfSkippy.addJoint(shoulderJoint);
 
-         hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis.X);
+         hipJoint = new PinJoint("hip", new Vector3D(0.0, 0.0, -TORSO_LENGTH / 2.0), this, Axis3D.X);
          hipJoint.setDamping(0.0);
          hipJoint.setInitialState(/*0.0*/2.0 * Math.PI / 8.0, 0.0);
          Link leg = createLegSkippy();
@@ -256,7 +256,7 @@ public class SkippyRobot extends Robot
 
       bodyZUpFrame = new TransformReferenceFrame("bodyFrame", ReferenceFrame.getWorldFrame());
 
-      GroundContactModel ground = new LinearGroundContactModel(this, 10000.0, 5000.0, 50.0, 5000.0, this.getRobotsYoVariableRegistry());//50.0, 5000.0, this.getRobotsYoVariableRegistry());
+      GroundContactModel ground = new LinearGroundContactModel(this, 10000.0, 5000.0, 50.0, 5000.0, this.getRobotsYoRegistry());//50.0, 5000.0, this.getRobotsYoVariableRegistry());
       GroundProfile3D profile = new FlatGroundProfile();
       ground.setGroundProfile3D(profile);
       this.setGroundContactModel(ground);
@@ -301,7 +301,7 @@ public class SkippyRobot extends Robot
        * Joint
        */
       linkGraphics.identity();
-      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.Y);
       linkGraphics.translate(0.0, 0.0, -LEG_CUBE_LENGTH);
       linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
       /*
@@ -371,14 +371,14 @@ public class SkippyRobot extends Robot
       arms.setMomentOfInertia(0.0001, SHOULDER_MOI, SHOULDER_MOI);
 
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.toRadians(90), Axis.Y);
+      linkGraphics.rotate(Math.toRadians(90), Axis3D.Y);
       linkGraphics.translate(0.0, 0.0, -SHOULDER_LENGTH / 2.0);
       linkGraphics.addCylinder(SHOULDER_LENGTH, SHOULDER_RADIUS, YoAppearance.Red());
       /*
        * Joint
        */
-      linkGraphics.rotate(Math.PI/2,Axis.Y);
-      linkGraphics.rotate(Math.PI/2,Axis.X);
+      linkGraphics.rotate(Math.PI/2,Axis3D.Y);
+      linkGraphics.rotate(Math.PI/2,Axis3D.X);
       linkGraphics.translate(-SHOULDER_LENGTH/2, 0.0, -LEG_CUBE_LENGTH);
       linkGraphics.addCylinder(2*LEG_CUBE_LENGTH, 2*LEG_CUBE_LENGTH/3, YoAppearance.LightSteelBlue());
       /*
@@ -466,7 +466,7 @@ public class SkippyRobot extends Robot
 
    public Point3D computeFootLocation()
    {
-      return footGroundContactPoint.getPositionPoint();
+      return footGroundContactPoint.getPositionCopy();
    }
 
    public void computeFootContactForce(Vector3DBasics tempForce){
@@ -479,7 +479,7 @@ public class SkippyRobot extends Robot
    {
       if (robotType == RobotType.TIPPY)
       {
-         transform.setTranslation(new Vector3D(bodyPoint.getPositionPoint()));
+         transform.getTranslation().set(new Vector3D(bodyPoint.getPositionCopy()));
       }
 
       else if (robotType == RobotType.SKIPPY)
@@ -488,16 +488,16 @@ public class SkippyRobot extends Robot
 
          // Change to ZUp by getting rid of x and y rotation.
          Vector3D translation = new Vector3D();
-         transform.getTranslation(translation);
+         translation.set(transform.getTranslation());
          Vector3D rotationEuler = new Vector3D();
-         transform.getRotationEuler(rotationEuler);
+         transform.getRotation().getEuler(rotationEuler);
          rotationEuler.setX(0.0);
          rotationEuler.setY(0.0);
          //         rotationEuler.setZ(0.0);
          yaw.set(rotationEuler.getZ());
 
          transform.setRotationEulerAndZeroTranslation(rotationEuler);
-         transform.setTranslation(translation);
+         transform.getTranslation().set(translation);
       }
 
       this.bodyZUpFrame.setTransformAndUpdate(transform);

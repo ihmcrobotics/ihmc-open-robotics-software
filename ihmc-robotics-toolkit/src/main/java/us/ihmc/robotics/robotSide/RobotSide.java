@@ -175,10 +175,18 @@ public enum RobotSide implements RobotSegment<RobotSide>
    {
       RobotSide[] sides = RobotSide.values;
 
-
       for(RobotSide side : sides)
       {
          if (robotSideName.equals(side.getSideNameFirstLetter()))
+            return side;
+
+         if (robotSideName.equals(side.getSideNameFirstLetter().toLowerCase()))
+            return side;
+
+         if (robotSideName.equals(side.getCamelCaseNameForStartOfExpression()))
+            return side;
+
+         if (robotSideName.equals(side.getCamelCaseNameForMiddleOfExpression()))
             return side;
       }
 

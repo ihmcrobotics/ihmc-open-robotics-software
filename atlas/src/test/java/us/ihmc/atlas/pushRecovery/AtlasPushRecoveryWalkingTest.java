@@ -30,7 +30,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushLeftEarlySwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(700.0);
+      setPushMagnitude(1500.0);
       super.testPushLeftEarlySwing();
    }
 
@@ -40,6 +40,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushLeftInitialTransferState() throws SimulationExceededMaximumTimeException
    {
+      setPushMagnitude(1500.0);
       super.testPushLeftInitialTransferState();
    }
 
@@ -48,6 +49,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushRightInitialTransferState() throws SimulationExceededMaximumTimeException
    {
+      setPushMagnitude(1500.0);
       super.testPushRightInitialTransferState();
    }
 
@@ -56,6 +58,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushRightLateSwing() throws SimulationExceededMaximumTimeException
    {
+      setPushMagnitude(1500.0);
       super.testPushRightLateSwing();
    }
 
@@ -64,7 +67,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushRightThenLeftMidSwing() throws SimulationExceededMaximumTimeException
    {
-      setPushMagnitude(800.0);
+      setPushMagnitude(1500.0);
       super.testPushRightThenLeftMidSwing();
    }
 
@@ -73,6 +76,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushRightTransferState() throws SimulationExceededMaximumTimeException
    {
+      setPushMagnitude(1500.0);
       super.testPushRightTransferState();
    }
 
@@ -81,6 +85,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushTowardsTheBack() throws SimulationExceededMaximumTimeException
    {
+      setPushMagnitude(1500.0);
       super.testPushTowardsTheBack();
    }
 
@@ -89,6 +94,7 @@ public class AtlasPushRecoveryWalkingTest extends DRCPushRecoveryWalkingTest
    @Test
    public void testPushTowardsTheFront() throws SimulationExceededMaximumTimeException
    {
+      setPushMagnitude(1500.0);
       super.testPushTowardsTheFront();
    }
 }

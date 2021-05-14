@@ -106,7 +106,7 @@ public abstract class DRCChestTrajectoryBehaviorTest implements MultiRobotTestIn
       boolean success = drcBehaviorTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       final ChestTrajectoryBehavior chestTrajectoryBehavior = new ChestTrajectoryBehavior(drcBehaviorTestHelper.getRobotName(),
-                                                                                          drcBehaviorTestHelper.getRos2Node(),
+                                                                                          drcBehaviorTestHelper.getROS2Node(),
                                                                                           drcBehaviorTestHelper.getYoTime());
 
       chestTrajectoryBehavior.initialize();

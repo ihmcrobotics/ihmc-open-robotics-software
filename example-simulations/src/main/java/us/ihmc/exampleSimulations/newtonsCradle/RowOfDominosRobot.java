@@ -7,13 +7,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.FunctionToIntegrate;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RowOfDominosRobot extends Robot
 {
@@ -23,10 +23,10 @@ public class RowOfDominosRobot extends Robot
 
       Random random = new Random(1999L);
 
-      final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", null, this.getRobotsYoVariableRegistry());
-      final YoDouble potentialEnergy = new YoDouble("potentialEnergy", this.getRobotsYoVariableRegistry());
-      final YoDouble kineticEnergy = new YoDouble("kineticEnergy", this.getRobotsYoVariableRegistry());
-      final YoDouble totalEnergy = new YoDouble("totalEnergy", this.getRobotsYoVariableRegistry());
+      final YoFrameVector3D yoLinearMomentum = new YoFrameVector3D("linearMomentum", null, this.getRobotsYoRegistry());
+      final YoDouble potentialEnergy = new YoDouble("potentialEnergy", this.getRobotsYoRegistry());
+      final YoDouble kineticEnergy = new YoDouble("kineticEnergy", this.getRobotsYoRegistry());
+      final YoDouble totalEnergy = new YoDouble("totalEnergy", this.getRobotsYoRegistry());
 
       double dominoWidth = 0.024;
       double dominoDepth = 0.0075;
@@ -34,7 +34,7 @@ public class RowOfDominosRobot extends Robot
 
       double dominoMass = 0.2;
       RigidBodyTransform nextDominoTransform = new RigidBodyTransform();
-      nextDominoTransform.setTranslation(new Vector3D(0.0, 0.0, dominoHeight/2.0 + 0.001));
+      nextDominoTransform.getTranslation().set(new Vector3D(0.0, 0.0, dominoHeight/2.0 + 0.001));
 
       Vector3D dominoTranslation = new Vector3D(dominoHeight * 0.6, 0.0, 0.0);
       RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -68,7 +68,7 @@ public class RowOfDominosRobot extends Robot
 
          tempTransform.setIdentity();
          tempTransform.setRotationYawAndZeroTranslation(0.15);
-         tempTransform.setTranslation(dominoTranslation);
+         tempTransform.getTranslation().set(dominoTranslation);
 
          tempTransform2.setIdentity();
          tempTransform2.set(tempTransform);

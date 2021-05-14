@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.collidingArms;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -8,7 +8,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 
 public class CollidingArmController implements RobotController
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry("CollidingArmController");
+   private final YoRegistry registry = new YoRegistry("CollidingArmController");
 
    private final YoDouble qd_d_base = new YoDouble("qd_d_base", registry);
 
@@ -60,7 +60,7 @@ public class CollidingArmController implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }

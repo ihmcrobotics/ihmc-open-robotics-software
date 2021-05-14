@@ -14,15 +14,15 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 
 public class AvatarPlanarRegionsSimulation
 {
-   public AvatarPlanarRegionsSimulation(DRCRobotModel robotModel, DataSetName dataSetName)
+   public AvatarPlanarRegionsSimulation(DRCRobotModel robotModel, DataSetName dataSetName, boolean generateGroundPlane)
    {
       DataSet dataSet = DataSetIOTools.loadDataSet(dataSetName);
-      startSimulation(robotModel, dataSet.getPlanarRegionsList(), dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw());
+      startSimulation(robotModel, dataSet.getPlanarRegionsList(), dataSet.getPlannerInput().getStartPosition(), dataSet.getPlannerInput().getStartYaw(), generateGroundPlane);
    }
 
-   public static void startSimulation(DRCRobotModel robotModel, PlanarRegionsList planarRegionsList, Tuple3DReadOnly startPosition, double startOrientation)
+   public static void startSimulation(DRCRobotModel robotModel, PlanarRegionsList planarRegionsList, Tuple3DReadOnly startPosition, double startOrientation, boolean generateGroundPlane)
    {
-      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.02, true);
+      PlanarRegionsListDefinedEnvironment simEnvironment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.025, generateGroundPlane);
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
@@ -30,7 +30,7 @@ public class AvatarPlanarRegionsSimulation
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       // talk to controller and footstep planner
-      networkProcessorParameters.setUseFootstepPlanningToolboxModule(true);
+      networkProcessorParameters.setUseFootstepPlanningToolboxModule(false);
       networkProcessorParameters.setUseWalkingPreviewModule(true);
       networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(true);
 

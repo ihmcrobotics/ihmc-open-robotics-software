@@ -1,7 +1,5 @@
 package us.ihmc.robotics.math.trajectories.trajectorypoints;
 
-import static us.ihmc.robotics.math.frames.YoFrameVariableNameTools.createName;
-
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -9,7 +7,8 @@ import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.FrameSO3TrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.waypoints.YoFrameSO3Waypoint;
 import us.ihmc.robotics.math.trajectories.waypoints.tools.WaypointToStringTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoGeometryNameTools;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointBasics
@@ -20,18 +19,18 @@ public class YoFrameSO3TrajectoryPoint implements FrameSO3TrajectoryPointBasics
    private final String namePrefix;
    private final String nameSuffix;
 
-   public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry)
+   public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry)
    {
       so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, registry);
-      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
    }
 
-   public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoVariableRegistry registry, ReferenceFrame referenceFrame)
+   public YoFrameSO3TrajectoryPoint(String namePrefix, String nameSuffix, YoRegistry registry, ReferenceFrame referenceFrame)
    {
       so3Waypoint = new YoFrameSO3Waypoint(namePrefix, nameSuffix, registry);
-      time = new YoDouble(createName(namePrefix, "time", nameSuffix), registry);
+      time = new YoDouble(YoGeometryNameTools.assembleName(namePrefix, "time", nameSuffix), registry);
       this.namePrefix = namePrefix;
       this.nameSuffix = nameSuffix;
       setToZero(referenceFrame);

@@ -19,10 +19,10 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
  * </p>
  * 
  * @author Sylvain Bertrand
- *
  */
 public class FeedbackControlCommandList implements FeedbackControlCommand<FeedbackControlCommandList>
 {
+   private int commandId;
    /**
     * Internal storage of the commands.
     */
@@ -53,7 +53,7 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
     * </p>
     * 
     * @param command the command to register. The command's reference is saved, no copy is done. Not
-    *           modified.
+    *                modified.
     */
    public void addCommand(FeedbackControlCommand<?> command)
    {
@@ -71,7 +71,7 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
     * {@link #addCommand(FeedbackControlCommand)} for each element.
     * 
     * @param commandList the list of commands to register. The command's reference is saved, no copy is
-    *           done. Not modified.
+    *                    done. Not modified.
     */
    public void addCommandList(FeedbackControlCommandList commandList)
    {
@@ -87,6 +87,7 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
     */
    public void clear()
    {
+      commandId = 0;
       commandList.clear();
    }
 
@@ -99,6 +100,42 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
    public FeedbackControlCommand<?> getCommand(int commandIndex)
    {
       return commandList.get(commandIndex);
+   }
+
+   /**
+    * Returns the index of the first occurrence of the specified command in this list, or {@code -1} if
+    * this list does not contain it.
+    * 
+    * @param command the command to get the index of.
+    * @return the index of the command, or {@code -1} if it could not be found.
+    */
+   public int indexOf(FeedbackControlCommand<?> command)
+   {
+      return commandList.indexOf(command);
+   }
+
+   /**
+    * Removes the first occurrence of the specified command from this list, if it is present.
+    * 
+    * @param command the command to remove.
+    */
+   public void removeCommand(FeedbackControlCommand<?> command)
+   {
+      int indexOf = indexOf(command);
+
+      if (indexOf == -1)
+         return;
+      removeCommand(indexOf);
+   }
+
+   /**
+    * Removes the command at the specified position in this list and shifts the subsequent commands.
+    * 
+    * @param commandIndex the index of the command to be removed.
+    */
+   public void removeCommand(int commandIndex)
+   {
+      commandList.remove(commandIndex);
    }
 
    /**
@@ -142,6 +179,7 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
    public void set(FeedbackControlCommandList other)
    {
       clear();
+      setCommandId(other.getCommandId());
       for (int i = 0; i < other.getNumberOfCommands(); i++)
          addCommand(other.getCommand(i));
    }
@@ -158,6 +196,18 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
    }
 
    @Override
+   public void setCommandId(int id)
+   {
+      commandId = id;
+   }
+
+   @Override
+   public int getCommandId()
+   {
+      return commandId;
+   }
+
+   @Override
    public boolean equals(Object object)
    {
       if (object == this)
@@ -168,6 +218,8 @@ public class FeedbackControlCommandList implements FeedbackControlCommand<Feedba
       {
          FeedbackControlCommandList other = (FeedbackControlCommandList) object;
 
+         if (commandId != other.commandId)
+            return false;
          if (getNumberOfCommands() != other.getNumberOfCommands())
             return false;
          for (int commandIndex = 0; commandIndex < getNumberOfCommands(); commandIndex++)

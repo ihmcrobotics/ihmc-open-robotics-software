@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoFunctionGeneratorTest
 {
@@ -16,7 +16,7 @@ public class YoFunctionGeneratorTest
    @BeforeEach
    public void setUp() throws Exception
    {
-	   YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+	   YoRegistry registry = new YoRegistry("testRegistry");
 	   yoFunctionGenerator = new YoFunctionGenerator("test", registry);
    }
 
@@ -121,6 +121,27 @@ public class YoFunctionGeneratorTest
          computedVelocityAbs = Math.abs(yoFunctionGenerator.getValueDot());
          assertEquals(expectedVelocityAbs, computedVelocityAbs, 1e-10);
          previousValue = value;
+      }
+   }
+   @Test
+   public void testValueDotOnSineWithPhase()
+   {
+      // Regardless of a phase offset, the derivative of the value should match up with the curve.
+      // When the value is equal to the amplitude, it is at the top of the curve, and so the derivative should be close to 0.
+      // The derivative has a much larger margin of error because it is acting linearly when close to 0, whereas the value is acting like a horizontal line.
+      yoFunctionGenerator.setMode(YoFunctionGeneratorMode.SINE);
+
+      double amplitude = 1.0;
+      yoFunctionGenerator.setAmplitude(amplitude);
+      yoFunctionGenerator.setFrequency(0.1);
+      yoFunctionGenerator.setPhase(Math.PI/2.0);
+      double value = 0.0;
+      for(double time = 0.0; time< 10.0; time+=0.001)
+      {
+         value = yoFunctionGenerator.getValue(time);
+         if(Math.abs(value - amplitude) <= 0.001){
+            assertTrue(Math.abs(yoFunctionGenerator.getValueDot()) <= 0.05);
+         }
       }
    }
 

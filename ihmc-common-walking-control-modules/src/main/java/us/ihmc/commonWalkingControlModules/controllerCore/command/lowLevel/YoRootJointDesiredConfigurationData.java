@@ -1,16 +1,16 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class YoRootJointDesiredConfigurationData implements RootJointDesiredConfigurationDataBasics
 {
@@ -22,13 +22,13 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    private final YoFrameVector3D linearAcceleration;
    private final YoFrameVector3D angularAcceleration;
 
-   private final DenseMatrix64F desiredConfiguration = new DenseMatrix64F(7, 0);
-   private final DenseMatrix64F desiredVelocity = new DenseMatrix64F(6, 0);
-   private final DenseMatrix64F desiredAcceleration = new DenseMatrix64F(6, 0);
+   private final DMatrixRMaj desiredConfiguration = new DMatrixRMaj(7, 0);
+   private final DMatrixRMaj desiredVelocity = new DMatrixRMaj(6, 0);
+   private final DMatrixRMaj desiredAcceleration = new DMatrixRMaj(6, 0);
 
-   public YoRootJointDesiredConfigurationData(FloatingJointBasics rootJoint, YoVariableRegistry parentRegistry)
+   public YoRootJointDesiredConfigurationData(FloatingJointBasics rootJoint, YoRegistry parentRegistry)
    {
-      YoVariableRegistry registry = new YoVariableRegistry("RootJointDesiredConfigurationData");
+      YoRegistry registry = new YoRegistry("RootJointDesiredConfigurationData");
       parentRegistry.addChild(registry);
       ReferenceFrame frameAfterJoint = rootJoint.getFrameAfterJoint();
 
@@ -153,21 +153,21 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    }
 
    @Override
-   public void setDesiredConfiguration(DenseMatrix64F q, int startIndex)
+   public void setDesiredConfiguration(DMatrixRMaj q, int startIndex)
    {
       orientation.set(startIndex, q);
       position.set(startIndex + 4, q);
    }
 
    @Override
-   public void setDesiredVelocity(DenseMatrix64F qd, int startIndex)
+   public void setDesiredVelocity(DMatrixRMaj qd, int startIndex)
    {
       angularVelocity.set(startIndex, qd);
       linearVelocity.set(startIndex + 3, qd);
    }
 
    @Override
-   public void setDesiredAcceleration(DenseMatrix64F qdd, int startIndex)
+   public void setDesiredAcceleration(DMatrixRMaj qdd, int startIndex)
    {
       angularAcceleration.set(startIndex, qdd);
       linearAcceleration.set(startIndex + 3, qdd);
@@ -192,7 +192,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    }
 
    @Override
-   public DenseMatrix64F getDesiredConfiguration()
+   public DMatrixRMaj getDesiredConfiguration()
    {
       if (!hasDesiredConfiguration())
       {
@@ -209,7 +209,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    }
 
    @Override
-   public DenseMatrix64F getDesiredVelocity()
+   public DMatrixRMaj getDesiredVelocity()
    {
       if (!hasDesiredVelocity())
       {
@@ -226,7 +226,7 @@ public class YoRootJointDesiredConfigurationData implements RootJointDesiredConf
    }
 
    @Override
-   public DenseMatrix64F getDesiredAcceleration()
+   public DMatrixRMaj getDesiredAcceleration()
    {
       if (!hasDesiredAcceleration())
       {

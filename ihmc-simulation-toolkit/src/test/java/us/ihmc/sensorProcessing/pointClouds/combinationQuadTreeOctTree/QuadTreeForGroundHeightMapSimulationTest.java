@@ -35,8 +35,8 @@ import us.ihmc.simulationToolkit.visualizers.QuadTreeHeightMapVisualizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.RotatableBoxTerrainObject;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class QuadTreeForGroundHeightMapSimulationTest
 {
@@ -270,7 +270,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
 
    private static ArrayList<Point3D> generatePointsForSlope(Plane3D plane3d, double halfWidth, double stepSize)
    {
-      Point3D centerPoint = plane3d.getPointCopy();
+      Point3D centerPoint = new Point3D(plane3d.getPoint());
 
       double minX = centerPoint.getX() - halfWidth;
       double minY = centerPoint.getY() - halfWidth;
@@ -306,7 +306,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
    private static class QuadTreeTestHelper
    {
       private final boolean visualize;
-      private YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+      private YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       private final Robot robot;
       private final SimulationConstructionSet scs;
@@ -339,7 +339,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
          if (visualize)
          {
             robot = new Robot("TestQuadTree");
-            robot.getRobotsYoVariableRegistry().addChild(registry);
+            robot.getRobotsYoRegistry().addChild(registry);
             scs = new SimulationConstructionSet(robot);
             
             scs.setGroundVisible(false);
@@ -627,7 +627,7 @@ public class QuadTreeForGroundHeightMapSimulationTest
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3D(x, y, height / 2));
+      location.getTranslation().set(new Vector3D(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

@@ -5,7 +5,7 @@ import us.ihmc.atlas.ros.ROSSandiaJointMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
-import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
 public class AtlasDampingParameters
 {
@@ -129,7 +129,7 @@ public class AtlasDampingParameters
       throw new RuntimeException("Joint not found: " + name);
    }
 
-   public static void setDampingParameters(FloatingRootJointRobot simulatedRobot, DRCRobotJointMap jointMap)
+   public static void setDampingParameters(FloatingRootJointRobot simulatedRobot, HumanoidJointNameMap jointMap)
    {
       String[] orderedJointNames = jointMap.getOrderedJointNames();
       for (int i = 0; i < orderedJointNames.length; i++)

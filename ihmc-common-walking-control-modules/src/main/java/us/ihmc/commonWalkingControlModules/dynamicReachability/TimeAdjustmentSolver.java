@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicReachability;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.configurations.DynamicReachabilityParameters;
 import us.ihmc.convexOptimization.exceptions.NoConvergenceException;
@@ -33,25 +33,25 @@ public class TimeAdjustmentSolver
 
    private double desiredParallelAdjustment;
 
-   private final DenseMatrix64F solverInput_H;
-   private final DenseMatrix64F solverInput_h;
+   private final DMatrixRMaj solverInput_H;
+   private final DMatrixRMaj solverInput_h;
 
-   private final DenseMatrix64F segmentAdjustmentObjective_H;
-   private final DenseMatrix64F stepAdjustmentObjective_H;
-   private final DenseMatrix64F perpendicularObjective_H;
-   private final DenseMatrix64F parallelObjective_H;
-   private final DenseMatrix64F parallelObjective_h;
-   private final DenseMatrix64F equalAdjustmentObjective_H;
+   private final DMatrixRMaj segmentAdjustmentObjective_H;
+   private final DMatrixRMaj stepAdjustmentObjective_H;
+   private final DMatrixRMaj perpendicularObjective_H;
+   private final DMatrixRMaj parallelObjective_H;
+   private final DMatrixRMaj parallelObjective_h;
+   private final DMatrixRMaj equalAdjustmentObjective_H;
 
-   private final DenseMatrix64F parallel_J;
-   private final DenseMatrix64F perpendicular_J;
-   private final DenseMatrix64F equalAdjustment_J;
-   private final DenseMatrix64F tempTrans_J;
+   private final DMatrixRMaj parallel_J;
+   private final DMatrixRMaj perpendicular_J;
+   private final DMatrixRMaj equalAdjustment_J;
+   private final DMatrixRMaj tempTrans_J;
 
-   private final DenseMatrix64F solverInput_Ain;
-   private final DenseMatrix64F solverInput_bin;
+   private final DMatrixRMaj solverInput_Ain;
+   private final DMatrixRMaj solverInput_bin;
 
-   private final DenseMatrix64F solution;
+   private final DMatrixRMaj solution;
 
    private final boolean useHigherOrderSteps;
 
@@ -77,27 +77,27 @@ public class TimeAdjustmentSolver
 
       int problemSize = 6 + 2 * (maxNumberOfFootstepsToConsider - 3);
 
-      solverInput_H = new DenseMatrix64F(problemSize, problemSize);
-      solverInput_h = new DenseMatrix64F(problemSize, 1);
+      solverInput_H = new DMatrixRMaj(problemSize, problemSize);
+      solverInput_h = new DMatrixRMaj(problemSize, 1);
 
-      solverInput_Ain = new DenseMatrix64F(12, problemSize);
-      solverInput_bin = new DenseMatrix64F(12, 1);
+      solverInput_Ain = new DMatrixRMaj(12, problemSize);
+      solverInput_bin = new DMatrixRMaj(12, 1);
 
-      solution = new DenseMatrix64F(problemSize, 1);
+      solution = new DMatrixRMaj(problemSize, 1);
 
-      parallel_J = new DenseMatrix64F(1, problemSize);
-      perpendicular_J = new DenseMatrix64F(1, problemSize);
-      equalAdjustment_J = new DenseMatrix64F(3, problemSize);
-      tempTrans_J = new DenseMatrix64F(problemSize, problemSize);
+      parallel_J = new DMatrixRMaj(1, problemSize);
+      perpendicular_J = new DMatrixRMaj(1, problemSize);
+      equalAdjustment_J = new DMatrixRMaj(3, problemSize);
+      tempTrans_J = new DMatrixRMaj(problemSize, problemSize);
 
-      segmentAdjustmentObjective_H = new DenseMatrix64F(problemSize, problemSize);
-      stepAdjustmentObjective_H = new DenseMatrix64F(problemSize, problemSize);
+      segmentAdjustmentObjective_H = new DMatrixRMaj(problemSize, problemSize);
+      stepAdjustmentObjective_H = new DMatrixRMaj(problemSize, problemSize);
 
-      perpendicularObjective_H = new DenseMatrix64F(problemSize, problemSize);
-      equalAdjustmentObjective_H = new DenseMatrix64F(problemSize, problemSize);
+      perpendicularObjective_H = new DMatrixRMaj(problemSize, problemSize);
+      equalAdjustmentObjective_H = new DMatrixRMaj(problemSize, problemSize);
 
-      parallelObjective_H = new DenseMatrix64F(problemSize, problemSize);
-      parallelObjective_h = new DenseMatrix64F(problemSize, 1);
+      parallelObjective_H = new DMatrixRMaj(problemSize, problemSize);
+      parallelObjective_h = new DMatrixRMaj(problemSize, 1);
    }
 
    /**
@@ -414,13 +414,13 @@ public class TimeAdjustmentSolver
       computeEqualAdjustmentObjective();
       computeTimeAdjustmentMinimizationObjective();
 
-      CommonOps.addEquals(solverInput_H, segmentAdjustmentObjective_H);
-      CommonOps.addEquals(solverInput_H, stepAdjustmentObjective_H);
-      CommonOps.addEquals(solverInput_H, perpendicularObjective_H);
-      CommonOps.addEquals(solverInput_H, parallelObjective_H);
-      CommonOps.addEquals(solverInput_H, equalAdjustmentObjective_H);
+      CommonOps_DDRM.addEquals(solverInput_H, segmentAdjustmentObjective_H);
+      CommonOps_DDRM.addEquals(solverInput_H, stepAdjustmentObjective_H);
+      CommonOps_DDRM.addEquals(solverInput_H, perpendicularObjective_H);
+      CommonOps_DDRM.addEquals(solverInput_H, parallelObjective_H);
+      CommonOps_DDRM.addEquals(solverInput_H, equalAdjustmentObjective_H);
 
-      CommonOps.addEquals(solverInput_h, parallelObjective_h);
+      CommonOps_DDRM.addEquals(solverInput_h, parallelObjective_h);
 
       // define bounds and timing constraints
       assembleTimingConstraints();
@@ -443,11 +443,11 @@ public class TimeAdjustmentSolver
    {
       double constraintWeight = dynamicReachabilityParameters.getConstraintWeight();
 
-      CommonOps.multTransA(parallel_J, parallel_J, parallelObjective_H);
-      CommonOps.scale(constraintWeight, parallelObjective_H);
+      CommonOps_DDRM.multTransA(parallel_J, parallel_J, parallelObjective_H);
+      CommonOps_DDRM.scale(constraintWeight, parallelObjective_H);
 
-      CommonOps.transpose(parallel_J, parallelObjective_h);
-      CommonOps.scale(-desiredParallelAdjustment * constraintWeight, parallelObjective_h);
+      CommonOps_DDRM.transpose(parallel_J, parallelObjective_h);
+      CommonOps_DDRM.scale(-desiredParallelAdjustment * constraintWeight, parallelObjective_h);
 
       return Math.pow(desiredParallelAdjustment, 2.0) * constraintWeight;
    }
@@ -455,8 +455,8 @@ public class TimeAdjustmentSolver
    private void computePerpendicularAdjustmentMinimizationObjective()
    {
       double perpendicularWeight = dynamicReachabilityParameters.getPerpendicularWeight();
-      CommonOps.multTransA(perpendicular_J, perpendicular_J, perpendicularObjective_H);
-      CommonOps.scale(perpendicularWeight, perpendicularObjective_H);
+      CommonOps_DDRM.multTransA(perpendicular_J, perpendicular_J, perpendicularObjective_H);
+      CommonOps_DDRM.scale(perpendicularWeight, perpendicularObjective_H);
    }
 
    private void computeEqualAdjustmentObjective()
@@ -473,12 +473,12 @@ public class TimeAdjustmentSolver
 
       tempTrans_J.reshape(equalAdjustment_J.numCols, equalAdjustment_J.numRows);
       tempTrans_J.zero();
-      CommonOps.transpose(equalAdjustment_J, tempTrans_J);
+      CommonOps_DDRM.transpose(equalAdjustment_J, tempTrans_J);
       MatrixTools.scaleRow(transferEqualAdjustmentWeight, 0, equalAdjustment_J);
       MatrixTools.scaleRow(swingEqualAdjustmentWeight, 1, equalAdjustment_J);
       MatrixTools.scaleRow(transferEqualAdjustmentWeight, 2, equalAdjustment_J);
 
-      CommonOps.mult(tempTrans_J, equalAdjustment_J, equalAdjustmentObjective_H);
+      CommonOps_DDRM.mult(tempTrans_J, equalAdjustment_J, equalAdjustmentObjective_H);
    }
 
    private void computeTimeAdjustmentMinimizationObjective()

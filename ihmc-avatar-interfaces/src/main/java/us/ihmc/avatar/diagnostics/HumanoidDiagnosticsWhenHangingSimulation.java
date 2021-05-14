@@ -17,9 +17,9 @@ import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
-import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -36,7 +36,8 @@ import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerS
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticsWhenHangingControllerStateFactory;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidDiagnosticsWhenHangingAnalyzer;
 import us.ihmc.wholeBodyController.diagnostics.HumanoidJointPoseList;
-import us.ihmc.yoVariables.dataBuffer.DataProcessingFunction;
+import us.ihmc.yoVariables.buffer.interfaces.YoBufferProcessor;
+import us.ihmc.yoVariables.registry.YoVariableHolder;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class HumanoidDiagnosticsWhenHangingSimulation
@@ -77,14 +78,19 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       SideDependentList<String> footSensorNames = sensorInformation.getFeetForceSensorNames();
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
-      ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
+      CoPTrajectoryParameters copTrajectoryParameters = model.getCoPTrajectoryParameters();
+
       SideDependentList<String> feetContactSensorNames = sensorInformation.getFeetContactSensorNames();
       SideDependentList<String> wristForceSensorNames = sensorInformation.getWristForceSensorNames();
 
-      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, footSensorNames,
-                                                                                                    feetContactSensorNames, wristForceSensorNames,
-                                                                                                    highLevelControllerParameters, walkingControllerParameters,
-                                                                                                    capturePointPlannerParameters);
+      HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory,
+                                                                                                    footSensorNames,
+                                                                                                    feetContactSensorNames,
+                                                                                                    wristForceSensorNames,
+                                                                                                    highLevelControllerParameters,
+                                                                                                    walkingControllerParameters,
+                                                                                                    copTrajectoryParameters,
+                                                                                                    model.getSplitFractionCalculatorParameters());
       controllerFactory.useDefaultDoNothingControlState();
       controllerFactory.useDefaultWalkingControlState();
 
@@ -192,7 +198,7 @@ public class HumanoidDiagnosticsWhenHangingSimulation
 
          this.simulationConstructionSet = simulationConstructionSet;
 
-         diagnosticsState = (YoEnum<DiagnosticsWhenHangingState>) simulationConstructionSet.getVariable("DiagnosticsState");
+         diagnosticsState = (YoEnum<DiagnosticsWhenHangingState>) simulationConstructionSet.findVariable("DiagnosticsState");
          this.addActionListener(this);
       }
 
@@ -212,12 +218,12 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                   simulationConstructionSet.setInPoint();
                   break;
                }
-               if (simulationConstructionSet.getIndex() == simulationConstructionSet.getOutPoint())
+               if (simulationConstructionSet.getCurrentIndex() == simulationConstructionSet.getOutPoint())
                {
                   return;
                }
 
-               simulationConstructionSet.tick(1);
+               simulationConstructionSet.tickAndReadFromBuffer(1);
             }
 
             while (true)
@@ -228,13 +234,13 @@ public class HumanoidDiagnosticsWhenHangingSimulation
                   simulationConstructionSet.cutBuffer();
                   break;
                }
-               if (simulationConstructionSet.getIndex() == simulationConstructionSet.getOutPoint())
+               if (simulationConstructionSet.getCurrentIndex() == simulationConstructionSet.getOutPoint())
                {
                   simulationConstructionSet.cutBuffer();
                   break;
                }
 
-               simulationConstructionSet.tick(1);
+               simulationConstructionSet.tickAndReadFromBuffer(1);
             }
 
             simulationConstructionSet.setInOutPointFullBuffer();
@@ -258,16 +264,16 @@ public class HumanoidDiagnosticsWhenHangingSimulation
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         DataProcessingFunction dataProcessingFunction = new DataProcessingFunction()
+         YoBufferProcessor dataProcessingFunction = new YoBufferProcessor()
          {
             @Override
-            public void processData()
+            public void process(int startIndex, int endIndex, int currentIndex)
             {
                analyzer.copyMeasuredTorqueToAppliedTorque();
             }
 
             @Override
-            public void initializeProcessing()
+            public void initialize(YoVariableHolder yoVariableHolder)
             {
             }
          };

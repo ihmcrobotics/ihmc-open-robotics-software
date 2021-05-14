@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,23 +9,23 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.geometry.*;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -34,7 +34,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionTest
@@ -87,7 +89,7 @@ public class PlanarRegionTest
       polygonsRegion2.add(polygon22);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
-      transform2.setTranslation(0.5, 0.0, 0.0);
+      transform2.getTranslation().set(0.5, 0.0, 0.0);
       transform2.appendYawRotation(-Math.PI / 4.0);
       transform2.appendRollRotation(Math.PI / 2.0);
       PlanarRegion region2 = new PlanarRegion(transform2, polygonsRegion2);
@@ -250,14 +252,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -289,14 +285,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -326,14 +316,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -402,9 +386,9 @@ public class PlanarRegionTest
       RigidBodyTransform regionTransform = new RigidBodyTransform();
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-      assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
+      assertEquals(3, planarRegion.getNumberOfConvexPolygons(), "Wrong number of convex polygons in the region.");
       for (int i = 0; i < 3; i++)
-         assertTrue("Unexpected region polygon.", regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10));
+         assertTrue(regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10), "Unexpected region polygon.");
 
       Vector3D actualNormal = new Vector3D();
       planarRegion.getNormal(actualNormal);
@@ -414,7 +398,7 @@ public class PlanarRegionTest
       EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
       RigidBodyTransform actualTransform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(actualTransform);
-      assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
+      assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
 
       Point2D point2d = new Point2D();
 
@@ -500,13 +484,13 @@ public class PlanarRegionTest
       assertEquals(3, intersectionsInPlaneFrame.size());
 
       lineSegment = new LineSegment2D(0.0, 0.0, 0.5, 0.5);
-      assertFalse("Not intersecting if fully inside a single polygon", planarRegion.isLineSegmentIntersecting(lineSegment));
+      assertFalse(planarRegion.isLineSegmentIntersecting(lineSegment), "Not intersecting if fully inside a single polygon");
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(0, intersectionsInPlaneFrame.size());
 
       lineSegment = new LineSegment2D(0.0, 0.0, 0.0, 1.5);
-      assertTrue("Intersecting if fully inside but cross two polygons", planarRegion.isLineSegmentIntersecting(lineSegment));
+      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment), "Intersecting if fully inside but cross two polygons");
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(2, intersectionsInPlaneFrame.size());
@@ -520,7 +504,7 @@ public class PlanarRegionTest
       lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
       lineSegment = new LineSegment2D(2.5, 4.5, 3.0, 9.0);
-      assertFalse("Not intersecting if fully outside", planarRegion.isLineSegmentIntersecting(lineSegment));
+      assertFalse(planarRegion.isLineSegmentIntersecting(lineSegment), "Not intersecting if fully outside");
 
       lineSegment = new LineSegment2D(2.0, -2.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
@@ -579,7 +563,7 @@ public class PlanarRegionTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
-      transform.setTranslation(1.2, 3.4, 5.6);
+      transform.getTranslation().set(1.2, 3.4, 5.6);
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
@@ -599,7 +583,7 @@ public class PlanarRegionTest
 
       RigidBodyTransform snappingTransform = new RigidBodyTransform();
       snappingTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
-      snappingTransform.setTranslation(1.2, 3.4, 5.6);
+      snappingTransform.getTranslation().set(1.2, 3.4, 5.6);
 
       double intersectionArea = planarRegion.getPolygonIntersectionAreaWhenSnapped(polygonToSnap, snappingTransform);
       assertEquals(0.04, intersectionArea, 1e-7);
@@ -641,12 +625,12 @@ public class PlanarRegionTest
          Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
          Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
-         ReferenceFrame localFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
+         ReferenceFrame localFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-         assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
+         assertEquals(3, planarRegion.getNumberOfConvexPolygons(), "Wrong number of convex polygons in the region.");
          for (int i = 0; i < 3; i++)
-            assertTrue("Unexpected region polygon.", regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10));
+            assertTrue(regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10), "Unexpected region polygon.");
 
          Vector3D expectedNormal = new Vector3D(0.0, 0.0, 1.0);
          regionTransform.transform(expectedNormal);
@@ -660,7 +644,7 @@ public class PlanarRegionTest
          EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", expectedOrigin, actualOrigin, 1.0e-10);
          RigidBodyTransform actualTransform = new RigidBodyTransform();
          planarRegion.getTransformToWorld(actualTransform);
-         assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
+         assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
 
          FramePoint2D point2d = new FramePoint2D();
 
@@ -804,9 +788,9 @@ public class PlanarRegionTest
                Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
                double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
-               assertTrue(
-                     "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, 1e-15));
+               assertTrue(boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, 1e-15),
+                       "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
+                       + boundingBox3dInWorld);
             }
          }
       }
@@ -832,7 +816,7 @@ public class PlanarRegionTest
 
       assertEquals(0.0, planeZGivenXY, 1e-7);
 
-      transformToWorld.setTranslation(1.0, 2.0, 3.0);
+      transformToWorld.getTranslation().set(1.0, 2.0, 3.0);
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       planeZGivenXY = planarRegion.getPlaneZGivenXY(xWorld, yWorld);
 
@@ -920,40 +904,46 @@ public class PlanarRegionTest
          Vector3D supportDirection = new Vector3D();
 
          // Trivial case #1: supportingVector = +X
-         supportDirection.set(Axis.X);
+         supportDirection.set(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #2: supportingVector = -X
-         supportDirection.setAndNegate(Axis.X);
+         supportDirection.setAndNegate(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #1: supportingVector = +Y
-         supportDirection.set(Axis.Y);
+         supportDirection.set(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #2: supportingVector = -Y
-         supportDirection.setAndNegate(Axis.Y);
+         supportDirection.setAndNegate(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #1: supportingVector = +Z
-         supportDirection.set(Axis.Z);
+         supportDirection.set(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #2: supportingVector = -Z
-         supportDirection.setAndNegate(Axis.Z);
+         supportDirection.setAndNegate(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Random support direction
          supportDirection = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
@@ -965,13 +955,269 @@ public class PlanarRegionTest
          supportDirection.scale(EuclidCoreRandomTools.nextDouble(random, 0.1, 10.0));
 
          Line3D line = new Line3D();
-         line.setDirection(orthogonalDirection);
+         line.getDirection().set(orthogonalDirection);
          line.translate(20.0 * supportDirectionInPlane.getX(), 20.0 * supportDirectionInPlane.getY(), 20.0 * supportDirectionInPlane.getZ());
 
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(line::distance)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
       }
+   }
+
+   @Test
+   public void testConcaveHullGeneration()
+   {
+      // test two triangles
+      ConvexPolygon2D convexPolygon0 = new ConvexPolygon2D();
+      convexPolygon0.addVertex(0.0, 0.0);
+      convexPolygon0.addVertex(1.0, 1.0);
+      convexPolygon0.addVertex(1.0, -1.0);
+      convexPolygon0.update();
+
+      ConvexPolygon2D convexPolygon1 = new ConvexPolygon2D();
+      convexPolygon1.addVertex(0.0, 0.0);
+      convexPolygon1.addVertex(-1.1, 1.0);
+      convexPolygon1.addVertex(-1.0, -1.0);
+      convexPolygon1.update();
+
+      ArrayList<ConvexPolygon2D> polygonList = new ArrayList<>();
+      polygonList.add(convexPolygon0);
+      polygonList.add(convexPolygon1);
+
+      PlanarRegion twoTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+
+      List<Point2D> concaveHull = twoTriangleRegion.getConcaveHull();
+      Assertions.assertEquals(twoTriangleRegion.getConcaveHullSize(), 6);
+      double epsilon = 1e-10;
+      Assertions.assertTrue(concaveHull.get(0).epsilonEquals(convexPolygon1.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(1).epsilonEquals(convexPolygon1.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
+      Assertions.assertTrue(concaveHull.get(4).epsilonEquals(convexPolygon0.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(5).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
+
+      // test three triangles
+      ConvexPolygon2D convexPolygon2 = new ConvexPolygon2D();
+      convexPolygon2.addVertex(0.0, 0.0);
+      convexPolygon2.addVertex(1.0, -1.0);
+      convexPolygon2.addVertex(-1.0, -1.0);
+      convexPolygon2.update();
+      polygonList.add(convexPolygon2);
+
+      PlanarRegion threeTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+
+      concaveHull = threeTriangleRegion.getConcaveHull();
+      Assertions.assertEquals(threeTriangleRegion.getConcaveHullSize(), 5);
+      Assertions.assertTrue(concaveHull.get(0).epsilonEquals(convexPolygon1.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(1).epsilonEquals(convexPolygon1.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
+      Assertions.assertTrue(concaveHull.get(4).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
+
+      // test four triangles
+      ConvexPolygon2D convexPolygon3 = new ConvexPolygon2D();
+      convexPolygon3.addVertex(0.0, 0.0);
+      convexPolygon3.addVertex(-1.1, 1.0);
+      convexPolygon3.addVertex(1.0, 1.0);
+      convexPolygon3.update();
+      polygonList.add(convexPolygon3);
+
+      PlanarRegion fourTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+
+      concaveHull = fourTriangleRegion.getConcaveHull();
+      Assertions.assertEquals(fourTriangleRegion.getConcaveHullSize(), 4);
+      Assertions.assertTrue(concaveHull.get(0).epsilonEquals(convexPolygon1.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(1).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
+      Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
+
+      // test ring of points with varying radius
+      Random random = new Random(12390);
+      int numberOfPoints = 3600;
+      double minRadius = 0.1, maxRadius = 2.0;
+      double centerX = 0.2;
+      double centerY = -1.3;
+      List<Point2D> points = new ArrayList<>();
+      points.add(new Point2D(-2.01 + centerX, 0.0 + centerY));
+      for (int i = 1; i < numberOfPoints; i++)
+      {
+         double radius = EuclidCoreRandomTools.nextDouble(random, minRadius, maxRadius);
+         double theta = Math.PI - (2 * Math.PI) * i / ((double) numberOfPoints);
+         double px = centerX + radius * Math.cos(theta);
+         double py = centerY + radius * Math.sin(theta);
+         points.add(new Point2D(px, py));
+      }
+
+      polygonList.clear();
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         ConvexPolygon2D triangle = new ConvexPolygon2D();
+         triangle.addVertex(new Point2D(centerX, centerY));
+         triangle.addVertex(points.get(i));
+         triangle.addVertex(points.get((i + 1) % numberOfPoints));
+         triangle.update();
+         polygonList.add(triangle);
+      }
+
+      PlanarRegion region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+      concaveHull = region.getConcaveHull();
+      Assertions.assertEquals(concaveHull.size(), points.size());
+
+      for (int i = 0; i < points.size(); i++)
+      {
+         Assertions.assertTrue(points.get(i).epsilonEquals(concaveHull.get(i), epsilon));
+      }
+
+      // test simple grid
+      ConvexPolygon2D unitSquare = new ConvexPolygon2D();
+      unitSquare.addVertex(-0.5, -0.5);
+      unitSquare.addVertex(-0.5, 0.5);
+      unitSquare.addVertex(0.5, 0.5);
+      unitSquare.addVertex(0.5, -0.5);
+      unitSquare.update();
+
+      ConvexPolygon2D bottomLeftSquare = new ConvexPolygon2D();
+      bottomLeftSquare.addVertex(-0.6, -0.5);
+      bottomLeftSquare.addVertex(-0.5, 0.5);
+      bottomLeftSquare.addVertex(0.5, 0.5);
+      bottomLeftSquare.addVertex(0.5, -0.5);
+      bottomLeftSquare.update();
+
+      polygonList.clear();
+      for (int i = -1; i <= 1; i++)
+      {
+         for (int j = -1; j <= 1; j++)
+         {
+            ConvexPolygon2D polygon = (i == -1 && j == -1) ? bottomLeftSquare : unitSquare;
+            polygonList.add(new ConvexPolygon2D(translateConvexPolygon(i, j, polygon)));
+         }
+      }
+
+      region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+      Assertions.assertEquals(region.getConcaveHullSize(), 12);
+      Assertions.assertTrue(region.getConcaveHull().get(0).epsilonEquals(new Point2D(-1.6, -1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(1).epsilonEquals(new Point2D(-1.5, -0.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(2).epsilonEquals(new Point2D(-1.5, 0.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(3).epsilonEquals(new Point2D(-1.5, 1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(4).epsilonEquals(new Point2D(-0.5, 1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(5).epsilonEquals(new Point2D(0.5, 1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(6).epsilonEquals(new Point2D(1.5, 1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(7).epsilonEquals(new Point2D(1.5, 0.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(8).epsilonEquals(new Point2D(1.5, -0.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(9).epsilonEquals(new Point2D(1.5, -1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(10).epsilonEquals(new Point2D(0.5, -1.5), epsilon));
+      Assertions.assertTrue(region.getConcaveHull().get(11).epsilonEquals(new Point2D(-0.5, -1.5), epsilon));
+
+      // test complex region
+      convexPolygon0 = new ConvexPolygon2D();
+      convexPolygon1 = new ConvexPolygon2D();
+      convexPolygon2 = new ConvexPolygon2D();
+      convexPolygon3 = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon4 = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon5 = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon6 = new ConvexPolygon2D();
+
+      convexPolygon0.addVertex(5.0, 9.0);
+      convexPolygon0.addVertex(6.0, 8.0);
+      convexPolygon0.addVertex(6.0, 10.0);
+      convexPolygon0.addVertex(7.0, 10.0);
+      convexPolygon0.addVertex(8.0, 8.0);
+      convexPolygon0.addVertex(8.0, 9.0);
+
+      convexPolygon1.addVertex(5.0, 9.0);
+      convexPolygon1.addVertex(5.5, 6.0);
+      convexPolygon1.addVertex(6.0, 8.0);
+
+      convexPolygon2.addVertex(6.0, 4.0);
+      convexPolygon2.addVertex(5.5, 6.0);
+      convexPolygon2.addVertex(6.0, 8.0);
+      convexPolygon2.addVertex(7.0, 2.0);
+      convexPolygon2.addVertex(8.0, 1.0);
+      convexPolygon2.addVertex(8.5, 4.0);
+      convexPolygon2.addVertex(8.0, 8.0);
+
+      convexPolygon3.addVertex(8.0, 1.0);
+      convexPolygon3.addVertex(8.5, 4.0);
+      convexPolygon3.addVertex(9.0, 2.0);
+      convexPolygon3.addVertex(9.0, 6.0);
+
+      convexPolygon4.addVertex(3.0, 4.0);
+      convexPolygon4.addVertex(6.0, 4.0);
+      convexPolygon4.addVertex(5.5, 6.0);
+
+      convexPolygon5.addVertex(3.0, 4.0);
+      convexPolygon5.addVertex(4.0, 3.0);
+      convexPolygon5.addVertex(6.0, 4.0);
+
+      convexPolygon6.addVertex(3.0, 4.0);
+      convexPolygon6.addVertex(4.0, 0.0);
+      convexPolygon6.addVertex(4.0, 3.0);
+
+      convexPolygon0.update();
+      convexPolygon1.update();
+      convexPolygon2.update();
+      convexPolygon3.update();
+      convexPolygon4.update();
+      convexPolygon5.update();
+      convexPolygon6.update();
+
+      polygonList.clear();
+      polygonList.add(convexPolygon0);
+      polygonList.add(convexPolygon1);
+      polygonList.add(convexPolygon2);
+      polygonList.add(convexPolygon3);
+      polygonList.add(convexPolygon4);
+      polygonList.add(convexPolygon5);
+      polygonList.add(convexPolygon6);
+
+      region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+      Assertions.assertEquals(region.getConcaveHull().size(), 15);
+
+      region.getConcaveHull().get(0).epsilonEquals(new Point2D(3.0,4.0), epsilon);
+      region.getConcaveHull().get(1).epsilonEquals(new Point2D(5.5,6.0), epsilon);
+      region.getConcaveHull().get(2).epsilonEquals(new Point2D(5.0,9.0), epsilon);
+      region.getConcaveHull().get(3).epsilonEquals(new Point2D(6.0,10.0), epsilon);
+      region.getConcaveHull().get(4).epsilonEquals(new Point2D(7.0,10.0), epsilon);
+      region.getConcaveHull().get(5).epsilonEquals(new Point2D(8.0,9.0), epsilon);
+      region.getConcaveHull().get(6).epsilonEquals(new Point2D(8.0,8.0), epsilon);
+      region.getConcaveHull().get(7).epsilonEquals(new Point2D(8.5,4.0), epsilon);
+      region.getConcaveHull().get(8).epsilonEquals(new Point2D(9.0,6.0), epsilon);
+      region.getConcaveHull().get(9).epsilonEquals(new Point2D(9.0,2.0), epsilon);
+      region.getConcaveHull().get(10).epsilonEquals(new Point2D(8.0,1.0), epsilon);
+      region.getConcaveHull().get(11).epsilonEquals(new Point2D(7.0,2.0), epsilon);
+      region.getConcaveHull().get(12).epsilonEquals(new Point2D(6.0,4.0), epsilon);
+      region.getConcaveHull().get(13).epsilonEquals(new Point2D(4.0,3.0), epsilon);
+      region.getConcaveHull().get(14).epsilonEquals(new Point2D(4.0,0.0), epsilon);
+   }
+
+   @Test
+   public void testSplitUpConcaveHullThrowsError()
+   {
+      // test two triangles
+      ConvexPolygon2D convexPolygon0 = new ConvexPolygon2D();
+      convexPolygon0.addVertex(5.0, 5.0);
+      convexPolygon0.addVertex(6.0, 6.0);
+      convexPolygon0.addVertex(6.0, 4.0);
+      convexPolygon0.update();
+
+      ConvexPolygon2D convexPolygon1 = new ConvexPolygon2D();
+      convexPolygon1.addVertex(0.0, 0.0);
+      convexPolygon1.addVertex(-1.1, 1.0);
+      convexPolygon1.addVertex(-1.0, -1.0);
+      convexPolygon1.update();
+
+      ArrayList<ConvexPolygon2D> polygonList = new ArrayList<>();
+      polygonList.add(convexPolygon0);
+      polygonList.add(convexPolygon1);
+
+      assertThrows(RuntimeException.class, () ->
+      {
+         PlanarRegion twoTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+         twoTriangleRegion.checkConcaveHullIsNotSeparated();
+      });
+
+//      List<Point2D> concaveHull = twoTriangleRegion.getConcaveHull();
    }
 
    static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
@@ -997,8 +1243,9 @@ public class PlanarRegionTest
             Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
             double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
-            assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                  + boundingBox3dInWorld, boundingBox3dInWorld.isInsideInclusive(vertex.getX(), vertex.getY(), planeZGivenXY));
+            assertTrue(boundingBox3dInWorld.isInsideInclusive(vertex.getX(), vertex.getY(), planeZGivenXY),
+                       "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
+                       + boundingBox3dInWorld);
          }
       }
    }

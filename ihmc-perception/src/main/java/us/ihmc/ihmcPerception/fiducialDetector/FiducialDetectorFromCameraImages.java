@@ -9,12 +9,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import boofcv.abst.fiducial.FiducialDetector;
+import boofcv.alg.distort.pinhole.LensDistortionPinhole;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
 import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinhole;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import controller_msgs.msg.dds.VideoPacket;
@@ -35,11 +36,11 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
-import us.ihmc.yoVariables.listener.VariableChangedListener;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
+import us.ihmc.yoVariables.listener.YoVariableChangedListener;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -59,7 +60,7 @@ public class FiducialDetectorFromCameraImages
 
    private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private FiducialDetector<GrayF32> detector;
    private Object expectedFiducialSizeChangedConch = new Object();
 
@@ -90,23 +91,23 @@ public class FiducialDetectorFromCameraImages
    private final YoFramePose3D reportedFiducialPoseInWorldFrame = new YoFramePose3D(prefix + "ReportedPoseWorldFrame", ReferenceFrame.getWorldFrame(),
                                                                                     registry);
 
-   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoVariableRegistry parentRegistry,
+   public FiducialDetectorFromCameraImages(RigidBodyTransform transformFromReportedToFiducialFrame, YoRegistry parentRegistry,
                                            YoGraphicsListRegistry yoGraphicsListRegistry, String prefix)
    {
       this.expectedFiducialSize.set(1.0);
       this.prefix = prefix;
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
-                                              ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+                                              ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
 
-      expectedFiducialSize.addVariableChangedListener(new VariableChangedListener()
+      expectedFiducialSize.addListener(new YoVariableChangedListener()
       {
          @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
+         public void changed(YoVariable v)
          {
             synchronized (expectedFiducialSizeChangedConch)
             {
                detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
-                                                       ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+                                                       ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
             }
          }
       });
@@ -193,11 +194,11 @@ public class FiducialDetectorFromCameraImages
    }
 
    public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
-                      IntrinsicParameters intrinsicParameters)
+                      CameraPinhole intrinsicParameters)
    {
-      detector.setIntrinsic(intrinsicParameters);
+      detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
       //increase brightness for sim
-      RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
+      RescaleOp rescaleOp = new RescaleOp(4.5f, 35, null);
       rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
       if (DEBUG)
       {
@@ -217,15 +218,15 @@ public class FiducialDetectorFromCameraImages
       synchronized (expectedFiducialSizeChangedConch)
       {
 
-         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
+         cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
-         cameraRigidTransform.setTranslation(cameraRigidPosition);
+         cameraRigidTransform.getTranslation().set(cameraRigidPosition);
 
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();
 
-         cameraPose.setOrientation(cameraOrientationInWorldXForward);
-         cameraPose.setPosition(cameraPositionInWorld);
+         cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
+         cameraPose.getPosition().set(cameraPositionInWorld);
 
          GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
@@ -264,8 +265,8 @@ public class FiducialDetectorFromCameraImages
             tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
             tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-            tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
-            tempFiducialDetectorFrame.setPosition(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+            tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
+            tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
@@ -296,10 +297,10 @@ public class FiducialDetectorFromCameraImages
       targetIDHasBeenLocatedFiltered.update();
    }
 
-  // private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+  // private final CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
 
    /*
-    * private IntrinsicParameters setIntrinsicParameters(BufferedImage image) {
+    * private CameraPinholeBrown setIntrinsicParameters(BufferedImage image) {
     * int height = image.getHeight(); int width = image.getWidth(); double fx =
     * (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
     * double fy = (height / 2.0) /

@@ -25,10 +25,10 @@ import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class DynamicReachabilityCalculator
@@ -50,7 +50,7 @@ public class DynamicReachabilityCalculator
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoDouble requiredAdjustmentSafetyFactor = new YoDouble("requiredAdjustmentSafetyFactor", registry);
    private final YoDouble requiredAdjustmentFeedbackGain = new YoDouble("requiredAdjustmentFeedbackGain", registry);
@@ -153,7 +153,7 @@ public class DynamicReachabilityCalculator
    private final TDoubleArrayList originalSwingAlphas = new TDoubleArrayList();
 
    public DynamicReachabilityCalculator(ICPPlannerInterface icpPlanner, FullHumanoidRobotModel fullRobotModel, ReferenceFrame centerOfMassFrame,
-                                        DynamicReachabilityParameters dynamicReachabilityParameters, YoVariableRegistry parentRegistry,
+                                        DynamicReachabilityParameters dynamicReachabilityParameters, YoRegistry parentRegistry,
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.dynamicReachabilityParameters = dynamicReachabilityParameters;
@@ -252,8 +252,8 @@ public class DynamicReachabilityCalculator
          {
             predictedCoMPosition.changeFrame(worldFrame);
             predictedPelvisOrientation.changeFrame(worldFrame);
-            transformToParent.setTranslation(predictedCoMPosition);
-            transformToParent.setRotation(predictedPelvisOrientation);
+            transformToParent.getTranslation().set(predictedCoMPosition);
+            transformToParent.getRotation().set(predictedPelvisOrientation);
          }
       };
 

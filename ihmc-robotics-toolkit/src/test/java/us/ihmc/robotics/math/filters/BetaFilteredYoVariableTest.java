@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class BetaFilteredYoVariableTest
@@ -21,7 +21,7 @@ public class BetaFilteredYoVariableTest
       int beta = 5000;
       double pseudoNoise = 0;
 
-      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      YoRegistry registry = new YoRegistry("testRegistry");
       YoDouble positionVariable = new YoDouble("positionVariable", registry);
       BetaFilteredYoVariable betaFilteredYoVariable = new BetaFilteredYoVariable("betaFilteredYoVariable", registry, beta, positionVariable);
 

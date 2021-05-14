@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.stickRobot;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -78,7 +79,7 @@ public class StickRobotVisualizer
       }
    }
 
-   private HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint j : joints)
       {

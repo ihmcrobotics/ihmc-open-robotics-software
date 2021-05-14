@@ -2,7 +2,7 @@ package us.ihmc.valkyrieRosControl.gui;
 
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationConstructionSetTools.util.inputdevices.MidiSliderBoard;
@@ -17,27 +17,27 @@ public class ValkyrieRosControlSliderBoardGUI extends SCSVisualizer
    }
 
    @Override
-   public void starting(SimulationConstructionSet scs, Robot robot, YoVariableRegistry registry)
+   public void starting(SimulationConstructionSet scs, Robot robot, YoRegistry registry)
    {
       MidiSliderBoard sliderBoard = new MidiSliderBoard(scs);
 
-      YoEnum<?> selectedJoint = (YoEnum<?>) registry.getVariable("ValkyrieRosControlSliderBoard", "selectedJoint");
+      YoEnum<?> selectedJoint = (YoEnum<?>) registry.findVariable("ValkyrieRosControlSliderBoard", "selectedJoint");
       
-      YoVariable<?> q_d = registry.getVariable("ValkyrieRosControlSliderBoard", "qDesiredSelected");
-      YoVariable<?> qd_d = registry.getVariable("ValkyrieRosControlSliderBoard", "qdDesiredSelected");
+      YoVariable q_d = registry.findVariable("ValkyrieRosControlSliderBoard", "qDesiredSelected");
+      YoVariable qd_d = registry.findVariable("ValkyrieRosControlSliderBoard", "qdDesiredSelected");
 
-      YoVariable<?> kp = registry.getVariable("ValkyrieRosControlSliderBoard", "kpSelected");
-      YoVariable<?> kd = registry.getVariable("ValkyrieRosControlSliderBoard", "kdSelected");
+      YoVariable kp = registry.findVariable("ValkyrieRosControlSliderBoard", "kpSelected");
+      YoVariable kd = registry.findVariable("ValkyrieRosControlSliderBoard", "kdSelected");
 
-      YoVariable<?> masterScaleFactor = registry.getVariable("ValkyrieRosControlSliderBoard", "masterScaleFactor");
+      YoVariable masterScaleFactor = registry.findVariable("ValkyrieRosControlSliderBoard", "masterScaleFactor");
 
-      YoVariable<?> functionGeneratorPhase = registry.getVariable("SelectedYoFunGen", "SelectedPhase");
-      YoVariable<?> functionGeneratorAmplitude = registry.getVariable("SelectedYoFunGen", "SelectedAmp");
-      YoVariable<?> functionGeneratorFrequency = registry.getVariable("SelectedYoFunGen", "SelectedFreq");
+      YoVariable functionGeneratorPhase = registry.findVariable("SelectedYoFunGen", "SelectedPhase");
+      YoVariable functionGeneratorAmplitude = registry.findVariable("SelectedYoFunGen", "SelectedAmp");
+      YoVariable functionGeneratorFrequency = registry.findVariable("SelectedYoFunGen", "SelectedFreq");
 
-      YoVariable<?> secondaryFunctionGeneratorPhase = registry.getVariable("SecondaryYoFunGen", "SecondaryPhase");
-      YoVariable<?> secondaryFunctionGeneratorAmplitude = registry.getVariable("SecondaryYoFunGen", "SecondaryAmp");
-      YoVariable<?> secondaryFunctionGeneratorFrequency = registry.getVariable("SecondaryYoFunGen", "SecondaryFreq");
+      YoVariable secondaryFunctionGeneratorPhase = registry.findVariable("SecondaryYoFunGen", "SecondaryPhase");
+      YoVariable secondaryFunctionGeneratorAmplitude = registry.findVariable("SecondaryYoFunGen", "SecondaryAmp");
+      YoVariable secondaryFunctionGeneratorFrequency = registry.findVariable("SecondaryYoFunGen", "SecondaryFreq");
       
 
       

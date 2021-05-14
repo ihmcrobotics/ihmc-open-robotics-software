@@ -8,21 +8,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.*;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
-import us.ihmc.commonWalkingControlModules.configurations.SmoothCMPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.controllers.Updatable;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.FootstepTestHelper;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -44,15 +34,10 @@ import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TwistCalculator;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.*;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SphereControlToolbox
@@ -71,7 +56,7 @@ public class SphereControlToolbox
    private static final double maxDurationForSmoothingEntryToExitCMPSwitch = 1.0;
    private static final double timeSpentOnExitCMPInPercentOfStepTime = 0.5;
 
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoFramePoint3D eCMP = new YoFramePoint3D("eCMP", worldFrame, registry);
    private final YoFramePoint3D desiredICP = new YoFramePoint3D("desiredICP", worldFrame, registry);
@@ -132,13 +117,12 @@ public class SphereControlToolbox
    private FootstepTestHelper footstepTestHelper;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   private SmoothCMPPlannerParameters smoothICPPlannerParameters;
    private ICPOptimizationParameters icpOptimizationParameters;
 
    private YoDouble yoTime;
 
    public SphereControlToolbox(FullRobotModel sphereRobotModel, double controlDT, double desiredHeight, double gravity, YoDouble yoTime,
-         YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+         YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.fullRobotModel = sphereRobotModel;
       this.controlDT = controlDT;
@@ -208,7 +192,6 @@ public class SphereControlToolbox
       twistCalculator = new TwistCalculator(worldFrame, sphereRobotModel.getRootJoint().getSuccessor());
       centerOfMassJacobian = new CenterOfMassJacobian(elevator, worldFrame);
 
-      smoothICPPlannerParameters = createNewICPPlannerParameters();
       icpOptimizationParameters = createICPOptimizationParameters();
 
       parentRegistry.addChild(registry);
@@ -267,9 +250,9 @@ public class SphereControlToolbox
       bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, soleZUpFrames, soleFrames, registry, yoGraphicsListRegistry);
 
       ICPControlPlane icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      omega0.addVariableChangedListener(var -> icpControlPlane.setOmega0(omega0.getValue()));
-      omega0.notifyVariableChangedListeners();
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
+      omega0.addListener(var -> icpControlPlane.setOmega0(omega0.getValue()));
+      omega0.notifyListeners();
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane, registry, yoGraphicsListRegistry);
 
       footstepTestHelper = new FootstepTestHelper(contactableFeet);
 
@@ -358,11 +341,6 @@ public class SphereControlToolbox
    public SideDependentList<FramePose3D> getFootPosesAtTouchdown()
    {
       return footPosesAtTouchdown;
-   }
-
-   public SmoothCMPPlannerParameters getNewCapturePointPlannerParameters()
-   {
-      return smoothICPPlannerParameters;
    }
 
    public ICPOptimizationParameters getICPOptimizationParameters()
@@ -592,51 +570,6 @@ public class SphereControlToolbox
       icp.set(capturePoint2d, 0.0);
    }
 
-   private SmoothCMPPlannerParameters createNewICPPlannerParameters()
-   {
-      return new SphereSmoothCMPPlannerParameters();
-   }
-
-   public static class SphereSmoothCMPPlannerParameters extends SmoothCMPPlannerParameters
-   {
-      public SphereSmoothCMPPlannerParameters()
-      {
-         super();
-         endCoPName = CoPPointName.MIDFEET_COP;
-         entryCoPName = CoPPointName.ENTRY_COP;
-         exitCoPName = CoPPointName.EXIT_COP;
-         swingCopPointsToPlan = new CoPPointName[]{CoPPointName.MIDFOOT_COP, CoPPointName.EXIT_COP};
-         transferCoPPointsToPlan = new CoPPointName[]{CoPPointName.MIDFEET_COP, CoPPointName.ENTRY_COP};
-
-         stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFEET_COP, 0.0);
-         stepLengthToCoPOffsetFactor.put(CoPPointName.ENTRY_COP, 1.0 / 3.0);
-         stepLengthToCoPOffsetFactor.put(CoPPointName.MIDFOOT_COP, 1.0 / 8.0);
-         stepLengthToCoPOffsetFactor.put(CoPPointName.EXIT_COP, 1.0 / 3.0);
-
-         copOffsetsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(0.0, 0.0));
-         copOffsetsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(0.0, -0.005));
-         copOffsetsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.01));
-         copOffsetsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.025));
-
-         copOffsetBoundsInFootFrame.put(CoPPointName.MIDFEET_COP, new Vector2D(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY));
-         copOffsetBoundsInFootFrame.put(CoPPointName.ENTRY_COP, new Vector2D(-0.04, 0.03));
-         copOffsetBoundsInFootFrame.put(CoPPointName.MIDFOOT_COP, new Vector2D(0.0, 0.055));
-         copOffsetBoundsInFootFrame.put(CoPPointName.EXIT_COP, new Vector2D(0.0, 0.08));
-      }
-
-      @Override
-      public boolean planSwingAngularMomentum()
-      {
-         return true;
-      }
-
-      @Override
-      public boolean planTransferAngularMomentum()
-      {
-         return true;
-      }
-   }
-
    public ICPOptimizationParameters createICPOptimizationParameters()
    {
       return new ICPOptimizationParameters()
@@ -738,18 +671,6 @@ public class SphereControlToolbox
          public boolean useFootstepRate()
          {
             return true;
-         }
-
-         @Override
-         public double getMinimumFootstepWeight()
-         {
-            return 0.0001;
-         }
-
-         @Override
-         public double getMinimumFeedbackWeight()
-         {
-            return 0.0001;
          }
 
          @Override

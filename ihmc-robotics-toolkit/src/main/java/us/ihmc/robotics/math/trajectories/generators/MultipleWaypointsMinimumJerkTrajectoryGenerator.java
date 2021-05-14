@@ -3,13 +3,13 @@ package us.ihmc.robotics.math.trajectories.generators;
 import java.util.ArrayList;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.robotics.math.trajectories.DoubleTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.QuinticPolynomialTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.interfaces.DoubleTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.yoVariables.YoPolynomial;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.YoOneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.TrajectoryPointListBasics;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -21,7 +21,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
 
    private final String namePrefix;
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final YoDouble currentTrajectoryTime;
 
@@ -37,19 +37,19 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
    private final SettableDoubleProvider finalVelocityProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider finalAccelerationProvider = new SettableDoubleProvider();
    private final SettableDoubleProvider trajectoryTimeProvider = new SettableDoubleProvider();
-   private final QuinticPolynomialTrajectoryGenerator subTrajectory;
+   private final YoPolynomial subTrajectory;
 
-   public MultipleWaypointsMinimumJerkTrajectoryGenerator(String namePrefix, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsMinimumJerkTrajectoryGenerator(String namePrefix, YoRegistry parentRegistry)
    {
       this(namePrefix, defaultMaximumNumberOfWaypoints, parentRegistry);
    }
 
-   public MultipleWaypointsMinimumJerkTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, YoVariableRegistry parentRegistry)
+   public MultipleWaypointsMinimumJerkTrajectoryGenerator(String namePrefix, int maximumNumberOfWaypoints, YoRegistry parentRegistry)
    {
       this.namePrefix = namePrefix;
       this.maximumNumberOfWaypoints = maximumNumberOfWaypoints;
 
-      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+      registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       numberOfWaypoints = new YoInteger(namePrefix + "NumberOfWaypoints", registry);
@@ -58,8 +58,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
       currentTrajectoryTime = new YoDouble(namePrefix + "TrajectoryTime", registry);
       currentWaypointIndex = new YoInteger(namePrefix + "CurrentWaypointIndex", registry);
 
-      subTrajectory = new QuinticPolynomialTrajectoryGenerator(namePrefix + "SubTrajectory", initialPositionProvider, initialVelocityProvider,
-            finalPositionProvider, finalVelocityProvider, trajectoryTimeProvider, registry);
+      subTrajectory = new YoPolynomial(namePrefix + "SubTrajectory", 5, registry);
 
       waypoints = new ArrayList<>(maximumNumberOfWaypoints);
 
@@ -157,7 +156,7 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
          finalPositionProvider.setValue(firstWaypoint.getPosition());
          finalVelocityProvider.setValue(firstWaypoint.getVelocity());
          trajectoryTimeProvider.setValue(0.0);
-         subTrajectory.initialize();
+         subTrajectory.setLinear(trajectoryTimeProvider.getValue(), finalPositionProvider.getValue(), finalVelocityProvider.getValue());
       }
       else
          initializeSubTrajectory(0);
@@ -178,7 +177,12 @@ public class MultipleWaypointsMinimumJerkTrajectoryGenerator implements DoubleTr
       double subTrajectoryTime = waypoints.get(waypointIndex + 1).getTime() - waypoints.get(waypointIndex).getTime();
       trajectoryTimeProvider.setValue(subTrajectoryTime);
 
-      subTrajectory.initialize();
+      subTrajectory.setQuinticWithZeroTerminalAcceleration(0.0,
+                                                           trajectoryTimeProvider.getValue(),
+                                                           initialPositionProvider.getValue(),
+                                                           initialVelocityProvider.getValue(),
+                                                           finalPositionProvider.getValue(),
+                                                           finalVelocityProvider.getValue());
    }
 
    @Override

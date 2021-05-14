@@ -1,11 +1,10 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import static us.ihmc.robotics.Assert.*;
 
 public class DampedQRNullspaceCalculatorTest extends DampedNullspaceCalculatorTest
 {
@@ -25,15 +24,15 @@ public class DampedQRNullspaceCalculatorTest extends DampedNullspaceCalculatorTe
     * Computes the inner product of a, assuming a is an upper diagonal matrix
     */
 
-   public static void matrixEquals(DenseMatrix64F expected, DenseMatrix64F actual, double epsilon)
+   public static void matrixEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)
    {
       for (int i = 0; i < expected.getNumElements(); i++)
          assertEquals(expected.get(i), actual.get(i), epsilon);
    }
 
-   private static DenseMatrix64F createMatrix(int size)
+   private static DMatrixRMaj createMatrix(int size)
    {
-      DenseMatrix64F upperDiagonal = new DenseMatrix64F(size, size);
+      DMatrixRMaj upperDiagonal = new DMatrixRMaj(size, size);
       double value = 1.0;
       for (int i = 0; i < size; i++)
       {
@@ -52,12 +51,12 @@ public class DampedQRNullspaceCalculatorTest extends DampedNullspaceCalculatorTe
    {
       for (int size = 2; size < 20; size++)
       {
-         DenseMatrix64F upperDiagonal = createMatrix(size);
+         DMatrixRMaj upperDiagonal = createMatrix(size);
 
-         DenseMatrix64F expected = new DenseMatrix64F(size, size);
-         CommonOps.multTransA(upperDiagonal, upperDiagonal, expected);
+         DMatrixRMaj expected = new DMatrixRMaj(size, size);
+         CommonOps_DDRM.multTransA(upperDiagonal, upperDiagonal, expected);
 
-         DenseMatrix64F actual = new DenseMatrix64F(size, size);
+         DMatrixRMaj actual = new DMatrixRMaj(size, size);
          DampedQRNullspaceCalculator.inner_small_upper_diagonal(upperDiagonal, actual);
 
          matrixEquals(expected, actual, 1e-7);

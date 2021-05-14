@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.agileHexapod;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -14,7 +14,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.CollisionGroundContactModel;
 import us.ihmc.simulationconstructionset.util.ground.BumpyGroundProfile;
 import us.ihmc.simulationconstructionset.util.ground.RollingGroundProfile;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 //February 17, 1996: Ann Torres and Jerry Pratt.  Agile Hexapod created using MIT Leg Laboratory Creature Library.
@@ -160,12 +160,12 @@ public class AgileHexapodRobot extends Robot
 
 
       // Pendulum:
-      PinJoint pend1 = new PinJoint("pend1", new Vector3D(), this, Axis.Y);
+      PinJoint pend1 = new PinJoint("pend1", new Vector3D(), this, Axis3D.Y);
       Link pinLink = pinLink();
       pend1.setLink(pinLink);
       floatingJoint.addJoint(pend1);
 
-      PinJoint pend2 = new PinJoint("pend2", new Vector3D(), this, Axis.X);
+      PinJoint pend2 = new PinJoint("pend2", new Vector3D(), this, Axis3D.X);
       Link rodLink = rodLink();
       pend2.setLink(rodLink);
       pend1.addJoint(pend2);
@@ -175,11 +175,11 @@ public class AgileHexapodRobot extends Robot
 
       // Set controller and ground contact model:
       
-      YoVariableRegistry groundRegistry = new YoVariableRegistry("Ground");
+      YoRegistry groundRegistry = new YoRegistry("Ground");
       
       // GroundContactModel groundModel = new LinearGroundContactModel(this, 2000.0, 100.0, 50.0, 50.0, groundRegistry);
       GroundContactModel groundModel = new CollisionGroundContactModel(this, 0.2, 0.7, groundRegistry);
-      this.addYoVariableRegistry(groundRegistry);
+      this.addYoRegistry(groundRegistry);
       
       GroundProfile3D profile = null;
 
@@ -214,7 +214,7 @@ public class AgileHexapodRobot extends Robot
    private void buildLeg(int side, String hipzName, String hipxName, String kneeName, String footName, Vector3D legOffset)
    {
       /* Building Leg */
-      PinJoint hip_z = new PinJoint(hipzName, legOffset, this, Axis.Z);
+      PinJoint hip_z = new PinJoint(hipzName, legOffset, this, Axis3D.Z);
 
       // hip_z.setLimitStops(-0.9*Math.PI/2.0,0.9*Math.PI/2.0,K_HIP_STOP, B_HIP_STOP);
       hip_z.setDamping(0.005);
@@ -222,13 +222,13 @@ public class AgileHexapodRobot extends Robot
       hip_z.setLink(pinLink);
       floatingJoint.addJoint(hip_z);
 
-      PinJoint hip_x = new PinJoint(hipxName, new Vector3D(), this, Axis.X);
+      PinJoint hip_x = new PinJoint(hipxName, new Vector3D(), this, Axis3D.X);
       Link thighLink = thighLink();
       hip_x.setLink(thighLink);
       hip_x.setDamping(0.005);
       hip_z.addJoint(hip_x);
 
-      PinJoint knee = new PinJoint(kneeName, new Vector3D(0.0, 0.0, -THIGH_Z), this, Axis.X);
+      PinJoint knee = new PinJoint(kneeName, new Vector3D(0.0, 0.0, -THIGH_Z), this, Axis3D.X);
 
       // if (side == LEFT) knee.setLimitStops(0.0,0.9*Math.PI, K_KNEE_STOP, B_KNEE_STOP);
       // else knee.setLimitStops(-0.9*Math.PI,0.0, K_KNEE_STOP, B_KNEE_STOP);
@@ -256,33 +256,33 @@ public class AgileHexapodRobot extends Robot
       Graphics3DObject linkGraphics = new Graphics3DObject();
       linkGraphics.translate(-BAND_X / 2.0, 0.0, 0.0);
       linkGraphics.translate(-BODY_OFF, 0.0, 0.0);
-      linkGraphics.rotate(-Math.PI / 2.0, Axis.Y);
+      linkGraphics.rotate(-Math.PI / 2.0, Axis3D.Y);
       linkGraphics.addHemiEllipsoid(BODY_Z, BODY_Y, BODY_XB, YoAppearance.PlaneMaterial());
 
       linkGraphics.identity();
       linkGraphics.translate(BAND_X / 2.0, 0.0, 0.0);
       linkGraphics.translate(-BODY_OFF, 0.0, 0.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.Y);
       linkGraphics.addHemiEllipsoid(BODY_Z, BODY_Y, BODY_XF, YoAppearance.PlaneMaterial());
 
       linkGraphics.identity();
       linkGraphics.translate(-BAND_X / 2.0, 0.0, 0.0);
       linkGraphics.translate(-BODY_OFF, 0.0, 0.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.Y);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.Y);
 
       // use_color("wood_material");
       linkGraphics.addGenTruncatedCone(BAND_X, BAND_Z, BAND_Y, BAND_Z, BAND_Y, YoAppearance.DarkRed());    // WoodMaterial
 
       linkGraphics.identity();
       linkGraphics.translate(BODY_TOT * 0.45, BODY_Y / 4.0, 0.0);
-      linkGraphics.rotate(-Math.PI / 3.0, Axis.Y);
-      linkGraphics.rotate(-Math.PI / 6.0, Axis.X);
+      linkGraphics.rotate(-Math.PI / 3.0, Axis3D.Y);
+      linkGraphics.rotate(-Math.PI / 6.0, Axis3D.X);
       linkGraphics.addCone(TENNA_LEN, TENNA_RAD, YoAppearance.BlackMetalMaterial());
 
       linkGraphics.identity();
       linkGraphics.translate(BODY_TOT * 0.45, -BODY_Y / 4.0, 0.0);
-      linkGraphics.rotate(-Math.PI / 3.0, Axis.Y);
-      linkGraphics.rotate(Math.PI / 6.0, Axis.X);
+      linkGraphics.rotate(-Math.PI / 3.0, Axis3D.Y);
+      linkGraphics.rotate(Math.PI / 6.0, Axis3D.X);
       linkGraphics.addCone(TENNA_LEN, TENNA_RAD, YoAppearance.BlackMetalMaterial());
 
       ret.setLinkGraphics(linkGraphics);
@@ -342,7 +342,7 @@ public class AgileHexapodRobot extends Robot
       linkGraphics.addCylinder(SHIN_Z, SHIN_RAD, YoAppearance.BlackMetalMaterial());
       linkGraphics.identity();
       linkGraphics.translate(0.0, 0.0, -SHIN_Z);
-      linkGraphics.rotate(Math.PI, Axis.Y);
+      linkGraphics.rotate(Math.PI, Axis3D.Y);
       linkGraphics.addHemiEllipsoid(SHIN_RAD, SHIN_RAD, SHIN_RAD, YoAppearance.BlackMetalMaterial());
       ret.setLinkGraphics(linkGraphics);
 

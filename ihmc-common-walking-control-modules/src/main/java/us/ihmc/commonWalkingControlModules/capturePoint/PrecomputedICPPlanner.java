@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.computeCentroidalMomentumPivot;
+import static us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools.*;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Black;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.BlueViolet;
 import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
@@ -9,13 +9,11 @@ import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajector
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -25,18 +23,18 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.robotics.math.filters.AlphaFilteredTuple2D;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class PrecomputedICPPlanner
 {
    private final String name = getClass().getSimpleName();
-   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+   private final YoRegistry registry = new YoRegistry(name);
 
    private final YoFramePoint3D yoDesiredCoPPosition = new YoFramePoint3D(name + "DesiredCoPPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D yoDesiredCMPPosition = new YoFramePoint3D(name + "DesiredCMPPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -54,6 +52,8 @@ public class PrecomputedICPPlanner
    private final FramePoint3D desiredCoPPosition = new FramePoint3D();
    private final FramePoint3D desiredCMPPosition = new FramePoint3D();
    private final FramePoint3D desiredCoMPosition = new FramePoint3D();
+   private final FrameVector3D desiredCoMVelocity = new FrameVector3D();
+   private final FrameVector3D desiredCoMAcceleration = new FrameVector3D();
    private final FramePoint3D desiredICPPosition = new FramePoint3D();
    private final FrameVector3D desiredICPVelocity = new FrameVector3D();
    private final FrameVector3D filteredDesiredICPVelocity = new FrameVector3D();
@@ -64,7 +64,6 @@ public class PrecomputedICPPlanner
    private final CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler;
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
 
-   private double comZAcceleration;
    private double mass;
    private double gravity;
 
@@ -76,13 +75,13 @@ public class PrecomputedICPPlanner
    private final FramePoint2D tempCoPPosition = new FramePoint2D();
 
    public PrecomputedICPPlanner(CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
-                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(Double.NaN, centerOfMassTrajectoryHandler, momentumTrajectoryHandler, parentRegistry, yoGraphicsListRegistry);
    }
 
    public PrecomputedICPPlanner(double dt, CenterOfMassTrajectoryHandler centerOfMassTrajectoryHandler, MomentumTrajectoryHandler momentumTrajectoryHandler,
-                                YoVariableRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+                                YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.centerOfMassTrajectoryHandler = centerOfMassTrajectoryHandler;
       this.momentumTrajectoryHandler = momentumTrajectoryHandler;
@@ -147,6 +146,9 @@ public class PrecomputedICPPlanner
       filteredDesiredICPVelocity.set(filteredPrecomputedIcpVelocity);
 
       computeCentroidalMomentumPivot(desiredICPPosition, filteredDesiredICPVelocity, omega0, desiredCMPPosition);
+      computeCenterOfMassVelocity(desiredCoMPosition, desiredICPPosition, omega0, desiredCoMVelocity);
+      computeCenterOfMassAcceleration(desiredCoMVelocity, filteredDesiredICPVelocity, omega0, desiredCoMAcceleration);
+      double comZAcceleration = desiredCoMAcceleration.getZ();
 
       desiredCoPPosition.set(desiredCMPPosition);
       // Can compute CoP if we have a momentum rate of change otherwise set it to match the CMP.
@@ -164,8 +166,10 @@ public class PrecomputedICPPlanner
       yoDesiredCMPPosition.set(desiredCMPPosition);
    }
 
-   public void compute(double time, FramePoint2D desiredCapturePoint2dToPack, FrameVector2D desiredCapturePointVelocity2dToPack,
-                       FramePoint2D desiredCoP2DToPack)
+   public void compute(double time,
+                       FramePoint2DBasics desiredCapturePoint2dToPack,
+                       FrameVector2DBasics desiredCapturePointVelocity2dToPack,
+                       FramePoint2DBasics desiredCoP2DToPack)
    {
       if (isWithinInterval(time))
       {
@@ -240,11 +244,6 @@ public class PrecomputedICPPlanner
    public void setOmega0(double omega0)
    {
       this.omega0.set(omega0);
-   }
-
-   public void setCoMZAcceleration(double comZAcceleration)
-   {
-      this.comZAcceleration = comZAcceleration;
    }
 
    public void setMass(double mass)

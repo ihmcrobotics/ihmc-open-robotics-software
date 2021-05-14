@@ -1,8 +1,8 @@
 package us.ihmc.exampleSimulations.fallingBox;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -13,13 +13,13 @@ import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.CollisionShapeBasedWrenchCalculator;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 public class CollisionShapeBasedEstimator implements RobotController
 {
    private static ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry registry;
+   private final YoRegistry registry;
 
    private final CollisionShapeBasedWrenchCalculator wrenchCalculator;
 
@@ -27,10 +27,10 @@ public class CollisionShapeBasedEstimator implements RobotController
 
    public CollisionShapeBasedEstimator(Robot robot)
    {
-      registry = new YoVariableRegistry(robot.getName() + "_registry");
+      registry = new YoRegistry(robot.getName() + "_registry");
 
       Joint joint = robot.getJoint("bodyJoint");
-      ArrayList<ExternalForcePoint> contactingExternalForcePoints = robot.getAllExternalForcePoints();
+      List<ExternalForcePoint> contactingExternalForcePoints = robot.getAllExternalForcePoints();
 
       wrenchCalculator = new CollisionShapeBasedWrenchCalculator(robot.getName() + "_ft", contactingExternalForcePoints, joint, new RigidBodyTransform(),
                                                                  registry);
@@ -45,7 +45,7 @@ public class CollisionShapeBasedEstimator implements RobotController
    }
 
    @Override
-   public YoVariableRegistry getYoVariableRegistry()
+   public YoRegistry getYoRegistry()
    {
       return registry;
    }
@@ -67,7 +67,7 @@ public class CollisionShapeBasedEstimator implements RobotController
    {
       wrenchCalculator.calculate();
 
-      DenseMatrix64F wrenchMatrix = wrenchCalculator.getWrench();
+      DMatrixRMaj wrenchMatrix = wrenchCalculator.getWrench();
       Wrench wrench = new Wrench(worldFrame, worldFrame, wrenchMatrix);
 
       this.wrench.set(wrench);

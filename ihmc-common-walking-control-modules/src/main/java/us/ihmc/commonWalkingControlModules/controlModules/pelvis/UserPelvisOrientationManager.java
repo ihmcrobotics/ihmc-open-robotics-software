@@ -12,18 +12,18 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrient
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class UserPelvisOrientationManager implements PelvisOrientationControlState
 {
-   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final RigidBodyOrientationController orientationController;
    private final ReferenceFrame baseFrame;
    private final FrameQuaternion homeOrientation;
 
-   public UserPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoVariableRegistry parentRegistry)
+   public UserPelvisOrientationManager(PID3DGainsReadOnly gains, HighLevelHumanoidControllerToolbox controllerToolbox, YoRegistry parentRegistry)
    {
       RigidBodyBasics pelvis = controllerToolbox.getFullRobotModel().getPelvis();
       RigidBodyBasics elevator = controllerToolbox.getFullRobotModel().getElevator();
@@ -75,9 +75,9 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      orientationController.onExit();
+      orientationController.onExit(timeInState);
    }
 
    public FrameQuaternionReadOnly getDesiredOrientation()

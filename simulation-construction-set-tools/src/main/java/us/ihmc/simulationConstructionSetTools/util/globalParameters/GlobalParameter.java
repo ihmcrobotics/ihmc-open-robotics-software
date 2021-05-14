@@ -2,14 +2,15 @@ package us.ihmc.simulationConstructionSetTools.util.globalParameters;
 
 import java.util.ArrayList;
 
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.registry.YoVariableList;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 
 public abstract class GlobalParameter
 {
-   protected YoVariable<?> yoVariable;
+   protected YoVariable yoVariable;
    private ArrayList<GlobalParameter> children;
 
    private final boolean hasParents;
@@ -20,16 +21,16 @@ public abstract class GlobalParameter
 
    protected GlobalParameterChangedListener changedListener;
 
-   protected static final YoVariableRegistry registry = new YoVariableRegistry("GlobalParameters");
+   protected static final YoRegistry registry = new YoRegistry("GlobalParameters");
 
-   public static YoVariableRegistry getAllParametersYoVariableRegistry()
+   public static YoRegistry getAllParametersYoVariableRegistry()
    {
       return registry;
    }
 
    public static void addVarListToSimulationConstructionSet(SimulationConstructionSet scs)
    {
-      scs.addVarList(registry.createVarList());
+      scs.addVarList(new YoVariableList(registry.getName(), registry.getVariables()));
    }
 
 
@@ -92,7 +93,7 @@ public abstract class GlobalParameter
 
    protected String getPaddedShortName()
    {
-      return padWithSpaces(yoVariable.getShortName(), YoVariable.MAX_LENGTH_SHORT_NAME);
+      return null;//padWithSpaces(yoVariable.getShortName(), YoVariable.MAX_LENGTH_SHORT_NAME);
    }
 
 

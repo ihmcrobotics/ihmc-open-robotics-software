@@ -3,20 +3,16 @@ package us.ihmc.exampleSimulations.beetle.footContact;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointInterface;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.ContactPointBasics;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactState;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 
 public class SimulatedPlaneContactStateUpdater implements PlaneContactState
 {
@@ -26,7 +22,6 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    private final GroundContactPoint contactPoint;
    private FrameVector3D contactNormal = new FrameVector3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 1.0);
    private final double coefficientOfFriction = 0.8;
-   private final int numberOfPointsInContact = 1;
    private boolean hasContactStateChanged = false;
    private final double contactForceThreshold = 0.3;
    private final FramePoint3D touchdownPoint = new FramePoint3D(ReferenceFrame.getWorldFrame());
@@ -166,7 +161,7 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
    }
 
    @Override
-   public List<? extends ContactPointInterface> getContactPoints()
+   public List<? extends ContactPointBasics> getContactPoints()
    {
       return contactPoints;
    }
@@ -203,9 +198,10 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       return hasContactStateChanged;
    }
 
-   private class ContactPointWrapper implements ContactPointInterface
+   private class ContactPointWrapper implements ContactPointBasics
    {
       private GroundContactPoint groundContactPoint;
+
       public ContactPointWrapper(GroundContactPoint groundContactPoint)
       {
          this.groundContactPoint = groundContactPoint;
@@ -224,21 +220,42 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       }
 
       @Override
-      public FramePoint3D getPosition()
+      public void setX(double x)
       {
-         return new FramePoint3D(groundContactPoint.getYoPosition());
       }
 
       @Override
-      public void getPosition(FramePoint3D framePointToPack)
+      public void setY(double y)
       {
-         framePointToPack.set(groundContactPoint.getPositionPoint());
+      }
+
+      @Override
+      public void setZ(double z)
+      {
       }
 
       @Override
       public ReferenceFrame getReferenceFrame()
       {
-         return null;
+         return ReferenceFrame.getWorldFrame();
+      }
+
+      @Override
+      public double getX()
+      {
+         return groundContactPoint.getX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return groundContactPoint.getY();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return groundContactPoint.getZ();
       }
 
       @Override
@@ -246,31 +263,5 @@ public class SimulatedPlaneContactStateUpdater implements PlaneContactState
       {
          return null;
       }
-
-      @Override
-      public void getPosition2d(FrameTuple2DBasics framePoint2dToPack)
-      {
-         
-      }
-
-      @Override
-      public void getPosition2d(Tuple2DBasics position2d)
-      {
-         
-      }
-
-      @Override
-      public void setPosition(FrameTuple3DReadOnly position)
-      {
-         
-      }
-
-      @Override
-      public void setPosition2d(FrameTuple2DReadOnly position2d)
-      {
-         
-      }
-
    }
-
 }

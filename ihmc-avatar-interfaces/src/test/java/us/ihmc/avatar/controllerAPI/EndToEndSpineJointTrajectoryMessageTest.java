@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -49,10 +49,10 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameQuaternion;
+import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 
 public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRobotTestInterface
 {
@@ -386,12 +386,12 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
       Random random = new Random(54651);
 
-      YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
+      YoRegistry testRegistry = new YoRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-      scs.addYoVariableRegistry(testRegistry);
+      scs.addYoRegistry(testRegistry);
 
       ThreadTools.sleep(1000);
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5);
@@ -475,7 +475,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
          }
 
          @Override
-         public YoVariableRegistry getYoVariableRegistry()
+         public YoRegistry getYoRegistry()
          {
             return null;
          }
@@ -770,7 +770,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          if (jointControl)
          {
-            DenseMatrix64F jointPositions = new DenseMatrix64F(spineJoints.length, 1);
+            DMatrixRMaj jointPositions = new DMatrixRMaj(spineJoints.length, 1);
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
                jointPositions.set(jointIdx, jointDesiredsMap.get(spineJoints[jointIdx]).getDoubleValue());
             MultiBodySystemTools.insertJointsState(spineJointClones, JointStateType.CONFIGURATION, jointPositions);

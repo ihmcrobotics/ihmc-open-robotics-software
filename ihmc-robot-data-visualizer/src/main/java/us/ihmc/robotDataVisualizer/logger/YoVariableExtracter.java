@@ -14,7 +14,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -32,7 +31,8 @@ import us.ihmc.robotDataLogger.jointState.JointState;
 import us.ihmc.robotDataLogger.logger.LogPropertiesReader;
 import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.util.FileSelectionDialog;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.tools.YoSearchTools;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 public class YoVariableExtracter
@@ -53,7 +53,7 @@ public class YoVariableExtracter
 
       YoVariableHandshakeParser parser = YoVariableHandshakeParser.create(logProperties.getVariables().getHandshakeFileType());
       parser.parseFrom(handshakeData);
-      YoVariableRegistry registry = parser.getRootRegistry();
+      YoRegistry registry = parser.getRootRegistry();
 
       File logdata = new File(logFile, logProperties.getVariables().getDataAsString());
       if(!logdata.exists())
@@ -63,7 +63,7 @@ public class YoVariableExtracter
       @SuppressWarnings("resource")
       final FileChannel logChannel = new FileInputStream(logdata).getChannel();
 
-      List<YoVariable<?>> variables = parser.getYoVariablesList();
+      List<YoVariable> variables = parser.getYoVariablesList();
       int jointStateOffset = variables.size();
       int numberOfJointStates = JointState.getNumberOfJointStates(parser.getJointStates());
       int bufferSize = (1 + jointStateOffset + numberOfJointStates) * 8;
@@ -85,17 +85,17 @@ public class YoVariableExtracter
    public static class YoVariableDialog extends JFrame implements DocumentListener, ActionListener
    {
       private static final long serialVersionUID = 7786541677872539903L;
-      private final YoVariableRegistry registry;
+      private final YoRegistry registry;
       private final JTextField searchField;
-      private final JList<YoVariable<?>> result;
-      private final List<YoVariable<?>> variables;
+      private final JList<YoVariable> result;
+      private final List<YoVariable> variables;
       
       private final FileChannel logChannel;
       private final int bufferSize;
       private final ByteBuffer logLine;
       private final LongBuffer logLongArray;
 
-      public YoVariableDialog(int bufferSize, FileChannel logChannel, List<YoVariable<?>> variables, YoVariableRegistry registry)
+      public YoVariableDialog(int bufferSize, FileChannel logChannel, List<YoVariable> variables, YoRegistry registry)
       {
          super();
          setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -109,7 +109,7 @@ public class YoVariableExtracter
          this.variables = variables;
          
          searchField = new JTextField();
-         result = new JList<YoVariable<?>>();
+         result = new JList<YoVariable>();
          result.setLayoutOrientation(JList.VERTICAL);
          result.setVisibleRowCount(10);
          JScrollPane scroller = new JScrollPane(result);
@@ -166,8 +166,9 @@ public class YoVariableExtracter
             return;
          }
          
-         ArrayList<YoVariable<?>> matchingVariables = registry.getMatchingVariables(search, regexp);
-         YoVariable<?>[] variables = matchingVariables.toArray(new YoVariable[matchingVariables.size()]);
+         List<YoVariable> matchingVariables = registry.findVariables(search[0]);
+         YoSearchTools.filterVariables(YoSearchTools.regularExpressionFilter(regexp), registry, matchingVariables);
+         YoVariable[] variables = matchingVariables.toArray(new YoVariable[matchingVariables.size()]);
          
          result.setListData(variables);
       }
@@ -175,19 +176,19 @@ public class YoVariableExtracter
       @Override
       public void actionPerformed(ActionEvent e)
       {
-         List<YoVariable<?>> results = result.getSelectedValuesList();
+         List<YoVariable> results = result.getSelectedValuesList();
          
          printVariable(results);
       }
 
-      private void printVariable(List<YoVariable<?>> variables)
+      private void printVariable(List<YoVariable> variables)
       {
          int[] offsets = new int[variables.size()];
          StringBuffer result[] = new StringBuffer[variables.size()];
          
          for(int i = 0; i < variables.size(); i++)
          {
-            YoVariable<?> variable = variables.get(i);
+            YoVariable variable = variables.get(i);
             result[i] = new StringBuffer();
             result[i].append(variable.getName());
             result[i].append(" = [");
@@ -212,9 +213,9 @@ public class YoVariableExtracter
                
                for(int i = 0; i < variables.size(); i++)
                {
-                  YoVariable<?> variable = variables.get(i);
+                  YoVariable variable = variables.get(i);
                   variable.setValueFromLongBits(longBuffer.get(1 + offsets[i]), false);
-                  variable.getValueString(result[i]);
+                  result[i].append(variable.getValueAsString());
                   result[i].append(",");
                }
                
