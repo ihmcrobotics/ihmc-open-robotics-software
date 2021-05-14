@@ -23,4 +23,21 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
                                                                                     getSteppingCameraParentFrame(referenceFrames),
                                                                                     getSteppingCameraTransform());
    }
+
+   public default RigidBodyTransform getObjectDetectionCameraTransform()
+   {
+      return new RigidBodyTransform();
+   }
+
+   public default ReferenceFrame getObjectDetectionCameraParentFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return referenceFrames.getChestFrame();
+   }
+
+   public default ReferenceFrame getObjectDetectionCameraFrame(CommonHumanoidReferenceFrames referenceFrames)
+   {
+      return ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("objectDetectionCamera",
+                                                                                    getObjectDetectionCameraParentFrame(referenceFrames),
+                                                                                    getObjectDetectionCameraTransform());
+   }
 }

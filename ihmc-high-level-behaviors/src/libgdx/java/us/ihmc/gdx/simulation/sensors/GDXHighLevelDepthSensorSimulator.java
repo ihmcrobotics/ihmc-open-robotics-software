@@ -2,7 +2,6 @@ package us.ihmc.gdx.simulation.sensors;
 
 import boofcv.struct.calib.CameraPinholeBrown;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
@@ -18,7 +17,6 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -48,21 +46,19 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
-import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.function.LongSupplier;
 
 public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 {
    private static final MutableInt INDEX = new MutableInt();
-   private static final String WINDOW_NAME = "Depth Sensor";
-   private final String windowName = ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), WINDOW_NAME);
+   private final String windowName;
    private final ReferenceFrame sensorFrame;
    private final Matrix4 gdxTransform = new Matrix4();
    private final GDXLowLevelDepthSensorSimulator depthSensorSimulator;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final LongSupplier timestampSupplier;
    private final CameraPinholeBrown depthCameraIntrinsics;
    private final int imageWidth;
    private final int imageHeight;
@@ -106,7 +102,8 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    private final ImFloat cx;
    private final ImFloat cy;
 
-   public GDXHighLevelDepthSensorSimulator(RosNodeInterface ros1Node,
+   public GDXHighLevelDepthSensorSimulator(String sensorName,
+                                           RosNodeInterface ros1Node,
                                            String ros1DepthImageTopic,
                                            String ros1DepthCameraInfoTopic,
                                            CameraPinholeBrown depthCameraIntrinsics,
@@ -115,7 +112,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                                            ROS2NodeInterface ros2Node,
                                            ROS2Topic<?> ros2Topic,
                                            ReferenceFrame sensorFrame,
-                                           RemoteSyncedRobotModel syncedRobot,
+                                           LongSupplier timestampSupplier,
                                            double verticalFOV,
                                            int imageWidth,
                                            int imageHeight,
@@ -124,11 +121,12 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                                            double publishRateHz,
                                            boolean renderPointCloudDirectly)
    {
+      windowName = ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator");
       this.ros1Node = ros1Node;
       this.depthCameraIntrinsics = depthCameraIntrinsics;
       this.ros2Node = ros2Node;
       this.sensorFrame = sensorFrame;
-      this.syncedRobot = syncedRobot;
+      this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.publishRateHz = publishRateHz;
@@ -140,7 +138,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       cx = new ImFloat((float) depthCameraIntrinsics.getCx());
       cy = new ImFloat((float) depthCameraIntrinsics.getCy());
 
-      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(verticalFOV, imageWidth, imageHeight, minRange, maxRange);
+      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName, verticalFOV, imageWidth, imageHeight, minRange, maxRange);
 
       if (ros1Node != null)
       {
@@ -182,9 +180,6 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    {
       if (sensorEnabled.get())
       {
-         if (syncedRobot != null)
-            syncedRobot.update();
-
          if(sensorFrame != null)
             GDXTools.toGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
          else
@@ -284,8 +279,8 @@ catch (IndexOutOfBoundsException e)
          {
             Image message = ros1ColorPublisher.createMessage(imageWidth, imageHeight, bytesPerPixel, "rgb8", ros1ColorChannelBuffer);
 
-            if(syncedRobot != null)
-               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp())));
+            if(timestampSupplier != null)
+               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(timestampSupplier.getAsLong())));
 
             ros1ColorPublisher.publish(message);
          });
@@ -339,8 +334,8 @@ catch (IndexOutOfBoundsException e)
             ros1DepthCameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
             Image message = ros1DepthPublisher.createMessage(imageWidth, imageHeight, 2, "16UC1", ros1DepthChannelBuffer); // maybe need to copy here if there are errors
 
-            if(syncedRobot != null)
-               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp())));
+            if(timestampSupplier != null)
+               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(timestampSupplier.getAsLong())));
 
             ros1DepthPublisher.publish(message);
          });
@@ -394,7 +389,7 @@ catch (IndexOutOfBoundsException e)
 
          pointCloudExecutor.execute(() ->
          {
-            long timestamp = syncedRobot == null ? System.nanoTime() : syncedRobot.getTimestamp();
+            long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
             tempSensorFramePose.setToZero(sensorFrame);
             tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
             if (ros2IsLidarScan)
