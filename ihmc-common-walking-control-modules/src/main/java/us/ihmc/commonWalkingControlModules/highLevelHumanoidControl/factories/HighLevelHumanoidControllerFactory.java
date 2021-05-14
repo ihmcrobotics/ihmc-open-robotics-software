@@ -482,9 +482,8 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       attachControllerFailureListeners(controllerFailureListenersToAttach);
       if (createComponentBasedFootstepDataMessageGenerator)
          createComponentBasedFootstepDataMessageGenerator(useHeadingAndVelocityScript, heightMapForFootstepZ);
-      if (createUserDesiredControllerCommandGenerator)
-         if (createQueuedControllerCommandGenerator)
-            createQueuedControllerCommandGenerator(controllerCommands);
+      if (createQueuedControllerCommandGenerator)
+         createQueuedControllerCommandGenerator(controllerCommands);
       if (createUserDesiredControllerCommandGenerator)
          createUserDesiredControllerCommandGenerator();
 
