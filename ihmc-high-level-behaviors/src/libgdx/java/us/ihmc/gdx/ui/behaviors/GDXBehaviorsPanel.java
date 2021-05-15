@@ -72,7 +72,13 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
    public void setupMessagerSubscribers()
    {
-      behaviorHelper.subscribeViaCallback(StatusLog, logEntry -> logArray.addLast(logEntry.getRight()));
+      behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
+      {
+         synchronized (logArray)
+         {
+            logArray.addLast(logEntry.getRight());
+         }
+      });
    }
 
    public void handleVREvents(GDXVRManager vrManager)
@@ -146,13 +152,16 @@ public class GDXBehaviorsPanel implements RenderableProvider
          }
       }
 
-      selectedLogEntry.set(logArray.size() - 1);
-      ImGui.text("Behavior status log:");
-      ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
-      int numLogEntriesToShow = 15;
-      while (logArray.size() > numLogEntriesToShow)
-         logArray.removeFirst();
-      ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), numLogEntriesToShow);
+      synchronized (logArray)
+      {
+         selectedLogEntry.set(logArray.size() - 1);
+         ImGui.text("Behavior status log:");
+         ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
+         int numLogEntriesToShow = 15;
+         while (logArray.size() > numLogEntriesToShow)
+            logArray.removeFirst();
+         ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), numLogEntriesToShow);
+      }
       ImGui.popItemWidth();
 
       ImGui.end();
