@@ -16,6 +16,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(enableBipedalSupportRegions);
    }
 
+   default int getPlanarRegionsHistorySize()
+   {
+      return get(planarRegionsHistorySize);
+   }
+
    default boolean getFlatGroundBodyPathPlan()
    {
       return get(flatGroundBodyPathPlan);
