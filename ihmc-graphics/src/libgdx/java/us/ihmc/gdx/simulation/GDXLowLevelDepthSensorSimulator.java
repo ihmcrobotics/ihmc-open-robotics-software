@@ -143,8 +143,9 @@ public class GDXLowLevelDepthSensorSimulator
       Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 4);
       rawDepthByteBuffer.rewind();
       Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_DEPTH_COMPONENT, GL30.GL_FLOAT, rawDepthByteBuffer);
+      Gdx.gl.glPixelStorei(GL20.GL_PACK_ALIGNMENT, 1);
       rawColorByteBuffer.rewind();
-      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_INT, rawColorByteBuffer);
+      Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, rawColorByteBuffer);
 
       frameBuffer.end();
 
