@@ -188,7 +188,8 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
          depthSensorSimulator.render(sceneManager);
 
-         coordinateFrame.transform.set(gdxTransform);
+         if (coordinateFrame != null)
+            coordinateFrame.transform.set(gdxTransform);
 
          if (renderPointCloudDirectly.get())
          {
