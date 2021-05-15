@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import imgui.internal.ImGui;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.gdx.imgui.ImGuiDerivativePlot;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -25,7 +26,9 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
    private final ROS2Topic<PlanarRegionsListMessage> topic;
 
    private long receivedCount = 0;
-   private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
+   private final ImGuiPlot receivedPlot = new ImGuiPlot("Received", 1000, 230, 20);
+   private final ImGuiPlot numberOfRegionsPlot = new ImGuiPlot("# Regions", 1000, 230, 20);
+   private int numberOfPlanarRegions = 0;
 
    public GDXROS2PlanarRegionsVisualizer(String title, ROS2NodeInterface ros2Node, ROS2Topic<PlanarRegionsListMessage> topic)
    {
@@ -46,6 +49,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
          executorService.clearQueueAndExecute(() ->
          {
             PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage);
+            numberOfPlanarRegions = planarRegionsList.getNumberOfPlanarRegions();
             planarRegionsGraphic.generateMeshes(planarRegionsList);
          });
       }
@@ -71,6 +75,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
       }
       ImGui.text(topic.getName());
       receivedPlot.render(receivedCount);
+      numberOfRegionsPlot.render(numberOfPlanarRegions);
    }
 
    @Override
