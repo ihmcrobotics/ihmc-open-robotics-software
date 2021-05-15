@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.mesh.GDXIDMappedColorFunction;
@@ -97,7 +98,16 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if (minimalFootstep.getFoothold() != null && !minimalFootstep.getFoothold().isEmpty())
-            foothold.set(minimalFootstep.getFoothold());
+         {
+            try
+            {
+               foothold.set(minimalFootstep.getFoothold());
+            }
+            catch (OutdatedPolygonException e)
+            {
+               LogTools.error(e.getMessage() + " See https://github.com/ihmcrobotics/euclid/issues/43");
+            }
+         }
          else
          {
             LogTools.error("Must specify default or per footstep foothold");
