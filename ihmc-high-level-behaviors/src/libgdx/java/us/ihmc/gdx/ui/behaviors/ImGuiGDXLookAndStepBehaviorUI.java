@@ -65,6 +65,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
+   private final ImBoolean showFootstepPlanningSection = new ImBoolean(true);
    private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
 
    private GDXImGuiBasedUI baseUI;
@@ -322,13 +323,18 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
 
       ImGui.checkbox("Show graphics", showGraphics);
-
-      if (ImGui.collapsingHeader("Behavior Visualization"))
+      ImGui.sameLine();
+      if (ImGui.button("Add support regions once"))
       {
-         ImGui.checkbox("Show tuner", showLookAndStepParametersTuner);
-         treePanel.renderWidgetsOnly();
+         behaviorHelper.publish(PublishSupportRegions);
       }
-      if (ImGui.collapsingHeader("Footstep Planning"))
+
+//      if (ImGui.collapsingHeader("Behavior Visualization"))
+//      {
+//         ImGui.checkbox("Show tuner", showLookAndStepParametersTuner);
+//         treePanel.renderWidgetsOnly();
+//      }
+      if (ImGui.collapsingHeader("Footstep Planning", showFootstepPlanningSection))
       {
          int flags = ImGuiInputTextFlags.ReadOnly;
          latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
@@ -336,7 +342,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          ImGui.text("Latest log:");
          ImGui.inputText("", latestFootstepPlannerLogPath, flags);
          ImGui.popItemWidth();
-         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
+//         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
          ImGui.text("Rejection reasons:");
          for (Pair<Integer, Double> latestFootstepPlannerRejectionReason : latestFootstepPlannerRejectionReasons)
@@ -345,10 +351,10 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
                        + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReason.getLeft()].name());
          }
       }
-      if (ImGui.collapsingHeader("Swing Planning"))
-      {
-         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
-      }
+//      if (ImGui.collapsingHeader("Swing Planning"))
+//      {
+//         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
+//      }
 
       if (showLookAndStepParametersTuner.get())
          lookAndStepParameterTuner.render();
