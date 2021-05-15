@@ -39,6 +39,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -73,9 +74,11 @@ public class LookAndStepFootstepPlanningTask
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
+      private final TypedInput<PlanarRegionsList> supportRegionsInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
+      private final Timer supportRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
@@ -155,6 +158,12 @@ public class LookAndStepFootstepPlanningTask
          planarRegionsExpirationTimer.reset();
       }
 
+      public void acceptSupportRegions(PlanarRegionsList supportRegions)
+      {
+         supportRegionsInput.set(supportRegions);
+         supportRegionsExpirationTimer.reset();
+      }
+
       public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
       {
          capturabilityBasedStatusInput.set(capturabilityBasedStatus);
@@ -171,12 +180,16 @@ public class LookAndStepFootstepPlanningTask
          executor.interruptAndReset();
          review.reset();
          plannerFailedLastTime.set(false);
+         planarRegionsHistory.clear();
+         planarRegionsHistoryPreview.clear();
       }
 
       private void evaluateAndRun()
       {
          planarRegions = planarRegionsInput.getLatest();
+         supportRegions = supportRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         supportRegionReceptionTimerSnapshot = supportRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          capturabilityBasedStatusReceptionTimerSnapshot
                = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
@@ -206,8 +219,12 @@ public class LookAndStepFootstepPlanningTask
    // snapshot data
    protected LookAndStepBodyPathLocalizationResult localizationResult;
    protected PlanarRegionsList planarRegions;
+   protected PlanarRegionsList supportRegions;
+   protected ArrayDeque<PlanarRegionsList> planarRegionsHistoryPreview = new ArrayDeque<>();
+   protected ArrayDeque<PlanarRegionsList> planarRegionsHistory = new ArrayDeque<>();
    protected CapturabilityBasedStatus capturabilityBasedStatus;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration supportRegionReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
@@ -219,7 +236,30 @@ public class LookAndStepFootstepPlanningTask
 
    protected void performTask()
    {
-      uiPublisher.publishToUI(PlanarRegionsForUI, planarRegions);
+      planarRegionsHistoryPreview.clear();
+      planarRegionsHistoryPreview.addAll(planarRegionsHistory);
+
+      if (planarRegionsHistoryPreview.isEmpty()
+          && lookAndStepParameters.getAutomaticallyInjectSupportRegions()
+          && !supportRegionReceptionTimerSnapshot.isExpired())
+      {
+         planarRegionsHistoryPreview.addLast(supportRegions);
+      }
+
+      planarRegionsHistoryPreview.add(planarRegions);
+
+      while (planarRegionsHistoryPreview.size() > lookAndStepParameters.getPlanarRegionsHistorySize())
+      {
+         planarRegionsHistoryPreview.removeFirst();
+      }
+
+      PlanarRegionsList map = new PlanarRegionsList();
+      for (PlanarRegionsList planarRegionsList : planarRegionsHistoryPreview)
+      {
+         map.addPlanarRegionsList(planarRegionsList);
+      }
+
+      uiPublisher.publishToUI(PlanarRegionsForUI, map);
 
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
@@ -283,7 +323,7 @@ public class LookAndStepFootstepPlanningTask
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       // TODO: Set start footholds!!
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
-      footstepPlannerRequest.setPlanarRegionsList(planarRegions);
+      footstepPlannerRequest.setPlanarRegionsList(map);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
@@ -329,6 +369,9 @@ public class LookAndStepFootstepPlanningTask
       else
       {
          uiPublisher.publishToUI(FootstepPlanForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+         planarRegionsHistory.clear();
+         planarRegionsHistory.addAll(planarRegionsHistoryPreview);
+         uiPublisher.publishToUI(PlanarRegionsForUI, map);
 
          FootstepPlanEtcetera footstepPlanEtc = new FootstepPlanEtcetera(footstepPlannerOutput.getFootstepPlan(),
                                                                          planarRegions,
