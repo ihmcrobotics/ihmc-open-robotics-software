@@ -76,14 +76,6 @@ public class LookAndStepReset
       lookAndStep.lastCommandedFootsteps.clear();
       lookAndStep.controllerStatusTracker.reset();
 
-      BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage
-            = new BipedalSupportPlanarRegionParametersMessage();
-      boolean enableSupportRegions = lookAndStep.lookAndStepParameters.getEnableBipedalSupportRegions();
-      supportPlanarRegionParametersMessage.setEnable(enableSupportRegions);
-      lookAndStep.statusLogger.info("Sending enable support regions: {}", enableSupportRegions);
-      lookAndStep.helper.publish(BipedalSupportPlanarRegionPublisher.getTopic(lookAndStep.helper.getRobotModel().getSimpleRobotName()),
-                                 supportPlanarRegionParametersMessage);
-
       // REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       // clearMessage.setRequestClear(true);
       // statusLogger.info("Requesting clear REA");

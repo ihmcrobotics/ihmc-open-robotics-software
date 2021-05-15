@@ -2,9 +2,11 @@ package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionCalculator;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -74,12 +76,12 @@ public class LookAndStepFootstepPlanningTask
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
-      private final TypedInput<PlanarRegionsList> supportRegionsInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
+      private final TypedInput<RobotConfigurationData> robotConfigurationDataInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
-      private final Timer supportRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
+      private final Timer robotConfigurationDataExpirationTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
 
       public void initialize(LookAndStepBehavior lookAndStep)
@@ -104,6 +106,7 @@ public class LookAndStepFootstepPlanningTask
             }
          };
          syncedRobot = lookAndStep.robotInterface.newSyncedRobot();
+         bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(lookAndStep.helper.getRobotModel());
 
          review.initialize(statusLogger, "footstep plan", lookAndStep.approvalNotification, autonomousOutput);
 
@@ -158,16 +161,16 @@ public class LookAndStepFootstepPlanningTask
          planarRegionsExpirationTimer.reset();
       }
 
-      public void acceptSupportRegions(PlanarRegionsList supportRegions)
-      {
-         supportRegionsInput.set(supportRegions);
-         supportRegionsExpirationTimer.reset();
-      }
-
       public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
       {
          capturabilityBasedStatusInput.set(capturabilityBasedStatus);
          capturabilityBasedStatusExpirationTimer.reset();
+      }
+
+      public void acceptRobotConfigurationData(RobotConfigurationData robotConfigurationData)
+      {
+         robotConfigurationDataInput.set(robotConfigurationData);
+         robotConfigurationDataExpirationTimer.reset();
       }
 
       public void acceptLocalizationResult(LookAndStepBodyPathLocalizationResult localizationResult)
@@ -181,18 +184,18 @@ public class LookAndStepFootstepPlanningTask
          review.reset();
          plannerFailedLastTime.set(false);
          planarRegionsHistory.clear();
-         planarRegionsHistoryPreview.clear();
       }
 
       private void evaluateAndRun()
       {
          planarRegions = planarRegionsInput.getLatest();
-         supportRegions = supportRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
-         supportRegionReceptionTimerSnapshot = supportRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          capturabilityBasedStatusReceptionTimerSnapshot
                = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         robotConfigurationData = robotConfigurationDataInput.getLatest();
+         robotConfigurationDataReceptionTimerSnapshot
+               = robotConfigurationDataExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          planningFailureTimerSnapshot = planningFailedTimer.createSnapshot(lookAndStepParameters.getWaitTimeAfterPlanFailed());
          localizationResult = localizationResultInput.getLatest();
          syncedRobot.update();
@@ -219,13 +222,13 @@ public class LookAndStepFootstepPlanningTask
    // snapshot data
    protected LookAndStepBodyPathLocalizationResult localizationResult;
    protected PlanarRegionsList planarRegions;
-   protected PlanarRegionsList supportRegions;
-   protected ArrayDeque<PlanarRegionsList> planarRegionsHistoryPreview = new ArrayDeque<>();
+   protected BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
    protected ArrayDeque<PlanarRegionsList> planarRegionsHistory = new ArrayDeque<>();
    protected CapturabilityBasedStatus capturabilityBasedStatus;
+   protected RobotConfigurationData robotConfigurationData;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
-   protected TimerSnapshotWithExpiration supportRegionReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration robotConfigurationDataReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected RobotSide lastStanceSide;
@@ -236,30 +239,23 @@ public class LookAndStepFootstepPlanningTask
 
    protected void performTask()
    {
-      planarRegionsHistoryPreview.clear();
-      planarRegionsHistoryPreview.addAll(planarRegionsHistory);
-
-      if (planarRegionsHistoryPreview.isEmpty()
-          && lookAndStepParameters.getAutomaticallyInjectSupportRegions()
-          && !supportRegionReceptionTimerSnapshot.isExpired())
+      if (planarRegionsHistory.isEmpty()
+       && lookAndStepParameters.getUseInitialSupportRegions()
+       && capturabilityBasedStatusReceptionTimerSnapshot.isRunning()
+       && robotConfigurationDataReceptionTimerSnapshot.isRunning())
       {
-         planarRegionsHistoryPreview.addLast(supportRegions);
+         bipedalSupportPlanarRegionCalculator.calculateSupportRegions(lookAndStepParameters.getSupportRegionScaleFactor(),
+                                                                      capturabilityBasedStatus,
+                                                                      robotConfigurationData);
+         planarRegionsHistory.addLast(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
       }
 
-      planarRegionsHistoryPreview.add(planarRegions);
+      planarRegionsHistory.add(planarRegions);
 
-      while (planarRegionsHistoryPreview.size() > lookAndStepParameters.getPlanarRegionsHistorySize())
-      {
-         planarRegionsHistoryPreview.removeFirst();
-      }
+      PlanarRegionsList combinedRegionsForPlanning = new PlanarRegionsList();
+      planarRegionsHistory.forEach(combinedRegionsForPlanning::addPlanarRegionsList);
 
-      PlanarRegionsList map = new PlanarRegionsList();
-      for (PlanarRegionsList planarRegionsList : planarRegionsHistoryPreview)
-      {
-         map.addPlanarRegionsList(planarRegionsList);
-      }
-
-      uiPublisher.publishToUI(PlanarRegionsForUI, map);
+      uiPublisher.publishToUI(PlanarRegionsForUI, combinedRegionsForPlanning);
 
       Point3D closestPointAlongPath = localizationResult.getClosestPointAlongPath();
       int closestSegmentIndex = localizationResult.getClosestSegmentIndex();
@@ -323,7 +319,7 @@ public class LookAndStepFootstepPlanningTask
                                                startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
       // TODO: Set start footholds!!
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), subGoalPoseBetweenFeet);
-      footstepPlannerRequest.setPlanarRegionsList(map);
+      footstepPlannerRequest.setPlanarRegionsList(combinedRegionsForPlanning);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
       footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
       footstepPlannerRequest.setSnapGoalSteps(true);
@@ -362,6 +358,8 @@ public class LookAndStepFootstepPlanningTask
          }
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
 
+         planarRegionsHistory.removeLast();
+
          statusLogger.info("Footstep planning failure. Aborting task...");
          plannerFailedLastTime.set(true);
          planningFailedTimer.reset();
@@ -369,9 +367,10 @@ public class LookAndStepFootstepPlanningTask
       else
       {
          uiPublisher.publishToUI(FootstepPlanForUI, MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
-         planarRegionsHistory.clear();
-         planarRegionsHistory.addAll(planarRegionsHistoryPreview);
-         uiPublisher.publishToUI(PlanarRegionsForUI, map);
+         while (planarRegionsHistory.size() > lookAndStepParameters.getPlanarRegionsHistorySize())
+         {
+            planarRegionsHistory.removeFirst();
+         }
 
          FootstepPlanEtcetera footstepPlanEtc = new FootstepPlanEtcetera(footstepPlannerOutput.getFootstepPlan(),
                                                                          planarRegions,
