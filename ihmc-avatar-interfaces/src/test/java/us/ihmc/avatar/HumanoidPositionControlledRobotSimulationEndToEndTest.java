@@ -192,7 +192,6 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
                                 CommonAvatarEnvironmentInterface environment)
          throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       ghostRobotModel.getRobotDescription().setName("Ghost");
       KinematicsToolboxControllerTest.recursivelyModifyGraphics(ghostRobotModel.getRobotDescription().getRootJoints().get(0), ghostApperance);
