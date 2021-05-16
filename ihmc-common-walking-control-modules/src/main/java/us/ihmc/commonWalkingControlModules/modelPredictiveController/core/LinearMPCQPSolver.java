@@ -309,6 +309,9 @@ public class LinearMPCQPSolver
          case FORCE_MINIMIZATION:
             submitForceMinimizationCommand((ForceMinimizationCommand) command);
             break;
+         case RHO_MINIMIZATION:
+            submitRhoMinimizationCommand((RhoMinimizationCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -361,6 +364,13 @@ public class LinearMPCQPSolver
       boolean success = inputCalculator.calculateForceMinimizationObjective(qpInputTypeC, command);
       if (success)
          addInput(qpInputTypeC);
+   }
+
+   public void submitRhoMinimizationCommand(RhoMinimizationCommand command)
+   {
+      int offset = inputCalculator.calculateRhoMinimizationObjective(qpInputTypeC, command);
+      if (offset > -1)
+         addInput(qpInputTypeC, offset);
    }
 
    public void addInput(QPInputTypeA input)

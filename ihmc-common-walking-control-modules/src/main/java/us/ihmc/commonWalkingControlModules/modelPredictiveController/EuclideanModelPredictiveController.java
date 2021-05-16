@@ -50,6 +50,7 @@ public abstract class EuclideanModelPredictiveController
    private static final boolean includeRhoMinInequality = true;
    private static final boolean includeRhoMaxInequality = false;
    private static final boolean includeForceMinimization = false;
+   private static final boolean includeRhoMinimization = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
@@ -64,12 +65,13 @@ public abstract class EuclideanModelPredictiveController
 
    private static final double mu = 0.8;
 
-   public static final double defaultInitialComWeight = 1e2;
+   public static final double defaultInitialComWeight = 5e3;
    public static final double defaultInitialComVelocityWeight = 5e1;
    public static final double defaultFinalComWeight = 5e2;
    public static final double defaultFinalVRPWeight = 5e1;
-   public static final double defaultVrpTrackingWeight = 5.0;
-   public static final double defaultForceMinimizationWeight = 1e-2;
+   public static final double defaultVrpTrackingWeight = 1e2;
+   public static final double defaultRhoMinimizationWeight = 1e-3;
+   public static final double defaultForceMinimizationWeight = 1e-1;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -100,6 +102,7 @@ public abstract class EuclideanModelPredictiveController
    private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
    private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
+   private final YoDouble rhoMinimizationWeight = new YoDouble("rhoMinimizationWeight", registry);
    private final YoDouble forceMinimizationWeight = new YoDouble("forceMinimizationWeight", registry);
 
    protected final MPCContactHandler contactHandler;
@@ -151,6 +154,7 @@ public abstract class EuclideanModelPredictiveController
       finalComWeight.set(defaultFinalComWeight);
       finalVRPWeight.set(defaultFinalVRPWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
+      rhoMinimizationWeight.set(defaultRhoMinimizationWeight);
       forceMinimizationWeight.set(defaultForceMinimizationWeight);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
@@ -411,6 +415,8 @@ public abstract class EuclideanModelPredictiveController
                                                             null));
          if (includeForceMinimization)
             mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), 0));
+         if (includeRhoMinimization)
+            mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), 0, initialDuration));
          if (includeRhoMinInequality)
             mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), 0, initialDuration));
          if (includeRhoMaxInequality)
@@ -447,6 +453,8 @@ public abstract class EuclideanModelPredictiveController
                                                                null));
             if (includeForceMinimization)
                mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), nextSequence));
+            if (includeRhoMinimization)
+               mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), nextSequence, nextDuration));
             if (includeRhoMinInequality)
                mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), nextSequence, nextDuration));
             if (includeRhoMaxInequality)
@@ -600,9 +608,24 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setOmega(omega.getValue());
       objectiveToPack.setWeight(forceMinimizationWeight.getDoubleValue());
       objectiveToPack.setSegmentNumber(segmentNumber);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeRhoMinimizationObjective(RhoMinimizationCommand objectiveToPack, int segmentNumber, double segmentDuration)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(rhoMinimizationWeight.getDoubleValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
       }
 
       return objectiveToPack;

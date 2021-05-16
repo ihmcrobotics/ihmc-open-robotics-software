@@ -23,6 +23,7 @@ public class CommandProvider
    private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
    private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
    private final RecyclingArrayList<ForceMinimizationCommand> forceMinimizationCommandPool = new RecyclingArrayList<>(ForceMinimizationCommand::new);
+   private final RecyclingArrayList<RhoMinimizationCommand> rhoMinimizationCommandPool = new RecyclingArrayList<>(RhoMinimizationCommand::new);
 
    /**
           * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
@@ -45,6 +46,7 @@ public class CommandProvider
       directOrientationValueCommandPool.clear();
       orientationContinuityCommandPool.clear();
       forceMinimizationCommandPool.clear();
+      rhoMinimizationCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -125,5 +127,10 @@ public class CommandProvider
    public ForceMinimizationCommand getForceMinimizationCommand()
    {
       return forceMinimizationCommandPool.add();
+   }
+
+   public RhoMinimizationCommand getRhoMinimizationCommand()
+   {
+      return rhoMinimizationCommandPool.add();
    }
 }
