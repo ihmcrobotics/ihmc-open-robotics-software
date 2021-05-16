@@ -208,6 +208,17 @@ public class MPCContactPlane
       return null;
    }
 
+   public void computeRhoAccelerationIntegrationMatrix(int startCol, DMatrixRMaj gradientToPack, DMatrixRMaj hessianToPack, double duration, double omega, double goalValueForPlane)
+   {
+      double goalValueForPoint = goalValueForPlane / numberOfContactPoints;
+      for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
+      {
+         MPCContactPoint contactPoint = contactPoints[contactPointIdx];
+         contactPoint.computeAccelerationIntegrationOfRhoMatrix(startCol, gradientToPack, hessianToPack, duration, omega, goalValueForPoint);
+
+         startCol += contactPoint.getCoefficientsSize();
+      }
+   }
 
    /**
     * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the plane over

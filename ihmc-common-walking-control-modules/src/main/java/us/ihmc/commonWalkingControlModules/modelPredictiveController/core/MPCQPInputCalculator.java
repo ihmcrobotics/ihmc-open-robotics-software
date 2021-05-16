@@ -329,7 +329,7 @@ public class MPCQPInputCalculator
       {
          MPCContactPlane contactPlaneHelper = objective.getContactPlaneHelper(i);
 
-         MatrixTools.addMatrixBlock(inputToPack.getDirectCostHessian(),
+         MatrixTools.setMatrixBlock(inputToPack.getDirectCostHessian(),
                                     startCol,
                                     startCol,
                                     contactPlaneHelper.getAccelerationIntegrationHessian(),
@@ -338,7 +338,7 @@ public class MPCQPInputCalculator
                                     contactPlaneHelper.getCoefficientSize(),
                                     contactPlaneHelper.getCoefficientSize(),
                                     1.0);
-         MatrixTools.addMatrixBlock(inputToPack.getDirectCostGradient(),
+         MatrixTools.setMatrixBlock(inputToPack.getDirectCostGradient(),
                                     startCol,
                                     0,
                                     contactPlaneHelper.getAccelerationIntegrationGradient(),
@@ -354,6 +354,40 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
 
       return true;
+   }
+
+   public int calculateRhoMinimizationObjective(QPInputTypeC inputToPack, RhoMinimizationCommand objective)
+   {
+      int segmentNumber = objective.getSegmentNumber();
+
+      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber));
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      double weight = objective.getWeight();
+      double duration = objective.getSegmentDuration();
+
+      int startCol = 0;
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         MPCContactPlane contactPlaneHelper = objective.getContactPlaneHelper(i);
+
+         contactPlaneHelper.computeRhoAccelerationIntegrationMatrix(startCol,
+                                                                    inputToPack.getDirectCostGradient(),
+                                                                    inputToPack.getDirectCostHessian(),
+                                                                    duration,
+                                                                    objective.getOmega(),
+                                                                    0.0);
+
+         startCol += contactPlaneHelper.getCoefficientSize();
+      }
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
    }
 
    /**
