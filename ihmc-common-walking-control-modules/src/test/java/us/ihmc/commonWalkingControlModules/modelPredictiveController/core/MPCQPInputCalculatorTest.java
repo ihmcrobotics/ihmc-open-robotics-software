@@ -786,12 +786,14 @@ public class MPCQPInputCalculatorTest
       rhoMinimizationCommand.setSegmentDuration(duration);
       rhoMinimizationCommand.setOmega(omega);
       rhoMinimizationCommand.setSegmentNumber(0);
+      rhoMinimizationCommand.setWeight(100.0);
       rhoMinimizationCommand.setObjectiveValue(goalValueForBasis);
       rhoMinimizationCommand.addContactPlaneHelper(contactPlane);
 
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, 1e-3, -9.81, new YoRegistry("registry"));
 
       solver.initialize();
+      solver.setRhoCoefficientRegularizationWeight(0.0);
       solver.addValueRegularization();
       solver.submitRhoMinimizationCommand(rhoMinimizationCommand);
       assertTrue(solver.solve());

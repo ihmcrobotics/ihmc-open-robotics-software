@@ -379,7 +379,7 @@ public class MPCQPInputCalculator
                                                                     inputToPack.getDirectCostHessian(),
                                                                     duration,
                                                                     objective.getOmega(),
-                                                                    0.0);
+                                                                    objective.getObjectiveValue());
 
          startCol += contactPlaneHelper.getCoefficientSize();
       }
