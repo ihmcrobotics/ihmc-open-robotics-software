@@ -20,6 +20,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -28,6 +29,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
+import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class MPCQPInputCalculatorTest
@@ -758,6 +761,65 @@ public class MPCQPInputCalculatorTest
 
             EjmlUnitTests.assertEquals(qpSolver1.solverInput_Ain, qpSolver2.solverInput_Ain, 1e-5);
             EjmlUnitTests.assertEquals(qpSolver1.solverInput_bin, qpSolver2.solverInput_bin, 1e-5);
+         }
+      }
+   }
+
+   @Test
+   public void testRhoMinimizationCommand()
+   {
+      int numberOfBasisVectorsPerContactPoint = 4;
+      MPCContactPlane contactPlane = new MPCContactPlane(4, numberOfBasisVectorsPerContactPoint, new ZeroConeRotationCalculator());
+      double mu = 0.8;
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+      contactPlane.computeBasisVectors(contactPolygon, new FramePose3D(), mu);
+
+      double omega = 3.0;
+      double duration = 0.7;
+      double goalValueForBasis = 0.2;
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+      indexHandler.initialize((i) -> 4, 1);
+
+      RhoMinimizationCommand rhoMinimizationCommand = new RhoMinimizationCommand();
+      rhoMinimizationCommand.setSegmentDuration(duration);
+      rhoMinimizationCommand.setOmega(omega);
+      rhoMinimizationCommand.setSegmentNumber(0);
+      rhoMinimizationCommand.setObjectiveValue(goalValueForBasis);
+      rhoMinimizationCommand.addContactPlaneHelper(contactPlane);
+
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, 1e-3, -9.81, new YoRegistry("registry"));
+
+      solver.initialize();
+      solver.addValueRegularization();
+      solver.submitRhoMinimizationCommand(rhoMinimizationCommand);
+      assertTrue(solver.solve());
+
+      contactPlane.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
+
+      for (double time = 0; time <= duration; time += 0.001)
+      {
+         contactPlane.computeContactForce(omega, time);
+
+         double omega2 = omega * omega;
+         double exponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+         double a0 = omega2 * exponential;
+         double a1 = omega2 / exponential;
+         double a2 = 6.0 * time;
+         double a3 = 2.0;
+
+         for (int i = 0; i < contactPlane.getRhoSize(); i++)
+         {
+            DMatrixRMaj basisCoefficients = contactPlane.getBasisCoefficients(i);
+
+            double rhoValue = a0 * basisCoefficients.get(0, 0);
+            rhoValue += a1 * basisCoefficients.get(0, 1);
+            rhoValue += a2 * basisCoefficients.get(0, 2);
+            rhoValue += a3 * basisCoefficients.get(0, 3);
+
+            assertEquals(goalValueForBasis, rhoValue, 1e-3);
+            assertEquals(goalValueForBasis, contactPlane.getBasisMagnitude(i).length(), 1e-3);
          }
       }
    }
