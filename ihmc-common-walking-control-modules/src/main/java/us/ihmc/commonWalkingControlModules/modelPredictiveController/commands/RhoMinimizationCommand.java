@@ -36,6 +36,8 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
 
    private double segmentDuration;
 
+   private double objectiveValue = 0.0;
+
    /**
     * Consumer for the computed cost to go on the output of the MPC function.
     */
@@ -57,6 +59,7 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
       segmentNumber = -1;
       costToGoConsumer = null;
       segmentDuration = Double.NaN;
+      objectiveValue = 0.0;
       contactPlaneHelpers.clear();
    }
 
@@ -71,6 +74,11 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
    public void setSegmentDuration(double duration)
    {
       this.segmentDuration = duration;
+   }
+
+   public void setObjectiveValue(double objectiveValue)
+   {
+      this.objectiveValue = objectiveValue;
    }
 
    /**
@@ -110,6 +118,11 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
    public double getSegmentDuration()
    {
       return segmentDuration;
+   }
+
+   public double getObjectiveValue()
+   {
+      return objectiveValue;
    }
 
    public double getOmega()
@@ -153,6 +166,7 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
       setWeight(other.getWeight());
       setCostToGoConsumer(other.getCostToGoConsumer());
       setSegmentDuration(other.getSegmentDuration());
+      setObjectiveValue(other.getObjectiveValue());
       for (int i = 0; i < other.getNumberOfContacts(); i++)
          addContactPlaneHelper(other.getContactPlaneHelper(i));
    }
@@ -190,6 +204,8 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
          if (segmentDuration != other.segmentDuration)
             return false;
          if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+            return false;
+         if (objectiveValue != other.objectiveValue)
             return false;
          for (int i = 0; i < contactPlaneHelpers.size(); i++)
          {

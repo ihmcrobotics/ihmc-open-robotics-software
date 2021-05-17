@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.MatrixMissingTools;
@@ -145,10 +146,9 @@ public class MPCContactPoint
       rhoNormalZ = basisVectors[0].getZ();
    }
 
-   public void computeAccelerationIntegrationOfRhoMatrix(int startCol, DMatrixRMaj gradientToPack, DMatrixRMaj hessianToPack, double duration, double omega, double goalValueForPoint)
+   public void computeAccelerationIntegrationOfRhoMatrix(int startCol, DMatrixRMaj gradientToPack, DMatrixRMaj hessianToPack, double duration, double omega, double goalValueForBasis)
    {
       duration = Math.min(duration, sufficientlyLongTime);
-      double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
 
       double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
       double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
@@ -195,10 +195,10 @@ public class MPCContactPoint
          hessianToPack.unsafe_set(startCol + 3, startCol + 2, c23);
          hessianToPack.unsafe_set(startCol + 3, startCol + 3, c33);
 
-         gradientToPack.unsafe_set(startCol, 0, g0);
-         gradientToPack.unsafe_set(startCol + 1, 0, g1);
-         gradientToPack.unsafe_set(startCol + 2, 0, g2);
-         gradientToPack.unsafe_set(startCol + 3, 0, g3);
+         gradientToPack.unsafe_set(startCol, 0, -g0);
+         gradientToPack.unsafe_set(startCol + 1, 0, -g1);
+         gradientToPack.unsafe_set(startCol + 2, 0, -g2);
+         gradientToPack.unsafe_set(startCol + 3, 0, -g3);
 
          startCol += LinearMPCIndexHandler.coefficientsPerRho;
       }
@@ -208,12 +208,12 @@ public class MPCContactPoint
     * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the point over some time
     * @param duration duration for the integration
     * @param omega time constant for the motion function
-    * @param goalValueForPoint nominal value for the acceleration to track.
+    * @param goalNormalForce nominal value for the acceleration to track.
     */
-   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)
+   public void computeAccelerationIntegrationMatrix(int startCol, DMatrixRMaj gradientToPack, DMatrixRMaj hessianToPack, double duration, double omega, double goalNormalForce)
    {
       duration = Math.min(duration, sufficientlyLongTime);
-      double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
+      double goalValueForBasis = goalNormalForce / numberOfBasisVectorsPerContactPoint;
 
       double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
       double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
@@ -235,38 +235,33 @@ public class MPCContactPoint
       double c23 = 6.0 * duration2;
       double c33 = 4.0 * duration;
 
-      double g0 = omega * (positiveExponential - 1.0) * goalValueForBasis;
-      double g1 = -omega * (negativeExponential - 1.0) * goalValueForBasis;
-      double g2 = 3.0 * duration2 * goalValueForBasis;
-      double g3 = 2.0 * duration * goalValueForBasis;
+      double g0 = omega * (positiveExponential - 1.0);
+      double g1 = -omega * (negativeExponential - 1.0);
+      double g2 = 3.0 * duration2;
+      double g3 = 2.0 * duration;
 
       for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
       {
          int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
+         FrameVector3DBasics basisVectorI = basisVectors[basisVectorIndexI];
 
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c02);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c03);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI, c01);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 3, c13);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI, c02);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 3, c23);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI, c03);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 1, c13);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 2, c23);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 3, c33);
-
-         accelerationIntegrationGradient.unsafe_set(startIdxI, 0, g0);
-         accelerationIntegrationGradient.unsafe_set(startIdxI + 1, 0, g1);
-         accelerationIntegrationGradient.unsafe_set(startIdxI + 2, 0, g2);
-         accelerationIntegrationGradient.unsafe_set(startIdxI + 3, 0, g3);
+         hessianToPack.unsafe_set(startIdxI, startIdxI, c00);
+         hessianToPack.unsafe_set(startIdxI, startIdxI + 1, c01);
+         hessianToPack.unsafe_set(startIdxI, startIdxI + 2, c02);
+         hessianToPack.unsafe_set(startIdxI, startIdxI + 2, c03);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI, c01);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 3, c13);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI, c02);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI + 3, c23);
+         hessianToPack.unsafe_set(startIdxI + 3, startIdxI, c03);
+         hessianToPack.unsafe_set(startIdxI + 3, startIdxI + 1, c13);
+         hessianToPack.unsafe_set(startIdxI + 3, startIdxI + 2, c23);
+         hessianToPack.unsafe_set(startIdxI + 3, startIdxI + 3, c33);
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
@@ -276,41 +271,52 @@ public class MPCContactPoint
 
             int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ, basisDot * c00);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 3, basisDot * c33);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ, basisDot * c00);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ + 1, basisDot * c01);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ + 2, basisDot * c02);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ + 3, basisDot * c03);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ, basisDot * c01);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ + 3, basisDot * c13);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ, basisDot * c02);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ + 3, basisDot * c23);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ, basisDot * c03);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ + 1, basisDot * c13);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ + 2, basisDot * c23);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ + 3, basisDot * c33);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI, basisDot * c00);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 3, basisDot * c33);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI, basisDot * c00);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI + 1, basisDot * c01);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI + 2, basisDot * c02);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI + 3, basisDot * c03);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI, basisDot * c01);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI + 3, basisDot * c13);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI, basisDot * c02);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI + 3, basisDot * c23);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI, basisDot * c03);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI + 1, basisDot * c13);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI + 2, basisDot * c23);
+            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI + 3, basisDot * c33);
          }
+
+         basisVectorI.changeFrame(planeFrame);
+
+         double basisValue = basisVectorI.getZ() * goalNormalForce;
+
+         gradientToPack.unsafe_set(startIdxI, 0, -g0 * basisValue);
+         gradientToPack.unsafe_set(startIdxI + 1, 0, -g1 * basisValue);
+         gradientToPack.unsafe_set(startIdxI + 2, 0, -g2 * basisValue);
+         gradientToPack.unsafe_set(startIdxI + 3, 0, -g3 * basisValue);
+
+         basisVectorI.changeFrame(ReferenceFrame.getWorldFrame());
       }
    }
 
@@ -483,6 +489,10 @@ public class MPCContactPoint
       return contactWrenchCoefficientMatrix;
    }
 
+   public DMatrixRMaj getBasisCoefficients(int rhoIdx)
+   {
+      return basisCoefficients[rhoIdx];
+   }
 
    public void computeContactForce(double omega, double time)
    {

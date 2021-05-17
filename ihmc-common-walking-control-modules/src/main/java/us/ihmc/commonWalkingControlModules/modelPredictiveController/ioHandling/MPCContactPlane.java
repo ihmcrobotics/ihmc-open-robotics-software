@@ -208,6 +208,32 @@ public class MPCContactPlane
       return null;
    }
 
+   public DMatrixRMaj getBasisCoefficients(int rhoIdx)
+   {
+      if (rhoIdx < rhoSize)
+      {
+         int pointIdx = Math.floorDiv(rhoIdx, numberOfBasisVectorsPerContactPoint);
+         int localIdx = rhoIdx - numberOfBasisVectorsPerContactPoint * pointIdx;
+
+         return contactPoints[pointIdx].getBasisCoefficients(localIdx);
+      }
+
+      return null;
+   }
+
+   public FrameVector3DReadOnly getBasisMagnitude(int rhoIdx)
+   {
+      if (rhoIdx < rhoSize)
+      {
+         int pointIdx = Math.floorDiv(rhoIdx, numberOfBasisVectorsPerContactPoint);
+         int localIdx = rhoIdx - numberOfBasisVectorsPerContactPoint * pointIdx;
+
+         return contactPoints[pointIdx].getBasisMagnitude(localIdx);
+      }
+
+      return null;
+   }
+
    public void computeRhoAccelerationIntegrationMatrix(int startCol, DMatrixRMaj gradientToPack, DMatrixRMaj hessianToPack, double duration, double omega, double goalValueForPlane)
    {
       double goalValueForPoint = goalValueForPlane / numberOfContactPoints;
@@ -235,7 +261,7 @@ public class MPCContactPlane
       for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
       {
          MPCContactPoint contactPoint = contactPoints[contactPointIdx];
-         contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValueForPoint);
+//         contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValueForPoint);
 
          MatrixTools.setMatrixBlock(accelerationIntegrationHessian,
                                     startIdx,
