@@ -372,16 +372,17 @@ public class MPCQPInputCalculator
       int startCol = 0;
       for (int i = 0; i < objective.getNumberOfContacts(); i++)
       {
-         MPCContactPlane contactPlaneHelper = objective.getContactPlaneHelper(i);
+         MPCContactPlane contactPlane = objective.getContactPlaneHelper(i);
 
-         contactPlaneHelper.computeRhoAccelerationIntegrationMatrix(startCol,
-                                                                    inputToPack.getDirectCostGradient(),
-                                                                    inputToPack.getDirectCostHessian(),
-                                                                    duration,
-                                                                    objective.getOmega(),
-                                                                    objective.getObjectiveValue());
+         IntegrationInputCalculator.computeRhoAccelerationIntegrationMatrix(startCol,
+                                                                            inputToPack.getDirectCostGradient(),
+                                                                            inputToPack.getDirectCostHessian(),
+                                                                            contactPlane.getRhoSize(),
+                                                                            duration,
+                                                                            objective.getOmega(),
+                                                                            objective.getObjectiveValue());
 
-         startCol += contactPlaneHelper.getCoefficientSize();
+         startCol += contactPlane.getCoefficientSize();
       }
 
       inputToPack.setUseWeightScalar(true);
