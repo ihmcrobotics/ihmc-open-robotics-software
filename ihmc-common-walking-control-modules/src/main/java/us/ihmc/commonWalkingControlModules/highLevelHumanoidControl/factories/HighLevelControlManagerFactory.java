@@ -19,8 +19,11 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
+import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -28,7 +31,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
 import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
@@ -37,6 +45,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGai
 import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -62,11 +71,13 @@ public class HighLevelControlManagerFactory
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private LegConfigurationManager legConfigurationManager;
+   private WholeBodyControllerCore controllerCore;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
+   private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
@@ -130,6 +141,11 @@ public class HighLevelControlManagerFactory
       userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
+   public void setPushRecoveryControllerParameters(PushRecoveryControllerParameters pushRecoveryControllerParameters)
+   {
+      this.pushRecoveryControllerParameters = pushRecoveryControllerParameters;
+   }
+
    public void setCopTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.copTrajectoryParameters = copTrajectoryParameters;
@@ -148,6 +164,8 @@ public class HighLevelControlManagerFactory
       if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
+         return null;
+      if (!hasPushRecoveryControllerParameters(BalanceManager.class))
          return null;
       if (!hasCoPTrajectoryParameters(BalanceManager.class))
          return null;
@@ -313,6 +331,39 @@ public class HighLevelControlManagerFactory
       return pelvisOrientationManager;
    }
 
+   public WholeBodyControllerCore getOrCreateWholeBodyControllerCore()
+   {
+      if (controllerCore != null)
+         return controllerCore;
+
+      if (!hasHighLevelHumanoidControllerToolbox(WholeBodyControllerCore.class))
+         return null;
+      if (!hasWalkingControllerParameters(WholeBodyControllerCore.class))
+         return null;
+
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
+
+      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
+      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
+      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
+              jointsToOptimizeFor, centerOfMassFrame,
+              walkingControllerParameters.getMomentumOptimizationSettings(),
+              controllerToolbox.getYoGraphicsListRegistry(), registry);
+      toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
+      toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
+      toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
+      fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
+      FeedbackControllerTemplate template = createFeedbackControlTemplate();
+      // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
+      template.setAllowDynamicControllerConstruction(false);
+      OneDoFJointBasics[] controlledJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
+      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
+      new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
+
+      return controllerCore;
+   }
+
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
    {
       if (controllerToolbox != null)
@@ -326,6 +377,14 @@ public class HighLevelControlManagerFactory
       if (walkingControllerParameters != null)
          return true;
       missingObjectWarning(WalkingControllerParameters.class, managerClass);
+      return false;
+   }
+
+   private boolean hasPushRecoveryControllerParameters(Class<?> managerClass)
+   {
+      if (pushRecoveryControllerParameters != null)
+         return true;
+      missingObjectWarning(PushRecoveryControllerParameters.class, managerClass);
       return false;
    }
 
