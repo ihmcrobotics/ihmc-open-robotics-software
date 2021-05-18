@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.BufferUtils;
 import org.lwjgl.openvr.VRControllerState;
 import org.lwjgl.openvr.VRSystem;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -12,6 +13,8 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+import java.nio.IntBuffer;
+
 /**
  * Represents a tracked VR device such as the head mounted
  * display, wands etc.
@@ -19,7 +22,6 @@ import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 public class GDXVRDevice
 {
    private final GDXVRContext gdxVRContext;
-   private final GDXVRDevicePose pose;
    private final GDXVRDeviceType type;
    private final GDXVRControllerRole role;
    private long buttons = 0;
@@ -27,6 +29,8 @@ public class GDXVRDevice
    private final ModelInstance modelInstance;
    private final String name;
 
+   private final IntBuffer tempIntBuffer = BufferUtils.newIntBuffer(1);
+   private final GDXVRDevicePose pose;
    // tracker space
    private final Vector3 position = new Vector3();
    private final Vector3 xAxis = new Vector3();
@@ -44,7 +48,6 @@ public class GDXVRDevice
    private final PoseReferenceFrame referenceFrame;
    private final YawPitchRoll toZUpXForward = new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(0.0));
 
-   private final Vector3 vecTmp = new Vector3();
    private final Matrix4 matTmp = new Matrix4();
 
    public GDXVRDevice(GDXVRContext gdxVRContext, GDXVRDevicePose pose, GDXVRDeviceType type, GDXVRControllerRole role)
@@ -244,9 +247,9 @@ public class GDXVRDevice
     */
    public boolean getBooleanProperty(GDXVRDeviceProperty property)
    {
-      gdxVRContext.getScratch().put(0, 0);
-      boolean result = VRSystem.VRSystem_GetBoolTrackedDeviceProperty(this.pose.getIndex(), property.value, gdxVRContext.getScratch());
-      if (gdxVRContext.getScratch().get(0) != 0)
+      tempIntBuffer.put(0, 0);
+      boolean result = VRSystem.VRSystem_GetBoolTrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      if (tempIntBuffer.get(0) != 0)
          return false;
       else
          return result;
@@ -257,9 +260,9 @@ public class GDXVRDevice
     */
    public float getFloatProperty(GDXVRDeviceProperty property)
    {
-      gdxVRContext.getScratch().put(0, 0);
-      float result = VRSystem.VRSystem_GetFloatTrackedDeviceProperty(this.pose.getIndex(), property.value, gdxVRContext.getScratch());
-      if (gdxVRContext.getScratch().get(0) != 0)
+      tempIntBuffer.put(0, 0);
+      float result = VRSystem.VRSystem_GetFloatTrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      if (tempIntBuffer.get(0) != 0)
          return 0;
       else
          return result;
@@ -270,9 +273,9 @@ public class GDXVRDevice
     */
    public int getInt32Property(GDXVRDeviceProperty property)
    {
-      gdxVRContext.getScratch().put(0, 0);
-      int result = VRSystem.VRSystem_GetInt32TrackedDeviceProperty(this.pose.getIndex(), property.value, gdxVRContext.getScratch());
-      if (gdxVRContext.getScratch().get(0) != 0)
+      tempIntBuffer.put(0, 0);
+      int result = VRSystem.VRSystem_GetInt32TrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      if (tempIntBuffer.get(0) != 0)
          return 0;
       else
          return result;
@@ -283,9 +286,9 @@ public class GDXVRDevice
     */
    public long getUInt64Property(GDXVRDeviceProperty property)
    {
-      gdxVRContext.getScratch().put(0, 0);
-      long result = VRSystem.VRSystem_GetUint64TrackedDeviceProperty(this.pose.getIndex(), property.value, gdxVRContext.getScratch());
-      if (gdxVRContext.getScratch().get(0) != 0)
+      tempIntBuffer.put(0, 0);
+      long result = VRSystem.VRSystem_GetUint64TrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      if (tempIntBuffer.get(0) != 0)
          return 0;
       else
          return result;
@@ -296,10 +299,10 @@ public class GDXVRDevice
     */
    public String getStringProperty(GDXVRDeviceProperty property)
    {
-      gdxVRContext.getScratch().put(0, 0);
+      tempIntBuffer.put(0, 0);
 
-      String result = VRSystem.VRSystem_GetStringTrackedDeviceProperty(this.pose.getIndex(), property.value, gdxVRContext.getScratch());
-      if (gdxVRContext.getScratch().get(0) != 0)
+      String result = VRSystem.VRSystem_GetStringTrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      if (tempIntBuffer.get(0) != 0)
          return null;
       return result;
    }

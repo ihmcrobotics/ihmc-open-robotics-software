@@ -596,9 +596,4 @@ public class GDXVRContext implements Disposable
 
       return model;
    }
-
-   public IntBuffer getScratch()
-   {
-      return scratch;
-   }
 }
