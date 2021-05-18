@@ -73,11 +73,11 @@ public class GDXVRContext implements Disposable
    // devices, their poses and listeners
    private final GDXVRDevicePose[] devicePoses = new GDXVRDevicePose[VR.k_unMaxTrackedDeviceCount];
    private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
-   private final Array<GDXVRDeviceListener> listeners = new Array<GDXVRDeviceListener>();
+   private final Array<GDXVRDeviceListener> listeners = new Array<>();
    private final VREvent event = VREvent.create();
 
    // render models
-   private final ObjectMap<String, Model> models = new ObjectMap<String, Model>();
+   private final ObjectMap<String, Model> models = new ObjectMap<>();
 
    // book keeping
    private GDXVREye currentEye = null;
@@ -228,7 +228,7 @@ public class GDXVRContext implements Disposable
     */
    public Array<GDXVRDevice> getDevicesByType(GDXVRDeviceType type)
    {
-      Array<GDXVRDevice> result = new Array<GDXVRDevice>();
+      Array<GDXVRDevice> result = new Array<>();
       for (GDXVRDevice d : devices)
       {
          if (d != null && d.getType() == type)
@@ -242,7 +242,7 @@ public class GDXVRContext implements Disposable
     */
    public Array<GDXVRDevice> getDevices()
    {
-      Array<GDXVRDevice> result = new Array<GDXVRDevice>();
+      Array<GDXVRDevice> result = new Array<>();
       for (GDXVRDevice d : devices)
       {
          if (d != null)

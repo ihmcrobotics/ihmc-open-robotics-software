@@ -47,7 +47,7 @@ public class GDXVRDevice
    private final Vector3 vecTmp = new Vector3();
    private final Matrix4 matTmp = new Matrix4();
 
-   GDXVRDevice(GDXVRContext gdxVRContext, GDXVRDevicePose pose, GDXVRDeviceType type, GDXVRControllerRole role)
+   public GDXVRDevice(GDXVRContext gdxVRContext, GDXVRDevicePose pose, GDXVRDeviceType type, GDXVRControllerRole role)
    {
       this.gdxVRContext = gdxVRContext;
       this.pose = pose;
@@ -191,18 +191,18 @@ public class GDXVRDevice
    {
       if (button < 0 || button >= 64)
          return false;
-      return (buttons & (1l << button)) != 0;
+      return (buttons & (1L << button)) != 0;
    }
 
    void setButton(int button, boolean pressed)
    {
       if (pressed)
       {
-         buttons |= (1l << button);
+         buttons |= (1L << button);
       }
       else
       {
-         buttons ^= (1l << button);
+         buttons ^= (1L << button);
       }
    }
 
