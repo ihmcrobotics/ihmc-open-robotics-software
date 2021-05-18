@@ -7,9 +7,10 @@ import org.lwjgl.openvr.VRSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
- * A {@link Camera} implementation for one {@link GDXVREye}
+ * A {@link Camera} implementation for one {@link RobotSide}
  * of a {@link GDXVRContext}. All properties except {@link Camera#near},
  * {@link Camera#far} and {@link #offset} will be overwritten
  * on every call to {@link #update()} based on the tracked values
@@ -21,14 +22,14 @@ import com.badlogic.gdx.math.Vector3;
 public class GDXVRCamera extends Camera
 {
    private final GDXVRContext context;
-   private final GDXVREye eye;
+   private final RobotSide eye;
    private final Matrix4 eyeSpace = new Matrix4();
    private final Matrix4 invEyeSpace = new Matrix4();
    private final HmdMatrix44 projectionMat = HmdMatrix44.create();
    private final HmdMatrix34 eyeMat = HmdMatrix34.create();
    private final Vector3 tmp = new Vector3();
 
-   public GDXVRCamera(GDXVRContext context, GDXVREye eye)
+   public GDXVRCamera(GDXVRContext context, RobotSide eye)
    {
       this.context = context;
       this.eye = eye;
@@ -44,11 +45,11 @@ public class GDXVRCamera extends Camera
    public void update(boolean updateFrustum)
    {
       // get the projection matrix from the HDM
-      VRSystem.VRSystem_GetProjectionMatrix(eye.getIndex(), near, far, projectionMat);
+      VRSystem.VRSystem_GetProjectionMatrix(eye.ordinal(), near, far, projectionMat);
       GDXVRTools.hmdMat4toMatrix4(projectionMat, projection);
 
       // get the eye space matrix from the HDM
-      VRSystem.VRSystem_GetEyeToHeadTransform(eye.getIndex(), eyeMat);
+      VRSystem.VRSystem_GetEyeToHeadTransform(eye.ordinal(), eyeMat);
       GDXVRTools.hmdMat34ToMatrix4(eyeMat, eyeSpace);
       invEyeSpace.set(eyeSpace).inv();
 

@@ -31,17 +31,17 @@ public class GDXVRManager implements RenderableProvider
    private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
 
    private GDXVRContext context;
-   private HashSet<ModelInstance> modelInstances = new HashSet<>();
+   private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
-   private SideDependentList<GDXVRDevice> controllers = new SideDependentList<>();
+   private final SideDependentList<GDXVRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
    private boolean holdingTouchpadToMove = false;
-   private Point3D initialVRSpacePosition = new Point3D();
-   private Point3D initialVRControllerPosition = new Point3D();
-   private Point3D currentVRControllerPosition = new Point3D();
-   private Vector3D deltaVRControllerPosition = new Vector3D();
-   private Point3D resultVRSpacePosition = new Point3D();
-   private Point3D lastVRSpacePosition = new Point3D();
+   private final Point3D initialVRSpacePosition = new Point3D();
+   private final Point3D initialVRControllerPosition = new Point3D();
+   private final Point3D currentVRControllerPosition = new Point3D();
+   private final Vector3D deltaVRControllerPosition = new Vector3D();
+   private final Point3D resultVRSpacePosition = new Point3D();
+   private final Point3D lastVRSpacePosition = new Point3D();
    private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
    private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
    private final GDXPose3DWidget scenePose = new GDXPose3DWidget();
@@ -62,8 +62,8 @@ public class GDXVRManager implements RenderableProvider
 
       scenePose.create();
 
-      context.getEyeData(GDXVREye.Left).getCamera().far = 100f;
-      context.getEyeData(GDXVREye.Right).getCamera().far = 100f;
+      context.getEyeData(RobotSide.LEFT).getCamera().far = 100f;
+      context.getEyeData(RobotSide.RIGHT).getCamera().far = 100f;
 
       context.addListener(new GDXVRDeviceListener()
       {
@@ -190,12 +190,12 @@ public class GDXVRManager implements RenderableProvider
       }
 
       context.begin();
-      renderScene(GDXVREye.Left, sceneManager);
-      renderScene(GDXVREye.Right, sceneManager);
+      renderScene(RobotSide.LEFT, sceneManager);
+      renderScene(RobotSide.RIGHT, sceneManager);
       context.end();
    }
 
-   private void renderScene(GDXVREye eye, GDX3DSceneManager sceneManager)
+   private void renderScene(RobotSide eye, GDX3DSceneManager sceneManager)
    {
       GDXVRCamera camera = context.getEyeData(eye).getCamera();
 

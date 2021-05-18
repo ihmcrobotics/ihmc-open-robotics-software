@@ -45,6 +45,8 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
  * Responsible for initializing the VR system, managing rendering surfaces,
@@ -61,7 +63,7 @@ public class GDXVRContext implements Disposable
    private final IntBuffer scratch = BufferUtils.newIntBuffer(1), scratch2 = BufferUtils.newIntBuffer(1);
 
    // per eye data such as rendering surfaces, textures, regions, cameras etc. for each eye
-   private final GDXVRPerEyeData[] perEyeData = new GDXVRPerEyeData[2];
+   private final SideDependentList<GDXVRPerEyeData> perEyeData = new SideDependentList<>();
 
    // batcher to draw eye rendering surface to companion window
    private final SpriteBatch batcher;
@@ -80,7 +82,7 @@ public class GDXVRContext implements Disposable
    private final ObjectMap<String, Model> models = new ObjectMap<>();
 
    // book keeping
-   private GDXVREye currentEye = null;
+   private RobotSide currentEye = null;
    private boolean renderingStarted = false;
    private boolean initialDevicesReported = false;
 
@@ -135,13 +137,13 @@ public class GDXVRContext implements Disposable
       int width = (int) (scratch.get(0) * renderTargetMultiplier);
       int height = (int) (scratch2.get(0) * renderTargetMultiplier);
 
-      setupEye(GDXVREye.Left, width, height, hasStencil);
-      setupEye(GDXVREye.Right, width, height, hasStencil);
+      setupEye(RobotSide.LEFT, width, height, hasStencil);
+      setupEye(RobotSide.RIGHT, width, height, hasStencil);
 
       batcher = new SpriteBatch();
    }
 
-   private void setupEye(GDXVREye eye, int width, int height, boolean hasStencil)
+   private void setupEye(RobotSide eye, int width, int height, boolean hasStencil)
    {
       FrameBuffer buffer = new FrameBuffer(Format.RGBA8888, width, height, true, hasStencil);
       TextureRegion region = new TextureRegion(buffer.getColorBufferTexture());
@@ -149,7 +151,7 @@ public class GDXVRContext implements Disposable
       GDXVRCamera camera = new GDXVRCamera(this, eye);
       camera.near = 0.1f;
       camera.far = 1000f;
-      perEyeData[eye.getIndex()] = new GDXVRPerEyeData(buffer, region, camera);
+      perEyeData.set(eye, new GDXVRPerEyeData(buffer, region, camera));
    }
 
    private void checkInitError(IntBuffer errorBuffer)
@@ -282,8 +284,8 @@ public class GDXVRContext implements Disposable
          throw new GdxRuntimeException("Last begin() call not completed, call end() before starting a new render");
       renderingStarted = true;
 
-      perEyeData[GDXVREye.Left.getIndex()].getCamera().update();
-      perEyeData[GDXVREye.Right.getIndex()].getCamera().update();
+      perEyeData.get(RobotSide.LEFT).getCamera().update();
+      perEyeData.get(RobotSide.RIGHT).getCamera().update();
    }
 
    /**
@@ -428,23 +430,23 @@ public class GDXVRContext implements Disposable
    /**
     * @return the {@link GDXVRPerEyeData} such as rendering surface and camera
     */
-   public GDXVRPerEyeData getEyeData(GDXVREye eye)
+   public GDXVRPerEyeData getEyeData(RobotSide eye)
    {
-      return perEyeData[eye.getIndex()];
+      return perEyeData.get(eye);
    }
 
    /**
     * Start rendering to the rendering surface for the given eye.
     * Complete by calling {@link #endEye()}.
     */
-   public void beginEye(GDXVREye eye)
+   public void beginEye(RobotSide eye)
    {
       if (!renderingStarted)
          throw new GdxRuntimeException("Call begin() before calling beginEye()");
       if (currentEye != null)
          throw new GdxRuntimeException("Last beginEye() call not completed, call endEye() before starting a new render");
       currentEye = eye;
-      perEyeData[eye.getIndex()].getFrameBuffer().begin();
+      perEyeData.get(eye).getFrameBuffer().begin();
    }
 
    /**
@@ -454,7 +456,7 @@ public class GDXVRContext implements Disposable
    {
       if (currentEye == null)
          throw new GdxRuntimeException("Call beginEye() before endEye()");
-      perEyeData[currentEye.getIndex()].getFrameBuffer().end();
+      perEyeData.get(currentEye).getFrameBuffer().end();
       currentEye = null;
    }
 
@@ -468,8 +470,8 @@ public class GDXVRContext implements Disposable
          throw new GdxRuntimeException("Call begin() before end()");
       renderingStarted = false;
 
-      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData[GDXVREye.Left.getIndex()].getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
-      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData[GDXVREye.Right.getIndex()].getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Left, perEyeData.get(RobotSide.LEFT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
+      VRCompositor.VRCompositor_Submit(VR.EVREye_Eye_Right, perEyeData.get(RobotSide.RIGHT).getTexture(), null, VR.EVRSubmitFlags_Submit_Default);
    }
 
    public void dispose()
@@ -486,7 +488,7 @@ public class GDXVRContext implements Disposable
     */
    public void resizeCompanionWindow()
    {
-      GLFrameBuffer<Texture> buffer = perEyeData[0].getFrameBuffer();
+      GLFrameBuffer<Texture> buffer = perEyeData.get(RobotSide.LEFT).getFrameBuffer();
       Gdx.graphics.setWindowedMode(buffer.getWidth(), buffer.getHeight());
    }
 
@@ -494,10 +496,10 @@ public class GDXVRContext implements Disposable
     * Renders the content of the given eye's rendering surface
     * to the entirety of the companion window.
     */
-   public void renderToCompanionWindow(GDXVREye eye)
+   public void renderToCompanionWindow(RobotSide eye)
    {
-      GLFrameBuffer<Texture> buffer = perEyeData[eye.getIndex()].getFrameBuffer();
-      TextureRegion region = perEyeData[eye.getIndex()].getRegion();
+      GLFrameBuffer<Texture> buffer = perEyeData.get(eye).getFrameBuffer();
+      TextureRegion region = perEyeData.get(eye).getRegion();
       batcher.getProjectionMatrix().setToOrtho2D(0, 0, buffer.getWidth(), buffer.getHeight());
       batcher.begin();
       batcher.draw(region, 0, 0);
