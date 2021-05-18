@@ -1,7 +1,8 @@
-package us.ihmc.gdx.ui.graphics;
+package us.ihmc.gdx.ui;
 
 import us.ihmc.euclid.Axis3D;
 
+/** Extract and use the same as the other VR UI */
 public enum SixDoFSelection
    {
       CENTER, LINEAR_X, LINEAR_Y, LINEAR_Z, ANGULAR_X, ANGULAR_Y, ANGULAR_Z;
