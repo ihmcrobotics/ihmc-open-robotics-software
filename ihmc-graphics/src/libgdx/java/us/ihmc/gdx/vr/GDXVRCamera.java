@@ -7,6 +7,7 @@ import org.lwjgl.openvr.VRSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
@@ -46,11 +47,11 @@ public class GDXVRCamera extends Camera
    {
       // get the projection matrix from the HDM
       VRSystem.VRSystem_GetProjectionMatrix(eye.ordinal(), near, far, projectionMat);
-      GDXVRTools.hmdMat4toMatrix4(projectionMat, projection);
+      GDXTools.toGDX(projectionMat, projection);
 
       // get the eye space matrix from the HDM
       VRSystem.VRSystem_GetEyeToHeadTransform(eye.ordinal(), eyeMat);
-      GDXVRTools.hmdMat34ToMatrix4(eyeMat, eyeSpace);
+      GDXTools.toGDX(eyeMat, eyeSpace);
       invEyeSpace.set(eyeSpace).inv();
 
       // get the pose matrix from the HDM
