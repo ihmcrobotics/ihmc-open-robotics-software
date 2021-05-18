@@ -3,18 +3,10 @@ package us.ihmc.gdx.vr;
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
+import java.util.ArrayList;
 
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.openvr.OpenVR;
-import org.lwjgl.openvr.RenderModel;
-import org.lwjgl.openvr.RenderModelTextureMap;
-import org.lwjgl.openvr.RenderModelVertex;
-import org.lwjgl.openvr.TrackedDevicePose;
-import org.lwjgl.openvr.VR;
-import org.lwjgl.openvr.VRCompositor;
-import org.lwjgl.openvr.VREvent;
-import org.lwjgl.openvr.VRRenderModels;
-import org.lwjgl.openvr.VRSystem;
+import org.lwjgl.openvr.*;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL20;
@@ -75,8 +67,8 @@ public class GDXVRContext implements Disposable
 
    // devices, their poses and listeners
    private final GDXVRDevicePose[] devicePoses = new GDXVRDevicePose[VR.k_unMaxTrackedDeviceCount];
-   private final GDXVRDevice[] devices = new GDXVRDevice[VR.k_unMaxTrackedDeviceCount];
-   private final Array<GDXVRDeviceListener> listeners = new Array<>();
+   private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount);
+   private final Array<GDXVRDeviceListener> deviceListeners = new Array<>();
    private final VREvent event = VREvent.create();
 
    // render models
@@ -129,9 +121,10 @@ public class GDXVRContext implements Disposable
       VR.VR_GetGenericInterface(VR.IVRRenderModels_Version, error);
       checkInitError(error);
 
-      for (int i = 0; i < devicePoses.length; i++)
+      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
       {
-         devicePoses[i] = new GDXVRDevicePose(i);
+         devicePoses[deviceIndex] = new GDXVRDevicePose(deviceIndex);
+         devices.add(null);
       }
 
       VRSystem.VRSystem_GetRecommendedRenderTargetSize(scratch, scratch2);
@@ -165,83 +158,6 @@ public class GDXVRContext implements Disposable
    }
 
    /**
-    * Adds a {@link GDXVRDeviceListener} to receive events
-    */
-   public void addListener(GDXVRDeviceListener listener)
-   {
-      this.listeners.add(listener);
-   }
-
-   /**
-    * Removes a {@link GDXVRDeviceListener}
-    */
-   public void removeListener(GDXVRDeviceListener listener)
-   {
-      this.listeners.removeValue(listener, true);
-   }
-
-   /**
-    * @return the first {@link GDXVRDevice} of the given {@link GDXVRDeviceType} or null.
-    */
-   public GDXVRDevice getDeviceByType(GDXVRDeviceType type)
-   {
-      for (GDXVRDevice d : devices)
-      {
-         if (d != null && d.getType() == type)
-            return d;
-      }
-      return null;
-   }
-
-   /**
-    * @return all {@link GDXVRDevice} instances of the given {@link GDXVRDeviceType}.
-    */
-   public Array<GDXVRDevice> getDevicesByType(GDXVRDeviceType type)
-   {
-      Array<GDXVRDevice> result = new Array<>();
-      for (GDXVRDevice d : devices)
-      {
-         if (d != null && d.getType() == type)
-            result.add(d);
-      }
-      return result;
-   }
-
-   /**
-    * @return all currently connected {@link GDXVRDevice} instances.
-    */
-   public Array<GDXVRDevice> getDevices()
-   {
-      Array<GDXVRDevice> result = new Array<>();
-      for (GDXVRDevice d : devices)
-      {
-         if (d != null)
-            result.add(d);
-      }
-      return result;
-   }
-
-   /**
-    * @return the {@link GDXVRDevice} of ype {@link GDXVRDeviceType#Controller} that matches the role, or null.
-    */
-   public GDXVRDevice getControllerByRole(GDXVRControllerRole role)
-   {
-      for (GDXVRDevice d : devices)
-      {
-         if (d != null && d.getType() == GDXVRDeviceType.Controller && d.getControllerRole() == role)
-            return d;
-      }
-      return null;
-   }
-
-   public GDXVRDevicePose getDevicePose(int deviceIndex)
-   {
-      if (deviceIndex < 0 || deviceIndex >= devicePoses.length)
-         throw new IndexOutOfBoundsException("Device index must be >= 0 and <= " + devicePoses.length);
-      return devicePoses[deviceIndex];
-   }
-
-   /**
     * Start rendering. Call beginEye to setup rendering
     * for each individual eye. End rendering by calling
     * #end
@@ -267,37 +183,41 @@ public class GDXVRContext implements Disposable
 
       if (!initialDevicesReported)
       {
-         for (int index = 0; index < devices.length; index++)
+         for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
          {
-            if (VRSystem.VRSystem_IsTrackedDeviceConnected(index))
+            if (VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex))
             {
-               createDevice(index);
-               for (GDXVRDeviceListener l : listeners)
+               createDevice(deviceIndex);
+               for (GDXVRDeviceListener deviceListener : deviceListeners)
                {
-                  l.connected(devices[index]);
+                  deviceListener.connected(devices.get(deviceIndex));
                }
             }
          }
          initialDevicesReported = true;
       }
 
-      for (int device = 0; device < VR.k_unMaxTrackedDeviceCount; device++)
+      for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
       {
-         TrackedDevicePose trackedPose = trackedDevicePoses.get(device);
-         GDXVRDevicePose pose = devicePoses[device];
+         TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
+         GDXVRDevicePose pose = devicePoses[deviceIndex];
 
-         GDXTools.toGDX(trackedPose.mDeviceToAbsoluteTracking(), pose.getTransform());
-         pose.getVelocity().set(trackedPose.vVelocity().v(0), trackedPose.vVelocity().v(1), trackedPose.vVelocity().v(2));
-         pose.getAngularVelocity().set(trackedPose.vAngularVelocity().v(0), trackedPose.vAngularVelocity().v(1), trackedPose.vAngularVelocity().v(2));
+         HmdVector3 velocity = trackedPose.vVelocity();
+         HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
+         HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
+
+         GDXTools.toGDX(openVRRigidBodyTransform, pose.getTransform());
+         pose.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
+         pose.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
          pose.setConnected(trackedPose.bDeviceIsConnected());
          pose.setValid(trackedPose.bPoseIsValid());
 
-         if (devices[device] != null)
+         if (devices.get(deviceIndex) != null)
          {
-            devices[device].updateAxesAndPosition();
-            if (devices[device].getModelInstance() != null)
+            devices.get(deviceIndex).updateAxesAndPosition();
+            if (devices.get(deviceIndex).getModelInstance() != null)
             {
-               devices[device].getModelInstance().transform.idt()
+               devices.get(deviceIndex).getModelInstance().transform.idt()
                                                       .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
                                                       .mul(trackerSpaceToWorldspaceRotationOffset)
                                                       .mul(pose.getTransform());
@@ -307,58 +227,58 @@ public class GDXVRContext implements Disposable
 
       while (VRSystem.VRSystem_PollNextEvent(event))
       {
-         int index = event.trackedDeviceIndex();
-         if (index < 0 || index > VR.k_unMaxTrackedDeviceCount)
+         int deviceIndex = event.trackedDeviceIndex();
+         if (deviceIndex < 0 || deviceIndex > VR.k_unMaxTrackedDeviceCount)
             continue;
          int button = 0;
 
          switch (event.eventType())
          {
             case VR.EVREventType_VREvent_TrackedDeviceActivated:
-               createDevice(index);
-               for (GDXVRDeviceListener l : listeners)
+               createDevice(deviceIndex);
+               for (GDXVRDeviceListener deviceListener : deviceListeners)
                {
-                  l.connected(devices[index]);
+                  deviceListener.connected(devices.get(deviceIndex));
                }
                break;
             case VR.EVREventType_VREvent_TrackedDeviceDeactivated:
-               index = event.trackedDeviceIndex();
-               if (devices[index] == null)
+               deviceIndex = event.trackedDeviceIndex();
+               if (devices.get(deviceIndex) == null)
                   continue;
-               for (GDXVRDeviceListener l : listeners)
+               for (GDXVRDeviceListener deviceListener : deviceListeners)
                {
-                  l.disconnected(devices[index]);
+                  deviceListener.disconnected(devices.get(deviceIndex));
                }
-               devices[index] = null;
+               devices.set(deviceIndex, null);
                break;
             case VR.EVREventType_VREvent_ButtonPress:
-               if (devices[index] == null)
+               if (devices.get(deviceIndex) == null)
                   continue;
                button = event.data().controller().button();
-               devices[index].setButton(button, true);
-               for (GDXVRDeviceListener l : listeners)
+               devices.get(deviceIndex).setButton(button, true);
+               for (GDXVRDeviceListener deviceListener : deviceListeners)
                {
-                  l.buttonPressed(devices[index], button);
+                  deviceListener.buttonPressed(devices.get(deviceIndex), button);
                }
                break;
             case VR.EVREventType_VREvent_ButtonUnpress:
-               if (devices[index] == null)
+               if (devices.get(deviceIndex) == null)
                   continue;
                button = event.data().controller().button();
-               devices[index].setButton(button, false);
-               for (GDXVRDeviceListener l : listeners)
+               devices.get(deviceIndex).setButton(button, false);
+               for (GDXVRDeviceListener deviceListener : deviceListeners)
                {
-                  l.buttonReleased(devices[index], button);
+                  deviceListener.buttonReleased(devices.get(deviceIndex), button);
                }
                break;
          }
       }
    }
 
-   private void createDevice(int index)
+   private void createDevice(int deviceIndex)
    {
       GDXVRDeviceType type = null;
-      int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(index);
+      int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
       switch (deviceClass)
       {
          case VR.ETrackedDeviceClass_TrackedDeviceClass_HMD:
@@ -380,7 +300,7 @@ public class GDXVRContext implements Disposable
       GDXVRControllerRole role = GDXVRControllerRole.Unknown;
       if (type == GDXVRDeviceType.Controller)
       {
-         int r = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(index);
+         int r = VRSystem.VRSystem_GetControllerRoleForTrackedDeviceIndex(deviceIndex);
          switch (r)
          {
             case VR.ETrackedControllerRole_TrackedControllerRole_LeftHand:
@@ -391,8 +311,8 @@ public class GDXVRContext implements Disposable
                break;
          }
       }
-      devices[index] = new GDXVRDevice(this, devicePoses[index], type, role);
-      devices[index].updateAxesAndPosition();
+      devices.set(deviceIndex, new GDXVRDevice(this, devicePoses[deviceIndex], type, role));
+      devices.get(deviceIndex).updateAxesAndPosition();
    }
 
    /**
@@ -555,6 +475,76 @@ public class GDXVRContext implements Disposable
       models.put(name, model);
 
       return model;
+   }
+
+   /**
+    * Adds a {@link GDXVRDeviceListener} to receive events
+    */
+   public void addListener(GDXVRDeviceListener listener)
+   {
+      this.deviceListeners.add(listener);
+   }
+
+   /**
+    * Removes a {@link GDXVRDeviceListener}
+    */
+   public void removeListener(GDXVRDeviceListener listener)
+   {
+      this.deviceListeners.removeValue(listener, true);
+   }
+
+   /**
+    * @return the first {@link GDXVRDevice} of the given {@link GDXVRDeviceType} or null.
+    */
+   public GDXVRDevice getDeviceByType(GDXVRDeviceType type)
+   {
+      for (GDXVRDevice device : devices)
+      {
+         if (device != null && device.getType() == type)
+            return device;
+      }
+      return null;
+   }
+
+   /**
+    * @return all {@link GDXVRDevice} instances of the given {@link GDXVRDeviceType}.
+    */
+   public Array<GDXVRDevice> getDevicesByType(GDXVRDeviceType type)
+   {
+      Array<GDXVRDevice> result = new Array<>();
+      for (GDXVRDevice device : devices)
+      {
+         if (device != null && device.getType() == type)
+            result.add(device);
+      }
+      return result;
+   }
+
+   /**
+    * @return all currently connected {@link GDXVRDevice} instances.
+    */
+   public Array<GDXVRDevice> getDevices()
+   {
+      Array<GDXVRDevice> result = new Array<>();
+      for (GDXVRDevice device : devices)
+      {
+         if (device != null)
+            result.add(device);
+      }
+      return result;
+   }
+
+   /**
+    * @return the {@link GDXVRDevice} of ype {@link GDXVRDeviceType#Controller} that matches the role, or null.
+    */
+   public GDXVRDevice getControllerByRole(GDXVRControllerRole role)
+   {
+      for (GDXVRDevice device : devices)
+      {
+         if (device != null && device.getType() == GDXVRDeviceType.Controller && device.getControllerRole() == role)
+            return device;
+      }
+      return null;
    }
 
    /**
