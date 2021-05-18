@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -22,6 +23,7 @@ public class HighLevelControllerFactoryHelper
    private HighLevelControlManagerFactory managerFactory;
    private HighLevelControllerParameters highLevelControllerParameters;
    private WalkingControllerParameters walkingControllerParameters;
+   private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private CommandInputManager commandInputManager;
    private StatusMessageOutputManager statusMessageOutputManager;
    private JointDesiredOutputListBasics lowLevelControllerOutput;
@@ -43,11 +45,14 @@ public class HighLevelControllerFactoryHelper
       this.controllerToolbox = controllerToolbox;
    }
 
-   public void setParameters(HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
+   public void setParameters(HighLevelControllerParameters highLevelControllerParameters,
+                             WalkingControllerParameters walkingControllerParameters,
+                             PushRecoveryControllerParameters pushRecoveryControllerParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-   }
+      this.pushRecoveryControllerParameters = pushRecoveryControllerParameters;
+}
 
    public void setHighLevelControlManagerFactory(HighLevelControlManagerFactory managerFactory)
    {
@@ -97,6 +102,11 @@ public class HighLevelControllerFactoryHelper
    public WalkingControllerParameters getWalkingControllerParameters()
    {
       return walkingControllerParameters;
+   }
+
+   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
+   {
+      return pushRecoveryControllerParameters;
    }
 
    public CommandInputManager getCommandInputManager()
