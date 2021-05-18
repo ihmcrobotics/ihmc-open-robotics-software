@@ -56,7 +56,6 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
  */
 public class GDXVRContext implements Disposable
 {
-
    // couple of scratch buffers
    private final IntBuffer error = BufferUtils.newIntBuffer(1);
    private final IntBuffer scratch = BufferUtils.newIntBuffer(1), scratch2 = BufferUtils.newIntBuffer(1);
@@ -92,7 +91,6 @@ public class GDXVRContext implements Disposable
                                                                                                     Math.toRadians(90.0),
                                                                                                     Math.toRadians(0.0)), new Point3D());
    private final RigidBodyTransformReadOnly toZForwardYUp;
-
    {
       RigidBodyTransform toXForwardZUpTemp = new RigidBodyTransform(toZUpXForward);
       toXForwardZUpTemp.invert();
@@ -266,7 +264,7 @@ public class GDXVRContext implements Disposable
       return null;
    }
 
-   GDXVRDevicePose getDevicePose(int deviceIndex)
+   public GDXVRDevicePose getDevicePose(int deviceIndex)
    {
       if (deviceIndex < 0 || deviceIndex >= devicePoses.length)
          throw new IndexOutOfBoundsException("Device index must be >= 0 and <= " + devicePoses.length);
