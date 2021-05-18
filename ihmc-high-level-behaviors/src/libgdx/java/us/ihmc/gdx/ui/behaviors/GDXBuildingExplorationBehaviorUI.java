@@ -13,9 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.VRDeviceAdapter;
+import us.ihmc.gdx.vr.*;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.log.LogTools;
@@ -23,7 +21,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
 {
@@ -42,10 +40,10 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
 
       if (GDXVRManager.isVREnabled())
       {
-         vrManager.getContext().addListener(new VRDeviceAdapter()
+         vrManager.getContext().addListener(new GDXVRDeviceAdapter()
          {
             @Override
-            public void buttonPressed(GDXVRContext.VRDevice device, int button)
+            public void buttonPressed(GDXVRDevice device, int button)
             {
                LogTools.info("Pressed: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.LEFT))
@@ -54,7 +52,7 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
                   {
                      goalIsBeingPlaced = true;
                   }
-                  else if (button == GDXVRContext.VRControllerButtons.Grip)
+                  else if (button == GDXVRControllerButtons.Grip)
                   {
                      messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, BuildingExplorationStateName.LOOK_AND_STEP);
                      messager.submitMessage(BuildingExplorationBehaviorAPI.Start, true);
@@ -62,7 +60,7 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
                }
                if (device == vrManager.getControllers().get(RobotSide.RIGHT))
                {
-                  if (button == GDXVRContext.VRControllerButtons.Grip)
+                  if (button == GDXVRControllerButtons.Grip)
                   {
                      messager.submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
                   }
@@ -70,7 +68,7 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
             }
 
             @Override
-            public void buttonReleased(GDXVRContext.VRDevice device, int button)
+            public void buttonReleased(GDXVRDevice device, int button)
             {
                LogTools.info("Released: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)

@@ -153,6 +153,7 @@ public class GDXImGuiBasedUI
    {
       vrManager.create();
       sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
+      addImGui3DViewInputProcessor(vrManager::process3DViewInput);
    }
 
    public void pollVREvents()
