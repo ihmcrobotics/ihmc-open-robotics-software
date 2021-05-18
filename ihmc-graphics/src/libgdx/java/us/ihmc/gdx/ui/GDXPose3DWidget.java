@@ -88,7 +88,6 @@ public class GDXPose3DWidget implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform tempPolytopeTransform = new RigidBodyTransform();
-   private GDXImGuiBasedUI baseUI;
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
    private final Point3D interpolatedPoint = new Point3D();
@@ -113,10 +112,8 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Vector3D axisMoveVector = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create()
    {
-      this.baseUI = baseUI;
-
       axisRotations[0] = new RotationMatrix(0.0, Math.PI / 2.0, 0.0);
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
       axisRotations[2] = new RotationMatrix();
@@ -139,7 +136,7 @@ public class GDXPose3DWidget implements RenderableProvider
       }
       if (isWindowHovered && !dragging)
       {
-         Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
+         Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
 
          if (rightMouseDown)
@@ -161,7 +158,7 @@ public class GDXPose3DWidget implements RenderableProvider
          dragBucketX += mouseDraggedX;
          dragBucketY += mouseDraggedY;
 
-         Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
+         Line3DReadOnly pickRay = input.getPickRayInWorld();
 
          axisDragLine.getPoint().set(transform.getTranslation());
          axisDragLine.getDirection().set(Axis3D.Z);

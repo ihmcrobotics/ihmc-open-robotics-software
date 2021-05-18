@@ -69,7 +69,6 @@ public class GDXModelInput
    private final HashMap<Character, ModelInstance> controlMap = new HashMap<>();
    private final HashSet<ModelInstance> controlAxes = new HashSet<>();
    private float modelYaw, modelPitch, modelRoll = 0;
-   private GDXImGuiBasedUI baseUI;
    private final FramePose3D tempFramePose = new FramePose3D();
    private final RotationMatrix tempRotationMatrix = new RotationMatrix();
    private final ImBoolean editMode = new ImBoolean(false);
@@ -117,7 +116,7 @@ public class GDXModelInput
 
    public void updateSelections(ImGui3DViewInput input)
    {
-      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
+      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
       int result = -1;
       double finalPerpDist = Double.MAX_VALUE;
       double finalDistFromOrigin = Double.MAX_VALUE;
@@ -245,7 +244,7 @@ public class GDXModelInput
             previousStateMouseX = input.getMousePosX();
             previousStateMouseY = input.getMousePosY();
 
-            Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
+            Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
 
             switch (state)
             {
@@ -423,11 +422,6 @@ public class GDXModelInput
    public void setState(State state)
    {
       this.state = state;
-   }
-
-   public void setBaseUI(GDXImGuiBasedUI baseUI)
-   {
-      this.baseUI = baseUI;
    }
 
    public HashSet<ModelInstance> getControlAxes()

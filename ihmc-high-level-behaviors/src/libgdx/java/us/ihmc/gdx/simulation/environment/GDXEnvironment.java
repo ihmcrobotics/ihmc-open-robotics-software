@@ -40,7 +40,6 @@ import java.util.*;
 public class GDXEnvironment implements RenderableProvider
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
-   private GDXImGuiBasedUI baseUI;
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
@@ -57,10 +56,9 @@ public class GDXEnvironment implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      this.baseUI = baseUI;
       baseUI.getSceneManager().addRenderableProvider(this);
 
-      pose3DWidget.create(baseUI);
+      pose3DWidget.create();
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -70,7 +68,7 @@ public class GDXEnvironment implements RenderableProvider
       {
          if (placing)
          {
-            Line3DReadOnly pickRay = viewInput.getPickRayInWorld(baseUI);
+            Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
             Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
                                                                                         Axis3D.Z,
                                                                                         pickRay.getPoint(),
@@ -88,7 +86,7 @@ public class GDXEnvironment implements RenderableProvider
             pose3DWidget.process3DViewInput(viewInput);
             selectedObject.set(pose3DWidget.getTransform());
 
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                if (intersectedObject != selectedObject)
@@ -106,7 +104,7 @@ public class GDXEnvironment implements RenderableProvider
       {
          if (viewInput.isWindowHovered())
          {
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
 
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
