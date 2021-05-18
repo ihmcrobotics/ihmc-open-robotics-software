@@ -45,6 +45,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -318,7 +319,7 @@ public class GDXVRContext implements Disposable
          TrackedDevicePose trackedPose = trackedDevicePoses.get(device);
          GDXVRDevicePose pose = devicePoses[device];
 
-         GDXVRTools.hmdMat34ToMatrix4(trackedPose.mDeviceToAbsoluteTracking(), pose.getTransform());
+         GDXTools.toGDX(trackedPose.mDeviceToAbsoluteTracking(), pose.getTransform());
          pose.getVelocity().set(trackedPose.vVelocity().v(0), trackedPose.vVelocity().v(1), trackedPose.vVelocity().v(2));
          pose.getAngularVelocity().set(trackedPose.vAngularVelocity().v(0), trackedPose.vAngularVelocity().v(1), trackedPose.vAngularVelocity().v(2));
          pose.setConnected(trackedPose.bDeviceIsConnected());

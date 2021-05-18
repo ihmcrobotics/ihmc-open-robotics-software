@@ -67,14 +67,6 @@ public class GDXVRDevice
       referenceFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   /**
-    * @return the most up-to-date {@link GDXVRDevicePose} in tracker space
-    */
-   public GDXVRDevicePose getPose()
-   {
-      return pose;
-   }
-
    public void updateAxesAndPosition()
    {
       Matrix4 matrix = pose.getTransform();
@@ -105,6 +97,14 @@ public class GDXVRDevice
       referenceFrame.setY(worldTransformEuclid.getTranslation().getY());
       referenceFrame.setZ(worldTransformEuclid.getTranslation().getZ());
       referenceFrame.setOrientationAndUpdate(worldTransformEuclid.getRotationView());
+   }
+
+   /**
+    * @return the most up-to-date {@link GDXVRDevicePose} in tracker space
+    */
+   public GDXVRDevicePose getPose()
+   {
+      return pose;
    }
 
    /**
