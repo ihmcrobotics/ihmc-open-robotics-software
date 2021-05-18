@@ -21,6 +21,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 {
    public static final double defaultScaleFactor = 2.0;
 
+   private final boolean manageROS2Node;
    private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<PlanarRegionsListMessage> regionPublisher;
 
@@ -28,26 +29,43 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
    private final AtomicReference<RobotConfigurationData> latestRobotConfigurationData = new AtomicReference<>(null);
    private final AtomicReference<BipedalSupportPlanarRegionParametersMessage> latestParametersMessage = new AtomicReference<>(null);
 
-   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private ScheduledFuture<?> task;
 
    private final BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
 
+   public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node)
+   {
+      this(robotModel, realtimeROS2Node, null);
+   }
+
    public BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   {
+      this(robotModel, null, pubSubImplementation);
+   }
+
+   private BipedalSupportPlanarRegionPublisher(DRCRobotModel robotModel, RealtimeROS2Node realtimeROS2Node, PubSubImplementation pubSubImplementation)
    {
       String robotName = robotModel.getSimpleRobotName();
       bipedalSupportPlanarRegionCalculator = new BipedalSupportPlanarRegionCalculator(robotModel);
 
-      ros2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
+      manageROS2Node = realtimeROS2Node == null;
+      if (realtimeROS2Node == null)
+         realtimeROS2Node = ROS2Tools.createRealtimeROS2Node(pubSubImplementation, "supporting_planar_region_publisher");
+      ros2Node = realtimeROS2Node;
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
+                                                    CapturabilityBasedStatus.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
-                                           subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(robotName),
+                                                    subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BIPEDAL_SUPPORT_REGIONS);
-      ROS2Tools.createCallbackSubscription(ros2Node, BipedalSupportPlanarRegionParametersMessage.class, getTopic(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           BipedalSupportPlanarRegionParametersMessage.class,
+                                           getTopic(robotName),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();
@@ -60,7 +78,8 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
    public void start()
    {
-      ros2Node.spin();
+      if (manageROS2Node)
+         ros2Node.spin();
       task = executorService.scheduleWithFixedDelay(this::run, 0, 1, TimeUnit.SECONDS);
    }
 
@@ -105,7 +124,8 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
    {
       stop();
       executorService.shutdownNow();
-      ros2Node.destroy();
+      if (manageROS2Node)
+         ros2Node.destroy();
    }
 
    @Override
@@ -116,7 +136,6 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getTopic(String robotName)
    {
-      return ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                     .withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
+      return ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
    }
 }
