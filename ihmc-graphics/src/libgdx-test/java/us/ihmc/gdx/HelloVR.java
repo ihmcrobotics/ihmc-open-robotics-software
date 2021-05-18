@@ -34,6 +34,7 @@ import com.badlogic.gdx.utils.JsonReader;
 
 import org.lwjgl.opengl.GL32;
 import us.ihmc.gdx.vr.*;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class HelloVR extends ApplicationAdapter {
 	static final String TAG = "HelloVR";
@@ -135,8 +136,8 @@ public class HelloVR extends ApplicationAdapter {
 
 			// Set the far clip plane distance on the camera of each eye
 			// All units are in meters.
-			context.getEyeData(GDXVREye.Left).getCamera().far = 100f;
-			context.getEyeData(GDXVREye.Right).getCamera().far = 100f;
+			context.getEyeData(RobotSide.LEFT).getCamera().far = 100f;
+			context.getEyeData(RobotSide.RIGHT).getCamera().far = 100f;
 
 			// Register a VRDeviceListener to get notified when
 			// controllers are (dis-)connected and their buttons
@@ -253,8 +254,8 @@ public class HelloVR extends ApplicationAdapter {
 
 			// render the scene for the left/right eye
 			context.begin();
-			renderScene(GDXVREye.Left);
-			renderScene(GDXVREye.Right);
+			renderScene(RobotSide.LEFT);
+			renderScene(RobotSide.RIGHT);
 			context.end();
 
 			// Render to the companion window (manually, see GDXVRContext for
@@ -278,7 +279,7 @@ public class HelloVR extends ApplicationAdapter {
 	Vector3 yAxis = new Vector3();
 	Vector3 zAxis = new Vector3();
 
-	private void renderScene(GDXVREye eye) {
+	private void renderScene(RobotSide eye) {
 		GDXVRCamera camera = context.getEyeData(eye).getCamera();
 		context.beginEye(eye);
 		renderScene(camera);
