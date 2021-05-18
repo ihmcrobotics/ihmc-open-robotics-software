@@ -66,7 +66,6 @@ public class GDXVRContext implements Disposable
    private final TrackedDevicePose.Buffer trackedDeviceGamePoses = TrackedDevicePose.create(VR.k_unMaxTrackedDeviceCount);
 
    // devices, their poses and listeners
-   private final GDXVRDevicePose[] devicePoses = new GDXVRDevicePose[VR.k_unMaxTrackedDeviceCount];
    private final ArrayList<GDXVRDevice> devices = new ArrayList<>(VR.k_unMaxTrackedDeviceCount);
    private final Array<GDXVRDeviceListener> deviceListeners = new Array<>();
    private final VREvent event = VREvent.create();
@@ -123,7 +122,6 @@ public class GDXVRContext implements Disposable
 
       for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
       {
-         devicePoses[deviceIndex] = new GDXVRDevicePose(deviceIndex);
          devices.add(null);
       }
 
@@ -199,28 +197,27 @@ public class GDXVRContext implements Disposable
 
       for (int deviceIndex = 0; deviceIndex < VR.k_unMaxTrackedDeviceCount; deviceIndex++)
       {
-         TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
-         GDXVRDevicePose pose = devicePoses[deviceIndex];
-
-         HmdVector3 velocity = trackedPose.vVelocity();
-         HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
-         HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
-
-         GDXTools.toGDX(openVRRigidBodyTransform, pose.getTransform());
-         pose.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
-         pose.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
-         pose.setConnected(trackedPose.bDeviceIsConnected());
-         pose.setValid(trackedPose.bPoseIsValid());
-
-         if (devices.get(deviceIndex) != null)
+         GDXVRDevice device = devices.get(deviceIndex);
+         if (device != null)
          {
-            devices.get(deviceIndex).updateAxesAndPosition();
-            if (devices.get(deviceIndex).getModelInstance() != null)
+            TrackedDevicePose trackedPose = trackedDevicePoses.get(deviceIndex);
+
+            HmdVector3 velocity = trackedPose.vVelocity();
+            HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
+            HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
+
+            GDXTools.toGDX(openVRRigidBodyTransform, device.getTransform());
+            device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
+            device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
+            device.setValid(trackedPose.bPoseIsValid());
+
+            device.updateAxesAndPosition();
+            if (device.getModelInstance() != null)
             {
-               devices.get(deviceIndex).getModelInstance().transform.idt()
-                                                      .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
-                                                      .mul(trackerSpaceToWorldspaceRotationOffset)
-                                                      .mul(pose.getTransform());
+               device.getModelInstance().transform.idt()
+                                                       .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
+                                                       .mul(trackerSpaceToWorldspaceRotationOffset)
+                                                       .mul(device.getTransform());
             }
          }
       }
@@ -311,7 +308,7 @@ public class GDXVRContext implements Disposable
                break;
          }
       }
-      devices.set(deviceIndex, new GDXVRDevice(this, devicePoses[deviceIndex], type, role));
+      devices.set(deviceIndex, new GDXVRDevice(this, deviceIndex, type, role));
       devices.get(deviceIndex).updateAxesAndPosition();
    }
 

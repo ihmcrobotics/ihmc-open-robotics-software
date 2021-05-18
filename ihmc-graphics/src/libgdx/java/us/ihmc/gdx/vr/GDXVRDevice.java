@@ -30,7 +30,6 @@ public class GDXVRDevice
    private final String name;
 
    private final IntBuffer tempIntBuffer = BufferUtils.newIntBuffer(1);
-   private final GDXVRDevicePose pose;
    // tracker space
    private final Vector3 position = new Vector3();
    private final Vector3 xAxis = new Vector3();
@@ -50,16 +49,23 @@ public class GDXVRDevice
 
    private final Matrix4 matTmp = new Matrix4();
 
-   public GDXVRDevice(GDXVRContext gdxVRContext, GDXVRDevicePose pose, GDXVRDeviceType type, GDXVRControllerRole role)
+   private final Matrix4 transform = new Matrix4();
+   private final Vector3 velocity = new Vector3();
+   private final Vector3 angularVelocity = new Vector3();
+   private boolean isValid;
+   /** the device index */
+   private final int deviceIndex;
+
+   public GDXVRDevice(GDXVRContext gdxVRContext, int deviceIndex, GDXVRDeviceType type, GDXVRControllerRole role)
    {
       this.gdxVRContext = gdxVRContext;
-      this.pose = pose;
+      this.deviceIndex = deviceIndex;
       this.type = type;
       this.role = role;
       Model model = gdxVRContext.loadRenderModel(getStringProperty(GDXVRDeviceProperty.RenderModelName_String));
       this.modelInstance = model != null ? new ModelInstance(model) : null;
       if (model != null)
-         this.modelInstance.transform.set(pose.getTransform());
+         this.modelInstance.transform.set(transform);
 
       String roleName = role == GDXVRControllerRole.LeftHand ? role.name() : "";
       roleName += role == GDXVRControllerRole.RightHand ? role.name() : "";
@@ -69,11 +75,10 @@ public class GDXVRDevice
 
    public void updateAxesAndPosition()
    {
-      Matrix4 matrix = pose.getTransform();
-      matrix.getTranslation(position);
-      xAxis.set(matrix.val[Matrix4.M00], matrix.val[Matrix4.M10], matrix.val[Matrix4.M20]).nor();
-      yAxis.set(matrix.val[Matrix4.M01], matrix.val[Matrix4.M11], matrix.val[Matrix4.M21]).nor();
-      zAxis.set(matrix.val[Matrix4.M02], matrix.val[Matrix4.M12], matrix.val[Matrix4.M22]).nor().scl(-1);
+      transform.getTranslation(position);
+      xAxis.set(transform.val[Matrix4.M00], transform.val[Matrix4.M10], transform.val[Matrix4.M20]).nor();
+      yAxis.set(transform.val[Matrix4.M01], transform.val[Matrix4.M11], transform.val[Matrix4.M21]).nor();
+      zAxis.set(transform.val[Matrix4.M02], transform.val[Matrix4.M12], transform.val[Matrix4.M22]).nor().scl(-1);
 
       matTmp.set(gdxVRContext.getTrackerSpaceToWorldspaceRotationOffset());
       positionWorld.set(position).mul(matTmp);
@@ -88,7 +93,7 @@ public class GDXVRDevice
       worldTransformGDX.idt()
                        .translate(gdxVRContext.getTrackerSpaceOriginToWorldSpaceTranslationOffset())
                        .mul(gdxVRContext.getTrackerSpaceToWorldspaceRotationOffset())
-                       .mul(pose.getTransform());
+                       .mul(transform);
       GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
       worldTransformEuclid.appendOrientation(toZUpXForward);
       GDXTools.toGDX(worldTransformEuclid, worldTransformGDX);
@@ -97,14 +102,6 @@ public class GDXVRDevice
       referenceFrame.setY(worldTransformEuclid.getTranslation().getY());
       referenceFrame.setZ(worldTransformEuclid.getTranslation().getZ());
       referenceFrame.setOrientationAndUpdate(worldTransformEuclid.getRotationView());
-   }
-
-   /**
-    * @return the most up-to-date {@link GDXVRDevicePose} in tracker space
-    */
-   public GDXVRDevicePose getPose()
-   {
-      return pose;
    }
 
    /**
@@ -184,7 +181,7 @@ public class GDXVRDevice
     */
    public boolean isConnected()
    {
-      return VRSystem.VRSystem_IsTrackedDeviceConnected(pose.getIndex());
+      return VRSystem.VRSystem_IsTrackedDeviceConnected(deviceIndex);
    }
 
    /**
@@ -216,7 +213,7 @@ public class GDXVRDevice
    {
       if (axis < 0 || axis >= 5)
          return 0;
-      VRSystem.VRSystem_GetControllerState(pose.getIndex(), state);
+      VRSystem.VRSystem_GetControllerState(deviceIndex, state);
       return state.rAxis(axis).x();
    }
 
@@ -227,7 +224,7 @@ public class GDXVRDevice
    {
       if (axis < 0 || axis >= 5)
          return 0;
-      VRSystem.VRSystem_GetControllerState(pose.getIndex(), state);
+      VRSystem.VRSystem_GetControllerState(deviceIndex, state);
       return state.rAxis(axis).y();
    }
 
@@ -239,7 +236,7 @@ public class GDXVRDevice
     */
    public void triggerHapticPulse(short duration)
    {
-      VRSystem.VRSystem_TriggerHapticPulse(pose.getIndex(), 0, duration);
+      VRSystem.VRSystem_TriggerHapticPulse(deviceIndex, 0, duration);
    }
 
    /**
@@ -248,7 +245,7 @@ public class GDXVRDevice
    public boolean getBooleanProperty(GDXVRDeviceProperty property)
    {
       tempIntBuffer.put(0, 0);
-      boolean result = VRSystem.VRSystem_GetBoolTrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      boolean result = VRSystem.VRSystem_GetBoolTrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
       if (tempIntBuffer.get(0) != 0)
          return false;
       else
@@ -261,7 +258,7 @@ public class GDXVRDevice
    public float getFloatProperty(GDXVRDeviceProperty property)
    {
       tempIntBuffer.put(0, 0);
-      float result = VRSystem.VRSystem_GetFloatTrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      float result = VRSystem.VRSystem_GetFloatTrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
       if (tempIntBuffer.get(0) != 0)
          return 0;
       else
@@ -274,7 +271,7 @@ public class GDXVRDevice
    public int getInt32Property(GDXVRDeviceProperty property)
    {
       tempIntBuffer.put(0, 0);
-      int result = VRSystem.VRSystem_GetInt32TrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      int result = VRSystem.VRSystem_GetInt32TrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
       if (tempIntBuffer.get(0) != 0)
          return 0;
       else
@@ -287,7 +284,7 @@ public class GDXVRDevice
    public long getUInt64Property(GDXVRDeviceProperty property)
    {
       tempIntBuffer.put(0, 0);
-      long result = VRSystem.VRSystem_GetUint64TrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      long result = VRSystem.VRSystem_GetUint64TrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
       if (tempIntBuffer.get(0) != 0)
          return 0;
       else
@@ -301,7 +298,7 @@ public class GDXVRDevice
    {
       tempIntBuffer.put(0, 0);
 
-      String result = VRSystem.VRSystem_GetStringTrackedDeviceProperty(this.pose.getIndex(), property.value, tempIntBuffer);
+      String result = VRSystem.VRSystem_GetStringTrackedDeviceProperty(deviceIndex, property.value, tempIntBuffer);
       if (tempIntBuffer.get(0) != 0)
          return null;
       return result;
@@ -315,10 +312,52 @@ public class GDXVRDevice
       return modelInstance;
    }
 
+   public int getDeviceIndex()
+   {
+      return deviceIndex;
+   }
+
+   /**
+    * transform encoding the position and rotation of the device in tracker space
+    **/
+   public Matrix4 getTransform()
+   {
+      return transform;
+   }
+
+   /**
+    * the velocity in m/s in tracker space space
+    **/
+   public Vector3 getVelocity()
+   {
+      return velocity;
+   }
+
+   /**
+    * the angular velocity in radians/s in tracker space
+    **/
+   public Vector3 getAngularVelocity()
+   {
+      return angularVelocity;
+   }
+
+   /**
+    * whether the pose is valid our invalid, e.g. outdated because of tracking failure
+    **/
+   public boolean isValid()
+   {
+      return isValid;
+   }
+
+   public void setValid(boolean valid)
+   {
+      isValid = valid;
+   }
+
    @Override
    public String toString()
    {
       return "VRDevice[manufacturer=" + getStringProperty(GDXVRDeviceProperty.ManufacturerName_String) + ", renderModel=" + getStringProperty(
-            GDXVRDeviceProperty.RenderModelName_String) + ", index=" + pose.getIndex() + ", type=" + type + ", role=" + role + "]";
+            GDXVRDeviceProperty.RenderModelName_String) + ", deviceIndex=" + deviceIndex + ", type=" + type + ", role=" + role + "]";
    }
 }
