@@ -1,4 +1,4 @@
-# Current version: 0.1
+# Current version: 0.2
 FROM ihmcrobotics/nvidia-ros:0.2
 
 USER root
@@ -14,7 +14,6 @@ RUN apt-get --quiet 2 --yes update \
  && rm -rf /var/lib/apt/lists/*
 
 COPY ./multisense_entrypoint.sh /home/robotlab/multisense_entrypoint.sh
-
 RUN chmod a+x /home/robotlab/multisense_entrypoint.sh
 
 USER robotlab

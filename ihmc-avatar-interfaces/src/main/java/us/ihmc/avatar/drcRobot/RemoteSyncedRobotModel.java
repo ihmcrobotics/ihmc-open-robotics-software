@@ -35,7 +35,7 @@ public class RemoteSyncedRobotModel
    {
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),
