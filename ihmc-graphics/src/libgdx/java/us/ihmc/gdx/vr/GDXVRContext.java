@@ -165,39 +165,6 @@ public class GDXVRContext implements Disposable
    }
 
    /**
-    * Returns the tracker space to world space translation offset. All positional vectors
-    * returned by {@link GDXVRDevice} methods taking a {@link GDXVRSpace#World} are
-    * multiplied offset by this vector. This allows offsetting {@link GDXVRDevice}
-    * positions and orientations in world space.
-    */
-   public Vector3 getTrackerSpaceOriginToWorldSpaceTranslationOffset()
-   {
-      return trackerSpaceOriginToWorldSpaceTranslationOffset;
-   }
-
-   /**
-    * Returns the tracker space to world space rotation offset. All rotational vectors
-    * returned by {@link GDXVRDevice} methods taking a {@link GDXVRSpace#World} are
-    * rotated by this offset. This allows offsetting {@link GDXVRDevice}
-    * orientations in world space. The matrix needs to only have
-    * rotational components.
-    */
-   public Matrix4 getTrackerSpaceToWorldspaceRotationOffset()
-   {
-      return trackerSpaceToWorldspaceRotationOffset;
-   }
-
-   public RigidBodyTransformReadOnly getToZForwardYUp()
-   {
-      return toZForwardYUp;
-   }
-
-   public RigidBodyTransformReadOnly getToZUpXForward()
-   {
-      return toZUpXForward;
-   }
-
-   /**
     * Adds a {@link GDXVRDeviceListener} to receive events
     */
    public void addListener(GDXVRDeviceListener listener)
@@ -429,14 +396,6 @@ public class GDXVRContext implements Disposable
    }
 
    /**
-    * @return the {@link GDXVRPerEyeData} such as rendering surface and camera
-    */
-   public GDXVRPerEyeData getEyeData(RobotSide eye)
-   {
-      return perEyeData.get(eye);
-   }
-
-   /**
     * Start rendering to the rendering surface for the given eye.
     * Complete by calling {@link #endEye()}.
     */
@@ -596,5 +555,46 @@ public class GDXVRContext implements Disposable
       models.put(name, model);
 
       return model;
+   }
+
+   /**
+    * @return the {@link GDXVRPerEyeData} such as rendering surface and camera
+    */
+   public GDXVRPerEyeData getEyeData(RobotSide eye)
+   {
+      return perEyeData.get(eye);
+   }
+
+   /**
+    * Returns the tracker space to world space translation offset. All positional vectors
+    * returned by {@link GDXVRDevice} methods taking a {@link GDXVRSpace#World} are
+    * multiplied offset by this vector. This allows offsetting {@link GDXVRDevice}
+    * positions and orientations in world space.
+    */
+   public Vector3 getTrackerSpaceOriginToWorldSpaceTranslationOffset()
+   {
+      return trackerSpaceOriginToWorldSpaceTranslationOffset;
+   }
+
+   /**
+    * Returns the tracker space to world space rotation offset. All rotational vectors
+    * returned by {@link GDXVRDevice} methods taking a {@link GDXVRSpace#World} are
+    * rotated by this offset. This allows offsetting {@link GDXVRDevice}
+    * orientations in world space. The matrix needs to only have
+    * rotational components.
+    */
+   public Matrix4 getTrackerSpaceToWorldspaceRotationOffset()
+   {
+      return trackerSpaceToWorldspaceRotationOffset;
+   }
+
+   public RigidBodyTransformReadOnly getToZForwardYUp()
+   {
+      return toZForwardYUp;
+   }
+
+   public RigidBodyTransformReadOnly getToZUpXForward()
+   {
+      return toZUpXForward;
    }
 }
