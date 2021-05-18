@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -53,11 +54,17 @@ public class TransferToWalkingSingleSupportState extends TransferState
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
-   public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum, WalkingMessageHandler walkingMessageHandler,
-                                              TouchdownErrorCompensator touchdownErrorCompensator, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                              HighLevelControlManagerFactory managerFactory, WalkingControllerParameters walkingControllerParameters,
-                                              WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
-                                              DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
+   public TransferToWalkingSingleSupportState(WalkingStateEnum stateEnum,
+                                              WalkingMessageHandler walkingMessageHandler,
+                                              TouchdownErrorCompensator touchdownErrorCompensator,
+                                              HighLevelHumanoidControllerToolbox controllerToolbox,
+                                              HighLevelControlManagerFactory managerFactory,
+                                              WalkingControllerParameters walkingControllerParameters,
+                                              WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                              DoubleProvider minimumTransferTime,
+                                              DoubleProvider unloadFraction,
+                                              DoubleProvider rhoMin,
+                                              YoRegistry parentRegistry)
    {
       super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction, rhoMin, parentRegistry);
 
