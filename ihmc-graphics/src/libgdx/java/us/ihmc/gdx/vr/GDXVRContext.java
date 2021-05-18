@@ -2,12 +2,9 @@ package us.ihmc.gdx.vr;
 
 import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
-import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
 import org.lwjgl.PointerBuffer;
-import org.lwjgl.openvr.HmdMatrix34;
-import org.lwjgl.openvr.HmdMatrix44;
 import org.lwjgl.openvr.OpenVR;
 import org.lwjgl.openvr.RenderModel;
 import org.lwjgl.openvr.RenderModelTextureMap;
@@ -59,11 +56,6 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
  */
 public class GDXVRContext implements Disposable
 {
-   /** device index of the head mounted display */
-   public static final int HMD_DEVICE_INDEX = VR.k_unTrackedDeviceIndex_Hmd;
-
-   /** maximum device index */
-   public static final int MAX_DEVICE_INDEX = VR.k_unMaxTrackedDeviceCount - 1;
 
    // couple of scratch buffers
    private final IntBuffer error = BufferUtils.newIntBuffer(1);
@@ -326,7 +318,7 @@ public class GDXVRContext implements Disposable
          TrackedDevicePose trackedPose = trackedDevicePoses.get(device);
          GDXVRDevicePose pose = devicePoses[device];
 
-         hmdMat34ToMatrix4(trackedPose.mDeviceToAbsoluteTracking(), pose.getTransform());
+         GDXVRTools.hmdMat34ToMatrix4(trackedPose.mDeviceToAbsoluteTracking(), pose.getTransform());
          pose.getVelocity().set(trackedPose.vVelocity().v(0), trackedPose.vVelocity().v(1), trackedPose.vVelocity().v(2));
          pose.getAngularVelocity().set(trackedPose.vAngularVelocity().v(0), trackedPose.vAngularVelocity().v(1), trackedPose.vAngularVelocity().v(2));
          pose.setConnected(trackedPose.bDeviceIsConnected());
@@ -514,7 +506,7 @@ public class GDXVRContext implements Disposable
       batcher.end();
    }
 
-   Model loadRenderModel(String name)
+   public Model loadRenderModel(String name)
    {
       if (models.containsKey(name))
          return models.get(name);
@@ -608,57 +600,5 @@ public class GDXVRContext implements Disposable
    public IntBuffer getScratch()
    {
       return scratch;
-   }
-
-   static void hmdMat4toMatrix4(HmdMatrix44 hdm, Matrix4 mat)
-   {
-      float[] val = mat.val;
-      FloatBuffer m = hdm.m();
-
-      val[0] = m.get(0);
-      val[1] = m.get(4);
-      val[2] = m.get(8);
-      val[3] = m.get(12);
-
-      val[4] = m.get(1);
-      val[5] = m.get(5);
-      val[6] = m.get(9);
-      val[7] = m.get(13);
-
-      val[8] = m.get(2);
-      val[9] = m.get(6);
-      val[10] = m.get(10);
-      val[11] = m.get(14);
-
-      val[12] = m.get(3);
-      val[13] = m.get(7);
-      val[14] = m.get(11);
-      val[15] = m.get(15);
-   }
-
-   static void hmdMat34ToMatrix4(HmdMatrix34 hmd, Matrix4 mat)
-   {
-      float[] val = mat.val;
-      FloatBuffer m = hmd.m();
-
-      val[0] = m.get(0);
-      val[1] = m.get(4);
-      val[2] = m.get(8);
-      val[3] = 0;
-
-      val[4] = m.get(1);
-      val[5] = m.get(5);
-      val[6] = m.get(9);
-      val[7] = 0;
-
-      val[8] = m.get(2);
-      val[9] = m.get(6);
-      val[10] = m.get(10);
-      val[11] = 0;
-
-      val[12] = m.get(3);
-      val[13] = m.get(7);
-      val[14] = m.get(11);
-      val[15] = 1;
    }
 }

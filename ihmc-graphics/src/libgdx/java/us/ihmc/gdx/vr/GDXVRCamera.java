@@ -45,11 +45,11 @@ public class GDXVRCamera extends Camera
    {
       // get the projection matrix from the HDM
       VRSystem.VRSystem_GetProjectionMatrix(eye.getIndex(), near, far, projectionMat);
-      GDXVRContext.hmdMat4toMatrix4(projectionMat, projection);
+      GDXVRTools.hmdMat4toMatrix4(projectionMat, projection);
 
       // get the eye space matrix from the HDM
       VRSystem.VRSystem_GetEyeToHeadTransform(eye.getIndex(), eyeMat);
-      GDXVRContext.hmdMat34ToMatrix4(eyeMat, eyeSpace);
+      GDXVRTools.hmdMat34ToMatrix4(eyeMat, eyeSpace);
       invEyeSpace.set(eyeSpace).inv();
 
       // get the pose matrix from the HDM
