@@ -28,7 +28,7 @@ import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRou
 import us.ihmc.gdx.simulation.environment.object.objects.GDXPalletObject;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.graphics.GDXPose3DWidget;
+import us.ihmc.gdx.ui.GDXPose3DWidget;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspacePathTools;
