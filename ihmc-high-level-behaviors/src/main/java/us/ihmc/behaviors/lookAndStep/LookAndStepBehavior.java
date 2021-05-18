@@ -43,7 +43,6 @@ public class LookAndStepBehavior implements BehaviorInterface
    final LookAndStepFootstepPlanning footstepPlanning = new LookAndStepFootstepPlanning();
    final LookAndStepStepping stepping = new LookAndStepStepping();
    final LookAndStepReset reset = new LookAndStepReset();
-   final LookAndStepSupportRegionsPublisher supportRegionsPublisher = new LookAndStepSupportRegionsPublisher();
    final BehaviorStateReference<State> behaviorStateReference;
    final LookAndStepBehaviorParameters lookAndStepParameters;
    final FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -131,10 +130,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.subscribeViaCallback(RESET, reset::queueReset);
       helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
-      supportRegionsPublisher.initialize(statusLogger, lookAndStepParameters, helper::publish);
-      helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, supportRegionsPublisher::acceptCapturabilityBasedStatus);
-      helper.subscribeViaCallback(PublishSupportRegions, message -> supportRegionsPublisher.queuePublish());
-
       bodyPathPlanning.initialize(this);
       helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
       helper.subscribeViaCallback(GOAL_INPUT, goal ->
@@ -148,15 +143,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.subscribeViaCallback(BodyPathInput, this::bodyPathPlanInput);
 
       footstepPlanning.initialize(this);
-      delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING,
-                                                   message ->
-                                                   {
-                                                      supportRegionsPublisher.acceptPlanarRegions(message);
-                                                      footstepPlanning.acceptPlanarRegions(message);
-                                                   });
+      delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Node());
       delayFixedPlanarRegionsSubscription.setEnabled(true);
-
+      helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
+                                  footstepPlanning::acceptRobotConfigurationData);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
       helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, status ->
       {

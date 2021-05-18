@@ -19,6 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Touchpad;
@@ -41,8 +42,13 @@ public class GDXVRManager implements RenderableProvider
    private Point3D lastVRSpacePosition = new Point3D();
    private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
 
+   private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
+
    public void create()
    {
+      ENABLE_VR = true;
+      System.setProperty("enable.vr", "true");
+
       context = new GDXVRContext();
 
       // transform space to Z up, X forward
@@ -139,6 +145,11 @@ public class GDXVRManager implements RenderableProvider
             }
          }
       });
+
+      for (Runnable runnable : thingsToCreateOnEnable)
+      {
+         runnable.run();
+      }
    }
 
    public void pollEvents()
@@ -148,6 +159,10 @@ public class GDXVRManager implements RenderableProvider
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      // Wait for VR setup to be ready. This is the primary indicator.
+      if (context.getDeviceByType(GDXVRContext.VRDeviceType.HeadMountedDisplay) == null)
+         return;
+
       if (holdingTouchpadToMove)
       {
          GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
@@ -206,6 +221,11 @@ public class GDXVRManager implements RenderableProvider
       {
          ExceptionTools.handle(modelInstance.model::dispose, DefaultExceptionHandler.PRINT_MESSAGE);
       }
+   }
+
+   public void create(Runnable runnable)
+   {
+      thingsToCreateOnEnable.add(runnable);
    }
 
    @Override

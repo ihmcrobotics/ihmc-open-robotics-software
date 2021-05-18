@@ -1,5 +1,8 @@
 {
   "windows" : {
-    "Environment Builder" : true
+    "Environment Builder" : true,
+    "Lighting" : true,
+    "Input Debugger" : false,
+    "Environment###java.lang.Class:Environment" : true
   }
 }

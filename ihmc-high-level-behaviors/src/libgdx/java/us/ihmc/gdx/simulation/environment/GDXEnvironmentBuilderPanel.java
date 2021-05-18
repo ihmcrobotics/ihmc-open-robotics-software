@@ -72,7 +72,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 //      baseUI.addImGui3DViewInputProcessor(pose3DWidget::process3DViewInput);
 //      baseUI.getSceneManager().addRenderableProvider(pose3DWidget);
 
-      if (GDXVRManager.isVREnabled())
+      vrManager.create(() ->
       {
          vrManager.getContext().addListener(new VRDeviceAdapter()
          {
@@ -101,7 +101,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
                }
             }
          });
-      }
+      });
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }

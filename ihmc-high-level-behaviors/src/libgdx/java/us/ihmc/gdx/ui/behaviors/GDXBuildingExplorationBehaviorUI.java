@@ -40,7 +40,7 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
    {
       goalSphere = GDXModelPrimitives.createSphere(0.1f, Color.GREEN);
 
-      if (Boolean.parseBoolean(System.getProperty("enable.vr")))
+      if (GDXVRManager.isVREnabled())
       {
          vrManager.getContext().addListener(new VRDeviceAdapter()
          {
