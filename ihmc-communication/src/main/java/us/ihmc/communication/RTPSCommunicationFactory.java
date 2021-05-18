@@ -67,9 +67,10 @@ public class RTPSCommunicationFactory
        && NetworkParameters.hasKey(NetworkParameterKeys.RTPSSubnet)
        && !(restrictionHost = NetworkParameters.getHost(NetworkParameterKeys.RTPSSubnet)).isEmpty())
       {
-         if (SystemUtils.IS_OS_WINDOWS)
+         if (SystemUtils.IS_OS_WINDOWS && !restrictionHost.contains("127.0.0.1")) // 127.0.0.1/X might be the only one that works on Windows
          {
-            LogTools.warn("This feature might not work on Windows! If you are not receiving data, try it without setting a subnet restriction.");
+            LogTools.warn("This feature might not work on Windows! "
+                          + "If you are not receiving data, try it using 127.0.0.1/24 or without setting a subnet restriction.");
          }
 
          LogTools.info("Scanning interfaces for restriction: " +  restrictionHost);
