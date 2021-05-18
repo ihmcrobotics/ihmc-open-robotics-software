@@ -4,6 +4,14 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Whether the pelvis should pinned or free to move.
+# Default value is false.
+bool lock_pelvis
+
+# Whether the chest should pinned or free to move.
+# Default value is false.
+bool lock_chest
+
 # Whether the left arm should be controller in joint-space.
 # This is compatible with the hand task-space control.
 # Default value is true.

@@ -3,7 +3,7 @@
 # link and zelda.
 
 IHMC_HOME=$HOME/git/ihmc-open-robotics-software
-GRADLE_VERSION=5.3.1
+GRADLE_VERSION=5.6.4
 GRADLE=/usr/lib/gradle/${GRADLE_VERSION}/bin/gradle
 
 if [[ ! -x $GRADLE ]]; then

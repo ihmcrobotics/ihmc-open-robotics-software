@@ -1,8 +1,21 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
+
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.NormalEstimationParametersMessage;
+import controller_msgs.msg.dds.OcTreeKeyListMessage;
+import controller_msgs.msg.dds.PlanarRegionSegmentationParametersMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.PolygonizerParametersMessage;
+import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -15,11 +28,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.REAParametersM
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2Node;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
+import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 
 public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
 {
@@ -34,7 +45,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    private REACurrentStateProvider currentStateProvider = null;
    private AtomicReference<Boolean> isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
 
-   private final ROS2Node ros2Node;
+   private final ROS2NodeInterface ros2Node;
 
    private final ROS2Topic<PlanarRegionsListMessage> outputTopic;
    private PlanarRegionsListMessage lastPlanarRegionsListMessage;
@@ -48,7 +59,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
            depthOutputTopic);
    }
 
-   public REAPlanarRegionPublicNetworkProvider(ROS2Node ros2Node,
+   public REAPlanarRegionPublicNetworkProvider(ROS2NodeInterface ros2Node,
                                                ROS2Topic outputTopic,
                                                ROS2Topic lidarOutputTopic,
                                                ROS2Topic stereoOutputTopic,
@@ -189,6 +200,7 @@ public class REAPlanarRegionPublicNetworkProvider implements REANetworkProvider
    @Override
    public void stop()
    {
-      ros2Node.destroy();
+      if (ros2Node.getName().equals(ROS2Tools.REA_NODE_NAME))
+         ((ROS2Node) ros2Node).destroy();
    }
 }

@@ -115,4 +115,18 @@ public class ThreadTimer
    {
       timer.set(Conversions.nanosecondsToMilliseconds((double) (System.nanoTime() - lastStartTime)));
    }
+
+   public void clear()
+   {
+      tick.set(0);
+      dt.set(0.0);
+      timer.set(0.0);
+      jitter.set(0);
+      realtimeRate.set(0.0);
+      elapsedSystemTime.set(0.0);
+
+      lastStartTime = 0;
+      realtimeRateCounter = 0;
+      systemInitialTime = 0;
+   }
 }

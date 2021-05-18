@@ -1,15 +1,16 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import controller_msgs.msg.dds.*;
+import java.util.concurrent.atomic.AtomicReference;
+
+import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import controller_msgs.msg.dds.REAStatusMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
-import us.ihmc.ros2.ROS2Node;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
-
-import java.util.concurrent.atomic.AtomicReference;
 
 public class REACurrentStateProvider
 {
@@ -19,7 +20,7 @@ public class REACurrentStateProvider
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
    private final REAStatusMessage currentState = new REAStatusMessage();
 
-   public REACurrentStateProvider(ROS2Node ros2Node,
+   public REACurrentStateProvider(ROS2NodeInterface ros2Node,
                                   ROS2Topic outputTopic,
                                   Messager messager)
    {

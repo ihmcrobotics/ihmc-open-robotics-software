@@ -1,13 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI;
 
-import controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage;
+import controller_msgs.msg.dds.KinematicsStreamingToolboxConfigurationMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class KinematicsStreamingToolboxOutputConfigurationCommand
-      implements Command<KinematicsStreamingToolboxOutputConfigurationCommand, KinematicsStreamingToolboxOutputConfigurationMessage>
+public class KinematicsStreamingToolboxConfigurationCommand
+      implements Command<KinematicsStreamingToolboxConfigurationCommand, KinematicsStreamingToolboxConfigurationMessage>
 {
    private long sequenceId = -1;
+
+   private boolean lockPelvis = false;
+   private boolean lockChest = false;
 
    private boolean enableLeftArmJointspace = true;
    private boolean enableRightArmJointspace = true;
@@ -18,7 +21,7 @@ public class KinematicsStreamingToolboxOutputConfigurationCommand
    private boolean enableChestTaskspace = true;
    private boolean enablePelvisTaskspace = true;
 
-   public KinematicsStreamingToolboxOutputConfigurationCommand()
+   public KinematicsStreamingToolboxConfigurationCommand()
    {
    }
 
@@ -27,6 +30,8 @@ public class KinematicsStreamingToolboxOutputConfigurationCommand
    {
       sequenceId = -1;
 
+      lockPelvis = false;
+      lockChest = false;
       enableLeftArmJointspace = true;
       enableRightArmJointspace = true;
       enableNeckJointspace = true;
@@ -38,10 +43,12 @@ public class KinematicsStreamingToolboxOutputConfigurationCommand
    }
 
    @Override
-   public void set(KinematicsStreamingToolboxOutputConfigurationCommand other)
+   public void set(KinematicsStreamingToolboxConfigurationCommand other)
    {
       sequenceId = other.sequenceId;
 
+      lockPelvis = other.lockPelvis;
+      lockChest = other.lockChest;
       enableLeftArmJointspace = other.enableLeftArmJointspace;
       enableRightArmJointspace = other.enableRightArmJointspace;
       enableNeckJointspace = other.enableNeckJointspace;
@@ -53,9 +60,12 @@ public class KinematicsStreamingToolboxOutputConfigurationCommand
    }
 
    @Override
-   public void setFromMessage(KinematicsStreamingToolboxOutputConfigurationMessage message)
+   public void setFromMessage(KinematicsStreamingToolboxConfigurationMessage message)
    {
       sequenceId = message.getSequenceId();
+
+      lockPelvis = message.getLockPelvis();
+      lockChest = message.getLockChest();
 
       enableLeftArmJointspace = message.getEnableLeftArmJointspace();
       enableRightArmJointspace = message.getEnableRightArmJointspace();
@@ -71,6 +81,16 @@ public class KinematicsStreamingToolboxOutputConfigurationCommand
    public long getSequenceId()
    {
       return sequenceId;
+   }
+
+   public boolean isLockPelvis()
+   {
+      return lockPelvis;
+   }
+
+   public boolean isLockChest()
+   {
+      return lockChest;
    }
 
    public boolean isArmJointspaceEnabled(RobotSide robotSide)
@@ -119,9 +139,9 @@ public class KinematicsStreamingToolboxOutputConfigurationCommand
    }
 
    @Override
-   public Class<KinematicsStreamingToolboxOutputConfigurationMessage> getMessageClass()
+   public Class<KinematicsStreamingToolboxConfigurationMessage> getMessageClass()
    {
-      return KinematicsStreamingToolboxOutputConfigurationMessage.class;
+      return KinematicsStreamingToolboxConfigurationMessage.class;
    }
 
    @Override
