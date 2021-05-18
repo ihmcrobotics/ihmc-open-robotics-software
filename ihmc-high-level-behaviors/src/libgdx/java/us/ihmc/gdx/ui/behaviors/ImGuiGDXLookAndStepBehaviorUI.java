@@ -68,7 +68,6 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImBoolean showFootstepPlanningSection = new ImBoolean(true);
    private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
 
-   private GDXImGuiBasedUI baseUI;
    private ModelInstance sphere;
    private ModelInstance arrow;
    private GDXUIActionMap placeGoalActionMap;
@@ -103,8 +102,6 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      this.baseUI = baseUI;
-
       if (behaviorHelper.getMessager() != null)
       {
          setupSubscribers();
@@ -191,7 +188,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    {
       if (placingGoal && input.isWindowHovered())
       {
-         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
+         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
          PlanarRegionsList latestRegions = this.latestRegions;
          Point3D pickPoint = null;
          if (latestRegions != null)

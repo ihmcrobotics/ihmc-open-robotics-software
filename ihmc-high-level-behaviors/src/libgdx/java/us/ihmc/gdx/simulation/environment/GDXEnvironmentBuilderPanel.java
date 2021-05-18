@@ -65,7 +65,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    {
       vrManager = baseUI.getVRManager();
 
-      modelInput.setBaseUI(baseUI);
       modelInput.create();
 
 //      pose3DWidget.create(baseUI);
