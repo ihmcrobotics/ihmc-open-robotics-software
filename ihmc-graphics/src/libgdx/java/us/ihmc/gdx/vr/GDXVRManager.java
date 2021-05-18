@@ -12,9 +12,11 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDXPose3DWidget;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,7 +24,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Touchpad;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Touchpad;
 
 public class GDXVRManager implements RenderableProvider
 {
@@ -31,7 +33,7 @@ public class GDXVRManager implements RenderableProvider
    private GDXVRContext context;
    private HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
-   private SideDependentList<GDXVRContext.VRDevice> controllers = new SideDependentList<>();
+   private SideDependentList<GDXVRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
    private boolean holdingTouchpadToMove = false;
    private Point3D initialVRSpacePosition = new Point3D();
@@ -41,8 +43,8 @@ public class GDXVRManager implements RenderableProvider
    private Point3D resultVRSpacePosition = new Point3D();
    private Point3D lastVRSpacePosition = new Point3D();
    private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
-
    private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
+   private final GDXPose3DWidget scenePose = new GDXPose3DWidget();
 
    public void create()
    {
@@ -58,30 +60,32 @@ public class GDXVRManager implements RenderableProvider
       RotationMatrix rotationMatrix = new RotationMatrix(yawPitchRoll);
       GDXTools.toGDX(rotationMatrix, context.getTrackerSpaceToWorldspaceRotationOffset());
 
-      context.getEyeData(GDXVRContext.Eye.Left).camera.far = 100f;
-      context.getEyeData(GDXVRContext.Eye.Right).camera.far = 100f;
+      scenePose.create();
 
-      context.addListener(new GDXVRContext.VRDeviceListener()
+      context.getEyeData(GDXVREye.Left).getCamera().far = 100f;
+      context.getEyeData(GDXVREye.Right).getCamera().far = 100f;
+
+      context.addListener(new GDXVRDeviceListener()
       {
          @Override
-         public void connected(GDXVRContext.VRDevice device)
+         public void connected(GDXVRDevice device)
          {
             LogTools.info("{} connected", device);
             if (device.getModelInstance() != null)
             {
                modelInstances.add(device.getModelInstance());
 
-               if (device.getType() == GDXVRContext.VRDeviceType.HeadMountedDisplay)
+               if (device.getType() == GDXVRDeviceType.HeadMountedDisplay)
                {
                   headsetModelInstance = device.getModelInstance();
                }
-               else if(device.getType() == GDXVRContext.VRDeviceType.Controller)
+               else if(device.getType() == GDXVRDeviceType.Controller)
                {
-                  if (device.getControllerRole() == GDXVRContext.VRControllerRole.LeftHand)
+                  if (device.getControllerRole() == GDXVRControllerRole.LeftHand)
                   {
                      controllers.set(RobotSide.LEFT, device);
                   }
-                  else if (device.getControllerRole() == GDXVRContext.VRControllerRole.RightHand)
+                  else if (device.getControllerRole() == GDXVRControllerRole.RightHand)
                   {
                      controllers.set(RobotSide.RIGHT, device);
                   }
@@ -103,28 +107,28 @@ public class GDXVRManager implements RenderableProvider
          }
 
          @Override
-         public void disconnected(GDXVRContext.VRDevice device)
+         public void disconnected(GDXVRDevice device)
          {
             LogTools.info("{} disconnected", device);
          }
 
          @Override
-         public void buttonPressed(GDXVRContext.VRDevice device, int button)
+         public void buttonPressed(GDXVRDevice device, int button)
          {
             LogTools.info("{} button pressed: {}", device, button);
          }
 
          @Override
-         public void buttonReleased(GDXVRContext.VRDevice device, int button)
+         public void buttonReleased(GDXVRDevice device, int button)
          {
             LogTools.info("{} button released: {}", device, button);
          }
       });
 
-      context.addListener(new VRDeviceAdapter()
+      context.addListener(new GDXVRDeviceAdapter()
       {
          @Override
-         public void buttonPressed(GDXVRContext.VRDevice device, int button)
+         public void buttonPressed(GDXVRDevice device, int button)
          {
             if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
             {
@@ -137,7 +141,7 @@ public class GDXVRManager implements RenderableProvider
          }
 
          @Override
-         public void buttonReleased(GDXVRContext.VRDevice device, int button)
+         public void buttonReleased(GDXVRDevice device, int button)
          {
             if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
             {
@@ -160,8 +164,11 @@ public class GDXVRManager implements RenderableProvider
    public void render(GDX3DSceneManager sceneManager)
    {
       // Wait for VR setup to be ready. This is the primary indicator.
-      if (context.getDeviceByType(GDXVRContext.VRDeviceType.HeadMountedDisplay) == null)
+      if (context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay) == null)
          return;
+
+//      GDXTools.toGDX(scenePose.getTransform().getTranslation(), context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//      GDXTools.toGDX(scenePose.getTransform(), context.getTrackerSpaceToWorldspaceRotationOffset());
 
       if (holdingTouchpadToMove)
       {
@@ -183,14 +190,14 @@ public class GDXVRManager implements RenderableProvider
       }
 
       context.begin();
-      renderScene(GDXVRContext.Eye.Left, sceneManager);
-      renderScene(GDXVRContext.Eye.Right, sceneManager);
+      renderScene(GDXVREye.Left, sceneManager);
+      renderScene(GDXVREye.Right, sceneManager);
       context.end();
    }
 
-   private void renderScene(GDXVRContext.Eye eye, GDX3DSceneManager sceneManager)
+   private void renderScene(GDXVREye eye, GDX3DSceneManager sceneManager)
    {
-      GDXVRCamera camera = context.getEyeData(eye).camera;
+      GDXVRCamera camera = context.getEyeData(eye).getCamera();
 
       context.beginEye(eye);
 
@@ -207,7 +214,7 @@ public class GDXVRManager implements RenderableProvider
       context.endEye();
    }
 
-   public SideDependentList<GDXVRContext.VRDevice> getControllers()
+   public SideDependentList<GDXVRDevice> getControllers()
    {
       return controllers;
    }
@@ -228,6 +235,11 @@ public class GDXVRManager implements RenderableProvider
       thingsToCreateOnEnable.add(runnable);
    }
 
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      scenePose.process3DViewInput(input);
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -238,6 +250,8 @@ public class GDXVRManager implements RenderableProvider
             modelInstance.getRenderables(renderables, pool);
          }
       }
+
+      scenePose.getRenderables(renderables, pool);
    }
 
    public GDXVRContext getContext()

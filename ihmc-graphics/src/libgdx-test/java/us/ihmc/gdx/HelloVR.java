@@ -7,7 +7,6 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.FPSLogger;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
@@ -34,9 +33,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.JsonReader;
 
 import org.lwjgl.opengl.GL32;
-import us.ihmc.gdx.vr.GDXVRCamera;
-import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRContext.*;
+import us.ihmc.gdx.vr.*;
 
 public class HelloVR extends ApplicationAdapter {
 	static final String TAG = "HelloVR";
@@ -138,50 +135,50 @@ public class HelloVR extends ApplicationAdapter {
 
 			// Set the far clip plane distance on the camera of each eye
 			// All units are in meters.
-			context.getEyeData(Eye.Left).camera.far = 100f;
-			context.getEyeData(Eye.Right).camera.far = 100f;
+			context.getEyeData(GDXVREye.Left).getCamera().far = 100f;
+			context.getEyeData(GDXVREye.Right).getCamera().far = 100f;
 
 			// Register a VRDeviceListener to get notified when
 			// controllers are (dis-)connected and their buttons
 			// are pressed. Note that we add/remove a ModelInstance for
 			// controllers for rendering on (dis-)connect.
-			context.addListener(new VRDeviceListener() {
+			context.addListener(new GDXVRDeviceListener() {
 				@Override
-				public void connected(VRDevice device) {
+				public void connected(GDXVRDevice device) {
 					Gdx.app.log(TAG, device + " connected");
-					if (device.getType() == VRDeviceType.Controller && device.getModelInstance() != null)
+					if (device.getType() == GDXVRDeviceType.Controller && device.getModelInstance() != null)
 						modelInstances.add(device.getModelInstance());
 				}
 
 				@Override
-				public void disconnected(VRDevice device) {
+				public void disconnected(GDXVRDevice device) {
 					Gdx.app.log(TAG, device + " disconnected");
-					if (device.getType() == VRDeviceType.Controller && device.getModelInstance() != null)
+					if (device.getType() == GDXVRDeviceType.Controller && device.getModelInstance() != null)
 						modelInstances.removeValue(device.getModelInstance(), true);
 				}
 
 				@Override
-				public void buttonPressed(VRDevice device, int button) {
+				public void buttonPressed(GDXVRDevice device, int button) {
 					Gdx.app.log(TAG, device + " button pressed: " + button);
 
 					// If the trigger button on the first controller was
 					// pressed, setup teleporting
 					// mode.
-					if (device == context.getDeviceByType(VRDeviceType.Controller)) {
-						if (button == VRControllerButtons.SteamVR_Trigger)
+					if (device == context.getDeviceByType(GDXVRDeviceType.Controller)) {
+						if (button == GDXVRControllerButtons.SteamVR_Trigger)
 							isTeleporting = true;
 					}
 				}
 
 				@Override
-				public void buttonReleased(VRDevice device, int button) {
+				public void buttonReleased(GDXVRDevice device, int button) {
 					Gdx.app.log(TAG, device + " button released: " + button);
 
 					// If the trigger button the first controller was released,
 					// teleport the player.
-					if (device == context.getDeviceByType(VRDeviceType.Controller)) {
-						if (button == VRControllerButtons.SteamVR_Trigger) {
-							if (intersectControllerXZPlane(context.getDeviceByType(VRDeviceType.Controller), tmp)) {
+					if (device == context.getDeviceByType(GDXVRDeviceType.Controller)) {
+						if (button == GDXVRControllerButtons.SteamVR_Trigger) {
+							if (intersectControllerXZPlane(context.getDeviceByType(GDXVRDeviceType.Controller), tmp)) {
 								// Teleportation
 								// - Tracker space origin in world space is initially at [0,0,0]
 								// - When teleporting, we want to set the tracker space origin in world space to the
@@ -190,7 +187,7 @@ public class HelloVR extends ApplicationAdapter {
 								//   origin in world space by the camera
 								//   x/z position so the camera is at the
 								//   teleportation point in world space
-								tmp2.set(context.getDeviceByType(VRDeviceType.HeadMountedDisplay).getPosition(Space.Tracker));
+								tmp2.set(context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay).getPosition(GDXVRSpace.Tracker));
 								tmp2.y = 0;
 								tmp.sub(tmp2);
 
@@ -223,9 +220,9 @@ public class HelloVR extends ApplicationAdapter {
 	Vector3 tmp = new Vector3();
 	Vector3 tmp2 = new Vector3();
 
-	private boolean intersectControllerXZPlane(VRDevice controller, Vector3 intersection) {
-		ray.origin.set(controller.getPosition(Space.World));
-		ray.direction.set(controller.getDirection(Space.World).nor());
+	private boolean intersectControllerXZPlane(GDXVRDevice controller, Vector3 intersection) {
+		ray.origin.set(controller.getPosition(GDXVRSpace.World));
+		ray.direction.set(controller.getDirection(GDXVRSpace.World).nor());
 		return Intersector.intersectRayPlane(ray, xzPlane, intersection);
 	}
 
@@ -248,7 +245,7 @@ public class HelloVR extends ApplicationAdapter {
 				// xz plane. If there's an intersection, place the disc at the
 				// position
 				// and add it to the model instances to be rendered.
-				if (intersectControllerXZPlane(context.getDeviceByType(VRDeviceType.Controller), tmp)) {
+				if (intersectControllerXZPlane(context.getDeviceByType(GDXVRDeviceType.Controller), tmp)) {
 					disc.transform.idt().translate(tmp);
 					modelInstances.add(disc);
 				}
@@ -256,16 +253,16 @@ public class HelloVR extends ApplicationAdapter {
 
 			// render the scene for the left/right eye
 			context.begin();
-			renderScene(Eye.Left);
-			renderScene(Eye.Right);
+			renderScene(GDXVREye.Left);
+			renderScene(GDXVREye.Right);
 			context.end();
 
 			// Render to the companion window (manually, see GDXVRContext for
 			// helpers)
-			VRDevice hmd = context.getDeviceByType(VRDeviceType.HeadMountedDisplay);
-			companionCamera.direction.set(hmd.getDirection(Space.World));
-			companionCamera.up.set(hmd.getUp(Space.World));
-			companionCamera.position.set(hmd.getPosition(Space.World));
+			GDXVRDevice hmd = context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay);
+			companionCamera.direction.set(hmd.getDirection(GDXVRSpace.World));
+			companionCamera.up.set(hmd.getUp(GDXVRSpace.World));
+			companionCamera.position.set(hmd.getPosition(GDXVRSpace.World));
 			companionCamera.update();
 			renderScene(companionCamera);
 		} else {
@@ -281,8 +278,8 @@ public class HelloVR extends ApplicationAdapter {
 	Vector3 yAxis = new Vector3();
 	Vector3 zAxis = new Vector3();
 
-	private void renderScene(Eye eye) {
-		GDXVRCamera camera = context.getEyeData(eye).camera;
+	private void renderScene(GDXVREye eye) {
+		GDXVRCamera camera = context.getEyeData(eye).getCamera();
 		context.beginEye(eye);
 		renderScene(camera);
 		context.endEye();
@@ -317,22 +314,22 @@ public class HelloVR extends ApplicationAdapter {
 		// the GDXVRContext was successfully created
 		if (context != null) {
 			renderer.begin(ShapeType.Line);
-			for (VRDevice device : context.getDevices()) {
-				if (device.getType() == VRDeviceType.Controller) {
+			for (GDXVRDevice device : context.getDevices()) {
+				if (device.getType() == GDXVRDeviceType.Controller) {
 					renderer.setColor(Color.BLUE);
-					Vector3 pos = tmp.set(device.getPosition(Space.World));
-					Vector3 dir = tmp2.set(device.getDirection(Space.World)).scl(0.5f);
-					renderer.line(device.getPosition(Space.World), pos.add(dir));
+					Vector3 pos = tmp.set(device.getPosition(GDXVRSpace.World));
+					Vector3 dir = tmp2.set(device.getDirection(GDXVRSpace.World)).scl(0.5f);
+					renderer.line(device.getPosition(GDXVRSpace.World), pos.add(dir));
 
 					renderer.setColor(Color.GREEN);
-					pos = tmp.set(device.getPosition(Space.World));
-					dir = tmp2.set(device.getUp(Space.World)).scl(0.1f);
-					renderer.line(device.getPosition(Space.World), pos.add(dir));
+					pos = tmp.set(device.getPosition(GDXVRSpace.World));
+					dir = tmp2.set(device.getUp(GDXVRSpace.World)).scl(0.1f);
+					renderer.line(device.getPosition(GDXVRSpace.World), pos.add(dir));
 
 					renderer.setColor(Color.RED);
-					pos = tmp.set(device.getPosition(Space.World));
-					dir = tmp2.set(device.getRight(Space.World)).scl(0.1f);
-					renderer.line(device.getPosition(Space.World), pos.add(dir));
+					pos = tmp.set(device.getPosition(GDXVRSpace.World));
+					dir = tmp2.set(device.getRight(GDXVRSpace.World)).scl(0.1f);
+					renderer.line(device.getPosition(GDXVRSpace.World), pos.add(dir));
 				}
 			}
 			renderer.end();

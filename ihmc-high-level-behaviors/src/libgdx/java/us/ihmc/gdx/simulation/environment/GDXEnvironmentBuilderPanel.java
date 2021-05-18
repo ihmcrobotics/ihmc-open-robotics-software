@@ -24,9 +24,9 @@ import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
-import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRDevice;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.VRDeviceAdapter;
+import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -38,7 +38,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXEnvironmentBuilderPanel implements RenderableProvider
 {
@@ -73,10 +73,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       vrManager.create(() ->
       {
-         vrManager.getContext().addListener(new VRDeviceAdapter()
+         vrManager.getContext().addListener(new GDXVRDeviceAdapter()
          {
             @Override
-            public void buttonPressed(GDXVRContext.VRDevice device, int button)
+            public void buttonPressed(GDXVRDevice device, int button)
             {
                LogTools.info("Pressed: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)
@@ -91,7 +91,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
             }
 
             @Override
-            public void buttonReleased(GDXVRContext.VRDevice device, int button)
+            public void buttonReleased(GDXVRDevice device, int button)
             {
                LogTools.info("Released: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)

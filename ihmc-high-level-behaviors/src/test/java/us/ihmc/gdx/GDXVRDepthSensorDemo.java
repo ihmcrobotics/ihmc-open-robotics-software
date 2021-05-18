@@ -9,13 +9,13 @@ import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRDevice;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.VRDeviceAdapter;
+import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXVRDepthSensorDemo
 {
@@ -58,10 +58,10 @@ public class GDXVRDepthSensorDemo
                sceneManager.addModelInstance(coordinateFrameInstance, GDXSceneLevel.VIRTUAL);
             }
 
-            vrManager.getContext().addListener(new VRDeviceAdapter()
+            vrManager.getContext().addListener(new GDXVRDeviceAdapter()
             {
                @Override
-               public void buttonPressed(GDXVRContext.VRDevice device, int button)
+               public void buttonPressed(GDXVRDevice device, int button)
                {
                   if (button == SteamVR_Trigger)
                   {
