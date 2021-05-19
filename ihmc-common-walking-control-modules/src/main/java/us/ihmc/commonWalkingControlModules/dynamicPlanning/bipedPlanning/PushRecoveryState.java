@@ -2,12 +2,15 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.lists.YoPreallocatedList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.saveableModule.YoSaveableModuleState;
 import us.ihmc.tools.saveableModule.YoSaveableModuleStateTools;
+import us.ihmc.yoVariables.euclid.YoPoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
@@ -107,6 +110,35 @@ public class PushRecoveryState extends YoSaveableModuleState
    {
       footPoses.get(robotSide).setFromReferenceFrame(soleFrame);
       footPolygonsInSole.get(robotSide).setMatchingFrame(supportPolygon, false);
+   }
+
+   public void setIcpAtStartOfState(FramePoint2DReadOnly icpAtStartOfState)
+   {
+      this.icpAtStartOfState.set(icpAtStartOfState);
+   }
+
+   public void addFootstep(Footstep footstep)
+   {
+      if (footsteps.size() < footsteps.capacity())
+         footsteps.add().set(footstep);
+   }
+
+   public void addFootstep(RobotSide robotSide, FramePose3DReadOnly footstepPose, List<YoPoint2D> predictedContactPoints)
+   {
+      if (footsteps.size() < footsteps.capacity())
+         footsteps.add().set(robotSide, footstepPose, predictedContactPoints);
+   }
+
+   public void addFootstepTiming(FootstepTiming timing)
+   {
+      if (footstepTimings.size() < footstepTimings.capacity())
+         footstepTimings.add().set(timing);
+   }
+
+   public void addFootstepTiming(double swingTime, double transferTime)
+   {
+      if (footstepTimings.size() < footstepTimings.capacity())
+         footstepTimings.add().set(swingTime, transferTime);
    }
 
    public FramePose3DReadOnly getFootPose(RobotSide robotSide)

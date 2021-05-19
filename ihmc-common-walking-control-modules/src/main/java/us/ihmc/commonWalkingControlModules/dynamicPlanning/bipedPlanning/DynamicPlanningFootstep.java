@@ -80,4 +80,15 @@ public class DynamicPlanningFootstep extends YoSaveableModuleState
       for (int i = 0; i < Math.min(footstep.getPredictedContactPoints().size(), predictedContactPoints.capacity()); i++)
          predictedContactPoints.add().set(footstep.getPredictedContactPoints().get(i));
    }
+
+   public void set(RobotSide robotSide, FramePose3DReadOnly footstepPose, List<YoPoint2D> predictedContactPoints)
+   {
+      this.footstepPose.set(footstepPose);
+      this.stepSide.set(robotSide);
+      if (predictedContactPoints == null)
+         return;
+
+      for (int i = 0; i < Math.min(predictedContactPoints.size(), this.predictedContactPoints.capacity()); i++)
+         this.predictedContactPoints.add().set(predictedContactPoints.get(i));
+   }
 }
