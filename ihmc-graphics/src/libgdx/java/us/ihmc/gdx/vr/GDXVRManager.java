@@ -165,8 +165,7 @@ public class GDXVRManager implements RenderableProvider
       if (context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay) == null)
          return;
 
-//      GDXTools.toGDX(scenePose.getTransform().getTranslation(), context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-//      GDXTools.toGDX(scenePose.getTransform(), context.getTrackerSpaceToWorldspaceRotationOffset());
+      context.teleport(scenePose.getTransform());
 
       if (holdingTouchpadToMove)
       {
@@ -184,7 +183,6 @@ public class GDXVRManager implements RenderableProvider
       else
       {
 //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
-
       }
 
       context.begin();
