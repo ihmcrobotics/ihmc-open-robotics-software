@@ -9,7 +9,9 @@ import com.badlogic.gdx.math.Vector3;
 import org.apache.logging.log4j.Level;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -171,6 +173,24 @@ public class GDXTools
       rigidBodyTransformToPack.getTranslation().setX(openVRValueBuffer.get(3));
       rigidBodyTransformToPack.getTranslation().setY(openVRValueBuffer.get(7));
       rigidBodyTransformToPack.getTranslation().setZ(openVRValueBuffer.get(11));
+   }
+
+   public static void toEuclid(HmdMatrix34 openVRRigidBodyTransform, Pose3DBasics poseToPack)
+   {
+      FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
+      poseToPack.getOrientation().setRotationMatrix(openVRValueBuffer.get(0),
+                                                    openVRValueBuffer.get(1),
+                                                    openVRValueBuffer.get(2),
+                                                    openVRValueBuffer.get(4),
+                                                    openVRValueBuffer.get(5),
+                                                    openVRValueBuffer.get(6),
+                                                    openVRValueBuffer.get(8),
+                                                    openVRValueBuffer.get(9),
+                                                    openVRValueBuffer.get(10));
+      poseToPack.getOrientation().normalize();
+      poseToPack.getPosition().setX(openVRValueBuffer.get(3));
+      poseToPack.getPosition().setY(openVRValueBuffer.get(7));
+      poseToPack.getPosition().setZ(openVRValueBuffer.get(11));
    }
 
    public static void toEuclid(HmdMatrix34 openVRAffineTransform, AffineTransform euclidAffine)

@@ -1,5 +1,6 @@
 package us.ihmc.gdx.vr;
 
+import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.lwjgl.openvr.VRSystem;
@@ -7,6 +8,10 @@ import org.lwjgl.openvr.VRSystem;
 import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -30,6 +35,12 @@ public class GDXVRCamera extends Camera
    private final HmdMatrix34 eyeMat = HmdMatrix34.create();
    private final Vector3 tmp = new Vector3();
 
+   private final Vector3D euclidDirection = new Vector3D();
+   private final Vector3D euclidUp = new Vector3D();
+
+   private boolean created = false;
+   private ModelInstance coordinateFrame;
+
    public GDXVRCamera(GDXVRContext context, RobotSide eye)
    {
       this.context = context;
@@ -39,6 +50,12 @@ public class GDXVRCamera extends Camera
    @Override
    public void update()
    {
+      if (!created)
+      {
+         created = true;
+         coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
+      }
+
       update(true);
    }
 
@@ -56,16 +73,20 @@ public class GDXVRCamera extends Camera
 
       // get the pose matrix from the HDM
       GDXVRDevice hmd = context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay);
-      Vector3 y = hmd.getUp(GDXVRSpace.World);
-      Vector3 z = hmd.getDirection(GDXVRSpace.World);
-      Vector3 p = hmd.getPosition(GDXVRSpace.World);
+      hmd.getPose().changeFrame(ReferenceFrame.getWorldFrame());
+      euclidDirection.set(Axis3D.Z);
+      euclidDirection.negate(); // Z is forward in libGDX, contrary to OpenVR where it's backward
+      hmd.getPose().getOrientation().transform(euclidDirection);
+      euclidUp.set(Axis3D.Y); // camera is rendered in Y up
+      hmd.getPose().getOrientation().transform(euclidUp);
 
-      view.idt();
-      view.setToLookAt(p, tmp.set(p).add(z), y);
+      hmd.getPose(ReferenceFrame.getWorldFrame(), coordinateFrame.transform);
 
-      position.set(p);
-      direction.set(z);
-      up.set(y);
+      position.set(hmd.getPose().getPosition().getX32(), hmd.getPose().getPosition().getY32(), hmd.getPose().getPosition().getZ32());
+      direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
+      up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
+
+      view.setToLookAt(position, tmp.set(position).add(direction), up);
 
       combined.set(projection);
       Matrix4.mul(combined.val, invEyeSpace.val);
@@ -77,5 +98,10 @@ public class GDXVRCamera extends Camera
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
       }
+   }
+
+   public ModelInstance getCoordinateFrame()
+   {
+      return coordinateFrame;
    }
 }

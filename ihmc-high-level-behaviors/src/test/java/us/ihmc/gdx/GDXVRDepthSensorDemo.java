@@ -1,14 +1,14 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import com.badlogic.gdx.math.Matrix4;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRDevice;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
@@ -21,6 +21,7 @@ public class GDXVRDepthSensorDemo
 {
    private ModelInstance cylinder;
    private boolean moveWithController = true;
+   private final Matrix4 tempTransform = new Matrix4();
 
    public GDXVRDepthSensorDemo()
    {
@@ -85,15 +86,15 @@ public class GDXVRDepthSensorDemo
 
             for (RobotSide side : vrManager.getControllers().sides())
             {
-               RigidBodyTransform transformToParent = vrManager.getControllers().get(side).getReferenceFrame().getTransformToParent();
                if (side.equals(RobotSide.LEFT) && moveWithController)
                {
-                  depthSensorSimulator.setCameraWorldTransform(vrManager.getControllers().get(side).getWorldTransformGDX());
-                  GDXTools.toGDX(transformToParent, controllerCoordinateFrames.get(side).transform);
+                  vrManager.getControllers().get(side).getPose(ReferenceFrame.getWorldFrame(), tempTransform);
+                  depthSensorSimulator.setCameraWorldTransform(tempTransform);
+                  controllerCoordinateFrames.get(side).transform.set(tempTransform);
                }
                else
                {
-                  GDXTools.toGDX(transformToParent, cylinder.nodes.get(0).globalTransform);
+                  vrManager.getControllers().get(side).getPose(ReferenceFrame.getWorldFrame(), cylinder.nodes.get(0).globalTransform);
                }
             }
 

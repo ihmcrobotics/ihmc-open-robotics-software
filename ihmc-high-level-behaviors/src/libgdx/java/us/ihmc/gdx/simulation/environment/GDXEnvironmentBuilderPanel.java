@@ -12,7 +12,6 @@ import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,7 +29,6 @@ import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.file.FileVisitResult;
@@ -47,9 +45,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final ImString saveString = new ImString("terrain.yml", 100);
 
    private GDXVRManager vrManager;
-
-   private final FramePose3D tempFramePose = new FramePose3D();
-   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
@@ -116,11 +111,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    {
       if (GDXVRManager.isVREnabled() && modelBeingPlaced != null)
       {
-         PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.RIGHT).getReferenceFrame();
-         tempFramePose.setToZero(controllerFrame);
-         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.getRealisticModelInstance().transform);
+         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
       }
    }
 

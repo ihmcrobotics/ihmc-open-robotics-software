@@ -54,16 +54,16 @@ public class GDXVRManager implements RenderableProvider
       context = new GDXVRContext();
 
       // transform space to Z up, X forward
-      YawPitchRoll yawPitchRoll = new YawPitchRoll();
-      yawPitchRoll.setRoll(Math.toRadians(90.0));
-      yawPitchRoll.setYaw(Math.toRadians(-90.0));
-      RotationMatrix rotationMatrix = new RotationMatrix(yawPitchRoll);
-      GDXTools.toGDX(rotationMatrix, context.getTrackerSpaceToWorldspaceRotationOffset());
+//      YawPitchRoll yawPitchRoll = new YawPitchRoll();
+//      yawPitchRoll.setRoll(Math.toRadians(90.0));
+//      yawPitchRoll.setYaw(Math.toRadians(-90.0));
+//      RotationMatrix rotationMatrix = new RotationMatrix(yawPitchRoll);
+//      GDXTools.toGDX(rotationMatrix, context.getTrackerSpaceToWorldspaceRotationOffset());
 
       scenePose.create();
 
-      context.getEyeData(RobotSide.LEFT).getCamera().far = 100f;
-      context.getEyeData(RobotSide.RIGHT).getCamera().far = 100f;
+      context.getPerEyeData().get(RobotSide.LEFT).getCamera().far = 100f;
+      context.getPerEyeData().get(RobotSide.RIGHT).getCamera().far = 100f;
 
       context.addListener(new GDXVRDeviceListener()
       {
@@ -132,10 +132,10 @@ public class GDXVRManager implements RenderableProvider
          {
             if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
             {
-               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
-               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
-               context.getToZUpXForward().transform(initialVRSpacePosition);
-               lastVRSpacePosition.set(initialVRSpacePosition);
+//               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
+//               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
+//               context.getToZUpXForward().transform(initialVRSpacePosition);
+//               lastVRSpacePosition.set(initialVRSpacePosition);
                holdingTouchpadToMove = true;
             }
          }
@@ -172,20 +172,20 @@ public class GDXVRManager implements RenderableProvider
 
       if (holdingTouchpadToMove)
       {
-         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
+//         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
 //         resultVRSpacePosition.set(initialVRSpacePosition);
 //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
 //         resultVRSpacePosition.sub(deltaVRControllerPosition);
 //         resultVRSpacePosition.sub(lastVRSpacePosition);
 //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
 //         lastVRSpacePosition.set(resultVRSpacePosition);
-         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
-         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
+//         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
 //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
       }
       else
       {
-         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
+//         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
 
       }
 
@@ -197,12 +197,13 @@ public class GDXVRManager implements RenderableProvider
 
    private void renderScene(RobotSide eye, GDX3DSceneManager sceneManager)
    {
-      GDXVRCamera camera = context.getEyeData(eye).getCamera();
+      GDXVRPerEyeData eyeData = context.getPerEyeData().get(eye);
+      GDXVRCamera camera = eyeData.getCamera();
 
       context.beginEye(eye);
 
-      int width = context.getEyeData(eye).getFrameBuffer().getWidth();
-      int height = context.getEyeData(eye).getFrameBuffer().getHeight();
+      int width = eyeData.getFrameBuffer().getWidth();
+      int height = eyeData.getFrameBuffer().getHeight();
       Gdx.gl.glViewport(0, 0, width, height);
 
       GDX3DSceneTools.glClearGray();
@@ -248,6 +249,15 @@ public class GDXVRManager implements RenderableProvider
          if (!skipHeadset || !(modelInstance == headsetModelInstance))
          {
             modelInstance.getRenderables(renderables, pool);
+         }
+      }
+
+      for (GDXVRPerEyeData perEyeDatum : context.getPerEyeData())
+      {
+         ModelInstance coordinateFrame = perEyeDatum.getCamera().getCoordinateFrame();
+         if (coordinateFrame != null)
+         {
+            coordinateFrame.getRenderables(renderables, pool);
          }
       }
 
