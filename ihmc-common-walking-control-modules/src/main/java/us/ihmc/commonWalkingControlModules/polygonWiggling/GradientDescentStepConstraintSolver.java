@@ -29,6 +29,8 @@ import us.ihmc.yoVariables.variable.YoEnum;
 
 public class GradientDescentStepConstraintSolver
 {
+   private static final boolean verbose = true;
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
@@ -59,6 +61,7 @@ public class GradientDescentStepConstraintSolver
    private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[500];
    private final YoFrameLineSegment2D[] yoRotationVectors = new YoFrameLineSegment2D[5];
+   private final YoFrameLineSegment2D[] stanceFootPolygon = new YoFrameLineSegment2D[5];
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
    private final YoGraphicCoordinateSystem soleFrameGraphic;
 
@@ -86,6 +89,9 @@ public class GradientDescentStepConstraintSolver
       {
          initialPolygonToWiggle[i] = new YoFrameLineSegment2D("initialFootV" + i, ReferenceFrame.getWorldFrame(), registry);
          graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicInitialFootV" + i, initialPolygonToWiggle[i], Color.RED, 0.0, 0.0));
+
+         stanceFootPolygon[i] = new YoFrameLineSegment2D("stanceFootV" + i, ReferenceFrame.getWorldFrame(), registry);
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicStanceFootV" + i, stanceFootPolygon[i], Color.YELLOW.darker(), 0.0, 0.0));
 
          transformedPolygonToWiggle[i] = new YoFrameLineSegment2D("transformedFootV" + i, ReferenceFrame.getWorldFrame(), registry);
          graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicFootV" + i, transformedPolygonToWiggle[i], Color.GREEN.darker(), 0.0, 0.0));
@@ -146,6 +152,9 @@ public class GradientDescentStepConstraintSolver
       activeConstraint.set(computeActiveConstraint(input));
       if (activeConstraint.getValue() == null)
       {
+         if (verbose)
+            LogTools.info("Constraints already satisfied in input. Returning identity transform.");
+
          return new RigidBodyTransform();
       }
 
@@ -256,6 +265,9 @@ public class GradientDescentStepConstraintSolver
          packWorldFrameTransform(polygonToWiggle, transform);
       }
 
+      if (verbose)
+         LogTools.info("Iterations: " + iterations);
+
       return transform;
    }
 
@@ -327,16 +339,25 @@ public class GradientDescentStepConstraintSolver
          yoRotationVectors[i].getSecondEndpoint().add(polygonToWiggle.getVertex(i));
       }
 
+      for (int i = 0; i < input.getStanceFootPolygon().getNumberOfVertices(); i++)
+      {
+         stanceFootPolygon[i].getFirstEndpoint().set(input.getStanceFootPolygon().getVertex(i));
+         stanceFootPolygon[i].getSecondEndpoint().set(input.getStanceFootPolygon().getVertex((i + 1) % input.getStanceFootPolygon().getNumberOfVertices()));
+      }
+
       for (int i = 0; i < concavePolygonToWiggleInto.getNumberOfVertices(); i++)
       {
          constraintPolygon[i].getFirstEndpoint().set(concavePolygonToWiggleInto.getVertex(i));
          constraintPolygon[i].getSecondEndpoint().set(concavePolygonToWiggleInto.getVertex((i + 1) % concavePolygonToWiggleInto.getNumberOfVertices()));
       }
 
-      RigidBodyTransform soleFrame = new RigidBodyTransform(footstepInRegionFrame);
-      soleFrame.preMultiply(input.getLocalToWorld());
-      soleFrameGraphic.setPosition(soleFrame.getTranslation());
-      soleFrameGraphic.setOrientation(new Quaternion(soleFrame.getRotation()));
+      if (input.containsInputForLegCollisionCheck())
+      {
+         RigidBodyTransform soleFrame = new RigidBodyTransform(footstepInRegionFrame);
+         soleFrame.preMultiply(input.getLocalToWorld());
+         soleFrameGraphic.setPosition(soleFrame.getTranslation());
+         soleFrameGraphic.setOrientation(new Quaternion(soleFrame.getRotation()));
+      }
    }
 
    private void updateGraphics(ConvexPolygon2DReadOnly polygonToWiggle)

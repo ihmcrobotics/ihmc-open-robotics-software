@@ -11,11 +11,14 @@ import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.HashMap;
 import java.util.function.ToDoubleFunction;
@@ -25,7 +28,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final FootstepPlannerParametersReadOnly parameters;
 
-   private final GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
+   private final GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -39,10 +42,30 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
+   // Use this by default
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
+   {
+      this(footPolygonsInSoleFrame, parameters, null, null, null);
+   }
+
+   // Call this constructor only for testing
+   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                 FootstepPlannerParametersReadOnly parameters,
+                                 TickAndUpdatable tickAndUpdatable,
+                                 YoGraphicsListRegistry graphicsListRegistry,
+                                 YoRegistry parentRegistry)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
+
+      if (tickAndUpdatable == null)
+      {
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
+      }
+      else
+      {
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(tickAndUpdatable, graphicsListRegistry, parentRegistry);
+      }
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
@@ -191,6 +214,12 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInRegionFrame);
          gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
          gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
+
+         DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide()), footPolygon);
+         tempTransform.set(snapDataHolder.get(stanceStep).getSnapTransform());
+         tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+         ConvexPolygon2D stancePolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+         gradientDescentStepConstraintInput.setStanceFootPolygon(stancePolygonInRegionFrame);
 
          if (parameters.getEnableShinCollisionCheck())
          {
