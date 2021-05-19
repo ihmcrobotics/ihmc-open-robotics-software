@@ -34,6 +34,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SphericalJointBasics;
@@ -56,6 +57,7 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.BallAndSocketJoint;
@@ -118,7 +120,9 @@ public class ExperimentalSimulation extends Simulation
       this.gravity = gravity;
    }
 
-   public void addEnvironmentCollidables(CollidableHelper helper, String robotCollisionMask, String environmentCollisionMask,
+   public void addEnvironmentCollidables(CollidableHelper helper,
+                                         String robotCollisionMask,
+                                         String environmentCollisionMask,
                                          CommonAvatarEnvironmentInterface environment)
    {
       addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment));
@@ -163,7 +167,9 @@ public class ExperimentalSimulation extends Simulation
    /**
     * Adds and configures a new robot to the simulation.
     */
-   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter,
+   public void addRobot(RobotDescription robotDescription,
+                        RobotCollisionModel robotCollisionModel,
+                        MultiBodySystemStateWriter robotInitialStateWriter,
                         MultiBodySystemStateWriter controllerOutputWriter)
    {
       RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
@@ -201,7 +207,9 @@ public class ExperimentalSimulation extends Simulation
     * Configures the physics for a robot that was already added via the constructor or
     * {@link #addRobot(Robot)}.
     */
-   public void configureRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
+   public void configureRobot(String robotName,
+                              RigidBodyBasics rootBody,
+                              RobotCollisionModel robotCollisionModel,
                               MultiBodySystemStateWriter robotInitialStateWriter)
    {
       Robot scsRobot = Stream.of(getRobots()).filter(candidate -> candidate.getName().toLowerCase().equals(robotName.toLowerCase())).findFirst().get();
@@ -346,7 +354,46 @@ public class ExperimentalSimulation extends Simulation
          {
             for (JointReadOnly joint : multiBodySystem.getAllJoints())
             {
-               if (joint instanceof OneDoFJointReadOnly)
+               if (joint instanceof InvertedFourBarJoint)
+               {
+                  InvertedFourBarJoint idJoint = (InvertedFourBarJoint) joint;
+                  OneDegreeOfFreedomJoint scsJointA = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointA().getName());
+                  OneDegreeOfFreedomJoint scsJointB = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointB().getName());
+                  OneDegreeOfFreedomJoint scsJointC = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointC().getName());
+                  OneDegreeOfFreedomJoint scsJointD = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointD().getName());
+                  OneDegreeOfFreedomJoint[] scsJoints = {scsJointA, scsJointB, scsJointC, scsJointD};
+                  List<RevoluteJointBasics> idFourBarJoints = idJoint.getFourBarFunction().getLoopJoints();
+                  int[] torqueSourceIndices;
+
+                  if (scsJointA == null || scsJointD == null)
+                     torqueSourceIndices = new int[] {1, 2};
+                  else
+                     torqueSourceIndices = new int[] {0, 3};
+
+                  stateCopiers.add(new Runnable()
+                  {
+                     @Override
+                     public void run()
+                     {
+                        for (int torqueSourceIndex : torqueSourceIndices)
+                        {
+                           double tau = 0.5 * idJoint.getMasterJoint().getTau() / idJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
+                           scsJoints[torqueSourceIndex].setTau(tau);
+                        }
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                           if (scsJoints[i] == null)
+                              continue;
+
+                           scsJoints[i].setQ(idFourBarJoints.get(i).getQ());
+                           scsJoints[i].setQd(idFourBarJoints.get(i).getQd());
+                           scsJoints[i].setQdd(idFourBarJoints.get(i).getQdd());
+                        }
+                     }
+                  });
+               }
+               else if (joint instanceof OneDoFJointReadOnly)
                {
                   OneDoFJointBasics idJoint = (OneDoFJointBasics) joint;
                   OneDegreeOfFreedomJoint scsJoint = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getName());
@@ -436,7 +483,38 @@ public class ExperimentalSimulation extends Simulation
          {
             for (JointBasics joint : multiBodySystem.getJointsToConsider())
             {
-               if (joint instanceof OneDoFJointBasics)
+               if (joint instanceof InvertedFourBarJoint)
+               {
+                  InvertedFourBarJoint idJoint = (InvertedFourBarJoint) joint;
+                  OneDegreeOfFreedomJoint scsJointA = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointA().getName());
+                  OneDegreeOfFreedomJoint scsJointB = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointB().getName());
+                  OneDegreeOfFreedomJoint scsJointC = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointC().getName());
+                  OneDegreeOfFreedomJoint scsJointD = (OneDegreeOfFreedomJoint) scsRobot.getJoint(idJoint.getJointD().getName());
+                  OneDegreeOfFreedomJoint[] scsJoints = {scsJointA, scsJointB, scsJointC, scsJointD};
+                  int[] torqueSourceIndices;
+
+                  if (scsJointA == null || scsJointD == null)
+                     torqueSourceIndices = new int[] {1, 2};
+                  else
+                     torqueSourceIndices = new int[] {0, 3};
+
+                  stateCopiers.add(new Runnable()
+                  {
+                     @Override
+                     public void run()
+                     {
+                        double tau = 0.0;
+
+                        for (int torqueSourceIndex : torqueSourceIndices)
+                        {
+                           tau += scsJoints[torqueSourceIndex].getTau() * idJoint.getFourBarFunction().getLoopJacobian().get(torqueSourceIndex);
+                        }
+
+                        idJoint.setTau(tau);
+                     }
+                  });
+               }
+               else if (joint instanceof OneDoFJointBasics)
                {
                   OneDoFJointBasics idJoint = (OneDoFJointBasics) joint;
                   OneDegreeOfFreedomJoint scsJoint = (OneDegreeOfFreedomJoint) scsRobot.getJoint(joint.getName());
@@ -518,16 +596,32 @@ public class ExperimentalSimulation extends Simulation
    }
 
    public static MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<HumanoidFloatingRootJointRobot, HumanoidJointNameMap> initialSetup,
-                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory, HumanoidJointNameMap jointMap)
+                                                                      SimulatedFullHumanoidRobotModelFactory robotFactory,
+                                                                      HumanoidJointNameMap jointMap)
    {
       return toRobotInitialStateWriter(initialSetup, robotFactory.createHumanoidFloatingRootJointRobot(false), jointMap);
    }
 
-   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup, T robot,
+   public static <T extends Robot> MultiBodySystemStateWriter toRobotInitialStateWriter(BiConsumer<T, HumanoidJointNameMap> initialSetup,
+                                                                                        T robot,
                                                                                         HumanoidJointNameMap jointMap)
    {
-      initialSetup.accept(robot, jointMap);
-      return toMultiBodySystemStateWriter(robot);
+      MultiBodySystemStateWriter multiBodySystemStateWriter = toMultiBodySystemStateWriter(robot);
+      return new MultiBodySystemStateWriter()
+      {
+         @Override
+         public boolean write()
+         {
+            initialSetup.accept(robot, jointMap);
+            return multiBodySystemStateWriter.write();
+         }
+         
+         @Override
+         public void setMultiBodySystem(MultiBodySystemBasics multiBodySystem)
+         {
+            multiBodySystemStateWriter.setMultiBodySystem(multiBodySystem);
+         }
+      };
    }
 
    private static MultiBodySystemStateWriter toMultiBodySystemStateWriter(Robot robot)
@@ -547,15 +641,42 @@ public class ExperimentalSimulation extends Simulation
             {
                if (idJoint instanceof OneDoFJointBasics)
                {
-                  OneDegreeOfFreedomJoint scsOneDoFJoint = (OneDegreeOfFreedomJoint) robot.getJoint(idJoint.getName());
                   OneDoFJointBasics idOneDoFJoint = (OneDoFJointBasics) idJoint;
 
-                  if (!stateChanged)
-                     stateChanged = !EuclidCoreTools.epsilonEquals(idOneDoFJoint.getQ(), scsOneDoFJoint.getQ(), epsilon)
-                           || !EuclidCoreTools.epsilonEquals(idOneDoFJoint.getQd(), scsOneDoFJoint.getQD(), epsilon);
+                  double q, qd;
 
-                  idOneDoFJoint.setQ(scsOneDoFJoint.getQ());
-                  idOneDoFJoint.setQd(scsOneDoFJoint.getQD());
+                  if (idOneDoFJoint instanceof InvertedFourBarJoint)
+                  {
+                     InvertedFourBarJoint idFourBarJoint = (InvertedFourBarJoint) idOneDoFJoint;
+                     OneDegreeOfFreedomJoint scsJointA = (OneDegreeOfFreedomJoint) robot.getJoint(idFourBarJoint.getJointA().getName());
+                     OneDegreeOfFreedomJoint scsJointB = (OneDegreeOfFreedomJoint) robot.getJoint(idFourBarJoint.getJointB().getName());
+                     OneDegreeOfFreedomJoint scsJointC = (OneDegreeOfFreedomJoint) robot.getJoint(idFourBarJoint.getJointC().getName());
+                     OneDegreeOfFreedomJoint scsJointD = (OneDegreeOfFreedomJoint) robot.getJoint(idFourBarJoint.getJointD().getName());
+
+                     if (scsJointA != null && scsJointD != null)
+                     {
+                        q = scsJointA.getQ() + scsJointD.getQ();
+                        qd = scsJointA.getQD() + scsJointD.getQD();
+                     }
+                     else
+                     {
+                        q = scsJointB.getQ() + scsJointC.getQ();
+                        qd = scsJointB.getQD() + scsJointC.getQD();
+                     }
+                  }
+                  else
+                  {
+                     OneDegreeOfFreedomJoint scsOneDoFJoint = (OneDegreeOfFreedomJoint) robot.getJoint(idJoint.getName());
+                     q = scsOneDoFJoint.getQ();
+                     qd = scsOneDoFJoint.getQD();
+                  }
+
+                  if (!stateChanged)
+                     stateChanged = !EuclidCoreTools.epsilonEquals(idOneDoFJoint.getQ(), q, epsilon)
+                           || !EuclidCoreTools.epsilonEquals(idOneDoFJoint.getQd(), qd, epsilon);
+
+                  idOneDoFJoint.setQ(q);
+                  idOneDoFJoint.setQd(qd);
                }
                else if (idJoint instanceof SixDoFJointBasics)
                {

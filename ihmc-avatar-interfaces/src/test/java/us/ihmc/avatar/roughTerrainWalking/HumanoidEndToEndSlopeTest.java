@@ -52,7 +52,7 @@ public abstract class HumanoidEndToEndSlopeTest implements MultiRobotTestInterfa
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+//      if (simulationTestingParameters.getKeepSCSUp())
          ThreadTools.sleepForever();
 
       if (drcSimulationTestHelper != null)

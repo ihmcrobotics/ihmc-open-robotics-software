@@ -1,5 +1,12 @@
 package us.ihmc.simulationToolkit.physicsEngine;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -9,16 +16,10 @@ import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialVectorBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.physics.ExternalWrenchProvider;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
 
 public class SCSRobotExternalForcePointWrapper implements ExternalWrenchProvider
 {
@@ -37,7 +38,13 @@ public class SCSRobotExternalForcePointWrapper implements ExternalWrenchProvider
       {
          ExternalForcePoint externalForcePoint = externalForcePoints.get(i);
          String jointName = externalForcePoint.getParentJoint().getName();
-         JointReadOnly joint = Stream.of(allJoints).filter(candidate -> candidate.getName().equals(jointName)).findAny().get();
+         JointReadOnly joint = Stream.of(allJoints).flatMap(candidate ->
+         {
+            if (candidate instanceof InvertedFourBarJoint)
+               return ((InvertedFourBarJoint) candidate).getFourBarFunction().getLoopJoints().stream();
+            else
+               return Stream.of(candidate);
+         }).filter(candidate -> candidate.getName().equals(jointName)).findAny().get();
 
          externalForcePointMap.computeIfAbsent(joint, name -> new ArrayList<>()).add(externalForcePoint);
       }
