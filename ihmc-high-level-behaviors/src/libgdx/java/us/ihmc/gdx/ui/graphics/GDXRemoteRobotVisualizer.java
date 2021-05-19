@@ -10,13 +10,8 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.gdx.FocusBasedGDXCamera;
-import us.ihmc.gdx.GDXGraphics3DNode;
-import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.ros2.ROS2NodeInterface;
-import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
-import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -26,8 +21,7 @@ public class GDXRemoteRobotVisualizer implements RenderableProvider
    private final RemoteSyncedRobotModel syncedRobot;
    private final ExceptionHandlingThreadScheduler scheduler;
 
-   private GraphicsRobot graphicsRobot;
-   private GDXGraphics3DNode robotRootNode;
+   private final GDXRobotModelGraphic robotModelGraphic = new GDXRobotModelGraphic();
    private Activator robotLoadedActivator = new Activator();
    private boolean trackRobot = false;
    private FocusBasedGDXCamera cameraForOptionalTracking;
@@ -44,7 +38,8 @@ public class GDXRemoteRobotVisualizer implements RenderableProvider
       // this doesn't work because you have to load GDX models in the same thread as the context or something
 //      scheduler.scheduleOnce(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()));
 
-      loadRobotModelAndGraphics(robotModel.getRobotDescription());
+      robotModelGraphic.loadRobotModelAndGraphics(robotModel.getRobotDescription(), syncedRobot.getFullRobotModel().getElevator());
+      robotLoadedActivator.activate();
    }
 
    public void create()
@@ -79,8 +74,8 @@ public class GDXRemoteRobotVisualizer implements RenderableProvider
       {
          syncedRobot.update();
 
-         graphicsRobot.update();
-         robotRootNode.update();
+         robotModelGraphic.getGraphicsRobot().update();
+         robotModelGraphic.getRobotRootNode().update();
 
          if (trackRobot)
          {
@@ -93,36 +88,18 @@ public class GDXRemoteRobotVisualizer implements RenderableProvider
       }
    }
 
-   private void loadRobotModelAndGraphics(RobotDescription robotDescription)
-   {
-      graphicsRobot = new GraphicsIDRobot(robotDescription.getName(), syncedRobot.getFullRobotModel().getElevator(), robotDescription);
-      robotRootNode = new GDXGraphics3DNode(graphicsRobot.getRootNode());
-//      robotRootNode.setMouseTransparent(true);
-      addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
-      robotRootNode.update();
-
-      robotLoadedActivator.activate();
-   }
-
-   private void addNodesRecursively(Graphics3DNode graphics3DNode, GDXGraphics3DNode parentNode)
-   {
-      GDXGraphics3DNode node = new GDXGraphics3DNode(graphics3DNode);
-      parentNode.addChild(node);
-      graphics3DNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
-   }
-
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       if (robotLoadedActivator.poll())
       {
-         robotRootNode.getRenderables(renderables, pool);
+         robotModelGraphic.getRenderables(renderables, pool);
       }
    }
 
    public void destroy()
    {
       scheduler.shutdownNow();
-      robotRootNode.destroy();
+      robotModelGraphic.destroy();
    }
 }
