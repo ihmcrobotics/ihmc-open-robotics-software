@@ -12,6 +12,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
@@ -20,6 +21,8 @@ import java.util.List;
 public class PushRecoveryState extends YoSaveableModuleState
 {
    private final YoFramePoint2D icpAtStartOfState;
+
+   private final YoDouble finalTransferDuration;
 
    private final YoPreallocatedList<DynamicPlanningFootstep> footsteps;
    private final YoPreallocatedList<PlanningTiming> footstepTimings;
@@ -40,7 +43,10 @@ public class PushRecoveryState extends YoSaveableModuleState
       registerVariableToSave(footsteps.getYoPosition());
       registerVariableToSave(footstepTimings.getYoPosition());
 
+      finalTransferDuration = new YoDouble("finalTransferDuration", registry);
       icpAtStartOfState = new YoFramePoint2D("icpAtStartOfState", ReferenceFrame.getWorldFrame(), registry);
+      registerVariableToSave(finalTransferDuration);
+      YoSaveableModuleStateTools.registerYoTuple2DToSave(icpAtStartOfState, this);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -70,7 +76,6 @@ public class PushRecoveryState extends YoSaveableModuleState
          footPolygonsInSole.put(robotSide, footPolygonInSole);
       }
 
-      YoSaveableModuleStateTools.registerYoTuple2DToSave(icpAtStartOfState, this);
    }
 
    private int footstepCounter = 0;
@@ -112,6 +117,16 @@ public class PushRecoveryState extends YoSaveableModuleState
    public FrameConvexPolygon2DReadOnly getFootPolygonInSole(RobotSide robotSide)
    {
       return footPolygonsInSole.get(robotSide);
+   }
+
+   public double getFinalTransferDuration()
+   {
+      return finalTransferDuration.getDoubleValue();
+   }
+
+   public void setFinalTransferDuration(double transferDuration)
+   {
+      finalTransferDuration.set(transferDuration);
    }
 
    public int getNumberOfFootsteps()
