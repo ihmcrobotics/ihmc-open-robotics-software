@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 
