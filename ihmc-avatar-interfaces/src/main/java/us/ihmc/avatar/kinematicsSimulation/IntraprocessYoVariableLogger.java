@@ -104,6 +104,18 @@ public class IntraprocessYoVariableLogger
    }
 
    public IntraprocessYoVariableLogger(String logName,
+                                       YoRegistry registry,
+                                       int maxTicksToRecord,
+                                       double dt)
+   {
+      this(logName,
+           null,
+           Lists.newArrayList(new RegistrySendBufferBuilder(registry)),
+           maxTicksToRecord,
+           dt);
+   }
+
+   public IntraprocessYoVariableLogger(String logName,
                                        LogModelProvider logModelProvider,
                                        List<RegistrySendBufferBuilder> registrySendBufferBuilders,
                                        int maxTicksToRecord,
@@ -155,33 +167,34 @@ public class IntraprocessYoVariableLogger
       logProperties.setTimestamp(timestamp);
 
       // create resource zip
-
-      logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
-      logProperties.getModel().setName(logModelProvider.getModelName());
-      for (String resourceDirectory : logModelProvider.getResourceDirectories())
+      if (logModelProvider != null)
       {
-         logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
-      }
-      logProperties.getModel().setPath(MODEL_FILENAME);
-      logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
+         logProperties.getModel().setLoader(logModelProvider.getLoader().getCanonicalName());
+         logProperties.getModel().setName(logModelProvider.getModelName());
+         for (String resourceDirectory : logModelProvider.getResourceDirectories())
+         {
+            logProperties.getModel().getResourceDirectoriesList().add(resourceDirectory);
+         }
+         logProperties.getModel().setPath(MODEL_FILENAME);
+         logProperties.getModel().setResourceBundle(MODEL_RESOURCE_BUNDLE);
 
-      File modelFile = createFileInLogFolder(MODEL_FILENAME);
-      File resourceFile = createFileInLogFolder(MODEL_RESOURCE_BUNDLE);
-      try
-      {
-         FileOutputStream modelStream = new FileOutputStream(modelFile, false);
-         modelStream.write(logModelProvider.getModel());
-         modelStream.getFD().sync();
-         modelStream.close();
-         FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
-         resourceStream.write(logModelProvider.getResourceZip());
-         resourceStream.getFD().sync();
-         resourceStream.close();
-
-      }
-      catch (IOException e)
-      {
-         throw new RuntimeException(e);
+         File modelFile = createFileInLogFolder(MODEL_FILENAME);
+         File resourceFile = createFileInLogFolder(MODEL_RESOURCE_BUNDLE);
+         try
+         {
+            FileOutputStream modelStream = new FileOutputStream(modelFile, false);
+            modelStream.write(logModelProvider.getModel());
+            modelStream.getFD().sync();
+            modelStream.close();
+            FileOutputStream resourceStream = new FileOutputStream(resourceFile, false);
+            resourceStream.write(logModelProvider.getResourceZip());
+            resourceStream.getFD().sync();
+            resourceStream.close();
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
       }
 
       try
