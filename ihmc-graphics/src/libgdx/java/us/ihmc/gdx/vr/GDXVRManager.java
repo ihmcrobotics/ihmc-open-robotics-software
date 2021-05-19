@@ -10,7 +10,6 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
@@ -40,7 +39,6 @@ public class GDXVRManager implements RenderableProvider
    private final Vector3D deltaVRControllerPosition = new Vector3D();
    private final Point3D resultVRSpacePosition = new Point3D();
    private final Point3D lastVRSpacePosition = new Point3D();
-   private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
    private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
    private final GDXPose3DWidget scenePose = new GDXPose3DWidget();
 
@@ -50,13 +48,6 @@ public class GDXVRManager implements RenderableProvider
       System.setProperty("enable.vr", "true");
 
       context = new GDXVRContext();
-
-      // transform space to Z up, X forward
-//      YawPitchRoll yawPitchRoll = new YawPitchRoll();
-//      yawPitchRoll.setRoll(Math.toRadians(90.0));
-//      yawPitchRoll.setYaw(Math.toRadians(-90.0));
-//      RotationMatrix rotationMatrix = new RotationMatrix(yawPitchRoll);
-//      GDXTools.toGDX(rotationMatrix, context.getTrackerSpaceToWorldspaceRotationOffset());
 
       scenePose.create();
 
