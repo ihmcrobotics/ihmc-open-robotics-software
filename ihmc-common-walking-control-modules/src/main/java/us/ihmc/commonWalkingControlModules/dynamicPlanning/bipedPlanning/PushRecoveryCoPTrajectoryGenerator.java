@@ -4,15 +4,9 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactSt
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
-import us.ihmc.euclid.shape.convexPolytope.tools.EuclidPolytopeTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -21,7 +15,6 @@ import us.ihmc.tools.saveableModule.YoSaveableModule;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.List;
-import java.util.function.Supplier;
 
 public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRecoveryState>
 {
@@ -33,7 +26,6 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", ReferenceFrame.getWorldFrame());
 
    private final ConvexPolygon2D defaultSupportPolygon = new ConvexPolygon2D();
-
 
    public PushRecoveryCoPTrajectoryGenerator(ConvexPolygon2DReadOnly defaultSupportPolygon, YoRegistry parentRegistry)
    {
@@ -60,6 +52,7 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
    private final FramePoint2D secondIntersection = new FramePoint2D();
 
    private final FramePoint2D stanceCMP = new FramePoint2D();
+   private final FramePoint3D nextCMP = new FramePoint3D();
 
    @Override
    public void compute(PushRecoveryState state)
@@ -83,9 +76,10 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       swingPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
       stancePolygon.setIncludingFrame(state.getFootPolygonInSole(stanceSide));
-      stancePolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
+      stanceCMP.setToZero(stanceFrame);
       intersectionLine.set(swingPolygon.getCentroid(), state.getIcpAtStartOfState());
+      intersectionLine.changeFrame(stanceFrame);
 
       int intersections = stancePolygon.intersectionWithRay(intersectionLine, firstIntersection, secondIntersection);
 
@@ -105,9 +99,67 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
             stanceCMP.set(secondIntersection);
       }
 
+      nextCMP.setIncludingFrame(stanceCMP, 0.0);
+      nextCMP.changeFrame(ReferenceFrame.getWorldFrame());
+
+      double currentTime = 0.0;
+
       SettableContactStateProvider swingContactState = contactStateProviders.add();
+      swingContactState.reset();
       swingContactState.setContactState(ContactState.IN_CONTACT);
-      swingContactState.getTimeInterval().setInterval(0.0, state.getTiming(0).getSwingTime());
+      swingContactState.getTimeInterval().setInterval(currentTime, currentTime + state.getTiming(0).getSwingTime());
+      swingContactState.setStartECMPPosition(nextCMP);
+      swingContactState.setEndECMPPosition(nextCMP);
+      swingContactState.setLinearECMPVelocity();
+
+      currentTime += state.getTiming(0).getSwingTime();
+
+      SettableContactStateProvider contactState = contactStateProviders.add();
+      contactState.reset();
+      contactState.setContactState(ContactState.IN_CONTACT);
+      contactState.getTimeInterval().setInterval(currentTime, currentTime + state.getTiming(0).getTransferTime());
+      contactState.setStartECMPPosition(nextCMP);
+      nextCMP.setIncludingFrame(recoveryFootstep.getFootstepPose().getPosition());
+
+      contactState.setEndECMPPosition(nextCMP);
+      contactState.setLinearECMPVelocity();
+
+      currentTime += state.getTiming(0).getTransferTime();
+
+      for (int i = 1; i < state.getNumberOfFootsteps(); i++)
+      {
+         recoveryFootstep = state.getFootstep(i);
+
+         contactState = contactStateProviders.add();
+         contactState.reset();
+         contactState.setContactState(ContactState.IN_CONTACT);
+         contactState.getTimeInterval().setInterval(currentTime, currentTime + state.getTiming(i).getSwingTime());
+         contactState.setStartECMPPosition(nextCMP);
+         contactState.setEndECMPPosition(nextCMP);
+         contactState.setLinearECMPVelocity();
+
+         currentTime += state.getTiming(i).getSwingTime();
+
+         contactState = contactStateProviders.add();
+         contactState.reset();
+         contactState.setContactState(ContactState.IN_CONTACT);
+         contactState.getTimeInterval().setInterval(currentTime, state.getTiming(i).getTransferTime());
+         contactState.setStartECMPPosition(nextCMP);
+         nextCMP.setIncludingFrame(recoveryFootstep.getFootstepPose().getPosition());
+
+         contactState.setEndECMPPosition(nextCMP);
+         contactState.setLinearECMPVelocity();
+
+         currentTime += state.getTiming(i).getTransferTime();
+      }
+
+      contactState = contactStateProviders.add();
+      contactState.reset();
+      contactState.setContactState(ContactState.IN_CONTACT);
+      contactState.getTimeInterval().setInterval(currentTime, currentTime + state.getFinalTransferDuration());
+      contactState.setStartECMPPosition(nextCMP);
+      contactState.setEndECMPPosition(nextCMP);
+      contactState.setLinearECMPVelocity();
    }
 
    private static void extractSupportPolygon(DynamicPlanningFootstep footstep,
