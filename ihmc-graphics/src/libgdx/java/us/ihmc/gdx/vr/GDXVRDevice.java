@@ -52,7 +52,7 @@ public class GDXVRDevice
 
    public void updatePoseInTrackerFrame(HmdMatrix34 openVRRigidBodyTransform)
    {
-      pose.setReferenceFrame(context.getTrackerFrame());
+      pose.setReferenceFrame(context.getVRPlayAreaFrame());
       GDXTools.toEuclid(openVRRigidBodyTransform, pose);
 
       // update model instance

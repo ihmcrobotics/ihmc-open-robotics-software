@@ -4,6 +4,7 @@ import static org.lwjgl.openvr.VR.VR_ShutdownInternal;
 
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.openvr.*;
@@ -32,11 +33,11 @@ import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -87,8 +88,14 @@ public class GDXVRContext implements Disposable
                                                                                                               Math.toRadians(0.0),
                                                                                                               Math.toRadians(90.0)),
                                                                                              new Point3D());
-   private final ReferenceFrame trackerFrame
-         = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("trackerFrame", ReferenceFrame.getWorldFrame(), openVRYUpToIHMCZUpSpace);
+   private final RigidBodyTransform tempVRPlayAreaZUp = new RigidBodyTransform();
+   /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
+   private final RigidBodyTransform totalTransformFromVRPlayAreaToIHMCZUpWorld = new RigidBodyTransform();
+   /** The VR play area is on the floor in the center of your VR tracker space area. Also called tracker frame. */
+   private final ReferenceFrame vrPlayAreaYUpZBackFrame
+         = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("vrPlayAreaFrame",
+                                                                                  ReferenceFrame.getWorldFrame(),
+                                                                                  totalTransformFromVRPlayAreaToIHMCZUpWorld);
 
    /**
     * Creates a new GDXVRContext, initializes the VR system, and
@@ -154,6 +161,19 @@ public class GDXVRContext implements Disposable
       }
    }
 
+   public void teleport(Consumer<RigidBodyTransform> vrPlayAreaZUpConsumer)
+   {
+      vrPlayAreaZUpConsumer.accept(tempVRPlayAreaZUp);
+      teleport(tempVRPlayAreaZUp);
+   }
+
+   public void teleport(RigidBodyTransform vrPlayAreaZUp)
+   {
+      totalTransformFromVRPlayAreaToIHMCZUpWorld.set(openVRYUpToIHMCZUpSpace);
+      vrPlayAreaZUp.transform(totalTransformFromVRPlayAreaToIHMCZUpWorld);
+      vrPlayAreaYUpZBackFrame.update();
+   }
+
    /**
     * Start rendering. Call beginEye to setup rendering
     * for each individual eye. End rendering by calling
@@ -168,8 +188,6 @@ public class GDXVRContext implements Disposable
       perEyeData.get(RobotSide.LEFT).getCamera().update();
       perEyeData.get(RobotSide.RIGHT).getCamera().update();
    }
-
-   RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
    /**
     * Get the latest tracking data and send events to {@link GDXVRDeviceListener} instance registered with the context.
@@ -540,8 +558,8 @@ public class GDXVRContext implements Disposable
       return perEyeData;
    }
 
-   public ReferenceFrame getTrackerFrame()
+   public ReferenceFrame getVRPlayAreaFrame()
    {
-      return trackerFrame;
+      return vrPlayAreaYUpZBackFrame;
    }
 }
