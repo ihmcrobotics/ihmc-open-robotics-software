@@ -12,10 +12,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -129,6 +127,11 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
                                                        YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       YoGraphicVector forceViz = new YoGraphicVector("desiredGRF", desiredECMPPosition, desiredGroundReactionForce, 0.05, YoAppearance.Red());
+
+      YoArtifactPolygon
+
+      graphicsListRegistry.registerArtifact("dcmPlanner", state.createLeftFootGraphic("left").createArtifact());
+      graphicsListRegistry.registerArtifact("dcmPlanner", state.createRightFootGraphic("right").createArtifact());
 
       graphicsListRegistry.registerYoGraphic("dcmPlanner", forceViz);
       graphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
