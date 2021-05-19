@@ -8,14 +8,12 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXPose3DWidget;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -249,15 +247,6 @@ public class GDXVRManager implements RenderableProvider
          if (!skipHeadset || !(modelInstance == headsetModelInstance))
          {
             modelInstance.getRenderables(renderables, pool);
-         }
-      }
-
-      for (GDXVRPerEyeData perEyeDatum : context.getPerEyeData())
-      {
-         ModelInstance coordinateFrame = perEyeDatum.getCamera().getCoordinateFrame();
-         if (coordinateFrame != null)
-         {
-            coordinateFrame.getRenderables(renderables, pool);
          }
       }
 
