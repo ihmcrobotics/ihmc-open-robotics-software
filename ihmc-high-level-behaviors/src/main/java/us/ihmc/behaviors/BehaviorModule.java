@@ -1,10 +1,12 @@
 package us.ihmc.behaviors;
 
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,7 +14,6 @@ import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -23,14 +24,24 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.RosMainNode;
 import us.ihmc.utilities.ros.RosTools;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
+import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
+import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
 public class BehaviorModule
 {
@@ -42,6 +53,11 @@ public class BehaviorModule
    private final boolean manageROS2Node;
    private final Messager messager;
    private final boolean manageMessager;
+   public static final double YO_VARIABLE_SERVER_UPDATE_PERIOD = UnitConversions.hertzToSeconds(100.0);
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
+   private YoVariableServer yoVariableServer;
+   private YoDouble yoTime = new YoDouble("time", yoRegistry);
+   private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
@@ -83,7 +99,7 @@ public class BehaviorModule
       if (messagerCommunicationMode == CommunicationMode.INTERPROCESS)
       {
          messager = KryoMessager.createServer(messagerAPI,
-                                              NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
+                                              BEHAVIOR_MODULE_MESSAGER_PORT.getPort(),
                                               new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
       }
       else // intraprocess
@@ -125,6 +141,11 @@ public class BehaviorModule
          BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node, false);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
+         YoRegistry yoRegistry = constructedBehavior.getYoRegistry();
+         if (yoRegistry != null)
+         {
+            this.yoRegistry.addChild(yoRegistry);
+         }
       }
 
       messager.registerTopicListener(BehaviorSelection, this::stringBasedSelection);
@@ -137,6 +158,20 @@ public class BehaviorModule
       });
 
       ros1Node.execute();
+      DataServerSettings dataServerSettings = new DataServerSettings(false, true, BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort(), null);
+      yoVariableServer = new YoVariableServer(getClass().getSimpleName(), null, dataServerSettings, 0.01);
+      yoVariableServer.setMainRegistry(yoRegistry, null);
+      LogTools.info("Starting YoVariableServer...");
+      yoVariableServer.start();
+      LogTools.info("Starting server update thread...");
+      MutableLong timestamp = new MutableLong();
+      LocalDateTime startTime = LocalDateTime.now();
+      yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", YO_VARIABLE_SERVER_UPDATE_PERIOD, () ->
+      {
+         yoTime.set(Conversions.nanosecondsToSeconds(-LocalDateTime.now().until(startTime, ChronoUnit.NANOS)));
+         yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(YO_VARIABLE_SERVER_UPDATE_PERIOD)));
+      });
+      yoServerUpdateThread.start();
    }
 
    private void stringBasedSelection(String selection)
@@ -181,7 +216,7 @@ public class BehaviorModule
    public void destroy()
    {
       statusLogger.info("Shutting down...");
-
+      yoVariableServer.close();
       if (manageROS2Node)
       {
          ros2Node.destroy();
