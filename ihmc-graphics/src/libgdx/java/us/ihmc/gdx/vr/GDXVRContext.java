@@ -83,12 +83,12 @@ public class GDXVRContext implements Disposable
    // your index finger is pointing at your face and your thumb up
    // IHMC Zup frame is right handed, Thumb +Z, Index +X, Middle +Y
    // such that your index finger is pointing away from you
-   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0),
-                                                                                                              Math.toRadians(90.0),
-                                                                                                              Math.toRadians(0.0)),
+   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.0),
+                                                                                                              Math.toRadians(0.0),
+                                                                                                              Math.toRadians(90.0)),
                                                                                              new Point3D());
    private final ReferenceFrame trackerFrame
-         = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("trackerFrame",ReferenceFrame.getWorldFrame(), openVRYUpToIHMCZUpSpace);
+         = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("trackerFrame", ReferenceFrame.getWorldFrame(), openVRYUpToIHMCZUpSpace);
 
    /**
     * Creates a new GDXVRContext, initializes the VR system, and

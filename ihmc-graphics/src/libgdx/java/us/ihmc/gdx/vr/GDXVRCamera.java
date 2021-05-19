@@ -1,6 +1,5 @@
 package us.ihmc.gdx.vr;
 
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
 import org.lwjgl.openvr.VRSystem;
@@ -11,19 +10,14 @@ import com.badlogic.gdx.math.Vector3;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 /**
  * A {@link Camera} implementation for one {@link RobotSide}
- * of a {@link GDXVRContext}. All properties except {@link Camera#near},
- * {@link Camera#far} and {@link #offset} will be overwritten
+ * of a {@link GDXVRContext}. All properties  will be overwritten
  * on every call to {@link #update()} based on the tracked values
- * from the head mounted display. The {@link #offset}
- * vector allows you to position the camera in world space.
- *
- * @author badlogic
+ * from the head mounted display.
  */
 public class GDXVRCamera extends Camera
 {
@@ -38,9 +32,6 @@ public class GDXVRCamera extends Camera
    private final Vector3D euclidDirection = new Vector3D();
    private final Vector3D euclidUp = new Vector3D();
 
-   private boolean created = false;
-   private ModelInstance coordinateFrame;
-
    public GDXVRCamera(GDXVRContext context, RobotSide eye)
    {
       this.context = context;
@@ -50,12 +41,6 @@ public class GDXVRCamera extends Camera
    @Override
    public void update()
    {
-      if (!created)
-      {
-         created = true;
-         coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
-      }
-
       update(true);
    }
 
@@ -80,8 +65,6 @@ public class GDXVRCamera extends Camera
       euclidUp.set(Axis3D.Y); // camera is rendered in Y up
       hmd.getPose().getOrientation().transform(euclidUp);
 
-      hmd.getPose(ReferenceFrame.getWorldFrame(), coordinateFrame.transform);
-
       position.set(hmd.getPose().getPosition().getX32(), hmd.getPose().getPosition().getY32(), hmd.getPose().getPosition().getZ32());
       direction.set(euclidDirection.getX32(), euclidDirection.getY32(), euclidDirection.getZ32());
       up.set(euclidUp.getX32(), euclidUp.getY32(), euclidUp.getZ32());
@@ -98,10 +81,5 @@ public class GDXVRCamera extends Camera
          Matrix4.inv(invProjectionView.val);
          frustum.update(invProjectionView);
       }
-   }
-
-   public ModelInstance getCoordinateFrame()
-   {
-      return coordinateFrame;
    }
 }
