@@ -5,13 +5,13 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.BufferUtils;
+import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.VRControllerState;
 import org.lwjgl.openvr.VRSystem;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.AffineTransform;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 import java.nio.IntBuffer;
 
@@ -21,129 +21,56 @@ import java.nio.IntBuffer;
  */
 public class GDXVRDevice
 {
-   private final GDXVRContext gdxVRContext;
+   private final GDXVRContext context;
    private final GDXVRDeviceType type;
    private final GDXVRControllerRole role;
    private long buttons = 0;
    private final VRControllerState state = VRControllerState.create();
    private final ModelInstance modelInstance;
    private final String name;
-
    private final IntBuffer tempIntBuffer = BufferUtils.newIntBuffer(1);
-   // tracker space
-   private final Vector3 position = new Vector3();
-   private final Vector3 xAxis = new Vector3();
-   private final Vector3 yAxis = new Vector3();
-   private final Vector3 zAxis = new Vector3();
-
-   // world space
-   private final Vector3 positionWorld = new Vector3();
-   private final Vector3 xAxisWorld = new Vector3();
-   private final Vector3 yAxisWorld = new Vector3();
-   private final Vector3 zAxisWorld = new Vector3();
-
-   private final Matrix4 worldTransformGDX = new Matrix4();
-   private final AffineTransform worldTransformEuclid = new AffineTransform();
-   private final PoseReferenceFrame referenceFrame;
-   private final YawPitchRoll toZUpXForward = new YawPitchRoll(Math.toRadians(90.0), Math.toRadians(90.0), Math.toRadians(0.0));
-
-   private final Matrix4 matTmp = new Matrix4();
-
-   private final Matrix4 transform = new Matrix4();
    private final Vector3 velocity = new Vector3();
    private final Vector3 angularVelocity = new Vector3();
+   private final FramePose3D pose = new FramePose3D();
+   private final RotationMatrix tempRotationMatrix = new RotationMatrix();
    private boolean isValid;
-   /** the device index */
    private final int deviceIndex;
 
-   public GDXVRDevice(GDXVRContext gdxVRContext, int deviceIndex, GDXVRDeviceType type, GDXVRControllerRole role)
+   public GDXVRDevice(GDXVRContext context, int deviceIndex, GDXVRDeviceType type, GDXVRControllerRole role)
    {
-      this.gdxVRContext = gdxVRContext;
+      this.context = context;
       this.deviceIndex = deviceIndex;
       this.type = type;
       this.role = role;
-      Model model = gdxVRContext.loadRenderModel(getStringProperty(GDXVRDeviceProperty.RenderModelName_String));
+      Model model = context.loadRenderModel(getStringProperty(GDXVRDeviceProperty.RenderModelName_String));
       this.modelInstance = model != null ? new ModelInstance(model) : null;
-      if (model != null)
-         this.modelInstance.transform.set(transform);
 
       String roleName = role == GDXVRControllerRole.LeftHand ? role.name() : "";
       roleName += role == GDXVRControllerRole.RightHand ? role.name() : "";
       name = type.name() + roleName;
-      referenceFrame = new PoseReferenceFrame(name, ReferenceFrame.getWorldFrame());
    }
 
-   public void updateAxesAndPosition()
+   public void updatePoseInTrackerFrame(HmdMatrix34 openVRRigidBodyTransform)
    {
-      transform.getTranslation(position);
-      xAxis.set(transform.val[Matrix4.M00], transform.val[Matrix4.M10], transform.val[Matrix4.M20]).nor();
-      yAxis.set(transform.val[Matrix4.M01], transform.val[Matrix4.M11], transform.val[Matrix4.M21]).nor();
-      zAxis.set(transform.val[Matrix4.M02], transform.val[Matrix4.M12], transform.val[Matrix4.M22]).nor().scl(-1);
+      pose.setReferenceFrame(context.getTrackerFrame());
+      GDXTools.toEuclid(openVRRigidBodyTransform, pose);
 
-      matTmp.set(gdxVRContext.getTrackerSpaceToWorldspaceRotationOffset());
-      positionWorld.set(position).mul(matTmp);
-      positionWorld.add(gdxVRContext.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
-
-      matTmp.set(gdxVRContext.getTrackerSpaceToWorldspaceRotationOffset());
-
-      xAxisWorld.set(xAxis).mul(matTmp);
-      yAxisWorld.set(yAxis).mul(matTmp);
-      zAxisWorld.set(zAxis).mul(matTmp);
-
-      worldTransformGDX.idt()
-                       .translate(gdxVRContext.getTrackerSpaceOriginToWorldSpaceTranslationOffset())
-                       .mul(gdxVRContext.getTrackerSpaceToWorldspaceRotationOffset())
-                       .mul(transform);
-      GDXTools.toEuclid(worldTransformGDX, worldTransformEuclid);
-      worldTransformEuclid.appendOrientation(toZUpXForward);
-      GDXTools.toGDX(worldTransformEuclid, worldTransformGDX);
-
-      referenceFrame.setX(worldTransformEuclid.getTranslation().getX());
-      referenceFrame.setY(worldTransformEuclid.getTranslation().getY());
-      referenceFrame.setZ(worldTransformEuclid.getTranslation().getZ());
-      referenceFrame.setOrientationAndUpdate(worldTransformEuclid.getRotationView());
+      // update model instance
+      if (modelInstance != null)
+         getPose(ReferenceFrame.getWorldFrame(), modelInstance.transform);
    }
 
-   /**
-    * @return the position in the given {@link GDXVRSpace}
-    */
-   public Vector3 getPosition(GDXVRSpace space)
+   public void getPose(ReferenceFrame referenceFrame, Matrix4 gdxRigidBodyTransform)
    {
-      return space == GDXVRSpace.Tracker ? position : positionWorld;
+      pose.changeFrame(referenceFrame);
+      pose.getOrientation().get(tempRotationMatrix);
+      GDXTools.toGDX(tempRotationMatrix, gdxRigidBodyTransform);
+      GDXTools.toGDX(pose.getPosition(), gdxRigidBodyTransform);
    }
 
-   /**
-    * @return the right vector in the given {@link GDXVRSpace}
-    */
-   public Vector3 getRight(GDXVRSpace space)
+   public FramePose3D getPose()
    {
-      return space == GDXVRSpace.Tracker ? xAxis : xAxisWorld;
-   }
-
-   /**
-    * @return the up vector in the given {@link GDXVRSpace}
-    */
-   public Vector3 getUp(GDXVRSpace space)
-   {
-      return space == GDXVRSpace.Tracker ? yAxis : yAxisWorld;
-   }
-
-   /**
-    * @return the direction vector in the given {@link GDXVRSpace}
-    */
-   public Vector3 getDirection(GDXVRSpace space)
-   {
-      return space == GDXVRSpace.Tracker ? zAxis : zAxisWorld;
-   }
-
-   public PoseReferenceFrame getReferenceFrame()
-   {
-      return referenceFrame;
-   }
-
-   public Matrix4 getWorldTransformGDX()
-   {
-      return worldTransformGDX;
+      return pose;
    }
 
    /**
@@ -315,14 +242,6 @@ public class GDXVRDevice
    public int getDeviceIndex()
    {
       return deviceIndex;
-   }
-
-   /**
-    * transform encoding the position and rotation of the device in tracker space
-    **/
-   public Matrix4 getTransform()
-   {
-      return transform;
    }
 
    /**

@@ -26,18 +26,17 @@ import com.badlogic.gdx.graphics.g3d.model.NodePart;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
-import com.badlogic.gdx.math.Matrix4;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ObjectMap;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -78,18 +77,18 @@ public class GDXVRContext implements Disposable
    private boolean renderingStarted = false;
    private boolean initialDevicesReported = false;
 
-   // offsets for translation and rotation from tracker to world space
-   private final Vector3 trackerSpaceOriginToWorldSpaceTranslationOffset = new Vector3();
-   private final Matrix4 trackerSpaceToWorldspaceRotationOffset = new Matrix4();
-   private final RigidBodyTransformReadOnly toZUpXForward = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0),
-                                                                                                    Math.toRadians(90.0),
-                                                                                                    Math.toRadians(0.0)), new Point3D());
-   private final RigidBodyTransformReadOnly toZForwardYUp;
-   {
-      RigidBodyTransform toXForwardZUpTemp = new RigidBodyTransform(toZUpXForward);
-      toXForwardZUpTemp.invert();
-      toZForwardYUp = toXForwardZUpTemp;
-   }
+   // ReferenceFrame.getWorldFrame() is Z-up frame
+   // OpenVR is right handed, Thumb: +Y, Index +Z, Middle +X
+   // The default orientation of that frame is such that
+   // your index finger is pointing at your face and your thumb up
+   // IHMC Zup frame is right handed, Thumb +Z, Index +X, Middle +Y
+   // such that your index finger is pointing away from you
+   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(90.0),
+                                                                                                              Math.toRadians(90.0),
+                                                                                                              Math.toRadians(0.0)),
+                                                                                             new Point3D());
+   private final ReferenceFrame trackerFrame
+         = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("trackerFrame",ReferenceFrame.getWorldFrame(), openVRYUpToIHMCZUpSpace);
 
    /**
     * Creates a new GDXVRContext, initializes the VR system, and
@@ -170,6 +169,8 @@ public class GDXVRContext implements Disposable
       perEyeData.get(RobotSide.RIGHT).getCamera().update();
    }
 
+   RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
+
    /**
     * Get the latest tracking data and send events to {@link GDXVRDeviceListener} instance registered with the context.
     * <p>
@@ -206,19 +207,10 @@ public class GDXVRContext implements Disposable
             HmdVector3 angularVelocity = trackedPose.vAngularVelocity();
             HmdMatrix34 openVRRigidBodyTransform = trackedPose.mDeviceToAbsoluteTracking();
 
-            GDXTools.toGDX(openVRRigidBodyTransform, device.getTransform());
             device.getVelocity().set(velocity.v(0), velocity.v(1), velocity.v(2));
             device.getAngularVelocity().set(angularVelocity.v(0), angularVelocity.v(1), angularVelocity.v(2));
             device.setValid(trackedPose.bPoseIsValid());
-
-            device.updateAxesAndPosition();
-            if (device.getModelInstance() != null)
-            {
-               device.getModelInstance().transform.idt()
-                                                       .translate(trackerSpaceOriginToWorldSpaceTranslationOffset)
-                                                       .mul(trackerSpaceToWorldspaceRotationOffset)
-                                                       .mul(device.getTransform());
-            }
+            device.updatePoseInTrackerFrame(openVRRigidBodyTransform);
          }
       }
 
@@ -274,7 +266,7 @@ public class GDXVRContext implements Disposable
 
    private void createDevice(int deviceIndex)
    {
-      GDXVRDeviceType type = null;
+      GDXVRDeviceType type;
       int deviceClass = VRSystem.VRSystem_GetTrackedDeviceClass(deviceIndex);
       switch (deviceClass)
       {
@@ -309,7 +301,6 @@ public class GDXVRContext implements Disposable
          }
       }
       devices.set(deviceIndex, new GDXVRDevice(this, deviceIndex, type, role));
-      devices.get(deviceIndex).updateAxesAndPosition();
    }
 
    /**
@@ -544,44 +535,13 @@ public class GDXVRContext implements Disposable
       return null;
    }
 
-   /**
-    * @return the {@link GDXVRPerEyeData} such as rendering surface and camera
-    */
-   public GDXVRPerEyeData getEyeData(RobotSide eye)
+   public SideDependentList<GDXVRPerEyeData> getPerEyeData()
    {
-      return perEyeData.get(eye);
+      return perEyeData;
    }
 
-   /**
-    * Returns the tracker space to world space translation offset. All positional vectors
-    * returned by {@link GDXVRDevice} methods taking a {@link GDXVRSpace#World} are
-    * multiplied offset by this vector. This allows offsetting {@link GDXVRDevice}
-    * positions and orientations in world space.
-    */
-   public Vector3 getTrackerSpaceOriginToWorldSpaceTranslationOffset()
+   public ReferenceFrame getTrackerFrame()
    {
-      return trackerSpaceOriginToWorldSpaceTranslationOffset;
-   }
-
-   /**
-    * Returns the tracker space to world space rotation offset. All rotational vectors
-    * returned by {@link GDXVRDevice} methods taking a {@link GDXVRSpace#World} are
-    * rotated by this offset. This allows offsetting {@link GDXVRDevice}
-    * orientations in world space. The matrix needs to only have
-    * rotational components.
-    */
-   public Matrix4 getTrackerSpaceToWorldspaceRotationOffset()
-   {
-      return trackerSpaceToWorldspaceRotationOffset;
-   }
-
-   public RigidBodyTransformReadOnly getToZForwardYUp()
-   {
-      return toZForwardYUp;
-   }
-
-   public RigidBodyTransformReadOnly getToZUpXForward()
-   {
-      return toZUpXForward;
+      return trackerFrame;
    }
 }

@@ -10,15 +10,12 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.*;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
@@ -27,10 +24,8 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Building Exploration";
 
-   private final FramePose3D goalPose = new FramePose3D();
    private Messager messager;
-   private FramePose3D tempFramePose = new FramePose3D();
-   private RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
+   private final FramePose3D tempFramePose = new FramePose3D();
    private ModelInstance goalSphere;
    private boolean goalIsBeingPlaced;
 
@@ -84,11 +79,7 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
    {
       if (goalIsBeingPlaced)
       {
-         PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.LEFT).getReferenceFrame();
-         tempFramePose.setToZero(controllerFrame);
-         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, goalSphere.transform);
+         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), goalSphere.transform);
          messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(tempFramePose));
       }
    }
