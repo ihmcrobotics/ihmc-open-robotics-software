@@ -30,7 +30,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final PlanarRegionCliffAvoider cliffAvoider;
    private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
    private final FootstepPlannerBodyCollisionDetector collisionDetector;
-   private final FootstepPoseChecker goodPositionChecker;
+   private final FootstepPoseHeuristicChecker goodPositionChecker;
 
    private PlanarRegionsList planarRegionsList = null;
    private boolean assumeFlatGround = false;
@@ -54,7 +54,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
       this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
-      this.goodPositionChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      this.goodPositionChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       parentRegistry.addChild(registry);
    }
 
