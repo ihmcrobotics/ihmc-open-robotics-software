@@ -1,0 +1,100 @@
+package us.ihmc.utilities.ros;
+
+import org.ros.internal.message.Message;
+import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.log.LogTools;
+import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
+import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * This class should help the user
+ * - Easily publish and subscribe
+ * - Reconnect
+ * - Remove and add topic subscriptions
+ */
+public class ROS1Helper
+{
+   private final String nodeName;
+   private RosMainNode ros1Node;
+
+   private final HashMap<RosTopicPublisher<? extends Message>, String> publishers = new HashMap<>();
+   private final HashMap<RosTopicSubscriberInterface<? extends Message>, String> subscribers = new HashMap<>();
+
+   private boolean hasBeenExecuted = false;
+   private boolean needsReconnect = true;
+
+   public ROS1Helper(String nodeName)
+   {
+      this.nodeName = nodeName;
+   }
+
+   public void ensureConnected()
+   {
+      if (needsReconnect)
+      {
+         hasBeenExecuted = false;
+         LogTools.info("Reconnecting ROS 1 node...");
+         if (ros1Node != null)
+            ros1Node.shutdown();
+
+         ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), nodeName);
+
+         for (Map.Entry<RosTopicPublisher<? extends Message>, String> publisher : publishers.entrySet())
+         {
+            ros1Node.attachPublisher(publisher.getValue(), publisher.getKey());
+         }
+         for (Map.Entry<RosTopicSubscriberInterface<? extends Message>, String> subscriber : subscribers.entrySet())
+         {
+            ros1Node.attachSubscriber(subscriber.getValue(), subscriber.getKey());
+         }
+
+         ros1Node.execute();
+         hasBeenExecuted = true;
+         needsReconnect = false;
+      }
+   }
+
+   public void addPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
+   {
+      publishers.put(publisher, topicName);
+
+      if (hasBeenExecuted)
+      {
+         needsReconnect = true;
+      }
+      else
+      {
+         ros1Node.attachPublisher(topicName, publisher);
+      }
+   }
+
+   public void addSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
+   {
+      subscribers.put(subscriber, topicName);
+
+      if (hasBeenExecuted)
+      {
+         needsReconnect = true;
+      }
+      else
+      {
+         ros1Node.attachSubscriber(topicName, subscriber);
+      }
+   }
+
+   public void removeSubscriber(RosTopicSubscriberInterface<? extends Message> subscriber)
+   {
+      if (ros1Node != null)
+         ros1Node.removeSubscriber(subscriber);
+
+      subscribers.remove(subscriber);
+   }
+
+   public boolean isConnected()
+   {
+      return hasBeenExecuted && ros1Node.isStarted();
+   }
+}
