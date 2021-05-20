@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -128,7 +129,6 @@ public class OneStepCaptureRegionCalculator
    private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
    private final FramePoint2D kinematicExtreme = new FramePoint2D(worldFrame);
    private final FramePoint2D additionalKinematicPoint = new FramePoint2D(worldFrame);
-   private final FrameVector2D projectedLine = new FrameVector2D(worldFrame);
    private final FrameVector2D firstKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameVector2D lastKinematicExtremeDirection = new FrameVector2D(worldFrame);
    private final FrameConvexPolygon2D rawCaptureRegion = new FrameConvexPolygon2D(worldFrame);
@@ -148,7 +148,6 @@ public class OneStepCaptureRegionCalculator
       firstKinematicExtremeDirection.setToZero(supportSoleZUp);
       lastKinematicExtremeDirection.setToZero(supportSoleZUp);
       predictedICP.setToZero(supportSoleZUp);
-      projectedLine.setToZero(supportSoleZUp);
 
       swingTimeRemaining = MathTools.clamp(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       footCentroid.setIncludingFrame(supportFootPolygon.getCentroid());
@@ -173,14 +172,14 @@ public class OneStepCaptureRegionCalculator
       for (int i = 0; i < visibleVertices.size(); i++)
       {
          FramePoint2D copExtreme = visibleVertices.get(i);
-         copExtreme.changeFrame(supportSoleZUp);
          CapturePointTools.computeDesiredCapturePointPosition(omega0, swingTimeRemaining, capturePoint, copExtreme, predictedICP);
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
-         projectedLine.sub(predictedICP, copExtreme);
-         CaptureRegionMathTools.solveIntersectionOfRayAndCircle(footCentroid, predictedICP, projectedLine, APPROXIMATION_MULTIPLIER * kinematicStepRange,
-                                                                kinematicExtreme);
+         int intersections = EuclidCoreMissingTools.intersectionBetweenRay2DAndCircle(APPROXIMATION_MULTIPLIER * kinematicStepRange, footCentroid, copExtreme,
+                                                                                      predictedICP, kinematicExtreme, null);
+         if (intersections > 1)
+            throw new RuntimeException("The cop was outside of the reachable range.");
 
          if (kinematicExtreme.containsNaN())
          {
