@@ -215,16 +215,51 @@ public class CapturePointTools
     *           robot.
     * @param time forward time to integrate. t in the above equation.
     * @param initialDesiredCapturePoint capture point position at t = 0. x<sup>ICP<sub>0</sub></sup> in the above equation
-    * @param initialDesiredCMP CMP position at t = 0. x<sup>CMP<sub>0</sub></sup> in the above equation
+    * @param constantDesiredCMP CMP position at t = 0. x<sup>CMP<sub>0</sub></sup> in the above equation
     * @param desiredCapturePointToPack Desired Capture Point position at time t given the initial ICP and CMP states. Ix<sup>ICP<sub>des</sub></sup> in the above equation.
     */
    public static void computeDesiredCapturePointPosition(double omega0, double time, FramePoint2DReadOnly initialDesiredCapturePoint,
-                                                         FramePoint2DReadOnly initialDesiredCMP, FixedFramePoint2DBasics desiredCapturePointToPack)
+                                                         FramePoint2DReadOnly constantDesiredCMP, FixedFramePoint2DBasics desiredCapturePointToPack)
    {
-      if (initialDesiredCapturePoint.distance(initialDesiredCMP) > EPSILON)
-         desiredCapturePointToPack.interpolate(initialDesiredCMP, initialDesiredCapturePoint, Math.exp(omega0 * time));
+      if (initialDesiredCapturePoint.distance(constantDesiredCMP) > EPSILON)
+         desiredCapturePointToPack.interpolate(constantDesiredCMP, initialDesiredCapturePoint, Math.exp(omega0 * time));
       else
          desiredCapturePointToPack.set(initialDesiredCapturePoint);
+   }
+
+   /**
+    * Compute the desired capture point position at a given time.
+    * <p>
+    *    x<sup>ICP<sub>des</sub></sup> =
+    * (e<sup>&omega;0 t</sup>) x<sup>ICP<sub>0</sub></sup> + (1-e<sup>&omega;0
+    * t</sup>)x<sup>CMP<sub>0</sub></sup>
+    * </p>
+    *
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           robot.
+    * @param time forward time to integrate. t in the above equation.
+    * @param initialDesiredCapturePoint capture point position at t = 0. x<sup>ICP<sub>0</sub></sup> in the above equation
+    * @param initialDesiredCMP CMP position at t = 0. x<sup>CMP<sub>0</sub></sup> in the above equation
+    * @param desiredCapturePointToPack Desired Capture Point position at time t given the initial ICP and CMP states. Ix<sup>ICP<sub>des</sub></sup> in the above equation.
+    */
+   public static void computeDesiredCapturePointPosition(double omega0, double time, double timeAtFinalCMP, FramePoint2DReadOnly initialDesiredCapturePoint,
+                                                         FramePoint2DReadOnly initialDesiredCMP, FramePoint2DReadOnly finalDesiredCMP,
+                                                         FixedFramePoint2DBasics desiredCapturePointToPack)
+   {
+      if (initialDesiredCapturePoint.distance(initialDesiredCMP) > EPSILON)
+      {
+         desiredCapturePointToPack.sub(finalDesiredCMP, initialDesiredCMP);
+         desiredCapturePointToPack.scale(1.0 / (omega0 * timeAtFinalCMP));
+         desiredCapturePointToPack.add(initialDesiredCMP);
+         desiredCapturePointToPack.interpolate(initialDesiredCapturePoint, Math.exp(omega0 * time));
+         desiredCapturePointToPack.scaleAdd(time / timeAtFinalCMP, finalDesiredCMP, desiredCapturePointToPack);
+         desiredCapturePointToPack.scaleAdd(-time / timeAtFinalCMP, initialDesiredCMP, desiredCapturePointToPack);
+      }
+      else
+      {
+         desiredCapturePointToPack.set(initialDesiredCapturePoint);
+      }
    }
 
    /**
