@@ -35,7 +35,7 @@ public class FootstepPoseCheckerTest
 
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      FootstepPoseChecker checker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker checker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
       parameters.setMaximumStepXWhenFullyPitched(0.3);
       parameters.setMinimumStepZWhenFullyPitched(0.05);
 
@@ -90,7 +90,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
@@ -126,7 +126,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
@@ -162,7 +162,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double parentYaw = snapToYawGrid(Math.toRadians(75));
 
@@ -207,7 +207,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double parentYaw = snapToYawGrid(Math.toRadians(75));
 
@@ -252,7 +252,7 @@ public class FootstepPoseCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      FootstepPoseChecker nodeChecker = new FootstepPoseChecker(parameters, snapper, registry);
+      FootstepPoseHeuristicChecker nodeChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
 
       double snappedYPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaximumStepReach());
