@@ -401,7 +401,7 @@ public class SwingOverPlanarRegionsTest
                                                                                           steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                                           steppingParameters.getMaxSwingHeightFromStanceFoot(),
                                                                                           steppingParameters.getMinSwingHeightFromStanceFoot(),
-                                                                                          steppingParameters.getMinimumHeightToKeepCustomWaypoint(),
+                                                                                          steppingParameters.getCustomWaypointAngleThreshold(),
                                                                                           new YoRegistry(getClass().getSimpleName()),
                                                                                           null);
 
