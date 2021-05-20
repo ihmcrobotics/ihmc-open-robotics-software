@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
@@ -14,18 +13,20 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.awt.*;
 
 public class PushRecoveryCoMTrajectoryPlannerVisualizer
 {
@@ -54,10 +55,13 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
    private final PushRecoveryState state;
    private final PushRecoveryCoPTrajectoryGenerator copPlanner;
-   private final CoMTrajectoryPlannerInterface comPlanner;
+   private final CoMTrajectoryPlanner comPlanner;
 
    private final ConvexPolygon2DBasics defaultSupportPolygon = new ConvexPolygon2D();
 
+   private final YoFrameConvexPolygon2D nextFootPolygon;
+
+   private final YoBoolean replan;
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
    private final YoFrameVector3D desiredCoMAcceleration;
@@ -117,8 +121,26 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       copPlanner.registerState(state);
 
       comPlanner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry);
-      ((CoMTrajectoryPlanner) comPlanner).setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+      comPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+      comPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(gravity, omega, registry));
 
+      FramePose3D leftStancePose = new FramePose3D();
+      FramePose3D rightStancePose = new FramePose3D();
+      leftStancePose.getPosition().setY(stepWidth);
+      rightStancePose.getPosition().setY(-stepWidth);
+
+      PoseReferenceFrame leftStepFrame = new PoseReferenceFrame("LeftStepFrame", worldFrame);
+      PoseReferenceFrame rightStepFrame = new PoseReferenceFrame("RightStepFrame", worldFrame);
+      leftStepFrame.setPoseAndUpdate(leftStancePose);
+      rightStepFrame.setPoseAndUpdate(rightStancePose);
+
+      FrameConvexPolygon2D leftSupport = new FrameConvexPolygon2D(leftStepFrame);
+      FrameConvexPolygon2D rightSupport = new FrameConvexPolygon2D(rightStepFrame);
+      leftSupport.set(defaultSupportPolygon);
+      rightSupport.set(defaultSupportPolygon);
+
+      state.initializeStance(RobotSide.LEFT, leftSupport, leftStepFrame);
+      state.initializeStance(RobotSide.RIGHT, rightSupport, rightStepFrame);
 
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
@@ -128,15 +150,25 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       YoGraphicVector forceViz = new YoGraphicVector("desiredGRF", desiredECMPPosition, desiredGroundReactionForce, 0.05, YoAppearance.Red());
 
-      YoArtifactPolygon
+      YoFrameConvexPolygon2D leftFootPolygon = new YoFrameConvexPolygon2D("leftFootPolygon", worldFrame, 4, registry);
+      YoFrameConvexPolygon2D rightFootPolygon = new YoFrameConvexPolygon2D("rightFootPolygon", worldFrame, 4, registry);
+      nextFootPolygon = new YoFrameConvexPolygon2D("nextFootPolygon", worldFrame, 4, registry);
 
-      graphicsListRegistry.registerArtifact("dcmPlanner", state.createLeftFootGraphic("left").createArtifact());
-      graphicsListRegistry.registerArtifact("dcmPlanner", state.createRightFootGraphic("right").createArtifact());
+      YoArtifactPolygon leftFootPolygonArtifact = new YoArtifactPolygon("leftFootArtifact", leftFootPolygon, Color.green, false);
+      YoArtifactPolygon rightFootPolygonArtifact = new YoArtifactPolygon("rightFootArtifact", rightFootPolygon, Color.green, false);
+      YoArtifactPolygon nextFootPolygonArtifact = new YoArtifactPolygon("nextFootArtifact", nextFootPolygon, Color.blue, false);
+
+      graphicsListRegistry.registerArtifact("dcmPlanner", leftFootPolygonArtifact);
+      graphicsListRegistry.registerArtifact("dcmPlanner", rightFootPolygonArtifact);
+      graphicsListRegistry.registerArtifact("dcmPlanner", nextFootPolygonArtifact);
 
       graphicsListRegistry.registerYoGraphic("dcmPlanner", forceViz);
       graphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
+
+      leftFootPolygon.setMatchingFrame(state.getFootPolygonInSole(RobotSide.LEFT), false);
+      rightFootPolygon.setMatchingFrame(state.getFootPolygonInSole(RobotSide.RIGHT), false);
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
@@ -156,22 +188,23 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
 
+      desiredCoMPosition.setToZero();
+      desiredCoMPosition.setZ(nominalHeight);
+      desiredCoMPosition.setX(0.15);
+      desiredCoMVelocity.setToZero();
+
       scs.startOnAThread();
       updateState();
       simulate();
 
-      desiredCoMPosition.getYoX().addListener(v -> {updateState(); simulate();});
-      desiredCoMPosition.getYoY().addListener(v -> {updateState(); simulate();});
-      desiredCoMPosition.getYoZ().addListener(v -> {updateState(); simulate();});
-
-      desiredCoMVelocity.getYoX().addListener(v -> {updateState(); simulate();});
-      desiredCoMVelocity.getYoY().addListener(v -> {updateState(); simulate();});
-      desiredCoMVelocity.getYoZ().addListener(v -> {updateState(); simulate();});
+      replan = new YoBoolean("replan", registry);
+      replan.addListener(v -> {updateState(); simulate();});
 
       ThreadTools.sleepForever();
    }
 
    private final FramePoint2D icp = new FramePoint2D();
+   private final PoseReferenceFrame newPoseFrame = new PoseReferenceFrame("newPose", worldFrame);
 
    private void updateState()
    {
@@ -182,14 +215,17 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
       state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       state.setFinalTransferDuration(finalTransferDuration);
+
+      newPoseFrame.setPoseAndUpdate(state.getFootstep(0).getFootstepPose());
+
+      FrameConvexPolygon2D newPolygon = new FrameConvexPolygon2D(newPoseFrame);
+      newPolygon.set(defaultSupportPolygon);
+      newPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+      nextFootPolygon.set(newPolygon);
    }
 
    private void simulate()
    {
-      desiredCoMPosition.setToZero();
-      desiredCoMPosition.setZ(nominalHeight);
-      desiredCoMVelocity.setToZero();
-
       copPlanner.compute(state);
 
       comPlanner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
