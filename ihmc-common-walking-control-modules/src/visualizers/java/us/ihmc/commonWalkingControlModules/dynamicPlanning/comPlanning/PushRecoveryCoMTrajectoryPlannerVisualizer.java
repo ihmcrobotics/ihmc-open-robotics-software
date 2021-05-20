@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.captureRegion.AchievableCaptureRegionCalculatorWithDelay;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepAchievableCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.ReachableFootholdsCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
@@ -86,8 +87,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
 
-   private final ReachableFootholdsCalculator reachableFootholdsCalculator;
-   private final AchievableCaptureRegionCalculatorWithDelay captureRegionCalculator;
+   private final MultiStepAchievableCaptureRegionCalculator captureRegionCalculator;
 
    private final YoDouble omega;
 
@@ -189,9 +189,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
-      reachableFootholdsCalculator = new ReachableFootholdsCalculator(kinematicsStepRange, kinematicsStepRange, 0.5 * footWidth, kinematicsStepRange,
-                                                                      new SideDependentList<>(leftStepFrame, rightStepFrame),"", registry, graphicsListRegistry);
-      captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay(footWidth, kinematicsStepRange, new SideDependentList<>(leftStepFrame, rightStepFrame),
+      captureRegionCalculator = new MultiStepAchievableCaptureRegionCalculator(kinematicsStepRange, footWidth, new SideDependentList<>(leftStepFrame, rightStepFrame),
                                                                                "", registry, graphicsListRegistry);
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
@@ -235,8 +233,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    {
       CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition), new FrameVector2D(initialCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
 
-      reachableFootholdsCalculator.calculateReachableRegions(RobotSide.LEFT);
-      captureRegionCalculator.calculateCaptureRegion(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
+      captureRegionCalculator.calculateCaptureRegions(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
 
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
