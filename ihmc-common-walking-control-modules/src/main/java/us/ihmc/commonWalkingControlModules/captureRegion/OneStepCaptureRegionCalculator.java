@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -176,7 +177,7 @@ public class OneStepCaptureRegionCalculator
       {
          FramePoint2D copExtreme = visibleVertices.get(i);
          copExtreme.changeFrame(supportSoleZUp);
-         CaptureRegionMathTools.predictCapturePoint(capturePoint, copExtreme, swingTimeRemaining, omega0, predictedICP);
+         CapturePointTools.computeDesiredCapturePointPosition(omega0, swingTimeRemaining, capturePoint, copExtreme, predictedICP);
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
