@@ -123,6 +123,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       comPlanner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry);
       comPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
       comPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(gravity, omega, registry));
+      comPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
       FramePose3D leftStancePose = new FramePose3D();
       FramePose3D rightStancePose = new FramePose3D();
