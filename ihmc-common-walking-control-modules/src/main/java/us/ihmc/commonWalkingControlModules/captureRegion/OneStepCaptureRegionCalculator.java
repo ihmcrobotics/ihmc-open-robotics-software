@@ -94,7 +94,7 @@ public class OneStepCaptureRegionCalculator
       parentRegistry.addChild(registry);
       if (yoGraphicsListRegistry != null && VISUALIZE)
       {
-         captureRegionVisualizer = new CaptureRegionVisualizer(this, suffix, yoGraphicsListRegistry, registry);
+         captureRegionVisualizer = new CaptureRegionVisualizer(this::getCaptureRegion, suffix, yoGraphicsListRegistry, registry);
       }
    }
 
@@ -121,8 +121,7 @@ public class OneStepCaptureRegionCalculator
    }
 
    // variables for the capture region calculation
-   private static final int APPROXIMATION_MULTILIER = 100;
-   private RobotSide previousSwingSide;
+   private static final int APPROXIMATION_MULTIPLIER = 100;
    private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
    private final FramePoint2D footCentroid = new FramePoint2D(worldFrame);
    private final FramePoint2D predictedICP = new FramePoint2D(worldFrame);
@@ -140,30 +139,27 @@ public class OneStepCaptureRegionCalculator
 
       // 1. Set up all needed variables and reference frames for the calculation:
       ReferenceFrame supportSoleZUp = soleZUpFrames.get(swingSide.getOppositeSide());
-      if (!swingSide.equals(previousSwingSide))
-      {
          // change the support foot polygon only if the swing side changed to avoid garbage every tick.
-         this.supportFootPolygon.setIncludingFrame(footPolygon);
-         this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportSoleZUp);
-         previousSwingSide = swingSide;
-      }
+      this.supportFootPolygon.setIncludingFrame(footPolygon);
+      this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportSoleZUp);
+
       capturePoint.setIncludingFrame(icp);
       capturePoint.changeFrame(supportSoleZUp);
-      footCentroid.changeFrame(supportSoleZUp);
-      firstKinematicExtremeDirection.changeFrame(supportSoleZUp);
-      lastKinematicExtremeDirection.changeFrame(supportSoleZUp);
-      predictedICP.changeFrame(supportSoleZUp);
-      projectedLine.changeFrame(supportSoleZUp);
+      firstKinematicExtremeDirection.setToZero(supportSoleZUp);
+      lastKinematicExtremeDirection.setToZero(supportSoleZUp);
+      predictedICP.setToZero(supportSoleZUp);
+      projectedLine.setToZero(supportSoleZUp);
 
       swingTimeRemaining = MathTools.clamp(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
       footCentroid.setIncludingFrame(supportFootPolygon.getCentroid());
       rawCaptureRegion.clear(supportSoleZUp);
       captureRegionPolygon.clear(supportSoleZUp);
+      kinematicExtreme.setToZero(supportSoleZUp);
 
       // 2. Get extreme CoP positions
-      boolean icpOusideSupport = computeVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
+      boolean icpOutsideSupport = computeVisibleVerticesFromOutsideLeftToRightCopy(supportFootPolygon, capturePoint);
       FrameConvexPolygon2D reachableRegion = reachableRegions.get(swingSide.getOppositeSide());
-      if (!icpOusideSupport)
+      if (!icpOutsideSupport)
       {
          // If the ICP is in the support polygon return the whole reachable region.
          globalTimer.stopMeasurement();
@@ -173,6 +169,7 @@ public class OneStepCaptureRegionCalculator
       }
 
       // 3. For every possible extreme CoP predict the corresponding ICP given the remaining swing time
+      int lastIndex = visibleVertices.size() - 1;
       for (int i = 0; i < visibleVertices.size(); i++)
       {
          FramePoint2D copExtreme = visibleVertices.get(i);
@@ -181,10 +178,9 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.addVertexMatchingFrame(predictedICP, false);
 
          // 4. Project the predicted ICP on a circle around the foot with the radius of the step range.
-         projectedLine.set(predictedICP);
-         projectedLine.sub(copExtreme);
-         CaptureRegionMathTools.solveIntersectionOfRayAndCircle(footCentroid, predictedICP, projectedLine, APPROXIMATION_MULTILIER * kinematicStepRange,
-               kinematicExtreme);
+         projectedLine.sub(predictedICP, copExtreme);
+         CaptureRegionMathTools.solveIntersectionOfRayAndCircle(footCentroid, predictedICP, projectedLine, APPROXIMATION_MULTIPLIER * kinematicStepRange,
+                                                                kinematicExtreme);
 
          if (kinematicExtreme.containsNaN())
          {
@@ -195,15 +191,9 @@ public class OneStepCaptureRegionCalculator
          rawCaptureRegion.addVertexMatchingFrame(kinematicExtreme, false);
 
          if (i == 0)
-         {
-            firstKinematicExtremeDirection.set(kinematicExtreme);
-            firstKinematicExtremeDirection.sub(footCentroid);
-         }
-         else
-         {
-            lastKinematicExtremeDirection.set(kinematicExtreme);
-            lastKinematicExtremeDirection.sub(footCentroid);
-         }
+            firstKinematicExtremeDirection.sub(kinematicExtreme, footCentroid);
+         else if (i == lastIndex)
+            lastKinematicExtremeDirection.sub(kinematicExtreme, footCentroid);
       }
 
       // 5. Add additional points to the capture region polygon on the circle between the kinematic extreme points
@@ -211,7 +201,7 @@ public class OneStepCaptureRegionCalculator
       {
          double alphaFromAToB = ((double) (i + 1)) / ((double) (KINEMATIC_LIMIT_POINTS + 1));
          captureRegionMath.getPointBetweenVectorsAtDistanceFromOriginCircular(firstKinematicExtremeDirection, lastKinematicExtremeDirection, alphaFromAToB,
-               APPROXIMATION_MULTILIER * kinematicStepRange, footCentroid, additionalKinematicPoint);
+                                                                              APPROXIMATION_MULTIPLIER * kinematicStepRange, footCentroid, additionalKinematicPoint);
          rawCaptureRegion.addVertexMatchingFrame(additionalKinematicPoint, false);
       }
 
@@ -234,7 +224,7 @@ public class OneStepCaptureRegionCalculator
 
    private void updateVisualizer()
    {
-      if (captureRegionVisualizer != null && captureRegionPolygon != null)
+      if (captureRegionVisualizer != null)
       {
          captureRegionVisualizer.update();
       }
