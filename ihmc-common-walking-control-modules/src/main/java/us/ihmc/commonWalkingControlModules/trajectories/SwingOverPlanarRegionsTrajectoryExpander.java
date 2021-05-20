@@ -14,7 +14,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -140,7 +139,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                 steppingParameters.getMaxSwingHeightFromStanceFoot(),
                                                                 steppingParameters.getDefaultSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getMinimumHeightToKeepCustomWaypoint(),
+                                                                steppingParameters.getCustomWaypointAngleThreshold(),
                                                                 this.registry,
                                                                 graphicsListRegistry);
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();

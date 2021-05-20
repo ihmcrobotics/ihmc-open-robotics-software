@@ -88,7 +88,7 @@ public class SwingTrajectoryCalculator
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMinSwingHeightFromStanceFoot();
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
-      double minimumHeightToKeepCustomWaypoint = walkingControllerParameters.getSteppingParameters().getMinimumHeightToKeepCustomWaypoint();
+      double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
 
       soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide);
       oppositeSoleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(robotSide.getOppositeSide());
@@ -110,7 +110,7 @@ public class SwingTrajectoryCalculator
                                                                minSwingHeightFromStanceFoot,
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
-                                                               minimumHeightToKeepCustomWaypoint,
+                                                               customWaypointAngleThreshold,
                                                                registry,
                                                                controllerToolbox.getYoGraphicsListRegistry());
       double minDistanceToStance = walkingControllerParameters.getMinSwingTrajectoryClearanceFromStanceFoot();

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -49,7 +47,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble minSwingHeight;
    private final YoDouble maxSwingHeight;
    private final YoDouble defaultSwingHeight;
-   private final YoDouble customWaypointHeightThreshold;
+   private final YoDouble customWaypointAngleThreshold;
 
    private final double[] waypointProportions = new double[2];
 
@@ -62,6 +60,9 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final FrameVector3D finalVelocity = new FrameVector3D();
    private final RecyclingArrayList<FramePoint3D> waypointPositions;
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
+
+   private final FrameVector3D interWaypointDisplacement = new FrameVector3D();
+   private final FrameVector3D startToWaypointDisplacement = new FrameVector3D();
 
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D desiredAcceleration = new FrameVector3D();
@@ -88,13 +89,13 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private boolean visualize = true;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double minimumHeightToKeepCustomWaypoint,
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double customWaypointAngleThreshold,
                                     YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, minimumHeightToKeepCustomWaypoint, worldFrame, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, worldFrame, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double minimumHeightToKeepCustomWaypoint,
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double customWaypointAngleThreshold,
                                     ReferenceFrame trajectoryFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
@@ -122,8 +123,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
       this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
 
-      this.customWaypointHeightThreshold = new YoDouble(namePrefix + "CustomWaypointHeightThreshold", registry);
-      this.customWaypointHeightThreshold.set(minimumHeightToKeepCustomWaypoint);
+      this.customWaypointAngleThreshold = new YoDouble(namePrefix + "customWaypointAngleThreshold", registry);
+      this.customWaypointAngleThreshold.set(customWaypointAngleThreshold);
 
       for (int i = 0; i < defaultNumberOfWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
@@ -209,21 +210,50 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       if (this.trajectoryType != TrajectoryType.CUSTOM)
          return;
 
-      initialPosition.changeFrame(ReferenceFrame.getWorldFrame());
-      double initialPositionZ = initialPosition.getZ();
-      double firstWaypointMinHeight = initialPositionZ + customWaypointHeightThreshold.getDoubleValue();
-
+      int initialWaypointIndex = computeStartingWaypointIndex(waypoints);
       waypointPositions.clear();
-      for (int i = 0; i < waypoints.size(); i++)
+      for (int i = initialWaypointIndex; i < waypoints.size(); i++)
       {
          FramePoint3D waypoint = waypoints.get(i);
-         if (waypointPositions.isEmpty() && waypoint.getZ() < firstWaypointMinHeight)
-            continue;
-
          FramePoint3D waypointToSet = waypointPositions.add();
          waypointToSet.setIncludingFrame(waypoint);
          waypointToSet.changeFrame(trajectoryFrame);
       }
+   }
+
+   private int computeStartingWaypointIndex(RecyclingArrayList<FramePoint3D> waypoints)
+   {
+      // Don't restrict if two or less waypoints
+      if (waypoints.size() <= 2)
+      {
+         return 0;
+      }
+
+      initialPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      finalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      double minimumDotProduct = Math.cos(customWaypointAngleThreshold.getValue());
+
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         FramePoint3D waypoint = waypoints.get(i);
+         FramePoint3D nextWaypoint = (i == waypoints.size() - 1) ? finalPosition : waypoints.get(i + 1);
+
+         startToWaypointDisplacement.sub(waypoint, initialPosition);
+         interWaypointDisplacement.sub(nextWaypoint, waypoint);
+
+         startToWaypointDisplacement.normalize();
+         interWaypointDisplacement.normalize();
+
+         double dotProduct = startToWaypointDisplacement.dot(interWaypointDisplacement);
+         if (dotProduct > minimumDotProduct)
+         {
+            return i;
+         }
+      }
+
+      // If this check fails for all waypoints, just use the whole trajectory. It might have a jerky start but probably shouldn't be aborted.
+      // If that happens customWaypointAngleThreshold should be increased.
+      return 0;
    }
 
    @Override
