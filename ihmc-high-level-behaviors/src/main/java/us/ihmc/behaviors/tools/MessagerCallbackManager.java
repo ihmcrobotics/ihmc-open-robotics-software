@@ -43,18 +43,24 @@ public class MessagerCallbackManager
 
    private void updateEnabledForListener(Pair<Topic, TopicListener> listenerPair)
    {
-      if (enabled)
-         messager.registerTopicListener(listenerPair.getLeft(), listenerPair.getRight());
-      else
-         messager.removeTopicListener(listenerPair.getLeft(), listenerPair.getRight());
+      if (messager != null)
+      {
+         if (enabled)
+            messager.registerTopicListener(listenerPair.getLeft(), listenerPair.getRight());
+         else
+            messager.removeTopicListener(listenerPair.getLeft(), listenerPair.getRight());
+      }
    }
 
    private void updateEnabledForInput(Pair<Topic, AtomicReference> inputPair)
    {
-      if (enabled)
-         messager.attachInput(inputPair.getLeft(), inputPair.getRight());
-      else
-         messager.removeInput(inputPair.getLeft(), inputPair.getRight());
+      if (messager != null)
+      {
+         if (enabled)
+            messager.attachInput(inputPair.getLeft(), inputPair.getRight());
+         else
+            messager.removeInput(inputPair.getLeft(), inputPair.getRight());
+      }
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
@@ -84,7 +90,7 @@ public class MessagerCallbackManager
    public <T> boolean removeInput(Topic<T> topic, AtomicReference<T> input)
    {
       topicInputs.remove(Pair.of(topic, input));
-      return messager.removeInput(topic, input);
+      return messager == null || messager.removeInput(topic, input);
    }
 
    public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
@@ -97,7 +103,7 @@ public class MessagerCallbackManager
    public <T> boolean removeTopicListener(Topic<T> topic, TopicListener<T> listener)
    {
       topicListeners.remove(Pair.of(topic, listener));
-      return messager.removeTopicListener(topic, listener);
+      return messager == null || messager.removeTopicListener(topic, listener);
    }
 
    public boolean isEnabled()

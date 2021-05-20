@@ -21,7 +21,7 @@ public class ManagedMessager extends MessagerCallbackManager implements Messager
    @Override
    public <T> void submitMessage(Topic<T> topic, T message)
    {
-      if (enabled)
+      if (messager != null && enabled)
       {
          messager.submitMessage(topic, message);
       }
@@ -30,7 +30,7 @@ public class ManagedMessager extends MessagerCallbackManager implements Messager
    @Override
    public <T> void submitMessage(Message<T> message)
    {
-      if (enabled)
+      if (messager != null && enabled)
       {
          messager.submitMessage(message);
       }
