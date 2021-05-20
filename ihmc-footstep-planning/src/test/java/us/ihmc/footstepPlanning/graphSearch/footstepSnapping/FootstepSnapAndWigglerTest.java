@@ -414,8 +414,7 @@ public class FootstepSnapAndWigglerTest
       Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
    }
 
-   @Test
-   public void testOnDataset1()
+   public void testStanceFootClearance()
    {
       DataSet dataset = DataSetIOTools.loadDataSet(DataSetName._20210419_111333_GPUCinders1);
       PlanarRegionsList planarRegionsList = dataset.getPlanarRegionsList();
@@ -424,29 +423,35 @@ public class FootstepSnapAndWigglerTest
       parameters.setWiggleInsideDeltaTarget(0.07);
       parameters.setWiggleInsideDeltaMinimum(0.02);
       parameters.setMaximumXYWiggleDistance(0.2);
-      parameters.setMinClearanceFromStance(0.055);
+      parameters.setMinClearanceFromStance(0.03);
 
       snapAndWiggler.initialize();
 
+      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
+      DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);
+
+      RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871,0.01066136,-0.00008137,0.99992954), new Vector3D(-0.00110121,0.00147726,0.88437723));
+      FootstepSnapData stanceSnapData = new FootstepSnapData(stanceSnapTransform);
+      stanceSnapData.setRegionIndex(2);
+      snapAndWiggler.addSnapData(stanceStep, stanceSnapData);
+
       if (visualize)
       {
-         snapAndWiggler.setPlanarRegions(planarRegionsList);
-         DiscreteFootstep stanceStep = new DiscreteFootstep(105, 82, 3, RobotSide.LEFT);
-         DiscreteFootstep candidateStep = new DiscreteFootstep(109, 80, 2, RobotSide.RIGHT);
-
-         RigidBodyTransform stanceSnapTransform = new RigidBodyTransform(new Quaternion(-0.00521871,0.01066136,-0.00008137,0.99992954), new Vector3D(-0.00110121,0.00147726,0.88437723));
-         FootstepSnapData stanceSnapData = new FootstepSnapData(stanceSnapTransform);
-         stanceSnapData.setRegionIndex(2);
-         snapAndWiggler.addSnapData(stanceStep, stanceSnapData);
-
-//         FootstepSnapData snapData = snapAndWiggler.snapFootstep(, null, false);
          FootstepSnapData snapWiggleData = snapAndWiggler.snapFootstep(candidateStep, stanceStep, true);
          achievedDeltaInside.set(snapWiggleData.getAchievedInsideDelta());
          scs.tickAndUpdate();
 
          scs.cropBuffer();
-
          ThreadTools.sleepForever();
       }
+   }
+
+   public static void main(String[] args)
+   {
+      FootstepSnapAndWigglerTest footstepSnapAndWigglerTest = new FootstepSnapAndWigglerTest();
+      visualize = true;
+      footstepSnapAndWigglerTest.setup();
+      footstepSnapAndWigglerTest.testStanceFootClearance();
    }
 }
