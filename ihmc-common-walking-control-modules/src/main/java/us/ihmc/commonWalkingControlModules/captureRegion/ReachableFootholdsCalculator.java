@@ -115,6 +115,11 @@ public class ReachableFootholdsCalculator
       }
    }
 
+   public FrameConvexPolygon2DReadOnly getReachableRegion(int regionIdx)
+   {
+      return reachableRegions.get(regionIdx);
+   }
+
    private final FramePoint2D tempPoint = new FramePoint2D();
 
    private FrameConvexPolygon2DReadOnly calculateReachableRegion(List<? extends FramePoint2DReadOnly> origins, RobotSide swingSide)

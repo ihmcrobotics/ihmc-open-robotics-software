@@ -28,10 +28,6 @@ public class AchievableCaptureRegionCalculatorWithDelay
 
    private double reachableRegionCutoffAngle = 1.0;
 
-   private final String name = getClass().getSimpleName();
-   private final YoRegistry registry = new YoRegistry(name);
-   private final ExecutionTimer globalTimer = new ExecutionTimer(name + "Timer", registry);
-
    private CaptureRegionVisualizer captureRegionVisualizer = null;
    private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D(worldFrame);
 
@@ -59,9 +55,12 @@ public class AchievableCaptureRegionCalculatorWithDelay
       calculateReachableRegions(footWidth);
 
       // set up registry and visualizer
-      parentRegistry.addChild(registry);
       if (yoGraphicsListRegistry != null && VISUALIZE)
-         captureRegionVisualizer = new CaptureRegionVisualizer(this::getCaptureRegion, suffix, yoGraphicsListRegistry, registry);
+      {
+         YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+         parentRegistry.addChild(registry);
+         captureRegionVisualizer = new CaptureRegionVisualizer(this::getUnconstrainedCaptureRegion, suffix, yoGraphicsListRegistry, registry);
+      }
    }
 
    private void calculateReachableRegions(double footWidth)
@@ -104,8 +103,6 @@ public class AchievableCaptureRegionCalculatorWithDelay
                                       double omega0,
                                       FrameConvexPolygon2DReadOnly footPolygon)
    {
-      globalTimer.startMeasurement();
-
       // 1. Set up all needed variables and reference frames for the calculation:
       ReferenceFrame supportSoleZUp = soleZUpFrames.get(swingSide.getOppositeSide());
 
@@ -129,7 +126,6 @@ public class AchievableCaptureRegionCalculatorWithDelay
       if (supportFootPolygon.isPointInside(capturePoint))
       {
          // If the ICP is in the support polygon return the whole reachable region.
-         globalTimer.stopMeasurement();
          captureRegionPolygon.setIncludingFrame(reachableRegion);
          updateVisualizer();
          return;
@@ -160,8 +156,6 @@ public class AchievableCaptureRegionCalculatorWithDelay
       }
 
       captureRegionPolygon.update();
-
-      globalTimer.stopMeasurement();
       updateVisualizer();
    }
 
@@ -185,9 +179,14 @@ public class AchievableCaptureRegionCalculatorWithDelay
       }
    }
 
-   public FrameConvexPolygon2D getCaptureRegion()
+   public FrameConvexPolygon2DReadOnly getCaptureRegion()
    {
       return captureRegionPolygon;
+   }
+
+   public FrameConvexPolygon2DReadOnly getUnconstrainedCaptureRegion()
+   {
+      return unconstrainedCaptureRegion;
    }
 
    public void setReachableRegionCutoffAngle(double reachableRegionCutoffAngle)
