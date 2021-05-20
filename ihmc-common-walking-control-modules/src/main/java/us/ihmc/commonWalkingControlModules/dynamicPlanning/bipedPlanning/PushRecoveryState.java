@@ -33,8 +33,8 @@ public class PushRecoveryState extends YoSaveableModuleState
    private final YoPreallocatedList<DynamicPlanningFootstep> footsteps;
    private final YoPreallocatedList<PlanningTiming> footstepTimings;
 
-   private final SideDependentList<YoFrameConvexPolygon2D> footPolygonsInSole = new SideDependentList<>();
-   private final SideDependentList<YoFramePose3D> footPoses = new SideDependentList<>();
+   private final SideDependentList<FixedFrameConvexPolygon2DBasics> footPolygonsInSole = new SideDependentList<>();
+   private final SideDependentList<FixedFramePose3DBasics> footPoses = new SideDependentList<>();
    private final SideDependentList<PoseReferenceFrame> soleContactFrames = new SideDependentList<>();
 
    public PushRecoveryState(YoRegistry registry)
@@ -82,28 +82,6 @@ public class PushRecoveryState extends YoSaveableModuleState
          footPolygonsInSole.put(robotSide, footPolygonInSole);
       }
    }
-
-   public YoGraphicPolygon createLeftFootGraphic(String name)
-   {
-      return createFootGraphic(name, RobotSide.LEFT);
-
-   }
-
-   public YoGraphicPolygon createRightFootGraphic(String name)
-   {
-      return createFootGraphic(name, RobotSide.RIGHT);
-   }
-
-   public YoGraphicPolygon createFootGraphic(String name, RobotSide robotSide)
-   {
-      return new YoGraphicPolygon(name,footPolygonsInSole.get(robotSide), footPoses.get(robotSide), 1.0, YoAppearance.Green());
-   }
-
-   public YoGraphicPolygon createFootArtifact(String name, RobotSide robotSide)
-   {
-      return new YoArtifactPolygon(name, footPolygonsInSole.get(robotSide), footPoses.get(robotSide), 1.0, YoAppearance.Green());
-   }
-
 
    private int footstepCounter = 0;
 

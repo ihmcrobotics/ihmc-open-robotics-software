@@ -18,6 +18,7 @@ import java.util.List;
 
 public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRecoveryState>
 {
+   private final static double continuityDuration = 0.1;
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
 
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
@@ -53,6 +54,7 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
 
    private final FramePoint2D stanceCMP = new FramePoint2D();
    private final FramePoint3D nextCMP = new FramePoint3D();
+   private final FramePoint2D startICP = new FramePoint2D();
 
    @Override
    public void compute(PushRecoveryState state)
@@ -66,7 +68,6 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
 
       FrameConvexPolygon2DBasics swingPolygon = movingPolygonsInSole.get(swingSide);
       FrameConvexPolygon2DBasics stancePolygon = movingPolygonsInSole.get(stanceSide);
-
 
       stanceFrame.setPoseAndUpdate(state.getFootPose(stanceSide));
       stepFrame.setPoseAndUpdate(recoveryFootstep.getFootstepPose());
@@ -90,11 +91,13 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       }
       else if (intersections == 1)
       {
-         stanceCMP.set(firstIntersection);
+         stanceCMP.setIncludingFrame(firstIntersection);
       }
       else
       {
-         if (firstIntersection.distanceSquared(state.getIcpAtStartOfState()) < secondIntersection.distanceSquared(state.getIcpAtStartOfState()))
+         startICP.setIncludingFrame(state.getIcpAtStartOfState());
+         startICP.changeFrameAndProjectToXYPlane(stanceFrame);
+         if (firstIntersection.distanceSquared(startICP) < secondIntersection.distanceSquared(startICP))
             stanceCMP.set(firstIntersection);
          else
             stanceCMP.set(secondIntersection);
@@ -108,7 +111,15 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       SettableContactStateProvider swingContactState = contactStateProviders.add();
       swingContactState.reset();
       swingContactState.setContactState(ContactState.IN_CONTACT);
-      swingContactState.getTimeInterval().setInterval(currentTime, currentTime + state.getTiming(0).getSwingTime());
+      swingContactState.getTimeInterval().setInterval(currentTime, currentTime + continuityDuration);
+      swingContactState.setStartECMPPosition(nextCMP);
+      swingContactState.setEndECMPPosition(nextCMP);
+      swingContactState.setLinearECMPVelocity();
+
+      swingContactState = contactStateProviders.add();
+      swingContactState.reset();
+      swingContactState.setContactState(ContactState.IN_CONTACT);
+      swingContactState.getTimeInterval().setInterval(currentTime + continuityDuration, currentTime + state.getTiming(0).getSwingTime());
       swingContactState.setStartECMPPosition(nextCMP);
       swingContactState.setEndECMPPosition(nextCMP);
       swingContactState.setLinearECMPVelocity();
