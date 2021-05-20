@@ -218,6 +218,7 @@ public class AchievableCaptureRegionCalculatorWithDelay
                                                   double duration,
                                                   FramePoint2DBasics finalCMPToPack)
    {
+      finalCMPToPack.setToZero(initialCMP.getReferenceFrame());
       double omegaT = omega * duration;
       double exponential = Math.exp(omegaT);
       finalCMPToPack.setAndScale(omegaT * exponential, initialICP);
