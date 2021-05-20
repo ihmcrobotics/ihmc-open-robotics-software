@@ -1,6 +1,8 @@
 package us.ihmc.utilities.ros;
 
 import org.ros.internal.message.Message;
+import org.ros.message.Time;
+import org.ros.node.parameter.ParameterListener;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -8,6 +10,7 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * This class should help the user
@@ -15,7 +18,7 @@ import java.util.Map;
  * - Reconnect
  * - Remove and add topic subscriptions
  */
-public class ROS1Helper
+public class ROS1Helper implements RosNodeInterface
 {
    private final String nodeName;
    private RosMainNode ros1Node;
@@ -57,7 +60,8 @@ public class ROS1Helper
       }
    }
 
-   public void addPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
+   @Override
+   public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
    {
       publishers.put(publisher, topicName);
 
@@ -71,7 +75,8 @@ public class ROS1Helper
       }
    }
 
-   public void addSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
+   @Override
+   public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       subscribers.put(subscriber, topicName);
 
@@ -85,6 +90,7 @@ public class ROS1Helper
       }
    }
 
+   @Override
    public void removeSubscriber(RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       if (ros1Node != null)
@@ -93,8 +99,52 @@ public class ROS1Helper
       subscribers.remove(subscriber);
    }
 
-   public boolean isConnected()
+   @Override
+   public boolean isStarted()
    {
       return hasBeenExecuted && ros1Node.isStarted();
+   }
+
+   @Override
+   public Time getCurrentTime()
+   {
+      if (isStarted())
+         return ros1Node.getCurrentTime();
+      else
+         return null;
+   }
+
+   public RosMainNode getROS1Node()
+   {
+      return ros1Node;
+   }
+
+   public void destroy()
+   {
+      ros1Node.shutdown();
+   }
+
+   @Override
+   public void attachParameterListener(String topicName, ParameterListener listener)
+   {
+      throw new RuntimeException("Not implemented yet.");
+   }
+
+   @Override
+   public void attachServiceServer(String topicName, RosServiceServer<? extends Message, ? extends Message> server)
+   {
+      throw new RuntimeException("Not implemented yet.");
+   }
+
+   @Override
+   public void attachServiceClient(String topicName, RosServiceClient<? extends Message, ? extends Message> client)
+   {
+      throw new RuntimeException("Not implemented yet.");
+   }
+
+   @Override
+   public <T extends Message> void attachSubscriber(String topicName, Class<T> type, Consumer<T> callback)
+   {
+      throw new RuntimeException("Not implemented yet.");
    }
 }
