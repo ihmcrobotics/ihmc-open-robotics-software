@@ -720,20 +720,31 @@ public class EuclidCoreMissingTools
       return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
                                                 endPoint.getX(), endPoint.getY(), false, firstIntersectionToPack, secondIntersectionToPack);
    }
-   public static int intersectionBetweenRay2DAndCylinder3D(double circleRadius, Point2DReadOnly circlePosition,
-                                                           Point2DReadOnly startPoint, Vector2DReadOnly direction,
-                                                           Point2DBasics firstIntersectionToPack,
-                                                           Point2DBasics secondIntersectionToPack)
+
+   public static int intersectionBetweenRay2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
+                                                       Point2DReadOnly startPoint, Point2DReadOnly pointOnRay,
+                                                       Point2DBasics firstIntersectionToPack,
+                                                       Point2DBasics secondIntersectionToPack)
+   {
+      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
+                                                pointOnRay.getX(), pointOnRay.getY(), true,
+                                                firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public static int intersectionBetweenRay2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
+                                                       Point2DReadOnly startPoint, Vector2DReadOnly direction,
+                                                       Point2DBasics firstIntersectionToPack,
+                                                       Point2DBasics secondIntersectionToPack)
    {
       return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
                                                 startPoint.getX() + direction.getX(), startPoint.getY() + direction.getY(), true,
                                                 firstIntersectionToPack, secondIntersectionToPack);
    }
 
-   public static int intersectionBetweenLine2DAndCylinder3D(double circleRadius, Point2DReadOnly circlePosition,
-                                                            Point2DReadOnly pointOnLine, Vector2DReadOnly direction,
-                                                            Point2DBasics firstIntersectionToPack,
-                                                            Point2DBasics secondIntersectionToPack)
+   public static int intersectionBetweenLine2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
+                                                        Point2DReadOnly pointOnLine, Vector2DReadOnly direction,
+                                                        Point2DBasics firstIntersectionToPack,
+                                                        Point2DBasics secondIntersectionToPack)
    {
       return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), pointOnLine.getX(), pointOnLine.getY(), true,
                                                 pointOnLine.getX() + direction.getX(), pointOnLine.getY() + direction.getY(), true,
