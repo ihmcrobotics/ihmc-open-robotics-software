@@ -1,12 +1,16 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
+import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
+import us.ihmc.commonWalkingControlModules.captureRegion.AchievableCaptureRegionCalculatorWithDelay;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -15,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -43,8 +48,6 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
    private static final double simDt = 1e-3;
 
-   private double simDuration;
-
    private static final int BUFFER_SIZE = 160000;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -59,6 +62,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
    private final ConvexPolygon2DBasics defaultSupportPolygon = new ConvexPolygon2D();
 
+   private final FrameConvexPolygon2DBasics leftSupport;
+   private final FrameConvexPolygon2DBasics rightSupport;
    private final YoFrameConvexPolygon2D nextFootPolygon;
 
    private final YoBoolean replan;
@@ -79,6 +84,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls dcmTrajectory;
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
+
+   private final AchievableCaptureRegionCalculatorWithDelay captureRegionCalculator;
 
    private final YoDouble omega;
 
@@ -139,8 +146,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       leftStepFrame.setPoseAndUpdate(leftStancePose);
       rightStepFrame.setPoseAndUpdate(rightStancePose);
 
-      FrameConvexPolygon2D leftSupport = new FrameConvexPolygon2D(leftStepFrame);
-      FrameConvexPolygon2D rightSupport = new FrameConvexPolygon2D(rightStepFrame);
+      leftSupport = new FrameConvexPolygon2D(leftStepFrame);
+      rightSupport = new FrameConvexPolygon2D(rightStepFrame);
       leftSupport.set(defaultSupportPolygon);
       rightSupport.set(defaultSupportPolygon);
 
@@ -177,6 +184,9 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       leftFootPolygon.setMatchingFrame(state.getFootPolygonInSole(RobotSide.LEFT), false);
       rightFootPolygon.setMatchingFrame(state.getFootPolygonInSole(RobotSide.RIGHT), false);
+
+      captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay(0.1, 1.0, new SideDependentList<>(leftStepFrame, rightStepFrame),
+                                                                               "", registry, graphicsListRegistry);
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
@@ -218,6 +228,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private void updateState()
    {
       CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition), new FrameVector2D(initialCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
+
+      captureRegionCalculator.calculateCaptureRegion(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
 
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
