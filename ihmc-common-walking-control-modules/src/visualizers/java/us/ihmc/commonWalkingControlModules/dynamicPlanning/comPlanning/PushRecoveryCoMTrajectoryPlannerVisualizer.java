@@ -62,6 +62,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final YoFrameConvexPolygon2D nextFootPolygon;
 
    private final YoBoolean replan;
+   private final YoFramePoint3D initialCoMPosition;
+   private final YoFrameVector3D initialCoMVelocity;
    private final YoFramePoint3D desiredCoMPosition;
    private final YoFrameVector3D desiredCoMVelocity;
    private final YoFrameVector3D desiredCoMAcceleration;
@@ -85,6 +87,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       YoRegistry registry = new YoRegistry("testJacobian");
       YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
 
+      initialCoMPosition = new YoFramePoint3D("initialCoMPosition", worldFrame, registry);
+      initialCoMVelocity = new YoFrameVector3D("initialCoMVelocity", worldFrame, registry);
       desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", worldFrame, registry);
       desiredCoMVelocity = new YoFrameVector3D("desiredCoMVelocity", worldFrame, registry);
       desiredCoMAcceleration = new YoFrameVector3D("desiredCoMAcceleration", worldFrame, registry);
@@ -143,6 +147,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       state.initializeStance(RobotSide.LEFT, leftSupport, leftStepFrame);
       state.initializeStance(RobotSide.RIGHT, rightSupport, rightStepFrame);
 
+      YoGraphicPosition initialDcmViz = new YoGraphicPosition("initialDCM", initialCoMPosition, 0.02, YoAppearance.Blue(),
+                                                       YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
@@ -164,6 +170,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       graphicsListRegistry.registerArtifact("dcmPlanner", nextFootPolygonArtifact);
 
       graphicsListRegistry.registerYoGraphic("dcmPlanner", forceViz);
+      graphicsListRegistry.registerArtifact("dcmPlanner", initialDcmViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", dcmViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", comViz.createArtifact());
       graphicsListRegistry.registerArtifact("dcmPlanner", vrpViz.createArtifact());
@@ -189,10 +196,11 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
 
-      desiredCoMPosition.setToZero();
-      desiredCoMPosition.setZ(nominalHeight);
-      desiredCoMPosition.setX(0.15);
-      desiredCoMVelocity.setToZero();
+      initialCoMPosition.setToZero();
+      initialCoMPosition.setZ(nominalHeight);
+      initialCoMPosition.setX(0.15);
+      initialCoMPosition.setY(-0.1);
+      initialCoMVelocity.setToZero();
 
       scs.startOnAThread();
       updateState();
@@ -209,7 +217,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
    private void updateState()
    {
-      CapturePointTools.computeCapturePointPosition(new FramePoint2D(desiredCoMPosition), new FrameVector2D(desiredCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
+      CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition), new FrameVector2D(initialCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
 
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
@@ -229,7 +237,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    {
       copPlanner.compute(state);
 
-      comPlanner.setInitialCenterOfMassState(desiredCoMPosition, desiredCoMVelocity);
+      comPlanner.setInitialCenterOfMassState(initialCoMPosition, initialCoMVelocity);
       comPlanner.solveForTrajectory(copPlanner.getContactStateProviders());
 
       scs.tickAndUpdate();
