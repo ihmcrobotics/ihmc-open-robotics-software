@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -215,11 +216,34 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
          gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
 
-         DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(footstepToWiggle.getRobotSide()), footPolygon);
-         tempTransform.set(snapDataHolder.get(stanceStep).getSnapTransform());
-         tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-         ConvexPolygon2D stancePolygonInRegionFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
-         gradientDescentStepConstraintInput.setStanceFootPolygon(stancePolygonInRegionFrame);
+         if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+         {
+            FootstepSnapData stanceSnapData = snapDataHolder.get(stanceStep);
+            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
+
+            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
+            ConvexPolygon2D stancePolygonInStanceSnapFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, stanceSnapData.getSnapTransform());
+
+            // transform from stance snap frame to region local
+            tempTransform.set(stanceSnapData.getSnapTransform());
+            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+
+            Point3D stanceVertex3D = new Point3D();
+            ConvexPolygon2D projectedStanceFoot = new ConvexPolygon2D();
+
+            for (int i = 0; i < stancePolygonInStanceSnapFrame.getNumberOfVertices(); i++)
+            {
+               stanceVertex3D.set(footPolygon.getVertex(i).getX(), footPolygon.getVertex(i).getY(), 0.0);
+               tempTransform.transform(stanceVertex3D);
+
+               // project to xy in region local
+               projectedStanceFoot.addVertex(stanceVertex3D.getX(), stanceVertex3D.getY());
+            }
+
+            projectedStanceFoot.update();
+            gradientDescentStepConstraintInput.setStanceFootPolygon(projectedStanceFoot);
+            gradientDescentStepConstraintSolver.setStanceFootClearance(parameters.getMinClearanceFromStance());
+         }
 
          if (parameters.getEnableShinCollisionCheck())
          {
@@ -274,7 +298,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
 
-      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (!parameters.getEnableConcaveHullWiggler() && stanceStep != null && snapDataHolder.containsKey(stanceStep))
       {
          FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
 
@@ -319,13 +343,13 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       polyon1.applyTransform(transform1, false);
       polyon2.applyTransform(transform2, false);
 
-      boolean intersection = DiscreteFootstepTools.arePolygonsIntersecting(polyon1, polyon2);
+      boolean intersection = StepConstraintPolygonTools.arePolygonsIntersecting(polyon1, polyon2);
       if (intersection)
       {
          return true;
       }
 
-      double distance = DiscreteFootstepTools.distanceBetweenPolygons(polyon1, polyon2);
+      double distance = StepConstraintPolygonTools.distanceBetweenPolygons(polyon1, polyon2);
       return distance < parameters.getMinClearanceFromStance();
    }
 
@@ -372,7 +396,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          Vertex2DSupplier concaveHullVertices = Vertex2DSupplier.asVertex2DSupplier(planarRegion.getConcaveHull());
          deltaInsideCalculator = vertex ->
          {
-            boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concaveHullVertices, vertex);
+            boolean pointIsInside = StepConstraintPolygonTools.isPointInsidePolygon(concaveHullVertices, vertex);
             double distanceSquaredFromPerimeter = FootPlacementConstraintCalculator.distanceSquaredFromPerimeter(concaveHullVertices, vertex, null);
             return (pointIsInside ? 1 : -1) * Math.sqrt(distanceSquaredFromPerimeter);
          };

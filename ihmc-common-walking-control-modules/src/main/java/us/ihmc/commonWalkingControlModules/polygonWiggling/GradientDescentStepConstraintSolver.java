@@ -19,6 +19,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameLineSegment2D;
@@ -40,6 +41,9 @@ public class GradientDescentStepConstraintSolver
    private double gradientMagnitudeToTerminate = 1e-5;
    private double gradientMagnitudeToApplyStandardAlpha = 1e-3;
    private final YoDouble gradientMagnitude = new YoDouble("gradientMagnitude", registry);
+   private final YoDouble stanceFootProximity = new YoDouble("stanceFootProximity", registry);
+
+   private double stanceFootClearance;
 
    private final FootPlacementConstraintCalculator footPlacementConstraintCalculator = new FootPlacementConstraintCalculator();
    private final LegCollisionConstraintCalculator legCollisionConstraintCalculator;
@@ -54,6 +58,8 @@ public class GradientDescentStepConstraintSolver
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);
    private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(5, Vector2D::new);
    private final RigidBodyTransform transformedSoleToRegionFrame = new RigidBodyTransform();
+
+   private final ConvexPolygon2D transformedFootPolygon = new ConvexPolygon2D();
 
    private final TickAndUpdatable tickAndUpdatable;
    private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[5];
@@ -233,15 +239,28 @@ public class GradientDescentStepConstraintSolver
          }
 
          accumulatedTransform.add(gradient);
+         transformedFootPolygon.clear();
+
          for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
          {
             transformedVertices.get(i).add(gradient.getX(), gradient.getY());
             transformedVertices.get(i).addX(gradient.getZ() * rotationVectors.get(i).getX());
             transformedVertices.get(i).addY(gradient.getZ() * rotationVectors.get(i).getY());
+            transformedFootPolygon.addVertex(transformedVertices.get(i).getX(), transformedVertices.get(i).getY());
          }
 
          transformedSoleToRegionFrame.getTranslation().add(gradient.getX(), gradient.getY(), 0.0);
          transformedSoleToRegionFrame.getRotation().appendYawRotation(gradient.getZ());
+         transformedFootPolygon.update();
+
+         if (input.containsInputForStanceFootCheck())
+         {
+            stanceFootProximity.set(StepConstraintPolygonTools.distanceBetweenPolygons(transformedFootPolygon, input.getStanceFootPolygon()));
+            if (stanceFootProximity.getValue() < stanceFootClearance)
+            {
+               break;
+            }
+         }
 
          if (iterations > 0)
          {
@@ -406,6 +425,11 @@ public class GradientDescentStepConstraintSolver
    public void setLegCollisionShape(Cylinder3D legCollisionShape, RigidBodyTransform legShapeTransformToSoleFrame)
    {
       this.legCollisionConstraintCalculator.setLegCollisionShape(legCollisionShape, legShapeTransformToSoleFrame);
+   }
+
+   public void setStanceFootClearance(double stanceFootClearance)
+   {
+      this.stanceFootClearance = stanceFootClearance;
    }
 
    public double getGradientMagnitudeToTerminate()
