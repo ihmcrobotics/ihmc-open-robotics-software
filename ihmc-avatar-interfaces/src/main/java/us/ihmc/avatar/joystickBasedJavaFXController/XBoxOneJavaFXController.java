@@ -1,5 +1,7 @@
 package us.ihmc.avatar.joystickBasedJavaFXController;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 import net.java.games.input.Event;
 import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
@@ -77,13 +79,47 @@ public class XBoxOneJavaFXController
    private Joystick joystick;
    private Topic<ButtonState> lastDPadPressed = null;
 
+   private AtomicBoolean joystickConnected = new AtomicBoolean(false);
+   private Thread reconnectThread = null;
+
    public XBoxOneJavaFXController(Messager messager) throws JoystickNotFoundException
    {
       this.messager = messager;
 
       messager.registerTopicListener(XBoxControllerReconnect, value -> reconnectJoystick());
 
-      connectJoystick();
+      scheduleReconnectJoystick();
+   }
+
+   public void scheduleReconnectJoystick()
+   {
+      if (reconnectThread != null)
+      {
+         if (reconnectThread.isAlive())
+            return;
+         reconnectThread = null;
+      }
+
+      Runnable reconnectTask = () ->
+      {
+         while (!joystickConnected.get())
+         {
+            reconnectJoystick();
+
+            try
+            {
+               Thread.sleep(5000);
+            }
+            catch (InterruptedException e)
+            {
+               LogTools.info("Reconnect has been interrupted");
+               return;
+            }
+         }
+      };
+      reconnectThread = new Thread(reconnectTask, getClass().getSimpleName() + "-reconnect");
+      reconnectThread.setDaemon(true);
+      reconnectThread.start();
    }
 
    public void reconnectJoystick()
@@ -95,18 +131,26 @@ public class XBoxOneJavaFXController
          joystick = null;
       }
 
+      Joystick.rescanControllers();
+
       try
       {
          connectJoystick();
       }
       catch (JoystickNotFoundException e)
       {
-         LogTools.warn("Could not reconnect joystick, try again.");
+         LogTools.warn("Could not reconnect joystick.");
       }
    }
 
-   private void connectJoystick() throws JoystickNotFoundException
+   private boolean connectJoystick() throws JoystickNotFoundException
    {
+      if (!Joystick.isAJoystickConnectedToSystem())
+      {
+         LogTools.warn("No joystick found.");
+         return false;
+      }
+
       try
       {
          joystick = new Joystick(JoystickModel.XBOX_ONE_S, 0);
@@ -123,100 +167,110 @@ public class XBoxOneJavaFXController
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_TRIGGER, true, 0.1, 3));
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_TRIGGER, true, 0.1, 3));
 
+      joystick.addJoystickStatusListener(connected ->
+      {
+         if (!connected)
+         {
+            joystickConnected.set(false);
+            scheduleReconnectJoystick();
+         }
+      });
       joystick.addJoystickEventListener(this::consumeEvent);
+      joystickConnected.set(true);
+      return true;
    }
 
    private void consumeEvent(Event event)
    {
       switch (XBoxOneMapping.getMapping(event))
       {
-      case A:
-         messager.submitMessage(ButtonAState, toState(event));
-         break;
-      case B:
-         messager.submitMessage(ButtonBState, toState(event));
-         break;
-      case X:
-         messager.submitMessage(ButtonXState, toState(event));
-         break;
-      case Y:
-         messager.submitMessage(ButtonYState, toState(event));
-         break;
-      case START:
-         messager.submitMessage(ButtonStartState, toState(event));
-         break;
-      case SELECT:
-         messager.submitMessage(ButtonSelectState, toState(event));
-         break;
-      case XBOX_BUTTON:
-         messager.submitMessage(ButtonXBoxState, toState(event));
-         break;
-      case LEFT_STICK_BUTTON:
-         messager.submitMessage(ButtonLeftStickState, toState(event));
-         break;
-      case RIGHT_STICK_BUTTON:
-         messager.submitMessage(ButtonRightStickState, toState(event));
-         break;
-      case LEFT_BUMPER:
-         messager.submitMessage(ButtonLeftBumperState, toState(event));
-         break;
-      case RIGHT_BUMPER:
-         messager.submitMessage(ButtonRightBumperState, toState(event));
-         break;
-      case LEFT_STICK_X:
-         messager.submitMessage(LeftStickXAxis, (double) event.getValue());
-         break;
-      case LEFT_STICK_Y:
-         messager.submitMessage(LeftStickYAxis, (double) event.getValue());
-         break;
-      case RIGHT_STICK_X:
-         messager.submitMessage(RightStickXAxis, (double) event.getValue());
-         break;
-      case RIGHT_STICK_Y:
-         messager.submitMessage(RightStickYAxis, (double) event.getValue());
-         break;
-      case LEFT_TRIGGER:
-         messager.submitMessage(LeftTriggerAxis, (double) event.getValue());
-         break;
-      case RIGHT_TRIGGER:
-         messager.submitMessage(RightTriggerAxis, (double) event.getValue());
-         break;
-      case DPAD:
-         if (MathTools.epsilonEquals(0.00, event.getValue(), 1.0e-6))
-         {
-            if (lastDPadPressed != null)
-               messager.submitMessage(lastDPadPressed, ButtonState.RELEASED);
-         }
-         else
-         {
-            Topic<ButtonState> stateTopic = null;
-            if (MathTools.epsilonEquals(0.25, event.getValue(), 1.0e-6))
-               stateTopic = DPadUpState;
-            else if (MathTools.epsilonEquals(0.50, event.getValue(), 1.0e-6))
-               stateTopic = DPadRightState;
-            else if (MathTools.epsilonEquals(0.75, event.getValue(), 1.0e-6))
-               stateTopic = DPadDownState;
-            else if (MathTools.epsilonEquals(1.00, event.getValue(), 1.0e-6))
-               stateTopic = DPadLeftState;
+         case A:
+            messager.submitMessage(ButtonAState, toState(event));
+            break;
+         case B:
+            messager.submitMessage(ButtonBState, toState(event));
+            break;
+         case X:
+            messager.submitMessage(ButtonXState, toState(event));
+            break;
+         case Y:
+            messager.submitMessage(ButtonYState, toState(event));
+            break;
+         case START:
+            messager.submitMessage(ButtonStartState, toState(event));
+            break;
+         case SELECT:
+            messager.submitMessage(ButtonSelectState, toState(event));
+            break;
+         case XBOX_BUTTON:
+            messager.submitMessage(ButtonXBoxState, toState(event));
+            break;
+         case LEFT_STICK_BUTTON:
+            messager.submitMessage(ButtonLeftStickState, toState(event));
+            break;
+         case RIGHT_STICK_BUTTON:
+            messager.submitMessage(ButtonRightStickState, toState(event));
+            break;
+         case LEFT_BUMPER:
+            messager.submitMessage(ButtonLeftBumperState, toState(event));
+            break;
+         case RIGHT_BUMPER:
+            messager.submitMessage(ButtonRightBumperState, toState(event));
+            break;
+         case LEFT_STICK_X:
+            messager.submitMessage(LeftStickXAxis, (double) event.getValue());
+            break;
+         case LEFT_STICK_Y:
+            messager.submitMessage(LeftStickYAxis, (double) event.getValue());
+            break;
+         case RIGHT_STICK_X:
+            messager.submitMessage(RightStickXAxis, (double) event.getValue());
+            break;
+         case RIGHT_STICK_Y:
+            messager.submitMessage(RightStickYAxis, (double) event.getValue());
+            break;
+         case LEFT_TRIGGER:
+            messager.submitMessage(LeftTriggerAxis, (double) event.getValue());
+            break;
+         case RIGHT_TRIGGER:
+            messager.submitMessage(RightTriggerAxis, (double) event.getValue());
+            break;
+         case DPAD:
+            if (MathTools.epsilonEquals(0.00, event.getValue(), 1.0e-6))
+            {
+               if (lastDPadPressed != null)
+                  messager.submitMessage(lastDPadPressed, ButtonState.RELEASED);
+            }
+            else
+            {
+               Topic<ButtonState> stateTopic = null;
+               if (MathTools.epsilonEquals(0.25, event.getValue(), 1.0e-6))
+                  stateTopic = DPadUpState;
+               else if (MathTools.epsilonEquals(0.50, event.getValue(), 1.0e-6))
+                  stateTopic = DPadRightState;
+               else if (MathTools.epsilonEquals(0.75, event.getValue(), 1.0e-6))
+                  stateTopic = DPadDownState;
+               else if (MathTools.epsilonEquals(1.00, event.getValue(), 1.0e-6))
+                  stateTopic = DPadLeftState;
 
-            if (stateTopic != null)
-               messager.submitMessage(stateTopic, ButtonState.PRESSED);
-         }
-         break;
-      case DPAD_UP:
-         messager.submitMessage(DPadUpState, toState(event));
-         break;
-      case DPAD_DOWN:
-         messager.submitMessage(DPadDownState, toState(event));
-         break;
-      case DPAD_LEFT:
-         messager.submitMessage(DPadLeftState, toState(event));
-         break;
-      case DPAD_RIGHT:
-         messager.submitMessage(DPadRightState, toState(event));
-         break;
-      default:
-         break;
+               if (stateTopic != null)
+                  messager.submitMessage(stateTopic, ButtonState.PRESSED);
+            }
+            break;
+         case DPAD_UP:
+            messager.submitMessage(DPadUpState, toState(event));
+            break;
+         case DPAD_DOWN:
+            messager.submitMessage(DPadDownState, toState(event));
+            break;
+         case DPAD_LEFT:
+            messager.submitMessage(DPadLeftState, toState(event));
+            break;
+         case DPAD_RIGHT:
+            messager.submitMessage(DPadRightState, toState(event));
+            break;
+         default:
+            break;
       }
    }
 
@@ -232,5 +286,8 @@ public class XBoxOneJavaFXController
    {
       if (joystick != null)
          joystick.shutdown();
+      if (reconnectThread != null)
+         reconnectThread.interrupt();
+      reconnectThread = null;
    }
 }
