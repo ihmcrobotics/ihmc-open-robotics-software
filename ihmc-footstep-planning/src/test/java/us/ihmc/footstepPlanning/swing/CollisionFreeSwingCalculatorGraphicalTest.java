@@ -304,9 +304,9 @@ public class CollisionFreeSwingCalculatorGraphicalTest
    public static void main(String[] args)
    {
       CollisionFreeSwingCalculatorGraphicalTest graphicalTest = new CollisionFreeSwingCalculatorGraphicalTest();
-//      graphicalTest.testFlatGround();
+      graphicalTest.testFlatGround();
 //      graphicalTest.testSmallBox();
-      graphicalTest.testBigBox();
+//      graphicalTest.testBigBox();
 //      graphicalTest.testStepUpAndDown();
 //      graphicalTest.testUpStairs();
 //      graphicalTest.testOverCinders1();
