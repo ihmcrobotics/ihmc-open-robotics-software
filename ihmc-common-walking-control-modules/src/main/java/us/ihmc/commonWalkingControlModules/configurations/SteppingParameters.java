@@ -59,7 +59,7 @@ public interface SteppingParameters extends FootstepParameters
     */
    public default double getCustomWaypointAngleThreshold()
    {
-      return Math.toRadians(65.0);
+      return Math.toRadians(50.0);
    }
 
    /**

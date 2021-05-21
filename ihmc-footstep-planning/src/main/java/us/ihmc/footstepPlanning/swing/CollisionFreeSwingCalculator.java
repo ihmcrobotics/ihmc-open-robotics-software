@@ -33,6 +33,7 @@ import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -49,7 +50,7 @@ public class CollisionFreeSwingCalculator
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry;
-   private final YoInteger iterations = new YoInteger("iterations", registry);
+   private final YoBoolean collisionFound = new YoBoolean("collisionFound", registry);
    private final YoDouble maxCollisionDistance = new YoDouble("maxCollisionDistance", registry);
    private final boolean visualize;
 
@@ -180,7 +181,7 @@ public class CollisionFreeSwingCalculator
          initializeKnotPoints();
          optimizeKnotPoints();
 
-         if (iterations.getIntegerValue() == 0)
+         if (!collisionFound.getValue())
          {
             continue;
          }
@@ -260,12 +261,11 @@ public class CollisionFreeSwingCalculator
 
    private void optimizeKnotPoints()
    {
-      iterations.set(0);
-
+      collisionFound.set(false);
       int maxIterations = 30;
+
       for (int i = 0; i < maxIterations; i++)
       {
-         iterations.increment();
          maxCollisionDistance.set(0.0);
          boolean intersectionFound = false;
 
@@ -277,6 +277,7 @@ public class CollisionFreeSwingCalculator
             boolean collisionDetected = knotPoint.doCollisionCheck(collisionDetector, planarRegionsList);
             if (collisionDetected)
             {
+               collisionFound.set(true);
                EuclidShape3DCollisionResult collisionResult = knotPoint.getCollisionResult();
                collisionGradients.get(j).sub(collisionResult.getPointOnB(), collisionResult.getPointOnA());
                collisionGradients.get(j).scale(collisionGradientScale);
