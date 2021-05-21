@@ -26,7 +26,6 @@ public class ROS1Helper implements RosNodeInterface
    private final HashMap<RosTopicPublisher<? extends Message>, String> publishers = new HashMap<>();
    private final HashMap<RosTopicSubscriberInterface<? extends Message>, String> subscribers = new HashMap<>();
 
-   private boolean hasBeenExecuted = false;
    private boolean needsReconnect = true;
 
    public ROS1Helper(String nodeName)
@@ -38,7 +37,7 @@ public class ROS1Helper implements RosNodeInterface
    {
       if (needsReconnect)
       {
-         hasBeenExecuted = false;
+         needsReconnect = false;
          LogTools.info("Reconnecting ROS 1 node...");
          if (ros1Node != null)
             ros1Node.shutdown();
@@ -55,8 +54,6 @@ public class ROS1Helper implements RosNodeInterface
          }
 
          ros1Node.execute();
-         hasBeenExecuted = true;
-         needsReconnect = false;
       }
    }
 
@@ -64,30 +61,14 @@ public class ROS1Helper implements RosNodeInterface
    public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
    {
       publishers.put(publisher, topicName);
-
-      if (hasBeenExecuted)
-      {
-         needsReconnect = true;
-      }
-      else
-      {
-         ros1Node.attachPublisher(topicName, publisher);
-      }
+      needsReconnect = true;
    }
 
    @Override
    public void attachSubscriber(String topicName, RosTopicSubscriberInterface<? extends Message> subscriber)
    {
       subscribers.put(subscriber, topicName);
-
-      if (hasBeenExecuted)
-      {
-         needsReconnect = true;
-      }
-      else
-      {
-         ros1Node.attachSubscriber(topicName, subscriber);
-      }
+      needsReconnect = true;
    }
 
    @Override
@@ -102,7 +83,7 @@ public class ROS1Helper implements RosNodeInterface
    @Override
    public boolean isStarted()
    {
-      return hasBeenExecuted && ros1Node.isStarted();
+      return ros1Node != null && ros1Node.isStarted();
    }
 
    @Override
