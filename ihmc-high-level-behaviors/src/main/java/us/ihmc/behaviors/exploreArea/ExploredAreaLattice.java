@@ -1,5 +1,6 @@
 package us.ihmc.behaviors.exploreArea;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.StepConstraintPolygonTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -72,7 +73,7 @@ public class ExploredAreaLattice
             for (int yCoordinate = minY; yCoordinate <= maxY; yCoordinate++)
             {
                setLatticeSquare(toDouble(xCoordinate), toDouble(yCoordinate));
-               boolean intersection = DiscreteFootstepTools.arePolygonsIntersecting(projectedPolygon, latticeSquare);
+               boolean intersection = StepConstraintPolygonTools.arePolygonsIntersecting(projectedPolygon, latticeSquare);
                if (intersection)
                {
                   markCellAndNeighbors(cellStatus, xCoordinate, yCoordinate);
