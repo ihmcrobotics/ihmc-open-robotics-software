@@ -15,8 +15,8 @@ import java.util.function.DoubleSupplier;
 public class YoVariableClientHelper implements YoVariableClientPublishSubscribeAPI
 {
    private final YoRegistry yoRegistry;
-   private final YoVariablesUpdatedListener listener;
-   private final YoVariableClient yoVariableClient;
+   private YoVariablesUpdatedListener listener;
+   private YoVariableClient yoVariableClient;
 
    public YoVariableClientHelper(String registryName)
    {
@@ -27,6 +27,8 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
 
    public void start(String hostname, int port)
    {
+      listener = new BasicYoVariablesUpdatedListener(yoRegistry);
+      yoVariableClient = new YoVariableClient(listener);
       MutableBoolean connecting = new MutableBoolean(true);
       ThreadTools.startAThread(() ->
       {
@@ -41,7 +43,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
             }
             catch (RuntimeException e)
             {
-               LogTools.warn("Couldn't connect to {}:{}. Trying again...", hostname, port);
+               LogTools.warn("Couldn't connect to {}:{}. {} Trying again...", hostname, port, e.getMessage());
                ThreadTools.sleepSeconds(1.0);
             }
          }
@@ -58,7 +60,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       return () ->
       {
          YoVariable variable;
-         if (yoVariableClient.isConnected() && (variable = yoRegistry.findVariable(variableName)) != null)
+         if (yoVariableClient != null && yoVariableClient.isConnected() && (variable = yoRegistry.findVariable(variableName)) != null)
          {
             return variable.getValueAsDouble();
          }
