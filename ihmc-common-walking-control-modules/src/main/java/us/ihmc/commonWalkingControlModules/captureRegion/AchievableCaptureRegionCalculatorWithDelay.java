@@ -67,12 +67,14 @@ public class AchievableCaptureRegionCalculatorWithDelay
       swingTimeRemaining = MathTools.clamp(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       unconstrainedCaptureRegion.clear(supportSoleZUp);
+      unconstrainedCaptureRegionAtTouchdown.clear(supportSoleZUp);
 
       // 2. Get extreme CoP positions
       if (supportFootPolygon.isPointInside(capturePoint))
       {
          // If the ICP is in the support polygon return the whole reachable region.
          unconstrainedCaptureRegion.setToNaN();
+         unconstrainedCaptureRegionAtTouchdown.setToNaN();
          return true;
       }
 

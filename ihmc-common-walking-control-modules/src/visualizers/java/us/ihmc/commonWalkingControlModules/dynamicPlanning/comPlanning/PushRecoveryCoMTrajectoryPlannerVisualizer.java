@@ -145,7 +145,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       copPlanner.registerState(state);
 
       comPlanner = new CoMTrajectoryPlanner(gravity, nominalHeight, registry);
-      comPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
+//      comPlanner.setCornerPointViewer(new CornerPointViewer(registry, graphicsListRegistry));
       comPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(gravity, omega, registry));
       comPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
@@ -254,7 +254,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       initialCoMPosition.setToZero();
       initialCoMPosition.setZ(nominalHeight);
-      initialCoMPosition.setX(0.15);
+      initialCoMPosition.setX(0.25);
       initialCoMPosition.setY(-0.05);
       initialCoMVelocity.setToZero();
 
@@ -321,8 +321,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       }
       //      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
       //      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
-
-      for (int i = 0; i < state.getNumberOfFootsteps(); i++)
+      int i = 0;
+      for (; i < state.getNumberOfFootsteps(); i++)
       {
          newPoseFrame.setPoseAndUpdate(state.getFootstep(i).getFootstepPose());
 
@@ -331,6 +331,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
          newPolygon.changeFrameAndProjectToXYPlane(worldFrame);
          nextFootPolygons.get(i).set(newPolygon);
       }
+      for (; i < nextFootPolygons.size(); i++)
+         nextFootPolygons.get(i).setToNaN();
    }
 
    private void simulate()
