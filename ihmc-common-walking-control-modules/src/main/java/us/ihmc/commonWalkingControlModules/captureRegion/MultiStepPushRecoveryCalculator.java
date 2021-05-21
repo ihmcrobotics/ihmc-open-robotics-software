@@ -9,6 +9,8 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,7 +24,7 @@ import java.util.List;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
-public class MultiStepAchievableCaptureRegionCalculator
+public class MultiStepPushRecoveryCalculator
 {
    private static final boolean VISUALIZE = true;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -43,16 +45,28 @@ public class MultiStepAchievableCaptureRegionCalculator
    private final List<YoFrameConvexPolygon2D> yoCaptureRegions = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> yoReachableRegions = new ArrayList<>();
 
+   private final FramePose3D stancePose = new FramePose3D();
+   private final FramePoint2D stancePosition = new FramePoint2D();
+
+   private final FramePoint3D stepPosition = new FramePoint3D();
+
+   private final FramePoint2D icpAtStart = new FramePoint2D();
+   private final FrameConvexPolygon2DBasics stancePolygon = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2DBasics intersectingRegion = new FrameConvexPolygon2D();
+
+   private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
+   private final RecyclingArrayList<FootstepTiming> recoveryFootstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
+
    private static final int maxRegionDepth = 3;
 
    private final int depth = 3;
 
-   public MultiStepAchievableCaptureRegionCalculator(double kinematicsStepRange,
-                                                     double footWidth,
-                                                     SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                                     String suffix,
-                                                     YoRegistry parentRegistry,
-                                                     YoGraphicsListRegistry graphicsListRegistry)
+   public MultiStepPushRecoveryCalculator(double kinematicsStepRange,
+                                          double footWidth,
+                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                          String suffix,
+                                          YoRegistry parentRegistry,
+                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleZUpFrames = soleZUpFrames;
       reachableFootholdsCalculator = new ReachableFootholdsCalculator(kinematicsStepRange,
@@ -88,10 +102,16 @@ public class MultiStepAchievableCaptureRegionCalculator
 
             YoArtifactPolygon reachablePolygonArtifact = new YoArtifactPolygon(reachableName + suffix, yoReachableRegionPolygon, Color.BLUE, false);
 
-            YoGraphicPosition touchdownICPViz = new YoGraphicPosition("capturePointTouchdown" + i + suffix, capturePointsAtTouchdown.get(i), 0.01, YoAppearance.Yellow(),
-                                                                   YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
-            YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i + suffix, recoveryStepLocations.get(i), 0.01, YoAppearance.Blue(),
+            YoGraphicPosition touchdownICPViz = new YoGraphicPosition("capturePointTouchdown" + i + suffix,
+                                                                      capturePointsAtTouchdown.get(i),
+                                                                      0.01,
+                                                                      YoAppearance.Yellow(),
                                                                       YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+            YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i + suffix,
+                                                                  recoveryStepLocations.get(i),
+                                                                  0.01,
+                                                                  YoAppearance.Blue(),
+                                                                  YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
             graphicsListRegistry.registerArtifact(listName, capturePolygonArtifact);
             graphicsListRegistry.registerArtifact(listName, reachablePolygonArtifact);
@@ -101,22 +121,56 @@ public class MultiStepAchievableCaptureRegionCalculator
       }
 
       parentRegistry.addChild(registry);
-
    }
 
-   private final FramePose3D stancePose = new FramePose3D();
-   private final FramePoint2D stancePosition = new FramePoint2D();
 
-   private final FramePoint2D icpAtStart = new FramePoint2D();
-   private final FrameConvexPolygon2DBasics stancePolygon = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2DBasics intersectingRegion = new FrameConvexPolygon2D();
+
+   public void computeRecoverySteps(RobotSide swingSide,
+                                    double swingTimeRemaining,
+                                    double nextTransferDuration,
+                                    FramePoint2DReadOnly currentICP,
+                                    double omega0,
+                                    FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      int numberOfRecoverySteps = calculateRecoveryStepLocations(swingSide, swingTimeRemaining, nextTransferDuration, currentICP, omega0, footPolygon);
+
+      recoveryFootsteps.clear();
+      recoveryFootstepTimings.clear();
+
+      for (int i = 0; i < numberOfRecoverySteps; i++)
+      {
+         stepPosition.set(recoveryStepLocations.get(i), stancePose.getZ());
+         Footstep recoveryFootstep = recoveryFootsteps.add();
+         recoveryFootstep.setPose(stepPosition, stancePose.getOrientation());
+         recoveryFootstep.setRobotSide(swingSide);
+
+         recoveryFootstepTimings.add().setTimings(swingTimeRemaining, nextTransferDuration);
+
+         swingSide = swingSide.getOppositeSide();
+      }
+   }
+
+   public int getNumberOfRecoverySteps()
+   {
+      return recoveryFootsteps.size();
+   }
+
+   public Footstep getRecoveryStep(int stepIdx)
+   {
+      return recoveryFootsteps.get(stepIdx);
+   }
+
+   public FootstepTiming getRecoveryStepTiming(int stepIdx)
+   {
+      return recoveryFootstepTimings.get(stepIdx);
+   }
 
    public int calculateRecoveryStepLocations(RobotSide swingSide,
-                                              double swingTimeRemaining,
-                                              double nextTransferDuration,
-                                              FramePoint2DReadOnly currentICP,
-                                              double omega0,
-                                              FrameConvexPolygon2DReadOnly footPolygon)
+                                             double swingTimeRemaining,
+                                             double nextTransferDuration,
+                                             FramePoint2DReadOnly currentICP,
+                                             double omega0,
+                                             FrameConvexPolygon2DReadOnly footPolygon)
    {
       icpAtStart.set(currentICP);
       stancePose.setToZero(soleZUpFrames.get(swingSide.getOppositeSide()));
@@ -162,7 +216,10 @@ public class MultiStepAchievableCaptureRegionCalculator
          }
          else
          {
-            polygonTools.computeMinimumDistancePoints(reachableRegion, captureRegion, recoveryStepLocations.get(depthIdx), capturePointsAtTouchdown.get(depthIdx));
+            polygonTools.computeMinimumDistancePoints(reachableRegion,
+                                                      captureRegion,
+                                                      recoveryStepLocations.get(depthIdx),
+                                                      capturePointsAtTouchdown.get(depthIdx));
          }
 
          swingSide = swingSide.getOppositeSide();
@@ -187,4 +244,6 @@ public class MultiStepAchievableCaptureRegionCalculator
 
       return numberOfRecoverySteps;
    }
+
+
 }

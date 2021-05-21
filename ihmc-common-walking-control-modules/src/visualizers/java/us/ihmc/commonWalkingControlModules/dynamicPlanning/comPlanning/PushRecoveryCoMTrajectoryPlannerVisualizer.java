@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepAchievableCaptureRegionCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
 import us.ihmc.commons.thread.ThreadTools;
@@ -83,7 +83,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
 
-   private final MultiStepAchievableCaptureRegionCalculator captureRegionCalculator;
+   private final MultiStepPushRecoveryCalculator captureRegionCalculator;
 
    private final YoDouble omega;
 
@@ -185,8 +185,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
-      captureRegionCalculator = new MultiStepAchievableCaptureRegionCalculator(kinematicsStepRange, footWidth, new SideDependentList<>(leftStepFrame, rightStepFrame),
-                                                                               "", registry, graphicsListRegistry);
+      captureRegionCalculator = new MultiStepPushRecoveryCalculator(kinematicsStepRange, footWidth, new SideDependentList<>(leftStepFrame, rightStepFrame),
+                                                                    "", registry, graphicsListRegistry);
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
@@ -229,13 +229,18 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    {
       CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition), new FrameVector2D(initialCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
 
-      captureRegionCalculator.calculateRecoveryStepLocations(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
+      captureRegionCalculator.computeRecoverySteps(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
 
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
-      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
-      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
       state.setFinalTransferDuration(finalTransferDuration);
+      for (int i = 0; i < captureRegionCalculator.getNumberOfRecoverySteps(); i++)
+      {
+         state.addFootstep(captureRegionCalculator.getRecoveryStep(i));
+         state.addFootstepTiming(captureRegionCalculator.getRecoveryStepTiming(i));
+      }
+//      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
+//      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
 
       newPoseFrame.setPoseAndUpdate(state.getFootstep(0).getFootstepPose());
 
