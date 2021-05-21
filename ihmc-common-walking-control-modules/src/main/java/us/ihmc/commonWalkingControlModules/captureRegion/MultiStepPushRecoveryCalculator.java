@@ -44,6 +44,7 @@ public class MultiStepPushRecoveryCalculator
    private final List<YoFramePoint2D> recoveryStepLocations = new ArrayList<>();
 
    private final List<YoFrameConvexPolygon2D> yoCaptureRegions = new ArrayList<>();
+   private final List<YoFrameConvexPolygon2D> yoCaptureRegionsAtTouchdown = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> yoReachableRegions = new ArrayList<>();
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
@@ -80,7 +81,7 @@ public class MultiStepPushRecoveryCalculator
                                                                       kinematicsStepRange,
                                                                       soleZUpFrames,
                                                                       registry);
-      captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay(footWidth, kinematicsStepRange, soleZUpFrames, suffix, registry, null);
+      captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay();
 
       for (int i = 0; i < maxRegionDepth; i++)
       {
@@ -98,7 +99,11 @@ public class MultiStepPushRecoveryCalculator
             YoFrameConvexPolygon2D yoCaptureRegionPolygon = new YoFrameConvexPolygon2D(captureName, suffix, worldFrame, 30, registry);
             yoCaptureRegions.add(yoCaptureRegionPolygon);
 
+            YoFrameConvexPolygon2D yoCaptureRegionPolygonAtTouchdown = new YoFrameConvexPolygon2D(captureName + "AtTouchdown", suffix, worldFrame, 30, registry);
+            yoCaptureRegionsAtTouchdown.add(yoCaptureRegionPolygonAtTouchdown);
+
             YoArtifactPolygon capturePolygonArtifact = new YoArtifactPolygon(captureName + suffix, yoCaptureRegionPolygon, Color.YELLOW, false);
+            YoArtifactPolygon capturePolygonAtTouchdownArtifact = new YoArtifactPolygon(captureName + "AtTouchdown" + suffix, yoCaptureRegionPolygonAtTouchdown, Color.YELLOW, false, true);
 
             String reachableName = "reachableRegion" + i;
 
@@ -119,6 +124,7 @@ public class MultiStepPushRecoveryCalculator
                                                                   YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
             graphicsListRegistry.registerArtifact(listName, capturePolygonArtifact);
+            graphicsListRegistry.registerArtifact(listName, capturePolygonAtTouchdownArtifact);
             graphicsListRegistry.registerArtifact(listName, reachablePolygonArtifact);
             graphicsListRegistry.registerArtifact(listName, touchdownICPViz.createArtifact());
             graphicsListRegistry.registerArtifact(listName, footstepViz.createArtifact());
@@ -190,12 +196,15 @@ public class MultiStepPushRecoveryCalculator
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
 
-         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, nextTransferDuration, icpAtStart, omega0, stancePose, stancePolygon);
+         if (captureRegionCalculator.calculateCaptureRegion(swingTimeRemaining, nextTransferDuration, icpAtStart, omega0, stancePose, stancePolygon))
+            break;
+
          captureRegion.setIncludingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion());
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
          if (VISUALIZE)
          {
+            yoCaptureRegionsAtTouchdown.get(depthIdx).setMatchingFrame(captureRegionCalculator.getUnconstrainedCaptureRegionAtTouchdown(), false);
             yoCaptureRegions.get(depthIdx).set(captureRegion);
             yoReachableRegions.get(depthIdx).set(reachableRegion);
          }
