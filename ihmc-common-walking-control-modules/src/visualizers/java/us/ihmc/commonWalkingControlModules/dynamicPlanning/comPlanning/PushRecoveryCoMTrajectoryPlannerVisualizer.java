@@ -50,7 +50,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private static final double defaultSwingTime = 0.6;
    private static final double defaultTransferTime = 0.05;
 
-   private static final double simDt = 1e-3;
+   private static final double simDt = 0.005;
 
    private static final int BUFFER_SIZE = 160000;
 
@@ -124,9 +124,9 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       swingTime = new YoDouble("swingTime", registry);
       transferTime = new YoDouble("transferTime", registry);
 
-      dcmTrajectory = new BagOfBalls(50, 0.02, "dcmTrajectory", YoAppearance.Yellow(), registry, graphicsListRegistry);
-      comTrajectory = new BagOfBalls(50, 0.02, "comTrajectory", YoAppearance.Black(), registry, graphicsListRegistry);
-      vrpTrajectory = new BagOfBalls(50, 0.02, "vrpTrajectory", YoAppearance.Green(), registry, graphicsListRegistry);
+      dcmTrajectory = new BagOfBalls(100, 0.01, "dcmTrajectory", YoAppearance.Yellow(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);
+      comTrajectory = new BagOfBalls(100, 0.01, "comTrajectory", YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);
+      vrpTrajectory = new BagOfBalls(100, 0.01, "vrpTrajectory", YoAppearance.Green(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);
 
       yoTime = new YoDouble("timeToCheck", registry);
       timeInPhase = new YoDouble("timeInPhase", registry);
