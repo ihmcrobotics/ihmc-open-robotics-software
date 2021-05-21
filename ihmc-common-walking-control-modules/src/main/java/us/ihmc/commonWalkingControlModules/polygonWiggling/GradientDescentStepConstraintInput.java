@@ -72,9 +72,9 @@ public class GradientDescentStepConstraintInput
       this.wiggleParameters.set(wiggleParameters);
    }
 
-   public void setStanceFootPolygon(ConvexPolygon2D stanceFootPolygon)
+   public void setStanceFootPolygon(ConvexPolygon2D stanceFootPolygonInRegionFrame)
    {
-      this.stanceFootPolygon.set(stanceFootPolygon);
+      this.stanceFootPolygon.set(stanceFootPolygonInRegionFrame);
    }
 
    public void setFootstepInRegionFrame(RigidBodyTransformReadOnly footstepInRegionFrame)
