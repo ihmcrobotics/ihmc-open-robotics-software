@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.captureRegion.AchievableCaptureRegionCalculatorWithDelay;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepAchievableCaptureRegionCalculator;
-import us.ihmc.commonWalkingControlModules.captureRegion.ReachableFootholdsCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
 import us.ihmc.commons.thread.ThreadTools;
@@ -12,7 +9,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -233,7 +229,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    {
       CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition), new FrameVector2D(initialCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
 
-      captureRegionCalculator.calculateCaptureRegions(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
+      captureRegionCalculator.calculateRecoveryStepLocations(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
 
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
