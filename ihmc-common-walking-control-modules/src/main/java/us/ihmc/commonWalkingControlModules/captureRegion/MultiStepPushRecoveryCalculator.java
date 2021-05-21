@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -12,6 +13,7 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
@@ -22,11 +24,10 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
-
 public class MultiStepPushRecoveryCalculator
 {
    private static final boolean VISUALIZE = true;
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
@@ -45,11 +46,13 @@ public class MultiStepPushRecoveryCalculator
    private final List<YoFrameConvexPolygon2D> yoCaptureRegions = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> yoReachableRegions = new ArrayList<>();
 
+   private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
    private final FramePose3D stancePose = new FramePose3D();
    private final FramePoint2D stancePosition = new FramePoint2D();
 
    private final FramePoint3D stepPosition = new FramePoint3D();
 
+   private final ConvexPolygon2DReadOnly defaultFootPolygon;
    private final FramePoint2D icpAtStart = new FramePoint2D();
    private final FrameConvexPolygon2DBasics stancePolygon = new FrameConvexPolygon2D();
    private final FrameConvexPolygon2DBasics intersectingRegion = new FrameConvexPolygon2D();
@@ -64,14 +67,16 @@ public class MultiStepPushRecoveryCalculator
    public MultiStepPushRecoveryCalculator(double kinematicsStepRange,
                                           double footWidth,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                          ConvexPolygon2DReadOnly defaultFootPolygon,
                                           String suffix,
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       this.soleZUpFrames = soleZUpFrames;
+      this.defaultFootPolygon = defaultFootPolygon;
       reachableFootholdsCalculator = new ReachableFootholdsCalculator(kinematicsStepRange,
                                                                       kinematicsStepRange,
-                                                                      0.5 * footWidth,
+                                                                      footWidth,
                                                                       kinematicsStepRange,
                                                                       soleZUpFrames,
                                                                       registry);
@@ -185,7 +190,7 @@ public class MultiStepPushRecoveryCalculator
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
 
-         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, nextTransferDuration, icpAtStart, omega0, stancePolygon);
+         captureRegionCalculator.calculateCaptureRegion(swingSide, swingTimeRemaining, nextTransferDuration, icpAtStart, omega0, stancePose, stancePolygon);
          captureRegion.setIncludingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion());
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
@@ -223,12 +228,17 @@ public class MultiStepPushRecoveryCalculator
          }
 
          swingSide = swingSide.getOppositeSide();
-         stancePolygon.clear();
-         stancePolygon.addVertex(recoveryStepLocations.get(depthIdx));
-         stancePolygon.update();
+
 
          stancePose.getPosition().set(recoveryStepLocations.get(depthIdx));
          icpAtStart.set(capturePointsAtTouchdown.get(depthIdx));
+
+         stanceFrame.setPoseAndUpdate(stancePose);
+         stancePolygon.clear(stanceFrame);
+         stancePolygon.set(defaultFootPolygon);
+         stancePolygon.update();
+         stancePolygon.scale(stancePolygon.getCentroid(), 0.5);
+         stancePolygon.changeFrameAndProjectToXYPlane(worldFrame);
       }
 
       if (VISUALIZE)

@@ -155,7 +155,7 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
          contactState = contactStateProviders.add();
          contactState.reset();
          contactState.setContactState(ContactState.IN_CONTACT);
-         contactState.getTimeInterval().setInterval(currentTime, state.getTiming(i).getTransferTime());
+         contactState.getTimeInterval().setInterval(currentTime, currentTime + state.getTiming(i).getTransferTime());
          contactState.setStartECMPPosition(nextCMP);
          nextCMP.setIncludingFrame(recoveryFootstep.getFootstepPose().getPosition());
 
