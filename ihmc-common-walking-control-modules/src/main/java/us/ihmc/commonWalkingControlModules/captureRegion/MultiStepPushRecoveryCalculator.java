@@ -116,12 +116,12 @@ public class MultiStepPushRecoveryCalculator
                                                                       capturePointsAtTouchdown.get(i),
                                                                       0.01,
                                                                       YoAppearance.Yellow(),
-                                                                      YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+                                                                      YoGraphicPosition.GraphicType.SOLID_BALL);
             YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i + suffix,
                                                                   recoveryStepLocations.get(i),
-                                                                  0.01,
+                                                                  0.025,
                                                                   YoAppearance.Blue(),
-                                                                  YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+                                                                  YoGraphicPosition.GraphicType.SOLID_BALL);
 
             graphicsListRegistry.registerArtifact(listName, capturePolygonArtifact);
             graphicsListRegistry.registerArtifact(listName, capturePolygonAtTouchdownArtifact);
@@ -257,6 +257,7 @@ public class MultiStepPushRecoveryCalculator
             capturePointsAtTouchdown.get(depthIdx).setToNaN();
             recoveryStepLocations.get(depthIdx).setToNaN();
             yoReachableRegions.get(depthIdx).clearAndUpdate();
+            yoCaptureRegionsAtTouchdown.get(depthIdx).clearAndUpdate();
             yoCaptureRegions.get(depthIdx).clearAndUpdate();
          }
       }
