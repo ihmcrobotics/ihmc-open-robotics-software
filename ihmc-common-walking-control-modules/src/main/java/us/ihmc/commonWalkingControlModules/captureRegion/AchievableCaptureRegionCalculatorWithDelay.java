@@ -11,9 +11,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -96,15 +99,20 @@ public class AchievableCaptureRegionCalculatorWithDelay
    private final FramePoint2D capturePoint = new FramePoint2D(worldFrame);
    private final FrameConvexPolygon2D unconstrainedCaptureRegion = new FrameConvexPolygon2D(worldFrame);
 
+   private final PoseReferenceFrame supportFrame = new PoseReferenceFrame("supportFrame", worldFrame);
+   private final ZUpFrame supportSoleZUp = new ZUpFrame(worldFrame, supportFrame, "supportZUpFrame");
+
    public void calculateCaptureRegion(RobotSide swingSide,
                                       double swingTimeRemaining,
                                       double nextTransferDuration,
                                       FramePoint2DReadOnly currentICP,
                                       double omega0,
+                                      FramePose3DReadOnly supportPose,
                                       FrameConvexPolygon2DReadOnly footPolygon)
    {
       // 1. Set up all needed variables and reference frames for the calculation:
-      ReferenceFrame supportSoleZUp = soleZUpFrames.get(swingSide.getOppositeSide());
+      supportFrame.setPoseAndUpdate(supportPose);
+      supportSoleZUp.update();
 
       this.supportFootPolygon.setIncludingFrame(footPolygon);
       this.supportFootPolygon.changeFrameAndProjectToXYPlane(supportSoleZUp);
@@ -143,17 +151,20 @@ public class AchievableCaptureRegionCalculatorWithDelay
          unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAfterTransfer, false);
       }
 
+      unconstrainedCaptureRegion.update();
+
       // 6. Intersect the capture region with the reachable region
+      /*
       if (!unconstrainedCaptureRegion.isEmpty())
       {
          // This causes the capture region to always be null if it is null once.
          // This assumes that once there is no capture region the robot will fall for sure.
-         unconstrainedCaptureRegion.update();
          unconstrainedCaptureRegion.checkReferenceFrameMatch(reachableRegion);
 
          captureRegionPolygon.clear(unconstrainedCaptureRegion.getReferenceFrame());
          convexPolygonTools.computeIntersectionOfPolygons(unconstrainedCaptureRegion, reachableRegion, captureRegionPolygon);
       }
+      */
 
       captureRegionPolygon.update();
       updateVisualizer();

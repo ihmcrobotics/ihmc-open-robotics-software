@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.*;
@@ -34,6 +33,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
@@ -44,7 +45,6 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private static final double nominalHeight = 9.81 / 9;
 
    private static final double finalTransferDuration = 1.0;
-   private static final double stepLength = 0.5;
    private static final double stepWidth = 0.15;
 
    private static final double defaultSwingTime = 0.6;
@@ -69,6 +69,10 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final FrameConvexPolygon2DBasics leftSupport;
    private final FrameConvexPolygon2DBasics rightSupport;
    private final YoFrameConvexPolygon2D nextFootPolygon;
+   private final YoFrameConvexPolygon2D nextNextFootPolygon;
+   private final YoFrameConvexPolygon2D nextNextNextFootPolygon;
+
+   private final List<YoFrameConvexPolygon2D> nextFootPolygons = new ArrayList<>();
 
    private final YoBoolean shouldReplan;
    private final YoBoolean replan;
@@ -185,14 +189,25 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       YoFrameConvexPolygon2D leftFootPolygon = new YoFrameConvexPolygon2D("leftFootPolygon", worldFrame, 4, registry);
       YoFrameConvexPolygon2D rightFootPolygon = new YoFrameConvexPolygon2D("rightFootPolygon", worldFrame, 4, registry);
       nextFootPolygon = new YoFrameConvexPolygon2D("nextFootPolygon", worldFrame, 4, registry);
+      nextNextFootPolygon = new YoFrameConvexPolygon2D("nextNextFootPolygon", worldFrame, 4, registry);
+      nextNextNextFootPolygon = new YoFrameConvexPolygon2D("nextNextNextFootPolygon", worldFrame, 4, registry);
+
+      nextFootPolygons.add(nextFootPolygon);
+      nextFootPolygons.add(nextNextFootPolygon);
+      nextFootPolygons.add(nextNextNextFootPolygon);
 
       YoArtifactPolygon leftFootPolygonArtifact = new YoArtifactPolygon("leftFootArtifact", leftFootPolygon, Color.green, false);
       YoArtifactPolygon rightFootPolygonArtifact = new YoArtifactPolygon("rightFootArtifact", rightFootPolygon, Color.green, false);
+
       YoArtifactPolygon nextFootPolygonArtifact = new YoArtifactPolygon("nextFootArtifact", nextFootPolygon, Color.blue, false);
+      YoArtifactPolygon nextNextFootPolygonArtifact = new YoArtifactPolygon("nextNextFootArtifact", nextNextFootPolygon, Color.blue, false);
+      YoArtifactPolygon nextNextNextFootPolygonArtifact = new YoArtifactPolygon("nextNextNextFootArtifact", nextNextNextFootPolygon, Color.blue, false);
 
       graphicsListRegistry.registerArtifact("dcmPlanner", leftFootPolygonArtifact);
       graphicsListRegistry.registerArtifact("dcmPlanner", rightFootPolygonArtifact);
       graphicsListRegistry.registerArtifact("dcmPlanner", nextFootPolygonArtifact);
+      graphicsListRegistry.registerArtifact("dcmPlanner", nextNextFootPolygonArtifact);
+      graphicsListRegistry.registerArtifact("dcmPlanner", nextNextNextFootPolygonArtifact);
 
       graphicsListRegistry.registerYoGraphic("dcmPlanner", forceViz);
       graphicsListRegistry.registerArtifact("dcmPlanner", initialDcmViz.createArtifact());
@@ -208,19 +223,13 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       captureRegionCalculator = new MultiStepPushRecoveryCalculator(kinematicsStepRange,
                                                                     footWidth,
                                                                     new SideDependentList<>(leftStepFrame, rightStepFrame),
+                                                                    defaultSupportPolygon,
                                                                     "",
                                                                     registry,
                                                                     graphicsListRegistry);
 
       shouldReplan = new YoBoolean("shouldReplan", registry);
       replan = new YoBoolean("replan", registry);
-      replan.addListener(v ->
-                         {
-                            if (replan.getBooleanValue())
-                            {
-
-                            }
-                         });
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
@@ -246,7 +255,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       initialCoMPosition.setToZero();
       initialCoMPosition.setZ(nominalHeight);
       initialCoMPosition.setX(0.15);
-      initialCoMPosition.setY(-0.1);
+      initialCoMPosition.setY(-0.05);
       initialCoMVelocity.setToZero();
 
       replan.set(true);
@@ -313,12 +322,15 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       //      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
       //      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
 
-      newPoseFrame.setPoseAndUpdate(state.getFootstep(0).getFootstepPose());
+      for (int i = 0; i < state.getNumberOfFootsteps(); i++)
+      {
+         newPoseFrame.setPoseAndUpdate(state.getFootstep(i).getFootstepPose());
 
-      FrameConvexPolygon2D newPolygon = new FrameConvexPolygon2D(newPoseFrame);
-      newPolygon.set(defaultSupportPolygon);
-      newPolygon.changeFrameAndProjectToXYPlane(worldFrame);
-      nextFootPolygon.set(newPolygon);
+         FrameConvexPolygon2D newPolygon = new FrameConvexPolygon2D(newPoseFrame);
+         newPolygon.set(defaultSupportPolygon);
+         newPolygon.changeFrameAndProjectToXYPlane(worldFrame);
+         nextFootPolygons.get(i).set(newPolygon);
+      }
    }
 
    private void simulate()
