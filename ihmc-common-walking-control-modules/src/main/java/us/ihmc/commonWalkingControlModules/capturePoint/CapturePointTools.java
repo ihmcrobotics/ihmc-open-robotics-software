@@ -107,6 +107,25 @@ public class CapturePointTools
       icpVelocityToPack.scale(omega0);
    }
 
+   /**
+    * Computes the Instantaneous Capture Point velocity by
+    * <p>
+    *    x&#775;<sup>ICP</sup> = &omega; (x<sup>ICP</sup> - x<sup>CMP</sup>)
+    * </p>
+    *
+    * @param capturePointPosition
+    * @param cmpPosition
+    * @param omega0 the natural frequency &omega; =
+    *           &radic;<span style="text-decoration:overline;">&nbsp; g / z0&nbsp;</span> of the
+    *           biped.
+    * @param icpVelocityToPack
+    */
+   public static void computeCapturePointVelocity(FramePoint2DReadOnly capturePointPosition, FramePoint2DReadOnly cmpPosition,
+                                                  double omega0, FixedFrameVector2DBasics icpVelocityToPack)
+   {
+      icpVelocityToPack.sub(capturePointPosition, cmpPosition);
+      icpVelocityToPack.scale(omega0);
+   }
 
    /**
     * FIXME this method is probably wrong.
