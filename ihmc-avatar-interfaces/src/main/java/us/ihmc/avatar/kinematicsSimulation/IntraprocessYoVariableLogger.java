@@ -110,7 +110,7 @@ public class IntraprocessYoVariableLogger
    {
       this(logName,
            null,
-           Lists.newArrayList(new RegistrySendBufferBuilder(registry, null)),
+           Lists.newArrayList(new RegistrySendBufferBuilder(registry)),
            maxTicksToRecord,
            dt);
    }

@@ -12,6 +12,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
@@ -40,6 +41,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -66,6 +68,7 @@ public class LookAndStepFootstepPlanningTask
    protected Timer planningFailedTimer = new Timer();
    protected AtomicReference<RobotSide> lastStanceSideReference;
    protected AtomicReference<Boolean> plannerFailedLastTime = new AtomicReference<>();
+   protected YoDouble footholdVolume;
 
    public static class LookAndStepFootstepPlanning extends LookAndStepFootstepPlanningTask
    {
@@ -97,6 +100,7 @@ public class LookAndStepFootstepPlanningTask
          operatorReviewEnabledSupplier = lookAndStep.operatorReviewEnabledInput::get;
          behaviorStateReference = lookAndStep.behaviorStateReference::get;
          controllerStatusTracker = lookAndStep.controllerStatusTracker;
+         footholdVolume = new YoDouble("footholdVolume", lookAndStep.yoRegistry);
          autonomousOutput = footstepPlanEtc ->
          {
             if (!lookAndStep.isBeingReset.get())
@@ -249,6 +253,18 @@ public class LookAndStepFootstepPlanningTask
                                                                       robotConfigurationData);
          planarRegionsHistory.addLast(bipedalSupportPlanarRegionCalculator.getSupportRegionsAsList());
       }
+
+      // detect flat ground
+      ConvexPolytope3D convexPolytope = new ConvexPolytope3D();
+      for (Point3D point3D : capturabilityBasedStatus.getLeftFootSupportPolygon3d())
+      {
+         convexPolytope.addVertex(point3D);
+      }
+      for (Point3D point3D : capturabilityBasedStatus.getRightFootSupportPolygon3d())
+      {
+         convexPolytope.addVertex(point3D);
+      }
+      footholdVolume.set(convexPolytope.getVolume());
 
       planarRegionsHistory.add(planarRegions);
 
