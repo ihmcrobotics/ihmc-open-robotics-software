@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.tools;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.BehaviorRegistry;
+import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
@@ -9,7 +11,8 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.thread.ActivationReference;
-import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -44,29 +47,27 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * TODO: Extract comms helper that does not have the behavior messager as part of it.
  */
-public class BehaviorHelper extends CommunicationHelper
+public class BehaviorHelper extends CommunicationHelper implements MessagerPublishSubscribeAPI
 {
-   private ManagedMessager managedMessager;
+   private final ROS1Helper ros1Helper;
+   private final MessagerHelper messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
    private StatusLogger statusLogger;
 
-   public BehaviorHelper(DRCRobotModel robotModel, Messager messager, RosNodeInterface ros1Node, ROS2NodeInterface ros2Node)
+   // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
+   public BehaviorHelper(DRCRobotModel robotModel, String ros1NodeName, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, messager, ros1Node, ros2Node, true);
+      this(robotModel, ros1NodeName, ros2Node, true);
    }
 
    public BehaviorHelper(DRCRobotModel robotModel,
-                         Messager messager,
-                         RosNodeInterface ros1Node,
+                         String ros1NodeName,
                          ROS2NodeInterface ros2Node,
                          boolean commsEnabledToStart)
    {
-      super(robotModel, ros1Node, ros2Node, commsEnabledToStart);
-      if (messager != null)
-      {
-         managedMessager = new ManagedMessager(messager);
-      }
+      super(robotModel, ros2Node, commsEnabledToStart);
+      this.ros1Helper = new ROS1Helper(ros1NodeName);
 
-      setCommunicationCallbacksEnabled(commsEnabledToStart);
+      messagerHelper.setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
 
    public StatusLogger getOrCreateStatusLogger()
@@ -77,40 +78,44 @@ public class BehaviorHelper extends CommunicationHelper
    }
 
    // UI Communication Methods:
-   // Extract into class?
 
+   @Override
    public <T> void publish(Topic<T> topic, T message)
    {
-      managedMessager.submitMessage(topic, message);
+      messagerHelper.publish(topic, message);
    }
 
+   @Override
    public void publish(Topic<Object> topic)
    {
-      managedMessager.submitMessage(topic, new Object());
+      messagerHelper.publish(topic);
    }
 
+   @Override
    public ActivationReference<Boolean> subscribeViaActivationReference(Topic<Boolean> topic)
    {
-      return managedMessager.createBooleanActivationReference(topic);
+      return messagerHelper.subscribeViaActivationReference(topic);
    }
 
+   @Override
    public <T> void subscribeViaCallback(Topic<T> topic, TopicListener<T> listener)
    {
-      managedMessager.registerTopicListener(topic, listener);
+      messagerHelper.subscribeViaCallback(topic, listener);
    }
 
+   @Override
    public <T> AtomicReference<T> subscribeViaReference(Topic<T> topic, T initialValue)
    {
-      return managedMessager.createInput(topic, initialValue);
+      return messagerHelper.subscribeViaReference(topic, initialValue);
    }
 
+   @Override
    public Notification subscribeTypelessViaNotification(Topic<Object> topic)
    {
-      Notification notification = new Notification();
-      subscribeViaCallback(topic, object -> notification.set());
-      return notification;
+      return messagerHelper.subscribeTypelessViaNotification(topic);
    }
 
+   @Override
    public <T extends K, K> TypedNotification<K> subscribeViaNotification(Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();
@@ -121,21 +126,48 @@ public class BehaviorHelper extends CommunicationHelper
    public void setCommunicationCallbacksEnabled(boolean enabled)
    {
       super.setCommunicationCallbacksEnabled(enabled);
-      if (managedMessager != null)
-      {
-         managedMessager.setEnabled(enabled);
-      }
+      messagerHelper.setCommunicationCallbacksEnabled(enabled);
    }
 
-   public void setNewMessager(Messager messager)
+   public MessagerHelper getMessagerHelper()
    {
-      boolean enabled = managedROS2Node.isEnabled();
-      managedMessager = new ManagedMessager(messager);
-      managedMessager.setEnabled(enabled);
+      return messagerHelper;
    }
 
    public Messager getMessager()
    {
-      return managedMessager;
+      return messagerHelper.getMessager();
+   }
+
+   public ROS1Helper getROS1Helper()
+   {
+      return ros1Helper;
+   }
+
+   // Behavior Helper Stuff:
+
+   // Thread and Schedule Methods:
+   // TODO: Track and auto start/stop threads?
+
+   public PausablePeriodicThread createPausablePeriodicThread(Class<?> clazz, double period, Runnable runnable)
+   {
+      return createPausablePeriodicThread(clazz.getSimpleName(), period, 0, runnable);
+   }
+
+   public PausablePeriodicThread createPausablePeriodicThread(Class<?> clazz, double period, int crashesBeforeGivingUp, Runnable runnable)
+   {
+      return createPausablePeriodicThread(clazz.getSimpleName(), period, crashesBeforeGivingUp, runnable);
+   }
+
+   public PausablePeriodicThread createPausablePeriodicThread(String name, double period, int crashesBeforeGivingUp, Runnable runnable)
+   {
+      return new PausablePeriodicThread(name, period, crashesBeforeGivingUp, runnable);
+   }
+
+   public void destroy()
+   {
+      super.destroy();
+      ros1Helper.destroy();
+      messagerHelper.disconnect();
    }
 }

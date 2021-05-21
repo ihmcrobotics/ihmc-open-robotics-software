@@ -50,6 +50,12 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
       managedMessager.setMessager(messager);
    }
 
+   public void setExternallyStartedMessager(Messager messager)
+   {
+      this.messager = messager;
+      managedMessager.setMessager(messager);
+   }
+
    public void disconnect()
    {
       if (messager instanceof SharedMemoryMessager)
@@ -66,7 +72,6 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
             disconnecting = false;
          }, "MessagerDisconnectionThread");
       }
-      managedMessager = null;
    }
 
    public void setCommunicationCallbacksEnabled(boolean enabled)
@@ -82,6 +87,16 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
    public boolean isConnected()
    {
       return messager != null && !disconnecting && messager.isMessagerOpen();
+   }
+
+   public Messager getMessager()
+   {
+      return managedMessager;
+   }
+
+   public boolean isUsingSharedMemory()
+   {
+      return messager instanceof SharedMemoryMessager;
    }
 
    @Override
