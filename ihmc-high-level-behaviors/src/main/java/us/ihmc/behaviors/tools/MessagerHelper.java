@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.tools;
 
 import us.ihmc.behaviors.RemoteBehaviorInterface;
+import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.Notification;
@@ -22,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * - Reconnecting
  * - Switching between Kryo and SharedMemory
  */
-public class MessagerHelper
+public class MessagerHelper implements MessagerPublishSubscribeAPI
 {
    private final MessagerAPI messagerAPI;
    private boolean disconnecting = false;
@@ -83,33 +84,37 @@ public class MessagerHelper
       return messager != null && !disconnecting && messager.isMessagerOpen();
    }
 
-   // TODO: Methods below should implement an interface?
-
+   @Override
    public <T> void publish(MessagerAPIFactory.Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
    }
 
+   @Override
    public void publish(MessagerAPIFactory.Topic<Object> topic)
    {
       managedMessager.submitMessage(topic, new Object());
    }
 
+   @Override
    public ActivationReference<Boolean> subscribeViaActivationReference(MessagerAPIFactory.Topic<Boolean> topic)
    {
       return managedMessager.createBooleanActivationReference(topic);
    }
 
+   @Override
    public <T> void subscribeViaCallback(MessagerAPIFactory.Topic<T> topic, TopicListener<T> listener)
    {
       managedMessager.registerTopicListener(topic, listener);
    }
 
+   @Override
    public <T> AtomicReference<T> subscribeViaReference(MessagerAPIFactory.Topic<T> topic, T initialValue)
    {
       return managedMessager.createInput(topic, initialValue);
    }
 
+   @Override
    public Notification subscribeTypelessViaNotification(MessagerAPIFactory.Topic<Object> topic)
    {
       Notification notification = new Notification();
@@ -117,6 +122,7 @@ public class MessagerHelper
       return notification;
    }
 
+   @Override
    public <T extends K, K> TypedNotification<K> subscribeViaNotification(MessagerAPIFactory.Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();
