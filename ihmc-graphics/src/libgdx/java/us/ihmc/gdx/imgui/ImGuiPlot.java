@@ -16,6 +16,11 @@ public class ImGuiPlot
    private final int height;
    private int index = 0;
 
+   public ImGuiPlot(String name)
+   {
+      this(name, 1000);
+   }
+
    public ImGuiPlot(String name, int bufferSize)
    {
       this(name, bufferSize, 230, 50);

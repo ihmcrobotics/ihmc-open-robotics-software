@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.MessagerHelper;
+import us.ihmc.behaviors.tools.YoVariableClientHelper;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -19,7 +20,6 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.ros2.ROS2Node;
 
 import java.time.LocalDateTime;
@@ -34,10 +34,11 @@ public class GDXBehaviorsPanel implements RenderableProvider
    private final GDXBehaviorUIRegistry behaviorRegistry;
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
    private volatile boolean messagerConnecting = false;
+   private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
    private volatile boolean yoClientDisconnecting = false;
    private volatile boolean yoClientConnecting = false;
-   private YoVariableClient yoVariableClient = null;
+   private final YoVariableClientHelper yoVariableClientHelper;
 
    private final GDXBuildingExplorationBehaviorUI buildingExplorationUI;
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
@@ -52,8 +53,9 @@ public class GDXBehaviorsPanel implements RenderableProvider
    {
       this.behaviorRegistry = behaviorRegistry;
 
-      behaviorHelper = new BehaviorHelper(robotModelSupplier.get(), ros1NodeName, ros2Node);
+      behaviorHelper = new BehaviorHelper(robotModelSupplier.get(), ros1NodeName, getClass().getSimpleName(), ros2Node);
       messagerHelper = behaviorHelper.getMessagerHelper();
+      yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
       buildingExplorationUI = new GDXBuildingExplorationBehaviorUI(messagerHelper);
       lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(behaviorHelper);
 
@@ -86,7 +88,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
       ImGui.begin(windowName);
       if (messagerConnecting)
       {
-         ImGui.text("Connecting...");
+         ImGui.text("Messager connecting...");
          if (messagerHelper.isConnected())
          {
             messagerConnecting = false;
@@ -94,7 +96,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
       }
       else if (messagerHelper.isDisconnecting())
       {
-         ImGui.text("Disconnecting...");
+         ImGui.text("Messager disconnecting...");
       }
       else if (!messagerHelper.isConnected())
       {
@@ -102,7 +104,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
          flags += ImGuiInputTextFlags.CallbackResize;
          ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "messagerHost"), behaviorModuleHost, flags);
          ImGui.sameLine();
-         if (ImGui.button("Connect"))
+         if (ImGui.button("Connect messager"))
          {
             connectViaKryo(behaviorModuleHost.get());
          }
@@ -110,7 +112,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
          SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
          if (potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen())
          {
-            if (ImGui.button("Use shared memory"))
+            if (ImGui.button("Use shared memory messager"))
             {
                messagerHelper.connectViaSharedMemory(potentialSharedMemoryMessager);
             }
@@ -118,24 +120,52 @@ public class GDXBehaviorsPanel implements RenderableProvider
       }
       else
       {
-         if (messagerHelper.isConnected())
+         if (messagerHelper.isUsingSharedMemory())
          {
-            if (messagerHelper.isUsingSharedMemory())
-            {
-               ImGui.text("Using shared memory messager.");
-            }
-            else
-            {
-               ImGui.text("Connected to: " + behaviorModuleHost.get());
-            }
-
-            if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
-            {
-               disconnect();
-            }
-
-            lookAndStepUI.renderWidgetsOnly();
+            ImGui.text("Using shared memory messager.");
          }
+         else
+         {
+            ImGui.text("Messager connected to " + messagerConnectedHost + ".");
+         }
+
+         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect messager")))
+         {
+            disconnectMessager();
+         }
+      }
+      if (yoClientConnecting)
+      {
+         ImGui.text("YoVariable client connecting...");
+         if (yoVariableClientHelper.getClient().isConnected())
+         {
+            yoClientConnecting = false;
+         }
+      }
+      else if (yoClientDisconnecting)
+      {
+         ImGui.text("YoVariable client disconnecting...");
+      }
+      else if (!yoVariableClientHelper.getClient().isConnected())
+      {
+         if (ImGui.button("Connect YoVariable client"))
+         {
+            connectYoVariableClient();
+         }
+      }
+      else
+      {
+         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getClient().getServerName() + ".");
+
+         if (ImGui.button("Disconnect YoVariable client"))
+         {
+            disconnectYoVariableClient();
+         }
+      }
+
+      if (messagerHelper.isConnected())
+      {
+         lookAndStepUI.renderWidgetsOnly();
       }
 
       synchronized (logArray)
@@ -157,17 +187,30 @@ public class GDXBehaviorsPanel implements RenderableProvider
    {
       behaviorModuleHost.set(hostname);
       messagerHelper.connectViaKryo(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
+      messagerConnectedHost = behaviorModuleHost.get();
       messagerConnecting = true;
    }
 
-   public void disconnect()
+   public void connectYoVariableClient()
+   {
+      yoVariableClientHelper.start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
+      yoClientConnecting = true;
+   }
+
+   public void disconnectMessager()
    {
       messagerHelper.disconnect();
    }
 
+   public void disconnectYoVariableClient()
+   {
+      yoVariableClientHelper.getClient().disconnect();
+   }
+
    public void destroy()
    {
-      disconnect();
+      disconnectMessager();
+      disconnectYoVariableClient();
       lookAndStepUI.destroy();
    }
 

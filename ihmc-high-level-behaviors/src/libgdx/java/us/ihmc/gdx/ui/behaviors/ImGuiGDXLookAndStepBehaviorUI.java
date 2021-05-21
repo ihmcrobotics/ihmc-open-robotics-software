@@ -38,6 +38,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
@@ -66,6 +67,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningSection = new ImBoolean(true);
    private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
+   private final ImGuiYoDoublePlot footholdVolumePlot;
 
    private ModelInstance sphere;
    private ModelInstance arrow;
@@ -124,6 +126,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       behaviorHelper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       behaviorHelper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
+      footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", behaviorHelper);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -308,6 +311,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       }
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      footholdVolumePlot.render();
 
       ImGui.checkbox("Show graphics", showGraphics);
       ImGui.sameLine();

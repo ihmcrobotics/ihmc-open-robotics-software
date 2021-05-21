@@ -1,6 +1,8 @@
 package us.ihmc.behaviors;
 
 import com.google.common.base.CaseFormat;
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.MutablePair;
 
@@ -130,7 +132,8 @@ public class BehaviorModule
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
          String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, behaviorDefinition.getName().replace(" ", ""));
-         BehaviorHelper helper = new BehaviorHelper(robotModel, ros1NodeName, ros2Node, false);
+         String yoVariableRegistryName = WordUtils.capitalize(behaviorDefinition.getName()).replace(" ", "");
+         BehaviorHelper helper = new BehaviorHelper(robotModel, ros1NodeName, yoVariableRegistryName, ros2Node, false);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
          YoRegistry yoRegistry = constructedBehavior.getYoRegistry();

@@ -4,6 +4,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.interfaces.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.messager.Messager;
@@ -15,6 +16,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleSupplier;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -47,25 +49,30 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  * TODO: Extract comms helper that does not have the behavior messager as part of it.
  */
-public class BehaviorHelper extends CommunicationHelper implements MessagerPublishSubscribeAPI
+public class BehaviorHelper extends CommunicationHelper implements MessagerPublishSubscribeAPI, YoVariableClientPublishSubscribeAPI
 {
    private final ROS1Helper ros1Helper;
    private final MessagerHelper messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
+   private final YoVariableClientHelper yoVariableClientHelper;
    private StatusLogger statusLogger;
 
    // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
-   public BehaviorHelper(DRCRobotModel robotModel, String ros1NodeName, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(DRCRobotModel robotModel, String ros1NodeName, String yoRegistryName, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, ros1NodeName, ros2Node, true);
+      this(robotModel, ros1NodeName, yoRegistryName, ros2Node, true);
    }
 
    public BehaviorHelper(DRCRobotModel robotModel,
                          String ros1NodeName,
+                         String yoRegistryName,
                          ROS2NodeInterface ros2Node,
                          boolean commsEnabledToStart)
    {
       super(robotModel, ros2Node, commsEnabledToStart);
       this.ros1Helper = new ROS1Helper(ros1NodeName);
+
+
+      yoVariableClientHelper = new YoVariableClientHelper(yoRegistryName);
 
       messagerHelper.setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
@@ -78,6 +85,12 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    }
 
    // UI Communication Methods:
+
+   @Override
+   public DoubleSupplier subscribeViaYoDouble(String variableName)
+   {
+      return yoVariableClientHelper.subscribeViaYoDouble(variableName);
+   }
 
    @Override
    public <T> void publish(Topic<T> topic, T message)
@@ -142,6 +155,11 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    public ROS1Helper getROS1Helper()
    {
       return ros1Helper;
+   }
+
+   public YoVariableClientHelper getYoVariableClientHelper()
+   {
+      return yoVariableClientHelper;
    }
 
    // Behavior Helper Stuff:
