@@ -9,12 +9,11 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -22,14 +21,21 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
+import us.ihmc.tools.thread.ExecutorServiceTools;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoVariable;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 public class PushRecoveryCoMTrajectoryPlannerVisualizer
 {
@@ -64,6 +70,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final FrameConvexPolygon2DBasics rightSupport;
    private final YoFrameConvexPolygon2D nextFootPolygon;
 
+   private final YoBoolean shouldReplan;
    private final YoBoolean replan;
    private final YoFramePoint3D initialCoMPosition;
    private final YoFrameVector3D initialCoMVelocity;
@@ -84,6 +91,10 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls vrpTrajectory;
 
    private final MultiStepPushRecoveryCalculator captureRegionCalculator;
+
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2,
+                                                                                                  getClass(),
+                                                                                                  ExecutorServiceTools.ExceptionHandling.CATCH_AND_REPORT);
 
    private final YoDouble omega;
 
@@ -152,12 +163,21 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       state.initializeStance(RobotSide.LEFT, leftSupport, leftStepFrame);
       state.initializeStance(RobotSide.RIGHT, rightSupport, rightStepFrame);
 
-      YoGraphicPosition initialDcmViz = new YoGraphicPosition("initialDCM", initialCoMPosition, 0.02, YoAppearance.Blue(),
-                                                       YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM", desiredDCMPosition, 0.02, YoAppearance.Yellow(),
+      YoGraphicPosition initialDcmViz = new YoGraphicPosition("initialDCM",
+                                                              initialCoMPosition,
+                                                              0.02,
+                                                              YoAppearance.Blue(),
+                                                              YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
+      YoGraphicPosition dcmViz = new YoGraphicPosition("desiredDCM",
+                                                       desiredDCMPosition,
+                                                       0.02,
+                                                       YoAppearance.Yellow(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
       YoGraphicPosition comViz = new YoGraphicPosition("desiredCoM", desiredCoMPosition, 0.02, YoAppearance.Black(), YoGraphicPosition.GraphicType.SOLID_BALL);
-      YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP", desiredVRPPosition, 0.02, YoAppearance.Purple(),
+      YoGraphicPosition vrpViz = new YoGraphicPosition("desiredVRP",
+                                                       desiredVRPPosition,
+                                                       0.02,
+                                                       YoAppearance.Purple(),
                                                        YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
 
       YoGraphicVector forceViz = new YoGraphicVector("desiredGRF", desiredECMPPosition, desiredGroundReactionForce, 0.05, YoAppearance.Red());
@@ -185,8 +205,22 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
-      captureRegionCalculator = new MultiStepPushRecoveryCalculator(kinematicsStepRange, footWidth, new SideDependentList<>(leftStepFrame, rightStepFrame),
-                                                                    "", registry, graphicsListRegistry);
+      captureRegionCalculator = new MultiStepPushRecoveryCalculator(kinematicsStepRange,
+                                                                    footWidth,
+                                                                    new SideDependentList<>(leftStepFrame, rightStepFrame),
+                                                                    "",
+                                                                    registry,
+                                                                    graphicsListRegistry);
+
+      shouldReplan = new YoBoolean("shouldReplan", registry);
+      replan = new YoBoolean("replan", registry);
+      replan.addListener(v ->
+                         {
+                            if (replan.getBooleanValue())
+                            {
+
+                            }
+                         });
 
       SimulationConstructionSetParameters scsParameters = new SimulationConstructionSetParameters(true, BUFFER_SIZE);
       Robot robot = new Robot("Dummy");
@@ -202,6 +236,9 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       scs.setCameraFix(0.0, 0.0, 0.5);
       scs.setCameraPosition(-0.5, 0.0, 1.0);
 
+      addButton("replan", 1.0);
+
+
       SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = scs.createSimulationOverheadPlotterFactory();
       simulationOverheadPlotterFactory.addYoGraphicsListRegistries(graphicsListRegistry);
       simulationOverheadPlotterFactory.createOverheadPlotter();
@@ -212,14 +249,35 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       initialCoMPosition.setY(-0.1);
       initialCoMVelocity.setToZero();
 
+      replan.set(true);
+      executorService.scheduleAtFixedRate(() ->
+                                          {
+                                             if (replan.getBooleanValue())
+                                             {
+                                                replan.set(false, false);
+                                                shouldReplan.set(true);
+
+                                                updateState();
+                                                simulate();
+                                             }
+                                          }, 0, 100, TimeUnit.MILLISECONDS);
       scs.startOnAThread();
-      updateState();
-      simulate();
+   }
 
-      replan = new YoBoolean("replan", registry);
-      replan.addListener(v -> {updateState(); simulate();});
-
-      ThreadTools.sleepForever();
+   private void addButton(String yoVariableName, double newValue)
+   {
+      YoRegistry registry = scs.getRootRegistry();
+      final YoVariable var = registry.findVariable(yoVariableName);
+      final JButton button = new JButton(yoVariableName);
+      scs.addButton(button);
+      button.addActionListener(new ActionListener()
+      {
+         @Override
+         public void actionPerformed(ActionEvent e)
+         {
+            var.setValueFromDouble(newValue);
+         }
+      });
    }
 
    private final FramePoint2D icp = new FramePoint2D();
@@ -227,10 +285,23 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
    private void updateState()
    {
-      CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition), new FrameVector2D(initialCoMVelocity), 1.0 / omega.getDoubleValue(), icp);
+      CapturePointTools.computeCapturePointPosition(new FramePoint2D(initialCoMPosition),
+                                                    new FrameVector2D(initialCoMVelocity),
+                                                    1.0 / omega.getDoubleValue(),
+                                                    icp);
 
-      captureRegionCalculator.computeRecoverySteps(RobotSide.LEFT, swingTime.getDoubleValue(), transferTime.getDoubleValue(), icp, omega.getDoubleValue(), rightSupport);
+      LogTools.info("Computing recovery steps");
 
+      captureRegionCalculator.computeRecoverySteps(RobotSide.LEFT,
+                                                   swingTime.getDoubleValue(),
+                                                   transferTime.getDoubleValue(),
+                                                   icp,
+                                                   omega.getDoubleValue(),
+                                                   rightSupport);
+
+      LogTools.info("Updating CoP state");
+
+      state.clear();
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
       state.setFinalTransferDuration(finalTransferDuration);
@@ -239,8 +310,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
          state.addFootstep(captureRegionCalculator.getRecoveryStep(i));
          state.addFootstepTiming(captureRegionCalculator.getRecoveryStepTiming(i));
       }
-//      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
-//      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
+      //      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
+      //      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
 
       newPoseFrame.setPoseAndUpdate(state.getFootstep(0).getFootstepPose());
 
@@ -252,14 +323,21 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
    private void simulate()
    {
+      timeInPhase.set(0.0);
+      shouldReplan.set(false);
+      LogTools.info("Solving for CoP plan");
       copPlanner.compute(state);
 
+      LogTools.info("Solving for CoM plan");
       comPlanner.setInitialCenterOfMassState(initialCoMPosition, initialCoMVelocity);
       comPlanner.solveForTrajectory(copPlanner.getContactStateProviders());
 
-      scs.tickAndUpdate();
+      LogTools.info("Visualizing CoM plan");
 
-      while (yoTime.getDoubleValue() < copPlanner.getContactStateProviders().get(copPlanner.getContactStateProviders().size() - 1).getTimeInterval().getEndTime())
+      while (timeInPhase.getDoubleValue() < copPlanner.getContactStateProviders()
+                                                      .get(copPlanner.getContactStateProviders().size() - 1)
+                                                      .getTimeInterval()
+                                                      .getEndTime())
       {
          //         planner.solveForTrajectory();
          comPlanner.compute(timeInPhase.getDoubleValue());
@@ -286,6 +364,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
          scs.tickAndUpdate();
       }
+
+      LogTools.info("Finished!");
 
    }
 
