@@ -119,6 +119,16 @@ public class PushRecoveryState extends YoSaveableModuleState
       this.icpAtStartOfState.set(icpAtStartOfState);
    }
 
+   public void clear()
+   {
+      for (int i = 0; i < footsteps.size(); i++)
+         footsteps.get(i).clear();
+      for (int i = 0; i < footstepTimings.size(); i++)
+         footstepTimings.get(i).clear();
+      footsteps.clear();
+      footstepTimings.clear();
+   }
+
    public void addFootstep(Footstep footstep)
    {
       if (footsteps.size() < footsteps.capacity())
