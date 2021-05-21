@@ -102,8 +102,8 @@ public class MultiStepPushRecoveryCalculator
             YoFrameConvexPolygon2D yoCaptureRegionPolygonAtTouchdown = new YoFrameConvexPolygon2D(captureName + "AtTouchdown", suffix, worldFrame, 30, registry);
             yoCaptureRegionsAtTouchdown.add(yoCaptureRegionPolygonAtTouchdown);
 
-            YoArtifactPolygon capturePolygonArtifact = new YoArtifactPolygon(captureName + suffix, yoCaptureRegionPolygon, Color.YELLOW, false);
-            YoArtifactPolygon capturePolygonAtTouchdownArtifact = new YoArtifactPolygon(captureName + "AtTouchdown" + suffix, yoCaptureRegionPolygonAtTouchdown, Color.YELLOW, false, true);
+            YoArtifactPolygon capturePolygonArtifact = new YoArtifactPolygon(captureName + suffix, yoCaptureRegionPolygon, Color.RED, false);
+            YoArtifactPolygon capturePolygonAtTouchdownArtifact = new YoArtifactPolygon(captureName + "AtTouchdown" + suffix, yoCaptureRegionPolygonAtTouchdown, Color.RED, false, true);
 
             String reachableName = "reachableRegion" + i;
 
