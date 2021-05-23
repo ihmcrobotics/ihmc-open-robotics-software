@@ -20,7 +20,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class RemoteSyncedRobotModel
+public class RemoteSyncedRobotModel extends MessageSyncedRobotModel
 {
    protected final FullHumanoidRobotModel fullRobotModel;
    private final Timer dataReceptionTimer;
@@ -33,7 +33,13 @@ public class RemoteSyncedRobotModel
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      fullRobotModel = robotModel.createFullRobotModel();
+      this(robotModel, ros2Node, robotModel.createFullRobotModel());
+   }
+
+   public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
+   {
+      super(fullRobotModel);   
+      this.fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationData = new RobotConfigurationData();
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
@@ -51,6 +57,12 @@ public class RemoteSyncedRobotModel
                                                     });
       dataReceptionTimer = new Timer();
       robotConfigurationDataInput.addCallback(this::resetDataReceptionTimer);
+   }
+
+   @Override
+   public RobotConfigurationData getLatestRobotConfigurationData()
+   {
+      return robotConfigurationDataInput.getLatest();
    }
 
    private synchronized void resetDataReceptionTimer(RobotConfigurationData message)

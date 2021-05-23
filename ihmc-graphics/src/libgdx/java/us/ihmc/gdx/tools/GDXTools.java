@@ -298,9 +298,16 @@ public class GDXTools
 
    public static Color toGDX(AppearanceDefinition appearanceDefinition)
    {
-      return new Color(appearanceDefinition.getColor().getX(),
-                       appearanceDefinition.getColor().getY(),
-                       appearanceDefinition.getColor().getZ(),
-                       1.0f - (float) appearanceDefinition.getTransparency());
+      Color gdxColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+      toGDX(appearanceDefinition, gdxColor);
+      return gdxColor;
+   }
+
+   public static void toGDX(AppearanceDefinition appearanceDefinition, Color gdxColor)
+   {
+      gdxColor.r = appearanceDefinition.getColor().getX();
+      gdxColor.g = appearanceDefinition.getColor().getY();
+      gdxColor.b = appearanceDefinition.getColor().getZ();
+      gdxColor.a = 1.0f - (float) appearanceDefinition.getTransparency();
    }
 }
