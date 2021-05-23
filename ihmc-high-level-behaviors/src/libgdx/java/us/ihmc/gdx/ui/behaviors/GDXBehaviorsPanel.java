@@ -137,7 +137,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
       if (yoClientConnecting)
       {
          ImGui.text("YoVariable client connecting...");
-         if (yoVariableClientHelper.getClient().isConnected())
+         if (yoVariableClientHelper.isConnected())
          {
             yoClientConnecting = false;
          }
@@ -146,7 +146,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
       {
          ImGui.text("YoVariable client disconnecting...");
       }
-      else if (!yoVariableClientHelper.getClient().isConnected())
+      else if (!yoVariableClientHelper.isConnected())
       {
          if (ImGui.button("Connect YoVariable client"))
          {
@@ -155,7 +155,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
       }
       else
       {
-         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getClient().getServerName() + ".");
+         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName() + ".");
 
          if (ImGui.button("Disconnect YoVariable client"))
          {
@@ -204,7 +204,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
    public void disconnectYoVariableClient()
    {
-      yoVariableClientHelper.getClient().disconnect();
+      yoVariableClientHelper.disconnect();
    }
 
    public void destroy()

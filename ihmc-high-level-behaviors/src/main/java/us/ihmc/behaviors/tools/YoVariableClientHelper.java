@@ -14,19 +14,19 @@ import java.util.function.DoubleSupplier;
 
 public class YoVariableClientHelper implements YoVariableClientPublishSubscribeAPI
 {
-   private final YoRegistry yoRegistry;
+   private final String registryName;
+   private YoRegistry yoRegistry;
    private YoVariablesUpdatedListener listener;
    private YoVariableClient yoVariableClient;
 
    public YoVariableClientHelper(String registryName)
    {
-      yoRegistry = new YoRegistry(registryName);
-      listener = new BasicYoVariablesUpdatedListener(yoRegistry);
-      yoVariableClient = new YoVariableClient(listener);
+      this.registryName = registryName;
    }
 
    public void start(String hostname, int port)
    {
+      yoRegistry = new YoRegistry(registryName);
       listener = new BasicYoVariablesUpdatedListener(yoRegistry);
       yoVariableClient = new YoVariableClient(listener);
       MutableBoolean connecting = new MutableBoolean(true);
@@ -37,7 +37,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
             try
             {
                LogTools.info("Connecting to {}:{}", hostname, port);
-               getClient().start(hostname, port);
+               yoVariableClient.start(hostname, port);
                connecting.setValue(false);
                LogTools.info("Connected to {}:{}", hostname, port);
             }
@@ -50,11 +50,22 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
       }, "YoVariableClientHelperConnection");
    }
 
-   public YoVariableClient getClient()
+   public boolean isConnected()
    {
-      return yoVariableClient;
+      return yoVariableClient.isConnected();
    }
 
+   public void disconnect()
+   {
+      yoVariableClient.disconnect();
+   }
+
+   public String getServerName()
+   {
+      return yoVariableClient.getServerName();
+   }
+
+   @Override
    public DoubleSupplier subscribeViaYoDouble(String variableName)
    {
       return () ->
