@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -43,7 +44,8 @@ public class GDXEnvironment implements RenderableProvider
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
-   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
+   private ImBoolean show3DWidgetTuner = new ImBoolean(false);
+   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget(getClass().getSimpleName());
    private boolean placing = false;
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
@@ -227,7 +229,9 @@ public class GDXEnvironment implements RenderableProvider
          reindexScripts();
       }
 
-      pose3DWidget.render();
+      ImGui.checkbox("Show 3D Widget Tuner", show3DWidgetTuner);
+      if (show3DWidgetTuner.get())
+         pose3DWidget.renderImGuiTuner();
 
       ImGui.end();
    }

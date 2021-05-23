@@ -111,6 +111,12 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Vector3D crossProduct = new Vector3D();
    private final Vector3D axisMoveVector = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
+   private final String imGuiWindowName;
+
+   public GDXPose3DWidget(String name)
+   {
+      imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
+   }
 
    public void create()
    {
@@ -424,9 +430,9 @@ public class GDXPose3DWidget implements RenderableProvider
    }
 
 
-   public void render()
+   public void renderImGuiTuner()
    {
-      ImGui.begin(ImGuiTools.uniqueLabel(this, "3D Widget Tuner"));
+      ImGui.begin(imGuiWindowName);
 
       ImGui.text("Use the right mouse button to manipulate the widget.");
       ImGui.text("X: " + mouseDraggedX);
