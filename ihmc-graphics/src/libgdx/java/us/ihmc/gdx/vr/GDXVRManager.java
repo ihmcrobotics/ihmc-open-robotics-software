@@ -40,7 +40,7 @@ public class GDXVRManager implements RenderableProvider
    private final Point3D resultVRSpacePosition = new Point3D();
    private final Point3D lastVRSpacePosition = new Point3D();
    private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
-   private final GDXPose3DWidget scenePose = new GDXPose3DWidget();
+   private final GDXPose3DWidget scenePose = new GDXPose3DWidget("VR Space");
 
    public void create()
    {
