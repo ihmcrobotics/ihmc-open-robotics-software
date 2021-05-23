@@ -322,6 +322,20 @@ public class MessageTools
       return message;
    }
 
+   public static void packSelectionMatrix3DMessage(boolean xSelected, boolean ySelected, boolean zSelected, ReferenceFrame selectionFrame,
+                                                   SelectionMatrix3DMessage messageToPack)
+   {
+      messageToPack.setSelectionFrameId(toFrameId(selectionFrame));
+      messageToPack.setXSelected(xSelected);
+      messageToPack.setYSelected(ySelected);
+      messageToPack.setZSelected(zSelected);
+   }
+
+   public static void packSelectionMatrix3DMessage(boolean selected, SelectionMatrix3DMessage messageToPack)
+   {
+      packSelectionMatrix3DMessage(selected, selected, selected, null, messageToPack);
+   }
+
    public static WeightMatrix3DMessage createWeightMatrix3DMessage(WeightMatrix3D weightMatrix)
    {
       WeightMatrix3DMessage message = new WeightMatrix3DMessage();

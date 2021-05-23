@@ -677,14 +677,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
-      {
-         return new ValkyrieArmMassSimCollisionModel(getJointMap());
-      }
-      else
-      {
-         return new ValkyrieKinematicsCollisionModel(getJointMap());
-      }
+      return new ValkyrieKinematicsCollisionModel(getJointMap());
    }
 
    @Override

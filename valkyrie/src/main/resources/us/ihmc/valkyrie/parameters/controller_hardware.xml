@@ -547,16 +547,16 @@
                <parameter name="lefthiprollStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.087" />
                <parameter name="righthiprollStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.087" />
                <parameter name="torsopitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
-               <parameter name="lefthippitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.6" />
-               <parameter name="righthippitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.6" />
+               <parameter name="lefthippitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.675" />
+               <parameter name="righthippitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.675" />
                <parameter name="torsorollStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                <parameter name="leftkneepitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.3" />
                <parameter name="rightkneepitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="1.3" />
                <parameter name="leftshoulderpitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.2" />
                <parameter name="lowerneckpitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                <parameter name="rightshoulderpitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.2" />
-               <parameter name="leftanklepitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.65" />
-               <parameter name="rightanklepitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.65" />
+               <parameter name="leftanklepitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.7" />
+               <parameter name="rightanklepitchStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.7" />
                <parameter name="leftshoulderrollStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="-0.5" />
                <parameter name="neckyawStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />
                <parameter name="rightshoulderrollStandPrepPosition" type="DoubleParameter" min="0.0" max="1.0" value="0.5" />
@@ -878,8 +878,8 @@
                      <parameter name="feedbackPartMaxRate" type="DoubleParameter" min="0.0" max="1.0" value="1.5" />
                      <parameter name="feedbackPartMaxValueParallelToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
                      <parameter name="feedbackPartMaxValueOrthogonalToMotion" type="DoubleParameter" min="0.0" max="1.0" value="Infinity" />
-                     <parameter name="useSmartICPIntegrator" type="BooleanParameter" value="false" />
-                     <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01" />
+                     <parameter name="useSmartICPIntegrator" type="BooleanParameter" value="true" />
+                     <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.05" />
                      <parameter name="controllerDynamicsObjectiveWeight" type="DoubleParameter" min="0.0" max="1.0" value="10000.0" />
                      <parameter name="controllerCMPFeedbackWeight" type="DoubleParameter" min="0.0" max="1.0" value="10.0" />
                      <parameter name="controllerLimitReachabilityFromAdjustment" type="BooleanParameter" value="false" />
@@ -1488,7 +1488,7 @@
             </registry>
             <registry name="JointStateUpdater">
                <registry name="SpineIMUBasedJointStateEstimator">
-                  <parameter name="SpineIMUBasedJointStateEstimatorEnableOutput" type="BooleanParameter" value="false" />
+                  <parameter name="SpineIMUBasedJointStateEstimatorEnableOutput" type="BooleanParameter" value="true" />
                   <parameter name="SpineIMUBasedJointStateEstimatorAlphaFuseVelocity" type="DoubleParameter" min="0.0" max="1.0" value="4.080895976715269" />
                   <parameter name="SpineIMUBasedJointStateEstimatorAlphaFusePosition" type="DoubleParameter" min="0.0" max="1.0" value="NaN" />
                   <parameter name="SpineIMUBasedJointStateEstimatorSlopTime" type="DoubleParameter" min="0.0" max="1.0" value="0.0" />

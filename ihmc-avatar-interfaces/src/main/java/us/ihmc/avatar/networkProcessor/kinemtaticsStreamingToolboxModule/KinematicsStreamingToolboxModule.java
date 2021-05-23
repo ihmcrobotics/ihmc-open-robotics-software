@@ -17,7 +17,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxConfigurationCommand;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -30,7 +30,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
    protected final KinematicsStreamingToolboxController controller;
-   private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher;
+   private IHMCRealtimeROS2Publisher<WholeBodyTrajectoryMessage> trajectoryMessagePublisher;
+   private IHMCRealtimeROS2Publisher<WholeBodyStreamingMessage> streamingMessagePublisher;
 
    public KinematicsStreamingToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
    {
@@ -50,7 +51,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       Map<String, Double> initialConfiguration = fromStandPrep(robotModel);
       if (initialConfiguration != null)
          controller.setInitialRobotConfigurationNamedMap(initialConfiguration);
-      controller.setOutputPublisher(outputPublisher::publish);
+      controller.setTrajectoryMessagePublisher(trajectoryMessagePublisher::publish);
+      controller.setStreamingMessagePublisher(streamingMessagePublisher::publish);
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
       if (yoVariableServer != null)
@@ -83,7 +85,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ROS2Topic controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
       ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
+      trajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
+      streamingMessagePublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node, WholeBodyStreamingMessage.class, controllerInputTopic);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
@@ -124,7 +127,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
       commands.add(KinematicsStreamingToolboxInputCommand.class);
-      commands.add(KinematicsStreamingToolboxOutputConfigurationCommand.class);
+      commands.add(KinematicsStreamingToolboxConfigurationCommand.class);
       commands.add(KinematicsToolboxConfigurationCommand.class);
       return commands;
    }
