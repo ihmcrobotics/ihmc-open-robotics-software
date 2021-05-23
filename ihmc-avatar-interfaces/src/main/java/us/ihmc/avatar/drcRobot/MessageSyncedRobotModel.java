@@ -1,80 +1,58 @@
 package us.ihmc.avatar.drcRobot;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
-import us.ihmc.log.LogTools;
-import us.ihmc.tools.Timer;
-import us.ihmc.tools.TimerSnapshot;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
-import us.ihmc.ros2.ROS2Input;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
-import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.tools.Timer;
+import us.ihmc.tools.TimerSnapshot;
 
-import java.util.function.Consumer;
 import java.util.function.Function;
 
-public class RemoteSyncedRobotModel extends MessageSyncedRobotModel
+public abstract class MessageSyncedRobotModel
 {
-   protected final FullHumanoidRobotModel fullRobotModel;
+   private final FullHumanoidRobotModel fullRobotModel;
    private final Timer dataReceptionTimer;
    protected RobotConfigurationData robotConfigurationData;
    private final OneDoFJointBasics[] allJoints;
-   private final int jointNameHash;
-   private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
+   protected final int jointNameHash;
    private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
-   public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public MessageSyncedRobotModel(FullHumanoidRobotModel fullRobotModel)
    {
-      this(robotModel, ros2Node, robotModel.createFullRobotModel());
-   }
-
-   public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
-   {
-      super(fullRobotModel);   
-      this.fullRobotModel = robotModel.createFullRobotModel();
+      this.fullRobotModel = fullRobotModel;
       robotConfigurationData = new RobotConfigurationData();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),
                                                                            fullRobotModel.getIMUDefinitions());
-      robotConfigurationDataInput = new ROS2Input<>(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
-                                                    robotConfigurationData,
-                                                    message ->
-                                                    {
-                                                       FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
-                                                       return true;
-                                                    });
       dataReceptionTimer = new Timer();
-      robotConfigurationDataInput.addCallback(this::resetDataReceptionTimer);
    }
 
-   @Override
-   public RobotConfigurationData getLatestRobotConfigurationData()
-   {
-      return robotConfigurationDataInput.getLatest();
-   }
+   public abstract RobotConfigurationData getLatestRobotConfigurationData();
 
-   private synchronized void resetDataReceptionTimer(RobotConfigurationData message)
+   protected synchronized void resetDataReceptionTimer()
    {
       dataReceptionTimer.reset();
    }
 
    public void update()
    {
-      robotConfigurationData = robotConfigurationDataInput.getLatest();
+      robotConfigurationData = getLatestRobotConfigurationData();
 
-      updateInternal();
+      if (robotConfigurationData != null)
+      {
+         updateInternal();
+      }
    }
 
    protected void updateInternal()
@@ -125,23 +103,8 @@ public class RemoteSyncedRobotModel extends MessageSyncedRobotModel
       return temporaryPoseForQuickReading;
    }
 
-   public boolean hasReceivedFirstMessage()
-   {
-      return robotConfigurationDataInput.hasReceivedFirstMessage();
-   }
-
    public synchronized TimerSnapshot getDataReceptionTimerSnapshot()
    {
       return dataReceptionTimer.createSnapshot();
-   }
-
-   public void addRobotConfigurationDataReceivedCallback(Runnable callback)
-   {
-      robotConfigurationDataInput.addCallback(message -> callback.run());
-   }
-
-   public void addRobotConfigurationDataReceivedCallback(Consumer<RobotConfigurationData> callback)
-   {
-      robotConfigurationDataInput.addCallback(callback);
    }
 }

@@ -29,9 +29,9 @@ module controller_msgs
          */
         sequence<double, 50> joint_angles;
         /**
-         * Terminal pelvis pose in world frame
+         * Terminal root joint pose in world frame
          */
-        geometry_msgs::msg::dds::Pose pelvis_pose;
+        geometry_msgs::msg::dds::Pose root_joint_pose;
         /**
          * Hash of joint array
          */

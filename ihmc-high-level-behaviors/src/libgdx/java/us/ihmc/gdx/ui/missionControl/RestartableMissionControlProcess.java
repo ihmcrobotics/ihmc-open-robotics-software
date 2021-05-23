@@ -14,11 +14,13 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    volatile boolean started = false;
    volatile boolean stopping = false;
 
-   private final ResettableExceptionHandlingExecutorService executorService;
+   private ResettableExceptionHandlingExecutorService executorService;
 
-   public RestartableMissionControlProcess()
+   public ResettableExceptionHandlingExecutorService getOrCreateExecutor()
    {
-      executorService = MissingThreadTools.newSingleThreadExecutor(getName() + "ManagementThread", true);
+      if (executorService == null)
+         executorService = MissingThreadTools.newSingleThreadExecutor(getName() + "ManagementThread", true);
+      return executorService;
    }
 
    protected abstract void startInternal();
@@ -65,7 +67,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    public void start()
    {
       starting = true;
-      executorService.execute(() ->
+      getOrCreateExecutor().execute(() ->
       {
          startInternal();
          starting = false;
@@ -77,7 +79,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
    {
       started = false;
       stopping = true;
-      executorService.execute(() ->
+      getOrCreateExecutor().execute(() ->
       {
          stopInternal();
          stopping = false;
@@ -121,7 +123,7 @@ public abstract class RestartableMissionControlProcess implements MissionControl
             LogTools.error("{} ran out of time to stop!", getName());
          }
       }
-      if (!executorService.isShutdown())
+      if (executorService != null && !executorService.isShutdown())
          executorService.destroy();
    }
 }

@@ -10,8 +10,8 @@ float64 trajectory_duration
 # Target joint angles of the trajectory
 float64[] joint_angles
 
-# Terminal pelvis pose in world frame
-geometry_msgs/Pose pelvis_pose
+# Terminal root joint pose in world frame
+geometry_msgs/Pose root_joint_pose
 
 # Hash of joint array
 int32 joint_name_hash
