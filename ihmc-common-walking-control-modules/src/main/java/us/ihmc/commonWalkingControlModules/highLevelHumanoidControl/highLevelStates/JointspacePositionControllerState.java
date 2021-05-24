@@ -88,6 +88,19 @@ public class JointspacePositionControllerState extends HighLevelControllerState
       }
    }
 
+   public void holdDesireds(JointDesiredOutputListReadOnly desiredsToHold)
+   {
+      for (int jointIndex = 0; jointIndex < joints.length; jointIndex++)
+      {
+         OneDoFJointBasics joint = joints[jointIndex];
+         OneDoFJointManager manager = jointManagers[jointIndex];
+
+         JointDesiredOutputReadOnly jointData = desiredsToHold.getJointDesiredOutput(joint);
+         if (jointData != null && jointData.hasDesiredPosition())
+            manager.holdPosition(jointData.getDesiredPosition());
+      }
+   }
+
    @Override
    public void onEntry()
    {
@@ -98,7 +111,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
          JointDesiredOutputReadOnly jointData = highLevelControllerOutput.getJointDesiredOutput(joint);
          if (jointData != null && jointData.hasDesiredPosition())
-            manager.holderPosition(jointData.getDesiredPosition());
+            manager.holdPosition(jointData.getDesiredPosition());
          else
             manager.holdCurrent();
       }
@@ -401,15 +414,15 @@ public class JointspacePositionControllerState extends HighLevelControllerState
 
       public void holdCurrent()
       {
-         holderPosition(joint.getQ());
+         holdPosition(joint.getQ());
       }
 
       public void holdCurrentDesired()
       {
-         holderPosition(getJointDesiredPosition());
+         holdPosition(getJointDesiredPosition());
       }
 
-      public void holderPosition(double position)
+      public void holdPosition(double position)
       {
          overrideTrajectory();
          resetLastCommandId();

@@ -133,7 +133,8 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       return new SwingPlanningModule(footstepPlannerParameters,
                                      swingPlannerParameters,
-                                     walkingControllerParameters);
+                                     walkingControllerParameters,
+                                     createFootPolygons());
    }
 
    public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)

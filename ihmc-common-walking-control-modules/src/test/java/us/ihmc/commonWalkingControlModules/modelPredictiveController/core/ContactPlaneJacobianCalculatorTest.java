@@ -11,7 +11,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTestTools;
-import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Random;
 
@@ -91,7 +90,7 @@ public class ContactPlaneJacobianCalculatorTest
       DMatrixRMaj jacobian = new DMatrixRMaj(contactPolygon.getNumberOfVertices() * 3, 4 * 4 * contactPolygon.getNumberOfVertices());
 
       double time = 0.75;
-      ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(1.0, time, omega, 0, 0, contactPlane, jacobian);
+      ContactPlaneJacobianCalculator.computeContactPlaneAccelerationJacobian(1.0, time, omega, 0, 0, contactPlane, jacobian);
 
       DMatrixRMaj jacobianExpected = new DMatrixRMaj(jacobian);
       jacobianExpected.zero();
@@ -141,7 +140,7 @@ public class ContactPlaneJacobianCalculatorTest
          contactPlane.computeContactForceCoefficientMatrix(trajectoryCoefficients,0);
          contactPlane.computeContactForce(omega, time);
 
-         ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(1.0, time, omega, 0, 0, contactPlane, jacobian);
+         ContactPlaneJacobianCalculator.computeContactPlaneAccelerationJacobian(1.0, time, omega, 0, 0, contactPlane, jacobian);
 
          DMatrixRMaj constructedVector = new DMatrixRMaj(3 * contactPlane.getNumberOfContactPoints(), 1);
          DMatrixRMaj expectedVector = new DMatrixRMaj(3 * contactPlane.getNumberOfContactPoints(), 1);

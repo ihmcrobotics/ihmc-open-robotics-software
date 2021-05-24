@@ -52,6 +52,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
 
    private static final double defaultSwingHeight = 0.08;
    private static final double obstacleClearanceSwingHeight = 0.1;
+   private static final double minimumHeightToKeepCustomWaypoint = 0.04;
 
    private final OneWaypointSwingGenerator oneWaypointSwingTrajectoryCalculator;
    private final TwoWaypointSwingGenerator twoWaypointSwingTrajectoryCalculator;
@@ -163,7 +164,7 @@ public class QuadrupedSwingState extends QuadrupedFootState
       
       oneWaypointSwingTrajectoryCalculator = new OneWaypointSwingGenerator(namePrefix + "1", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
                                                                            graphicsListRegistry);
-      twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix + "2", minSwingHeight, maxSwingHeight, defaultSwingHeight, registry,
+      twoWaypointSwingTrajectoryCalculator = new TwoWaypointSwingGenerator(namePrefix + "2", minSwingHeight, maxSwingHeight, defaultSwingHeight, minimumHeightToKeepCustomWaypoint, registry,
                                                                            graphicsListRegistry);
       FramePoint3D dummyPoint = new FramePoint3D();
       dummyPoint.setToNaN();
