@@ -22,6 +22,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Arrays;
 import java.util.List;
@@ -35,6 +36,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
    final BehaviorHelper helper;
+   final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    final StatusLogger statusLogger;
    final RemoteHumanoidRobotInterface robotInterface;
 
@@ -144,7 +146,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       footstepPlanning.initialize(this);
       delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
-      delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Node());
+      delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Helper());
       delayFixedPlanarRegionsSubscription.setEnabled(true);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);
@@ -184,5 +186,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathPlanning.destroy();
       footstepPlanning.destroy();
       reset.destroy();
+   }
+
+   @Override
+   public YoRegistry getYoRegistry()
+   {
+      return yoRegistry;
    }
 }

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -23,9 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXPalletObject;
+import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.GDXPose3DWidget;
@@ -40,11 +39,11 @@ import java.util.*;
 public class GDXEnvironment implements RenderableProvider
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
-   private GDXImGuiBasedUI baseUI;
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
-   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
+   private ImBoolean show3DWidgetTuner = new ImBoolean(false);
+   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget(getClass().getSimpleName());
    private boolean placing = false;
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
@@ -57,10 +56,9 @@ public class GDXEnvironment implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      this.baseUI = baseUI;
       baseUI.getSceneManager().addRenderableProvider(this);
 
-      pose3DWidget.create(baseUI);
+      pose3DWidget.create();
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -70,7 +68,7 @@ public class GDXEnvironment implements RenderableProvider
       {
          if (placing)
          {
-            Line3DReadOnly pickRay = viewInput.getPickRayInWorld(baseUI);
+            Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
             Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
                                                                                         Axis3D.Z,
                                                                                         pickRay.getPoint(),
@@ -88,7 +86,7 @@ public class GDXEnvironment implements RenderableProvider
             pose3DWidget.process3DViewInput(viewInput);
             selectedObject.set(pose3DWidget.getTransform());
 
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                if (intersectedObject != selectedObject)
@@ -106,7 +104,7 @@ public class GDXEnvironment implements RenderableProvider
       {
          if (viewInput.isWindowHovered())
          {
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
 
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -145,12 +143,20 @@ public class GDXEnvironment implements RenderableProvider
       GDXEnvironmentObject objectToPlace = null;
       if (!placing)
       {
+         if (ImGui.button("Place Small Cinder Block Roughed"))
+            objectToPlace = new GDXSmallCinderBlockRoughed();
          if (ImGui.button("Place Medium Cinder Block Roughed"))
             objectToPlace = new GDXMediumCinderBlockRoughed();
+         if (ImGui.button("Place Medium Cinder Block Roughed"))
+            objectToPlace = new GDXLargeCinderBlockRoughed();
          if (ImGui.button("Place Lab Floor"))
             objectToPlace = new GDXLabFloorObject();
          if (ImGui.button("Place Pallet"))
             objectToPlace = new GDXPalletObject();
+         if (ImGui.button("Place Door Only"))
+            objectToPlace = new GDXDoorOnlyObject();
+         if (ImGui.button("Place Door Frame"))
+            objectToPlace = new GDXDoorFrameObject();
       }
       if (objectToPlace != null)
       {
@@ -181,11 +187,11 @@ public class GDXEnvironment implements RenderableProvider
       String fileNameToSave = null;
       for (Path environmentFile : environmentFiles)
       {
-         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile == environmentFile))
+         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile)))
          {
             loadEnvironment(environmentFile);
          }
-         if (selectedEnvironmentFile == environmentFile)
+         if (selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile))
          {
             ImGui.sameLine();
             if (ImGui.button("Save"))
@@ -229,7 +235,9 @@ public class GDXEnvironment implements RenderableProvider
          reindexScripts();
       }
 
-      pose3DWidget.render();
+      ImGui.checkbox("Show 3D Widget Tuner", show3DWidgetTuner);
+      if (show3DWidgetTuner.get())
+         pose3DWidget.renderImGuiTuner();
 
       ImGui.end();
    }

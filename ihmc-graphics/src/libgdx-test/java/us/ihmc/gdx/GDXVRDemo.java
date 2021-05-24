@@ -1,20 +1,20 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class GDXVRDemo
 {
-   private GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-   private GDXVRManager vrManager = new GDXVRManager();
-   private SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();
+   private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
+   private final GDXVRManager vrManager = new GDXVRManager();
+   private final SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();
 
    public GDXVRDemo()
    {
@@ -48,8 +48,7 @@ public class GDXVRDemo
 
          for (RobotSide side : vrManager.getControllers().sides())
          {
-            RigidBodyTransform transformToParent = vrManager.getControllers().get(side).getReferenceFrame().getTransformToParent();
-            GDXTools.toGDX(transformToParent, controllerCoordinateFrames.get(side).transform);
+            vrManager.getControllers().get(side).getPose(ReferenceFrame.getWorldFrame(), controllerCoordinateFrames.get(side).transform);
          }
 
          vrManager.render(sceneManager);
