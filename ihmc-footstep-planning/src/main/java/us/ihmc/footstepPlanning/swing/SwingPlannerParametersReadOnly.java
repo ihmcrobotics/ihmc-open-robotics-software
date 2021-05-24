@@ -240,6 +240,24 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       packet.setMinimumHeightAboveFloorForCollision(getMinimumHeightAboveFloorForCollision());
       packet.setAdditionalSwingTimeIfExpanded(getAdditionalSwingTimeIfExpanded());
 
+      packet.setPercentageExtraSizeXLow(getExtraSizePercentageLow(Axis3D.X));
+      packet.setPercentageExtraSizeXHigh(getExtraSizePercentageHigh(Axis3D.X));
+      packet.setExtraSizeXLow(getExtraSizeLow(Axis3D.X));
+      packet.setExtraSizeXHigh(getExtraSizeHigh(Axis3D.X));
+      packet.setPercentageExtraSizeYLow(getExtraSizePercentageLow(Axis3D.Y));
+      packet.setPercentageExtraSizeYHigh(getExtraSizePercentageHigh(Axis3D.Y));
+      packet.setExtraSizeYLow(getExtraSizeLow(Axis3D.Y));
+      packet.setExtraSizeYHigh(getExtraSizeHigh(Axis3D.Y));
+      packet.setPercentageExtraSizeZLow(getExtraSizePercentageLow(Axis3D.Z));
+      packet.setPercentageExtraSizeZHigh(getExtraSizePercentageHigh(Axis3D.Z));
+      packet.setExtraSizeZLow(getExtraSizeLow(Axis3D.Z));
+      packet.setExtraSizeZHigh(getExtraSizeHigh(Axis3D.Z));
+      packet.setPercentageMaxDisplacementLow(getPercentageLowMaxDisplacement());
+      packet.setPercentageMaxDisplacementHigh(getPercentageHighMaxDisplacement());
+      packet.setMaxDisplacementLow(getMaxDisplacementLow());
+      packet.setMaxDisplacementHigh(getMaxDisplacementHigh());
+      packet.setMotionCorrelationAlpha(getMotionCorrelationAlpha());
+
       return packet;
    }
 }
