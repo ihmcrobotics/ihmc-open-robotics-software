@@ -16,6 +16,7 @@ import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -272,7 +273,7 @@ public class GDXTools
                       gdxAffine.val[Matrix4.M23]);
    }
 
-   public static void toGDX(Point3DBasics euclidPoint, Matrix4 gdxAffine)
+   public static void toGDX(Point3DReadOnly euclidPoint, Matrix4 gdxAffine)
    {
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
    }

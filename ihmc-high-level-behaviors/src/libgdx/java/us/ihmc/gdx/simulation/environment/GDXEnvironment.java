@@ -24,9 +24,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXLabFloorObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXPalletObject;
+import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.GDXPose3DWidget;
@@ -145,12 +143,20 @@ public class GDXEnvironment implements RenderableProvider
       GDXEnvironmentObject objectToPlace = null;
       if (!placing)
       {
+         if (ImGui.button("Place Small Cinder Block Roughed"))
+            objectToPlace = new GDXSmallCinderBlockRoughed();
          if (ImGui.button("Place Medium Cinder Block Roughed"))
             objectToPlace = new GDXMediumCinderBlockRoughed();
+         if (ImGui.button("Place Medium Cinder Block Roughed"))
+            objectToPlace = new GDXLargeCinderBlockRoughed();
          if (ImGui.button("Place Lab Floor"))
             objectToPlace = new GDXLabFloorObject();
          if (ImGui.button("Place Pallet"))
             objectToPlace = new GDXPalletObject();
+         if (ImGui.button("Place Door Only"))
+            objectToPlace = new GDXDoorOnlyObject();
+         if (ImGui.button("Place Door Frame"))
+            objectToPlace = new GDXDoorFrameObject();
       }
       if (objectToPlace != null)
       {
@@ -181,11 +187,11 @@ public class GDXEnvironment implements RenderableProvider
       String fileNameToSave = null;
       for (Path environmentFile : environmentFiles)
       {
-         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile == environmentFile))
+         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile.equals(environmentFile)))
          {
             loadEnvironment(environmentFile);
          }
-         if (selectedEnvironmentFile == environmentFile)
+         if (selectedEnvironmentFile.equals(environmentFile))
          {
             ImGui.sameLine();
             if (ImGui.button("Save"))
