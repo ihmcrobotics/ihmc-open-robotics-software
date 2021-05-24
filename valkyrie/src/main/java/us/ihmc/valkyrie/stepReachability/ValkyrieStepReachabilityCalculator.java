@@ -78,7 +78,7 @@ import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMe
 import static us.ihmc.robotics.Assert.assertTrue;
 
 /**
- * Pattern matched off of HumanoidKinematicsToolboxController. Check there for reference if needed.
+ * Pattern matched off of HumanoidKinematicsToolboxControllerTest. Check there for reference if needed.
  */
 public class ValkyrieStepReachabilityCalculator
 {
@@ -179,7 +179,8 @@ public class ValkyrieStepReachabilityCalculator
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
             rightFoot.getPosition().set(0.0, -0.25, 0.0);
-            testStep(leftFoot, rightFoot);
+            testStep(leftFoot, rightFoot, 0.0);
+            break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
       }
@@ -214,6 +215,8 @@ public class ValkyrieStepReachabilityCalculator
          for (RobotSide robotSide : RobotSide.values)
          {
             randomizeArmJointPositions(random, robotSide, randomizedFullRobotModel, 0.4);
+
+            // change to holdRigidBodyAtSomePose
             KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(randomizedFullRobotModel.getHand(robotSide));
             message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
             message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -236,6 +239,9 @@ public class ValkyrieStepReachabilityCalculator
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
          toolboxController.updateRobotConfigurationData(robotConfigurationData);
+
+         // holds the feet at current configuration
+         // get rid and replace with rigid body message
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 150;
@@ -251,9 +257,17 @@ public class ValkyrieStepReachabilityCalculator
       }
    }
 
-   private void testStep(FramePose3D leftFoot, FramePose3D rightFoot)
+   private boolean testStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold)
    {
       // TODO
+
+      // one objective per foot
+      // put CoM in the middle of the feet at some nominal height
+      // either joint angles or rigid body message for the arms
+
+      // return whether solution quality is above some threshold
+
+      return false;
    }
 
    private void runKinematicsToolboxController(int numberOfIterations) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
