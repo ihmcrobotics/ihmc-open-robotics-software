@@ -11,8 +11,8 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParametersReadOnly;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredBehaviorReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -125,9 +125,9 @@ public class JointSettingsHelper
 
       if (!jointsWithoutParameters.isEmpty())
       {
-         PrintTools.warn("In State " + stateName + "\n"
-               + "Got joints without acceleration integration parameters.\n"
-               + "Will use default values for: " + jointsWithoutParameters);
+         LogTools.warn("In State " + stateName + "\n"
+                       + "Got joints without acceleration integration parameters.\n"
+                       + "Will use default values for: " + jointsWithoutParameters);
       }
       if (!jointsWithoutBehaviors.isEmpty())
       {
