@@ -123,6 +123,8 @@ public class HumanoidDynamicsSimulation
       SimulationConstructionSet scs = avatarSimulation.getSimulationConstructionSet();
       if (scs.getGUI() != null )
          scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
+      scs.skipLoadingDefaultConfiguration();
+      scs.setupGraph("t");
 
       avatarSimulation.start();
       realtimeROS2Node.spin();  // TODO Should probably happen in start()
