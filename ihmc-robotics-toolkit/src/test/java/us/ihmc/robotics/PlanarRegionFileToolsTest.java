@@ -3,6 +3,7 @@ package us.ihmc.robotics;
 import org.junit.jupiter.api.Test;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,15 +11,18 @@ import java.util.Random;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class PlanarRegionFileToolsTest {
+public class PlanarRegionFileToolsTest
+{
 
    private static final Random rand = new Random();
    private static Path tempDirectory = null;
 
-   private static Path getTestDirectory() {
+   private static Path getTestDirectory()
+   {
       Path dir = null;
 
-      try {
+      try
+      {
          if (tempDirectory == null)
             tempDirectory = Files.createTempDirectory(PlanarRegionFileToolsTest.class.getSimpleName() + "_");
 
@@ -31,7 +35,8 @@ public class PlanarRegionFileToolsTest {
 
          System.out.println("Test taking place in directory " + dir.toAbsolutePath());
       }
-      catch (IOException ex) {
+      catch (IOException ex)
+      {
          ex.printStackTrace();
          fail("The test could not be performed, as getTestDirectory() threw an IOException.");
       }
@@ -40,7 +45,8 @@ public class PlanarRegionFileToolsTest {
    }
 
    @Test
-   void exportAsFolderAndImportTest() {
+   public void exportAsFolderAndImportTest()
+   {
       Path path = getTestDirectory();
       PlanarRegionsList list = PlanarRegionsList.generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(rand, 5, 5, 5, 5);
 
@@ -51,7 +57,8 @@ public class PlanarRegionFileToolsTest {
    }
 
    @Test
-   void exportAsFileAndImportTest() {
+   public void exportAsFileAndImportTest()
+   {
       Path path = getTestDirectory().resolve("regions.prl");
       PlanarRegionsList list = PlanarRegionsList.generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(rand, 5, 5, 5, 5);
 
@@ -62,7 +69,30 @@ public class PlanarRegionFileToolsTest {
    }
 
    @Test
-   void isPlanarRegionDirectoryTest() {
+   public void exportToStreamAndImportTest()
+   {
+      Path path = getTestDirectory().resolve("regions.prl");
+      PlanarRegionsList list = PlanarRegionsList.generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(rand, 5, 5, 5, 5);
+
+      try
+      {
+         FileOutputStream ostream = new FileOutputStream(path.toFile());
+         PlanarRegionFileTools.exportPlanarRegionDataToStream(ostream, list);
+         ostream.close();
+      }
+      catch (IOException ex)
+      {
+         fail("IOException thrown - " + ex.getMessage());
+      }
+
+      PlanarRegionsList test = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
+
+      assertEquals(list, test);
+   }
+
+   @Test
+   public void isPlanarRegionDirectoryTest()
+   {
       Path path = getTestDirectory();
       PlanarRegionsList list = PlanarRegionsList.generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(rand, 1, 5, 5, 5);
 
@@ -74,7 +104,8 @@ public class PlanarRegionFileToolsTest {
    }
 
    @Test
-   void isPlanarRegionFileTest() {
+   public void isPlanarRegionFileTest()
+   {
       Path path = getTestDirectory().resolve("regions.prl");
       PlanarRegionsList list = PlanarRegionsList.generatePlanarRegionsListFromRandomPolygonsWithRandomTransform(rand, 1, 5, 5, 5);
 
