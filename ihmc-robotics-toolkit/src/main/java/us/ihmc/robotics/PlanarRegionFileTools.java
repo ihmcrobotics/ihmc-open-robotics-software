@@ -1,12 +1,6 @@
 package us.ihmc.robotics;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -14,11 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -83,14 +73,40 @@ public class PlanarRegionFileTools
       }
    }
 
+   /**
+    * Creates a single file with the given path and export the data contained in
+    * {@code planarRegionData}.
+    *
+    * @param filePath the path of the file that will contain the exported data.
+    * @param planarRegionData the planar regions to be exported. Not modified.
+    * @return whether the exportation succeeded or not.
+    */
+   public static boolean exportPlanarRegionDataAsFile(Path filePath, PlanarRegionsList planarRegionData)
+   {
+      try
+      {
+         Files.createFile(filePath);
+         writePlanarRegionsDataAsFile(filePath, planarRegionData);
+         return true;
+      }
+      catch (IOException e)
+      {
+         e.printStackTrace();
+         return false;
+      }
+   }
+
    public static boolean isPlanarRegionFile(File file)
    {
-      if (file == null || !file.exists() || !file.isDirectory())
+      if (file == null || !file.exists())
          return false;
 
       try
       {
-         return importPlanarRegionDataInternal(filename -> new File(file, filename)) != null;
+         if (file.isDirectory())
+            return importPlanarRegionDataInternal(filename -> new File(file, filename)) != null;
+         else
+            return importPlanarRegionDataFromFileInternal(file) != null;
       }
       catch (IOException e)
       {
@@ -102,16 +118,20 @@ public class PlanarRegionFileTools
     * Load from the given data folder planar region data that has been previously exported via
     * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
     *
-    * @param dataFolder the data folder containing the files with the planar region data.
+    * @param data the data folder or file containing the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
     */
-   public static PlanarRegionsList importPlanarRegionData(File dataFolder)
+   public static PlanarRegionsList importPlanarRegionData(File data)
    {
       try
       {
-         PlanarRegionsList loadedRegions = importPlanarRegionDataInternal(filename -> new File(dataFolder, filename));
+         PlanarRegionsList loadedRegions;
+         if (data.isDirectory())
+            loadedRegions = importPlanarRegionDataInternal(filename -> new File(data, filename));
+         else
+            loadedRegions = importPlanarRegionDataFromFileInternal(data);
          if (loadedRegions == null)
-            LogTools.error("Could not load the file: " + dataFolder.getName());
+            LogTools.error("Could not load the file: " + data.getName());
          return loadedRegions;
       }
       catch (IOException e)
@@ -196,7 +216,7 @@ public class PlanarRegionFileTools
     * Load from the given data folder planar region data that has been previously exported via
     * {@link #exportPlanarRegionData(Path, PlanarRegionsList)}.
     *
-    * @param dataFolder the data folder containing the files with the planar region data.
+    * @param dataFolderRelativePath the data folder containing the files with the planar region data.
     * @return the planar regions if succeeded, {@code null} otherwise.
     */
    public static PlanarRegionsList importPlanarRegionData(Class<?> loadingClass, Path dataFolderRelativePath)
@@ -255,6 +275,53 @@ public class PlanarRegionFileTools
       }
 
       bufferedReader.close();
+
+      return new PlanarRegionsList(planarRegions);
+   }
+
+   private static PlanarRegionsList importPlanarRegionDataFromFileInternal(File file) throws IOException {
+      Scanner scan = new Scanner(file);
+      List<PlanarRegion> planarRegions = new ArrayList<>();
+
+      scan.useDelimiter("\\*\n");
+
+      BufferedReader headerBufferedReader = new BufferedReader(new StringReader(scan.next()));
+
+      HashMap<String, String> regionStrings = new HashMap<>();
+
+      while (scan.hasNext()) {
+         scan.nextLine(); //Skip past delimiter
+         regionStrings.put(scan.nextLine(), scan.next());
+      }
+
+      while (true)
+      {
+         Point3D origin = new Point3D();
+         Vector3D normal = new Vector3D();
+         MutableInt regionId = new MutableInt();
+         MutableInt concaveHullSize = new MutableInt();
+         TIntArrayList convexPolygonsSize = new TIntArrayList();
+
+         String regionName = readHeaderLine(headerBufferedReader, origin, normal, regionId, concaveHullSize, convexPolygonsSize);
+
+         if (regionName == null)
+            break;
+
+         BufferedReader regionBufferedReader = new BufferedReader(new StringReader(regionStrings.get(regionName)));
+         PlanarRegion loadedRegion = loadPlanarRegionVertices(regionBufferedReader, concaveHullSize.intValue(), convexPolygonsSize.toArray(),
+                                                              regionId.intValue(), origin, normal);
+         regionBufferedReader.close();
+
+         if (loadedRegion != null)
+            planarRegions.add(loadedRegion);
+         else
+         {
+            headerBufferedReader.close();
+            return null;
+         }
+      }
+
+      headerBufferedReader.close();
 
       return new PlanarRegionsList(planarRegions);
    }
@@ -362,11 +429,43 @@ public class PlanarRegionFileTools
       return "region" + regionIdToPack.toString() + "_" + regionIndex;
    }
 
+   private static void writePlanarRegionsDataAsFile(Path filePath, PlanarRegionsList planarRegionData) throws IOException {
+      FileWriter fw = new FileWriter(filePath.toFile());
+
+      HashMap<Integer, PlanarRegion> writeQueue = writePlanarRegionHeader(fw, planarRegionData);
+
+      for (Map.Entry<Integer, PlanarRegion> entry : writeQueue.entrySet()) {
+         int regionIndex = entry.getKey();
+         PlanarRegion region = entry.getValue();
+
+         fw.write("*\nregion" + region.getRegionId() + "_" + regionIndex + "\n"); //Separate entries
+         writePlanarRegionVertices(fw, region);
+      }
+
+      fw.close();
+   }
+
    private static void writePlanarRegionsData(Path folderPath, PlanarRegionsList planarRegionData) throws IOException
    {
       File header = new File(folderPath.toFile(), "header.txt");
-      FileWriter fileWriter = new FileWriter(header);
 
+      FileWriter headerWriter = new FileWriter(header);
+      HashMap<Integer, PlanarRegion> writeQueue = writePlanarRegionHeader(headerWriter, planarRegionData);
+      headerWriter.close();
+
+      for (Map.Entry<Integer, PlanarRegion> entry : writeQueue.entrySet()) {
+         int regionIndex = entry.getKey();
+         PlanarRegion region = entry.getValue();
+
+         File regionFile = new File(folderPath.toFile(), "region" + region.getRegionId() + "_" + regionIndex);
+         FileWriter fileWriter = new FileWriter(regionFile);
+         writePlanarRegionVertices(fileWriter, region);
+         fileWriter.close();
+      }
+   }
+
+   private static HashMap<Integer, PlanarRegion> writePlanarRegionHeader(FileWriter fw, PlanarRegionsList planarRegionData) throws IOException {
+      HashMap<Integer, PlanarRegion> writeQueue = new HashMap<>();
       Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
 
       for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
@@ -387,26 +486,23 @@ public class PlanarRegionFileTools
          regionIdToIndex.put(regionId, regionIndex);
          regionIndex.increment();
 
-         fileWriter.write("regionId: " + Integer.toString(regionId));
-         fileWriter.write(", index: " + Integer.toString(regionIndex.getValue().intValue()));
-         fileWriter.write(", origin: " + origin.getX() + ", " + origin.getY() + ", " + origin.getZ());
-         fileWriter.write(", normal: " + normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
-         fileWriter.write(", concave hull size: " + region.getConcaveHullSize());
-         fileWriter.write(", number of convex polygons: " + numberOfConvexPolygons + ", " + Arrays.toString(convexPolygonsSizes));
+         fw.write("regionId: " + Integer.toString(regionId));
+         fw.write(", index: " + Integer.toString(regionIndex.getValue().intValue()));
+         fw.write(", origin: " + origin.getX() + ", " + origin.getY() + ", " + origin.getZ());
+         fw.write(", normal: " + normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
+         fw.write(", concave hull size: " + region.getConcaveHullSize());
+         fw.write(", number of convex polygons: " + numberOfConvexPolygons + ", " + Arrays.toString(convexPolygonsSizes));
 
-         fileWriter.write("\n");
+         fw.write("\n");
 
-         writePlanarRegionVertices(folderPath, region, regionIndex.intValue());
+         writeQueue.put(regionIndex.getValue(), region);
       }
 
-      fileWriter.close();
+      return writeQueue;
    }
 
-   private static void writePlanarRegionVertices(Path folderPath, PlanarRegion region, int regionIndex) throws IOException
+   private static void writePlanarRegionVertices(FileWriter fileWriter, PlanarRegion region) throws IOException
    {
-      File regionFile = new File(folderPath.toFile(), "region" + region.getRegionId() + "_" + regionIndex);
-      FileWriter fileWriter = new FileWriter(regionFile);
-
       for (Point2D vertex : region.getConcaveHull())
       {
          fileWriter.write(vertex.getX() + ", " + vertex.getY() + "\n");
@@ -422,8 +518,6 @@ public class PlanarRegionFileTools
             fileWriter.write(vertex.getX() + ", " + vertex.getY() + "\n");
          }
       }
-
-      fileWriter.close();
    }
 
    private static PlanarRegion loadPlanarRegionVertices(BufferedReader regionFile, int concaveHullSize, int[] convexPolygonsSize, int regionId, Point3D origin,
