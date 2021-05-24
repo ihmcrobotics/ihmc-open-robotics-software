@@ -10,16 +10,19 @@ public class PlanarRegionsListBuffer
    private final HashMap<Long, PlanarRegionsList> buffer;
    private long index = 0;
 
-   public PlanarRegionsListBuffer() {
+   public PlanarRegionsListBuffer()
+   {
       this(Long.MAX_VALUE);
    }
 
-   public PlanarRegionsListBuffer(long buffer_length) {
+   public PlanarRegionsListBuffer(long buffer_length)
+   {
       this.buffer_length = buffer_length;
       this.buffer = new HashMap<>();
    }
 
-   public void putAndTick(PlanarRegionsList list) {
+   public void putAndTick(PlanarRegionsList list)
+   {
       buffer.put(index, list);
 
       if (index > buffer_length)
@@ -28,15 +31,18 @@ public class PlanarRegionsListBuffer
       index++;
    }
 
-   public PlanarRegionsList get(long index) {
+   public PlanarRegionsList get(long index)
+   {
       return buffer.get(index);
    }
 
-   public long getCurrentIndex() {
+   public long getCurrentIndex()
+   {
       return index;
    }
 
-   public long getBufferLength() {
+   public long getBufferLength()
+   {
       return buffer_length;
    }
 }
