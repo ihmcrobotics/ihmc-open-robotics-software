@@ -12,7 +12,6 @@ import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -24,13 +23,12 @@ import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
-import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRDevice;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.VRDeviceAdapter;
+import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.nio.file.FileVisitResult;
@@ -38,7 +36,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXEnvironmentBuilderPanel implements RenderableProvider
 {
@@ -47,9 +45,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final ImString saveString = new ImString("terrain.yml", 100);
 
    private GDXVRManager vrManager;
-
-   private final FramePose3D tempFramePose = new FramePose3D();
-   private final RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
 
    private GDXEnvironmentObject modelBeingPlaced;
    private final GDXModelInput modelInput = new GDXModelInput();
@@ -65,7 +60,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    {
       vrManager = baseUI.getVRManager();
 
-      modelInput.setBaseUI(baseUI);
       modelInput.create();
 
 //      pose3DWidget.create(baseUI);
@@ -74,10 +68,10 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       vrManager.create(() ->
       {
-         vrManager.getContext().addListener(new VRDeviceAdapter()
+         vrManager.getContext().addListener(new GDXVRDeviceAdapter()
          {
             @Override
-            public void buttonPressed(GDXVRContext.VRDevice device, int button)
+            public void buttonPressed(GDXVRDevice device, int button)
             {
                LogTools.info("Pressed: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)
@@ -92,7 +86,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
             }
 
             @Override
-            public void buttonReleased(GDXVRContext.VRDevice device, int button)
+            public void buttonReleased(GDXVRDevice device, int button)
             {
                LogTools.info("Released: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.RIGHT) && button == SteamVR_Trigger)
@@ -117,11 +111,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    {
       if (GDXVRManager.isVREnabled() && modelBeingPlaced != null)
       {
-         PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.RIGHT).getReferenceFrame();
-         tempFramePose.setToZero(controllerFrame);
-         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, modelBeingPlaced.getRealisticModelInstance().transform);
+         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(), modelBeingPlaced.getRealisticModelInstance().transform);
       }
    }
 

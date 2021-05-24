@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;

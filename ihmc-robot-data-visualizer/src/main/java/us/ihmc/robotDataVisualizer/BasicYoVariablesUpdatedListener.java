@@ -17,7 +17,6 @@ public class BasicYoVariablesUpdatedListener implements YoVariablesUpdatedListen
 
    public BasicYoVariablesUpdatedListener(YoRegistry parentRegistry)
    {
-
       this.parentRegistry = parentRegistry;
    }
 

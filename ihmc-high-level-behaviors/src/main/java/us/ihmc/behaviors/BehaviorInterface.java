@@ -1,11 +1,26 @@
 package us.ihmc.behaviors;
 
+import us.ihmc.yoVariables.registry.YoRegistry;
+
 public interface BehaviorInterface
 {
-   void setEnabled(boolean enabled);
+//   private final BehaviorHelper helper;
+//
+//   public BehaviorInterface(BehaviorHelper helper)
+//   {
+//      this.helper = helper;
+//   }
 
-   default void destroy()
+   public abstract void setEnabled(boolean enabled);
+
+   public default YoRegistry getYoRegistry()
    {
+      return null;
+   }
 
+   public default void destroy()
+   {
+      // TODO: Destroy behavior helper
+      // helper.destroy();
    }
 }

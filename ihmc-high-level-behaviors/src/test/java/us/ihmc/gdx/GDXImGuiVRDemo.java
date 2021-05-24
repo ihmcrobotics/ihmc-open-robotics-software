@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.flag.ImGuiDir;
 import imgui.internal.ImGui;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -73,7 +74,6 @@ public class GDXImGuiVRDemo
 
    public static void main(String[] args)
    {
-      System.setProperty("enable.vr", "true");
       new GDXImGuiVRDemo();
    }
 }
