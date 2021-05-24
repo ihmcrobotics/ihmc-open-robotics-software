@@ -187,11 +187,11 @@ public class GDXEnvironment implements RenderableProvider
       String fileNameToSave = null;
       for (Path environmentFile : environmentFiles)
       {
-         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile.equals(environmentFile)))
+         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile)))
          {
             loadEnvironment(environmentFile);
          }
-         if (selectedEnvironmentFile.equals(environmentFile))
+         if (selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile))
          {
             ImGui.sameLine();
             if (ImGui.button("Save"))
