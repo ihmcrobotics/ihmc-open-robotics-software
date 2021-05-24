@@ -387,7 +387,7 @@ public class RobotDescriptionFromSDFLoader
       if (doNotSimulateJoint)
          scsJoint.setIsDynamic(false);
 
-      if(!Double.isNaN(transparency))
+      if(!Double.isNaN(transparency) && joint.getChildLinkHolder().getVisuals() != null)
          joint.getChildLinkHolder().getVisuals().forEach(visual -> visual.setTransparency(Double.toString(transparency)));
       scsJoint.setLink(createLinkDescription(joint.getChildLinkHolder(), visualTransform, useCollisionMeshes));
       scsParentJoint.addJoint(scsJoint);
