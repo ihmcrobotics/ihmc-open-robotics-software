@@ -1,4 +1,4 @@
-package us.ihmc.avatar.kinematicsSimulation;
+package us.ihmc.avatar.logging;
 
 import com.google.common.collect.Lists;
 import us.ihmc.commons.ContinuousIntegrationTools;
