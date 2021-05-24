@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.trajectories;
 
-import java.util.ArrayList;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -28,10 +26,12 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import static us.ihmc.humanoidRobotics.footstep.Footstep.maxNumberOfSwingWaypoints;
+
 public class TwoWaypointSwingGenerator implements SwingGenerator
 {
    private static final int maxTimeIterations = -1; // setting this negative activates continuous updating
-   private static final int numberWaypoints = 2;
+   private static final int defaultNumberOfWaypoints = 2;
    private static final double[] defaultWaypointProportions = new double[] {0.15, 0.85};
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -47,6 +47,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final YoDouble minSwingHeight;
    private final YoDouble maxSwingHeight;
    private final YoDouble defaultSwingHeight;
+   private final YoDouble customWaypointAngleThreshold;
 
    private final double[] waypointProportions = new double[2];
 
@@ -57,8 +58,11 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    private final FrameVector3D initialVelocity = new FrameVector3D();
    private final FramePoint3D finalPosition = new FramePoint3D();
    private final FrameVector3D finalVelocity = new FrameVector3D();
-   private final ArrayList<FramePoint3D> waypointPositions = new ArrayList<>();
+   private final RecyclingArrayList<FramePoint3D> waypointPositions;
    private final FramePoint3D stanceFootPosition = new FramePoint3D();
+
+   private final FrameVector3D interWaypointDisplacement = new FrameVector3D();
+   private final FrameVector3D startToWaypointDisplacement = new FrameVector3D();
 
    private final FrameVector3D desiredVelocity = new FrameVector3D();
    private final FrameVector3D desiredAcceleration = new FrameVector3D();
@@ -85,20 +89,20 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
 
    private boolean visualize = true;
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight,
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double customWaypointAngleThreshold,
                                     YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, worldFrame, parentRegistry, yoGraphicsListRegistry);
+      this(namePrefix, minSwingHeight, maxSwingHeight, defaultSwingHeight, customWaypointAngleThreshold, worldFrame, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, ReferenceFrame trajectoryFrame,
-                                    YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public TwoWaypointSwingGenerator(String namePrefix, double minSwingHeight, double maxSwingHeight, double defaultSwingHeight, double customWaypointAngleThreshold,
+                                    ReferenceFrame trajectoryFrame, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
 
       this.trajectoryFrame = trajectoryFrame;
-
+      waypointPositions = new RecyclingArrayList<>(maxNumberOfSwingWaypoints, this::createNewWaypoint);
       tempWaypointVelocity = new FrameVector3D(trajectoryFrame);
 
       stepTime = new YoDouble(namePrefix + "StepTime", registry);
@@ -119,16 +123,21 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       this.minDistanceToStance = new YoDouble(namePrefix + "MinDistanceToStance", registry);
       this.minDistanceToStance.set(Double.NEGATIVE_INFINITY);
 
-      for (int i = 0; i < numberWaypoints; i++)
+      this.customWaypointAngleThreshold = new YoDouble(namePrefix + "customWaypointAngleThreshold", registry);
+      this.customWaypointAngleThreshold.set(customWaypointAngleThreshold);
+
+      for (int i = 0; i < defaultNumberOfWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
 
-      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints, trajectoryFrame);
-
-      for (int i = 0; i < numberWaypoints; i++)
-         waypointPositions.add(new FramePoint3D(trajectoryFrame));
+      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix,
+                                                            registry,
+                                                            yoGraphicsListRegistry,
+                                                            maxTimeIterations,
+                                                            maxNumberOfSwingWaypoints,
+                                                            trajectoryFrame);
 
       if (yoGraphicsListRegistry != null)
-         waypointViz = new BagOfBalls(numberWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
+         waypointViz = new BagOfBalls(maxNumberOfSwingWaypoints, 0.02, namePrefix + "Waypoints", YoAppearance.White(), registry, yoGraphicsListRegistry);
       else
          waypointViz = null;
 
@@ -188,7 +197,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
          LogTools.warn("Received no waypoints but trajectory type is custom. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
       }
-      else if (trajectoryType == TrajectoryType.CUSTOM && waypoints.size() != numberWaypoints)
+      else if (trajectoryType == TrajectoryType.CUSTOM && (waypoints.isEmpty() || waypoints.size() > maxNumberOfSwingWaypoints))
       {
          LogTools.warn("Received unexpected amount of waypoints. Using default trajectory.");
          this.trajectoryType = TrajectoryType.DEFAULT;
@@ -201,11 +210,50 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       if (this.trajectoryType != TrajectoryType.CUSTOM)
          return;
 
-      for (int i = 0; i < numberWaypoints; i++)
+      int initialWaypointIndex = computeStartingWaypointIndex(waypoints);
+      waypointPositions.clear();
+      for (int i = initialWaypointIndex; i < waypoints.size(); i++)
       {
-         waypointPositions.get(i).setIncludingFrame(waypoints.get(i));
-         waypointPositions.get(i).changeFrame(trajectoryFrame);
+         FramePoint3D waypoint = waypoints.get(i);
+         FramePoint3D waypointToSet = waypointPositions.add();
+         waypointToSet.setIncludingFrame(waypoint);
+         waypointToSet.changeFrame(trajectoryFrame);
       }
+   }
+
+   private int computeStartingWaypointIndex(RecyclingArrayList<FramePoint3D> waypoints)
+   {
+      // Don't restrict if two or less waypoints
+      if (waypoints.size() <= 2)
+      {
+         return 0;
+      }
+
+      initialPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      finalPosition.changeFrame(ReferenceFrame.getWorldFrame());
+      double minimumDotProduct = Math.cos(customWaypointAngleThreshold.getValue());
+
+      for (int i = 0; i < waypoints.size(); i++)
+      {
+         FramePoint3D waypoint = waypoints.get(i);
+         FramePoint3D nextWaypoint = (i == waypoints.size() - 1) ? finalPosition : waypoints.get(i + 1);
+
+         startToWaypointDisplacement.sub(waypoint, initialPosition);
+         interWaypointDisplacement.sub(nextWaypoint, waypoint);
+
+         startToWaypointDisplacement.normalize();
+         interWaypointDisplacement.normalize();
+
+         double dotProduct = startToWaypointDisplacement.dot(interWaypointDisplacement);
+         if (dotProduct > minimumDotProduct)
+         {
+            return i;
+         }
+      }
+
+      // If this check fails for all waypoints, just use the whole trajectory. It might have a jerky start but probably shouldn't be aborted.
+      // If that happens customWaypointAngleThreshold should be increased.
+      return 0;
    }
 
    @Override
@@ -258,8 +306,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       switch (trajectoryType)
       {
       case OBSTACLE_CLEARANCE:
-         for (int i = 0; i < numberWaypoints; i++)
+         waypointPositions.clear();
+         for (int i = 0; i < defaultNumberOfWaypoints; i++)
          {
+            waypointPositions.add();
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
             waypointPositions.get(i).setZ(maxStepZ + swingHeight.getDoubleValue());
 
@@ -270,8 +320,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
          }
          break;
       case DEFAULT:
-         for (int i = 0; i < numberWaypoints; i++)
+         waypointPositions.clear();
+         for (int i = 0; i < defaultNumberOfWaypoints; i++)
          {
+            waypointPositions.add();
             waypointPositions.get(i).interpolate(initialPosition, finalPosition, waypointProportions[i]);
             waypointPositions.get(i).addZ(swingHeight.getDoubleValue());
             if (needToAdjustedSwingForSelfCollision.getBooleanValue())
@@ -292,7 +344,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       else
          maxWaypointZ = Math.max(stanceFootPosition.getZ() + maxSwingHeight.getDoubleValue(), maxStepZ + minSwingHeight.getDoubleValue());
 
-      for (int i = 0; i < numberWaypoints; i++)
+      for (int i = 0; i < waypointPositions.size(); i++)
       {
          waypointPositions.get(i).setZ(Math.min(waypointPositions.get(i).getZ(), maxWaypointZ));
       }
@@ -417,7 +469,8 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
          return;
 
       tempPoint3D.setToZero(worldFrame);
-      for (int i = 0; i < numberWaypoints; i++)
+      waypointViz.reset();
+      for (int i = 0; i < waypointPositions.size(); i++)
       {
          tempPoint3D.setMatchingFrame(waypointPositions.get(i));
          waypointViz.setBall(tempPoint3D, i);
@@ -492,7 +545,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    {
       waypointViz.hideAll();
       tempPoint3D.setToNaN();
-      for (int i = 0; i < numberWaypoints; i++)
+      for (int i = 0; i < waypointPositions.size(); i++)
          waypointViz.setBall(tempPoint3D, i);
       trajectory.hideVisualization();
    }
@@ -505,7 +558,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    @Override
    public int getNumberOfWaypoints()
    {
-      return numberWaypoints;
+      return waypointPositions.size();
    }
 
    @Override
@@ -591,5 +644,10 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
    public double getWaypointTime(int waypointIndex)
    {
       return stepTime.getDoubleValue() * trajectory.getWaypointTime(waypointIndex);
+   }
+
+   private FramePoint3D createNewWaypoint()
+   {
+      return new FramePoint3D(trajectoryFrame);
    }
 }
