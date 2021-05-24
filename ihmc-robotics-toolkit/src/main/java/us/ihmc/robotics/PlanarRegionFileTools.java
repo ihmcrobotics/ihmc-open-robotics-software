@@ -491,7 +491,7 @@ public class PlanarRegionFileTools
          writePlanarRegionVertices(ow, region);
       }
 
-      ow.close();
+      ow.flush();
    }
 
    private static void writePlanarRegionsData(Path folderPath, PlanarRegionsList planarRegionData) throws IOException
