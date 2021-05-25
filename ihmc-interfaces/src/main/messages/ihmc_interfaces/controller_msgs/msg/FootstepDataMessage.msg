@@ -44,13 +44,13 @@ float64[<=2] custom_waypoint_proportions
 # This is a convenient way to shape the trajectory of the swing.
 # If full control over the swing trajectory is desired use the trajectory type TRAJECTORY_TYPE_WAYPOINTS instead.
 # The position waypoints are expected in the trajectory frame.
-geometry_msgs/Point[<=10] custom_position_waypoints
+geometry_msgs/Point[<=12] custom_position_waypoints
 # In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, swing waypoints can be specified here.
 # The waypoints do not include the start point (which is set to the current foot state at lift-off) and the touch down point
 # (which is specified by the location and orientation fields).
 # All waypoints are for the sole frame and expressed in the trajectory frame.
 # The maximum number of points can be found in the Footstep class.
-SE3TrajectoryPointMessage[<=10] swing_trajectory
+SE3TrajectoryPointMessage[<=12] swing_trajectory
 # In case the trajectory type is set to TRAJECTORY_TYPE_WAYPOINTS, this value can be used to specify the trajectory blend duration in seconds.
 # If greater than zero, waypoints that fall within the valid time window (beginning at the start of the swing phase and spanning the desired blend duration)
 # will be adjusted to account for the initial error between the actual and expected position and orientation of the swing foot.

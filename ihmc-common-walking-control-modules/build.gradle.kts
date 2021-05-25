@@ -39,7 +39,7 @@ mainDependencies {
 }
 
 testDependencies {
-
+   api(ihmc.sourceSetProject("visualizers"))
    api("us.ihmc:ihmc-commons-testing:0.30.4")
    api("us.ihmc:simulation-construction-set-tools-test:source")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")

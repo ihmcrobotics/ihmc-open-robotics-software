@@ -25,9 +25,9 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
             */
    public us.ihmc.idl.IDLSequence.Double  joint_angles_;
    /**
-            * Terminal pelvis pose in world frame
+            * Terminal root joint pose in world frame
             */
-   public us.ihmc.euclid.geometry.Pose3D pelvis_pose_;
+   public us.ihmc.euclid.geometry.Pose3D root_joint_pose_;
    /**
             * Hash of joint array
             */
@@ -37,7 +37,7 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
    {
       joint_angles_ = new us.ihmc.idl.IDLSequence.Double (50, "type_6");
 
-      pelvis_pose_ = new us.ihmc.euclid.geometry.Pose3D();
+      root_joint_pose_ = new us.ihmc.euclid.geometry.Pose3D();
    }
 
    public WholeBodyMultiContactTrajectoryMessage(WholeBodyMultiContactTrajectoryMessage other)
@@ -53,7 +53,7 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
       trajectory_duration_ = other.trajectory_duration_;
 
       joint_angles_.set(other.joint_angles_);
-      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pelvis_pose_, pelvis_pose_);
+      geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.root_joint_pose_, root_joint_pose_);
       joint_name_hash_ = other.joint_name_hash_;
 
    }
@@ -99,11 +99,11 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
 
 
    /**
-            * Terminal pelvis pose in world frame
+            * Terminal root joint pose in world frame
             */
-   public us.ihmc.euclid.geometry.Pose3D getPelvisPose()
+   public us.ihmc.euclid.geometry.Pose3D getRootJointPose()
    {
-      return pelvis_pose_;
+      return root_joint_pose_;
    }
 
    /**
@@ -145,7 +145,7 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsDoubleSequence(this.joint_angles_, other.joint_angles_, epsilon)) return false;
 
-      if (!this.pelvis_pose_.epsilonEquals(other.pelvis_pose_, epsilon)) return false;
+      if (!this.root_joint_pose_.epsilonEquals(other.root_joint_pose_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.joint_name_hash_, other.joint_name_hash_, epsilon)) return false;
 
 
@@ -166,7 +166,7 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
       if(this.trajectory_duration_ != otherMyClass.trajectory_duration_) return false;
 
       if (!this.joint_angles_.equals(otherMyClass.joint_angles_)) return false;
-      if (!this.pelvis_pose_.equals(otherMyClass.pelvis_pose_)) return false;
+      if (!this.root_joint_pose_.equals(otherMyClass.root_joint_pose_)) return false;
       if(this.joint_name_hash_ != otherMyClass.joint_name_hash_) return false;
 
 
@@ -185,8 +185,8 @@ public class WholeBodyMultiContactTrajectoryMessage extends Packet<WholeBodyMult
       builder.append(this.trajectory_duration_);      builder.append(", ");
       builder.append("joint_angles=");
       builder.append(this.joint_angles_);      builder.append(", ");
-      builder.append("pelvis_pose=");
-      builder.append(this.pelvis_pose_);      builder.append(", ");
+      builder.append("root_joint_pose=");
+      builder.append(this.root_joint_pose_);      builder.append(", ");
       builder.append("joint_name_hash=");
       builder.append(this.joint_name_hash_);
       builder.append("}");

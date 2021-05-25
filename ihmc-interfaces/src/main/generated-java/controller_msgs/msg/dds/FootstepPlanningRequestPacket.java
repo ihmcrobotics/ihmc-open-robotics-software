@@ -14,8 +14,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
    public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
-   public static final byte SWING_PLANNER_TYPE_POSITION = (byte) 1;
-   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
+   public static final byte SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION = (byte) 1;
+   public static final byte SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION = (byte) 2;
+   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 3;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -95,7 +96,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
    /**
-            * Explicitly tell the planner to use flat ground
+            * If true, steps are snapped assuming flat ground.
+            * Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
             */
    public boolean assume_flat_ground_;
    /**
@@ -431,14 +433,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
-            * Explicitly tell the planner to use flat ground
+            * If true, steps are snapped assuming flat ground.
+            * Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
             */
    public void setAssumeFlatGround(boolean assume_flat_ground)
    {
       assume_flat_ground_ = assume_flat_ground;
    }
    /**
-            * Explicitly tell the planner to use flat ground
+            * If true, steps are snapped assuming flat ground.
+            * Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
             */
    public boolean getAssumeFlatGround()
    {

@@ -167,7 +167,8 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
                                                                    toolboxControllerPeriod,
                                                                    yoGraphicsListRegistry,
                                                                    toolboxRegistry);
-      toolboxController.setOutputPublisher(drcSimulationTestHelper::publishToController);
+      toolboxController.setTrajectoryMessagePublisher(drcSimulationTestHelper::publishToController);
+      toolboxController.setStreamingMessagePublisher(drcSimulationTestHelper::publishToController);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxROS2Node,
                                                     RobotConfigurationData.class,

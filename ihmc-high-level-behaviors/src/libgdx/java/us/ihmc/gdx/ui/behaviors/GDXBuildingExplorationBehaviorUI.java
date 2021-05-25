@@ -7,45 +7,43 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
+import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.vr.GDXVRContext;
-import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.VRDeviceAdapter;
+import us.ihmc.gdx.vr.*;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.log.LogTools;
-import us.ihmc.messager.Messager;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Building Exploration";
 
-   private final FramePose3D goalPose = new FramePose3D();
-   private Messager messager;
-   private FramePose3D tempFramePose = new FramePose3D();
-   private RigidBodyTransform tempRigidBodyTransform = new RigidBodyTransform();
+   private final MessagerPublishSubscribeAPI messager;
+   private final FramePose3D tempFramePose = new FramePose3D();
    private ModelInstance goalSphere;
    private boolean goalIsBeingPlaced;
+
+   public GDXBuildingExplorationBehaviorUI(MessagerPublishSubscribeAPI messager)
+   {
+      this.messager = messager;
+   }
 
    public void create(GDXVRManager vrManager)
    {
       goalSphere = GDXModelPrimitives.createSphere(0.1f, Color.GREEN);
 
-      if (Boolean.parseBoolean(System.getProperty("enable.vr")))
+      if (GDXVRManager.isVREnabled())
       {
-         vrManager.getContext().addListener(new VRDeviceAdapter()
+         vrManager.getContext().addListener(new GDXVRDeviceAdapter()
          {
             @Override
-            public void buttonPressed(GDXVRContext.VRDevice device, int button)
+            public void buttonPressed(GDXVRDevice device, int button)
             {
                LogTools.info("Pressed: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.LEFT))
@@ -54,23 +52,23 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
                   {
                      goalIsBeingPlaced = true;
                   }
-                  else if (button == GDXVRContext.VRControllerButtons.Grip)
+                  else if (button == GDXVRControllerButtons.Grip)
                   {
-                     messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, BuildingExplorationStateName.LOOK_AND_STEP);
-                     messager.submitMessage(BuildingExplorationBehaviorAPI.Start, true);
+                     messager.publish(BuildingExplorationBehaviorAPI.RequestedState, BuildingExplorationStateName.LOOK_AND_STEP);
+                     messager.publish(BuildingExplorationBehaviorAPI.Start, true);
                   }
                }
                if (device == vrManager.getControllers().get(RobotSide.RIGHT))
                {
-                  if (button == GDXVRContext.VRControllerButtons.Grip)
+                  if (button == GDXVRControllerButtons.Grip)
                   {
-                     messager.submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
+                     messager.publish(BuildingExplorationBehaviorAPI.Stop, true);
                   }
                }
             }
 
             @Override
-            public void buttonReleased(GDXVRContext.VRDevice device, int button)
+            public void buttonReleased(GDXVRDevice device, int button)
             {
                LogTools.info("Released: {}, {}", device, button);
                if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
@@ -86,12 +84,8 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
    {
       if (goalIsBeingPlaced)
       {
-         PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.LEFT).getReferenceFrame();
-         tempFramePose.setToZero(controllerFrame);
-         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, goalSphere.transform);
-         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(tempFramePose));
+         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), goalSphere.transform);
+         messager.publish(BuildingExplorationBehaviorAPI.Goal, new Pose3D(tempFramePose));
       }
    }
 
@@ -103,11 +97,6 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
 //      ImGui.dragFlo
 
       ImGui.end();
-   }
-
-   public void setMessager(Messager messager)
-   {
-      this.messager = messager;
    }
 
    public String getWindowName()

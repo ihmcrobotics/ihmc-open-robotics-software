@@ -6,7 +6,7 @@ set -e
 source "/opt/ros/$ROS_DISTRO/setup.bash"
 
 # Setup the Multisense workspace.
-cd /home/robotlab/dev/multisense_ws/src && catkin_init_workspace .
+#cd /home/robotlab/dev/multisense_ws/src && catkin_init_workspace .
 cd /home/robotlab/dev/multisense_ws && catkin_make
 source "/home/robotlab/dev/multisense_ws/devel/setup.bash"
 

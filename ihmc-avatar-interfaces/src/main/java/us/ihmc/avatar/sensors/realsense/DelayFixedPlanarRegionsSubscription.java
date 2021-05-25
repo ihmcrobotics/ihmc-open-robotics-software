@@ -9,9 +9,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
@@ -32,7 +29,6 @@ public class DelayFixedPlanarRegionsSubscription
 
    private final ResettableExceptionHandlingExecutorService executorService;
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
-   private final ReferenceFrame sensorFrame;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final HumanoidReferenceFrames referenceFrames;
    private final ROS2NodeInterface ros2Node;
@@ -75,12 +71,7 @@ public class DelayFixedPlanarRegionsSubscription
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
-
-      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
-
-      RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
    }
 
    public void subscribe(RosNodeInterface ros1Node)
@@ -156,7 +147,7 @@ public class DelayFixedPlanarRegionsSubscription
                try
                {
                   planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-                  planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+                  planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
                }
                catch (NotARotationMatrixException e)
                {

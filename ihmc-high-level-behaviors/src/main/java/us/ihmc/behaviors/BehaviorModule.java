@@ -1,18 +1,21 @@
 package us.ihmc.behaviors;
 
+import com.google.common.base.CaseFormat;
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -23,25 +26,37 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.YoVariableServer;
+import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
+import us.ihmc.tools.UnitConversions;
+import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
+import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
+import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
 public class BehaviorModule
 {
    private static SharedMemoryMessager sharedMemoryMessager;
 
-   private final RosMainNode ros1Node;
-   private final boolean manageROS1Node;
+   private static final String ros1NodeName = "behavior_backpack";
    private final ROS2Node ros2Node;
    private final boolean manageROS2Node;
    private final Messager messager;
    private final boolean manageMessager;
+   public static final double YO_VARIABLE_SERVER_UPDATE_PERIOD = UnitConversions.hertzToSeconds(100.0);
+   private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
+   private YoVariableServer yoVariableServer;
+   private YoDouble yoTime = new YoDouble("time", yoRegistry);
+   private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
@@ -61,13 +76,10 @@ public class BehaviorModule
                          CommunicationMode ros2CommunicationMode,
                          CommunicationMode messagerCommunicationMode)
    {
-      this.manageROS1Node = true;
       this.manageROS2Node = true;
       this.manageMessager = true;
 
       LogTools.info("Starting behavior module in ROS 2: {}, Messager: {} modes", ros2CommunicationMode.name(), messagerCommunicationMode.name());
-
-      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "behavior_backpack");
 
       MessagerAPI messagerAPI = behaviorRegistry.getMessagerAPI();
 
@@ -83,7 +95,7 @@ public class BehaviorModule
       if (messagerCommunicationMode == CommunicationMode.INTERPROCESS)
       {
          messager = KryoMessager.createServer(messagerAPI,
-                                              NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
+                                              BEHAVIOR_MODULE_MESSAGER_PORT.getPort(),
                                               new BehaviorMessagerUpdateThread(BehaviorModule.class.getSimpleName(), 5));
       }
       else // intraprocess
@@ -94,26 +106,23 @@ public class BehaviorModule
 
       ros2Node = ROS2Tools.createROS2Node(pubSubImplementation, "behavior_backpack");
 
-      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
+      init(behaviorRegistry, robotModel, ros2Node, messager);
    }
 
    public BehaviorModule(BehaviorRegistry behaviorRegistry,
                          DRCRobotModel robotModel,
-                         RosMainNode ros1Node,
                          ROS2Node ros2Node,
                          Messager messager)
    {
-      this.ros1Node = ros1Node;
-      this.manageROS1Node = false;
       this.ros2Node = ros2Node;
       this.manageROS2Node = false;
       this.messager = messager;
       this.manageMessager = false;
 
-      init(behaviorRegistry, robotModel, ros1Node, ros2Node, messager);
+      init(behaviorRegistry, robotModel, ros2Node, messager);
    }
 
-   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, RosMainNode ros1Node, ROS2Node ros2Node, Messager messager)
+   private void init(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel, ROS2Node ros2Node, Messager messager)
    {
       if (messager instanceof SharedMemoryMessager)
          sharedMemoryMessager = (SharedMemoryMessager) messager;
@@ -122,9 +131,18 @@ public class BehaviorModule
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros1Node, ros2Node, false);
+         String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, behaviorDefinition.getName().replace(" ", ""));
+         String yoVariableRegistryName = WordUtils.capitalize(behaviorDefinition.getName()).replace(" ", "");
+         BehaviorHelper helper = new BehaviorHelper(robotModel, ros1NodeName, yoVariableRegistryName, ros2Node, false);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
+         YoRegistry yoRegistry = constructedBehavior.getYoRegistry();
+         if (yoRegistry != null)
+         {
+            this.yoRegistry.addChild(yoRegistry);
+         }
+         helper.getROS1Helper().ensureConnected();
+         helper.getMessagerHelper().setExternallyStartedMessager(messager);
       }
 
       messager.registerTopicListener(BehaviorSelection, this::stringBasedSelection);
@@ -136,7 +154,20 @@ public class BehaviorModule
          ThreadTools.startAsDaemon(this::destroy, "DestroyThread");
       });
 
-      ros1Node.execute();
+      DataServerSettings dataServerSettings = new DataServerSettings(false, true, BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort(), null);
+      yoVariableServer = new YoVariableServer(getClass().getSimpleName(), null, dataServerSettings, 0.01);
+      yoVariableServer.setMainRegistry(yoRegistry, null);
+      LogTools.info("Starting YoVariableServer...");
+      yoVariableServer.start();
+      LogTools.info("Starting server update thread...");
+      MutableLong timestamp = new MutableLong();
+      LocalDateTime startTime = LocalDateTime.now();
+      yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", YO_VARIABLE_SERVER_UPDATE_PERIOD, () ->
+      {
+         yoTime.set(Conversions.nanosecondsToSeconds(-LocalDateTime.now().until(startTime, ChronoUnit.NANOS)));
+         yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(YO_VARIABLE_SERVER_UPDATE_PERIOD)));
+      });
+      yoServerUpdateThread.start();
    }
 
    private void stringBasedSelection(String selection)
@@ -181,14 +212,10 @@ public class BehaviorModule
    public void destroy()
    {
       statusLogger.info("Shutting down...");
-
+      yoVariableServer.close();
       if (manageROS2Node)
       {
          ros2Node.destroy();
-      }
-      if (manageROS1Node)
-      {
-         ros1Node.shutdown();
       }
       if (manageMessager)
       {

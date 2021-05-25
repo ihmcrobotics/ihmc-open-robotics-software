@@ -100,6 +100,7 @@ import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WallPosePacket;
 import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
@@ -1804,6 +1805,7 @@ public class HumanoidMessageTools
    public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
       configureForStreaming(messageToModify.getHeadTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getNeckTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getChestTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getPelvisTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getLeftArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
@@ -2558,5 +2560,12 @@ public class HumanoidMessageTools
    public static void resetWholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryMessage message)
    {
       message.set(EMPTY_WHOLE_BODY_TRAJECTORY_MESSAGE);
+   }
+
+   private static final WholeBodyStreamingMessage EMPTY_WHOLE_BODY_STREAMING_MESSAGE = new WholeBodyStreamingMessage();
+
+   public static void resetWholeBodyStreamingMessage(WholeBodyStreamingMessage message)
+   {
+      message.set(EMPTY_WHOLE_BODY_STREAMING_MESSAGE);
    }
 }

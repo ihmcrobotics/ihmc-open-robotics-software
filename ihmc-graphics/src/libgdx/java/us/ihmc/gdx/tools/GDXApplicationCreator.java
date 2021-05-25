@@ -51,9 +51,7 @@ public class GDXApplicationCreator
       launchGDXApplication(getDefaultConfiguration(title, width, height), applicationAdapter, title);
    }
 
-   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration,
-                                                        Lwjgl3ApplicationAdapter applicationAdapter,
-                                                        String title)
+   public static void launchGDXApplication(Lwjgl3ApplicationConfiguration applicationConfiguration, Lwjgl3ApplicationAdapter applicationAdapter, String title)
    {
       ThreadTools.startAThread(() ->
       {
