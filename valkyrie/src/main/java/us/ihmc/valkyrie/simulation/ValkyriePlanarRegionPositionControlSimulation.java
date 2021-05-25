@@ -1,7 +1,10 @@
 package us.ihmc.valkyrie.simulation;
 
 import controller_msgs.msg.dds.GroundPlaneMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.MultiContactScriptReader;
 import us.ihmc.avatar.networkProcessor.HumanoidNetworkProcessorParameters;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.simulationStarter.DRCSimulationStarter;
@@ -20,6 +23,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.jMonkeyEngineToolkit.NullGraphics3DAdapter;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionJointLimitRemover;
 import us.ihmc.modelFileLoaders.SdfLoader.SDFDescriptionMutatorList;
@@ -32,6 +36,7 @@ import us.ihmc.robotics.stateMachine.core.StateTransition;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.valkyrie.ValkyrieInitialSetupFactories;
 import us.ihmc.valkyrie.ValkyrieMutableInitialSetup;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
@@ -39,13 +44,17 @@ import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
 import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.io.File;
+import java.nio.file.Path;
 import java.util.EnumMap;
 
 public class ValkyriePlanarRegionPositionControlSimulation
 {
    public static void main(String[] args)
    {
-      new ValkyriePlanarRegionPositionControlSimulation();
+      new ValkyriePlanarRegionPositionControlSimulation(args.length > 0 && args[0].equals("headless"));
    }
 
    private static final boolean REMOVE_JOINT_LIMITS = true;
@@ -58,18 +67,18 @@ public class ValkyriePlanarRegionPositionControlSimulation
                                                                                                         ROS2Tools.IHMC_ROOT.withTypeName(GroundPlaneMessage.class));
    private final GroundPlaneMessage groundPlaneMessage = new GroundPlaneMessage();
 
-   private enum Environment
+   public enum InitialPose
    {
-      FLAT_GROUND,
-      GROUND_AND_WALLS,
-      TILTED_TILES,
+      STANDING,
+      DOWN_ON_ALL_FOURS,
+      FROM_SCRIPT
    }
 
-   private static final Environment environment = Environment.GROUND_AND_WALLS;
+   public static InitialPose initialPose = InitialPose.FROM_SCRIPT;
 
-   public ValkyriePlanarRegionPositionControlSimulation()
+   public ValkyriePlanarRegionPositionControlSimulation(boolean headless)
    {
-      PlanarRegionsList planarRegionsList = createPlanarRegions();
+      PlanarRegionsList planarRegionsList = ValkyrieMultiContactEnvironment.createPlanarRegions();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.01, false);
 
       groundPlaneMessage.getRegionNormal().set(Axis3D.Z);
@@ -96,11 +105,60 @@ public class ValkyriePlanarRegionPositionControlSimulation
 
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel, environment);
       simulationStarter.setUsePerfectSensors(true);
-      ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
 
-      simulationStarter.setRobotInitialSetup(initialSetup);
+      if (headless)
+      {
+         simulationStarter.getGuiInitialSetup().setGraphics3DAdapter(new NullGraphics3DAdapter());
+         simulationStarter.getGuiInitialSetup().setShowWindow(false);
+      }
+
+      if (initialPose == InitialPose.FROM_SCRIPT)
+      {
+         MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+         Path currentDirectory = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software")
+                                                   .resolve("valkyrie/src/main/resources/multiContact/scripts")
+                                                   .toAbsolutePath()
+                                                   .normalize();
+         System.out.println(currentDirectory);
+         JFileChooser fileChooser = new JFileChooser(currentDirectory.toFile());
+         fileChooser.setFileFilter(new FileNameExtensionFilter("JSON log", "json"));
+
+         int chooserState = fileChooser.showOpenDialog(null);
+         if (chooserState != JFileChooser.APPROVE_OPTION)
+            return;
+
+         File selectedFile = fileChooser.getSelectedFile();
+         if (!scriptReader.loadScript(selectedFile))
+            return;
+
+         scriptReader.loadScript(selectedFile);
+         KinematicsToolboxSnapshotDescription initialSnapshot = scriptReader.getAllItems().get(0);
+         RobotConfigurationData robotConfigurationData = initialSnapshot.getControllerConfiguration();
+
+         ValkyrieMutableInitialSetup initialSetup = new ValkyrieMutableInitialSetup(jointMap);
+
+         // set root joint
+         initialSetup.getRootJointPosition().set(robotConfigurationData.getRootTranslation());
+         initialSetup.getRootJointOrientation().set(robotConfigurationData.getRootOrientation());
+         initialSetup.getRootJointOrientation().appendPitchRotation(Math.toRadians(1.0));
+
+         // set joint positions
+         OneDoFJointBasics[] oneDoFJoints = robotModel.createFullRobotModel().getControllableOneDoFJoints();
+         for (int i = 0; i < oneDoFJoints.length; i++)
+         {
+            if (!oneDoFJoints[i].getName().contains("hokuyo"))
+               initialSetup.jointPositions.put(oneDoFJoints[i].getName(), (double) robotConfigurationData.getJointAngles().get(i));
+         }
+
+         simulationStarter.setRobotInitialSetup(initialSetup);
+      }
+      else if (initialPose == InitialPose.DOWN_ON_ALL_FOURS)
+      {
+         ValkyrieMutableInitialSetup initialSetup = ValkyrieInitialSetupFactories.newAllFoursBellyDown(jointMap);
+         simulationStarter.setRobotInitialSetup(initialSetup);
+      }
       simulationStarter.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
-      simulationStarter.getSCSInitialSetup().setRecordFrequency(10);
+      simulationStarter.getSCSInitialSetup().setRecordFrequency(50);
       simulationStarter.registerHighLevelControllerState(new HighLevelControllerStateFactory()
       {
          @Override
@@ -154,48 +212,15 @@ public class ValkyriePlanarRegionPositionControlSimulation
       });
 
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
-      simulationStarter.createSimulation(networkProcessorParameters, true, false);
+      simulationStarter.createSimulation(networkProcessorParameters, true, true);
       simulationStarter.getAvatarSimulation().getHighLevelHumanoidControllerFactory().getRequestedControlStateEnum().set(null);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setFastSimulate(true, 10);
+      simulationStarter.getSimulationConstructionSet().skipLoadingDefaultConfiguration();
+
+      // adds a new row each time. the method above looks like it's supposed to prevent that but it doesn't seem to work, at least on windows.
+//      simulationStarter.getSimulationConstructionSet().setupGraph("t");
 
       KinematicsToolboxModule kinematicsToolboxModule = new KinematicsToolboxModule(robotModel, false, 10, false, DomainFactory.PubSubImplementation.FAST_RTPS);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addYoRegistry(kinematicsToolboxModule.getRegistry());
-   }
-
-   private static PlanarRegionsList createPlanarRegions()
-   {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-
-      switch (environment)
-      {
-         case GROUND_AND_WALLS:
-            generator.addRectangle(5.0, 5.0);
-
-            double wallHeight = 2.0;
-            double wallSpacing = 1.5;
-
-            generator.translate(0.0, 0.0, 0.5 * wallHeight);
-            for (RobotSide robotSide : RobotSide.values)
-            {
-               generator.translate(0.0, 0.5 * robotSide.negateIfRightSide(wallSpacing), 0.0);
-               generator.rotate(robotSide.negateIfRightSide(0.5 * Math.PI), Axis3D.X);
-               generator.addRectangle(1.0, wallHeight);
-               generator.rotate(robotSide.negateIfLeftSide(0.5 * Math.PI), Axis3D.X);
-               generator.translate(0.0, 0.5 * robotSide.negateIfLeftSide(wallSpacing), 0.0);
-            }
-            generator.translate(0.0, 0.0, -0.5 * wallHeight);
-
-            generator.translate(0.9, 0.0, 0.3);
-            generator.rotate(-0.25 * Math.PI, Axis3D.Y);
-            generator.addRectangle(0.7, 0.7);
-
-            return generator.getPlanarRegionsList();
-
-         case FLAT_GROUND:
-         default:
-            generator.translate(0.0, 0.0, 1.0);
-            generator.addRectangle(5.0, 5.0);
-            return generator.getPlanarRegionsList();
-      }
    }
 }

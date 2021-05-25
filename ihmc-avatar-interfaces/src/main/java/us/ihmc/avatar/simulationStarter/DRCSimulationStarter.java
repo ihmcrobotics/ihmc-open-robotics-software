@@ -222,6 +222,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
       return scsInitialSetup;
    }
 
+   public DRCGuiInitialSetup getGuiInitialSetup()
+   {
+      return guiInitialSetup;
+   }
+
    /**
     * Sets whether the estimator and the controller are running on the same thread or multiThreaded.
     * Defaults to multiThreaded. Need to set to false if you want the simulation to be rewindable.
