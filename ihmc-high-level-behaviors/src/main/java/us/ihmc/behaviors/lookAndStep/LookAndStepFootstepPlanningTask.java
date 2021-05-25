@@ -244,6 +244,7 @@ public class LookAndStepFootstepPlanningTask
    protected void performTask()
    {
       if (planarRegionsHistory.isEmpty()
+       && lookAndStepParameters.getPlanarRegionsHistorySize() > 0
        && lookAndStepParameters.getUseInitialSupportRegions()
        && capturabilityBasedStatusReceptionTimerSnapshot.isRunning()
        && robotConfigurationDataReceptionTimerSnapshot.isRunning())
