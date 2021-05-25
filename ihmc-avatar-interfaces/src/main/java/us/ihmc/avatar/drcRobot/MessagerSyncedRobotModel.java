@@ -5,6 +5,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +20,10 @@ public class MessagerSyncedRobotModel extends MessageSyncedRobotModel
 
    public MessagerSyncedRobotModel(Messager messager,
                                    MessagerAPIFactory.Topic<RobotConfigurationData> topic,
-                                   FullHumanoidRobotModel fullRobotModel)
+                                   FullHumanoidRobotModel fullRobotModel,
+                                   HumanoidRobotSensorInformation sensorInformation)
    {
-      super(fullRobotModel);
+      super(fullRobotModel, sensorInformation);
 
       messager.registerTopicListener(topic, robotConfigurationData ->
       {

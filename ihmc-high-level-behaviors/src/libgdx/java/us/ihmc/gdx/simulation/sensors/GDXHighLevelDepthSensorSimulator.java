@@ -182,7 +182,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       {
          if(sensorFrame != null)
             GDXTools.toGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
-         else if (sensorFrameToWorldTransform != null)
+         else
             GDXTools.toGDX(sensorFrameToWorldTransform, gdxTransform);
 
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
