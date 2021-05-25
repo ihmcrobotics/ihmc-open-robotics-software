@@ -167,6 +167,8 @@ public class CollisionFreeSwingCalculator
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         footstep.getCustomWaypointPositions().clear();
+
          RobotSide stepSide = footstep.getRobotSide();
          startOfSwingPose.set((i < 2 ? initialStanceFootPoses.get(stepSide) : footstepPlan.getFootstep(i - 2).getFootstepPose()));
          endOfSwingPose.set(footstep.getFootstepPose());
