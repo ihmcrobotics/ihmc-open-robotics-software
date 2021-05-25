@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import com.badlogic.gdx.graphics.*;
@@ -65,7 +66,6 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
-   private final ImBoolean showFootstepPlanningSection = new ImBoolean(true);
    private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
    private final ImGuiYoDoublePlot footholdVolumePlot;
 
@@ -325,7 +325,8 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 //         ImGui.checkbox("Show tuner", showLookAndStepParametersTuner);
 //         treePanel.renderWidgetsOnly();
 //      }
-      if (ImGui.collapsingHeader("Footstep Planning", showFootstepPlanningSection))
+      int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
+      if (ImGui.collapsingHeader("Footstep Planning", defaultOpen))
       {
          int flags = ImGuiInputTextFlags.ReadOnly;
          latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
