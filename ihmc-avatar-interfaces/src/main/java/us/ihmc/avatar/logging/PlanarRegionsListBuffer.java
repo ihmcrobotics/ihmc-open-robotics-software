@@ -13,11 +13,11 @@ import java.util.Scanner;
 
 public class PlanarRegionsListBuffer
 {
-   private final long buffer_length;
-   private final HashMap<Long, PlanarRegionsList> buffer;
+   private long buffer_length = 0;
+   private HashMap<Long, PlanarRegionsList> buffer;
    private long index = 0;
 
-   public PlanarRegionsListBuffer(File planarRegionListLog) throws IOException
+   public void loadFromLog(File planarRegionListLog) throws IOException
    {
       buffer = new HashMap<>();
       Scanner in = new Scanner(planarRegionListLog);
@@ -38,7 +38,13 @@ public class PlanarRegionsListBuffer
          buffer.put(id, list);
       }
 
-      buffer_length = buffer.size();
+      if (buffer_length < buffer.size())
+         buffer_length = buffer.size();
+   }
+
+   public PlanarRegionsListBuffer(File planarRegionListLog) throws IOException
+   {
+      loadFromLog(planarRegionListLog);
    }
 
    public PlanarRegionsListBuffer()
@@ -50,6 +56,13 @@ public class PlanarRegionsListBuffer
    {
       this.buffer_length = buffer_length;
       this.buffer = new HashMap<>();
+   }
+
+   public void expandBuffer(long additionalSize) {
+      if (additionalSize <= 0)
+         return;
+
+      buffer_length += additionalSize;
    }
 
    public void putAndTick(PlanarRegionsList list)
