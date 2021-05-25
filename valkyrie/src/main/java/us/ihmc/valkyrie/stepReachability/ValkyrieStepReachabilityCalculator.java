@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie.stepReachability;
 
 import controller_msgs.msg.dds.*;
-import org.ejml.data.DMatrix;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -16,24 +15,22 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
@@ -49,6 +46,7 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
@@ -77,9 +75,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
-import java.util.Arrays;
+import java.util.*;
 import java.util.List;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
@@ -95,14 +92,16 @@ public class ValkyrieStepReachabilityCalculator
 
    private enum Mode
    {
-      HAND_POSE, TEST_STEP
+      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS
    }
 
 //   private static final Mode mode = Mode.HAND_POSE;
-   private static final Mode mode = Mode.TEST_STEP;
+   private static final Mode mode = Mode.TEST_SINGLE_STEP;
+
+   // TODO tune this
+   private static final double SOLUTION_QUALITY_THRESHOLD = 1e-3;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   public static final double DEFAULT_LOW_WEIGHT = 0.02;
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
@@ -188,12 +187,24 @@ public class ValkyrieStepReachabilityCalculator
          case HAND_POSE:
             testHandPose();
             break;
-         case TEST_STEP:
+         case TEST_SINGLE_STEP:
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
             rightFoot.getPosition().set(0.25, 0.25, 0.0);
-            testStep(leftFoot, rightFoot, 0.0);
+            testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
             break;
+         case TEST_MULTIPLE_STEPS:
+            List<FramePose3D> leftFootPoseList = createLeftFootPoseList();
+            Map<FramePose3D, Boolean> poseValidityMap = new HashMap<>();
+            for (int i = 0; i < leftFootPoseList.size(); i++)
+            {
+               FramePose3D leftFootPose = leftFootPoseList.get(i);
+               boolean isValid = testSingleStep(leftFootPose, null, SOLUTION_QUALITY_THRESHOLD);
+               poseValidityMap.put(leftFootPose, isValid);
+            }
+
+            StepReachabilityFileTools.writeToFile(poseValidityMap);
+
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
       }
@@ -269,7 +280,10 @@ public class ValkyrieStepReachabilityCalculator
       }
    }
 
-   private boolean testStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
+   /**
+    * Solves IK assuming that the left foot is at the origin and right foot is at the given position
+    */
+   private boolean testSingleStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
    {
       LogTools.info("Entering: testStep");
       Random random = new Random(2134);
@@ -300,6 +314,17 @@ public class ValkyrieStepReachabilityCalculator
       }
 
       // Rigid body objective for each chest
+      // TODO set check objective to be interpolated between feet
+
+      // some code snippets for frame poses
+      FramePose3D poseA = new FramePose3D();
+      FramePose3D poseB = new FramePose3D();
+      FramePose3D poseInterpolated = new FramePose3D();
+
+      // This method call sets "poseInterpolated" to be 50% between poseA and poseB
+      double interpolationAlpha = 0.5;
+      poseInterpolated.interpolate(poseA, poseB, interpolationAlpha);
+
       KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyCurrentOrientation(targetFullRobotModel.getChest());
       rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -355,6 +380,45 @@ public class ValkyrieStepReachabilityCalculator
       }
 
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
+   }
+
+   // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
+   private static final int queriesPerAxis = 10;
+   private static final double minimumOffsetX = -0.5;
+   private static final double maximumOffsetX = 0.5;
+   private static final double minimumOffsetY = -0.5;
+   private static final double maximumOffsetY = 0.5;
+   private static final double minimumOffsetYaw = - Math.toRadians(90.0);
+   private static final double maximumOffsetYaw = Math.toRadians(90.0);
+
+   private static List<FramePose3D> createLeftFootPoseList()
+   {
+      List<FramePose3D> posesToCheck = new ArrayList<>();
+
+      for (int i = 0; i < queriesPerAxis; i++)
+      {
+         for (int j = 0; j < queriesPerAxis; j++)
+         {
+            for (int k = 0; k < queriesPerAxis; k++)
+            {
+               double alphaX = ((double) i) / (queriesPerAxis - 1);
+               double alphaY = ((double) i) / (queriesPerAxis - 1);
+               double alphaYaw = ((double) i) / (queriesPerAxis - 1);
+
+               double x = EuclidCoreTools.interpolate(minimumOffsetX, maximumOffsetX, alphaX);
+               double y = EuclidCoreTools.interpolate(minimumOffsetY, maximumOffsetY, alphaY);
+               double yaw = AngleTools.interpolateAngle(minimumOffsetYaw, maximumOffsetYaw, alphaYaw);
+
+               FramePose3D pose = new FramePose3D();
+               pose.getPosition().set(x, y, 0.0);
+               pose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+
+               posesToCheck.add(pose);
+            }
+         }
+      }
+
+      return posesToCheck;
    }
 
    public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
