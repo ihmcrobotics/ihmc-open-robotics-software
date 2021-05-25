@@ -30,10 +30,11 @@ fi
 echo "Starting Network Processor"
 
 IHMC_LOGS_DIR=$HOME/.ihmc/logs
+OLDEST_LOG_AGE_HOURS=3
 if [[ ! -d $IHMC_LOGS_DIR ]]; then
     mkdir -p $IHMC_LOGS_DIR
 fi
-java -Djava.library.path=lib/ -cp ValkyrieController.jar $NETWORK_PROCESSOR_CLASS | tee $HOME/.ihmc/logs/ValkyrieNetworkProc_$(date '+%Y%m%d_%H%M%S').log &
+java -Djava.library.path=lib/ -cp ValkyrieController.jar $NETWORK_PROCESSOR_CLASS 2>&1 | tee $IHMC_LOGS_DIR/ValkyrieNetworkProc_$(date '+%Y%m%d_%H%M%S').log &
 # Some time for process to get established
 sleep 1
 find_network_processor_pids
@@ -42,9 +43,3 @@ trap "kill $old_processes; \
       sleep 5; \
       kill -9 $old_processes; exit 0" INT TERM
 wait
-
-OLDEST_LOG_AGE_HOURS=3
-
-mkdir -p $HOME/.ihmc/logs/
-find $HOME/.ihmc/logs/  \( -name "*.log" -o -name "*.json" \) -type f -mmin +$((60 * $OLDEST_LOG_AGE_HOURS)) -delete;
-java -Djava.library.path=lib/ -cp ValkyrieController.jar us.ihmc.valkyrie.ValkyrieNetworkProcessor 2>&1 | tee $HOME/.ihmc/logs/ValkyrieNetworkProc_$(date '+%Y%m%d_%H%M%S').log

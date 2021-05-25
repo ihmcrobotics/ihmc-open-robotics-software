@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -210,7 +211,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          usingWeightFromMessage.set(orienationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
-         statusHelper.registerNewTrajectory(command);
+         if (command.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(command);
          return true;
       }
 
@@ -240,7 +242,8 @@ public class RigidBodyPoseController extends RigidBodyTaskspaceControlState
       {
          usingWeightFromMessage.set(positionHelper.isMessageWeightValid() && orienationHelper.isMessageWeightValid());
          hybridModeActive.set(false);
-         statusHelper.registerNewTrajectory(command);
+         if (command.getExecutionMode() != ExecutionMode.STREAM)
+            statusHelper.registerNewTrajectory(command);
          return true;
       }
 

@@ -8,74 +8,73 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
-import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDXPose3DWidget;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Touchpad;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Touchpad;
 
 public class GDXVRManager implements RenderableProvider
 {
    private static boolean ENABLE_VR = Boolean.parseBoolean(System.getProperty("enable.vr"));
 
    private GDXVRContext context;
-   private HashSet<ModelInstance> modelInstances = new HashSet<>();
+   private final HashSet<ModelInstance> modelInstances = new HashSet<>();
    private ModelInstance headsetModelInstance;
-   private SideDependentList<GDXVRContext.VRDevice> controllers = new SideDependentList<>();
+   private final SideDependentList<GDXVRDevice> controllers = new SideDependentList<>();
    private boolean skipHeadset = false;
    private boolean holdingTouchpadToMove = false;
-   private Point3D initialVRSpacePosition = new Point3D();
-   private Point3D initialVRControllerPosition = new Point3D();
-   private Point3D currentVRControllerPosition = new Point3D();
-   private Vector3D deltaVRControllerPosition = new Vector3D();
-   private Point3D resultVRSpacePosition = new Point3D();
-   private Point3D lastVRSpacePosition = new Point3D();
-   private final YawPitchRoll toXForwardZUp = new YawPitchRoll(Math.toRadians(-90.0), Math.toRadians(-90.0), Math.toRadians(0.0));
+   private final Point3D initialVRSpacePosition = new Point3D();
+   private final Point3D initialVRControllerPosition = new Point3D();
+   private final Point3D currentVRControllerPosition = new Point3D();
+   private final Vector3D deltaVRControllerPosition = new Vector3D();
+   private final Point3D resultVRSpacePosition = new Point3D();
+   private final Point3D lastVRSpacePosition = new Point3D();
+   private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
+   private final GDXPose3DWidget scenePose = new GDXPose3DWidget("VR Space");
 
    public void create()
    {
+      ENABLE_VR = true;
+      System.setProperty("enable.vr", "true");
+
       context = new GDXVRContext();
 
-      // transform space to Z up, X forward
-      YawPitchRoll yawPitchRoll = new YawPitchRoll();
-      yawPitchRoll.setRoll(Math.toRadians(90.0));
-      yawPitchRoll.setYaw(Math.toRadians(-90.0));
-      RotationMatrix rotationMatrix = new RotationMatrix(yawPitchRoll);
-      GDXTools.toGDX(rotationMatrix, context.getTrackerSpaceToWorldspaceRotationOffset());
+      scenePose.create();
 
-      context.getEyeData(GDXVRContext.Eye.Left).camera.far = 100f;
-      context.getEyeData(GDXVRContext.Eye.Right).camera.far = 100f;
+      context.getPerEyeData().get(RobotSide.LEFT).getCamera().far = 100f;
+      context.getPerEyeData().get(RobotSide.RIGHT).getCamera().far = 100f;
 
-      context.addListener(new GDXVRContext.VRDeviceListener()
+      context.addListener(new GDXVRDeviceListener()
       {
          @Override
-         public void connected(GDXVRContext.VRDevice device)
+         public void connected(GDXVRDevice device)
          {
             LogTools.info("{} connected", device);
             if (device.getModelInstance() != null)
             {
                modelInstances.add(device.getModelInstance());
 
-               if (device.getType() == GDXVRContext.VRDeviceType.HeadMountedDisplay)
+               if (device.getType() == GDXVRDeviceType.HeadMountedDisplay)
                {
                   headsetModelInstance = device.getModelInstance();
                }
-               else if(device.getType() == GDXVRContext.VRDeviceType.Controller)
+               else if(device.getType() == GDXVRDeviceType.Controller)
                {
-                  if (device.getControllerRole() == GDXVRContext.VRControllerRole.LeftHand)
+                  if (device.getControllerRole() == GDXVRControllerRole.LeftHand)
                   {
                      controllers.set(RobotSide.LEFT, device);
                   }
-                  else if (device.getControllerRole() == GDXVRContext.VRControllerRole.RightHand)
+                  else if (device.getControllerRole() == GDXVRControllerRole.RightHand)
                   {
                      controllers.set(RobotSide.RIGHT, device);
                   }
@@ -97,41 +96,41 @@ public class GDXVRManager implements RenderableProvider
          }
 
          @Override
-         public void disconnected(GDXVRContext.VRDevice device)
+         public void disconnected(GDXVRDevice device)
          {
             LogTools.info("{} disconnected", device);
          }
 
          @Override
-         public void buttonPressed(GDXVRContext.VRDevice device, int button)
+         public void buttonPressed(GDXVRDevice device, int button)
          {
             LogTools.info("{} button pressed: {}", device, button);
          }
 
          @Override
-         public void buttonReleased(GDXVRContext.VRDevice device, int button)
+         public void buttonReleased(GDXVRDevice device, int button)
          {
             LogTools.info("{} button released: {}", device, button);
          }
       });
 
-      context.addListener(new VRDeviceAdapter()
+      context.addListener(new GDXVRDeviceAdapter()
       {
          @Override
-         public void buttonPressed(GDXVRContext.VRDevice device, int button)
+         public void buttonPressed(GDXVRDevice device, int button)
          {
             if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
             {
-               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
-               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
-               context.getToZUpXForward().transform(initialVRSpacePosition);
-               lastVRSpacePosition.set(initialVRSpacePosition);
+//               GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), initialVRControllerPosition);
+//               GDXTools.toEuclid(context.getTrackerSpaceOriginToWorldSpaceTranslationOffset(), initialVRSpacePosition);
+//               context.getToZUpXForward().transform(initialVRSpacePosition);
+//               lastVRSpacePosition.set(initialVRSpacePosition);
                holdingTouchpadToMove = true;
             }
          }
 
          @Override
-         public void buttonReleased(GDXVRContext.VRDevice device, int button)
+         public void buttonReleased(GDXVRDevice device, int button)
          {
             if (device == controllers.get(RobotSide.RIGHT) && button == SteamVR_Touchpad)
             {
@@ -139,6 +138,11 @@ public class GDXVRManager implements RenderableProvider
             }
          }
       });
+
+      for (Runnable runnable : thingsToCreateOnEnable)
+      {
+         runnable.run();
+      }
    }
 
    public void pollEvents()
@@ -148,39 +152,45 @@ public class GDXVRManager implements RenderableProvider
 
    public void render(GDX3DSceneManager sceneManager)
    {
+      // Wait for VR setup to be ready. This is the primary indicator.
+      if (context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay) == null)
+         return;
+
+      context.teleport(scenePose.getTransform());
+
       if (holdingTouchpadToMove)
       {
-         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
+//         GDXTools.toEuclid(controllers.get(RobotSide.RIGHT).getWorldTransformGDX(), currentVRControllerPosition);
 //         resultVRSpacePosition.set(initialVRSpacePosition);
 //         deltaVRControllerPosition.sub(currentVRControllerPosition, initialVRControllerPosition);
 //         resultVRSpacePosition.sub(deltaVRControllerPosition);
 //         resultVRSpacePosition.sub(lastVRSpacePosition);
 //         GDXTools.toGDX(resultVRSpacePosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
 //         lastVRSpacePosition.set(resultVRSpacePosition);
-         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
-         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
+//         context.getToZUpXForward().inverseTransform(currentVRControllerPosition);
+//         GDXTools.toGDX(currentVRControllerPosition, context.getTrackerSpaceOriginToWorldSpaceTranslationOffset());
 //         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.1f, 0.0f, 0.0f);
       }
       else
       {
-         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
-
+//         context.getTrackerSpaceOriginToWorldSpaceTranslationOffset().set(0.0f, 0.0f, 0.0f);
       }
 
       context.begin();
-      renderScene(GDXVRContext.Eye.Left, sceneManager);
-      renderScene(GDXVRContext.Eye.Right, sceneManager);
+      renderScene(RobotSide.LEFT, sceneManager);
+      renderScene(RobotSide.RIGHT, sceneManager);
       context.end();
    }
 
-   private void renderScene(GDXVRContext.Eye eye, GDX3DSceneManager sceneManager)
+   private void renderScene(RobotSide eye, GDX3DSceneManager sceneManager)
    {
-      GDXVRCamera camera = context.getEyeData(eye).camera;
+      GDXVRPerEyeData eyeData = context.getPerEyeData().get(eye);
+      GDXVRCamera camera = eyeData.getCamera();
 
       context.beginEye(eye);
 
-      int width = context.getEyeData(eye).getFrameBuffer().getWidth();
-      int height = context.getEyeData(eye).getFrameBuffer().getHeight();
+      int width = eyeData.getFrameBuffer().getWidth();
+      int height = eyeData.getFrameBuffer().getHeight();
       Gdx.gl.glViewport(0, 0, width, height);
 
       GDX3DSceneTools.glClearGray();
@@ -192,7 +202,7 @@ public class GDXVRManager implements RenderableProvider
       context.endEye();
    }
 
-   public SideDependentList<GDXVRContext.VRDevice> getControllers()
+   public SideDependentList<GDXVRDevice> getControllers()
    {
       return controllers;
    }
@@ -208,6 +218,16 @@ public class GDXVRManager implements RenderableProvider
       }
    }
 
+   public void create(Runnable runnable)
+   {
+      thingsToCreateOnEnable.add(runnable);
+   }
+
+   public void process3DViewInput(ImGui3DViewInput input)
+   {
+      scenePose.process3DViewInput(input);
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
@@ -218,6 +238,8 @@ public class GDXVRManager implements RenderableProvider
             modelInstance.getRenderables(renderables, pool);
          }
       }
+
+      scenePose.getRenderables(renderables, pool);
    }
 
    public GDXVRContext getContext()

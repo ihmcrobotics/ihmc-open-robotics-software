@@ -7,6 +7,7 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -111,15 +112,21 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return factory.build(KSTState.SLEEP);
    }
 
-   public void setOutputPublisher(OutputPublisher outputPublisher)
+   public void setTrajectoryMessagePublisher(WholeBodyTrajectoryMessagePublisher outputPublisher)
    {
-      streamingState.setOutputPublisher(outputPublisher);
+      streamingState.setTrajectoryMessagerPublisher(outputPublisher);
+   }
+
+   public void setStreamingMessagePublisher(WholeBodyStreamingMessagePublisher outputPublisher)
+   {
+      streamingState.setStreamingMessagePublisher(outputPublisher);
    }
 
    @Override
    public boolean initialize()
    {
       isDone.set(false);
+      initialTimestamp = System.nanoTime();
       return true;
    }
 
@@ -130,8 +137,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
    {
       try
       {
-         if (initialTimestamp == -1L)
-            initialTimestamp = System.nanoTime();
          time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
 
          if (tools.getCommandInputManager().isNewCommandAvailable(KinematicsToolboxConfigurationCommand.class))
@@ -171,9 +176,14 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       return isDone.getValue();
    }
 
-   public static interface OutputPublisher
+   public static interface WholeBodyTrajectoryMessagePublisher
    {
       void publish(WholeBodyTrajectoryMessage messageToPublish);
+   }
+
+   public static interface WholeBodyStreamingMessagePublisher
+   {
+      void publish(WholeBodyStreamingMessage messageToPublish);
    }
 
    KSTState getCurrentStateKey()

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -23,30 +24,30 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
+import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.graphics.GDXPose3DWidget;
+import us.ihmc.gdx.ui.GDXPose3DWidget;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.*;
 
 public class GDXEnvironment implements RenderableProvider
 {
    private final static String WINDOW_NAME = ImGuiTools.uniqueLabel(GDXEnvironment.class, "Environment");
-   private GDXImGuiBasedUI baseUI;
    private final ArrayList<GDXEnvironmentObject> objects = new ArrayList<>();
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
-   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
+   private ImBoolean show3DWidgetTuner = new ImBoolean(false);
+   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget(getClass().getSimpleName());
    private boolean placing = false;
    private boolean loadedFilesOnce = false;
-   private int selectedEnvironmentFile = -1;
-   private final ArrayList<Path> environmentFiles = new ArrayList<>();
+   private Path selectedEnvironmentFile = null;
+   private final TreeSet<Path> environmentFiles = new TreeSet<>(Comparator.comparing(path -> path.getFileName().toString()));
    private final ImString saveString = new ImString("", 100);
    private final Point3D tempTranslation = new Point3D();
    private final Quaternion tempOrientation = new Quaternion();
@@ -55,10 +56,9 @@ public class GDXEnvironment implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      this.baseUI = baseUI;
       baseUI.getSceneManager().addRenderableProvider(this);
 
-      pose3DWidget.create(baseUI);
+      pose3DWidget.create();
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -68,7 +68,7 @@ public class GDXEnvironment implements RenderableProvider
       {
          if (placing)
          {
-            Line3DReadOnly pickRay = viewInput.getPickRayInWorld(baseUI);
+            Line3DReadOnly pickRay = viewInput.getPickRayInWorld();
             Point3D pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
                                                                                         Axis3D.Z,
                                                                                         pickRay.getPoint(),
@@ -86,7 +86,7 @@ public class GDXEnvironment implements RenderableProvider
             pose3DWidget.process3DViewInput(viewInput);
             selectedObject.set(pose3DWidget.getTransform());
 
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                if (intersectedObject != selectedObject)
@@ -104,7 +104,7 @@ public class GDXEnvironment implements RenderableProvider
       {
          if (viewInput.isWindowHovered())
          {
-            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld(baseUI));
+            intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
 
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -140,11 +140,28 @@ public class GDXEnvironment implements RenderableProvider
       ImGui.text("Selected: " + selectedObject);
       ImGui.text("Intersecting: " + intersectedObject);
 
-      if (ImGui.button("Place Medium Cinder Block Roughed"))
+      GDXEnvironmentObject objectToPlace = null;
+      if (!placing)
       {
-         GDXMediumCinderBlockRoughed mediumCinderBlockRoughed = new GDXMediumCinderBlockRoughed();
-         objects.add(mediumCinderBlockRoughed);
-         selectedObject = mediumCinderBlockRoughed;
+         if (ImGui.button("Place Small Cinder Block Roughed"))
+            objectToPlace = new GDXSmallCinderBlockRoughed();
+         if (ImGui.button("Place Medium Cinder Block Roughed"))
+            objectToPlace = new GDXMediumCinderBlockRoughed();
+         if (ImGui.button("Place Medium Cinder Block Roughed"))
+            objectToPlace = new GDXLargeCinderBlockRoughed();
+         if (ImGui.button("Place Lab Floor"))
+            objectToPlace = new GDXLabFloorObject();
+         if (ImGui.button("Place Pallet"))
+            objectToPlace = new GDXPalletObject();
+         if (ImGui.button("Place Door Only"))
+            objectToPlace = new GDXDoorOnlyObject();
+         if (ImGui.button("Place Door Frame"))
+            objectToPlace = new GDXDoorFrameObject();
+      }
+      if (objectToPlace != null)
+      {
+         objects.add(objectToPlace);
+         selectedObject = objectToPlace;
          placing = true;
       }
 
@@ -156,64 +173,46 @@ public class GDXEnvironment implements RenderableProvider
       }
 
       ImGui.text("Environments:");
-      boolean reindexClicked = imgui.internal.ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
+      if (!loadedFilesOnce && selectedEnvironmentFile != null)
+      {
+         loadedFilesOnce = true;
+         loadEnvironment(selectedEnvironmentFile);
+      }
+      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex scripts"));
       if (!loadedFilesOnce || reindexClicked)
       {
          loadedFilesOnce = true;
-         Path scriptsPath = WorkspacePathTools.findPathToResource("ihmc-open-robotics-software",
-                                                                  "ihmc-high-level-behaviors/src/libgdx/resources",
-                                                                  "environments");
-         environmentFiles.clear();
-         PathTools.walkFlat(scriptsPath, (path, pathType) ->
-         {
-            if (pathType == BasicPathVisitor.PathType.FILE)
-            {
-               environmentFiles.add(path);
-            }
-            return FileVisitResult.CONTINUE;
-         });
+         reindexScripts();
       }
-      for (int i = 0; i < environmentFiles.size(); i++)
+      String fileNameToSave = null;
+      for (Path environmentFile : environmentFiles)
       {
-         if (ImGui.radioButton(environmentFiles.get(i).getFileName().toString(), selectedEnvironmentFile == i))
+         if (ImGui.radioButton(environmentFile.getFileName().toString(), selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile)))
          {
-            selectedEnvironmentFile = i;
-            objects.clear();
-            selectedObject = null;
-            intersectedObject = null;
-
-            JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
-                                            "ihmc-high-level-behaviors/src/libgdx/resources",
-                                            "environments/" + environmentFiles.get(i).getFileName().toString(),
-            node ->
+            loadEnvironment(environmentFile);
+         }
+         if (selectedEnvironmentFile != null && selectedEnvironmentFile.equals(environmentFile))
+         {
+            ImGui.sameLine();
+            if (ImGui.button("Save"))
             {
-               for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
-               {
-                  JsonNode objectNode = it.next();
-                  GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
-                  tempTranslation.setX(objectNode.get("x").asDouble());
-                  tempTranslation.setY(objectNode.get("y").asDouble());
-                  tempTranslation.setZ(objectNode.get("z").asDouble());
-                  tempOrientation.set(objectNode.get("qx").asDouble(),
-                                      objectNode.get("qy").asDouble(),
-                                      objectNode.get("qz").asDouble(),
-                                      objectNode.get("qs").asDouble());
-                  tempTransform.set(tempOrientation, tempTranslation);
-                  object.set(tempTransform);
-                  objects.add(object);
-               }
-            });
+               fileNameToSave = environmentFile.getFileName().toString();
+            }
          }
       }
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
       ImGui.inputText("###saveText", saveString, flags);
       ImGui.sameLine();
-      if (ImGui.button("Save as new"))
+      if (ImGui.button("Save as"))
+      {
+         fileNameToSave = saveString.get();
+      }
+      if (fileNameToSave != null)
       {
          JSONFileTools.saveToClasspath("ihmc-open-robotics-software",
                                        "ihmc-high-level-behaviors/src/libgdx/resources",
-                                       "environments/" + saveString.get(),
+                                       "environments/" + fileNameToSave,
          rootNode ->
          {
             ArrayNode objectsArrayNode = rootNode.putArray("objects");
@@ -233,11 +232,77 @@ public class GDXEnvironment implements RenderableProvider
                objectNode.put("qs", tempOrientation.getS());
             }
          });
+         reindexScripts();
       }
 
-      pose3DWidget.render();
+      ImGui.checkbox("Show 3D Widget Tuner", show3DWidgetTuner);
+      if (show3DWidgetTuner.get())
+         pose3DWidget.renderImGuiTuner();
 
       ImGui.end();
+   }
+
+   private void loadEnvironment(Path environmentFile)
+   {
+      selectedEnvironmentFile = environmentFile;
+      objects.clear();
+      selectedObject = null;
+      intersectedObject = null;
+
+      if (loadedFilesOnce)
+      {
+         JSONFileTools.loadFromWorkspace("ihmc-open-robotics-software",
+                                         "ihmc-high-level-behaviors/src/libgdx/resources",
+                                         "environments/" + environmentFile.getFileName().toString(),
+         node ->
+         {
+            for (Iterator<JsonNode> it = node.withArray("objects").elements(); it.hasNext(); )
+            {
+               JsonNode objectNode = it.next();
+               GDXEnvironmentObject object = GDXEnvironmentObject.loadByName(objectNode.get("type").asText());
+               tempTranslation.setX(objectNode.get("x").asDouble());
+               tempTranslation.setY(objectNode.get("y").asDouble());
+               tempTranslation.setZ(objectNode.get("z").asDouble());
+               tempOrientation.set(objectNode.get("qx").asDouble(),
+                                   objectNode.get("qy").asDouble(),
+                                   objectNode.get("qz").asDouble(),
+                                   objectNode.get("qs").asDouble());
+               tempTransform.set(tempOrientation, tempTranslation);
+               object.set(tempTransform);
+               objects.add(object);
+            }
+         });
+      }
+   }
+
+   public void loadEnvironment(String environmentFileName)
+   {
+      reindexScripts();
+      Optional<Path> match = environmentFiles.stream().filter(path -> path.getFileName().toString().equals(environmentFileName)).findFirst();
+      if (match.isPresent())
+      {
+         loadEnvironment(match.get());
+      }
+      else
+      {
+         LogTools.error("Could not find environment file: {}", environmentFileName);
+      }
+   }
+
+   private void reindexScripts()
+   {
+      Path scriptsPath = WorkspacePathTools.findPathToResource("ihmc-open-robotics-software",
+                                                               "ihmc-high-level-behaviors/src/libgdx/resources",
+                                                               "environments");
+      environmentFiles.clear();
+      PathTools.walkFlat(scriptsPath, (path, pathType) ->
+      {
+         if (pathType == BasicPathVisitor.PathType.FILE)
+         {
+            environmentFiles.add(path);
+         }
+         return FileVisitResult.CONTINUE;
+      });
    }
 
    @Override

@@ -76,7 +76,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    private HumanoidFloatingRootJointRobot sdfRobot;
    private HighLevelHumanoidControllerFactory controllerFactory;
    private AvatarSimulation avatarSimulation;
-   private HumanoidNetworkProcessor networkProcessor;
+   protected HumanoidNetworkProcessor networkProcessor;
    private SimulationConstructionSet simulationConstructionSet;
 
    private ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator;
@@ -118,7 +118,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
 
    private final ConcurrentLinkedQueue<Command<?, ?>> controllerCommands = new ConcurrentLinkedQueue<>();
 
-   private PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
+   protected PubSubImplementation pubSubImplementation = PubSubImplementation.FAST_RTPS;
 
    public DRCSimulationStarter(DRCRobotModel robotModel, GroundProfile3D groundProfile3D)
    {
@@ -220,6 +220,11 @@ public class DRCSimulationStarter implements SimulationStarterInterface
    public DRCSCSInitialSetup getSCSInitialSetup()
    {
       return scsInitialSetup;
+   }
+
+   public DRCGuiInitialSetup getGuiInitialSetup()
+   {
+      return guiInitialSetup;
    }
 
    /**
@@ -605,7 +610,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * 
     * @param networkModuleParams
     */
-   private void startNetworkProcessor(HumanoidNetworkProcessorParameters networkModuleParams)
+   protected void startNetworkProcessor(HumanoidNetworkProcessorParameters networkModuleParams)
    {
       if (networkModuleParams.isUseROSModule() || networkModuleParams.isUseSensorModule())
       {

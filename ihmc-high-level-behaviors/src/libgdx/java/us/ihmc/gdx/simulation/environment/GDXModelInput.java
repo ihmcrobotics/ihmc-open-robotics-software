@@ -19,7 +19,6 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -29,10 +28,8 @@ import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXLargeCinderBlockRoughed;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -69,8 +66,6 @@ public class GDXModelInput
    private final HashMap<Character, ModelInstance> controlMap = new HashMap<>();
    private final HashSet<ModelInstance> controlAxes = new HashSet<>();
    private float modelYaw, modelPitch, modelRoll = 0;
-   private GDXImGuiBasedUI baseUI;
-   private final FramePose3D tempFramePose = new FramePose3D();
    private final RotationMatrix tempRotationMatrix = new RotationMatrix();
    private final ImBoolean editMode = new ImBoolean(false);
 
@@ -117,7 +112,7 @@ public class GDXModelInput
 
    public void updateSelections(ImGui3DViewInput input)
    {
-      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
+      Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
       int result = -1;
       double finalPerpDist = Double.MAX_VALUE;
       double finalDistFromOrigin = Double.MAX_VALUE;
@@ -245,7 +240,7 @@ public class GDXModelInput
             previousStateMouseX = input.getMousePosX();
             previousStateMouseY = input.getMousePosY();
 
-            Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
+            Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
 
             switch (state)
             {
@@ -317,13 +312,11 @@ public class GDXModelInput
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      if (vrManager.isVREnabled() && !selectedObjectIndexes.isEmpty())
+      if (GDXVRManager.isVREnabled() && !selectedObjectIndexes.isEmpty())
       {
-         PoseReferenceFrame controllerFrame = vrManager.getControllers().get(RobotSide.RIGHT).getReferenceFrame();
-         tempFramePose.setToZero(controllerFrame);
-         tempFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-         tempFramePose.get(tempRigidBodyTransform);
-         GDXTools.toGDX(tempRigidBodyTransform, environmentObjects.get(selectedObjectIndexes.stream().findFirst().get()).getRealisticModelInstance().transform);
+         vrManager.getControllers().get(RobotSide.RIGHT).getPose(ReferenceFrame.getWorldFrame(),
+                                                                 environmentObjects.get(selectedObjectIndexes.stream().findFirst().get())
+                                                                                   .getRealisticModelInstance().transform);
       }
    }
 
@@ -423,11 +416,6 @@ public class GDXModelInput
    public void setState(State state)
    {
       this.state = state;
-   }
-
-   public void setBaseUI(GDXImGuiBasedUI baseUI)
-   {
-      this.baseUI = baseUI;
    }
 
    public HashSet<ModelInstance> getControlAxes()

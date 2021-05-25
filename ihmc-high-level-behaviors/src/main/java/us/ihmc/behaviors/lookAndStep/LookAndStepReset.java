@@ -3,12 +3,14 @@ package us.ihmc.behaviors.lookAndStep;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.OperatorReviewEnabledToUI;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.ResetForUI;
+import java.util.ArrayList;
+
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepReset
 {
@@ -74,18 +76,13 @@ public class LookAndStepReset
       lookAndStep.lastCommandedFootsteps.clear();
       lookAndStep.controllerStatusTracker.reset();
 
-      BipedalSupportPlanarRegionParametersMessage supportPlanarRegionParametersMessage
-            = new BipedalSupportPlanarRegionParametersMessage();
-      boolean enableSupportRegions = lookAndStep.lookAndStepParameters.getEnableBipedalSupportRegions();
-      supportPlanarRegionParametersMessage.setEnable(enableSupportRegions);
-      lookAndStep.statusLogger.info("Sending enable support regions: {}", enableSupportRegions);
-      lookAndStep.helper.publish(BipedalSupportPlanarRegionPublisher.getTopic(lookAndStep.helper.getRobotModel().getSimpleRobotName()),
-                                 supportPlanarRegionParametersMessage);
-
       // REAStateRequestMessage clearMessage = new REAStateRequestMessage();
       // clearMessage.setRequestClear(true);
       // statusLogger.info("Requesting clear REA");
       // helper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+
+      lookAndStep.helper.publish(PlanarRegionsForUI, new PlanarRegionsList());
+      lookAndStep.helper.publish(BodyPathPlanForUI, new ArrayList<>());
 
       lookAndStep.statusLogger.info("Clearing SLAM");
       lookAndStep.helper.publish(SLAMModuleAPI.CLEAR);

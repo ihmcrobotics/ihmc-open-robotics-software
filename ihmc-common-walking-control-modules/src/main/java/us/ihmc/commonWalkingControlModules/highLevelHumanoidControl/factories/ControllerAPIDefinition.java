@@ -84,7 +84,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMass
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ClearDelayQueueCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ContactStateChangeCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
@@ -162,7 +161,6 @@ public class ControllerAPIDefinition
 
       /** Commands supported by multi-contact controller, not in this repo */
       commands.add(WholeBodyMultiContactTrajectoryCommand.class);
-      commands.add(ContactStateChangeCommand.class);
 
       /** Command supported by the joint-space controller {@link JointspacePositionControllerState} */
       commands.add(WholeBodyJointspaceTrajectoryCommand.class);

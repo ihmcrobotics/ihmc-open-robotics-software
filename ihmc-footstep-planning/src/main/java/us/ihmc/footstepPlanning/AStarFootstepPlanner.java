@@ -113,7 +113,8 @@ public class AStarFootstepPlanner
 
       this.swingPlanningModule = new SwingPlanningModule(footstepPlannerParameters,
                                                          swingPlannerParameters,
-                                                         walkingControllerParameters);
+                                                         walkingControllerParameters,
+                                                         footPolygons);
    }
 
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
@@ -132,11 +133,12 @@ public class AStarFootstepPlanner
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
-      PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
+      PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
+      PlanarRegionsList planarRegionsListForChecking = request.getPlanarRegionsList();
 
-      snapper.setPlanarRegions(planarRegionsList);
-      checker.setPlanarRegions(planarRegionsList);
-      idealStepCalculator.setPlanarRegionsList(planarRegionsList);
+      snapper.setPlanarRegions(planarRegionsListForStepping);
+      idealStepCalculator.setPlanarRegionsList(planarRegionsListForStepping);
+      checker.setPlanarRegions(planarRegionsListForChecking);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength =

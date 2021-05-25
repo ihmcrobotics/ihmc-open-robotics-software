@@ -71,8 +71,11 @@ public class ValkyrieTorqueOffsetPrinter implements TorqueOffsetPrinter
       try
       {
          Path torqueOffsetFilePath = Paths.get(TORQUE_OFFSET_FILE);
-         Files.createDirectories(torqueOffsetFilePath.getParent());
+         if (!torqueOffsetFilePath.getParent().toFile().exists())
+            Files.createDirectories(torqueOffsetFilePath.getParent());
          File file = torqueOffsetFilePath.toFile();
+         if (!file.exists())
+            file.createNewFile();
          Map<String, Double> oldTorqueOffsets = loadTorqueOffsetsFromFile();
          exportTorqueOffsetsToFile(file, buildXMLJoints(jointTorqueOffsetEstimator, oldTorqueOffsets));
       }

@@ -53,6 +53,16 @@ public interface SteppingParameters extends FootstepParameters
    }
 
    /**
+    * Custom waypoint positions are precomputed externally. During execution the initial foot pose might be different than expected,
+    * and the preplanned trajectory might have the foot go backward before moving forward, for example. This provides a threshold
+    * for the maximum angle from forward to use - lower is more restrictive, 90 deg max recommended.
+    */
+   public default double getCustomWaypointAngleThreshold()
+   {
+      return Math.toRadians(50.0);
+   }
+
+   /**
     * Returns the maximum angle the foot can turn outwards in a step.
     */
    public abstract double getMaxAngleTurnOutwards();

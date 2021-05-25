@@ -1,0 +1,36 @@
+#ifndef __controller_msgs__msg__DirectionalControlInputMessage__idl__
+#define __controller_msgs__msg__DirectionalControlInputMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is sent to command the robot to move as if controlled by a joystick.
+       * The forward, right and clockwise parameters are a direction of travel and speed
+       * represented as a set of 3 movement impulses:
+       * - forwards/backwards
+       * - left/right
+       * - clockwise/counter-clockwise rotation
+       * 
+       * Each impulse value is a floating point number, v, with -1 <= v <= 1, where
+       * v<0 indicates backwards/left/counter-clockwise movement at (-v)*max speed,
+       * v=0 indicates no change,
+       * v>0 indicates forwards/right/clockwise at v*max speed.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::DirectionalControlInputMessage_")
+      struct DirectionalControlInputMessage
+      {
+        unsigned long sequence_id;
+        double forward;
+        double right;
+        double clockwise;
+      };
+    };
+  };
+};
+
+#endif

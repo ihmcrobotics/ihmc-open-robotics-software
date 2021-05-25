@@ -135,7 +135,7 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    private static final String lidarPoseLink = "hokuyo_link";
    private static final String lidarJointName = "hokuyo_joint";
    private static final String lidarBaseFrame = multisense_namespace + "/head";
-   private static final String lidarEndFrame = "/head_hokuyo_frame";
+   private static final String lidarEndFrame = multisense_namespace + "/head_hokuyo_frame";
    private static final String baseTfName = "upperNeckPitchLink";
 
    private ImmutableTriple<String, String, RigidBodyTransform> neckToLeftCameraTransform = new ImmutableTriple<>(baseTfName,
@@ -252,7 +252,9 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                MULTISENSE_LIDAR_ID);
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT,
                                                                                           left_camera_name,
-                                                                                          left_camera_compressed_topic,
+// SCS produces an uncompressed image rather than a compressed image                                                                                          
+//                                                                                          left_camera_compressed_topic,
+                                                                                          left_camera_topic,
                                                                                           left_info_camera_topic,
                                                                                           multisenseHandoffFrame,
                                                                                           baseTfName,
@@ -260,7 +262,9 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                           MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT,
                                                                                            right_camera_name,
-                                                                                           right_camera_compressed_topic,
+// SCS produces an uncompressed image rather than a compressed image                                                     
+//                                                                                           right_camera_compressed_topic,
+                                                                                           right_camera_topic,
                                                                                            right_info_camera_topic,
                                                                                            multisenseHandoffFrame,
                                                                                            baseTfName,

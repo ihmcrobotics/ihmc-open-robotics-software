@@ -29,6 +29,9 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @deprecated This class isn't currently used.
+ */
 public class LookAndStepSupportRegionsPublisher
 {
    private ResettableExceptionHandlingExecutorService executor;

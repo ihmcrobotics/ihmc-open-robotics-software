@@ -7,7 +7,8 @@ import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+
+import java.util.function.Supplier;
 
 /**
  * This class is just to do the non-trivial or high computation stuff.
@@ -16,21 +17,29 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
  */
 public class ImGui3DViewInput
 {
+   private final FocusBasedGDXCamera camera;
+   private final Supplier<Float> viewportSizeXSupplier;
+   private final Supplier<Float> viewportSizeYSupplier;
    private boolean draggingLeft = false;
    private float dragBucketX;
    private float dragBucketY;
-
    private float mouseDraggedX = 0.0f;
    private float mouseDraggedY = 0.0f;
    private float mousePosX = 0.0f;
    private float mousePosY = 0.0f;
    private boolean isWindowHovered;
    private float mouseWheelDelta;
-
    private final Vector3 gdxOrigin = new Vector3();
    private final Vector3 gdxDirection = new Vector3();
    private final Line3D pickRayInWorld = new Line3D();
    private boolean computedPickRay = false;
+
+   public ImGui3DViewInput(FocusBasedGDXCamera camera, Supplier<Float> viewportSizeXSupplier, Supplier<Float> viewportSizeYSupplier)
+   {
+      this.camera = camera;
+      this.viewportSizeXSupplier = viewportSizeXSupplier;
+      this.viewportSizeYSupplier = viewportSizeYSupplier;
+   }
 
    public void compute()
    {
@@ -64,15 +73,14 @@ public class ImGui3DViewInput
       }
    }
 
-   public Line3DReadOnly getPickRayInWorld(GDXImGuiBasedUI baseUI)
+   public Line3DReadOnly getPickRayInWorld()
    {
       if (!computedPickRay)
       {
          computedPickRay = true;
 
-         FocusBasedGDXCamera camera = baseUI.getSceneManager().getCamera3D();
-         float viewportWidth = baseUI.getViewportSizeX();
-         float viewportHeight = baseUI.getViewportSizeY();
+         float viewportWidth = viewportSizeXSupplier.get();
+         float viewportHeight = viewportSizeYSupplier.get();
 
          float viewportX = (2.0f * getMousePosX()) / viewportWidth - 1.0f;
          float viewportY = (2.0f * (viewportHeight - getMousePosY())) / viewportHeight - 1.0f;

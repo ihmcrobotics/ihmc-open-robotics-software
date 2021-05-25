@@ -3,8 +3,6 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.ContactStateMagnitudeToForceMatrixHelper;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -565,7 +563,7 @@ public class MPCTestHelper
       DMatrixRMaj contactPointForceToTorqueJacobian = new DMatrixRMaj(3, 3 * contact.getNumberOfContactPoints());
       DMatrixRMaj coefficientsToForceJacobian = new DMatrixRMaj(3 * contact.getNumberOfContactPoints(), coefficients);
 
-      ContactPlaneJacobianCalculator.computeContactPointAccelerationJacobian(mass, time, omega, 0, 0, contact, coefficientsToForceJacobian);
+      ContactPlaneJacobianCalculator.computeContactPlaneAccelerationJacobian(mass, time, omega, 0, 0, contact, coefficientsToForceJacobian);
 
       for (int contactIdx = 0; contactIdx < contact.getNumberOfContactPoints(); contactIdx++)
       {

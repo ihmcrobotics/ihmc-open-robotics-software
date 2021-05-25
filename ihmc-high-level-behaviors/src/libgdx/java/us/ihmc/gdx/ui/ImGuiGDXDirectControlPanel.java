@@ -200,7 +200,7 @@ public class ImGuiGDXDirectControlPanel
                    .set(HumanoidMessageTools.createSO3TrajectoryMessage(2.0,
                                                                         frameChestYawPitchRoll,
                                                                         EuclidCoreTools.zeroVector3D,
-                                                                        ReferenceFrame.getWorldFrame()));
+                                                                        syncedRobotForChestSlider.getReferenceFrames().getPelvisZUpFrame()));
             long frameId = MessageTools.toFrameId(ReferenceFrame.getWorldFrame());
             message.getSo3Trajectory().getFrameInformation().setDataReferenceFrameId(frameId);
 

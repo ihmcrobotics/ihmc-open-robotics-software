@@ -1,15 +1,11 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.ContactStateChangeMessage;
 import controller_msgs.msg.dds.WholeBodyMultiContactTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-
-import java.util.List;
 
 public class WholeBodyMultiContactTrajectoryCommand
       implements Command<WholeBodyMultiContactTrajectoryCommand, WholeBodyMultiContactTrajectoryMessage>, EpsilonComparable<WholeBodyMultiContactTrajectoryCommand>
@@ -33,7 +29,7 @@ public class WholeBodyMultiContactTrajectoryCommand
    {
       sequenceId = message.getSequenceId();
       trajectoryDuration = message.getTrajectoryDuration();
-      pelvisPose.set(message.getPelvisPose());
+      pelvisPose.set(message.getRootJointPose());
 
       for (int i = 0; i < message.getJointAngles().size(); i++)
       {

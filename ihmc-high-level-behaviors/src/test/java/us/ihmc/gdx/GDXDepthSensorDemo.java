@@ -11,7 +11,7 @@ public class GDXDepthSensorDemo
    public GDXDepthSensorDemo()
    {
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(80.0, 800, 600, 0.05, 5.0);
+      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor", 80.0, 800, 600, 0.05, 5.0);
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
@@ -28,6 +28,7 @@ public class GDXDepthSensorDemo
             depthSensorSimulator.getCamera().direction.set(0.0f, 0.0f, -1.0f);
 
             pointCloudRenderer.create((int) depthSensorSimulator.getCamera().viewportHeight * (int) depthSensorSimulator.getCamera().viewportWidth);
+            pointCloudRenderer.setPointSize(0.01f);
             sceneManager.addRenderableProvider(pointCloudRenderer, GDXSceneLevel.VIRTUAL);
          }
 

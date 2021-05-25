@@ -11,10 +11,10 @@ import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXMediumCinderBlockRoughed;
+import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.function.Function;
@@ -26,6 +26,7 @@ public class GDXEnvironmentObject
 
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
+   private Vector3D collisionShapeOffset;
    private Sphere3D boundingSphere;
    private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
@@ -35,19 +36,23 @@ public class GDXEnvironmentObject
    private final Point3D tempRayOrigin = new Point3D();
    private final Point3D firstSphereIntersection = new Point3D();
    private final Point3D secondSphereIntersection = new Point3D();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
    public void create(Model realisticModel)
    {
       this.realisticModel = realisticModel;
+      realisticModelInstance = new GDXModelInstance(realisticModel);
    }
 
    public void create(Model realisticModel,
+                      Vector3D collisionShapeOffset,
                       Sphere3D boundingSphere,
                       Shape3DBasics collisionGeometryObject,
                       Function<Point3DReadOnly, Boolean> isPointInside,
                       Model collisionGraphic)
    {
       this.realisticModel = realisticModel;
+      this.collisionShapeOffset = collisionShapeOffset;
       this.boundingSphere = boundingSphere;
       this.collisionGeometryObject = collisionGeometryObject;
       this.isPointInside = isPointInside;
@@ -108,6 +113,11 @@ public class GDXEnvironmentObject
       }
    }
 
+   public Vector3D getCollisionShapeOffset()
+   {
+      return collisionShapeOffset;
+   }
+
    public GDXModelInstance getRealisticModelInstance()
    {
       return realisticModelInstance;
@@ -123,34 +133,64 @@ public class GDXEnvironmentObject
       return collisionGeometryObject;
    }
 
-   public void set(Point3DBasics translation)
+   public void set(Point3DReadOnly translation)
    {
+      tempTransform.setToZero();
+      tempTransform.appendTranslation(collisionShapeOffset);
+      tempTransform.appendTranslation(translation);
       GDXTools.toGDX(translation, getRealisticModelInstance().transform);
-      GDXTools.toGDX(translation, getCollisionModelInstance().transform);
-      getCollisionGeometryObject().getPose().getTranslation().set(translation);
-      boundingSphere.getPosition().set(translation);
+      GDXTools.toGDX(tempTransform, getCollisionModelInstance().transform);
+      getCollisionGeometryObject().getPose().getTranslation().set(tempTransform.getTranslation());
+      boundingSphere.getPosition().set(tempTransform.getTranslation());
    }
 
    public void set(RigidBodyTransform transform)
    {
+      tempTransform.setToZero();
+      tempTransform.appendTranslation(collisionShapeOffset);
+      transform.transform(tempTransform);
       GDXTools.toGDX(transform, getRealisticModelInstance().transform);
-      GDXTools.toGDX(transform, getCollisionModelInstance().transform);
-      getCollisionGeometryObject().getPose().set(transform);
-      boundingSphere.getPosition().set(transform.getTranslation());
+      GDXTools.toGDX(tempTransform, getCollisionModelInstance().transform);
+      getCollisionGeometryObject().getPose().set(tempTransform);
+      boundingSphere.getPosition().set(tempTransform.getTranslation());
    }
 
    public GDXEnvironmentObject duplicate()
    {
       GDXEnvironmentObject duplicate = new GDXEnvironmentObject();
-      duplicate.create(realisticModel, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
+      duplicate.create(realisticModel, collisionShapeOffset, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
       return duplicate;
    }
 
    public static GDXEnvironmentObject loadByName(String objectClassName)
    {
-      if (objectClassName.equals(GDXMediumCinderBlockRoughed.class.getSimpleName()))
+      if (objectClassName.equals(GDXSmallCinderBlockRoughed.class.getSimpleName()))
+      {
+         return new GDXSmallCinderBlockRoughed();
+      }
+      else if (objectClassName.equals(GDXMediumCinderBlockRoughed.class.getSimpleName()))
       {
          return new GDXMediumCinderBlockRoughed();
+      }
+      else if (objectClassName.equals(GDXLargeCinderBlockRoughed.class.getSimpleName()))
+      {
+         return new GDXLargeCinderBlockRoughed();
+      }
+      else if (objectClassName.equals(GDXLabFloorObject.class.getSimpleName()))
+      {
+         return new GDXLabFloorObject();
+      }
+      else if (objectClassName.equals(GDXPalletObject.class.getSimpleName()))
+      {
+         return new GDXPalletObject();
+      }
+      else if (objectClassName.equals(GDXDoorOnlyObject.class.getSimpleName()))
+      {
+         return new GDXDoorOnlyObject();
+      }
+      else if (objectClassName.equals(GDXDoorFrameObject.class.getSimpleName()))
+      {
+         return new GDXDoorFrameObject();
       }
       else
       {

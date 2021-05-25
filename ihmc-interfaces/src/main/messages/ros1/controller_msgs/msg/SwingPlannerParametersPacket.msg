@@ -1,4 +1,7 @@
 # This message is part of the IHMC footstep planning module.
+# The parameters below are used in the class CollisionFreeSwingCalculator, which computes a trajectory with ~10 knot points.
+# The naming below is used to describe a trapezoid curve, such that parameters have a low and high value, and are interpolated
+# between them based on a low and high percentage through the trajectory.
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
@@ -69,5 +72,56 @@ float64 waypoint_proportion_shift_for_stub_avoidance
 # If using the custom position swing planner, will add additional swing time if the trajectory is expanded
 # Field default value -1.0
 float64 additional_swing_time_if_expanded
+
+# Field default value -1.0
+float64 percentage_extra_size_x_low
+
+# Field default value -1.0
+float64 percentage_extra_size_x_high
+
+# Field default value -1.0
+float64 extra_size_x_low
+
+# Field default value -1.0
+float64 extra_size_x_high
+
+# Field default value -1.0
+float64 percentage_extra_size_y_low
+
+# Field default value -1.0
+float64 percentage_extra_size_y_high
+
+# Field default value -1.0
+float64 extra_size_y_low
+
+# Field default value -1.0
+float64 extra_size_y_high
+
+# Field default value -1.0
+float64 percentage_extra_size_z_low
+
+# Field default value -1.0
+float64 percentage_extra_size_z_high
+
+# Field default value -1.0
+float64 extra_size_z_low
+
+# Field default value -1.0
+float64 extra_size_z_high
+
+# Field default value -1.0
+float64 percentage_max_displacement_low
+
+# Field default value -1.0
+float64 percentage_max_displacement_high
+
+# Field default value -1.0
+float64 max_displacement_low
+
+# Field default value -1.0
+float64 max_displacement_high
+
+# Field default value -1.0
+float64 motion_correlation_alpha
 
 

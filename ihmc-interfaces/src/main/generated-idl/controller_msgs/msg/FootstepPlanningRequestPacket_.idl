@@ -18,11 +18,14 @@ module controller_msgs
       const octet SWING_PLANNER_TYPE_NONE =
       0;
 
-      const octet SWING_PLANNER_TYPE_POSITION =
+      const octet SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION =
       1;
 
-      const octet SWING_PLANNER_TYPE_PROPORTION =
+      const octet SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION =
       2;
+
+      const octet SWING_PLANNER_TYPE_PROPORTION =
+      3;
 
       const long NO_PLAN_ID =
       -1;
@@ -119,7 +122,8 @@ module controller_msgs
          */
         controller_msgs::msg::dds::PlanarRegionsListMessage planar_regions_list_message;
         /**
-         * Explicitly tell the planner to use flat ground
+         * If true, steps are snapped assuming flat ground.
+         * Note that collision checks will still be performed if enabled, such as FootstepPlannerParametersPacket.checkForBodyBoxCollisions
          */
         boolean assume_flat_ground;
         /**

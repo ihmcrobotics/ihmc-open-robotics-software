@@ -6,49 +6,67 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImInt;
 import imgui.type.ImString;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
-import us.ihmc.behaviors.RemoteBehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.behaviors.tools.MessagerHelper;
+import us.ihmc.behaviors.tools.YoVariableClientHelper;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.messager.Messager;
 import us.ihmc.messager.SharedMemoryMessager;
-import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.ros2.ROS2Node;
-import us.ihmc.utilities.ros.RosMainNode;
 
+import java.time.LocalDateTime;
+import java.util.LinkedList;
 import java.util.function.Supplier;
+
+import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
 public class GDXBehaviorsPanel implements RenderableProvider
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
    private final GDXBehaviorUIRegistry behaviorRegistry;
-   private final ImString messagerHost = new ImString("localhost", 100);
-   private volatile boolean disconnecting = false;
-   private volatile boolean connecting = false;
-   private Messager messager = null;
-
+   private final ImString behaviorModuleHost = new ImString("localhost", 100);
+   private volatile boolean messagerConnecting = false;
+   private String messagerConnectedHost = "";
+   private final MessagerHelper messagerHelper;
+   private volatile boolean yoClientDisconnecting = false;
+   private volatile boolean yoClientConnecting = false;
+   private final YoVariableClientHelper yoVariableClientHelper;
 
    private final GDXBuildingExplorationBehaviorUI buildingExplorationUI;
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
+   private final BehaviorHelper behaviorHelper;
+   private final LinkedList<String> logArray = new LinkedList<>();
+   private final ImInt selectedLogEntry = new ImInt();
 
-   public GDXBehaviorsPanel(RosMainNode ros1Node,
+   public GDXBehaviorsPanel(String ros1NodeName,
                             ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
                             GDXBehaviorUIRegistry behaviorRegistry)
    {
       this.behaviorRegistry = behaviorRegistry;
 
-      buildingExplorationUI = new GDXBuildingExplorationBehaviorUI();
-      lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(new BehaviorHelper(robotModelSupplier.get(), null, ros1Node, ros2Node));
+      behaviorHelper = new BehaviorHelper(robotModelSupplier.get(), ros1NodeName, getClass().getSimpleName(), ros2Node);
+      messagerHelper = behaviorHelper.getMessagerHelper();
+      yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
+      buildingExplorationUI = new GDXBuildingExplorationBehaviorUI(messagerHelper);
+      lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(behaviorHelper);
+
+      logArray.addLast("Log started at " + LocalDateTime.now());
+      behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
+      {
+         synchronized (logArray)
+         {
+            logArray.addLast(logEntry.getRight());
+         }
+      });
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -68,98 +86,131 @@ public class GDXBehaviorsPanel implements RenderableProvider
    public void render()
    {
       ImGui.begin(windowName);
-      if (connecting)
+      if (messagerConnecting)
       {
-         ImGui.text("Connecting...");
-         if (messager.isMessagerOpen())
+         ImGui.text("Messager connecting...");
+         if (messagerHelper.isConnected())
          {
-            connecting = false;
-            updateMessager();
+            messagerConnecting = false;
          }
       }
-      else if (disconnecting)
+      else if (messagerHelper.isDisconnecting())
       {
-         ImGui.text("Disconnecting...");
+         ImGui.text("Messager disconnecting...");
       }
-      else if (messager == null)
+      else if (!messagerHelper.isConnected())
       {
          int flags = ImGuiInputTextFlags.None;
          flags += ImGuiInputTextFlags.CallbackResize;
-         ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "messagerHost"), messagerHost, flags);
+         ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "messagerHost"), behaviorModuleHost, flags);
          ImGui.sameLine();
-         if (ImGui.button("Connect"))
+         if (ImGui.button("Connect messager"))
          {
-            connectViaKryo(messagerHost.get());
+            connectViaKryo(behaviorModuleHost.get());
          }
 
          SharedMemoryMessager potentialSharedMemoryMessager = BehaviorModule.getSharedMemoryMessager();
          if (potentialSharedMemoryMessager != null && potentialSharedMemoryMessager.isMessagerOpen())
          {
-            if (ImGui.button("Use shared memory"))
+            if (ImGui.button("Use shared memory messager"))
             {
-               messager = potentialSharedMemoryMessager;
-               updateMessager();
+               messagerHelper.connectViaSharedMemory(potentialSharedMemoryMessager);
             }
          }
       }
       else
       {
-         if (messager.isMessagerOpen())
+         if (messagerHelper.isUsingSharedMemory())
          {
-            if (messager instanceof SharedMemoryMessager)
-            {
-               ImGui.text("Using shared memory messager.");
-            }
-            else if (messager instanceof KryoMessager)
-            {
-               ImGui.text("Connected to: " + messagerHost.get());
-            }
+            ImGui.text("Using shared memory messager.");
+         }
+         else
+         {
+            ImGui.text("Messager connected to " + messagerConnectedHost + ".");
+         }
 
-            if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
-            {
-               if (messager instanceof SharedMemoryMessager)
-               {
-                  messager = null;
-               }
-               else
-               {
-                  disconnect();
-               }
-            }
-
-            lookAndStepUI.renderWidgetsOnly();
+         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect messager")))
+         {
+            disconnectMessager();
          }
       }
+      if (yoClientConnecting)
+      {
+         ImGui.text("YoVariable client connecting...");
+         if (yoVariableClientHelper.isConnected())
+         {
+            yoClientConnecting = false;
+         }
+      }
+      else if (yoClientDisconnecting)
+      {
+         ImGui.text("YoVariable client disconnecting...");
+      }
+      else if (!yoVariableClientHelper.isConnected())
+      {
+         if (ImGui.button("Connect YoVariable client"))
+         {
+            connectYoVariableClient();
+         }
+      }
+      else
+      {
+         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName() + ".");
+
+         if (ImGui.button("Disconnect YoVariable client"))
+         {
+            disconnectYoVariableClient();
+         }
+      }
+
+      if (messagerHelper.isConnected())
+      {
+         lookAndStepUI.renderWidgetsOnly();
+      }
+
+      synchronized (logArray)
+      {
+         selectedLogEntry.set(logArray.size() - 1);
+         ImGui.text("Behavior status log:");
+         ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
+         int numLogEntriesToShow = 15;
+         while (logArray.size() > numLogEntriesToShow)
+            logArray.removeFirst();
+         ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), numLogEntriesToShow);
+      }
+      ImGui.popItemWidth();
+
       ImGui.end();
    }
 
    public void connectViaKryo(String hostname)
    {
-      messagerHost.set(hostname);
-      messager = RemoteBehaviorInterface.createForUI(behaviorRegistry, hostname);
-      connecting = true;
+      behaviorModuleHost.set(hostname);
+      messagerHelper.connectViaKryo(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT.getPort());
+      messagerConnectedHost = behaviorModuleHost.get();
+      messagerConnecting = true;
    }
 
-   public void disconnect()
+   public void connectYoVariableClient()
    {
-      disconnecting = true;
-      ThreadTools.startAThread(() ->
-      {
-         ExceptionTools.handle(messager::closeMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
-         messager = null;
-         disconnecting = false;
-      }, "MessagerDisconnectionThread");
+      yoVariableClientHelper.start(behaviorModuleHost.get(), NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT.getPort());
+      yoClientConnecting = true;
    }
 
-   private void updateMessager()
+   public void disconnectMessager()
    {
-      buildingExplorationUI.setMessager(messager);
-      lookAndStepUI.setMessager(messager);
+      messagerHelper.disconnect();
+   }
+
+   public void disconnectYoVariableClient()
+   {
+      yoVariableClientHelper.disconnect();
    }
 
    public void destroy()
    {
-      disconnect();
+      disconnectMessager();
+      disconnectYoVariableClient();
       lookAndStepUI.destroy();
    }
 
