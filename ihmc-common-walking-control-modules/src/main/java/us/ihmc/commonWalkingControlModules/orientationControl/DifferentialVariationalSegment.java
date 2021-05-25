@@ -14,15 +14,18 @@ import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPositionTr
 import java.util.ArrayList;
 import java.util.List;
 
-public class DifferentialVariationalSegment implements S1Function
+public class DifferentialVariationalSegment implements VariationalFunction
 {
    private final double dt;
    private final DMatrixRMaj PB = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj BTransposeP = new DMatrixRMaj(3, 6);
    private final DMatrixRMaj PDot = new DMatrixRMaj(6, 6);
 
    private final VariationalDynamicsCalculator dynamicsCalculator = new VariationalDynamicsCalculator();
    private final RecyclingArrayList<DMatrixRMaj> PReverseTrajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
+   private final RecyclingArrayList<DMatrixRMaj> KReverseTrajectory = new RecyclingArrayList<>(() -> new DMatrixRMaj(6, 6));
    final List<DMatrixRMaj> PTrajectory = new ArrayList<>();
+   final List<DMatrixRMaj> KTrajectory = new ArrayList<>();
 
    private final Vector3DBasics angularVelocityInBodyFrame = new Vector3D();
 
@@ -31,19 +34,24 @@ public class DifferentialVariationalSegment implements S1Function
       this.dt = dt;
    }
 
-   /*
-   public void set(LQRCommonValues lqrCommonValues, DMatrixRMaj S1AtEnd, double duration)
-   {
-      set(lqrCommonValues.getQ1(),
-          lqrCommonValues.getR1Inverse(),
-          lqrCommonValues.getNTranspose(),
-          lqrCommonValues.getA(),
-          lqrCommonValues.getB(),
-          S1AtEnd,
-          duration);
-   }
 
-    */
+   public void set(VariationalCommonValues commonValues,
+                   MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectory,
+                   MultipleWaypointsPositionTrajectoryGenerator angularMomentumTrajectory,
+                   DMatrixRMaj PAtEnd,
+                   double startTime,
+                   double endTime)
+   {
+      set(commonValues.getQ(),
+          commonValues.getRInverse(),
+          commonValues.getInertia(),
+          commonValues.getInertiaInverse(),
+          orientationTrajectory,
+          angularMomentumTrajectory,
+          PAtEnd,
+          startTime,
+          endTime);
+   }
 
    public void set(DMatrixRMaj Q,
                    DMatrixRMaj RInverse,
@@ -56,23 +64,17 @@ public class DifferentialVariationalSegment implements S1Function
                    double endTime)
    {
       PTrajectory.clear();
+      KTrajectory.clear();
       PReverseTrajectory.clear();
+      KReverseTrajectory.clear();
       PReverseTrajectory.add().set(PAtEnd);
+
+      computeDesireds(endTime, inertia, inertiaInverse, orientationTrajectory, angularMomentumTrajectory);
+      computeGainMatrix(dynamicsCalculator.getB(), PAtEnd, RInverse, KReverseTrajectory.add());
 
       for (double time = endTime - dt; time >= startTime + dt / 10.0; time -= dt)
       {
-         orientationTrajectory.compute(time);
-         angularMomentumTrajectory.compute(time);
-
-         FrameQuaternionReadOnly desiredOrientation = orientationTrajectory.getOrientation();
-         angularVelocityInBodyFrame.set(orientationTrajectory.getAngularVelocity());
-         desiredOrientation.transform(angularVelocityInBodyFrame);
-
-         dynamicsCalculator.compute(desiredOrientation,
-                                    angularVelocityInBodyFrame,
-                                    angularMomentumTrajectory.getVelocity(),
-                                    inertia,
-                                    inertiaInverse);
+         computeDesireds(time, inertia, inertiaInverse, orientationTrajectory, angularMomentumTrajectory);
 
          DMatrixRMaj previousP = PReverseTrajectory.getLast();
          DMatrixRMaj newP = PReverseTrajectory.add();
@@ -81,26 +83,60 @@ public class DifferentialVariationalSegment implements S1Function
          computePDot(Q, PB, RInverse, previousP, dynamicsCalculator.getA());
 
          CommonOps_DDRM.add(previousP, -dt, PDot, newP);
+
+         computeGainMatrix(dynamicsCalculator.getB(), newP, RInverse, KReverseTrajectory.add());
       }
 
       for (int i = PReverseTrajectory.size() - 1; i >= 0; i--)
       {
          PTrajectory.add(PReverseTrajectory.get(i));
+         KTrajectory.add(KReverseTrajectory.get(i));
       }
    }
 
+   private void computeDesireds(double time,
+                                DMatrixRMaj inertia,
+                                DMatrixRMaj inertiaInverse,
+                                MultipleWaypointsOrientationTrajectoryGenerator orientationTrajectory,
+                                MultipleWaypointsPositionTrajectoryGenerator angularMomentumTrajectory)
+   {
+      orientationTrajectory.compute(time);
+      angularMomentumTrajectory.compute(time);
+
+      FrameQuaternionReadOnly desiredOrientation = orientationTrajectory.getOrientation();
+      angularVelocityInBodyFrame.set(orientationTrajectory.getAngularVelocity());
+      desiredOrientation.transform(angularVelocityInBodyFrame);
+
+      dynamicsCalculator.compute(desiredOrientation,
+                                 angularVelocityInBodyFrame,
+                                 angularMomentumTrajectory.getVelocity(),
+                                 inertia,
+                                 inertiaInverse);
+   }
+
+   private void computeGainMatrix(DMatrixRMaj B, DMatrixRMaj P, DMatrixRMaj RInverse, DMatrixRMaj KMatrixToPack)
+   {
+      CommonOps_DDRM.mult(B, P, BTransposeP);
+      CommonOps_DDRM.mult(RInverse, BTransposeP, KMatrixToPack);
+   }
+
    @Override
-   public void compute(double timeInState, DMatrixRMaj S1ToPack)
+   public void compute(double timeInState, DMatrixRMaj PToPack, DMatrixRMaj KToPack)
    {
       int startIndex = getStartIndex(timeInState);
-      DMatrixRMaj start = PTrajectory.get(startIndex);
+      DMatrixRMaj startP = PTrajectory.get(startIndex);
+      DMatrixRMaj startK = KTrajectory.get(startIndex);
       if (startIndex == PTrajectory.size() - 1)
       {
-         S1ToPack.set(PTrajectory.get(PTrajectory.size() - 1));
+         PToPack.set(PTrajectory.get(PTrajectory.size() - 1));
+         KToPack.set(KTrajectory.get(KTrajectory.size() - 1));
          return;
       }
-      DMatrixRMaj end = PTrajectory.get(startIndex + 1);
-      interpolate(start, end, getAlphaBetweenSegments(timeInState), S1ToPack);
+      DMatrixRMaj endP = PTrajectory.get(startIndex + 1);
+      DMatrixRMaj endK = KTrajectory.get(startIndex + 1);
+      double alpha = getAlphaBetweenSegments(timeInState);
+      interpolate(startP, endP, alpha, PToPack);
+      interpolate(startK, endK, alpha, KToPack);
    }
 
    int getStartIndex(double timeInState)
