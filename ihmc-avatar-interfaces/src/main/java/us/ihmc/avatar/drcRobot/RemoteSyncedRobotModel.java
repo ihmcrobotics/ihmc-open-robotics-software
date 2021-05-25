@@ -20,7 +20,7 @@ public class RemoteSyncedRobotModel extends MessageSyncedRobotModel
 
    public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
-      super(fullRobotModel);
+      super(fullRobotModel, robotModel.getSensorInformation());
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
                                                     RobotConfigurationData.class,
                                                     ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()),
