@@ -1,9 +1,9 @@
 package us.ihmc.gdx;
 
-import com.badlogic.gdx.graphics.g3d.Model;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.*;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.badlogic.gdx.utils.SerializationException;
@@ -99,6 +99,23 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          Model model = GDXModelLoader.loadG3DModel(modifiedFileName);
          models.add(model);
 
+         if (graphics3DAddModelFile.getAppearance() != null)
+         {
+            AppearanceDefinition appearance = graphics3DAddModelFile.getAppearance();
+            Color color = GDXTools.toGDX(appearance);
+
+            Material firstMaterial = model.materials.get(0);
+
+            if (firstMaterial != null)
+            {
+               firstMaterial.set(ColorAttribute.createDiffuse(color.r, color.g, color.b, color.a));
+               if (color.a < 1.0f)
+               {
+                  firstMaterial.set(new BlendingAttribute(true, color.a));
+               }
+            }
+         }
+
          ModelInstance modelInstance = new ModelInstance(model);
          modelInstances.add(modelInstance);
       }
@@ -108,18 +125,6 @@ public class GDXGraphicsObject extends Graphics3DInstructionExecutor implements 
          e.printStackTrace();
       }
 
-      //      if (graphics3DAddModelFile.getAppearance() != null)
-//      {
-//         Material outputMaterial = convertMaterial(graphics3DAddModelFile.getAppearance());
-//         for (int i = 0; i < outputModelMeshes.length; i++)
-//         {
-//            outputModelMeshes[i].setMaterial(outputMaterial);
-//         }
-//      }
-//
-//      Group meshGroup = new Group(outputModelMeshes);
-//      currentNode.getChildren().add(meshGroup);
-//      currentNode = meshGroup;
    }
 
    @Override
