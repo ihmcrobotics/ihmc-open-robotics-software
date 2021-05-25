@@ -52,17 +52,18 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
 
    public boolean isConnected()
    {
-      return yoVariableClient.isConnected();
+      return yoVariableClient != null && yoVariableClient.isConnected();
    }
 
    public void disconnect()
    {
-      yoVariableClient.disconnect();
+      if (yoVariableClient != null)
+         yoVariableClient.disconnect();
    }
 
    public String getServerName()
    {
-      return yoVariableClient.getServerName();
+      return yoVariableClient == null ? "null" : yoVariableClient.getServerName();
    }
 
    @Override
