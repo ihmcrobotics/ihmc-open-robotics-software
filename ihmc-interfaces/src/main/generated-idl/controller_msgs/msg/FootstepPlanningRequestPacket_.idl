@@ -18,11 +18,14 @@ module controller_msgs
       const octet SWING_PLANNER_TYPE_NONE =
       0;
 
-      const octet SWING_PLANNER_TYPE_POSITION =
+      const octet SWING_PLANNER_TYPE_TWO_WAYPOINT_POSITION =
       1;
 
-      const octet SWING_PLANNER_TYPE_PROPORTION =
+      const octet SWING_PLANNER_TYPE_MULTI_WAYPOINT_POSITION =
       2;
+
+      const octet SWING_PLANNER_TYPE_PROPORTION =
+      3;
 
       const long NO_PLAN_ID =
       -1;

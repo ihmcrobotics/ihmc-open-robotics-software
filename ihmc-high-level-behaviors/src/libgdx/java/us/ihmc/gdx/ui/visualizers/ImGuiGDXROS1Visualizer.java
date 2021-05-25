@@ -12,4 +12,19 @@ public abstract class ImGuiGDXROS1Visualizer extends ImGuiGDXVisualizer
    public abstract void subscribe(RosNodeInterface ros1Node);
 
    public abstract void unsubscribe(RosNodeInterface ros1Node);
+
+   public void updateSubscribers(RosNodeInterface ros1Node)
+   {
+      if (getActiveChanged())
+      {
+         if (isActive())
+         {
+            subscribe(ros1Node);
+         }
+         else
+         {
+            unsubscribe(ros1Node);
+         }
+      }
+   }
 }

@@ -8,7 +8,7 @@ import us.ihmc.avatar.AvatarEstimatorThread;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.SimulatedDRCRobotTimeProvider;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.avatar.kinematicsSimulation.IntraprocessYoVariableLogger;
+import us.ihmc.avatar.logging.IntraprocessYoVariableLogger;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commons.thread.ThreadTools;

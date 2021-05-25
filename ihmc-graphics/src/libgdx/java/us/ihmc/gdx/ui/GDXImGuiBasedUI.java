@@ -57,7 +57,7 @@ public class GDXImGuiBasedUI
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = "";
 
-   private final ImGui3DViewInput inputCalculator = new ImGui3DViewInput();
+   private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imGuiInputProcessors = new ArrayList<>();
    private boolean dragging = false;
    private float dragBucketX;
@@ -129,6 +129,7 @@ public class GDXImGuiBasedUI
       LogTools.info("create()");
 
       sceneManager.create(GDXInputMode.ImGui);
+      inputCalculator = new ImGui3DViewInput(sceneManager.getCamera3D(), this::getViewportSizeX, this::getViewportSizeY);
 
       Gdx.input.setInputProcessor(null); // detach from getting input events from GDX. TODO: Should we do this here?
       imGuiInputProcessors.add(sceneManager.getCamera3D()::processImGuiInput);
@@ -152,6 +153,7 @@ public class GDXImGuiBasedUI
    {
       vrManager.create();
       sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
+      addImGui3DViewInputProcessor(vrManager::process3DViewInput);
    }
 
    public void pollVREvents()
