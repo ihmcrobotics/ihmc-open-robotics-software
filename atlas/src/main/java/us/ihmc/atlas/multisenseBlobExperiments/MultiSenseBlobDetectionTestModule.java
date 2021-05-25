@@ -31,7 +31,7 @@ import us.ihmc.utilities.ros.subscriber.RosCompressedImageSubscriber;
 public class MultiSenseBlobDetectionTestModule
 {
    private final PacketCommunicator packetCommunicator = PacketCommunicator
-         .createTCPPacketCommunicatorServer(NetworkPorts.BEHAVIOUR_MODULE_PORT, new IHMCCommunicationKryoNetClassList());
+         .createTCPPacketCommunicatorServer(NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT, new IHMCCommunicationKryoNetClassList());
    private final String stereoTopic = "/multisense/image_points2_color";
    private final String lidarTopic = "/assembled_cloud";
    private final String leftImageColorTopic = "/multisense/left/image_rect_color/compressed"; //  "/multisense/left/image_rect_color";

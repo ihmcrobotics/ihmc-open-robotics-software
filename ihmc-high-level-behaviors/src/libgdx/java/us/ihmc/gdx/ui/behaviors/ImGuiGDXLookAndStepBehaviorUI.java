@@ -38,11 +38,11 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -67,8 +67,8 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningSection = new ImBoolean(true);
    private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
+   private final ImGuiYoDoublePlot footholdVolumePlot;
 
-   private GDXImGuiBasedUI baseUI;
    private ModelInstance sphere;
    private ModelInstance arrow;
    private GDXUIActionMap placeGoalActionMap;
@@ -99,17 +99,38 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper behaviorHelper)
    {
       this.behaviorHelper = behaviorHelper;
+      behaviorHelper.subscribeViaCallback(CurrentState, state -> currentState = state);
+      behaviorHelper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
+      behaviorHelper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+      {
+         this.latestRegions = regions;
+         ++numberOfSteppingRegionsReceived;
+         if (regions != null)
+            planarRegionsGraphic.generateMeshesAsync(regions);
+      });
+      behaviorHelper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
+      {
+         if (bodyPath != null)
+            bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
+      });
+      footstepPlanGraphic.setTransparency(0.2);
+      behaviorHelper.subscribeViaCallback(FootstepPlanForUI, footsteps ->
+      {
+         reviewingBodyPath = false;
+         footstepPlanGraphic.generateMeshesAsync(footsteps);
+      });
+      behaviorHelper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
+      startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
+      startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
+      startAndGoalFootstepsGraphic.setTransparency(0.4);
+      behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
+      behaviorHelper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
+      behaviorHelper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
+      footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", behaviorHelper);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      this.baseUI = baseUI;
-
-      if (behaviorHelper.getMessager() != null)
-      {
-         setupSubscribers();
-      }
-
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
       lookAndStepParameterTuner.create(lookAndStepParameters,
                                        LookAndStepBehaviorParameters.keys,
@@ -156,42 +177,11 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
 
-   public void setupSubscribers()
-   {
-      behaviorHelper.subscribeViaCallback(CurrentState, state -> currentState = state);
-      behaviorHelper.subscribeViaCallback(OperatorReviewEnabledToUI, operatorReview::set);
-      behaviorHelper.subscribeViaCallback(PlanarRegionsForUI, regions ->
-      {
-         this.latestRegions = regions;
-         ++numberOfSteppingRegionsReceived;
-         if (regions != null)
-            planarRegionsGraphic.generateMeshesAsync(regions);
-      });
-      behaviorHelper.subscribeViaCallback(BodyPathPlanForUI, bodyPath ->
-      {
-         if (bodyPath != null)
-            bodyPathPlanGraphic.generateMeshesAsync(bodyPath);
-      });
-      footstepPlanGraphic.setTransparency(0.2);
-      behaviorHelper.subscribeViaCallback(FootstepPlanForUI, footsteps ->
-      {
-         reviewingBodyPath = false;
-         footstepPlanGraphic.generateMeshesAsync(footsteps);
-      });
-      behaviorHelper.subscribeViaCallback(LastCommandedFootsteps, commandedFootstepsGraphic::generateMeshesAsync);
-      startAndGoalFootstepsGraphic.setColor(RobotSide.LEFT, Color.BLUE);
-      startAndGoalFootstepsGraphic.setColor(RobotSide.RIGHT, Color.BLUE);
-      startAndGoalFootstepsGraphic.setTransparency(0.4);
-      behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
-      behaviorHelper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
-      behaviorHelper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
-   }
-
    public void processImGui3DViewInput(ImGui3DViewInput input)
    {
       if (placingGoal && input.isWindowHovered())
       {
-         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld(baseUI);
+         Line3DReadOnly pickRayInWorld = input.getPickRayInWorld();
          PlanarRegionsList latestRegions = this.latestRegions;
          Point3D pickPoint = null;
          if (latestRegions != null)
@@ -321,6 +311,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       }
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      footholdVolumePlot.render();
 
       ImGui.checkbox("Show graphics", showGraphics);
       ImGui.sameLine();
@@ -394,11 +385,6 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          planarRegionsGraphic.getRenderables(renderables, pool);
          bodyPathPlanGraphic.getRenderables(renderables, pool);
       }
-   }
-
-   public void setMessager(Messager messager)
-   {
-      setupSubscribers();
    }
 
    public void destroy()
