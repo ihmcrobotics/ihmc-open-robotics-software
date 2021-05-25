@@ -48,9 +48,11 @@ import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobo
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest implements MultiRobotTestInterface
 {
@@ -205,9 +207,16 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       ghostRobot.setGravity(0);
 
       createSimulation(testInfo, ghostRobot, initialSetup, environment);
+
+      SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+      YoInteger totalNumberOfFrames = new YoInteger("totalNumberOfFrames", scs.getRootRegistry());
+      YoInteger frameIndex = new YoInteger("frameIndex", scs.getRootRegistry());
+      scs.setupGraph(totalNumberOfFrames.getFullNameString(), frameIndex.getFullNameString());
+      
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
       assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
       assertTrue(scriptReader.hasNext(), "Script is empty");
+      totalNumberOfFrames.set(scriptReader.size());
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
@@ -218,6 +227,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       while (scriptReader.hasNext())
       {
          KinematicsToolboxSnapshotDescription nextItem = scriptReader.next();
+         frameIndex.increment();
          WholeBodyJointspaceTrajectoryMessage message = toWholeBodyJointspaceTrajectoryMessage(nextItem.getIkSolution(), allJoints, itemDuration);
          setSCSRobotConfiguration(nextItem.getIkSolution(), allJoints, ghostRobot);
          drcSimulationTestHelper.publishToController(message);
