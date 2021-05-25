@@ -35,8 +35,6 @@ public class ImGuiGDXDirectControlPanel
    private static final double SLIDER_RANGE = 100.0;
    private static final double ROBOT_DATA_EXPIRATION = 1.0;
    private final CommunicationHelper communicationHelper;
-   private final double neckJointJointLimitLower;
-   private final double neckJointRange;
 
    private final ThrottledRobotStateCallback throttledRobotStateCallback;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
@@ -49,6 +47,9 @@ public class ImGuiGDXDirectControlPanel
 
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
+   private final OneDoFJointBasics neckJoint;
+   private double neckJointJointLimitLower;
+   private double neckJointRange;
 
    public ImGuiGDXDirectControlPanel(CommunicationHelper communicationHelper)
    {
@@ -68,10 +69,13 @@ public class ImGuiGDXDirectControlPanel
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
 
-      OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-      double neckJointLimitUpper = neckJoint.getJointLimitUpper();
-      neckJointJointLimitLower = neckJoint.getJointLimitLower();
-      neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
+      if (neckJoint != null)
+      {
+         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
+         neckJointJointLimitLower = neckJoint.getJointLimitLower();
+         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+      }
 
       throttledRobotStateCallback = new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
       {
@@ -90,11 +94,14 @@ public class ImGuiGDXDirectControlPanel
          double flippedChestSliderValue = 100.0 - newChestSliderValue;
          leanForwardSliderValue[0] = (float) flippedChestSliderValue;
 
-         double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
-         double angleInRange = neckAngle - neckJointJointLimitLower;
-         double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
-         double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
-         neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
+         if (neckJoint != null)
+         {
+            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
+            double angleInRange = neckAngle - neckJointJointLimitLower;
+            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
+            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
+            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
+         }
       });
    }
 
@@ -207,7 +214,7 @@ public class ImGuiGDXDirectControlPanel
             communicationHelper.publishToController(message);
          }
       }
-      if (imGuiSlider("Neck Pitch", neckPitchSliderValue))
+      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
       {
          double percent = neckPitchSliderValue[0] / 100.0;
          percent = 1.0 - percent;
