@@ -27,4 +27,34 @@ public class VariationalCommonValues
       UnrolledInverseFromMinor_DDRM.inv3(R, RInverse, 1.0);
    }
 
+   public void setInertia(DMatrixRMaj inertia)
+   {
+      this.inertia.set(inertia);
+      UnrolledInverseFromMinor_DDRM.inv3(inertia, inertiaInverse, 1.0);
+   }
+
+   public DMatrixRMaj getQ()
+   {
+      return Q;
+   }
+
+   public DMatrixRMaj getR()
+   {
+      return R;
+   }
+
+   public DMatrixRMaj getRInverse()
+   {
+      return RInverse;
+   }
+
+   public DMatrixRMaj getInertia()
+   {
+      return inertia;
+   }
+
+   public DMatrixRMaj getInertiaInverse()
+   {
+      return inertiaInverse;
+   }
 }
