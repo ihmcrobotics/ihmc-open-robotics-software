@@ -60,6 +60,29 @@ public class KinematicsToolboxMessageFactory
       return message;
    }
 
+
+   public static KinematicsToolboxRigidBodyMessage holdRigidBodyAtTargetPosition(RigidBodyBasics rigidBody, FramePose3D desiredPosition)
+   {
+      KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
+      FramePose3D currentPose = new FramePose3D(rigidBody.getBodyFixedFrame());
+      currentPose.changeFrame(worldFrame);
+      desiredPosition.changeFrame(worldFrame);
+
+      message.getDesiredPositionInWorld().set(desiredPosition.getPosition());
+      message.getDesiredOrientationInWorld().set(currentPose.getOrientation());
+      message.getAngularSelectionMatrix().setXSelected(true);
+      message.getAngularSelectionMatrix().setYSelected(true);
+      message.getAngularSelectionMatrix().setZSelected(true);
+      message.getLinearSelectionMatrix().setXSelected(true);
+      message.getLinearSelectionMatrix().setYSelected(true);
+      message.getLinearSelectionMatrix().setZSelected(true);
+      message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
+      message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(DEFAULT_LOW_WEIGHT));
+      message.setDestination(PacketDestination.KINEMATICS_TOOLBOX_MODULE.ordinal());
+
+      return message;
+   }
+
    /**
     * Convenience method to create a {@link KinematicsToolboxRigidBodyMessage} that can be used to hold
     * the current orientation of the given rigid-body.
