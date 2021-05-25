@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.stepReachability;
 
 import controller_msgs.msg.dds.*;
+import org.ejml.data.DMatrix;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -15,18 +16,23 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
@@ -60,6 +66,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
@@ -75,6 +82,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyAtTargetPosition;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentOrientation;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 /**
@@ -82,14 +91,17 @@ import static us.ihmc.robotics.Assert.assertTrue;
  */
 public class ValkyrieStepReachabilityCalculator
 {
+
    private enum Mode
    {
       HAND_POSE, TEST_STEP
    }
 
-   private static final Mode mode = Mode.HAND_POSE;
+//   private static final Mode mode = Mode.HAND_POSE;
+   private static final Mode mode = Mode.TEST_STEP;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   public static final double DEFAULT_LOW_WEIGHT = 0.02;
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
@@ -178,7 +190,7 @@ public class ValkyrieStepReachabilityCalculator
          case TEST_STEP:
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
-            rightFoot.getPosition().set(0.0, -0.25, 0.0);
+            rightFoot.getPosition().set(0.25, 0.25, 0.0);
             testStep(leftFoot, rightFoot, 0.0);
             break;
          default:
@@ -241,7 +253,6 @@ public class ValkyrieStepReachabilityCalculator
          toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
          // holds the feet at current configuration
-         // get rid and replace with rigid body message
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 150;
@@ -257,17 +268,80 @@ public class ValkyrieStepReachabilityCalculator
       }
    }
 
-   private boolean testStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold)
+   private boolean testStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
+   {
+      LogTools.info("Entering: testStep");
+      Random random = new Random(2134);
+      double groundHeight = 0.0; // EuclidCoreRandomTools.nextDouble(random, 0.1);
+      Point2D offset = new Point2D(); // EuclidCoreRandomTools.nextPoint2D(random, 2.0);
+      double offsetYaw = 0.0; // EuclidCoreRandomTools.nextDouble(random, Math.PI);
+
+      FullHumanoidRobotModel targetFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
+      RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(targetFullRobotModel);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         // Rigid body objective for each foot
+         KinematicsToolboxRigidBodyMessage rbMessage;
+         if (robotSide == RobotSide.LEFT)
+            rbMessage = holdRigidBodyAtTargetPosition(targetFullRobotModel.getFoot(robotSide), leftFoot);
+         else
+            rbMessage = holdRigidBodyAtTargetPosition(targetFullRobotModel.getFoot(robotSide), rightFoot);
+         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
+         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
+         commandInputManager.submitMessage(rbMessage);
+
+         // Rigid body objective for each hand, can try fixing joint angles
+         rbMessage = holdRigidBodyCurrentPose(targetFullRobotModel.getHand(robotSide));
+         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+         commandInputManager.submitMessage(rbMessage);
+      }
+
+      // Rigid body objective for each chest
+      KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyCurrentOrientation(targetFullRobotModel.getChest());
+      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      commandInputManager.submitMessage(rbMessage);
+
+      // Rigid body objective for each head
+      rbMessage = holdRigidBodyCurrentOrientation(targetFullRobotModel.getHead());
+      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      commandInputManager.submitMessage(rbMessage);
+
+      { // Setup CoM message TODO: put CoM in the middle of the feet at some nominal height
+         Point3DReadOnly comFeet = computeCoMForFeet(leftFoot, rightFoot);
+         KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(targetFullRobotModel));
+         SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
+         selectionMatrix.selectZAxis(false);
+         comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
+         comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
+         commandInputManager.submitMessage(comMessage);
+      }
+
+      // Disable the support polygon constraint, the randomized model isn't constrained.
+      KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
+      configurationMessage.setDisableSupportPolygonConstraint(true);
+      commandInputManager.submitMessage(configurationMessage);
+
+      snapGhostToFullRobotModel(targetFullRobotModel);
+      toolboxController.updateRobotConfigurationData(robotConfigurationData);
+
+      int numberOfIterations = 150;
+
+      runKinematicsToolboxController(numberOfIterations);
+
+      assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
+      double solutionQuality = toolboxController.getSolution().getSolutionQuality();
+
+      return (solutionQuality > solutionQualityThreshold);
+   }
+
+   private Point3DReadOnly computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot) // maybe Tuple3DReadOnly
    {
       // TODO
-
-      // one objective per foot
-      // put CoM in the middle of the feet at some nominal height
-      // either joint angles or rigid body message for the arms
-
-      // return whether solution quality is above some threshold
-
-      return false;
+      return new Point3D();
    }
 
    private void runKinematicsToolboxController(int numberOfIterations) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
