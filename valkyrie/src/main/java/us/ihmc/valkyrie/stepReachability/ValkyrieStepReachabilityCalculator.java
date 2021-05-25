@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.stepReachability;
 
 import controller_msgs.msg.dds.*;
+import org.lwjgl.Sys;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -79,9 +80,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyAtTargetPosition;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentOrientation;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 /**
@@ -92,11 +91,10 @@ public class ValkyrieStepReachabilityCalculator
 
    private enum Mode
    {
-      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS
+      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_FILE_LOADING
    }
 
-//   private static final Mode mode = Mode.HAND_POSE;
-   private static final Mode mode = Mode.TEST_SINGLE_STEP;
+   private static final Mode mode = Mode.TEST_FILE_LOADING;
 
    // TODO tune this
    private static final double SOLUTION_QUALITY_THRESHOLD = 1e-3;
@@ -190,21 +188,27 @@ public class ValkyrieStepReachabilityCalculator
          case TEST_SINGLE_STEP:
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
-            rightFoot.getPosition().set(0.25, 0.25, 0.0);
+            leftFoot.getPosition().set(0.056,  0.056,  0.000);
+            leftFoot.getOrientation().setYawPitchRoll(0.000,  0.000,  0.996);
             testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
             break;
          case TEST_MULTIPLE_STEPS:
             List<FramePose3D> leftFootPoseList = createLeftFootPoseList();
             Map<FramePose3D, Boolean> poseValidityMap = new HashMap<>();
+            FramePose3D rightFootPose = new FramePose3D();
             for (int i = 0; i < leftFootPoseList.size(); i++)
             {
                FramePose3D leftFootPose = leftFootPoseList.get(i);
-               boolean isValid = testSingleStep(leftFootPose, null, SOLUTION_QUALITY_THRESHOLD);
+               boolean isValid = testSingleStep(leftFootPose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
                poseValidityMap.put(leftFootPose, isValid);
             }
-
             StepReachabilityFileTools.writeToFile(poseValidityMap);
-
+            break;
+         case TEST_FILE_LOADING:
+//            Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
+//            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
+            StepReachabilityFileTools.load("StepReachabilityMap.txt");
+            break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
       }
@@ -286,10 +290,9 @@ public class ValkyrieStepReachabilityCalculator
    private boolean testSingleStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
    {
       LogTools.info("Entering: testStep");
-      Random random = new Random(2134);
-      double groundHeight = 0.0; // EuclidCoreRandomTools.nextDouble(random, 0.1);
-      Point2D offset = new Point2D(); // EuclidCoreRandomTools.nextPoint2D(random, 2.0);
-      double offsetYaw = 0.0; // EuclidCoreRandomTools.nextDouble(random, Math.PI);
+      double groundHeight = 0.0;
+      Point2D offset = new Point2D();
+      double offsetYaw = 0.0;
 
       FullHumanoidRobotModel targetFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(targetFullRobotModel);
@@ -299,9 +302,9 @@ public class ValkyrieStepReachabilityCalculator
          // Rigid body objective for each foot
          KinematicsToolboxRigidBodyMessage rbMessage;
          if (robotSide == RobotSide.LEFT)
-            rbMessage = holdRigidBodyAtTargetPosition(targetFullRobotModel.getFoot(robotSide), leftFoot);
+            rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
          else
-            rbMessage = holdRigidBodyAtTargetPosition(targetFullRobotModel.getFoot(robotSide), rightFoot);
+            rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
          rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
          rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
          commandInputManager.submitMessage(rbMessage);
@@ -313,31 +316,30 @@ public class ValkyrieStepReachabilityCalculator
          commandInputManager.submitMessage(rbMessage);
       }
 
-      // Rigid body objective for each chest
       // TODO set check objective to be interpolated between feet
 
-      // some code snippets for frame poses
-      FramePose3D poseA = new FramePose3D();
-      FramePose3D poseB = new FramePose3D();
-      FramePose3D poseInterpolated = new FramePose3D();
-
-      // This method call sets "poseInterpolated" to be 50% between poseA and poseB
+      // Set betweenFeet to be 50% interpolation between leftFoot and rightFoot
+      // This should be 50% interpolation between orientation as well?
       double interpolationAlpha = 0.5;
-      poseInterpolated.interpolate(poseA, poseB, interpolationAlpha);
+      FramePose3D centerFeet = new FramePose3D();
+      centerFeet.interpolate(leftFoot, rightFoot, interpolationAlpha);
 
-      KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyCurrentOrientation(targetFullRobotModel.getChest());
+      // Rigid body objective for chest, center XY pose of feet
+      KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getChest(), centerFeet);
+      rbMessage.getLinearSelectionMatrix().setZSelected(false);
       rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       commandInputManager.submitMessage(rbMessage);
 
-      // Rigid body objective for each head
-      rbMessage = holdRigidBodyCurrentOrientation(targetFullRobotModel.getHead());
+      // Rigid body objective for head, center XY pose of feet
+      rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getHead(), centerFeet);
+      rbMessage.getLinearSelectionMatrix().setZSelected(false);
       rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
       commandInputManager.submitMessage(rbMessage);
 
-      { // Setup CoM message TODO: put CoM in the middle of the feet at some nominal height
-         Point3DReadOnly comFeet = computeCoMForFeet(leftFoot, rightFoot);
+      { // Setup CoM message
+//         KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCoMForFeet(leftFoot, rightFoot));
          KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(targetFullRobotModel));
          SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
          selectionMatrix.selectZAxis(false);
@@ -360,6 +362,10 @@ public class ValkyrieStepReachabilityCalculator
 
       assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
       double solutionQuality = toolboxController.getSolution().getSolutionQuality();
+      /* TODO: For solution quality
+       - Can look at how well the feet/chest matches
+       - Check for feet collision
+       */
 
       return (solutionQuality > solutionQualityThreshold);
    }
@@ -383,7 +389,7 @@ public class ValkyrieStepReachabilityCalculator
    }
 
    // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
-   private static final int queriesPerAxis = 10;
+   private static final int queriesPerAxis = 2;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
@@ -402,8 +408,8 @@ public class ValkyrieStepReachabilityCalculator
             for (int k = 0; k < queriesPerAxis; k++)
             {
                double alphaX = ((double) i) / (queriesPerAxis - 1);
-               double alphaY = ((double) i) / (queriesPerAxis - 1);
-               double alphaYaw = ((double) i) / (queriesPerAxis - 1);
+               double alphaY = ((double) j) / (queriesPerAxis - 1);
+               double alphaYaw = ((double) k) / (queriesPerAxis - 1);
 
                double x = EuclidCoreTools.interpolate(minimumOffsetX, maximumOffsetX, alphaX);
                double y = EuclidCoreTools.interpolate(minimumOffsetY, maximumOffsetY, alphaY);
@@ -635,8 +641,13 @@ public class ValkyrieStepReachabilityCalculator
    // CoM in between feet
    private Point3D computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot) // maybe Tuple3DReadOnly
    {
-      // TODO
-      return new Point3D();
+      FramePose3D centerPose = new FramePose3D();
+      double interpolationAlpha = 0.5;
+      centerPose.interpolate(leftFoot, rightFoot, interpolationAlpha);
+      Point3D CoM = (Point3D) centerPose.getPosition();
+      CoM.setZ(1.3496);
+
+      return CoM;
    }
 
    public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)

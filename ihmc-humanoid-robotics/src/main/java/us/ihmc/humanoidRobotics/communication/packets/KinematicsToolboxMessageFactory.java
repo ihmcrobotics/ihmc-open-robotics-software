@@ -60,16 +60,27 @@ public class KinematicsToolboxMessageFactory
       return message;
    }
 
-
-   public static KinematicsToolboxRigidBodyMessage holdRigidBodyAtTargetPosition(RigidBodyBasics rigidBody, FramePose3D desiredPosition)
+   /**
+    * Convenience method to create a {@link KinematicsToolboxRigidBodyMessage} that can be used to hold
+    * the rigid-body at a target position and orientation.
+    * <p>
+    * By default the weight of the task is set to {@value #DEFAULT_LOW_WEIGHT} such that the rigid-body
+    * will be held in place only if the other tasks are reachable from the current pose.
+    * </p>
+    *
+    * @param rigidBody the rigid-body to hold in desired frame.
+    * @param desiredFrame the desired frame to hold rigid-body at.
+    * @return the message ready to send to the {@code KinematicsToolbosModule}.
+    */
+   public static KinematicsToolboxRigidBodyMessage holdRigidBodyAtTargetFrame(RigidBodyBasics rigidBody, FramePose3D desiredFrame)
    {
       KinematicsToolboxRigidBodyMessage message = MessageTools.createKinematicsToolboxRigidBodyMessage(rigidBody);
       FramePose3D currentPose = new FramePose3D(rigidBody.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
-      desiredPosition.changeFrame(worldFrame);
+      desiredFrame.changeFrame(worldFrame);
 
-      message.getDesiredPositionInWorld().set(desiredPosition.getPosition());
-      message.getDesiredOrientationInWorld().set(currentPose.getOrientation());
+      message.getDesiredPositionInWorld().set(desiredFrame.getPosition());
+      message.getDesiredOrientationInWorld().set(desiredFrame.getOrientation());
       message.getAngularSelectionMatrix().setXSelected(true);
       message.getAngularSelectionMatrix().setYSelected(true);
       message.getAngularSelectionMatrix().setZSelected(true);
