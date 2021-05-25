@@ -26,6 +26,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -338,12 +339,6 @@ public class ValkyrieStepReachabilityCalculator
       return (solutionQuality > solutionQualityThreshold);
    }
 
-   private Point3DReadOnly computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot) // maybe Tuple3DReadOnly
-   {
-      // TODO
-      return new Point3D();
-   }
-
    private void runKinematicsToolboxController(int numberOfIterations) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       initializationSucceeded.set(false);
@@ -567,9 +562,17 @@ public class ValkyrieStepReachabilityCalculator
       MultiBodySystemTools.getRootBody(joints[0].getPredecessor()).updateFramesRecursively();
    }
 
+   // CoM at elevator
    public static FramePoint3D computeCenterOfMass3D(FullHumanoidRobotModel fullHumanoidRobotModel)
    {
       return new FramePoint3D(new CenterOfMassCalculator(fullHumanoidRobotModel.getElevator(), worldFrame).getCenterOfMass());
+   }
+
+   // CoM in between feet
+   private Point3D computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot) // maybe Tuple3DReadOnly
+   {
+      // TODO
+      return new Point3D();
    }
 
    public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)
