@@ -2,14 +2,16 @@ package us.ihmc.commonWalkingControlModules.orientationControl;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.interfaces.SpatialInertiaReadOnly;
-import us.ihmc.robotics.MatrixMissingTools;
 
 public class VariationalLQRController
 {
@@ -17,7 +19,12 @@ public class VariationalLQRController
    private static final double defaultQw = 5;
    private static final double defaultR = 1.25;
 
+   private final MPCAngleTools angleTools = new MPCAngleTools();
+
    private final VariationalCommonValues commonValues = new VariationalCommonValues();
+
+   private final Vector3DBasics axisAngleError = new Vector3D();
+   private final Vector3DBasics angularVelocityError = new Vector3D();
 
    private final DMatrixRMaj wBd = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj desiredRotationMatrix = new DMatrixRMaj(3, 3);
@@ -50,10 +57,12 @@ public class VariationalLQRController
       commonValues.setInertia(this.inertia);
    }
 
+   private final QuaternionBasics desiredRotation = new Quaternion();
    private final RotationMatrix tempRotation = new RotationMatrix();
 
    public void setDesired(QuaternionReadOnly desiredRotation, Vector3DReadOnly desiredAngularVelocityInBodyFrame, Vector3DReadOnly desiredNetAngularMomentum)
    {
+      this.desiredRotation.set(desiredRotation);
       desiredRotation.get(tempRotation);
       tempRotation.get(desiredRotationMatrix);
       desiredAngularVelocityInBodyFrame.get(wBd);
@@ -68,14 +77,10 @@ public class VariationalLQRController
       tempRotation.get(currentRotationMatrix);
       currentAngularVelocityInBodyFrame.get(wB);
 
-      CommonOps_DDRM.multTransA(-1.0, currentRotationMatrix, desiredRotationMatrix, RBerror);
-      CommonOps_DDRM.mult(RBerror, wBd, wBerror);
-      CommonOps_DDRM.addEquals(wBerror, wB);
+      angleTools.computeRotationError(currentRotation, desiredRotation, axisAngleError);
+      axisAngleError.get(RBerrorVector);
 
-      CommonOps_DDRM.multAddTransA(desiredRotationMatrix, currentRotationMatrix, RBerror);
-      CommonOps_DDRM.scale(0.5, RBerror);
-
-      fromSkewSymmetric(RBerror, RBerrorVector);
+      CommonOps_DDRM.subtract(wB, wBd, wBerror);
 
       MatrixTools.setMatrixBlock(state, 0, 0, wBerror, 0, 0, 3, 1, 1.0);
       MatrixTools.setMatrixBlock(state, 3, 0, RBerrorVector, 0, 0, 3, 1, 1.0);
