@@ -15,13 +15,12 @@ public class AlgebraicVariationalFunction
    private final DMatrixRMaj A21 = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj A22 = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj B2 = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj eye = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj identity = CommonOps_DDRM.identity(3);
    private final DMatrixRMaj A = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj B = new DMatrixRMaj(6, 3);
 
-   private final DMatrixRMaj tauD = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj desiredTorque = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj RBd = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj RB = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj wBd = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj wBdHat = new DMatrixRMaj(3, 3);
@@ -29,8 +28,8 @@ public class AlgebraicVariationalFunction
    private final DMatrixRMaj RBdTtau = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj RBdTtauHat = new DMatrixRMaj(3, 3);
 
-   private final DMatrixRMaj Iwd = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj IwdHat = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj angularMomentum = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj skewAngularMomentum = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj wdI = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj temp = new DMatrixRMaj(3, 3);
 
@@ -41,8 +40,8 @@ public class AlgebraicVariationalFunction
    private final RotationMatrix rotationMatrix = new RotationMatrix();
 
    public void setDesired(QuaternionReadOnly desiredRotation,
-                          Vector3DReadOnly desiredAngularVelocity,
-                          Vector3DReadOnly desiredTorque,
+                          Vector3DReadOnly desiredBodyAngularVelocityInBodyFrame,
+                          Vector3DReadOnly desiredNetAngularMomentum,
                           DMatrixRMaj Q,
                           DMatrixRMaj R,
                           DMatrixRMaj inertia,
@@ -50,21 +49,21 @@ public class AlgebraicVariationalFunction
    {
       desiredRotation.get(rotationMatrix);
       rotationMatrix.get(RBd);
-      desiredAngularVelocity.get(wBd);
-      desiredTorque.get(tauD);
+      desiredBodyAngularVelocityInBodyFrame.get(wBd);
+      desiredNetAngularMomentum.get(desiredTorque);
 
-      MatrixMissingTools.toSkewSymmetricMatrix(wBd, wBdHat);
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocityInBodyFrame, wBdHat);
 
-      CommonOps_DDRM.multTransA(RBd, tauD, RBdTtau);
+      CommonOps_DDRM.multTransA(RBd, desiredTorque, RBdTtau);
       MatrixMissingTools.toSkewSymmetricMatrix(RBdTtau, RBdTtauHat);
 
       CommonOps_DDRM.mult(inertiaInverse, RBdTtauHat, A21);
 
-      CommonOps_DDRM.mult(inertia, wBd, Iwd);
-      MatrixMissingTools.toSkewSymmetricMatrix(Iwd, IwdHat);
+      CommonOps_DDRM.mult(inertia, wBd, angularMomentum);
+      MatrixMissingTools.toSkewSymmetricMatrix(angularMomentum, skewAngularMomentum);
       CommonOps_DDRM.mult(wBdHat, inertia, wdI);
 
-      CommonOps_DDRM.subtract(IwdHat, wdI, temp);
+      CommonOps_DDRM.subtract(skewAngularMomentum, wdI, temp);
       CommonOps_DDRM.mult(inertiaInverse, temp, A22);
 
       CommonOps_DDRM.multTransB(inertiaInverse, RBd, B2);
@@ -76,10 +75,15 @@ public class AlgebraicVariationalFunction
       P.set(careSolver.getP());
    }
 
+   public DMatrixRMaj getP()
+   {
+      return P;
+   }
+
    private void assembleAMatrix()
    {
       MatrixMissingTools.setMatrixBlock(A, 0, 0, wBdHat, 0, 0, 3, 3, -1.0);
-      MatrixMissingTools.setMatrixBlock(A, 0, 3, eye, 0, 0, 3, 3, 1.0);
+      MatrixMissingTools.setMatrixBlock(A, 0, 3, identity, 0, 0, 3, 3, 1.0);
       MatrixMissingTools.setMatrixBlock(A, 3, 0, A21, 0, 0, 3, 3, 1.0);
       MatrixMissingTools.setMatrixBlock(A, 3, 3, A22, 0, 0, 3, 3, 1.0);
    }
