@@ -17,13 +17,11 @@ public class VariationalDynamicsCalculator
    private final DMatrixRMaj B = new DMatrixRMaj(6, 3);
 
    private final DMatrixRMaj desiredTorque = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj tauHat = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj RBd = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj wBd = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj wBdHat = new DMatrixRMaj(3, 3);
-
-   private final DMatrixRMaj RBdTtau = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj RBdTtauHat = new DMatrixRMaj(3, 3);
 
    private final DMatrixRMaj angularMomentum = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj skewAngularMomentum = new DMatrixRMaj(3, 3);
@@ -43,12 +41,12 @@ public class VariationalDynamicsCalculator
       desiredBodyAngularVelocityInBodyFrame.get(wBd);
       desiredNetAngularMomentum.get(desiredTorque);
 
+      CommonOps_DDRM.multTransB(inertiaInverse, RBd, B2);
+
       MatrixMissingTools.toSkewSymmetricMatrix(desiredBodyAngularVelocityInBodyFrame, wBdHat);
+      MatrixMissingTools.toSkewSymmetricMatrix(desiredTorque, tauHat);
 
-      CommonOps_DDRM.multTransA(RBd, desiredTorque, RBdTtau);
-      MatrixMissingTools.toSkewSymmetricMatrix(RBdTtau, RBdTtauHat);
-
-      CommonOps_DDRM.mult(inertiaInverse, RBdTtauHat, A21);
+      CommonOps_DDRM.mult(B2, tauHat, A21);
 
       CommonOps_DDRM.mult(inertia, wBd, angularMomentum);
       MatrixMissingTools.toSkewSymmetricMatrix(angularMomentum, skewAngularMomentum);
@@ -56,8 +54,6 @@ public class VariationalDynamicsCalculator
 
       CommonOps_DDRM.subtract(skewAngularMomentum, wdI, temp);
       CommonOps_DDRM.mult(inertiaInverse, temp, A22);
-
-      CommonOps_DDRM.multTransB(inertiaInverse, RBd, B2);
 
       assembleAMatrix();
       assembleBMatrix();
