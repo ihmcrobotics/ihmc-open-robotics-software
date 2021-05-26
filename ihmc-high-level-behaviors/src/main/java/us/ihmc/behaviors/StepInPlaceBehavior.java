@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicLong;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -54,6 +55,12 @@ public class StepInPlaceBehavior implements BehaviorInterface
       helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::stepInPlace);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tick()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

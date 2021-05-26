@@ -6,6 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -181,6 +182,12 @@ public class BuildingExplorationBehavior implements BehaviorInterface
          objectDetectorPublisher.publish(wakeUpMessage);
       });
       toolboxWakerThread.start();
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tick()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

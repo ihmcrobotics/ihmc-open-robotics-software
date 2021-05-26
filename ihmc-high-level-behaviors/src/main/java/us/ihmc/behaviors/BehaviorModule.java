@@ -3,7 +3,6 @@ package us.ihmc.behaviors;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.MutablePair;
 
-import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNode;
@@ -38,9 +37,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
 
-import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.FAILURE;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
@@ -50,7 +47,6 @@ public class BehaviorModule
 {
    private static SharedMemoryMessager sharedMemoryMessager;
 
-   private static final String ros1NodeName = "behavior_backpack";
    private final ROS2Node ros2Node;
    private final boolean manageROS2Node;
    private final Messager messager;
@@ -63,8 +59,7 @@ public class BehaviorModule
    private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
    private final FallbackNode rootNode = new FallbackNode();
-   private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
-   private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
+   private BehaviorInterface highestLevelNode;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -136,21 +131,17 @@ public class BehaviorModule
 
       rootNode.addChild(new DisabledNode());
 
-      for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
+      BehaviorDefinition highestLevelNodeDefinition = behaviorRegistry.getHighestLevelNode();
+      BehaviorHelper helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node);
+      highestLevelNode = highestLevelNodeDefinition.getBehaviorSupplier().build(helper);
+      if (highestLevelNode.getYoRegistry() != null)
       {
-         BehaviorHelper helper = new BehaviorHelper(behaviorDefinition.getName(), robotModel, ros2Node, false);
-         BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
-         constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
-         YoRegistry yoRegistry = constructedBehavior.getYoRegistry();
-         if (yoRegistry != null)
-         {
-            this.yoRegistry.addChild(yoRegistry);
-         }
-         helper.getROS1Helper().ensureConnected();
-         helper.getMessagerHelper().setExternallyStartedMessager(messager);
+         yoRegistry.addChild(highestLevelNode.getYoRegistry());
       }
-
-      messager.registerTopicListener(BehaviorSelection, this::stringBasedSelection);
+      helper.getROS1Helper().ensureConnected();
+      helper.getMessagerHelper().setExternallyStartedMessager(messager);
+      highestLevelNode.setEnabled(true);
+      rootNode.addChild(highestLevelNode);
 
       new IHMCROS2Callback<>(ros2Node, API.SHUTDOWN, message ->
       {
@@ -164,7 +155,7 @@ public class BehaviorModule
       yoVariableServer.setMainRegistry(yoRegistry, null);
       LogTools.info("Starting YoVariableServer...");
       yoVariableServer.start();
-      LogTools.info("Starting server update thread...");
+      LogTools.info("Starting YoVariableServer update thread...");
       MutableLong timestamp = new MutableLong();
       LocalDateTime startTime = LocalDateTime.now();
       yoServerUpdateThread = new PausablePeriodicThread("YoServerUpdate", YO_VARIABLE_SERVER_UPDATE_PERIOD, () ->
@@ -191,40 +182,6 @@ public class BehaviorModule
       }
    }
 
-   private void stringBasedSelection(String selection)
-   {
-      ArrayList<String> selectedBehaviors = new ArrayList<>();
-      selectedBehaviors.add(selection);
-      if (constructedBehaviors.containsKey(selection)) // i.e. Might be "None"
-      {
-         for (BehaviorDefinition subBehavior : constructedBehaviors.get(selection).getLeft().getSubBehaviors())
-         {
-            selectedBehaviors.add(subBehavior.getName());
-         }
-      }
-
-      boolean selectedOne = false;
-      for (Map.Entry<String, Pair<BehaviorDefinition, BehaviorInterface>> behavior : constructedBehaviors.entrySet())
-      {
-         String behaviorName = behavior.getKey();
-         boolean selected = selectedBehaviors.contains(behaviorName);
-         if (selected)
-         {
-            selectedOne = true;
-         }
-         if (enabledBehaviors.computeIfAbsent(behaviorName, key -> false) != selected)
-         {
-            enabledBehaviors.put(behaviorName, selected);
-            statusLogger.info("{} {} behavior.", selected ? "Enabling" : "Disabling", behaviorName);
-            behavior.getValue().getRight().setEnabled(selected);
-         }
-      }
-      if (!selectedOne)
-      {
-         statusLogger.info("All behaviors disabled.");
-      }
-   }
-
    public Messager getMessager()
    {
       return messager;
@@ -243,10 +200,7 @@ public class BehaviorModule
          ExceptionTools.handle(() -> getMessager().closeMessager(), DefaultExceptionHandler.PRINT_STACKTRACE);
       }
 
-      for (Pair<BehaviorDefinition, BehaviorInterface> behavior : constructedBehaviors.values())
-      {
-         behavior.getRight().destroy();
-      }
+      highestLevelNode.destroy();
    }
 
    public static SharedMemoryMessager getSharedMemoryMessager()
