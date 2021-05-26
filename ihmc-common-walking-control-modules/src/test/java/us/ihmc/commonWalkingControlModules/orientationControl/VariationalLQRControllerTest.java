@@ -91,7 +91,7 @@ public class VariationalLQRControllerTest
 
 
          // check roll only
-         controller.compute(0.0, rolledOrientation, desiredAngularVelocity);
+         controller.compute(rolledOrientation, desiredAngularVelocity);
 
          controller.getDesiredTorque(feedbackTorque);
          assertEquals(-Math.signum(rollRotation), Math.signum(feedbackTorque.getX()), 1e-5);
