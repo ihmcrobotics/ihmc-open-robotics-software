@@ -3,6 +3,7 @@ package us.ihmc.behaviors.navigation;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -117,6 +118,12 @@ public class NavigationBehavior implements BehaviorInterface
       sequence.addChild(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tick()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

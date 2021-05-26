@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
@@ -18,6 +19,7 @@ import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
@@ -85,6 +87,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+      LogTools.info("Constructing");
 
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
@@ -169,6 +172,12 @@ public class LookAndStepBehavior implements BehaviorInterface
          behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          bodyPathLocalization.acceptBodyPathPlan(bodyPath);
       }
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tick()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

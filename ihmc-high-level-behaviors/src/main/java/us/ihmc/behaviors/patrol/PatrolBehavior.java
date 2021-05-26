@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -171,6 +172,12 @@ public class PatrolBehavior implements BehaviorInterface
    private void patrolThread()   // update the active state
    {
       stateMachine.doActionAndTransition();
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tick()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override
