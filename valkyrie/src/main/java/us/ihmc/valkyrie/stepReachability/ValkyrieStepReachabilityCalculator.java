@@ -203,11 +203,12 @@ public class ValkyrieStepReachabilityCalculator
                poseValidityMap.put(leftFootPose, isValid);
             }
             StepReachabilityFileTools.writeToFile(poseValidityMap);
+//            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case TEST_FILE_LOADING:
-//            Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
-//            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
-            StepReachabilityFileTools.load("StepReachabilityMap.txt");
+            Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
+            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
+
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -389,7 +390,7 @@ public class ValkyrieStepReachabilityCalculator
    }
 
    // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
-   private static final int queriesPerAxis = 2;
+   private static final int queriesPerAxis = 3;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
