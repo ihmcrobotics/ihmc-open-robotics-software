@@ -90,12 +90,9 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic commandedFootstepsGraphic = new GDXFootstepPlanGraphic();
    private final GDXFootstepPlanGraphic startAndGoalFootstepsGraphic = new GDXFootstepPlanGraphic();
-   private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner
-         = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Look and Step Parameters"));
-   private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner
-         = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Footstep Planner Parameters (for Look and Step)"));
-   private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner
-         = new ImGuiStoredPropertySetTuner(ImGuiTools.uniqueLabel(this, "Swing Planner Parameters (for Look and Step)"));
+   private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner = new ImGuiStoredPropertySetTuner("Look and Step Parameters");
+   private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (for Look and Step)");
+   private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
    private final ImGuiBehaviorTreePanel treePanel = new ImGuiBehaviorTreePanel("Look and step");
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper behaviorHelper)
