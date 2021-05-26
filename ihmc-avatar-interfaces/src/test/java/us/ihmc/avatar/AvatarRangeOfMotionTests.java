@@ -144,7 +144,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(DRCObstacleCourseStartingLocation.DEFAULT);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -189,7 +189,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(DRCObstacleCourseStartingLocation.DEFAULT);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
