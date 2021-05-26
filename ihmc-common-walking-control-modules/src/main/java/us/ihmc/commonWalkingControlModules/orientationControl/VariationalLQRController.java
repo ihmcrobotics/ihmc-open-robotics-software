@@ -24,14 +24,12 @@ public class VariationalLQRController
    private final VariationalCommonValues commonValues = new VariationalCommonValues();
 
    private final Vector3DBasics axisAngleError = new Vector3D();
-   private final Vector3DBasics angularVelocityError = new Vector3D();
 
    private final DMatrixRMaj wBd = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj desiredRotationMatrix = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj currentRotationMatrix = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj wB = new DMatrixRMaj(3, 1);
 
-   private final DMatrixRMaj RBerror = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj RBerrorVector = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj wBerror = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj state = new DMatrixRMaj(6, 1);
@@ -47,6 +45,7 @@ public class VariationalLQRController
    public VariationalLQRController()
    {
       CommonOps_DDRM.setIdentity(inertia);
+      commonValues.setInertia(inertia);
 
       commonValues.computeCostMatrices(defaultQR, defaultQw, defaultR);
    }
@@ -82,8 +81,8 @@ public class VariationalLQRController
 
       CommonOps_DDRM.subtract(wB, wBd, wBerror);
 
-      MatrixTools.setMatrixBlock(state, 0, 0, wBerror, 0, 0, 3, 1, 1.0);
-      MatrixTools.setMatrixBlock(state, 3, 0, RBerrorVector, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(state, 0, 0, RBerrorVector, 0, 0, 3, 1, 1.0);
+      MatrixTools.setMatrixBlock(state, 3, 0, wBerror, 0, 0, 3, 1, 1.0);
 
       CommonOps_DDRM.mult(-1.0, variationalFunction.getK(), state, deltaTau);
 
