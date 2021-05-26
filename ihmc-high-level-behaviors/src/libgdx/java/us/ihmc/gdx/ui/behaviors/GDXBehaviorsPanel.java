@@ -46,14 +46,13 @@ public class GDXBehaviorsPanel implements RenderableProvider
    private final LinkedList<String> logArray = new LinkedList<>();
    private final ImInt selectedLogEntry = new ImInt();
 
-   public GDXBehaviorsPanel(String ros1NodeName,
-                            ROS2Node ros2Node,
+   public GDXBehaviorsPanel(ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
                             GDXBehaviorUIRegistry behaviorRegistry)
    {
       this.behaviorRegistry = behaviorRegistry;
 
-      behaviorHelper = new BehaviorHelper(robotModelSupplier.get(), ros1NodeName, getClass().getSimpleName(), ros2Node);
+      behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       messagerHelper = behaviorHelper.getMessagerHelper();
       yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
       buildingExplorationUI = new GDXBuildingExplorationBehaviorUI(messagerHelper);
@@ -104,7 +103,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
          flags += ImGuiInputTextFlags.CallbackResize;
          ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "messagerHost"), behaviorModuleHost, flags);
          ImGui.sameLine();
-         if (ImGui.button("Connect messager"))
+         if (ImGui.button("Connect messager")) // TODO: One button should connect both
          {
             connectViaKryo(behaviorModuleHost.get());
          }
