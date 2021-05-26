@@ -112,7 +112,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
 
-      BehaviorHelper helperForLookAndStep = new BehaviorHelper(robotModel, "sub_look_and_step", "SubLookAndStep", ros2Node, false);
+      BehaviorHelper helperForLookAndStep = new BehaviorHelper("Sub Look and Step", robotModel, ros2Node, false);
       helperForLookAndStep.getMessagerHelper().setExternallyStartedMessager(behaviorMessager);
       lookAndStepBehavior = new LookAndStepBehavior(helperForLookAndStep);
 

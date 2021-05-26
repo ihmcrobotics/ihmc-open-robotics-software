@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.tools;
 
+import com.google.common.base.CaseFormat;
+import org.apache.commons.lang.WordUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
@@ -57,23 +59,21 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    private StatusLogger statusLogger;
 
    // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
-   public BehaviorHelper(DRCRobotModel robotModel, String ros1NodeName, String yoRegistryName, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, ros1NodeName, yoRegistryName, ros2Node, true);
+      this(titleCasedBehaviorName, robotModel, ros2Node, true);
    }
 
-   public BehaviorHelper(DRCRobotModel robotModel,
-                         String ros1NodeName,
-                         String yoRegistryName,
+   public BehaviorHelper(String titleCasedBehaviorName,
+                         DRCRobotModel robotModel,
                          ROS2NodeInterface ros2Node,
                          boolean commsEnabledToStart)
    {
       super(robotModel, ros2Node, commsEnabledToStart);
+      String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, titleCasedBehaviorName.replace(" ", ""));
+      String yoVariableRegistryName = WordUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
       this.ros1Helper = new ROS1Helper(ros1NodeName);
-
-
-      yoVariableClientHelper = new YoVariableClientHelper(yoRegistryName);
-
+      yoVariableClientHelper = new YoVariableClientHelper(yoVariableRegistryName);
       messagerHelper.setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
 

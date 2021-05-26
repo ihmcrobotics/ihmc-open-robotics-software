@@ -1,14 +1,14 @@
 package us.ihmc.behaviors;
 
-import com.google.common.base.CaseFormat;
-import org.apache.commons.lang.WordUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.mutable.MutableLong;
 import org.apache.commons.lang3.tuple.MutablePair;
 
 import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -33,6 +33,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.time.LocalDateTime;
@@ -40,6 +41,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.FAILURE;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
@@ -55,9 +58,11 @@ public class BehaviorModule
    public static final double YO_VARIABLE_SERVER_UPDATE_PERIOD = UnitConversions.hertzToSeconds(100.0);
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private YoVariableServer yoVariableServer;
-   private YoDouble yoTime = new YoDouble("time", yoRegistry);
+   private final YoDouble yoTime = new YoDouble("time", yoRegistry);
+   private final YoBoolean enabled = new YoBoolean("enabled", yoRegistry);
    private PausablePeriodicThread yoServerUpdateThread;
    private StatusLogger statusLogger;
+   private final FallbackNode rootNode = new FallbackNode();
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();
    private final Map<String, Boolean> enabledBehaviors = new HashMap<>();
 
@@ -129,11 +134,11 @@ public class BehaviorModule
 
       statusLogger = new StatusLogger(messager::submitMessage);
 
+      rootNode.addChild(new DisabledNode());
+
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, behaviorDefinition.getName().replace(" ", ""));
-         String yoVariableRegistryName = WordUtils.capitalize(behaviorDefinition.getName()).replace(" ", "");
-         BehaviorHelper helper = new BehaviorHelper(robotModel, ros1NodeName, yoVariableRegistryName, ros2Node, false);
+         BehaviorHelper helper = new BehaviorHelper(behaviorDefinition.getName(), robotModel, ros2Node, false);
          BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
          constructedBehaviors.put(behaviorDefinition.getName(), Pair.of(behaviorDefinition, constructedBehavior));
          YoRegistry yoRegistry = constructedBehavior.getYoRegistry();
@@ -168,6 +173,22 @@ public class BehaviorModule
          yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(YO_VARIABLE_SERVER_UPDATE_PERIOD)));
       });
       yoServerUpdateThread.start();
+   }
+
+   private class DisabledNode implements BehaviorTreeNode
+   {
+      @Override
+      public BehaviorTreeNodeStatus tick()
+      {
+         if (enabled.getValue())
+         {
+            return FAILURE;
+         }
+         else
+         {
+            return SUCCESS;
+         }
+      }
    }
 
    private void stringBasedSelection(String selection)
