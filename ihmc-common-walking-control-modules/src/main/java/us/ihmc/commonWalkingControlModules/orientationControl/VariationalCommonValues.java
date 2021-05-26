@@ -7,7 +7,7 @@ import us.ihmc.matrixlib.MatrixTools;
 
 public class VariationalCommonValues
 {
-   private final DMatrixRMaj Q = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj Q = new DMatrixRMaj(6, 6);
    private final DMatrixRMaj R = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj RInverse = new DMatrixRMaj(3, 3);
 
