@@ -13,6 +13,7 @@ import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
+import imgui.type.ImFloat;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
@@ -61,6 +62,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 50);
+   private final ImFloat goalZ = new ImFloat(0.0f);
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 230, 30);
    private final ImBoolean showGraphics = new ImBoolean(true);
@@ -216,9 +218,14 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
          if (placingPosition)
          {
-            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), pickPoint.getZ32());
+            if (ImGui.getIO().getKeyCtrl())
+            {
+               goalZ.set(goalZ.get() - (input.getMouseWheelDelta() / 30.0f));
+            }
 
-            if (ImGui.isMouseReleased(ImGuiMouseButton.Left))
+            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) goalZ.get());
+
+            if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placeGoalActionMap.triggerAction(GDXUITrigger.POSITION_LEFT_CLICK);
             }
@@ -226,6 +233,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
          else // placing orientation
          {
             GDXTools.toEuclid(sphere.transform, spherePosition);
+            spherePosition.setZ(goalZ.get());
             GDXTools.toGDX(spherePosition, arrow.transform);
 
             rotationVector.set(pickPoint);
@@ -237,13 +245,13 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
 
             goalPose.set(spherePosition, arrowRotationMatrix);
 
-            if (ImGui.isMouseReleased(ImGuiMouseButton.Left))
+            if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                placeGoalActionMap.triggerAction(GDXUITrigger.ORIENTATION_LEFT_CLICK);
             }
          }
 
-         if (ImGui.isMouseReleased(ImGuiMouseButton.Right))
+         if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Right))
          {
             placeGoalActionMap.triggerAction(GDXUITrigger.RIGHT_CLICK);
          }
@@ -295,6 +303,14 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       {
          ImGui.popItemFlag();
       }
+      if (ImGui.isItemHovered())
+      {
+         ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
+      }
+      ImGui.sameLine();
+      ImGui.pushItemWidth(50.0f);
+      ImGui.dragFloat("Goal Z", goalZ.getData(), 0.01f);
+      ImGui.popItemWidth();
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
