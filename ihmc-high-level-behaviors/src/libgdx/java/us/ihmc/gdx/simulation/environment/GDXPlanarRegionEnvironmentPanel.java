@@ -14,15 +14,16 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.nio.file.FileVisitResult;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class GDXPlanarRegionEnvironmentPanel implements RenderableProvider
 {
    private final String windowName = ImGuiTools.uniqueLabel("Planar Region Data Sets");
    private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
-   private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
-   private final ArrayList<Path> reaDataSetPaths = new ArrayList<>();
+   private final TreeSet<Path> pathPlanningDataSetPaths = new TreeSet<>(this::alphabetizePlanarRegionFolders);
+   private final TreeSet<Path> reaDataSetPaths = new TreeSet<>(this::alphabetizePlanarRegionFolders);
+
    private boolean loadedDatasetsOnce = false;
 
    public void renderImGuiWindow()
@@ -78,7 +79,7 @@ public class GDXPlanarRegionEnvironmentPanel implements RenderableProvider
       }
    }
 
-   private void renderDataSetPathWidgets(ArrayList<Path> dataSetPaths)
+   private void renderDataSetPathWidgets(TreeSet<Path> dataSetPaths)
    {
       for (Path dataSetPath : dataSetPaths)
       {
@@ -116,6 +117,17 @@ public class GDXPlanarRegionEnvironmentPanel implements RenderableProvider
             planarRegionsGraphic.getRenderables(renderables, pool);
          }
       }
+   }
+
+   private int alphabetizePlanarRegionFolders(Path path1, Path path2)
+   {
+      return getPlanarRegionFolderName(path1).compareTo(getPlanarRegionFolderName(path2));
+   }
+
+   private String getPlanarRegionFolderName(Path path1)
+   {
+      String path1FileName = path1.getFileName().toString();
+      return path1FileName.equals("PlanarRegions") ? path1.getParent().getFileName().toString() : path1FileName;
    }
 
    public String getWindowName()
