@@ -43,7 +43,6 @@ public class VariationalLQRControllerTest
       }
    }
 
-   @Disabled
    @Test
    public void testWithEasyOrientationError()
    {
@@ -88,6 +87,15 @@ public class VariationalLQRControllerTest
          controller.getDesiredTorque(feedbackTorque);
          assertEquals(0.0, feedbackTorque.getX(), 1e-5);
          assertEquals(-Math.signum(pitchRotation), Math.signum(feedbackTorque.getY()), 1e-5);
+         assertEquals(0.0, feedbackTorque.getZ(), 1e-5);
+
+
+         // check roll only
+         controller.compute(0.0, rolledOrientation, desiredAngularVelocity);
+
+         controller.getDesiredTorque(feedbackTorque);
+         assertEquals(-Math.signum(rollRotation), Math.signum(feedbackTorque.getX()), 1e-5);
+         assertEquals(0.0, feedbackTorque.getY(), 1e-5);
          assertEquals(0.0, feedbackTorque.getZ(), 1e-5);
       }
    }
