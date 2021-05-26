@@ -27,7 +27,6 @@ public class VariationalLQRController
 
    private final DMatrixRMaj wBd = new DMatrixRMaj(3, 1);
    private final DMatrixRMaj desiredRotationMatrix = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj currentRotationMatrix = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj wB = new DMatrixRMaj(3, 1);
 
    private final DMatrixRMaj RBerrorVector = new DMatrixRMaj(3, 1);
@@ -72,8 +71,6 @@ public class VariationalLQRController
 
    public void compute(QuaternionReadOnly currentRotation, Vector3DReadOnly currentAngularVelocityInBodyFrame)
    {
-      currentRotation.get(tempRotation);
-      tempRotation.get(currentRotationMatrix);
       currentAngularVelocityInBodyFrame.get(wB);
 
       angleTools.computeRotationError(desiredRotation, currentRotation, axisAngleError);
@@ -92,20 +89,5 @@ public class VariationalLQRController
    public void getDesiredTorque(Vector3DBasics tau)
    {
       tau.set(this.feedbackTorque);
-   }
-
-
-   private static void fromSkewSymmetric(DMatrixRMaj mHat, DMatrixRMaj mToPack)
-   {
-      if (mToPack.getNumRows() != 3)
-         throw new IllegalArgumentException("Not the right number of rows.");
-      if (mToPack.getNumCols() != 1)
-         throw new IllegalArgumentException("m is not a column vector.");
-      if (mHat.getNumRows() != 3 || mHat.getNumCols() != 3)
-         throw new IllegalArgumentException("Matrix to pack is the wrong size.");
-
-      mToPack.set(0, mHat.get(2, 1));
-      mToPack.set(1, mHat.get(0, 2));
-      mToPack.set(2, mHat.get(1, 0));
    }
 }
