@@ -76,7 +76,7 @@ public class VariationalLQRController
       tempRotation.get(currentRotationMatrix);
       currentAngularVelocityInBodyFrame.get(wB);
 
-      angleTools.computeRotationError(currentRotation, desiredRotation, axisAngleError);
+      angleTools.computeRotationError(desiredRotation, currentRotation, axisAngleError);
       axisAngleError.get(RBerrorVector);
 
       CommonOps_DDRM.subtract(wB, wBd, wBerror);
