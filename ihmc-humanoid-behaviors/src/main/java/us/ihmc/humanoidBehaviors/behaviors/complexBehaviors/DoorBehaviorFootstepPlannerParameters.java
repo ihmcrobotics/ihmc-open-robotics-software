@@ -16,25 +16,24 @@ public class DoorBehaviorFootstepPlannerParameters extends StoredPropertySet imp
       this(PROJECT_NAME, PATH_TO_RESOURCES, fileNameSuffix);
    }
 
-   public DoorBehaviorFootstepPlannerParameters(String projectName, String pathToResources)
-   {
-      this(projectName, pathToResources, "");
-   }
-
    public DoorBehaviorFootstepPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
       super(FootstepPlannerParameterKeys.keys, DoorBehaviorFootstepPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
       load();
+
+      System.out.println();
    }
 
    /** Use this to update and fix the INI file */
    public static void main(String[] args)
    {
-      StoredPropertySet storedPropertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
-                                                                  DoorBehaviorFootstepPlannerParameters.class,
-                                                                  PROJECT_NAME,
-                                                                  PATH_TO_RESOURCES);
-      storedPropertySet.loadUnsafe();
-      storedPropertySet.save();
+      new DoorBehaviorFootstepPlannerParameters();
+
+//      StoredPropertySet storedPropertySet = new StoredPropertySet(FootstepPlannerParameterKeys.keys,
+//                                                                  DoorBehaviorFootstepPlannerParameters.class,
+//                                                                  PROJECT_NAME,
+//                                                                  PATH_TO_RESOURCES);
+//      storedPropertySet.loadUnsafe();
+//      storedPropertySet.save();
    }
 }

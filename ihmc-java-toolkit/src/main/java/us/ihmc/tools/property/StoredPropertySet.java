@@ -58,7 +58,8 @@ public class StoredPropertySet implements StoredPropertySetBasics
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
 
-      this.saveFileName = StringUtils.uncapitalize(classForLoading.getSimpleName()) + fileNameSuffix + ".ini";
+      String className = classForLoading.getSimpleName();
+      this.saveFileName = StringUtils.uncapitalize(className) + fileNameSuffix + ".ini";
 
       values = new Object[keys.keys().size()];
 
