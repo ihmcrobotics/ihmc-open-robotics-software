@@ -2,9 +2,11 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.tools;
 
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameQuaternionReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class MPCAngleTools
 {
@@ -14,7 +16,7 @@ public class MPCAngleTools
    private final Matrix3D transformedRotationA = new Matrix3D();
    private final Matrix3D transformedRotationB = new Matrix3D();
 
-   public void computeRotationError(FrameOrientation3DReadOnly orientationA, FrameQuaternionReadOnly orientationB, Vector3DBasics errorVectorToPack)
+   public void computeRotationError(Orientation3DReadOnly orientationA, Orientation3DReadOnly orientationB, Vector3DBasics errorVectorToPack)
    {
       orientationA.get(rotationA);
       orientationB.get(rotationB);
