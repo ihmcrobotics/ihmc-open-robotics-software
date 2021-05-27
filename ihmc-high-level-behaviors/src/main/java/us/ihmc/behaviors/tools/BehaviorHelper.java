@@ -187,5 +187,6 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       super.destroy();
       ros1Helper.destroy();
       messagerHelper.disconnect();
+      yoVariableClientHelper.disconnect();
    }
 }
