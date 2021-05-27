@@ -7,18 +7,12 @@ import us.ihmc.ihmcPerception.linemod.LineModTemplate;
 import us.ihmc.log.LogTools;
 
 import java.io.*;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
 public class StepReachabilityFileTools
 {
-   // for references on writing to file, check out
-   // FootstepPlannerLogger line 245
-   // AtlasMultiDataExporter.writeSpreadsheetFormattedData
-
-//   static String filePath = "ihmc-open-robotics-software/valkyrie/src/main/java/us/ihmc/valkyrie/stepReachability/";
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
    public static void writeToFile(Map<FramePose3D, Boolean> feasibilityMap)
@@ -48,7 +42,6 @@ public class StepReachabilityFileTools
       catch (Exception e)
       {
          LogTools.error("Error logging reachability file");
-//         fileWriter = null;
          e.printStackTrace();
       }
    }
@@ -91,9 +84,9 @@ public class StepReachabilityFileTools
             System.out.print(frame);
             System.out.println(line.contains("true"));
 
-            // Load into hashmap TODO Fix this
+            // Load into hashmap TODO Fix this, might have to round to 2 decimals, something with hashcode
             feasibilityMap.put(frame, line.contains("true"));
-            System.out.println(feasibilityMap);
+//            System.out.println(feasibilityMap);
          }
          scanner.close();
          System.out.println("Done loading from file");

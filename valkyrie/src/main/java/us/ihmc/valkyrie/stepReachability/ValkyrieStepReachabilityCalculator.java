@@ -23,18 +23,24 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.instructions.Graphics3DInstruction;
 import us.ihmc.graphicsDescription.instructions.Graphics3DPrimitiveInstruction;
@@ -51,7 +57,9 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -65,6 +73,7 @@ import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigura
 import us.ihmc.sensorProcessing.simulatedSensors.DRCPerfectSensorReaderFactory;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -101,7 +110,7 @@ public class ValkyrieStepReachabilityCalculator
    private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    // TODO tune this
-   private static final double SOLUTION_QUALITY_THRESHOLD = 50; //1e-3;
+   private static final double SOLUTION_QUALITY_THRESHOLD = 5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
@@ -176,6 +185,10 @@ public class ValkyrieStepReachabilityCalculator
       robot.setDynamic(false);
       robot.setGravity(0);
 
+      // Green collision body
+      addKinematicsCollisionGraphics(desiredFullRobotModel, robot, collisionModel);
+
+      // Yellow initial body
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
       recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
@@ -322,17 +335,11 @@ public class ValkyrieStepReachabilityCalculator
          rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
          rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
          commandInputManager.submitMessage(rbMessage);
-
-         // Rigid body objective for each hand, TODO: try fixing joint angles instead or above feet poses
-//         rbMessage = holdRigidBodyCurrentPose(targetFullRobotModel.getHand(robotSide));
-//         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-//         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-//         commandInputManager.submitMessage(rbMessage);
       }
 
       FramePose3D centerFeet = interpolateFeet(leftFoot, rightFoot);
 
-//       Rigid body objective for chest, center XY pose of feet
+      // Rigid body objective for chest, center XY pose of feet
       KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getChest(), centerFeet);
       rbMessage.getLinearSelectionMatrix().setZSelected(false);
       rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -361,11 +368,8 @@ public class ValkyrieStepReachabilityCalculator
       configurationMessage.setEnableCollisionAvoidance(true);
       commandInputManager.submitMessage(configurationMessage);
 
-      snapGhostToFullRobotModel(targetFullRobotModel);
+//      snapGhostToFullRobotModel(targetFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
-
-//      int numberOfIterations = 150;
-//      runKinematicsToolboxController(numberOfIterations);
 
       while (!solutionQualityConvergenceDetector.isSolved())
       {
@@ -376,8 +380,8 @@ public class ValkyrieStepReachabilityCalculator
 
       assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
       double solutionQuality = toolboxController.getSolution().getSolutionQuality();
-      System.out.println(solutionQuality);
 
+      // how is solutionQuality different from finalSolutionQuality?
       boolean isValid = (solutionQuality < solutionQualityThreshold);
       validStep.set(isValid);
 
@@ -403,13 +407,13 @@ public class ValkyrieStepReachabilityCalculator
    }
 
    // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
-   private static final int queriesPerAxis = 8;
+   private static final int queriesPerAxis = 6;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
    private static final double maximumOffsetY = 0.5;
-   private static final double minimumOffsetYaw = - Math.toRadians(70.0);
-   private static final double maximumOffsetYaw = Math.toRadians(70.0);
+   private static final double minimumOffsetYaw = - Math.toRadians(80.0);
+   private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
    private static List<FramePose3D> createLeftFootPoseList()
    {
@@ -706,6 +710,64 @@ public class ValkyrieStepReachabilityCalculator
          contactableFeet.get(RobotSide.RIGHT).getContactPointsCopy().stream().peek(cp -> cp.changeFrame(worldFrame))
                         .forEach(cp -> rightFootSupportPolygon2d.add().set(cp.getX(), cp.getY(), 0.0));
       return capturabilityBasedStatus;
+   }
+
+   private static Graphics3DObject getGraphics(Collidable collidable)
+   {
+      Shape3DReadOnly shape = collidable.getShape();
+      RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
+                                                            .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
+      Graphics3DObject graphics = new Graphics3DObject();
+      graphics.transform(transformToParentJoint);
+      AppearanceDefinition appearance = YoAppearance.DarkGreen();
+      appearance.setTransparency(0.5);
+
+      if (shape instanceof Sphere3DReadOnly)
+      {
+         Sphere3DReadOnly sphere = (Sphere3DReadOnly) shape;
+         graphics.translate(sphere.getPosition());
+         graphics.addSphere(sphere.getRadius(), appearance);
+      }
+      else if (shape instanceof Capsule3DReadOnly)
+      {
+         Capsule3DReadOnly capsule = (Capsule3DReadOnly) shape;
+         RigidBodyTransform transform = new RigidBodyTransform();
+         EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), transform.getRotation());
+         transform.getTranslation().set(capsule.getPosition());
+         graphics.transform(transform);
+         graphics.addCapsule(capsule.getRadius(),
+                             capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.
+                             appearance);
+      }
+      else if (shape instanceof Box3DReadOnly)
+      {
+         Box3DReadOnly box = (Box3DReadOnly) shape;
+         graphics.translate(box.getPosition());
+         graphics.rotate(new RotationMatrix(box.getOrientation()));
+         graphics.addCube(box.getSizeX(), box.getSizeY(), box.getSizeZ(), true, appearance);
+      }
+      else if (shape instanceof PointShape3DReadOnly)
+      {
+         PointShape3DReadOnly pointShape = (PointShape3DReadOnly) shape;
+         graphics.translate(pointShape);
+         graphics.addSphere(0.01, appearance);
+      }
+      else
+      {
+         throw new UnsupportedOperationException("Unsupported shape: " + shape.getClass().getSimpleName());
+      }
+      return graphics;
+   }
+
+   public static void addKinematicsCollisionGraphics(FullHumanoidRobotModel fullRobotModel, Robot robot, RobotCollisionModel collisionModel)
+   {
+      List<Collidable> robotCollidables = collisionModel.getRobotCollidables(fullRobotModel.getElevator());
+
+      for (Collidable collidable : robotCollidables)
+      {
+         Link link = robot.getLink(collidable.getRigidBody().getName());
+         link.getLinkGraphics().combine(getGraphics(collidable));
+      }
    }
 
 }
