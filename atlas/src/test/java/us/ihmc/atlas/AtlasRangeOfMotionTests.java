@@ -6,6 +6,7 @@ import us.ihmc.avatar.AvatarRangeOfMotionTests;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 
 public class AtlasRangeOfMotionTests extends AvatarRangeOfMotionTests
 {
@@ -35,6 +36,23 @@ public class AtlasRangeOfMotionTests extends AvatarRangeOfMotionTests
    public void testSquattingDown() throws Exception
    {
       super.testSquattingDown();
+   }
+
+   @Tag("controller-api-2")
+   @Override
+   @Test
+   public void testWalkingOffOfLargePlatform() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      setUseExperimentalPhysicsEngine(false);
+      super.testWalkingOffOfLargePlatform();
+   }
+
+   @Tag("controller-api-2")
+   @Test
+   public void testWalkingOffOfLargePlatformWithExperimentalPhysicsEngine() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   {
+      setUseExperimentalPhysicsEngine(true);
+      super.testWalkingOffOfLargePlatform();
    }
 
 }
