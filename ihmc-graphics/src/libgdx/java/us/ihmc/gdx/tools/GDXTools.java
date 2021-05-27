@@ -7,15 +7,22 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import org.apache.logging.log4j.Level;
+import org.lwjgl.openvr.HmdMatrix34;
+import org.lwjgl.openvr.HmdMatrix44;
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.log.LogTools;
+
+import java.nio.FloatBuffer;
 
 public class GDXTools
 {
@@ -110,6 +117,101 @@ public class GDXTools
       gdxAffineToPack.val[Matrix4.M23] = (float) rigidBodyTransform.getM23();
    }
 
+   public static void toGDX(HmdMatrix44 openVRProjectionMatrix, Matrix4 gdxProjectionMatrixToPack)
+   {
+      FloatBuffer openVRValueBuffer = openVRProjectionMatrix.m();
+      gdxProjectionMatrixToPack.val[0] = openVRValueBuffer.get(0);
+      gdxProjectionMatrixToPack.val[1] = openVRValueBuffer.get(4);
+      gdxProjectionMatrixToPack.val[2] = openVRValueBuffer.get(8);
+      gdxProjectionMatrixToPack.val[3] = openVRValueBuffer.get(12);
+      gdxProjectionMatrixToPack.val[4] = openVRValueBuffer.get(1);
+      gdxProjectionMatrixToPack.val[5] = openVRValueBuffer.get(5);
+      gdxProjectionMatrixToPack.val[6] = openVRValueBuffer.get(9);
+      gdxProjectionMatrixToPack.val[7] = openVRValueBuffer.get(13);
+      gdxProjectionMatrixToPack.val[8] = openVRValueBuffer.get(2);
+      gdxProjectionMatrixToPack.val[9] = openVRValueBuffer.get(6);
+      gdxProjectionMatrixToPack.val[10] = openVRValueBuffer.get(10);
+      gdxProjectionMatrixToPack.val[11] = openVRValueBuffer.get(14);
+      gdxProjectionMatrixToPack.val[12] = openVRValueBuffer.get(3);
+      gdxProjectionMatrixToPack.val[13] = openVRValueBuffer.get(7);
+      gdxProjectionMatrixToPack.val[14] = openVRValueBuffer.get(11);
+      gdxProjectionMatrixToPack.val[15] = openVRValueBuffer.get(15);
+   }
+
+   public static void toGDX(HmdMatrix34 openVRRigidBodyTransform, Matrix4 gdxAffineToPack)
+   {
+      FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
+      gdxAffineToPack.val[0] = openVRValueBuffer.get(0);
+      gdxAffineToPack.val[1] = openVRValueBuffer.get(4);
+      gdxAffineToPack.val[2] = openVRValueBuffer.get(8);
+      gdxAffineToPack.val[3] = 0;
+      gdxAffineToPack.val[4] = openVRValueBuffer.get(1);
+      gdxAffineToPack.val[5] = openVRValueBuffer.get(5);
+      gdxAffineToPack.val[6] = openVRValueBuffer.get(9);
+      gdxAffineToPack.val[7] = 0;
+      gdxAffineToPack.val[8] = openVRValueBuffer.get(2);
+      gdxAffineToPack.val[9] = openVRValueBuffer.get(6);
+      gdxAffineToPack.val[10] = openVRValueBuffer.get(10);
+      gdxAffineToPack.val[11] = 0;
+      gdxAffineToPack.val[12] = openVRValueBuffer.get(3);
+      gdxAffineToPack.val[13] = openVRValueBuffer.get(7);
+      gdxAffineToPack.val[14] = openVRValueBuffer.get(11);
+      gdxAffineToPack.val[15] = 1;
+   }
+
+   public static void toEuclid(HmdMatrix34 openVRRigidBodyTransform, RigidBodyTransform rigidBodyTransformToPack)
+   {
+      FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
+      rigidBodyTransformToPack.getRotation().setAndNormalize(openVRValueBuffer.get(0),
+                                                             openVRValueBuffer.get(1),
+                                                             openVRValueBuffer.get(2),
+                                                             openVRValueBuffer.get(4),
+                                                             openVRValueBuffer.get(5),
+                                                             openVRValueBuffer.get(6),
+                                                             openVRValueBuffer.get(8),
+                                                             openVRValueBuffer.get(9),
+                                                             openVRValueBuffer.get(10));
+      rigidBodyTransformToPack.getTranslation().setX(openVRValueBuffer.get(3));
+      rigidBodyTransformToPack.getTranslation().setY(openVRValueBuffer.get(7));
+      rigidBodyTransformToPack.getTranslation().setZ(openVRValueBuffer.get(11));
+   }
+
+   public static void toEuclid(HmdMatrix34 openVRRigidBodyTransform, Pose3DBasics poseToPack)
+   {
+      FloatBuffer openVRValueBuffer = openVRRigidBodyTransform.m();
+      poseToPack.getOrientation().setRotationMatrix(openVRValueBuffer.get(0),
+                                                    openVRValueBuffer.get(1),
+                                                    openVRValueBuffer.get(2),
+                                                    openVRValueBuffer.get(4),
+                                                    openVRValueBuffer.get(5),
+                                                    openVRValueBuffer.get(6),
+                                                    openVRValueBuffer.get(8),
+                                                    openVRValueBuffer.get(9),
+                                                    openVRValueBuffer.get(10));
+      poseToPack.getOrientation().normalize();
+      poseToPack.getPosition().setX(openVRValueBuffer.get(3));
+      poseToPack.getPosition().setY(openVRValueBuffer.get(7));
+      poseToPack.getPosition().setZ(openVRValueBuffer.get(11));
+   }
+
+   public static void toEuclid(HmdMatrix34 openVRAffineTransform, AffineTransform euclidAffine)
+   {
+      FloatBuffer openVRValueBuffer = openVRAffineTransform.m();
+      euclidAffine.getLinearTransform().setM00(openVRValueBuffer.get(0));
+      euclidAffine.getLinearTransform().setM01(openVRValueBuffer.get(1));
+      euclidAffine.getLinearTransform().setM02(openVRValueBuffer.get(2));
+      euclidAffine.getLinearTransform().setM10(openVRValueBuffer.get(4));
+      euclidAffine.getLinearTransform().setM11(openVRValueBuffer.get(5));
+      euclidAffine.getLinearTransform().setM12(openVRValueBuffer.get(6));
+      euclidAffine.getLinearTransform().setM20(openVRValueBuffer.get(8));
+      euclidAffine.getLinearTransform().setM21(openVRValueBuffer.get(9));
+      euclidAffine.getLinearTransform().setM22(openVRValueBuffer.get(10));
+      euclidAffine.getLinearTransform().normalize();
+      euclidAffine.getTranslation().setX(openVRValueBuffer.get(3));
+      euclidAffine.getTranslation().setY(openVRValueBuffer.get(7));
+      euclidAffine.getTranslation().setZ(openVRValueBuffer.get(11));
+   }
+
    public static void toEuclid(Matrix4 gdxAffine, RigidBodyTransform rigidBodyTransform)
    {
       rigidBodyTransform.getRotation().setAndNormalize(gdxAffine.val[Matrix4.M00],
@@ -171,7 +273,7 @@ public class GDXTools
                       gdxAffine.val[Matrix4.M23]);
    }
 
-   public static void toGDX(Point3DBasics euclidPoint, Matrix4 gdxAffine)
+   public static void toGDX(Point3DReadOnly euclidPoint, Matrix4 gdxAffine)
    {
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
    }

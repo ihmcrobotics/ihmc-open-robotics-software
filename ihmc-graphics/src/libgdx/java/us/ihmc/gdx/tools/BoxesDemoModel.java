@@ -1,4 +1,4 @@
-package us.ihmc.gdx;
+package us.ihmc.gdx.tools;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;

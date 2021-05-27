@@ -5,9 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
-import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.utilities.ros.RosMainNode;
-import us.ihmc.utilities.ros.RosTools;
+import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.ArrayList;
 
@@ -17,7 +15,7 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 
    private final ArrayList<ImGuiGDXVisualizer> visualizers = new ArrayList<>();
 
-   private RosMainNode ros1Node;
+   private final ROS1Helper ros1Helper = new ROS1Helper("global_visualizers");
 
    public void addVisualizer(ImGuiGDXVisualizer visualizer)
    {
@@ -30,54 +28,26 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       {
          visualizer.create();
       }
-
-      recreateRos1Node();
-   }
-
-   public void recreateRos1Node()
-   {
-      if (ros1Node != null)
-         ros1Node.shutdown();
-
-      ros1Node = RosTools.createRosNode(NetworkParameters.getROSURI(), "global_visualizers");
-
-      for (ImGuiGDXVisualizer visualizer : visualizers)
-      {
-         if (visualizer instanceof ImGuiGDXROS1Visualizer && visualizer.isActive())
-         {
-            ((ImGuiGDXROS1Visualizer) visualizer).subscribe(ros1Node);
-         }
-      }
-
-      ros1Node.execute();
    }
 
    public void render()
    {
       ImGui.begin(WINDOW_NAME);
 
-      boolean anyNewROS1Enabled = false;
-
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
          visualizer.renderImGuiWidgets();
          if (visualizer instanceof ImGuiGDXROS1Visualizer)
          {
-            anyNewROS1Enabled |= visualizer.getActiveChanged() && visualizer.isActive();
-            if (visualizer.getActiveChanged() && !visualizer.isActive())
-            {
-               ((ImGuiGDXROS1Visualizer) visualizer).unsubscribe(ros1Node);
-            }
+            ((ImGuiGDXROS1Visualizer) visualizer).updateSubscribers(ros1Helper);
          }
+
          ImGui.separator();
       }
 
       ImGui.end();
 
-      if (anyNewROS1Enabled)
-      {
-         recreateRos1Node();
-      }
+      ros1Helper.ensureConnected();
 
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
@@ -106,6 +76,7 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       {
          visualizer.destroy();
       }
+      ros1Helper.destroy();
    }
 
    public String getWindowName()

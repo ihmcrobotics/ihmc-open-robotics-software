@@ -88,7 +88,6 @@ public class GDXPose3DWidget implements RenderableProvider
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RigidBodyTransform tempPolytopeTransform = new RigidBodyTransform();
-   private GDXImGuiBasedUI baseUI;
    private final Point3D firstIntersectionToPack = new Point3D();
    private final Point3D secondIntersectionToPack = new Point3D();
    private final Point3D interpolatedPoint = new Point3D();
@@ -112,11 +111,15 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Vector3D crossProduct = new Vector3D();
    private final Vector3D axisMoveVector = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
+   private final String imGuiWindowName;
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public GDXPose3DWidget(String name)
    {
-      this.baseUI = baseUI;
+      imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
+   }
 
+   public void create()
+   {
       axisRotations[0] = new RotationMatrix(0.0, Math.PI / 2.0, 0.0);
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
       axisRotations[2] = new RotationMatrix();
@@ -139,7 +142,7 @@ public class GDXPose3DWidget implements RenderableProvider
       }
       if (isWindowHovered && !dragging)
       {
-         Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
+         Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
 
          if (rightMouseDown)
@@ -161,7 +164,7 @@ public class GDXPose3DWidget implements RenderableProvider
          dragBucketX += mouseDraggedX;
          dragBucketY += mouseDraggedY;
 
-         Line3DReadOnly pickRay = input.getPickRayInWorld(baseUI);
+         Line3DReadOnly pickRay = input.getPickRayInWorld();
 
          axisDragLine.getPoint().set(transform.getTranslation());
          axisDragLine.getDirection().set(Axis3D.Z);
@@ -427,9 +430,9 @@ public class GDXPose3DWidget implements RenderableProvider
    }
 
 
-   public void render()
+   public void renderImGuiTuner()
    {
-      ImGui.begin(ImGuiTools.uniqueLabel(this, "3D Widget Tuner"));
+      ImGui.begin(imGuiWindowName);
 
       ImGui.text("Use the right mouse button to manipulate the widget.");
       ImGui.text("X: " + mouseDraggedX);

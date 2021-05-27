@@ -112,7 +112,9 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
 
-      lookAndStepBehavior = new LookAndStepBehavior(new BehaviorHelper(robotModel, behaviorMessager, helper.getROS1Node(), ros2Node, false));
+      BehaviorHelper helperForLookAndStep = new BehaviorHelper(robotModel, "sub_look_and_step", "SubLookAndStep", ros2Node, false);
+      helperForLookAndStep.getMessagerHelper().setExternallyStartedMessager(behaviorMessager);
+      lookAndStepBehavior = new LookAndStepBehavior(helperForLookAndStep);
 
       teleopState = new TeleopState(robotModel,ros2Node);
       lookAndStepState = new LookAndStepState(robotModel, ros2Node, behaviorMessager, bombPose, robotConfigurationData::get);
