@@ -1,9 +1,5 @@
 package us.ihmc.gdx.ui.behaviors;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
@@ -17,6 +13,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.messager.SharedMemoryMessager;
@@ -28,10 +25,9 @@ import java.util.function.Supplier;
 
 import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
-public class GDXBehaviorsPanel implements RenderableProvider
+public class GDXBehaviorsPanel
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
-   private final GDXBehaviorUIRegistry behaviorRegistry;
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
@@ -40,8 +36,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
    private volatile boolean yoClientConnecting = false;
    private final YoVariableClientHelper yoVariableClientHelper;
 
-   private final GDXBuildingExplorationBehaviorUI buildingExplorationUI;
-   private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
+   private final GDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<String> logArray = new LinkedList<>();
    private final ImInt selectedLogEntry = new ImInt();
@@ -50,13 +45,11 @@ public class GDXBehaviorsPanel implements RenderableProvider
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
                             GDXBehaviorUIRegistry behaviorRegistry)
    {
-      this.behaviorRegistry = behaviorRegistry;
 
       behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       messagerHelper = behaviorHelper.getMessagerHelper();
       yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
-      buildingExplorationUI = new GDXBuildingExplorationBehaviorUI(messagerHelper);
-      lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(behaviorHelper);
+      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
 
       logArray.addLast("Log started at " + LocalDateTime.now());
       behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
@@ -70,16 +63,13 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      buildingExplorationUI.create(baseUI.getVRManager());
-      baseUI.getSceneManager().addRenderableProvider(buildingExplorationUI, GDXSceneLevel.VIRTUAL);
-
-      lookAndStepUI.create(baseUI);
-      baseUI.getSceneManager().addRenderableProvider(lookAndStepUI, GDXSceneLevel.VIRTUAL);
+      highestLevelUI.create(baseUI);
+      baseUI.getSceneManager().addRenderableProvider(highestLevelUI, GDXSceneLevel.VIRTUAL);
    }
 
    public void handleVREvents(GDXVRManager vrManager)
    {
-      buildingExplorationUI.handleVREvents(vrManager);
+      highestLevelUI.handleVREvents(vrManager);
    }
 
    public void render()
@@ -164,7 +154,7 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
       if (messagerHelper.isConnected())
       {
-         lookAndStepUI.renderWidgetsOnly();
+         highestLevelUI.render();
       }
 
       synchronized (logArray)
@@ -208,16 +198,8 @@ public class GDXBehaviorsPanel implements RenderableProvider
 
    public void destroy()
    {
-      disconnectMessager();
-      disconnectYoVariableClient();
-      lookAndStepUI.destroy();
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      buildingExplorationUI.getRenderables(renderables, pool);
-      lookAndStepUI.getRenderables(renderables, pool);
+      behaviorHelper.destroy();
+      highestLevelUI.destroy();
    }
 
    public String getWindowName()

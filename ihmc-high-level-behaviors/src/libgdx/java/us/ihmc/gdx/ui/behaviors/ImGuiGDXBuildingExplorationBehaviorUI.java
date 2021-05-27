@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
@@ -12,6 +11,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.vr.*;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
@@ -20,7 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
-public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
+public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterface
 {
    private static final String WINDOW_NAME = "Building Exploration";
 
@@ -29,13 +30,15 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
    private ModelInstance goalSphere;
    private boolean goalIsBeingPlaced;
 
-   public GDXBuildingExplorationBehaviorUI(MessagerPublishSubscribeAPI messager)
+   public ImGuiGDXBuildingExplorationBehaviorUI(MessagerPublishSubscribeAPI messager)
    {
       this.messager = messager;
    }
 
-   public void create(GDXVRManager vrManager)
+   @Override
+   public void create(GDXImGuiBasedUI baseUI)
    {
+      GDXVRManager vrManager = baseUI.getVRManager();
       goalSphere = GDXModelPrimitives.createSphere(0.1f, Color.GREEN);
 
       if (GDXVRManager.isVREnabled())
@@ -80,6 +83,7 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
       }
    }
 
+   @Override
    public void handleVREvents(GDXVRManager vrManager)
    {
       if (goalIsBeingPlaced)
@@ -93,10 +97,19 @@ public class GDXBuildingExplorationBehaviorUI implements RenderableProvider
    {
       ImGui.begin(WINDOW_NAME);
 
-      ImGui.button("Place goal");
-//      ImGui.dragFlo
-
       ImGui.end();
+   }
+
+   @Override
+   public void render()
+   {
+      ImGui.button("Place goal");
+   }
+
+   @Override
+   public void destroy()
+   {
+
    }
 
    public String getWindowName()

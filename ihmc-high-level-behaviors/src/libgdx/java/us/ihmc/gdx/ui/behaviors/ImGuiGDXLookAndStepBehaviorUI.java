@@ -2,7 +2,6 @@ package us.ihmc.gdx.ui.behaviors;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
@@ -38,6 +37,8 @@ import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
+import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
+import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.yo.ImGuiYoDoublePlot;
@@ -54,8 +55,11 @@ import java.util.ArrayList;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
+public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 {
+   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(LookAndStepBehavior.DEFINITION,
+                                                                                        ImGuiGDXLookAndStepBehaviorUI::new);
+
    private final BehaviorHelper behaviorHelper;
 
    private String currentState = "";
@@ -128,6 +132,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", behaviorHelper);
    }
 
+   @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
@@ -258,11 +263,12 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
    public void renderAsWindow()
    {
       ImGui.begin(getWindowName());
-      renderWidgetsOnly();
+      render();
       ImGui.end();
    }
 
-   public void renderWidgetsOnly()
+   @Override
+   public void render()
    {
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
@@ -401,6 +407,7 @@ public class ImGuiGDXLookAndStepBehaviorUI implements RenderableProvider
       }
    }
 
+   @Override
    public void destroy()
    {
       footstepPlanGraphic.destroy();
