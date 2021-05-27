@@ -92,8 +92,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
    private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.5f, -0.6f, 0f);
    
-   private Point3D pushDoorWalkThroughPoint= new Point3D(0.5f, 1, 0f);
-   private Point3D pullDoorWalkThroughPoint= new Point3D(0.5f, -1, 0f);
+   private Point3D pushDoorWalkThroughPoint= new Point3D(0.5f, -1, 0f);
+   private Point3D pullDoorWalkThroughPoint= new Point3D(0.5f, 1, 0f);
 
 
    private Vector3D32 pullDoorOffsetPoint1 = new Vector3D32(1.15f, 1.2f, 0f);
@@ -375,8 +375,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             //          double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
             //          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
 
-            double[] rightArmPose = new double[] {1.5704801015872456, -0.35110091371120383, 1.5178986529430736, -2.1131867720911983, -1.9322024171454417, -0.9233865014518488, 0.2558450966233221};
-            double[] leftArmPose = new double[] {-1.5654576116314267, -0.22196114265785774, 1.5676545701265892, 1.5343550876369374, -2.1789789852785604, -0.7435422629461594, -2.8798335374002835};
+            double[] rightArmPose = new double[] {1.5613054651064713, -0.9117259090941617, 1.7801731462565251, -1.714681567425272, 0.4701641267471464, 0.3553805956221843, -0.883528619644353};
+            double[] leftArmPose = new double[] {-1.5708, -0.315140943959265, 1.4699954842804037, 1.1655918121416153, -2.2416048392105234, -0.988080471516879, 2.829256909246439};
 
             ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
 
@@ -536,18 +536,18 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            Pair<FramePose3D, Double> desiredGoalAndHeading = Pair.of(getWalkPathPoseRelativeToDoorInWorldFrame(), 0.0); 
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setAssumeFlatGround(true);
+            Pair<FramePose3D, Double> desiredGoalAndHeading = Pair.of(getWalkPathPoseRelativeToDoorInWorldFrame(), 0.0);
+            walkThroughDoorPlannedBehavior.setAssumeFlatGround(true);
 
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
+            walkThroughDoorPlannedBehavior.setPlanBodyPath(false);
+            walkThroughDoorPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
 
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setHeading(desiredGoalAndHeading.getRight());
+            walkThroughDoorPlannedBehavior.setHeading(desiredGoalAndHeading.getRight());
          }
       };
 
 
-      
+
 
       BehaviorAction failedState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
@@ -618,7 +618,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                             WalkThroughDoorBehaviorState.OPEN_PULL_DOOR,
                             t -> searchForDoorNear.isDone() && searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT);
 
-      //OPEN PUSH DOOR      
+      //OPEN PUSH DOOR
       factory.addState(WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR, openPushDoorAction);
 
       factory.addTransition(WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
@@ -675,7 +675,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       return point1;
    }
 
-   
+
    public FramePose3D getWalkPathPoseRelativeToDoorInWorldFrame()
    {
 	      PoseReferenceFrame doorPose = new PoseReferenceFrame("DoorPathReferenceFrame", ReferenceFrame.getWorldFrame());
@@ -688,7 +688,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 	         unrotatedDoor.appendTranslation(-0.9144, 0, 0);
 
 	         doorPose.setPoseAndUpdate(unrotatedDoor);
-		      FramePose3D pose = offsetPointFromFrameInWorldFrame(doorPose, pushDoorWalkThroughPoint, new Quaternion());
+		      FramePose3D pose = offsetPointFromFrameInWorldFrame(doorPose, pushDoorWalkThroughPoint,   new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
 
 		      return pose;
 	         
