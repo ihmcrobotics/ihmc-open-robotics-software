@@ -15,6 +15,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -25,11 +26,18 @@ import us.ihmc.gdx.input.editor.GDXUIActionMap;
 import us.ihmc.gdx.input.editor.GDXUITrigger;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.vr.GDXVRDevice;
+import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
+import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.function.Consumer;
+
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 {
@@ -46,11 +54,11 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private PlanarRegionsList latestRegions;
 
-   public void create(Consumer<Pose3D> placedPoseConsumer)
+   public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
       float sphereRadius = 0.03f;
-      sphere = GDXModelPrimitives.createSphere(sphereRadius, Color.CYAN);
-      arrow = GDXModelPrimitives.createArrow(sphereRadius * 6.0, Color.CYAN);
+      sphere = GDXModelPrimitives.createSphere(sphereRadius, color);
+      arrow = GDXModelPrimitives.createArrow(sphereRadius * 6.0, color);
 
       placeGoalActionMap = new GDXUIActionMap(startAction ->
                                               {
@@ -71,6 +79,35 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       {
          placingGoal = false;
       });
+
+      GDXVRManager vrManager = baseUI.getVRManager();
+      if (GDXVRManager.isVREnabled())
+      {
+         vrManager.getContext().addListener(new GDXVRDeviceAdapter() // TODO: Make this kind of thing less verbose
+         {
+            @Override
+            public void buttonPressed(GDXVRDevice device, int button)
+            {
+               if (device == vrManager.getControllers().get(RobotSide.LEFT))
+               {
+                  if (button == SteamVR_Trigger)
+                  {
+                     placingGoal = true;
+                  }
+               }
+            }
+
+            @Override
+            public void buttonReleased(GDXVRDevice device, int button)
+            {
+               if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
+               {
+                  placingGoal = false;
+                  placedPoseConsumer.accept(goalPose);
+               }
+            }
+         });
+      }
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -152,22 +189,31 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       }
    }
 
-   public void renderPlaceGoalButton()
+   public void handleVREvents(GDXVRManager vrManager)
    {
-      boolean pushed = false;
       if (placingGoal)
       {
-         pushed = true;
-         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), sphere.transform);
+         vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), arrow.transform);
       }
+   }
+
+   public void renderPlaceGoalButton()
+   {
+//      boolean pushed = false;
+//      if (placingGoal)
+//      {
+//         pushed = true;
+//         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+//      }
       if (ImGui.button(labels.get("Place goal")))
       {
          placeGoalActionMap.start();
       }
-      if (pushed)
-      {
-         ImGui.popItemFlag();
-      }
+//      if (pushed)
+//      {
+//         ImGui.popItemFlag();
+//      }
       if (ImGui.isItemHovered())
       {
          ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
