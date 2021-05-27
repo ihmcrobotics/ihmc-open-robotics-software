@@ -145,7 +145,8 @@ public class PlanarRegionsListBuffer
 
    public PlanarRegionsList get(int index)
    {
-      return indexBuffer.get(index).getList();
+      Container container = indexBuffer.get(index);
+      return container == null ? null : container.getList();
    }
 
    private Container getNearTimeInternal(long time)
