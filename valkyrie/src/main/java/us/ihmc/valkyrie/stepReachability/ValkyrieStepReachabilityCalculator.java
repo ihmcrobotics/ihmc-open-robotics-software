@@ -71,6 +71,7 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.ValkyrieSimulationCollisionModel;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -163,6 +164,7 @@ public class ValkyrieStepReachabilityCalculator
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
       toolboxController.setInitialRobotConfiguration(robotModel);
+      toolboxController.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
@@ -211,7 +213,7 @@ public class ValkyrieStepReachabilityCalculator
                poseValidityMap.put(leftFootPose, isValid);
             }
             StepReachabilityFileTools.writeToFile(poseValidityMap);
-//            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
+            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case TEST_FILE_LOADING:
             Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
@@ -271,6 +273,7 @@ public class ValkyrieStepReachabilityCalculator
          // Disable the support polygon constraint, the randomized model isn't constrained.
          KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
          configurationMessage.setDisableSupportPolygonConstraint(true);
+         configurationMessage.setEnableCollisionAvoidance(true);
          commandInputManager.submitMessage(configurationMessage);
 
          snapGhostToFullRobotModel(randomizedFullRobotModel);
@@ -351,6 +354,7 @@ public class ValkyrieStepReachabilityCalculator
       // Disable the support polygon constraint, the randomized model isn't constrained.
       KinematicsToolboxConfigurationMessage configurationMessage = new KinematicsToolboxConfigurationMessage();
       configurationMessage.setDisableSupportPolygonConstraint(true);
+      configurationMessage.setEnableCollisionAvoidance(true);
       commandInputManager.submitMessage(configurationMessage);
 
       snapGhostToFullRobotModel(targetFullRobotModel);
@@ -369,7 +373,6 @@ public class ValkyrieStepReachabilityCalculator
       assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
       double solutionQuality = toolboxController.getSolution().getSolutionQuality();
       System.out.println(solutionQuality);
-      // TODO: Check for feet collision
 
       boolean isValid = (solutionQuality < solutionQualityThreshold);
       validStep.set(isValid);
@@ -396,13 +399,13 @@ public class ValkyrieStepReachabilityCalculator
    }
 
    // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
-   private static final int queriesPerAxis = 10;
+   private static final int queriesPerAxis = 8;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
    private static final double maximumOffsetY = 0.5;
-   private static final double minimumOffsetYaw = - Math.toRadians(90.0);
-   private static final double maximumOffsetYaw = Math.toRadians(90.0);
+   private static final double minimumOffsetYaw = - Math.toRadians(70.0);
+   private static final double maximumOffsetYaw = Math.toRadians(70.0);
 
    private static List<FramePose3D> createLeftFootPoseList()
    {

@@ -10,6 +10,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Scanner;
 
 public class StepReachabilityFileTools
 {
@@ -17,13 +18,11 @@ public class StepReachabilityFileTools
    // FootstepPlannerLogger line 245
    // AtlasMultiDataExporter.writeSpreadsheetFormattedData
 
-   // Check path
-   static String filePath = "ihmc-open-robotics-software/valkyrie/src/main/java/us/ihmc/valkyrie/stepReachability/";
+//   static String filePath = "ihmc-open-robotics-software/valkyrie/src/main/java/us/ihmc/valkyrie/stepReachability/";
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
    public static void writeToFile(Map<FramePose3D, Boolean> feasibilityMap)
    {
-
       FileWriter fileWriter;
       String reachabilityDataFileName = logDirectory + "StepReachabilityMap.txt";
 
@@ -49,7 +48,7 @@ public class StepReachabilityFileTools
       catch (Exception e)
       {
          LogTools.error("Error logging reachability file");
-         fileWriter = null;
+//         fileWriter = null;
          e.printStackTrace();
       }
    }
@@ -58,7 +57,7 @@ public class StepReachabilityFileTools
    {
       for (FramePose3D frame : feasibilityMap.keySet())
       {
-         System.out.print("Frame: " + frame.toString());
+         System.out.print("Frame: " + frame);
          System.out.println(", Feasiblility: " + feasibilityMap.get(frame));
       }
    }
@@ -66,47 +65,40 @@ public class StepReachabilityFileTools
    public static Map<FramePose3D, Boolean> loadFromFile(String filename)
    {
       String reachabilityDataFileName = logDirectory + filename;
-      File file = new File(reachabilityDataFileName);
+      Map<FramePose3D, Boolean> feasibilityMap = new HashMap<>();
+      FramePose3D frame = new FramePose3D();
+
       try
       {
-         BufferedReader reader = new BufferedReader(new FileReader(file));
-         try
+         Scanner scanner = new Scanner(new File(reachabilityDataFileName));
+         while(scanner.hasNextLine())
          {
-            Map<FramePose3D, Boolean> feasibilityMap = new HashMap<>();
-            FramePose3D frame = new FramePose3D();
-            String line;
-            while((line = reader.readLine())!=null)
-            {
-               // Parse to get frame position, orientation and feasibility boolean
-               String[] data = line.split(",");
-               double posX = Double.parseDouble(data[0]);
-               double posY = Double.parseDouble(data[1]);
-               double posZ = Double.parseDouble(data[2]);
-               frame.getPosition().set(posX, posY, posZ);
+            String line = scanner.nextLine();
 
-               double orX = Double.parseDouble(data[3]);
-               double orY = Double.parseDouble(data[4]);
-               double orZ = Double.parseDouble(data[5]);
-               double orS = Double.parseDouble(data[6]);
-               frame.getOrientation().set(orX, orY, orZ, orS);
+            // Parse to get frame position, orientation and feasibility boolean
+            String[] data = line.split(",");
+            double posX = Double.parseDouble(data[0]);
+            double posY = Double.parseDouble(data[1]);
+            double posZ = Double.parseDouble(data[2]);
+            frame.getPosition().set(posX, posY, posZ);
 
-               // Load into hashmap
-               if (line.contains("true"))
-                  feasibilityMap.put(frame, true);
-               else if (line.contains("false"))
-                  feasibilityMap.put(frame, false);
-               else
-                  throw new RuntimeException("Error in reachability file");
-            }
-            System.out.println("Done loading from file");
-            return feasibilityMap;
+            double orX = Double.parseDouble(data[3]);
+            double orY = Double.parseDouble(data[4]);
+            double orZ = Double.parseDouble(data[5]);
+            double orS = Double.parseDouble(data[6]);
+            frame.getOrientation().set(orX, orY, orZ, orS);
 
+            System.out.print(frame);
+            System.out.println(line.contains("true"));
+
+            // Load into hashmap TODO Fix this
+            feasibilityMap.put(frame, line.contains("true"));
+            System.out.println(feasibilityMap);
          }
-         catch (IOException e)
-         {
-            LogTools.error("Error loading reachability file");
-            e.printStackTrace();
-         }
+         scanner.close();
+         System.out.println("Done loading from file");
+         return feasibilityMap;
+
       }
       catch (FileNotFoundException e)
       {
