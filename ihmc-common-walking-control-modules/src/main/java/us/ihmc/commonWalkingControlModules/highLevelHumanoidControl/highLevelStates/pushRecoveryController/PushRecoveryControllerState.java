@@ -1,6 +1,8 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController;
 
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
@@ -10,6 +12,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
@@ -17,6 +21,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -42,11 +47,16 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class PushRecoveryControllerState extends HighLevelControllerState
 {
    private final static HighLevelControllerName controllerState = HighLevelControllerName.PUSH_RECOVERY;
-//   private final static FrameVector2D emptyVector = new FrameVector2D();
 
    private final WholeBodyControllerCore controllerCore;
-//   private final LinearMomentumRateControlModule linearMomentumRateControlModule;
    private final PushRecoveryHighLevelHumanoidController pushRecoveryController;
+
+   private final PushRecoveryControlModule pushRecoveryControlModule;
+   private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final BipedSupportPolygons bipedSupportPolygons;
+
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
@@ -73,7 +83,9 @@ public class PushRecoveryControllerState extends HighLevelControllerState
       pushRecoveryController = new PushRecoveryHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, pushRecoveryControllerParameters,
                                                                  controllerToolbox);
 
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
+      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
+      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
+
       // get controller core
       controllerCore = managerFactory.getOrCreateWholeBodyControllerCore();
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
@@ -81,17 +93,10 @@ public class PushRecoveryControllerState extends HighLevelControllerState
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
-      double controlDT = controllerToolbox.getControlDT();
-      double gravityZ = controllerToolbox.getGravityZ();
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
-
-      // TODO implement momentum controller?
-//      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, pushRecoveryControllerParameters,
-//                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry);
       managerFactory.getOrCreateBalanceManager().setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
+
+      bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
+      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, pushRecoveryControllerParameters, registry);
 
       registry.addChild(pushRecoveryController.getYoVariableRegistry());
    }
@@ -100,24 +105,22 @@ public class PushRecoveryControllerState extends HighLevelControllerState
    {
       controllerCore.initialize();
       pushRecoveryController.initialize();
-//      linearMomentumRateControlModule.reset();
       requestIntegratorReset = true;
    }
 
    @Override
    public void doAction(double timeInState)
    {
+      desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
+      capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
+      double omega0 = controllerToolbox.getOmega0();
+
       pushRecoveryController.doAction();
 
-//      linearMomentumRateControlModule.setInputFromWalkingStateMachine(pushRecoveryController.getLinearMomentumRateControlModuleInput());
-//      pushRecoveryController.setLinearMomentumRateControlModuleOutput(linearMomentumRateControlModule.getOutputForWalkingStateMachine());
+
+      pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
       ControllerCoreCommand controllerCoreCommand = pushRecoveryController.getControllerCoreCommand();
-//      controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getMomentumRateCommand());
-      if (useCoPObjective.getValue())
-      {
-//         controllerCoreCommand.addInverseDynamicsCommand(linearMomentumRateControlModule.getCenterOfPressureCommand());
-      }
 
       JointDesiredOutputList stateSpecificJointSettings = getStateSpecificJointSettings();
 
@@ -143,9 +146,6 @@ public class PushRecoveryControllerState extends HighLevelControllerState
       controllerCore.submitControllerCoreCommand(controllerCoreCommand);
       controllerCore.compute();
       controllerCoreTimer.stopMeasurement();
-
-//      linearMomentumRateControlModule.setInputFromControllerCore(controllerCore.getControllerCoreOutput());
-//      linearMomentumRateControlModule.computeAchievedCMP();
    }
 
    @Override
