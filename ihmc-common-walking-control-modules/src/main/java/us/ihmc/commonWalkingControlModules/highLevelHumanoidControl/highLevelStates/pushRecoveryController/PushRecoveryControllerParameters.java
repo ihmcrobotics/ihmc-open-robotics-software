@@ -1,44 +1,23 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController;
 
-import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.configurations.*;
-import us.ihmc.commonWalkingControlModules.controlModules.PelvisICPBasedTranslationManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.ToeSlippingDetector;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOffsetTrajectoryWhileWalking;
-import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlMode;
 import us.ihmc.commonWalkingControlModules.dynamicReachability.DynamicReachabilityCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackController.FeedbackControllerSettings;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
-import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
-import us.ihmc.robotics.sensors.FootSwitchFactory;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class PushRecoveryControllerParameters
 {
    private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
    private final DynamicReachabilityParameters dynamicReachabilityParameters;
-   private final PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters;
-   private final LeapOfFaithParameters leapOfFaithParameters;
 
    public PushRecoveryControllerParameters()
    {
       jointPrivilegedConfigurationParameters = new JointPrivilegedConfigurationParameters();
       dynamicReachabilityParameters = new DynamicReachabilityParameters();
-      pelvisOffsetWhileWalkingParameters = new PelvisOffsetWhileWalkingParameters();
-      leapOfFaithParameters = new LeapOfFaithParameters();
       legConfigurationParameters = new LegConfigurationParameters();
    }
 
@@ -270,26 +249,6 @@ public class PushRecoveryControllerParameters
    public boolean applySecondaryJointScaleDuringSwing()
    {
       return false;
-   }
-
-   /**
-    * Parameters for the {@link PelvisOffsetTrajectoryWhileWalking}. These parameters can be used to
-    * shape the pelvis orientation trajectory while walking to create a more natural motion and
-    * improve foot reachability.
-    */
-   public PelvisOffsetWhileWalkingParameters getPelvisOffsetWhileWalkingParameters()
-   {
-      return pelvisOffsetWhileWalkingParameters;
-   }
-
-   /**
-    * Parameters for the 'Leap of Faith' Behavior. This caused the robot to activly fall onto an upcoming
-    * foothold when necessary to reach an upcoming foothold. This method returns the robot specific
-    * implementation of the {@link LeapOfFaithParameters};
-    */
-   public LeapOfFaithParameters getLeapOfFaithParameters()
-   {
-      return leapOfFaithParameters;
    }
 
    /**
