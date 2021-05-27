@@ -138,7 +138,6 @@ public class BehaviorModule
       {
          yoRegistry.addChild(highestLevelNode.getYoRegistry());
       }
-      helper.getROS1Helper().ensureConnected();
       helper.getMessagerHelper().setExternallyStartedMessager(messager);
       highestLevelNode.setEnabled(true);
       rootNode.addChild(highestLevelNode);

@@ -5,6 +5,7 @@ import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
 import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
@@ -27,13 +28,16 @@ public class ROS1Helper implements RosNodeInterface
    private final HashMap<RosTopicSubscriberInterface<? extends Message>, String> subscribers = new HashMap<>();
 
    private boolean needsReconnect = true;
+   private final PausablePeriodicThread maintenanceThread;
 
    public ROS1Helper(String nodeName)
    {
       this.nodeName = nodeName;
+      maintenanceThread = new PausablePeriodicThread("ROS1HelperMaintenanceThread", 1.0 / 3.0, this::ensureConnected);
+      maintenanceThread.start();
    }
 
-   public void ensureConnected()
+   private void ensureConnected()
    {
       if (needsReconnect)
       {
@@ -102,6 +106,7 @@ public class ROS1Helper implements RosNodeInterface
 
    public void destroy()
    {
+      maintenanceThread.destroy();
       ros1Node.shutdown();
    }
 
