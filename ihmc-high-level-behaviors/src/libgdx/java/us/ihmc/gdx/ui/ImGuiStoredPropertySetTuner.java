@@ -148,6 +148,8 @@ public class ImGuiStoredPropertySetTuner
       {
          entry.getValue().set(storedPropertySet.get(entry.getKey()));
       }
+
+      onParametersUpdatedCallback.run();
    }
 
    public String getWindowName()
