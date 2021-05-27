@@ -1,6 +1,5 @@
 package us.ihmc.avatar.logging;
 
-import javafx.util.Pair;
 import org.apache.commons.io.IOUtils;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
