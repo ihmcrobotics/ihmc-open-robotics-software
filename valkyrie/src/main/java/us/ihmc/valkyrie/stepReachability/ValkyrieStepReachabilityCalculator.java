@@ -51,6 +51,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -164,7 +165,10 @@ public class ValkyrieStepReachabilityCalculator
                                                                   yoGraphicsListRegistry,
                                                                   mainRegistry);
       toolboxController.setInitialRobotConfiguration(robotModel);
-      toolboxController.setCollisionModel(robotModel.getHumanoidRobotKinematicsCollisionModel());
+
+      ValkyrieSimulationCollisionModel collisionModel = new ValkyrieSimulationCollisionModel(robotModel.getJointMap());
+      collisionModel.setCollidableHelper(new CollidableHelper(), "robot", "ground");
+      toolboxController.setCollisionModel(collisionModel);
 
       robot = robotModel.createHumanoidFloatingRootJointRobot(false);
       toolboxUpdater = createToolboxUpdater();
