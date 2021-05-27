@@ -343,6 +343,9 @@ public class PlanarRegionFileTools
          if (regionName == null)
             break;
 
+         if (!regionStrings.containsKey(regionName))
+            continue;
+
          BufferedReader regionBufferedReader = new BufferedReader(new StringReader(regionStrings.get(regionName)));
          PlanarRegion loadedRegion = loadPlanarRegionVertices(regionBufferedReader,
                                                               concaveHullSize.intValue(),
