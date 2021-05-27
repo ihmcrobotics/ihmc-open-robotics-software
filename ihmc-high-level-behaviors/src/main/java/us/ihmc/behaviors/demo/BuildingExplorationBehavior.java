@@ -101,6 +101,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+      LogTools.info("Constructing");
       DRCRobotModel robotModel = helper.getRobotModel();
       ROS2NodeInterface ros2Node = helper.getROS2Node();
       Messager behaviorMessager = helper.getMessager();
@@ -113,7 +114,7 @@ public class BuildingExplorationBehavior implements BehaviorInterface
 
       AtomicReference<Pose3D> goal = behaviorMessager.createInput(Goal);
 
-      BehaviorHelper helperForLookAndStep = new BehaviorHelper("Sub Look and Step", robotModel, ros2Node, false);
+      BehaviorHelper helperForLookAndStep = new BehaviorHelper("Sub Look and Step", robotModel, ros2Node);
       helperForLookAndStep.getMessagerHelper().setExternallyStartedMessager(behaviorMessager);
       lookAndStepBehavior = new LookAndStepBehavior(helperForLookAndStep);
 

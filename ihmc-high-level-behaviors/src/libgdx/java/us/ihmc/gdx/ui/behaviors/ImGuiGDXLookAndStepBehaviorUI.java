@@ -281,7 +281,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          currentStatePlot.render(-1, "");
       }
 
-      if (ImGui.button("Select behavior"))
+      if (ImGui.button(labels.get("Select behavior")))
       {
          behaviorHelper.publish(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
       }
@@ -298,7 +298,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          pushed = true;
          ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
       }
-      if (ImGui.button("Place goal"))
+      if (ImGui.button(labels.get("Place goal")))
       {
          placeGoalActionMap.start();
       }

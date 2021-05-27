@@ -163,6 +163,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       });
 
       stepping.initialize(this);
+
+      reset.queueReset();
    }
 
    void bodyPathPlanInput(List<? extends Pose3DReadOnly> bodyPath)

@@ -5,13 +5,16 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
-import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
+import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
+import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.vr.*;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
@@ -23,16 +26,19 @@ import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterface
 {
-   private static final String WINDOW_NAME = "Building Exploration";
+   public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+                                                                                        ImGuiGDXBuildingExplorationBehaviorUI::new);
 
-   private final MessagerPublishSubscribeAPI messager;
+   private final BehaviorHelper helper;
    private final FramePose3D tempFramePose = new FramePose3D();
    private ModelInstance goalSphere;
    private boolean goalIsBeingPlaced;
+   private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
 
-   public ImGuiGDXBuildingExplorationBehaviorUI(MessagerPublishSubscribeAPI messager)
+   public ImGuiGDXBuildingExplorationBehaviorUI(BehaviorHelper helper)
    {
-      this.messager = messager;
+      this.helper = helper;
+      lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(helper);
    }
 
    @Override
@@ -57,15 +63,15 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
                   }
                   else if (button == GDXVRControllerButtons.Grip)
                   {
-                     messager.publish(BuildingExplorationBehaviorAPI.RequestedState, BuildingExplorationStateName.LOOK_AND_STEP);
-                     messager.publish(BuildingExplorationBehaviorAPI.Start, true);
+                     helper.publish(BuildingExplorationBehaviorAPI.RequestedState, BuildingExplorationStateName.LOOK_AND_STEP);
+                     helper.publish(BuildingExplorationBehaviorAPI.Start, true);
                   }
                }
                if (device == vrManager.getControllers().get(RobotSide.RIGHT))
                {
                   if (button == GDXVRControllerButtons.Grip)
                   {
-                     messager.publish(BuildingExplorationBehaviorAPI.Stop, true);
+                     helper.publish(BuildingExplorationBehaviorAPI.Stop, true);
                   }
                }
             }
@@ -81,6 +87,8 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
             }
          });
       }
+
+      lookAndStepUI.create(baseUI);
    }
 
    @Override
@@ -89,37 +97,32 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       if (goalIsBeingPlaced)
       {
          vrManager.getControllers().get(RobotSide.LEFT).getPose(ReferenceFrame.getWorldFrame(), goalSphere.transform);
-         messager.publish(BuildingExplorationBehaviorAPI.Goal, new Pose3D(tempFramePose));
+         helper.publish(BuildingExplorationBehaviorAPI.Goal, new Pose3D(tempFramePose));
       }
-   }
-
-   public void renderImGuiWindows()
-   {
-      ImGui.begin(WINDOW_NAME);
-
-      ImGui.end();
    }
 
    @Override
    public void render()
    {
       ImGui.button("Place goal");
+
+      int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
+      if (ImGui.collapsingHeader("Look and Step", defaultOpen))
+      {
+         lookAndStepUI.render();
+      }
    }
 
    @Override
    public void destroy()
    {
-
-   }
-
-   public String getWindowName()
-   {
-      return WINDOW_NAME;
+      lookAndStepUI.destroy();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       goalSphere.getRenderables(renderables, pool);
+      lookAndStepUI.getRenderables(renderables, pool);
    }
 }
