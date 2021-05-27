@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.wrenchDistribution.WrenchDistributorT
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -91,6 +92,8 @@ public class LinearMomentumRateControlModule
 
    private final FixedFramePoint2DBasics desiredCapturePoint = new FramePoint2D();
    private final FixedFrameVector2DBasics desiredCapturePointVelocity = new FrameVector2D();
+
+   private final FixedFrameVector3DBasics desiredDistributedLinearMomentumRate = new FrameVector3D();
 
    private final FixedFramePoint2DBasics perfectCMP = new FramePoint2D();
    private final FixedFramePoint2DBasics perfectCoP = new FramePoint2D();
@@ -248,6 +251,7 @@ public class LinearMomentumRateControlModule
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
       this.perfectCoP.setMatchingFrame(input.getPerfectCoP());
+      this.desiredDistributedLinearMomentumRate.setMatchingFrame(input.getDesiredDistributedLinearMomentumRate());
       this.controlHeightWithMomentum = input.getControlHeightWithMomentum();
       this.initializeOnStateChange = input.getInitializeOnStateChange();
       this.keepCoPInsideSupportPolygon = input.getKeepCoPInsideSupportPolygon();
@@ -466,6 +470,11 @@ public class LinearMomentumRateControlModule
       boolean success = true;
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
+      double additionalForce = 0.0;
+      if (!desiredDistributedLinearMomentumRate.containsNaN())
+         additionalForce = desiredDistributedLinearMomentumRate.getZ();
+      fZ += additionalForce;
+
       centerOfMass.setToZero(centerOfMassFrame);
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
       WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);

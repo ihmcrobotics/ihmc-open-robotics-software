@@ -135,6 +135,16 @@ public class AngularMomentumHandler<T extends ContactStateBasics<T>>
       return angularMomentumCalculator.getDesiredAngularMomentumRate();
    }
 
+   public FrameVector3DReadOnly getDesiredDistributedLinearMomentum()
+   {
+      return angularMomentumCalculator.getDesiredDistributedLinearMomentum();
+   }
+
+   public FrameVector3DReadOnly getDesiredDistributedLinearMomentumRate()
+   {
+      return angularMomentumCalculator.getDesiredDistributedLinearMomentumRate();
+   }
+
    public FrameVector3DReadOnly getDesiredHeightScaledAngularMomentumRate()
    {
       return angularMomentumCalculator.getDesiredHeightScaledAngularMomentumRate();

@@ -529,6 +529,8 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setMinimizeAngularMomentumRateZ(minimizeAngularMomentumRateZ);
       linearMomentumRateControlModuleInput.setContactStateCommand(contactStateCommands);
 
+      linearMomentumRateControlModuleInput.setDesiredDistributedLinearMomentumRate(angularMomentumHandler.getDesiredDistributedLinearMomentumRate());
+
       initializeOnStateChange = false;
 
       supportSide = null;
