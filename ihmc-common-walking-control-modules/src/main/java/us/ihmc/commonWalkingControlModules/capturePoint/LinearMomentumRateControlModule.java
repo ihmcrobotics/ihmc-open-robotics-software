@@ -128,6 +128,8 @@ public class LinearMomentumRateControlModule
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
    private final YoFramePoint2D yoCapturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
+   private final YoBoolean useLinearMomentumRateOffset = new YoBoolean("useLinearMomentumRateOffset", registry);
+
    private final FilteredVelocityYoFrameVector2d capturePointVelocity;
    private final DoubleProvider capturePointVelocityBreakFrequency = new DoubleParameter("capturePointVelocityBreakFrequency", registry, 26.5);
 
@@ -161,6 +163,7 @@ public class LinearMomentumRateControlModule
                                                                momentumOptimizationSettings.getRecoveryLinearMomentumWeight(),
                                                                registry);
       angularMomentumRateWeight = new ParameterVector3D("AngularMomentumRateWeight", momentumOptimizationSettings.getAngularMomentumWeight(), registry);
+//      useLinearMomentumRateOffset.set(true);
 
       allowMomentumRecoveryWeight = new BooleanParameter("allowMomentumRecoveryWeight", registry, false);
       maxMomentumRateWeightChangeRate = new DoubleParameter("maxMomentumRateWeightChangeRate", registry, 10.0);
@@ -471,7 +474,7 @@ public class LinearMomentumRateControlModule
 
       double fZ = WrenchDistributorTools.computeFz(totalMass, gravityZ, desiredCoMHeightAcceleration);
       double additionalForce = 0.0;
-      if (!desiredDistributedLinearMomentumRate.containsNaN())
+      if (useLinearMomentumRateOffset.getBooleanValue() && !desiredDistributedLinearMomentumRate.containsNaN())
          additionalForce = desiredDistributedLinearMomentumRate.getZ();
       fZ += additionalForce;
 
@@ -479,7 +482,7 @@ public class LinearMomentumRateControlModule
       WrenchDistributorTools.computePseudoCMP3d(cmp3d, centerOfMass, desiredCMP, fZ, totalMass, omega0);
       WrenchDistributorTools.computeForce(linearMomentumRateOfChange, centerOfMass, cmp3d, fZ);
       linearMomentumRateOfChange.checkReferenceFrameMatch(centerOfMassFrame);
-      linearMomentumRateOfChange.setZ(linearMomentumRateOfChange.getZ() - totalMass * gravityZ);
+      linearMomentumRateOfChange.subZ(totalMass * gravityZ);
 
       if (linearMomentumRateOfChange.containsNaN())
       {
