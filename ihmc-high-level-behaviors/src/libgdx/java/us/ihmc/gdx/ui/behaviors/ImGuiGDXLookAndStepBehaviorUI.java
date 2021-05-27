@@ -125,7 +125,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       swingPlannerParameterTuner.create(swingPlannerParameters, SwingPlannerParameterKeys.keys,
                                         () -> behaviorHelper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
-      goalAffordance.create(goalPose -> behaviorHelper.publish(GOAL_INPUT, goalPose));
+      goalAffordance.create(baseUI, goalPose -> behaviorHelper.publish(GOAL_INPUT, goalPose), Color.CYAN);
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }
