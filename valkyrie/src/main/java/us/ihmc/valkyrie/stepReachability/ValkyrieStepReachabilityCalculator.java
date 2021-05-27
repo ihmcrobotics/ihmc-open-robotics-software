@@ -5,6 +5,8 @@ import org.lwjgl.Sys;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
+import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxOptimizationSettings;
+import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.SolutionQualityConvergenceDetector;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
@@ -94,10 +96,10 @@ public class ValkyrieStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_FILE_LOADING
    }
 
-   private static final Mode mode = Mode.TEST_FILE_LOADING;
+   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    // TODO tune this
-   private static final double SOLUTION_QUALITY_THRESHOLD = 1e-3;
+   private static final double SOLUTION_QUALITY_THRESHOLD = 50; //1e-3;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
@@ -112,10 +114,13 @@ public class ValkyrieStepReachabilityCalculator
    private final YoRegistry mainRegistry;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
    private final HumanoidKinematicsToolboxController toolboxController;
+   private final KinematicsPlanningToolboxOptimizationSettings optimizationSettings;
+   private SolutionQualityConvergenceDetector solutionQualityConvergenceDetector;
 
    private final YoBoolean initializationSucceeded;
    private final YoInteger numberOfIterations;
    private final YoDouble finalSolutionQuality;
+   private final YoBoolean validStep;
 
    private SimulationConstructionSet scs;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -135,7 +140,10 @@ public class ValkyrieStepReachabilityCalculator
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
+      validStep = new YoBoolean("validStep", mainRegistry);
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      optimizationSettings = new KinematicsPlanningToolboxOptimizationSettings();
+      solutionQualityConvergenceDetector = new SolutionQualityConvergenceDetector(optimizationSettings, mainRegistry);
 
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotModel ghostRobotModel = getRobotModel();
@@ -208,7 +216,6 @@ public class ValkyrieStepReachabilityCalculator
          case TEST_FILE_LOADING:
             Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
             StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
-
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -273,7 +280,6 @@ public class ValkyrieStepReachabilityCalculator
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 150;
-
          runKinematicsToolboxController(numberOfIterations);
 
          assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
@@ -286,7 +292,7 @@ public class ValkyrieStepReachabilityCalculator
    }
 
    /**
-    * Solves IK assuming that the left foot is at the origin and right foot is at the given position
+    * Solves IK assuming that the right foot is at the origin and left foot is at the given position
     */
    private boolean testSingleStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
    {
@@ -310,22 +316,16 @@ public class ValkyrieStepReachabilityCalculator
          rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
          commandInputManager.submitMessage(rbMessage);
 
-         // Rigid body objective for each hand, can try fixing joint angles
-         rbMessage = holdRigidBodyCurrentPose(targetFullRobotModel.getHand(robotSide));
-         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-         commandInputManager.submitMessage(rbMessage);
+         // Rigid body objective for each hand, TODO: try fixing joint angles instead or above feet poses
+//         rbMessage = holdRigidBodyCurrentPose(targetFullRobotModel.getHand(robotSide));
+//         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+//         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+//         commandInputManager.submitMessage(rbMessage);
       }
 
-      // TODO set check objective to be interpolated between feet
+      FramePose3D centerFeet = interpolateFeet(leftFoot, rightFoot);
 
-      // Set betweenFeet to be 50% interpolation between leftFoot and rightFoot
-      // This should be 50% interpolation between orientation as well?
-      double interpolationAlpha = 0.5;
-      FramePose3D centerFeet = new FramePose3D();
-      centerFeet.interpolate(leftFoot, rightFoot, interpolationAlpha);
-
-      // Rigid body objective for chest, center XY pose of feet
+//       Rigid body objective for chest, center XY pose of feet
       KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getChest(), centerFeet);
       rbMessage.getLinearSelectionMatrix().setZSelected(false);
       rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
@@ -340,8 +340,7 @@ public class ValkyrieStepReachabilityCalculator
       commandInputManager.submitMessage(rbMessage);
 
       { // Setup CoM message
-//         KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCoMForFeet(leftFoot, rightFoot));
-         KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCenterOfMass3D(targetFullRobotModel));
+         KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCoMForFeet(leftFoot, rightFoot));
          SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
          selectionMatrix.selectZAxis(false);
          comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
@@ -357,18 +356,25 @@ public class ValkyrieStepReachabilityCalculator
       snapGhostToFullRobotModel(targetFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
-      int numberOfIterations = 150;
+//      int numberOfIterations = 150;
+//      runKinematicsToolboxController(numberOfIterations);
 
+      while (!solutionQualityConvergenceDetector.isSolved())
+      {
+         solutionQualityConvergenceDetector.update();
+      }
+      int numberOfIterations = solutionQualityConvergenceDetector.getNumberOfIteration();
       runKinematicsToolboxController(numberOfIterations);
 
       assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
       double solutionQuality = toolboxController.getSolution().getSolutionQuality();
-      /* TODO: For solution quality
-       - Can look at how well the feet/chest matches
-       - Check for feet collision
-       */
+      System.out.println(solutionQuality);
+      // TODO: Check for feet collision
 
-      return (solutionQuality > solutionQualityThreshold);
+      boolean isValid = (solutionQuality < solutionQualityThreshold);
+      validStep.set(isValid);
+
+      return isValid;
    }
 
    private void runKinematicsToolboxController(int numberOfIterations) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
@@ -390,7 +396,7 @@ public class ValkyrieStepReachabilityCalculator
    }
 
    // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
-   private static final int queriesPerAxis = 3;
+   private static final int queriesPerAxis = 10;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
@@ -639,16 +645,22 @@ public class ValkyrieStepReachabilityCalculator
       return new FramePoint3D(new CenterOfMassCalculator(fullHumanoidRobotModel.getElevator(), worldFrame).getCenterOfMass());
    }
 
-   // CoM in between feet
-   private Point3D computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot) // maybe Tuple3DReadOnly
+   private FramePose3D interpolateFeet(FramePose3D leftFoot, FramePose3D rightFoot)
    {
-      FramePose3D centerPose = new FramePose3D();
+      // Set betweenFeet to be 50% interpolation between leftFoot and rightFoot
       double interpolationAlpha = 0.5;
-      centerPose.interpolate(leftFoot, rightFoot, interpolationAlpha);
-      Point3D CoM = (Point3D) centerPose.getPosition();
-      CoM.setZ(1.3496);
+      FramePose3D centerFeet = new FramePose3D();
+      centerFeet.interpolate(leftFoot, rightFoot, interpolationAlpha);
+      return centerFeet;
+   }
 
-      return CoM;
+   // CoM in between feet, at chest height
+   private FramePoint3D computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot)
+   {
+      FramePose3D centerPose = interpolateFeet(leftFoot, rightFoot);
+      centerPose.getPosition().setZ(1.3496);
+
+      return new FramePoint3D(centerPose.getPosition());
    }
 
    public static RobotConfigurationData extractRobotConfigurationData(FullHumanoidRobotModel fullRobotModel)

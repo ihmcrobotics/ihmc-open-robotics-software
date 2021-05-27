@@ -25,7 +25,7 @@ public class StepReachabilityFileTools
    {
 
       FileWriter fileWriter;
-      String reachabilityDataFileName = filePath + "StepReachabilityMap.txt";
+      String reachabilityDataFileName = logDirectory + "StepReachabilityMap.txt";
 
       try
       {
@@ -65,7 +65,7 @@ public class StepReachabilityFileTools
 
    public static Map<FramePose3D, Boolean> loadFromFile(String filename)
    {
-      String reachabilityDataFileName = filePath + filename;
+      String reachabilityDataFileName = logDirectory + filename;
       File file = new File(reachabilityDataFileName);
       try
       {
