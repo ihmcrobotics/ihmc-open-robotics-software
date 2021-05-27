@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,6 +12,7 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
@@ -147,6 +149,15 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          lowerLegShape.getPosition().set(-0.012, 0.0, -0.189);
          lowerLegShape.getAxis().set(new Vector3D(0.08, 0.0, 1.0));
          collidables.add(new Collidable(lowerLeg, collisionMask, collisionGroup, lowerLegShape));
+
+         JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
+         MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+
+         // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
+         FrameBox3D footShape = new FrameBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
+         footShape.getPosition().set(0.044, 0.0, -0.042);
+         collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
+
       }
 
       return collidables;
