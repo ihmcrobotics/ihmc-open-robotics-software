@@ -1,24 +1,23 @@
 package us.ihmc.gdx.ui.behaviors.registry;
 
-import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorRegistry;
-import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.gdx.ui.behaviors.ImGuiGDXLookAndStepBehaviorUI;
 
 import java.util.LinkedHashSet;
 
 public class GDXBehaviorUIRegistry extends BehaviorRegistry
 {
-   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(LookAndStepBehavior.DEFINITION);
+   public static final GDXBehaviorUIRegistry DEFAULT_BEHAVIORS = new GDXBehaviorUIRegistry(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
    static
    {
-      DEFAULT_BEHAVIORS.register(LookAndStepBehavior.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
    }
 
    private final LinkedHashSet<GDXBehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();
    private int numberOfUIs = 0;
    private String nameOfOnlyUIBehavior;
 
-   public static GDXBehaviorUIRegistry of(BehaviorDefinition highestLevelNode, GDXBehaviorUIDefinition... entries)
+   public static GDXBehaviorUIRegistry of(GDXBehaviorUIDefinition highestLevelNode, GDXBehaviorUIDefinition... entries)
    {
       GDXBehaviorUIRegistry registry = new GDXBehaviorUIRegistry(highestLevelNode);
       for (GDXBehaviorUIDefinition entry : entries)
@@ -28,7 +27,7 @@ public class GDXBehaviorUIRegistry extends BehaviorRegistry
       return registry;
    }
 
-   public GDXBehaviorUIRegistry(BehaviorDefinition highestLevelNode)
+   public GDXBehaviorUIRegistry(GDXBehaviorUIDefinition highestLevelNode)
    {
       super(highestLevelNode);
    }
@@ -58,5 +57,11 @@ public class GDXBehaviorUIRegistry extends BehaviorRegistry
    public String getNameOfOnlyUIBehavior()
    {
       return nameOfOnlyUIBehavior;
+   }
+
+   @Override
+   public GDXBehaviorUIDefinition getHighestLevelNode()
+   {
+      return (GDXBehaviorUIDefinition) super.getHighestLevelNode();
    }
 }
