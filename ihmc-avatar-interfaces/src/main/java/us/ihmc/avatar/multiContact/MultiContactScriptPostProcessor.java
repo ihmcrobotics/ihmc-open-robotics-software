@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
@@ -13,6 +12,7 @@ import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -66,8 +66,16 @@ public class MultiContactScriptPostProcessor
       TrajectoryPointOptimizer trajectoryPointOptimizer = new TrajectoryPointOptimizer(numberOfJoints);
       trajectoryPointOptimizer.setEndPoints(startPosition, startVelocity, targetPosition, targetVelocity);
       trajectoryPointOptimizer.setWaypoints(waypoints);
-      trajectoryPointOptimizer.computeForFixedTime(new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1)
-                                                                                 .mapToDouble(i -> (double) i / (numberOfConfigurations - 1)).toArray()));
+//      trajectoryPointOptimizer.computeForFixedTime(new TDoubleArrayList(IntStream.range(1, numberOfConfigurations - 1)
+//                                                                                 .mapToDouble(i -> (double) i / (numberOfConfigurations - 1)).toArray()));
+      trajectoryPointOptimizer.compute(0);
+
+      for (int i = 0; i < 40; i++)
+      {
+         if (trajectoryPointOptimizer.doFullTimeUpdate())
+            break;
+         LogTools.info("Iteration: " + i);
+      }
 
       WholeBodyJointspaceTrajectoryMessage message = new WholeBodyJointspaceTrajectoryMessage();
       double trajectoryTimeOffset = 0.5;
