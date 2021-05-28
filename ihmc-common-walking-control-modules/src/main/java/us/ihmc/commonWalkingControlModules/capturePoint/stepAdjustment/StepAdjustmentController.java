@@ -95,7 +95,7 @@ public class StepAdjustmentController
    private final YoBoolean footstepWasAdjusted = new YoBoolean(yoNamePrefix + "FootstepWasAdjusted", registry);
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
-   private final OneStepCaptureRegionCalculator captureRegionCalculator;
+//   private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final EnvironmentConstraintHandler environmentConstraintProvider;
 
    private final FrameConvexPolygon2D captureRegionInWorld = new FrameConvexPolygon2D();
@@ -163,7 +163,7 @@ public class StepAdjustmentController
                                                                                registry,
                                                                                yoGraphicsListRegistry);
 
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
+//      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
@@ -200,7 +200,7 @@ public class StepAdjustmentController
       footstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
       hasPlanarRegionBeenAssigned.set(false);
-      captureRegionCalculator.hideCaptureRegion();
+//      captureRegionCalculator.hideCaptureRegion();
       environmentConstraintProvider.reset();
    }
 
@@ -273,11 +273,11 @@ public class StepAdjustmentController
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
-      captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
-                                                     timeRemainingInState.getDoubleValue(),
-                                                     currentICP,
-                                                     omega0,
-                                                     bipedSupportPolygons.getFootPolygonInWorldFrame(upcomingFootstepSide.getEnumValue().getOppositeSide()));
+//      captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
+//                                                     timeRemainingInState.getDoubleValue(),
+//                                                     currentICP,
+//                                                     omega0,
+//                                                     bipedSupportPolygons.getFootPolygonInWorldFrame(upcomingFootstepSide.getEnumValue().getOppositeSide()));
 
       if (!useStepAdjustment.getBooleanValue())
          return;
@@ -341,7 +341,7 @@ public class StepAdjustmentController
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
       adjustedSolutionInControlPlane.add(deadbandedAdjustment);
 
-      captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
+//      captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);

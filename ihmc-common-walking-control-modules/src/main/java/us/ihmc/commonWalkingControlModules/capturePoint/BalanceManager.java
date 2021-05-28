@@ -99,8 +99,8 @@ public class BalanceManager
    private final LinearMomentumRateControlModuleInput linearMomentumRateControlModuleInput = new LinearMomentumRateControlModuleInput();
 
    private final PelvisICPBasedTranslationManager pelvisICPBasedTranslationManager;
-   private final PushRecoveryControlModule pushRecoveryControlModule;
-   private final StepAdjustmentController stepAdjustmentController;
+//   private final PushRecoveryControlModule pushRecoveryControlModule;
+   private final StepAdjustmentController stepAdjustmentController;  //TODO move to PushRecoveryController
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
    private final YoFramePoint2D yoDesiredCapturePoint = new YoFramePoint2D("desiredICP", worldFrame, registry);
@@ -132,8 +132,8 @@ public class BalanceManager
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FramePoint2D centerOfMassPosition2d = new FramePoint2D();
 
-   private final FramePoint2D capturePoint2d = new FramePoint2D();
-   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
+   private final FramePoint2D capturePoint2d = new FramePoint2D();            //TODO delete; moved to PushRecoveryControllerState
+   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();     //TODO delete; moved to PushRecoveryControllerState
    private final FramePoint2D desiredCoM2d = new FramePoint2D();
    private final FrameVector2D desiredCapturePointVelocity2d = new FrameVector2D();
    private final FramePoint2D perfectCMP2d = new FramePoint2D();
@@ -219,7 +219,7 @@ public class BalanceManager
    private final FlamingoCoPTrajectoryGenerator flamingoCopTrajectory;
 
    private final AngularMomentumHandler<SettableContactStateProvider> angularMomentumHandler;
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;
+   private final CoMTrajectoryPlanner comTrajectoryPlanner;    //TODO delete; moved to PushRecoveryControllerState
    private final int maxNumberOfStepsToConsider;
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
    private final BooleanProvider maintainInitialCoMVelocityContinuityTransfer;
@@ -298,7 +298,7 @@ public class BalanceManager
       flamingoCopTrajectory = new FlamingoCoPTrajectoryGenerator(copTrajectoryParameters, registry);
       flamingoCopTrajectory.registerState(copTrajectoryState);
 
-      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
+//      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, walkingControllerParameters, registry);
 
       stepAdjustmentController = new StepAdjustmentController(walkingControllerParameters,
                                                               controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
@@ -378,10 +378,10 @@ public class BalanceManager
       this.stepConstraintRegionHandler = planarRegionStepConstraint;
    }
 
-   public boolean checkAndUpdateFootstep(Footstep footstep)
-   {
-      return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
-   }
+//   public boolean checkAndUpdateFootstep(Footstep footstep)
+//   {
+//      return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
+//   }
 
    public boolean checkAndUpdateStepAdjustment(Footstep footstep)
    {
@@ -452,10 +452,10 @@ public class BalanceManager
       if (Double.isNaN(omega0))
          throw new RuntimeException("omega0 is NaN");
 
-      if (supportLeg == null)
-         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
-      else
-         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
+//      if (supportLeg == null)
+//         pushRecoveryControlModule.updateForDoubleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
+//      else
+//         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
       // --- compute adjusted desired capture point
       controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
@@ -654,7 +654,7 @@ public class BalanceManager
 
    public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
    {
-      pushRecoveryControlModule.packFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining, footstepToPack);
+//      pushRecoveryControlModule.packFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining, footstepToPack);
    }
 
    public void disablePelvisXYControl()
@@ -664,7 +664,7 @@ public class BalanceManager
 
    public void disablePushRecovery()
    {
-      pushRecoveryControlModule.setIsEnabled(false);
+//      pushRecoveryControlModule.setIsEnabled(false);
    }
 
    public void enablePelvisXYControl()
@@ -674,7 +674,7 @@ public class BalanceManager
 
    public void enablePushRecovery()
    {
-      pushRecoveryControlModule.setIsEnabled(true);
+//      pushRecoveryControlModule.setIsEnabled(true);
    }
 
    public double estimateTimeRemainingForSwingUnderDisturbance()
@@ -811,7 +811,7 @@ public class BalanceManager
 
    public void prepareForDoubleSupportPushRecovery()
    {
-      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
+//      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
    public void initializeICPPlanForSingleSupport()
@@ -966,37 +966,43 @@ public class BalanceManager
 
    public boolean isPushRecoveryEnabled()
    {
-      return pushRecoveryControlModule.isEnabled();
+//      return pushRecoveryControlModule.isEnabled();
+      return false;
    }
 
    public boolean isRecovering()
    {
-      return pushRecoveryControlModule.isRecovering();
+//      return pushRecoveryControlModule.isRecovering();
+      return false;
    }
 
    public boolean isRecoveringFromDoubleSupportFall()
    {
-      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
+//      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
+      return false;
    }
 
    public boolean isRecoveryImpossible()
    {
-      return pushRecoveryControlModule.isCaptureRegionEmpty();
+//      return pushRecoveryControlModule.isCaptureRegionEmpty();
+      return false;
    }
 
    public boolean isRobotBackToSafeState()
    {
-      return pushRecoveryControlModule.isRobotBackToSafeState();
+//      return pushRecoveryControlModule.isRobotBackToSafeState();
+      return false;
    }
 
    public RobotSide isRobotFallingFromDoubleSupport()
    {
-      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
+//      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
+      return null;
    }
 
    public void resetPushRecovery()
    {
-      pushRecoveryControlModule.reset();
+//      pushRecoveryControlModule.reset();
    }
 
    public void requestICPPlannerToHoldCurrentCoMInNextDoubleSupport()
