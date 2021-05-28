@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.tools.behaviorTree;
 
-public abstract class CheckableBehaviorTreeNode implements BehaviorTreeNode
+public abstract class CheckableBehaviorTreeNode implements BehaviorTreeNodeBasics
 {
    private BehaviorTreeNodeStatus status = null;
 

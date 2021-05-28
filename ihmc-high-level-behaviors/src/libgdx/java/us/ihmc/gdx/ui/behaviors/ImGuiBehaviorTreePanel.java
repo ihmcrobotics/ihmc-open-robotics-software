@@ -4,10 +4,7 @@ import imgui.ImColor;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.internal.ImGui;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNodeBasics;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.CheckableBehaviorTreeNode;
+import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
 public class ImGuiBehaviorTreePanel
@@ -40,7 +37,7 @@ public class ImGuiBehaviorTreePanel
       ImNodes.endNodeEditor();
    }
 
-   private void renderNodeAndChildren(BehaviorTreeNode node) {
+   private void renderNodeAndChildren(BehaviorTreeNodeBasics node) {
       if (node instanceof CheckableBehaviorTreeNode) {
          if (((CheckableBehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS)
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#32a852"));
@@ -68,9 +65,9 @@ public class ImGuiBehaviorTreePanel
          ImNodes.popColorStyle();
       }
 
-      if (node instanceof BehaviorTreeControlFlowNodeBasics)
+      if (node instanceof BehaviorTreeControlFlowNode)
       {
-         for (BehaviorTreeNode child : ((BehaviorTreeControlFlowNodeBasics) node).getChildren())
+         for (BehaviorTreeNodeBasics child : ((BehaviorTreeControlFlowNode) node).getChildren())
             renderNodeAndChildren(child);
       }
 
