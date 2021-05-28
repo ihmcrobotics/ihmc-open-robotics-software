@@ -136,7 +136,7 @@ public class JumpingControllerToolbox
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
 
       standingHeight.set(1.05);
-      squattingHeight.set(0.6);
+      squattingHeight.set(0.7);
 
       finalTransferTime = new YoDouble("finalTransferTime", registry);
       finalTransferTime.set(0.25);
