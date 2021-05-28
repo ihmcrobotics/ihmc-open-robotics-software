@@ -31,7 +31,7 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final double defaultBallCMPMaxX = 0.055;
 
    private static final double defaultExitCMPMinX = 0.0;
-   private static final double defaultExitCMPMaxX = 0.08;
+   private static final double defaultExitCMPMaxX = 0.1;
 
    private static final double defaultDurationForContinuityMaintenanceSegment = 0.2;
    private static final double defaultExitCoPForwardSafetyMarginOnToes = 1.6e-2;
@@ -49,7 +49,7 @@ public class CoPTrajectoryParameters extends YoSaveableModuleState
    private static final double defaultBallCMPLengthOffsetFactor = 1.0 / 8.0;
    private static final double defaultExitCMPLengthOffsetFactor = 1.0 / 3.0;
 
-   private static final double defaultStepDownLengthOffsetScaleFactor = 1.5;
+   private static final double defaultStepDownLengthOffsetScaleFactor = 2;
 
    private static final int defaultNumberOfStepsToConsider = 3;
 
