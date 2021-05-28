@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.create;
 
-public class TraverseStairsBehavior implements BehaviorInterface
+public class TraverseStairsBehavior extends BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
    private static final int UPDATE_RATE_MILLIS = 100;

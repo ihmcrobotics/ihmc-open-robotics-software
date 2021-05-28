@@ -61,7 +61,7 @@ import java.util.function.Supplier;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
 
-public class BuildingExplorationBehavior implements BehaviorInterface
+public class BuildingExplorationBehavior extends BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
                                                                               BuildingExplorationBehavior::new,

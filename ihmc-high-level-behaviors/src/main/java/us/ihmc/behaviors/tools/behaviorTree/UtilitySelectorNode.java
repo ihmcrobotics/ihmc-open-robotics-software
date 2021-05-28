@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.tools.behaviorTree;
 
-public class UtilitySelectorNode extends BehaviorTreeControlFlowNodeBasics
+public class UtilitySelectorNode extends BehaviorTreeControlFlowNode
 {
    @Override
    public BehaviorTreeNodeStatus tick()
@@ -8,8 +8,8 @@ public class UtilitySelectorNode extends BehaviorTreeControlFlowNodeBasics
       super.tick();
 
       double highestUtility = 0.0;
-      BehaviorTreeNode nodeOfHighestUtility = null;
-      for (BehaviorTreeNode child : getChildren())
+      BehaviorTreeNodeBasics nodeOfHighestUtility = null;
+      for (BehaviorTreeNodeBasics child : getChildren())
       {
          double utility = child.evaluateUtility();
          if (utility > highestUtility)

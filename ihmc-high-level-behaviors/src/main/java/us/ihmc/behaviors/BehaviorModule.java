@@ -165,7 +165,7 @@ public class BehaviorModule
       yoServerUpdateThread.start();
    }
 
-   private class DisabledNode implements BehaviorTreeNode
+   private class DisabledNode extends BehaviorTreeNode
    {
       @Override
       public BehaviorTreeNodeStatus tick()

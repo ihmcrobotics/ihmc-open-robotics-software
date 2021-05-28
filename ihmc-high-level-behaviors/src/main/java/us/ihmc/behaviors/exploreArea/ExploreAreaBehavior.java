@@ -1,11 +1,11 @@
 package us.ihmc.behaviors.exploreArea;
 
+import us.ihmc.behaviors.FallbackNodeBehaviorInterface;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.behaviors.BehaviorDefinition;
-import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -25,7 +25,7 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehav
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
-public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
+public class ExploreAreaBehavior extends FallbackNodeBehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area",
                                                                               ExploreAreaBehavior::new,
@@ -81,7 +81,7 @@ public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterfa
       mainThread.setRunning(enabled);
    }
 
-   class StopNode implements BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
+   class StopNode extends BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
    {
       @Override
       public BehaviorTreeNodeStatus tick()

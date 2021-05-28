@@ -5,18 +5,18 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A sequence node proceeds through children left to right while they are SUCCESSful.
  */
-public class SequenceNode extends BehaviorTreeControlFlowNodeBasics
+public class SequenceNode extends BehaviorTreeControlFlowNode
 {
    @Override
    public BehaviorTreeNodeStatus tick()
    {
       super.tick();
 
-      for (BehaviorTreeNode child : getChildren())
+      for (BehaviorTreeNodeBasics child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         BehaviorTreeNode.checkStatusInNotNull(childStatus);
+         BehaviorTreeNodeBasics.checkStatusInNotNull(childStatus);
 
          if (childStatus == RUNNING)
          {

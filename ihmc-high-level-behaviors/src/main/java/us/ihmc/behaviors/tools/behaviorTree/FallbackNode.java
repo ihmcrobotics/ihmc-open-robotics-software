@@ -5,18 +5,18 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A fallback node proceeds through children left to right until they return SUCCESS.
  */
-public class FallbackNode extends BehaviorTreeControlFlowNodeBasics
+public class FallbackNode extends BehaviorTreeControlFlowNode
 {
    @Override
    public BehaviorTreeNodeStatus tick()
    {
       super.tick();
 
-      for (BehaviorTreeNode child : getChildren())
+      for (BehaviorTreeNodeBasics child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();
 
-         BehaviorTreeNode.checkStatusInNotNull(childStatus);
+         BehaviorTreeNodeBasics.checkStatusInNotNull(childStatus);
 
          if (childStatus == RUNNING)
          {

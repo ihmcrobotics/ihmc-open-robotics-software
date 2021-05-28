@@ -7,7 +7,7 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * A behavior tree action that draws from a boolean supplier.
  */
-public class BehaviorTreeCondition implements BehaviorTreeAction
+public class BehaviorTreeCondition extends BehaviorTreeAction
 {
    private final BooleanSupplier conditionSupplier;
 

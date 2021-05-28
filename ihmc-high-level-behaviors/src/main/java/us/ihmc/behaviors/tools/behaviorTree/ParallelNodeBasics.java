@@ -17,7 +17,7 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCES
  *
  * TODO: Kill the task as soon as we aren't getting ticked.
  */
-public abstract class ParallelNodeBasics implements BehaviorTreeNode
+public abstract class ParallelNodeBasics extends BehaviorTreeNode
 {
    private boolean hasStarted = false;
    private boolean isFinished = false;

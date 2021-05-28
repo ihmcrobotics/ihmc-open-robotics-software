@@ -44,7 +44,7 @@ import us.ihmc.commons.thread.TypedNotification;
 /**
  * Walk through a list of waypoints in order, looping forever.
  */
-public class PatrolBehavior implements BehaviorInterface
+public class PatrolBehavior extends BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Patrol", PatrolBehavior::new, PatrolBehaviorAPI.create());
 
