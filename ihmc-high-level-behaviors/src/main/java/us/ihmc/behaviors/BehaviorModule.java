@@ -168,7 +168,7 @@ public class BehaviorModule
    private class DisabledNode extends BehaviorTreeNode
    {
       @Override
-      public BehaviorTreeNodeStatus tick()
+      public BehaviorTreeNodeStatus tickInternal()
       {
          if (enabled.getValue())
          {

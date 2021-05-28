@@ -108,7 +108,7 @@ public class TraverseStairsBehavior extends BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

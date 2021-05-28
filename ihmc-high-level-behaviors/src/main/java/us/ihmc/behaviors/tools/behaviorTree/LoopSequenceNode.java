@@ -10,9 +10,9 @@ public class LoopSequenceNode extends SequenceNode
    private int currentChild = 0;
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
-      super.tick();
+      super.tickInternal();
 
       if (currentChild >= getChildren().size())
       {

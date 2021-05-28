@@ -15,7 +15,7 @@ public class AlwaysSuccessfulAction extends BehaviorTreeAction
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       action.run();
       return SUCCESS;

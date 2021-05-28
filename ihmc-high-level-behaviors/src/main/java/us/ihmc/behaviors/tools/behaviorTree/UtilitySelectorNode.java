@@ -3,9 +3,9 @@ package us.ihmc.behaviors.tools.behaviorTree;
 public class UtilitySelectorNode extends BehaviorTreeControlFlowNode
 {
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
-      super.tick();
+      super.tickInternal();
 
       double highestUtility = 0.0;
       BehaviorTreeNodeBasics nodeOfHighestUtility = null;

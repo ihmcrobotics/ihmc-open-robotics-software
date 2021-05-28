@@ -18,7 +18,7 @@ public class OneShotAction extends BehaviorTreeAction
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       if (!hasRunOnce)
       {

@@ -22,7 +22,7 @@ public class BehaviorTreeCondition extends BehaviorTreeAction
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       boolean success = checkCondition();
 

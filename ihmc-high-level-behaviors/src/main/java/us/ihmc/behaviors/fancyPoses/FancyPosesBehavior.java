@@ -85,7 +85,7 @@ public class FancyPosesBehavior extends BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

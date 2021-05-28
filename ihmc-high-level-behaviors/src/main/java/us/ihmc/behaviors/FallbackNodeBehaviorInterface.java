@@ -25,8 +25,8 @@ public abstract class FallbackNodeBehaviorInterface extends BehaviorInterface im
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
-      return fallbackNode.tick();
+      return fallbackNode.tickInternal();
    }
 }

@@ -41,7 +41,7 @@ public abstract class ParallelNodeBasics extends BehaviorTreeNode
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       if (resetRequired)
       {

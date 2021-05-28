@@ -186,7 +186,7 @@ public class BuildingExplorationBehavior extends BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }
