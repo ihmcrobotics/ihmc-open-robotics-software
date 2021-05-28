@@ -38,10 +38,10 @@ public class ImGuiBehaviorTreePanel
    }
 
    private void renderNodeAndChildren(BehaviorTreeNodeBasics node) {
-      if (node instanceof CheckableBehaviorTreeNode) {
-         if (((CheckableBehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS)
+      if (node instanceof BehaviorTreeNode) {
+         if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS)
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#32a852"));
-         else if (((CheckableBehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE)
+         else if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE)
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#a83232"));
          else
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#3452eb"));
@@ -61,7 +61,7 @@ public class ImGuiBehaviorTreePanel
 
       ImNodes.endNode();
 
-      if (node instanceof CheckableBehaviorTreeNode) {
+      if (node instanceof BehaviorTreeNode) {
          ImNodes.popColorStyle();
       }
 

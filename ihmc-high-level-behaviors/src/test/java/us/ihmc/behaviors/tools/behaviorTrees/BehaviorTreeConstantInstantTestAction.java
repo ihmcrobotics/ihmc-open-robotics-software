@@ -19,7 +19,7 @@ public class BehaviorTreeConstantInstantTestAction extends BehaviorTreeAction
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       action.run();
       return status;

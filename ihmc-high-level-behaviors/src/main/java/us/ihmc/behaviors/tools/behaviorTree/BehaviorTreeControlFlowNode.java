@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * Add default ArrayList storage of children nodes for a control flow node.
  */
-public abstract class BehaviorTreeControlFlowNode implements BehaviorTreeControlFlowNodeBasics
+public abstract class BehaviorTreeControlFlowNode extends BehaviorTreeNode implements BehaviorTreeControlFlowNodeBasics
 {
    private final ArrayList<BehaviorTreeNodeBasics> children = new ArrayList<>();
    private boolean hasBeenClocked = false;
@@ -33,7 +33,7 @@ public abstract class BehaviorTreeControlFlowNode implements BehaviorTreeControl
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       if (!hasBeenClocked)
       {

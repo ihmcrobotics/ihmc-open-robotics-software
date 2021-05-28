@@ -58,7 +58,7 @@ public class StepInPlaceBehavior extends BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       return BehaviorTreeNodeStatus.SUCCESS;
    }

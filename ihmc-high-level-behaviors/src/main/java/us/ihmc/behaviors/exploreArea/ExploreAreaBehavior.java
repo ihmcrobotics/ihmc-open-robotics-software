@@ -84,7 +84,7 @@ public class ExploreAreaBehavior extends FallbackNodeBehaviorInterface
    class StopNode extends BehaviorTreeNode // TODO: Is there a more general reusable robot stop node?
    {
       @Override
-      public BehaviorTreeNodeStatus tick()
+      public BehaviorTreeNodeStatus tickInternal()
       {
          if (explore.get())
          {

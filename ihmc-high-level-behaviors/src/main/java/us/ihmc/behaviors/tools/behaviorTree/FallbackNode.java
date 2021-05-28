@@ -8,9 +8,9 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 public class FallbackNode extends BehaviorTreeControlFlowNode
 {
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
-      super.tick();
+      super.tickInternal();
 
       for (BehaviorTreeNodeBasics child : getChildren())
       {
