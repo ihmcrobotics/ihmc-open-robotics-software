@@ -50,6 +50,7 @@ public class SE3MPCIndexHandler extends LinearMPCIndexHandler
 
          int orientationIndex = comStartIndices.get(segmentNumber);
          orientationStartIndices.add(orientationIndex);
+         variablesInSegment.set(segmentNumber, variablesPerOrientationTick + variablesInSegment.get(segmentNumber));
 
          // shift the remaining segments
          for (int j = segmentNumber; j < previewWindowContactSequence.size(); j++)
