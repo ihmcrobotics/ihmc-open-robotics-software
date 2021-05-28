@@ -9,7 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
 
-public class BehaviorTreeReactiveTestAction implements BehaviorTreeAction
+public class BehaviorTreeReactiveTestAction extends BehaviorTreeAction
 {
    private final int stepDuration;
    private final int taskSteps;

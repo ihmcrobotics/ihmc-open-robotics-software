@@ -15,7 +15,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
 /**
  * Not finished or tested. Mostly to hold old code.
  */
-public class MessagerStringSelectorNode implements BehaviorInterface
+public class MessagerStringSelectorNode extends BehaviorInterface
 {
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();

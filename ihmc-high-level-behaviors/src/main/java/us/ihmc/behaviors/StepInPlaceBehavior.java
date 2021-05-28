@@ -28,7 +28,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class StepInPlaceBehavior implements BehaviorInterface
+public class StepInPlaceBehavior extends BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new, API.create());
 

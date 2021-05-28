@@ -5,7 +5,7 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 /**
  * Experimental action. Not sure about this one.
  */
-public class AlwaysSuccessfulAction implements BehaviorTreeAction
+public class AlwaysSuccessfulAction extends BehaviorTreeAction
 {
    private final Runnable action;
 
