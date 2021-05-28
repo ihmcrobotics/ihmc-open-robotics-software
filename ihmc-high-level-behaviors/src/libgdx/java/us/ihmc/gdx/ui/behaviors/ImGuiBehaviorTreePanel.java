@@ -1,15 +1,26 @@
 package us.ihmc.gdx.ui.behaviors;
 
+import imgui.ImColor;
+import imgui.extension.imnodes.ImNodes;
+import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.internal.ImGui;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNodeBasics;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.CheckableBehaviorTreeNode;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
 public class ImGuiBehaviorTreePanel
 {
    private final String windowName;
+   private final BehaviorTreeControlFlowNodeBasics tree;
 
-   public ImGuiBehaviorTreePanel(String name)
+   private static int nodeIndex = 0;
+
+   public ImGuiBehaviorTreePanel(BehaviorTreeControlFlowNodeBasics tree, String name)
    {
       windowName = ImGuiTools.uniqueLabel(getClass(), name + " tree");
+      this.tree = tree;
    }
 
    public void renderAsWindow()
@@ -21,13 +32,47 @@ public class ImGuiBehaviorTreePanel
 
    public void renderWidgetsOnly()
    {
-//      ImGui.text("Behavior tree render WIP");
+      ImNodes.beginNodeEditor();
 
-      float x = ImGui.getItemRectMinX();
-      float y = ImGui.getItemRectMaxY();
-      int color = ImGui.colorConvertFloat4ToU32(0.5f, 0.5f, 0.5f, 1.0f);
-      ImGui.getWindowDrawList().addCircle(x + 30.0f, y + 30.0f, 15.0f, color);
+      nodeIndex = 0;
+      renderNodeAndChildren(tree);
 
-      ImGui.getWindowDrawList().addRect(x + 50.0f, y, x + 100.0f, y + 50.0f, ImGui.getColorU32(0.5f, 0.5f, 0.5f, 1.0f));
+      ImNodes.endNodeEditor();
+   }
+
+   private void renderNodeAndChildren(BehaviorTreeNode node) {
+      if (node instanceof CheckableBehaviorTreeNode) {
+         if (((CheckableBehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS)
+            ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#32a852"));
+         else if (((CheckableBehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE)
+            ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#a83232"));
+         else
+            ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#3452eb"));
+      }
+
+      ImNodes.beginNode(nodeIndex++);
+
+      ImNodes.beginNodeTitleBar();
+      switch(node.getClass().getSimpleName()) {
+         case "SequenceNode": ImGui.textUnformatted("Sequence Node"); break;
+         case "FallbackNode": ImGui.textUnformatted("Fallback Node"); break;
+         default: ImGui.textUnformatted("Behavior " + (nodeIndex - 1)); break;
+      }
+      ImNodes.endNodeTitleBar();
+
+      ImGui.dummy(40f, 20f);
+
+      ImNodes.endNode();
+
+      if (node instanceof CheckableBehaviorTreeNode) {
+         ImNodes.popColorStyle();
+      }
+
+      if (node instanceof BehaviorTreeControlFlowNodeBasics)
+      {
+         for (BehaviorTreeNode child : ((BehaviorTreeControlFlowNodeBasics) node).getChildren())
+            renderNodeAndChildren(child);
+      }
+
    }
 }
