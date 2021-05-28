@@ -46,6 +46,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    public void create(GDXImGuiBasedUI baseUI)
    {
       goalAffordance.create(baseUI, goalPose -> helper.publish(Goal, goalPose), Color.GREEN);
+      baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
 
       lookAndStepUI.create(baseUI);
    }
