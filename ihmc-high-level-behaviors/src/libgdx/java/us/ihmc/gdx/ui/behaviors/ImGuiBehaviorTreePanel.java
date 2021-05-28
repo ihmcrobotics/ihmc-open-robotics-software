@@ -4,15 +4,20 @@ import imgui.ImColor;
 import imgui.extension.imnodes.ImNodes;
 import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.internal.ImGui;
+import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.imgui.ImGuiTools;
+
+import java.util.ArrayList;
 
 public class ImGuiBehaviorTreePanel
 {
    private final String windowName;
    private final BehaviorTreeControlFlowNodeBasics tree;
 
-   private static int nodeIndex = 0;
+   private int nodeIndex = 0;
+   private int pinIndex = 0;
+   private int linkIndex = 0;
 
    public ImGuiBehaviorTreePanel(BehaviorTreeControlFlowNodeBasics tree, String name)
    {
@@ -30,36 +35,79 @@ public class ImGuiBehaviorTreePanel
    public void renderWidgetsOnly()
    {
       ImNodes.beginNodeEditor();
-
       nodeIndex = 0;
-      renderNodeAndChildren(tree);
+      ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
+      renderNodeAndChildren(tree, -1, links);
+      renderLinks(links);
 
       ImNodes.endNodeEditor();
    }
 
-   private void renderNodeAndChildren(BehaviorTreeNodeBasics node) {
+   public void renderLinks(ArrayList<Pair<Integer, Integer>> links) {
+      for (Pair<Integer, Integer> p : links) {
+         ImNodes.link(linkIndex++, p.getFirst(), p.getSecond());
+      }
+   }
+
+   private void renderNodeAndChildren(BehaviorTreeNodeBasics node, int parentPin, ArrayList<Pair<Integer, Integer>> links) {
+      long timeSinceLastTick = -1;
+
       if (node instanceof BehaviorTreeNode) {
-         if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS)
+         timeSinceLastTick = System.currentTimeMillis() - ((BehaviorTreeNode) node).lastTickMillis();
+         boolean isTickRecent = timeSinceLastTick < 5000;
+
+         if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#32a852"));
-         else if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE)
+         else if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#a83232"));
          else
             ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#3452eb"));
       }
 
-      ImNodes.beginNode(nodeIndex++);
+      ImNodes.beginNode(nodeIndex);
 
       ImNodes.beginNodeTitleBar();
+      String name = null;
+      if (node instanceof BehaviorTreeNode)
+         name = ((BehaviorTreeNode) node).getName();
+
       switch(node.getClass().getSimpleName()) {
-         case "SequenceNode": ImGui.textUnformatted("Sequence Node"); break;
-         case "FallbackNode": ImGui.textUnformatted("Fallback Node"); break;
-         default: ImGui.textUnformatted("Behavior " + (nodeIndex - 1)); break;
+         case "SequenceNode": ImGui.textUnformatted("[->] " + (name != null ? name : "Sequence Node")); break;
+         case "FallbackNode": ImGui.textUnformatted("[F] " + (name != null ? name : "Fallback Node")); break;
+         case "LoopSequenceNode": ImGui.textUnformatted("[o] " + (name != null ? name : "Loop Sequence Node")); break;
+         case "OneShotAction": ImGui.textUnformatted("[1] " + (name != null ? name : "One Shot Action")); break;
+         case "AlwaysSuccessfulAction": ImGui.textUnformatted("[A] " + (name != null ? name : "Always Successful Action")); break;
+         default: ImGui.textUnformatted(name != null ? name : "Behavior " + nodeIndex); break;
       }
       ImNodes.endNodeTitleBar();
 
-      ImGui.dummy(40f, 20f);
+      if (timeSinceLastTick > -1)
+      {
+         if (((BehaviorTreeNode) node).getPreviousStatus() != null)
+            ImGui.textColored(0xFFFFFFFF, "Last tick: " + (timeSinceLastTick < 1000 ? "< 1s" : timeSinceLastTick / 1000 + "s") + " ago");
+         else
+            ImGui.textColored(0xFFFFFFFF,"Not yet ticked.");
+      }
+
+      ImGui.dummy(120f, 20f);
+
+      if (parentPin != -1) {
+         ImNodes.beginInputAttribute(pinIndex);
+         ImNodes.endInputAttribute();
+
+         links.add(new Pair<>(parentPin, pinIndex++));
+      }
+
+      int nodePinIndex = pinIndex;
+      if (node instanceof BehaviorTreeControlFlowNode) {
+         for (BehaviorTreeNodeBasics child : ((BehaviorTreeControlFlowNode) node).getChildren()) {
+            ImNodes.beginOutputAttribute(pinIndex++);
+            ImNodes.endOutputAttribute();
+         }
+      }
 
       ImNodes.endNode();
+      nodeIndex++;
 
       if (node instanceof BehaviorTreeNode) {
          ImNodes.popColorStyle();
@@ -68,7 +116,7 @@ public class ImGuiBehaviorTreePanel
       if (node instanceof BehaviorTreeControlFlowNode)
       {
          for (BehaviorTreeNodeBasics child : ((BehaviorTreeControlFlowNode) node).getChildren())
-            renderNodeAndChildren(child);
+            renderNodeAndChildren(child, nodePinIndex++, links);
       }
 
    }
