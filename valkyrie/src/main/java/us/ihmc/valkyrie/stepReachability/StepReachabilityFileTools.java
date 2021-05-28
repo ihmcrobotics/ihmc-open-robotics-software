@@ -59,7 +59,6 @@ public class StepReachabilityFileTools
    {
       String reachabilityDataFileName = logDirectory + filename;
       Map<FramePose3D, Boolean> feasibilityMap = new HashMap<>();
-      FramePose3D frame = new FramePose3D();
 
       try
       {
@@ -67,6 +66,7 @@ public class StepReachabilityFileTools
          while(scanner.hasNextLine())
          {
             String line = scanner.nextLine();
+            FramePose3D frame = new FramePose3D();
 
             // Parse to get frame position, orientation and feasibility boolean
             String[] data = line.split(",");
@@ -81,17 +81,11 @@ public class StepReachabilityFileTools
             double orS = Double.parseDouble(data[6]);
             frame.getOrientation().set(orX, orY, orZ, orS);
 
-            System.out.print(frame);
-            System.out.println(line.contains("true"));
-
-            // Load into hashmap TODO Fix this, might have to round to 2 decimals, something with hashcode
             feasibilityMap.put(frame, line.contains("true"));
-//            System.out.println(feasibilityMap);
          }
          scanner.close();
          System.out.println("Done loading from file");
          return feasibilityMap;
-
       }
       catch (FileNotFoundException e)
       {

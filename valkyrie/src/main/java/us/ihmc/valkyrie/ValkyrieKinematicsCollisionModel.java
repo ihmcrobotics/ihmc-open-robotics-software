@@ -149,15 +149,6 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          lowerLegShape.getPosition().set(-0.012, 0.0, -0.189);
          lowerLegShape.getAxis().set(new Vector3D(0.08, 0.0, 1.0));
          collidables.add(new Collidable(lowerLeg, collisionMask, collisionGroup, lowerLegShape));
-
-         JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
-         MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
-
-         // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
-         FrameBox3D footShape = new FrameBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
-         footShape.getPosition().set(0.044, 0.0, -0.042);
-         collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
-
       }
 
       return collidables;

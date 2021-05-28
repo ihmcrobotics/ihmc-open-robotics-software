@@ -109,7 +109,6 @@ public class ValkyrieStepReachabilityCalculator
 
    private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
-   // TODO tune this
    private static final double SOLUTION_QUALITY_THRESHOLD = 5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -230,7 +229,6 @@ public class ValkyrieStepReachabilityCalculator
                poseValidityMap.put(leftFootPose, isValid);
             }
             StepReachabilityFileTools.writeToFile(poseValidityMap);
-            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case TEST_FILE_LOADING:
             Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
@@ -300,7 +298,7 @@ public class ValkyrieStepReachabilityCalculator
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
          int numberOfIterations = 150;
-         runKinematicsToolboxController(numberOfIterations);
+         runKinematicsToolboxController();
 
          assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
          double solutionQuality = toolboxController.getSolution().getSolutionQuality();
@@ -371,49 +369,53 @@ public class ValkyrieStepReachabilityCalculator
 //      snapGhostToFullRobotModel(targetFullRobotModel);
       toolboxController.updateRobotConfigurationData(robotConfigurationData);
 
-      while (!solutionQualityConvergenceDetector.isSolved())
-      {
-         solutionQualityConvergenceDetector.update();
-      }
-      int numberOfIterations = solutionQualityConvergenceDetector.getNumberOfIteration();
-      runKinematicsToolboxController(numberOfIterations);
+      runKinematicsToolboxController();
 
       assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
       double solutionQuality = toolboxController.getSolution().getSolutionQuality();
 
-      // how is solutionQuality different from finalSolutionQuality?
       boolean isValid = (solutionQuality < solutionQualityThreshold);
       validStep.set(isValid);
 
       return isValid;
    }
 
-   private void runKinematicsToolboxController(int numberOfIterations) throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
+   private void runKinematicsToolboxController() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       initializationSucceeded.set(false);
       this.numberOfIterations.set(0);
 
+      // Using convergence detector currently very slow
+      // Can play around with convergence settings to speed things up
+      solutionQualityConvergenceDetector.initialize();
       if (visualize)
       {
-         blockingSimulationRunner.simulateNTicksAndBlockAndCatchExceptions(numberOfIterations);
+         while (!solutionQualityConvergenceDetector.isSolved())
+         {
+            blockingSimulationRunner.simulateNTicksAndBlockAndCatchExceptions(1);
+            solutionQualityConvergenceDetector.submitSolutionQuality(toolboxController.getSolution().getSolutionQuality());
+            solutionQualityConvergenceDetector.update();
+         }
       }
       else
       {
-         for (int i = 0; i < numberOfIterations; i++)
+         while (!solutionQualityConvergenceDetector.isSolved())
+         {
             toolboxUpdater.doControl();
+            solutionQualityConvergenceDetector.submitSolutionQuality(toolboxController.getSolution().getSolutionQuality());
+            solutionQualityConvergenceDetector.update();
+         }
       }
-
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   // TODO find good values for these, they should be the maximum feasible but not too big so that it slows down the solver
-   private static final int queriesPerAxis = 6;
+   private static final int queriesPerAxis = 5;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
    private static final double maximumOffsetY = 0.5;
-   private static final double minimumOffsetYaw = - Math.toRadians(80.0);
-   private static final double maximumOffsetYaw = Math.toRadians(80.0);
+   private static final double minimumOffsetYaw = - Math.toRadians(70.0);
+   private static final double maximumOffsetYaw = Math.toRadians(70.0);
 
    private static List<FramePose3D> createLeftFootPoseList()
    {
@@ -441,7 +443,6 @@ public class ValkyrieStepReachabilityCalculator
             }
          }
       }
-
       return posesToCheck;
    }
 
@@ -658,16 +659,16 @@ public class ValkyrieStepReachabilityCalculator
 
    private FramePose3D interpolateFeet(FramePose3D leftFoot, FramePose3D rightFoot)
    {
-      // Set betweenFeet to be 50% interpolation between leftFoot and rightFoot
+      // 50% interpolation between leftFoot and rightFoot
       double interpolationAlpha = 0.5;
       FramePose3D centerFeet = new FramePose3D();
       centerFeet.interpolate(leftFoot, rightFoot, interpolationAlpha);
       return centerFeet;
    }
 
-   // CoM in between feet, at chest height
    private FramePoint3D computeCoMForFeet(FramePose3D leftFoot, FramePose3D rightFoot)
    {
+      // 50% interpolation between feet, at chest height
       FramePose3D centerPose = interpolateFeet(leftFoot, rightFoot);
       centerPose.getPosition().setZ(1.3496);
 

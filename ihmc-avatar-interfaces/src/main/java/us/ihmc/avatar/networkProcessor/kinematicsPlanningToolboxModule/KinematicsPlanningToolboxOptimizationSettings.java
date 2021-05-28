@@ -5,7 +5,7 @@ public class KinematicsPlanningToolboxOptimizationSettings implements SolutionQu
    @Override
    public double getSolutionStabilityThreshold()
    {
-      return 0.00005;
+      return 0.01;
    }
    
    @Override
