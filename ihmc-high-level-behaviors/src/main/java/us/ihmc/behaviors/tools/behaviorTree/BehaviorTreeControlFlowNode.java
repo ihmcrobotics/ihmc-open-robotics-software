@@ -10,7 +10,7 @@ public abstract class BehaviorTreeControlFlowNode implements BehaviorTreeControl
    private final ArrayList<BehaviorTreeNodeBasics> children = new ArrayList<>();
    private boolean hasBeenClocked = false;
 
-   protected ArrayList<BehaviorTreeNodeBasics> getChildren()
+   public ArrayList<BehaviorTreeNodeBasics> getChildren()
    {
       return children;
    }
