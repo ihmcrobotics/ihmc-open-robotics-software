@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -71,7 +72,7 @@ public class PushRecoveryControlModule
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                    WalkingControllerParameters walkingControllerParameters, YoRegistry parentRegistry)
+                                    PushRecoveryControllerParameters recoveryControllerParameters, YoRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;
@@ -84,7 +85,7 @@ public class PushRecoveryControlModule
       enablePushRecovery.set(ENABLE); // todo add some smartness on whether ot not to enable this if using the icp optimization
 
       yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, walkingControllerParameters, registry, yoGraphicsListRegistry);
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(referenceFrames, recoveryControllerParameters, registry, yoGraphicsListRegistry);
       footstepAdjustor = new FootstepAdjustor(feet, registry, yoGraphicsListRegistry);
 
       footstepWasProjectedInCaptureRegion = new YoBoolean("footstepWasProjectedInCaptureRegion", registry);

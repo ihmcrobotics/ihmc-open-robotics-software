@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -47,21 +48,21 @@ public class OneStepCaptureRegionCalculator
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
+   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, PushRecoveryControllerParameters walkingControllerParameters,
          YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
            referenceFrames.getSoleZUpFrames(), "", parentRegistry, yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, WalkingControllerParameters walkingControllerParameters,
+   public OneStepCaptureRegionCalculator(CommonHumanoidReferenceFrames referenceFrames, PushRecoveryControllerParameters walkingControllerParameters,
                                          String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
            referenceFrames.getSoleZUpFrames(), suffix, parentRegistry, yoGraphicsListRegistry);
    }
 
-   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
+   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, PushRecoveryControllerParameters walkingControllerParameters,
                                          YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
@@ -69,6 +70,13 @@ public class OneStepCaptureRegionCalculator
    }
 
    public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, WalkingControllerParameters walkingControllerParameters,
+                                         String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
+   {
+      this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+              soleZUpFrames, suffix, parentRegistry, yoGraphicsListRegistry);
+   }
+
+   public OneStepCaptureRegionCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames, PushRecoveryControllerParameters walkingControllerParameters,
                                          String suffix, YoRegistry parentRegistry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this(walkingControllerParameters.getSteppingParameters().getFootWidth(), walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
