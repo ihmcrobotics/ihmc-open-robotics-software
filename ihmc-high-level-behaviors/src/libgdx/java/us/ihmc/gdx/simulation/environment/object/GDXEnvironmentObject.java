@@ -37,6 +37,7 @@ public class GDXEnvironmentObject
    private final Point3D firstSphereIntersection = new Point3D();
    private final Point3D secondSphereIntersection = new Point3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform tempTransformForPose = new RigidBodyTransform();
 
    public void create(Model realisticModel)
    {
@@ -142,6 +143,12 @@ public class GDXEnvironmentObject
       GDXTools.toGDX(tempTransform, getCollisionModelInstance().transform);
       getCollisionGeometryObject().getPose().getTranslation().set(tempTransform.getTranslation());
       boundingSphere.getPosition().set(tempTransform.getTranslation());
+   }
+
+   public void set(Pose3D pose)
+   {
+      tempTransformForPose.set(pose.getOrientation(), pose.getPosition()); // might need inverting
+      set(tempTransformForPose);
    }
 
    public void set(RigidBodyTransform transform)
