@@ -1,10 +1,12 @@
 package us.ihmc.behaviors.tools;
 
+import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
 import us.ihmc.avatar.ros2.ROS2ControllerPublishSubscribeAPI;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
@@ -179,6 +181,11 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
    {
       ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(ros2Helper.getROS2NodeInterface(), topic.getType(), topic);
       return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
+   }
+
+   public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
+   {
+      subscribeViaCallback(ObjectDetectorToolboxModule.getOutputTopic(getRobotModel().getSimpleRobotName()).withTypeName(DoorLocationPacket.class), callback);
    }
 
    @Override
