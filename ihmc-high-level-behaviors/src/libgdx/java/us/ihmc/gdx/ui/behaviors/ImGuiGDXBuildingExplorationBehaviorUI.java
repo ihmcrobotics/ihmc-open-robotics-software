@@ -124,5 +124,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       goalAffordance.getRenderables(renderables, pool);
       controllerFootsteps.getRenderables(renderables, pool);
       lookAndStepUI.getRenderables(renderables, pool);
+      door.getRealisticModelInstance().getRenderables(renderables, pool);
    }
 }
