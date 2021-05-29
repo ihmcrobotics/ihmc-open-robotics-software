@@ -20,10 +20,10 @@ public class BuildingExplorationBehaviorAPI
    public static final MessagerAPIFactory.Topic<Boolean> DoorDetected = topic("DoorDetected");
 
    public static final MessagerAPIFactory.Topic<Boolean> IgnoreDebris = topic("IgnoreDebris");
-   public static final MessagerAPIFactory.Topic<Boolean> ConfirmDoor = topic("ConfirmDoor");
+   public static final MessagerAPIFactory.Topic<Object> ConfirmDoor = topic("ConfirmDoor");
 
-   public static final MessagerAPIFactory.Topic<Boolean> Start = topic("Start");
-   public static final MessagerAPIFactory.Topic<Boolean> Stop = topic("Stop");
+   public static final MessagerAPIFactory.Topic<Object> Start = topic("Start");
+   public static final MessagerAPIFactory.Topic<Object> Stop = topic("Stop");
    public static final MessagerAPIFactory.Topic<Pose3D> Goal = topic("Goal");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();

@@ -28,7 +28,10 @@ public class ImGuiEnumPlot
 
    public void render(int ordinal, String overlayText)
    {
-      values[index] = ordinal;
+      if (ordinal < 0)
+         values[index] = Float.NaN;
+      else
+         values[index] = ordinal;
 
       ImGui.plotLines("", values, bufferSize, 0, overlayText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
 

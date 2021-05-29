@@ -10,9 +10,9 @@ public class ImGuiYoDoublePlot
    private final ImGuiPlot imGuiPlot;
    private final DoubleSupplier doubleSupplier;
 
-   public ImGuiYoDoublePlot(String yoVariableName, YoVariableClientPublishSubscribeAPI yoAPI)
+   public ImGuiYoDoublePlot(String yoVariableName, YoVariableClientPublishSubscribeAPI yoAPI, int bufferSize, int width, int height)
    {
-      imGuiPlot = new ImGuiPlot(yoVariableName);
+      imGuiPlot = new ImGuiPlot(yoVariableName, bufferSize, width, height);
       doubleSupplier = yoAPI.subscribeViaYoDouble(yoVariableName);
    }
 
