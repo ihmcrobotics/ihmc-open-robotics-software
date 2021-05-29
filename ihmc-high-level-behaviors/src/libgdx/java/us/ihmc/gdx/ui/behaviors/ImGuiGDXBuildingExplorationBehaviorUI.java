@@ -11,11 +11,11 @@ import imgui.type.ImBoolean;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
-import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXDoorOnlyObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
@@ -39,6 +39,12 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private ImGuiLabelMap labels = new ImGuiLabelMap();
    private String[] stateNames = new String[BuildingExplorationStateName.values().length];
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
+   private final ImGuiPlot debrisDetectedPlot = new ImGuiPlot("Debris detected", 1000, 250, 30);
+   private volatile boolean debrisDetected = false;
+   private final ImGuiPlot stairsDetectedPlot = new ImGuiPlot("Stairs detected", 1000, 250, 30);
+   private volatile boolean stairsDetected = false;
+   private final ImGuiPlot doorDetectedPlot = new ImGuiPlot("Door detected", 1000, 250, 30);
+   private volatile boolean doorDetected = false;
    private BuildingExplorationStateName currentState = null;
    private ImBoolean ignoreDebris = new ImBoolean();
 
@@ -61,6 +67,9 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
 
       helper.subscribeToDoorLocationViaCallback(doorLocation -> door.set(doorLocation.getDoorTransformToWorld()));
       helper.subscribeViaCallback(CurrentState, state -> currentState = state);
+      helper.subscribeViaCallback(DebrisDetected, detected -> debrisDetected = detected);
+      helper.subscribeViaCallback(StairsDetected, detected -> stairsDetected = detected);
+      helper.subscribeViaCallback(DoorDetected, detected -> doorDetected = detected);
    }
 
    @Override
@@ -98,9 +107,16 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       {
          helper.publish(IgnoreDebris, true); // TODO: Fix this
       }
+      if (ImGui.button(labels.get("Confirm door")))
+      {
+         helper.publish(ConfirmDoor, true);
+      }
 
       ImGui.text("Current state:");
       currentStatePlot.render(currentState == null ? -1 : currentState.ordinal(), currentState == null ? "" : currentState.name());
+      debrisDetectedPlot.render(debrisDetected ? 1.0f : 0.0f);
+      stairsDetectedPlot.render(stairsDetected ? 1.0f : 0.0f);
+      doorDetectedPlot.render(doorDetected ? 1.0f : 0.0f);
 
       int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
       if (ImGui.collapsingHeader("Look and Step", defaultOpen))
