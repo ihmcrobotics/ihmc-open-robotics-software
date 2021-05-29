@@ -206,14 +206,14 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
    public void requestStart()
    {
       LogTools.info("Requesting start");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, new Object());
    }
 
    @FXML
    public void requestStop()
    {
       LogTools.info("Requesting stop");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, new Object());
    }
 
    @FXML
@@ -234,7 +234,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
    public void confirmDoor()
    {
       LogTools.info("Confirm door pressed");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, new Object());
    }
 
    @FXML

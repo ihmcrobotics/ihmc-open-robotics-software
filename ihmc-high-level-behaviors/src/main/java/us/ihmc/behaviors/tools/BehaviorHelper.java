@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.tools;
 
 import com.google.common.base.CaseFormat;
+import controller_msgs.msg.dds.*;
 import org.apache.commons.lang.WordUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
@@ -9,16 +10,24 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -134,6 +143,40 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       TypedNotification<K> typedNotification = new TypedNotification<>();
       subscribeViaCallback(topic, typedNotification::set);
       return typedNotification;
+   }
+
+   public void publishBehaviorControlMode(BehaviorControlModeEnum controlMode)
+   {
+      BehaviorControlModePacket behaviorControlModePacket = new BehaviorControlModePacket();
+      behaviorControlModePacket.setBehaviorControlModeEnumRequest(controlMode.toByte());
+      publish(ROS2Tools.getBehaviorControlModeTopic(getRobotModel().getSimpleRobotName()), behaviorControlModePacket);
+   }
+
+   public void publishBehaviorType(HumanoidBehaviorType type)
+   {
+      HumanoidBehaviorTypePacket humanoidBehaviorTypePacket = new HumanoidBehaviorTypePacket();
+      humanoidBehaviorTypePacket.setHumanoidBehaviorType(type.toByte());
+      publish(ROS2Tools.getBehaviorTypeTopic(getRobotModel().getSimpleRobotName()), humanoidBehaviorTypePacket);
+   }
+
+   public void publishToolboxState(Function<String, ROS2Topic<?>> robotNameConsumer, ToolboxState state)
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(state.toByte());
+      publish(robotNameConsumer.apply(getRobotModel().getSimpleRobotName()).withTypeName(ToolboxStateMessage.class), toolboxStateMessage);
+   }
+
+   public void subscribeToBehaviorStatusViaCallback(Consumer<CurrentBehaviorStatus> callback)
+   {
+      subscribeViaCallback(ROS2Tools.getBehaviorStatusTopic(getRobotModel().getSimpleRobotName()), behaviorStatusPacket ->
+      {
+         callback.accept(CurrentBehaviorStatus.fromByte(behaviorStatusPacket.getCurrentBehaviorStatus()));
+      });
+   }
+
+   public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
+   {
+      subscribeViaCallback(ROS2Tools.getDoorLocationTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
    public void setCommunicationCallbacksEnabled(boolean enabled)

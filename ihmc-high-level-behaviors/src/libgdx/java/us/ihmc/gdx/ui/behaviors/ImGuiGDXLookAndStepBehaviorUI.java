@@ -46,9 +46,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
-   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 50);
+   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
    private long numberOfSteppingRegionsReceived = 0;
-   private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 230, 30);
+   private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 30);
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
@@ -100,7 +100,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       behaviorHelper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       behaviorHelper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       behaviorHelper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
-      footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", behaviorHelper);
+      footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", behaviorHelper, 1000, 250, 30);
    }
 
    @Override

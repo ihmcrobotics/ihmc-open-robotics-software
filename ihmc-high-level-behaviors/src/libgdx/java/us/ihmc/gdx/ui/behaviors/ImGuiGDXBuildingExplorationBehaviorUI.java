@@ -7,16 +7,23 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
+import us.ihmc.behaviors.demo.BuildingExplorationStateName;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.gdx.imgui.ImGuiEnumPlot;
+import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXDoorOnlyObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.Goal;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 
 public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterface
 {
@@ -28,10 +35,21 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
+   private GDXDoorOnlyObject door;
+   private ImGuiLabelMap labels = new ImGuiLabelMap();
+   private String[] stateNames = new String[BuildingExplorationStateName.values().length];
+   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
+   private BuildingExplorationStateName currentState = null;
+   private ImBoolean ignoreDebris = new ImBoolean();
 
    public ImGuiGDXBuildingExplorationBehaviorUI(BehaviorHelper helper)
    {
       this.helper = helper;
+
+      for (int i = 0; i < BuildingExplorationStateName.values.length; i++)
+      {
+         stateNames[i] = StringUtils.capitalize(BuildingExplorationStateName.values[i].name().toLowerCase().replaceAll("_", " "));
+      }
 
       helper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
       {
@@ -40,6 +58,9 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
 
       lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(helper);
       traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
+
+      helper.subscribeToDoorLocationViaCallback(doorLocation -> door.set(doorLocation.getDoorTransformToWorld()));
+      helper.subscribeViaCallback(CurrentState, state -> currentState = state);
    }
 
    @Override
@@ -47,6 +68,8 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    {
       goalAffordance.create(baseUI, goalPose -> helper.publish(Goal, goalPose), Color.GREEN);
       baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
+
+      door = new GDXDoorOnlyObject();
 
       lookAndStepUI.create(baseUI);
    }
@@ -56,6 +79,28 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    {
       ImGui.text("Building Exploration");
       goalAffordance.renderPlaceGoalButton();
+
+      for (int i = 0; i < BuildingExplorationStateName.values.length; i++)
+      {
+         if (ImGui.button(labels.get(stateNames[i])))
+         {
+            helper.publish(RequestedState, BuildingExplorationStateName.values[i]);
+            helper.publish(Start);
+         }
+         if (i < BuildingExplorationStateName.values.length - 1)
+            ImGui.sameLine();
+      }
+      if (ImGui.button(labels.get("Stop")))
+      {
+         helper.publish(Stop);
+      }
+      if (ImGui.button(labels.get("Ignore debris")))
+      {
+         helper.publish(IgnoreDebris, true); // TODO: Fix this
+      }
+
+      ImGui.text("Current state:");
+      currentStatePlot.render(currentState == null ? -1 : currentState.ordinal(), currentState == null ? "" : currentState.name());
 
       int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
       if (ImGui.collapsingHeader("Look and Step", defaultOpen))

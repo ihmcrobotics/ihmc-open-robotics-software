@@ -2,6 +2,7 @@ package us.ihmc.behaviors.tools;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
@@ -15,6 +16,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -40,6 +42,7 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -186,6 +189,16 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
    public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
    {
       subscribeViaCallback(ObjectDetectorToolboxModule.getOutputTopic(getRobotModel().getSimpleRobotName()).withTypeName(DoorLocationPacket.class), callback);
+   }
+
+   public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
+   {
+      subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
+   }
+
+   public <T> void publish(Function<String, ROS2Topic<T>> topic, T message)
+   {
+      ros2Helper.publish(topic.apply(getRobotModel().getSimpleRobotName()), message);
    }
 
    @Override
