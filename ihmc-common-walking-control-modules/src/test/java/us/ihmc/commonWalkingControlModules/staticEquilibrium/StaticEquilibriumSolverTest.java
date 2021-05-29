@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.staticEquilibrium;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -15,42 +16,49 @@ public class StaticEquilibriumSolverTest
    private static final boolean VISUALIZE = Boolean.parseBoolean(System.getProperty("visualize", "true"));
    private static final double marginToTest = 0.02;
 
+   @Disabled
    @Test
    public void testTriangleFlat()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleFlatGround());
    }
 
+   @Disabled
    @Test
    public void testTriangleLowAngle()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutSlightly());
    }
 
+   @Disabled
    @Test
    public void testTriangleHighAngle()
    {
       runTest(StaticEquilibriumSolverInputExamples.createTriangleTiltedOutALot());
    }
 
+   @Disabled
    @Test
    public void testFlatSquare()
    {
       runTest(StaticEquilibriumSolverInputExamples.createFlatSquare());
    }
 
+   @Disabled
    @Test
    public void testBipedFeet()
    {
       runTest(StaticEquilibriumSolverInputExamples.createBipedFeet());
    }
 
+   @Disabled
    @Test
    public void testBipedFeetWithHandhold()
    {
       runTest(StaticEquilibriumSolverInputExamples.createBipedFeetWithHandhold());
    }
 
+   @Disabled
    @Test
    public void testMatricesForFlatGround()
    {

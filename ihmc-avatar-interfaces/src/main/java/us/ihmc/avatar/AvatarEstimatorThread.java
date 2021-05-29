@@ -18,6 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
+import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -45,11 +46,17 @@ public class AvatarEstimatorThread extends ModularRobotController
    private final IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher;
    private final YoGraphicsListRegistry yoGraphicsListRegistry;
 
-   public AvatarEstimatorThread(SensorReader sensorReader, FullHumanoidRobotModel estimatorFullRobotModel, HumanoidRobotContextData humanoidRobotContextData,
-                                   StateEstimatorController mainStateEstimator, PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
-                                   ForceSensorStateUpdater forceSensorStateUpdater,
-                                   IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher, YoRegistry estimatorRegistry,
-                                   YoGraphicsListRegistry yoGraphicsListRegistry)
+   private final ExecutionTimer estimatorThreadTimer;
+
+   public AvatarEstimatorThread(SensorReader sensorReader,
+                                FullHumanoidRobotModel estimatorFullRobotModel,
+                                HumanoidRobotContextData humanoidRobotContextData,
+                                StateEstimatorController mainStateEstimator,
+                                PairList<BooleanSupplier, StateEstimatorController> secondaryStateEstimators,
+                                ForceSensorStateUpdater forceSensorStateUpdater,
+                                IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> controllerCrashPublisher,
+                                YoRegistry estimatorRegistry,
+                                YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super("EstimatorController");
 
@@ -74,12 +81,16 @@ public class AvatarEstimatorThread extends ModularRobotController
          addRobotController(secondaryStateEstimators.get(i).getRight());
       }
 
+      estimatorThreadTimer = new ExecutionTimer("estimatorThreadTimer", super.getYoRegistry());
+
       firstTick = new YoBoolean("firstTick", estimatorRegistry);
       firstTick.set(true);
    }
 
    public void run()
    {
+      estimatorThreadTimer.startMeasurement();
+
       try
       {
          if (firstTick.getBooleanValue())
@@ -119,6 +130,8 @@ public class AvatarEstimatorThread extends ModularRobotController
          }
          throw new RuntimeException(e);
       }
+
+      estimatorThreadTimer.stopMeasurement();
    }
 
    public void initializeStateEstimators(RigidBodyTransform rootJointTransform, TObjectDoubleMap<String> jointPositions)
@@ -138,7 +151,8 @@ public class AvatarEstimatorThread extends ModularRobotController
       humanoidRobotContextData.setEstimatorRan(false);
    }
 
-   public void setupHighLevelControllerCallback(String robotName, RealtimeROS2Node realtimeROS2Node,
+   public void setupHighLevelControllerCallback(String robotName,
+                                                RealtimeROS2Node realtimeROS2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
       ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);

@@ -148,7 +148,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       DMatrixRMaj expectedSolutionMatrix = MPCTestHelper.getVectorOfCoefficients(gravityZ, rhoHelper, solutionCoefficients);
       DMatrixRMaj expectedContactForceMatrix = MPCTestHelper.getContactForceCoefficients(rhoHelper, solutionCoefficients);
-      DMatrixRMaj contactForceMatrix = mpc.contactPlaneHelperPool.get(0).get(0).getContactWrenchCoefficientMatrix();
+      DMatrixRMaj contactForceMatrix = mpc.getContactPlanes().get(0).get(0).getContactWrenchCoefficientMatrix();
 
       EjmlUnitTests.assertEquals(expectedContactForceMatrix, contactForceMatrix, epsilon);
 

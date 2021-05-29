@@ -30,6 +30,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 public class SE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
@@ -80,6 +81,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
    private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
 
+   private final IntUnaryOperator firstVariableIndex;
+
    public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
                                        double gravityZ,
                                        double nominalCoMHeight,
@@ -110,6 +113,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
 
+      firstVariableIndex = indexHandler::getOrientationStartIndex;
+
       orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
       orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
       initialOrientationWeight.set(defaultInitialOrientationWeight);
@@ -128,7 +133,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.momentOfInertia = momentOfInertia;
 
       qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
-      qpSolver.setMaxNumberOfIterations(1000);
+      qpSolver.setMaxNumberOfIterations(10);
 
       qpSolver.setFirstOrientationVariableRegularization(1e-10);
       qpSolver.setSecondOrientationVariableRegularization(1e-10);
@@ -194,7 +199,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
                                                momentOfInertia,
                                                linearTrajectoryHandler,
                                                orientationTrajectoryHandler,
-                                               contactPlaneHelperPool);
+                                               contactHandler.getContactPlanes());
 
       int numberOfSegments = indexHandler.getNumberOfSegments();
       for (int i = 0; i < numberOfSegments; i++)
@@ -292,11 +297,25 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       qpSolver.initialize();
       qpSolver.submitMPCCommandList(mpcCommands);
+
+      qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
+      if (useWarmStart.getBooleanValue())
+      {
+         assembleActiveSet(firstVariableIndex);
+         qpSolver.setPreviousSolution(previousSolution);
+         qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
+         qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
+         qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
+      }
+
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");
+         extractNewActiveSetData(false, qpSolver, firstVariableIndex);
          return null;
       }
+
+      extractNewActiveSetData(true, qpSolver, firstVariableIndex);
 
       return qpSolver.getSolution();
    }
@@ -395,7 +414,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    public void computeTorque(double time, FixedFrameVector3DBasics torqueToPack)
    {
-      List<MPCContactPlane> contactPlanes = contactPlaneHelperPool.get(0);
+      List<MPCContactPlane> contactPlanes = contactHandler.getContactPlanesForSegment(0);
       linearTrajectoryHandler.compute(time);
 
       torqueToPack.setToZero();
