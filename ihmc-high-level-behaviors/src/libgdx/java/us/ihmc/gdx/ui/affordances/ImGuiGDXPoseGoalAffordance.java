@@ -235,4 +235,9 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    {
       this.latestRegions = latestRegions;
    }
+
+   public Pose3D getGoalPose()
+   {
+      return goalPose;
+   }
 }
