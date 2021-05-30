@@ -10,6 +10,7 @@ public abstract class BehaviorTreeControlFlowNode extends BehaviorTreeNode imple
    private final ArrayList<BehaviorTreeNodeBasics> children = new ArrayList<>();
    private boolean hasBeenClocked = false;
 
+   @Override
    public ArrayList<BehaviorTreeNodeBasics> getChildren()
    {
       return children;
@@ -23,24 +24,14 @@ public abstract class BehaviorTreeControlFlowNode extends BehaviorTreeNode imple
    }
 
    @Override
-   public void clock()
+   public boolean getHasBeenClocked()
    {
-      hasBeenClocked = true;
-      for (BehaviorTreeNodeBasics child : getChildren())
-      {
-         child.clock();
-      }
+      return hasBeenClocked;
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public void setHasBeenClocked(boolean hasBeenClocked)
    {
-      if (!hasBeenClocked)
-      {
-         clock();
-      }
-      hasBeenClocked = false;
-
-      return null;
+      this.hasBeenClocked = hasBeenClocked;
    }
 }

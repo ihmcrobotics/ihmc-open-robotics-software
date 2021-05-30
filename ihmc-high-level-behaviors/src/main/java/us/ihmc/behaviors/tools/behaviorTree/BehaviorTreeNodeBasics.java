@@ -19,7 +19,26 @@ public interface BehaviorTreeNodeBasics
 
    }
 
-   public abstract BehaviorTreeNodeStatus tick();
+   public default BehaviorTreeNodeStatus tick()
+   {
+      setPreviousStatus(tickInternal());
+      setLastTickMillis(System.currentTimeMillis());
+      return getPreviousStatus();
+   }
+
+   public abstract BehaviorTreeNodeStatus tickInternal();
+
+   public abstract BehaviorTreeNodeStatus getPreviousStatus();
+
+   public abstract void setPreviousStatus(BehaviorTreeNodeStatus status);
+
+   public abstract long getLastTickMillis();
+
+   public abstract void setLastTickMillis(long lastTickMillis);
+
+   public abstract String getName();
+
+   public abstract void setName(String name);
 
    public static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
    {

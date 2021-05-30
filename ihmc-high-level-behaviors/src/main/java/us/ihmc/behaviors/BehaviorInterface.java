@@ -1,9 +1,9 @@
 package us.ihmc.behaviors;
 
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public abstract class BehaviorInterface extends BehaviorTreeNode
+public abstract class BehaviorInterface extends BehaviorTreeControlFlowNode
 {
 //   private final BehaviorHelper helper;
 //

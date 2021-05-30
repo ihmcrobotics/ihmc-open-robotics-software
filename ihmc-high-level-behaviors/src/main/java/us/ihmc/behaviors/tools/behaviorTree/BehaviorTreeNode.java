@@ -5,27 +5,43 @@ package us.ihmc.behaviors.tools.behaviorTree;
  */
 public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
 {
-   private BehaviorTreeNodeStatus status = null;
-   private long time = -1;
-
-   protected abstract BehaviorTreeNodeStatus tickInternal();
+   private BehaviorTreeNodeStatus previousStatus = null;
+   private long lastTickMillis = -1;
+   private String name;
 
    @Override
-   public final BehaviorTreeNodeStatus tick() {
-      status = tickInternal();
-      time = System.currentTimeMillis();
-      return status;
+   public BehaviorTreeNodeStatus getPreviousStatus()
+   {
+      return previousStatus;
    }
 
-   public BehaviorTreeNodeStatus getPreviousStatus() {
-      return status;
+   @Override
+   public void setPreviousStatus(BehaviorTreeNodeStatus previousStatus)
+   {
+      this.previousStatus = previousStatus;
    }
 
-   public long lastTickMillis() {
-      return time;
+   @Override
+   public long getLastTickMillis()
+   {
+      return lastTickMillis;
    }
 
-   public String getName() {
-      return null;
+   @Override
+   public String getName()
+   {
+      return name;
+   }
+
+   @Override
+   public void setName(String name)
+   {
+      this.name = name;
+   }
+
+   @Override
+   public void setLastTickMillis(long lastTickMillis)
+   {
+      this.lastTickMillis = lastTickMillis;
    }
 }
