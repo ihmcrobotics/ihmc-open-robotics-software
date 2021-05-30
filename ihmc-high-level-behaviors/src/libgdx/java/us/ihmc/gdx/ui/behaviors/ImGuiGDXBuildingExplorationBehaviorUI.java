@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import controller_msgs.msg.dds.FootstepDataListMessage;
 import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
@@ -12,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiPlot;
@@ -21,7 +19,6 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
-import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 
@@ -31,7 +28,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
                                                                                         ImGuiGDXBuildingExplorationBehaviorUI::new);
 
    private final BehaviorHelper helper;
-   private final GDXFootstepPlanGraphic controllerFootsteps = new GDXFootstepPlanGraphic();
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
@@ -56,11 +52,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       {
          stateNames[i] = StringUtils.capitalize(BuildingExplorationStateName.values[i].name().toLowerCase().replaceAll("_", " "));
       }
-
-      helper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
-      {
-         controllerFootsteps.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
-      });
 
       lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(helper);
       traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
@@ -123,14 +114,11 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       {
          lookAndStepUI.render();
       }
-
-      controllerFootsteps.render();
    }
 
    @Override
    public void destroy()
    {
-      controllerFootsteps.destroy();
       lookAndStepUI.destroy();
    }
 
@@ -138,7 +126,6 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       goalAffordance.getRenderables(renderables, pool);
-      controllerFootsteps.getRenderables(renderables, pool);
       lookAndStepUI.getRenderables(renderables, pool);
       door.getRealisticModelInstance().getRenderables(renderables, pool);
    }

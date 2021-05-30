@@ -1,11 +1,16 @@
 package us.ihmc.gdx.ui;
 
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.MessageTools;
@@ -14,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
+import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
@@ -23,7 +29,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
-public class ImGuiGDXDirectControlPanel
+public class ImGuiGDXDirectControlPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Direct Control";
    private static final double MIN_PELVIS_HEIGHT = 0.52;
@@ -35,16 +41,14 @@ public class ImGuiGDXDirectControlPanel
    private static final double SLIDER_RANGE = 100.0;
    private static final double ROBOT_DATA_EXPIRATION = 1.0;
    private final CommunicationHelper communicationHelper;
-
    private final ThrottledRobotStateCallback throttledRobotStateCallback;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final RemoteSyncedRobotModel syncedRobotForHeightSlider;
    private final RemoteSyncedRobotModel syncedRobotForChestSlider;
-
+   private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final float[] stanceHeightSliderValue = new float[1];
    private final float[] leanForwardSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
-
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
    private final OneDoFJointBasics neckJoint;
@@ -102,6 +106,12 @@ public class ImGuiGDXDirectControlPanel
             double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
             neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
          }
+      });
+
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
+      {
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
       });
    }
 
@@ -225,6 +235,8 @@ public class ImGuiGDXDirectControlPanel
       }
 
       ImGui.end();
+
+      footstepPlanGraphic.render();
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -235,6 +247,12 @@ public class ImGuiGDXDirectControlPanel
       return currentValue != previousValue;
    }
 
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      footstepPlanGraphic.getRenderables(renderables, pool);
+   }
+
    private void sendPSIRequest()
    {
       robotLowLevelMessenger.setHydraulicPumpPSI(Integer.parseInt(psiValues[pumpPSI.get()]));
@@ -242,6 +260,7 @@ public class ImGuiGDXDirectControlPanel
 
    public void destroy()
    {
+      footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
    }
 
