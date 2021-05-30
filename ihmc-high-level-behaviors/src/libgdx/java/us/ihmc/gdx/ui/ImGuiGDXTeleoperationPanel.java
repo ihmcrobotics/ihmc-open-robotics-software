@@ -29,7 +29,7 @@ import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
-public class ImGuiGDXDirectControlPanel implements RenderableProvider
+public class ImGuiGDXTeleoperationPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Direct Control";
    private static final double MIN_PELVIS_HEIGHT = 0.52;
@@ -55,7 +55,7 @@ public class ImGuiGDXDirectControlPanel implements RenderableProvider
    private double neckJointJointLimitLower;
    private double neckJointRange;
 
-   public ImGuiGDXDirectControlPanel(CommunicationHelper communicationHelper)
+   public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
       String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
