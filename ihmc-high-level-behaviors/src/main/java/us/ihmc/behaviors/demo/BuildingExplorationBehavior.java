@@ -7,9 +7,7 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -17,14 +15,10 @@ import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -33,7 +27,6 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlM
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
@@ -41,14 +34,11 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -84,8 +74,8 @@ public class BuildingExplorationBehavior extends BehaviorInterface
    private Consumer<BuildingExplorationStateName> stateChangedCallback = state -> {};
    private Runnable doorDetectedCallback = () -> {};
 
-   private final TeleopState teleopState;
-   private final LookAndStepState lookAndStepState;
+   private final BuildingExplorationBehaviorTeleopState teleopState;
+   private final BuildingExplorationBehaviorLookAndStepState lookAndStepState;
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
    private final AtomicReference<Pose3D> goal;
@@ -97,8 +87,8 @@ public class BuildingExplorationBehavior extends BehaviorInterface
       executorService = Executors.newSingleThreadScheduledExecutor();
       goal = helper.subscribeViaReference(Goal, new Pose3D());
       lookAndStepBehavior = new LookAndStepBehavior(helper);
-      teleopState = new TeleopState(helper);
-      lookAndStepState = new LookAndStepState(helper, bombPose);
+      teleopState = new BuildingExplorationBehaviorTeleopState(helper);
+      lookAndStepState = new BuildingExplorationBehaviorLookAndStepState(this, helper, bombPose);
       walkThroughDoorState = new WalkThroughDoorState(helper);
       traverseStairsState = new TraverseStairsState(helper, bombPose);
 
@@ -177,7 +167,7 @@ public class BuildingExplorationBehavior extends BehaviorInterface
 
    public void setDebrisDetectedCallback(Runnable debrisDetectedCallback)
    {
-      lookAndStepState.debrisDetectedCallback = debrisDetectedCallback;
+      lookAndStepState.setDebrisDetectedCallback(debrisDetectedCallback);
    }
 
    public void setDoorDetectedCallback(Runnable doorDetectedCallback)
@@ -187,7 +177,7 @@ public class BuildingExplorationBehavior extends BehaviorInterface
 
    public void setStairsDetectedCallback(Runnable stairsDetectedCallback)
    {
-      lookAndStepState.stairsDetectedCallback = stairsDetectedCallback;
+      lookAndStepState.setStairsDetectedCallback(stairsDetectedCallback);
    }
 
    public void ignoreDebris()
@@ -291,58 +281,6 @@ public class BuildingExplorationBehavior extends BehaviorInterface
       }
    }
 
-   private static class TeleopState implements State
-   {
-      private final BehaviorHelper helper;
-
-      public TeleopState(BehaviorHelper helper)
-      {
-         this.helper = helper;
-      }
-
-      @Override
-      public void onEntry()
-      {
-         // do nothing, this is an idle state where the operator sends commands from the VR UI
-         LogTools.info("Entering " + getClass().getSimpleName());
-      }
-
-      @Override
-      public void doAction(double timeInState)
-      {
-         // do nothing
-      }
-
-      @Override
-      public void onExit(double timeInState)
-      {
-         LogTools.info("Exiting " + getClass().getSimpleName());
-
-         double trajectoryTime = 3.5;
-         GoHomeMessage homeLeftArm = new GoHomeMessage();
-         homeLeftArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeLeftArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_LEFT);
-         homeLeftArm.setTrajectoryTime(trajectoryTime);
-         helper.publishToController(homeLeftArm);
-
-         GoHomeMessage homeRightArm = new GoHomeMessage();
-         homeRightArm.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_ARM);
-         homeRightArm.setRobotSide(GoHomeMessage.ROBOT_SIDE_RIGHT);
-         homeRightArm.setTrajectoryTime(trajectoryTime);
-         helper.publishToController(homeRightArm);
-
-         GoHomeMessage homePelvis = new GoHomeMessage();
-         homePelvis.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_PELVIS);
-         homePelvis.setTrajectoryTime(trajectoryTime);
-         helper.publishToController(homePelvis);
-
-         GoHomeMessage homeChest = new GoHomeMessage();
-         homeChest.setHumanoidBodyPart(GoHomeMessage.HUMANOID_BODY_PART_CHEST);
-         homeChest.setTrajectoryTime(trajectoryTime);
-         helper.publishToController(homeChest);
-      }
-   }
-
    private boolean transitionToWalkThroughDoor(double timeInState)
    {
       DoorLocationPacket doorLocationPacket = this.doorLocationPacket.get();
@@ -366,221 +304,7 @@ public class BuildingExplorationBehavior extends BehaviorInterface
       return doorDetected;
    }
 
-   private class LookAndStepState implements State
-   {
-      private static final double horizonFromDebrisToStop = 0.8;
-      private static final double horizonForStairs = 1.0;
-      private static final double heightIncreaseForStairs = 0.55;
-
-      private static final double debrisCheckBodyBoxWidth = 0.3;
-      private static final double debrisCheckBodyBoxDepth = 0.8;
-      private static final double debrisCheckBodyBoxHeight = 1.5;
-      private static final double debrisCheckBodyBoxBaseZ = 0.5;
-      private static final int numberOfStepsToIgnoreDebrisAfterClearing = 4;
-
-      private final BehaviorHelper helper;
-
-      private final Pose3DReadOnly bombPose;
-
-      private final FootstepPlannerParametersBasics footstepPlannerParameters;
-
-      private final AtomicReference<List<Pose3D>> bodyPath;
-      private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
-      private final AtomicReference<RobotConfigurationData> robotConfigurationData = new AtomicReference<>();
-
-      private final AtomicBoolean debrisDetected = new AtomicBoolean();
-      private final AtomicBoolean stairsDetected = new AtomicBoolean();
-
-      private final AtomicInteger stepCounter = new AtomicInteger();
-      private final RemoteSyncedRobotModel syncedRobot;
-      private int numberOfStepsToIgnoreDebris = 0;
-
-      private Runnable debrisDetectedCallback = () -> {};
-      private Runnable stairsDetectedCallback = () -> {};
-
-      private LookAndStepBehavior.State currentState = LookAndStepBehavior.State.RESET;
-
-      boolean lookAndStepStarted = false;
-
-      public LookAndStepState(BehaviorHelper helper, Pose3DReadOnly bombPose)
-      {
-         this.helper = helper;
-         this.bombPose = bombPose;
-         String robotName = helper.getRobotModel().getSimpleRobotName();
-
-         this.footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-         this.footstepPlannerParameters.setBodyBoxDepth(debrisCheckBodyBoxWidth);
-         this.footstepPlannerParameters.setBodyBoxWidth(debrisCheckBodyBoxDepth);
-         this.footstepPlannerParameters.setBodyBoxHeight(debrisCheckBodyBoxHeight);
-         this.footstepPlannerParameters.setBodyBoxBaseZ(debrisCheckBodyBoxBaseZ);
-
-         syncedRobot = helper.newSyncedRobot();
-
-         bodyPath = helper.subscribeViaReference(LookAndStepBehaviorAPI.BodyPathPlanForUI, new ArrayList<>());
-         helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
-         helper.subscribeToRobotConfigurationDataViaCallback(robotConfigurationData::set);
-         helper.subscribeToControllerViaCallback(FootstepStatusMessage.class, footstepStatusMessage ->
-         {
-            if (footstepStatusMessage.getFootstepStatus() == FootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED)
-            {
-               stepCounter.incrementAndGet();
-            }
-         });
-         helper.subscribeViaCallback(LookAndStepBehaviorAPI.CurrentState, state ->
-         {
-            currentState = LookAndStepBehavior.State.valueOf(state);
-         });
-      }
-
-      @Override
-      public void onEntry()
-      {
-         pitchChestToSeeDoor(syncedRobot, helper);
-
-         LogTools.info("Entering " + getClass().getSimpleName());
-
-         planarRegions.set(null);
-         bodyPath.set(null);
-         debrisDetected.set(false);
-         stairsDetected.set(false);
-         stepCounter.set(0);
-         lookAndStepStarted = false;
-
-         helper.publish(LookAndStepBehaviorAPI.RESET);
-
-         LogTools.info("Enabling look and step behavior");
-         lookAndStepBehavior.setEnabled(true);
-         ThreadTools.sleep(100);
-
-         if (!currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
-         {
-            LogTools.info("Waiting for BODY_PATH_PLANNING state...");
-         }
-      }
-
-      @Override
-      public void doAction(double timeInState)
-      {
-         if (!lookAndStepStarted && currentState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
-         {
-            lookAndStepStarted = true;
-            LogTools.info("Look and step is in BODY_PATH_PLANNING state. Proceeding...");
-
-            boolean operatorReviewEnabled = false;
-            LogTools.info("Sending operator review enabled: {}", operatorReviewEnabled);
-            helper.publish(LookAndStepBehaviorAPI.OperatorReviewEnabled, operatorReviewEnabled);
-            ThreadTools.sleep(100);
-
-            LogTools.info("Publishing goal pose: {}", bombPose);
-
-            helper.publish(LookAndStepBehaviorAPI.GOAL_INPUT, new Pose3D(bombPose));
-         }
-         else if (!lookAndStepStarted)
-         {
-            return;
-         }
-
-         if (!debrisDetected.get() && (stepCounter.get() > numberOfStepsToIgnoreDebris))
-         {
-            checkForDebris();
-         }
-         if (!stairsDetected.get())
-         {
-            checkForStairs();
-         }
-      }
-
-      private void ignoreDebris()
-      {
-         numberOfStepsToIgnoreDebris = numberOfStepsToIgnoreDebrisAfterClearing;
-      }
-
-      private void checkForDebris()
-      {
-         List<Pose3D> bodyPath = this.bodyPath.get();
-         if (bodyPath == null)
-         {
-            LogTools.info("No body path received");
-            return;
-         }
-
-         PlanarRegionsListMessage planarRegionsMessage = this.planarRegions.get();
-         if (planarRegionsMessage == null)
-         {
-            LogTools.info("No Lidar regions received");
-            return;
-         }
-
-         RobotConfigurationData robotConfigurationData = this.robotConfigurationData.get();
-         if (robotConfigurationData == null)
-         {
-            LogTools.info("No robot configuration data received");
-            return;
-         }
-
-
-         PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
-         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
-
-         boolean debrisDetected = PlannerTools.doesPathContainBodyCollisions(rootPose, bodyPath, planarRegionsList, footstepPlannerParameters, horizonFromDebrisToStop);
-         if (debrisDetected)
-         {
-            LogTools.debug("Debris detected");
-            this.debrisDetected.set(true);
-            debrisDetectedCallback.run();
-         }
-      }
-
-      private void checkForStairs()
-      {
-         List<Pose3D> bodyPath = this.bodyPath.get();
-         if (bodyPath == null)
-            return;
-
-         RobotConfigurationData robotConfigurationData = this.robotConfigurationData.get();
-         if (robotConfigurationData == null)
-            return;
-
-         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
-         Pose3D currentPoseAlongBodyPath = new Pose3D();
-         Pose3D extrapolatedPoseAlongBodyPath = new Pose3D();
-
-         PlannerTools.extrapolatePose(rootPose, bodyPath, 0.0, currentPoseAlongBodyPath);
-         PlannerTools.extrapolatePose(rootPose, bodyPath, horizonForStairs, extrapolatedPoseAlongBodyPath);
-
-         boolean stairsDetected = Math.abs(currentPoseAlongBodyPath.getZ() - extrapolatedPoseAlongBodyPath.getZ()) >= heightIncreaseForStairs;
-         if (stairsDetected)
-         {
-            LogTools.debug("Stairs detected");
-            this.stairsDetected.set(true);
-            stairsDetectedCallback.run();
-         }
-      }
-
-      boolean getDebrisDetected()
-      {
-         return debrisDetected.get();
-      }
-
-      boolean getStairsDetected()
-      {
-         return stairsDetected.get();
-      }
-
-      @Override
-      public void onExit(double timeInState)
-      {
-         LogTools.info("Exiting " + getClass().getSimpleName());
-
-         lookAndStepBehavior.setEnabled(false);
-
-         lookAndStepStarted = false;
-         numberOfStepsToIgnoreDebris = 0;
-         helper.publish(LookAndStepBehaviorAPI.RESET);
-      }
-   }
-
-   private static void pitchChestToSeeDoor(RemoteSyncedRobotModel syncedRobot, BehaviorHelper helper)
+   public static void pitchChestToSeeDoor(RemoteSyncedRobotModel syncedRobot, BehaviorHelper helper)
    {
       syncedRobot.update();
 
@@ -727,5 +451,10 @@ public class BuildingExplorationBehavior extends BehaviorInterface
       {
          return isDone.get();
       }
+   }
+
+   public LookAndStepBehavior getLookAndStepBehavior()
+   {
+      return lookAndStepBehavior;
    }
 }

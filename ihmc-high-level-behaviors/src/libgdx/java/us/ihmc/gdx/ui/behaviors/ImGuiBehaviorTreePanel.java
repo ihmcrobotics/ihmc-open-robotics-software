@@ -53,7 +53,7 @@ public class ImGuiBehaviorTreePanel
       long timeSinceLastTick = -1;
 
       if (node instanceof BehaviorTreeNode) {
-         timeSinceLastTick = System.currentTimeMillis() - ((BehaviorTreeNode) node).lastTickMillis();
+         timeSinceLastTick = System.currentTimeMillis() - ((BehaviorTreeNode) node).getLastTickMillis();
          boolean isTickRecent = timeSinceLastTick < 5000;
 
          if (((BehaviorTreeNode) node).getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)

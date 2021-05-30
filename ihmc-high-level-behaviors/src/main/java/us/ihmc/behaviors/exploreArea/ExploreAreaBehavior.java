@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.exploreArea;
 
-import us.ihmc.behaviors.FallbackNodeBehaviorInterface;
+import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -25,7 +25,7 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehav
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
-public class ExploreAreaBehavior extends FallbackNodeBehaviorInterface
+public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNodeBasics
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area",
                                                                               ExploreAreaBehavior::new,
