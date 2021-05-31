@@ -145,10 +145,10 @@ public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNo
          }
 
          @Override
-         public void doAction()
+         public BehaviorTreeNodeStatus doAction()
          {
             if (noWhereToExploreSupplier.get())
-               return;
+               return SUCCESS; // return failure?
 
             helper.publish(CurrentState, LookAndStep);
 
@@ -164,6 +164,7 @@ public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNo
             helper.publish(LookAndStepBehaviorAPI.BodyPathInput, bestBodyPath.stream().map(Pose3D::new).collect(Collectors.toList()));
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();
+            return SUCCESS;
          }
       }
    }
