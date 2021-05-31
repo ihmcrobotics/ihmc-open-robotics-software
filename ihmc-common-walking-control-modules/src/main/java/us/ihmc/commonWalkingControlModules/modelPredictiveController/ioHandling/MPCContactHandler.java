@@ -20,7 +20,6 @@ public class MPCContactHandler
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
    private static final double mu = 0.8;
 
-   private final double maxContactForce;
    private final double mass;
    private final double gravityZ;
 
@@ -41,8 +40,6 @@ public class MPCContactHandler
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
-
-      this.maxContactForce = 2.0 * Math.abs(gravityZ);
    }
 
 
@@ -88,7 +85,6 @@ public class MPCContactHandler
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
             MPCContactPlane contactPlane = contactPlanes.get(contactId);
-            contactPlane.setMaxNormalForce(maxContactForce);
             contactPlane.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
             contactPlane.computeAccelerationIntegrationMatrix(duration, omega, objectiveForce);
          }
