@@ -9,6 +9,8 @@ import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.behaviors.tools.YoVariableClientHelper;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -21,25 +23,28 @@ import us.ihmc.ros2.ROS2Node;
 
 import java.time.LocalDateTime;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
+import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
 import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
 public class GDXBehaviorsPanel
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
+   private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus;
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
    private volatile boolean yoClientDisconnecting = false;
    private volatile boolean yoClientConnecting = false;
    private final YoVariableClientHelper yoVariableClientHelper;
-
    private final GDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<String> logArray = new LinkedList<>();
    private final ImInt selectedLogEntry = new ImInt();
+   private final ImGuiBehaviorTreePanel behaviorTreePanel = new ImGuiBehaviorTreePanel("Behavior Tree");
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -59,6 +64,7 @@ public class GDXBehaviorsPanel
             logArray.addLast(logEntry.getRight());
          }
       });
+      behaviorTreeStatus = behaviorHelper.subscribeViaReference(BehaviorTreeStatus, new FallbackNode());
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -170,6 +176,8 @@ public class GDXBehaviorsPanel
       ImGui.popItemWidth();
 
       ImGui.end();
+
+      behaviorTreePanel.renderAsWindow(behaviorTreeStatus.get());
    }
 
    public void connectViaKryo(String hostname)

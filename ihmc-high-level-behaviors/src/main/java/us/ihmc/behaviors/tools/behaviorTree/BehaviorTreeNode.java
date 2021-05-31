@@ -7,7 +7,7 @@ public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
 {
    private BehaviorTreeNodeStatus previousStatus = null;
    private long lastTickMillis = -1;
-   private String name;
+   private String name = getClass().getSimpleName();
 
    @Override
    public BehaviorTreeNodeStatus getPreviousStatus()

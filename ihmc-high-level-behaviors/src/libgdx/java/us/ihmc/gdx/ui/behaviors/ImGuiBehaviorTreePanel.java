@@ -13,26 +13,24 @@ import java.util.ArrayList;
 public class ImGuiBehaviorTreePanel
 {
    private final String windowName;
-   private final BehaviorTreeControlFlowNodeBasics tree;
 
    private int nodeIndex = 0;
    private int pinIndex = 0;
    private int linkIndex = 0;
 
-   public ImGuiBehaviorTreePanel(BehaviorTreeControlFlowNodeBasics tree, String name)
+   public ImGuiBehaviorTreePanel(String name)
    {
       windowName = ImGuiTools.uniqueLabel(getClass(), name + " tree");
-      this.tree = tree;
    }
 
-   public void renderAsWindow()
+   public void renderAsWindow(BehaviorTreeControlFlowNodeBasics tree)
    {
       ImGui.begin(windowName);
-      renderWidgetsOnly();
+      renderWidgetsOnly(tree);
       ImGui.end();
    }
 
-   public void renderWidgetsOnly()
+   public void renderWidgetsOnly(BehaviorTreeControlFlowNodeBasics tree)
    {
       ImNodes.beginNodeEditor();
       nodeIndex = 0;

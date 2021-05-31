@@ -5,9 +5,7 @@ import org.apache.commons.lang3.tuple.MutablePair;
 
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNode;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
+import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -60,6 +58,7 @@ public class BehaviorModule
    private StatusLogger statusLogger;
    private final FallbackNode rootNode = new FallbackNode();
    private BehaviorInterface highestLevelNode;
+   private PausablePeriodicThread behaviorTreeTickThread;
 
    public static BehaviorModule createInterprocess(BehaviorRegistry behaviorRegistry, DRCRobotModel robotModel)
    {
@@ -142,6 +141,13 @@ public class BehaviorModule
       highestLevelNode.setEnabled(true);
       rootNode.addChild(highestLevelNode);
 
+      behaviorTreeTickThread = new PausablePeriodicThread("BehaviorTree", UnitConversions.hertzToSeconds(5.0), () ->
+      {
+         rootNode.tick();
+         helper.publish(API.BehaviorTreeStatus, new BehaviorTreeStatus(rootNode));
+      });
+      behaviorTreeTickThread.start();
+
       new IHMCROS2Callback<>(ros2Node, API.SHUTDOWN, message ->
       {
          statusLogger.info("Received SHUTDOWN. Shutting down...");
@@ -189,6 +195,7 @@ public class BehaviorModule
    public void destroy()
    {
       statusLogger.info("Shutting down...");
+      behaviorTreeTickThread.destroy();
       yoVariableServer.close();
       if (manageROS2Node)
       {
@@ -218,6 +225,7 @@ public class BehaviorModule
 
       public static final MessagerAPIFactory.Topic<String> BehaviorSelection = topic("BehaviorSelection");
       public static final MessagerAPIFactory.Topic<MutablePair<Integer, String>> StatusLog = topic("StatusLog");
+      public static final MessagerAPIFactory.Topic<BehaviorTreeControlFlowNode> BehaviorTreeStatus = topic("BehaviorTreeStatus");
 
       private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
