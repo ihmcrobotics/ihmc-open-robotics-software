@@ -3,8 +3,7 @@ package us.ihmc.behaviors.tools.behaviorTree;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
-import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.RUNNING;
-import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
+import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
 /**
  * A Technique for Parallelism with Behavior Trees
@@ -24,6 +23,7 @@ public abstract class ParallelNodeBasics extends BehaviorTreeNode
 
    private boolean lastWasClock = false;
    private boolean resetRequired = false;
+   private BehaviorTreeNodeStatus finishedStatus;
 
    public ParallelNodeBasics()
    {
@@ -66,7 +66,7 @@ public abstract class ParallelNodeBasics extends BehaviorTreeNode
       }
       else
       {
-         return SUCCESS;
+         return finishedStatus;
       }
    }
 
@@ -78,9 +78,9 @@ public abstract class ParallelNodeBasics extends BehaviorTreeNode
 
    private void doActionInternal()
    {
-      doAction();
+      finishedStatus = doAction();
       isFinished = true;
    }
 
-   public abstract void doAction();
+   public abstract BehaviorTreeNodeStatus doAction();
 }

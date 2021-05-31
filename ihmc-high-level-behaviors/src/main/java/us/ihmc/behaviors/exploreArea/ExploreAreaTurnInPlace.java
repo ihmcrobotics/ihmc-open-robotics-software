@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -56,7 +57,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    }
 
    @Override
-   public void doAction()
+   public BehaviorTreeNodeStatus doAction()
    {
       helper.publish(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
@@ -89,6 +90,8 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
 
       turnInPlace(turnYaw);
       ThreadTools.sleepSeconds(3.0);
+
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    private LatticeCell findNearestHole()

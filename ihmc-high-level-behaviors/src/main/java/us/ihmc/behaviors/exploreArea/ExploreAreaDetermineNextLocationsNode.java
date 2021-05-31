@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -86,7 +87,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    }
 
    @Override
-   public void doAction()
+   public BehaviorTreeNodeStatus doAction()
    {
       helper.publish(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
 
@@ -96,6 +97,8 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
       determineNextPlacesToWalkTo(syncedRobot);
 
 //      exploreAreaMapUI.update();
+
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
