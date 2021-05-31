@@ -4,7 +4,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.StringUtils;
@@ -75,6 +74,19 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    }
 
    @Override
+   public void renderNode(String nodeName)
+   {
+      if (nodeName.equals(DEFINITION.getName()))
+      {
+         render();
+      }
+      else
+      {
+         lookAndStepUI.renderNode(nodeName); // TODO: UIs need children
+      }
+   }
+
+   @Override
    public void render()
    {
       ImGui.text("Building Exploration");
@@ -109,11 +121,11 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       stairsDetectedPlot.render(stairsDetected ? 1.0f : 0.0f);
       doorDetectedPlot.render(doorDetected ? 1.0f : 0.0f);
 
-      int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
-      if (ImGui.collapsingHeader("Look and Step", defaultOpen))
-      {
-         lookAndStepUI.render();
-      }
+//      int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
+//      if (ImGui.collapsingHeader("Look and Step", defaultOpen))
+//      {
+//         lookAndStepUI.render();
+//      }
    }
 
    @Override

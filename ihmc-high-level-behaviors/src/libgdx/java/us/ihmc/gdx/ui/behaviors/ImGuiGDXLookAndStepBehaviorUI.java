@@ -143,6 +143,15 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
+   public void renderNode(String nodeName)
+   {
+      if (nodeName.equals(DEFINITION.getName()))
+      {
+         render();
+      }
+   }
+
+   @Override
    public void render()
    {
       ImGui.text("Current state:");
@@ -198,14 +207,19 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 //         ImGui.checkbox("Show tuner", showLookAndStepParametersTuner);
 //         treePanel.renderWidgetsOnly();
 //      }
-      int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
-      if (ImGui.collapsingHeader("Footstep Planning", defaultOpen))
-      {
-         int flags = ImGuiInputTextFlags.ReadOnly;
+//      ImGui.pushItemWidth(100.0f);
+//      int flags = ImGuiTreeNodeFlags.DefaultOpen;
+//      flags += ImGuiTreeNodeFlags.FramePadding;
+//      if (ImGui.collapsingHeader("Footstep Planning", flags))
+//      {
+//      ImGui.separator();
+      ImGui.text("Footstep planning:");
          latestFootstepPlannerLogPath.set(latestFootstepPlannerLogPath.get().replace(System.getProperty("user.home"), "~"));
-         ImGui.pushItemWidth(ImGui.getWindowWidth() - 3);
+//         ImGui.pushItemWidth(ImGui.getWindowWidth() - 3);
+         ImGui.pushItemWidth(340.0f);
          ImGui.text("Latest log:");
-         ImGui.inputText("", latestFootstepPlannerLogPath, flags);
+         int flags2 = ImGuiInputTextFlags.ReadOnly;
+         ImGui.inputText("", latestFootstepPlannerLogPath, flags2);
          ImGui.popItemWidth();
 //         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
@@ -215,7 +229,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
             ImGui.text(latestFootstepPlannerRejectionReason.getRight() + "%: "
                        + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReason.getLeft()].name());
          }
-      }
+//         ImGui.separator();
+//      }
+//      ImGui.popItemWidth();
 //      if (ImGui.collapsingHeader("Swing Planning"))
 //      {
 //         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);

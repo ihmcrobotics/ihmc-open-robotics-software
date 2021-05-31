@@ -9,6 +9,7 @@ import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.imgui.ImGuiTools;
 
 import java.util.ArrayList;
+import java.util.function.Consumer;
 
 public class ImGuiBehaviorTreePanel
 {
@@ -23,19 +24,19 @@ public class ImGuiBehaviorTreePanel
       windowName = ImGuiTools.uniqueLabel(getClass(), name + " tree");
    }
 
-   public void renderAsWindow(BehaviorTreeControlFlowNodeBasics tree)
+   public void renderAsWindow(BehaviorTreeControlFlowNodeBasics tree, Consumer<String> nodeRenderer)
    {
       ImGui.begin(windowName);
-      renderWidgetsOnly(tree);
+      renderWidgetsOnly(tree, nodeRenderer);
       ImGui.end();
    }
 
-   public void renderWidgetsOnly(BehaviorTreeControlFlowNodeBasics tree)
+   public void renderWidgetsOnly(BehaviorTreeControlFlowNodeBasics tree, Consumer<String> nodeRenderer)
    {
       ImNodes.beginNodeEditor();
       nodeIndex = 0;
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
-      renderNodeAndChildren(tree, -1, links);
+      renderNodeAndChildren(tree, nodeRenderer, -1, links);
       renderLinks(links);
 
       ImNodes.endNodeEditor();
@@ -47,7 +48,7 @@ public class ImGuiBehaviorTreePanel
       }
    }
 
-   private void renderNodeAndChildren(BehaviorTreeNodeBasics node, int parentPin, ArrayList<Pair<Integer, Integer>> links) {
+   private void renderNodeAndChildren(BehaviorTreeNodeBasics node, Consumer<String> nodeRenderer, int parentPin, ArrayList<Pair<Integer, Integer>> links) {
       long timeSinceLastTick = -1;
 
       if (node instanceof BehaviorTreeNode) {
@@ -87,7 +88,9 @@ public class ImGuiBehaviorTreePanel
             ImGui.textColored(0xFFFFFFFF,"Not yet ticked.");
       }
 
-      ImGui.dummy(120f, 20f);
+      nodeRenderer.accept(name);
+
+//      ImGui.dummy(120f, 20f);
 
       if (parentPin != -1) {
          ImNodes.beginInputAttribute(pinIndex);
@@ -114,7 +117,7 @@ public class ImGuiBehaviorTreePanel
       if (node instanceof BehaviorTreeControlFlowNode)
       {
          for (BehaviorTreeNodeBasics child : ((BehaviorTreeControlFlowNode) node).getChildren())
-            renderNodeAndChildren(child, nodePinIndex++, links);
+            renderNodeAndChildren(child, nodeRenderer, nodePinIndex++, links);
       }
 
    }

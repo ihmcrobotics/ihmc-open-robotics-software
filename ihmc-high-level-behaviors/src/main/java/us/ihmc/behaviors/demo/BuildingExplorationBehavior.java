@@ -93,6 +93,8 @@ public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode imp
       walkThroughDoorState = new WalkThroughDoorState(helper);
       traverseStairsState = new TraverseStairsState(helper, bombPose);
 
+      addChild(lookAndStepBehavior);
+
       helper.subscribeViaCallback(RequestedState, this::requestState);
       AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
 
@@ -149,6 +151,12 @@ public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode imp
       helper.setCommunicationCallbacksEnabled(enabled);
       if (!enabled)
          lookAndStepBehavior.setEnabled(false);
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
    }
 
    public void setBombPose(Pose3DReadOnly bombPose)

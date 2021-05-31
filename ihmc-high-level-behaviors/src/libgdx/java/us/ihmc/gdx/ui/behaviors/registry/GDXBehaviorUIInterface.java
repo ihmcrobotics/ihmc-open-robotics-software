@@ -19,6 +19,8 @@ public abstract class GDXBehaviorUIInterface implements RenderableProvider
 
    }
 
+   public abstract void renderNode(String nodeName);
+
    public abstract void render();
 
    public abstract void destroy();

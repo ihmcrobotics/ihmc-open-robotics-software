@@ -217,4 +217,10 @@ public class LookAndStepBehavior extends AsynchronousActionNode implements Behav
    {
       return yoRegistry;
    }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
+   }
 }

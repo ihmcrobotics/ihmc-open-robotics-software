@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
-import imgui.type.ImInt;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
@@ -14,6 +13,7 @@ import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.behaviors.tools.YoVariableClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -46,7 +46,6 @@ public class GDXBehaviorsPanel
    private final GDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
-   private final ImInt selectedLogEntry = new ImInt();
    private final ImGuiBehaviorTreePanel behaviorTreePanel = new ImGuiBehaviorTreePanel("Behavior Tree");
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
@@ -59,16 +58,19 @@ public class GDXBehaviorsPanel
       yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
 
-      logArray.addLast(Pair.of(Level.ERROR.intLevel(), "Log started at " + LocalDateTime.now()));
-      logArray.addLast(Pair.of(Level.WARN.intLevel(), "Log started at " + LocalDateTime.now()));
       logArray.addLast(Pair.of(Level.INFO.intLevel(), "Log started at " + LocalDateTime.now()));
-      logArray.addLast(Pair.of(Level.DEBUG.intLevel(), "Log started at " + LocalDateTime.now()));
-      logArray.addLast(Pair.of(Level.TRACE.intLevel(), "Log started at " + LocalDateTime.now()));
       behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
       {
          synchronized (logArray)
          {
             logArray.addLast(logEntry);
+         }
+      });
+      behaviorHelper.subscribeViaCallback(ROS2Tools.TEXT_STATUS, textStatus ->
+      {
+         synchronized (logArray)
+         {
+            logArray.addLast(Pair.of(Level.INFO.intLevel(), textStatus.getTextToSpeakAsString()));
          }
       });
       behaviorTreeStatus = behaviorHelper.subscribeViaReference(BehaviorTreeStatus, new FallbackNode());
@@ -167,15 +169,14 @@ public class GDXBehaviorsPanel
 
       if (messagerHelper.isConnected())
       {
-         highestLevelUI.render();
+//         highestLevelUI.render();
       }
 
       synchronized (logArray)
       {
-         selectedLogEntry.set(logArray.size() - 1);
          ImGui.text("Behavior status log:");
          ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
-         int numLogEntriesToShow = 15;
+         int numLogEntriesToShow = 20;
          while (logArray.size() > numLogEntriesToShow)
             logArray.removeFirst();
          for (Pair<Integer, String> logEntry : logArray)
@@ -209,7 +210,7 @@ public class GDXBehaviorsPanel
 
       ImGui.end();
 
-      behaviorTreePanel.renderAsWindow(behaviorTreeStatus.get());
+      behaviorTreePanel.renderAsWindow(behaviorTreeStatus.get(), highestLevelUI::renderNode);
    }
 
    public void connectViaKryo(String hostname)
