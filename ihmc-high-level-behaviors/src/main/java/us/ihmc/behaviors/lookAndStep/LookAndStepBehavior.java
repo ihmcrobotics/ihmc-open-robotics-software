@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepBehavior extends BehaviorInterface
+public class LookAndStepBehavior extends AsynchronousActionNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
@@ -177,9 +178,21 @@ public class LookAndStepBehavior extends BehaviorInterface
    }
 
    @Override
-   public BehaviorTreeNodeStatus tickInternal()
+   public void startAction()
    {
-      return BehaviorTreeNodeStatus.SUCCESS;
+
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus doActionInternal()
+   {
+      return null;
+   }
+
+   @Override
+   public void resetInternal()
+   {
+
    }
 
    @Override

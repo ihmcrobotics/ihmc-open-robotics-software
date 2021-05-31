@@ -1,8 +1,8 @@
 package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
-import us.ihmc.behaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.behaviors.tools.behaviorTree.SequenceNode;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -85,7 +85,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       lookLeft.reset();
    }
 
-   class LookInADirection extends ParallelNodeBasics
+   class LookInADirection extends AsynchronousActionNode
    {
       private final double chestYaw;
       private final double headPitch;
@@ -97,7 +97,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
       }
 
       @Override
-      public BehaviorTreeNodeStatus doAction()
+      public BehaviorTreeNodeStatus doActionInternal()
       {
          ExploreAreaBehaviorState currentState;
          if (chestYaw < 0.0)
@@ -133,6 +133,12 @@ public class ExploreAreaLookAroundNode extends SequenceNode
          doSlam(true);
 
          return BehaviorTreeNodeStatus.SUCCESS;
+      }
+
+      @Override
+      public void resetInternal()
+      {
+
       }
 
       private void turnChestWithRespectToMidFeetZUpFrame(double chestYaw, double trajectoryTime)

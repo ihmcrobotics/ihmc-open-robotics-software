@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.exploreArea;
 
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -16,7 +17,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -31,7 +31,7 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.*;
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.FoundBodyPath;
 
-public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
+public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean useNewGoalDetermination = true;
@@ -87,7 +87,7 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
    }
 
    @Override
-   public BehaviorTreeNodeStatus doAction()
+   public BehaviorTreeNodeStatus doActionInternal()
    {
       helper.publish(CurrentState, ExploreAreaBehaviorState.DetermineNextLocations);
 
@@ -99,6 +99,12 @@ public class ExploreAreaDetermineNextLocationsNode extends ParallelNodeBasics
 //      exploreAreaMapUI.update();
 
       return BehaviorTreeNodeStatus.SUCCESS;
+   }
+
+   @Override
+   public void resetInternal()
+   {
+
    }
 
    private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)

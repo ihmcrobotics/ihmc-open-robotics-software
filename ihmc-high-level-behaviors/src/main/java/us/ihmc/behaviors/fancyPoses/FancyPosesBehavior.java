@@ -5,6 +5,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.Notification;
@@ -34,7 +35,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class FancyPosesBehavior extends BehaviorInterface
+public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new, API.create());
 

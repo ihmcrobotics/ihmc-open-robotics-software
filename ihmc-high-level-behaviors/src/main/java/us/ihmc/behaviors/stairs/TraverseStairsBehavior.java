@@ -2,6 +2,7 @@ package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -25,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.create;
 
-public class TraverseStairsBehavior extends BehaviorInterface
+public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
    private static final int UPDATE_RATE_MILLIS = 100;
