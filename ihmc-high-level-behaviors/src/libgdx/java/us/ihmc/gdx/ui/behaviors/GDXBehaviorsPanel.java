@@ -1,9 +1,12 @@
 package us.ihmc.gdx.ui.behaviors;
 
+import com.badlogic.gdx.graphics.Color;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import imgui.type.ImString;
+import org.apache.commons.lang3.tuple.Pair;
+import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -42,7 +45,7 @@ public class GDXBehaviorsPanel
    private final YoVariableClientHelper yoVariableClientHelper;
    private final GDXBehaviorUIInterface highestLevelUI;
    private final BehaviorHelper behaviorHelper;
-   private final LinkedList<String> logArray = new LinkedList<>();
+   private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
    private final ImInt selectedLogEntry = new ImInt();
    private final ImGuiBehaviorTreePanel behaviorTreePanel = new ImGuiBehaviorTreePanel("Behavior Tree");
 
@@ -56,12 +59,16 @@ public class GDXBehaviorsPanel
       yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
 
-      logArray.addLast("Log started at " + LocalDateTime.now());
+      logArray.addLast(Pair.of(Level.ERROR.intLevel(), "Log started at " + LocalDateTime.now()));
+      logArray.addLast(Pair.of(Level.WARN.intLevel(), "Log started at " + LocalDateTime.now()));
+      logArray.addLast(Pair.of(Level.INFO.intLevel(), "Log started at " + LocalDateTime.now()));
+      logArray.addLast(Pair.of(Level.DEBUG.intLevel(), "Log started at " + LocalDateTime.now()));
+      logArray.addLast(Pair.of(Level.TRACE.intLevel(), "Log started at " + LocalDateTime.now()));
       behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
       {
          synchronized (logArray)
          {
-            logArray.addLast(logEntry.getRight());
+            logArray.addLast(logEntry);
          }
       });
       behaviorTreeStatus = behaviorHelper.subscribeViaReference(BehaviorTreeStatus, new FallbackNode());
@@ -171,7 +178,32 @@ public class GDXBehaviorsPanel
          int numLogEntriesToShow = 15;
          while (logArray.size() > numLogEntriesToShow)
             logArray.removeFirst();
-         ImGui.listBox("", selectedLogEntry, logArray.toArray(new String[0]), numLogEntriesToShow);
+         for (Pair<Integer, String> logEntry : logArray)
+         {
+            Color color = Color.WHITE;
+            float[] hsv = new float[3];
+            switch (logEntry.getLeft())
+            {
+               case 100:
+               case 200:
+                  color = Color.RED;
+                  break;
+               case 300:
+                  Color.YELLOW.toHsv(hsv);
+                  color = color.fromHsv(hsv[0], hsv[1], 0.7f);
+                  break;
+               case 400:
+                  color = Color.BLACK;
+                  break;
+               case 500:
+                  color = Color.CYAN;
+                  break;
+               case 600:
+                  color = Color.GREEN;
+                  break;
+            }
+            ImGui.textColored(color.r, color.g, color.b, 1.0f, logEntry.getRight());
+         }
       }
       ImGui.popItemWidth();
 
