@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
@@ -19,7 +20,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.behaviors.tools.behaviorTree.ParallelNodeBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.CurrentState;
 
-public class ExploreAreaTurnInPlace extends ParallelNodeBasics
+public class ExploreAreaTurnInPlace extends AsynchronousActionNode
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -57,7 +57,7 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
    }
 
    @Override
-   public BehaviorTreeNodeStatus doAction()
+   public BehaviorTreeNodeStatus doActionInternal()
    {
       helper.publish(CurrentState, ExploreAreaBehavior.ExploreAreaBehaviorState.TurnInPlace);
 
@@ -92,6 +92,12 @@ public class ExploreAreaTurnInPlace extends ParallelNodeBasics
       ThreadTools.sleepSeconds(3.0);
 
       return BehaviorTreeNodeStatus.SUCCESS;
+   }
+
+   @Override
+   public void resetInternal()
+   {
+
    }
 
    private LatticeCell findNearestHole()

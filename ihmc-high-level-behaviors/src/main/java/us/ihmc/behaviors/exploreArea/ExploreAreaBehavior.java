@@ -25,7 +25,7 @@ import static us.ihmc.behaviors.exploreArea.ExploreAreaBehavior.ExploreAreaBehav
 import static us.ihmc.behaviors.exploreArea.ExploreAreaBehaviorAPI.*;
 import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
 
-public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNodeBasics
+public class ExploreAreaBehavior extends FallbackNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area",
                                                                               ExploreAreaBehavior::new,
@@ -129,7 +129,7 @@ public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNo
          addChild(new AlwaysSuccessfulAction(lookAround::reset));
       }
 
-      class LookAndStepNode extends ParallelNodeBasics // TODO: Use look and step node directly somehow.
+      class LookAndStepNode extends AsynchronousActionNode // TODO: Use look and step node directly somehow.
       {
          private final Supplier<List<Pose3DReadOnly>> bestBodyPathSupplier;
          private final Supplier<ArrayList<Pose3D>> exploredGoalPosesSoFarSupplier;
@@ -145,7 +145,7 @@ public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNo
          }
 
          @Override
-         public BehaviorTreeNodeStatus doAction()
+         public BehaviorTreeNodeStatus doActionInternal()
          {
             if (noWhereToExploreSupplier.get())
                return SUCCESS; // return failure?
@@ -165,6 +165,12 @@ public class ExploreAreaBehavior extends BehaviorInterface implements FallbackNo
             lookAndStepReachedGoal.poll();
             lookAndStepReachedGoal.blockingPoll();
             return SUCCESS;
+         }
+
+         @Override
+         public void resetInternal()
+         {
+
          }
       }
    }

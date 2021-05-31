@@ -3,6 +3,7 @@ package us.ihmc.behaviors.navigation;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
@@ -60,7 +61,7 @@ import java.util.List;
 import static us.ihmc.behaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
-public class NavigationBehavior extends BehaviorInterface
+public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new, NavigationBehaviorAPI.create());
 

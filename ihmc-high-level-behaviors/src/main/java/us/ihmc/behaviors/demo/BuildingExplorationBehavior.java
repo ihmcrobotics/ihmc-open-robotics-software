@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -45,7 +46,7 @@ import java.util.function.Consumer;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
 
-public class BuildingExplorationBehavior extends BehaviorInterface
+public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
                                                                               BuildingExplorationBehavior::new,

@@ -2,6 +2,7 @@ package us.ihmc.behaviors;
 
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -15,7 +16,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.BehaviorSelection;
 /**
  * Not finished or tested. Mostly to hold old code.
  */
-public class MessagerStringSelectorNode extends BehaviorInterface
+public class MessagerStringSelectorNode extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    private final YoRegistry yoRegistry = new YoRegistry(getClass().getSimpleName());
    private final Map<String, Pair<BehaviorDefinition, BehaviorInterface>> constructedBehaviors = new HashMap<>();

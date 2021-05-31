@@ -1,9 +1,9 @@
 package us.ihmc.behaviors;
 
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNodeBasics;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-public abstract class BehaviorInterface extends BehaviorTreeControlFlowNode
+public interface BehaviorInterface extends BehaviorTreeControlFlowNodeBasics
 {
 //   private final BehaviorHelper helper;
 //
@@ -14,12 +14,12 @@ public abstract class BehaviorInterface extends BehaviorTreeControlFlowNode
 
    public abstract void setEnabled(boolean enabled);
 
-   public YoRegistry getYoRegistry()
+   public default YoRegistry getYoRegistry()
    {
       return null;
    }
 
-   public void destroy()
+   public default void destroy()
    {
       // TODO: Destroy behavior helper
       // helper.destroy();
