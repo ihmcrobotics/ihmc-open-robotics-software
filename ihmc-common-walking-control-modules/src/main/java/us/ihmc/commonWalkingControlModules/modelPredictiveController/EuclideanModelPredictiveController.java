@@ -55,6 +55,7 @@ public abstract class EuclideanModelPredictiveController
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
    private static final double defaultMinRhoValue = 0.0;//05;
+   private final double maxContactForce;
 
    protected final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -142,6 +143,8 @@ public abstract class EuclideanModelPredictiveController
       this.mass = mass;
       this.omega = omega;
       this.indexHandler = indexHandler;
+
+      this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       linearTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
@@ -538,8 +541,6 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
-      valueObjective.setUseScalarObjective(true);
       for (int i = 0; i < numberOfContactPlanes; i++)
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
@@ -558,24 +559,11 @@ public abstract class EuclideanModelPredictiveController
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.LEQ_INEQUALITY);
 
-      int objectiveSize = 0;
       for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
          MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
-         objectiveSize += contactPlane.getRhoSize();
          valueObjective.addContactPlane(contactPlane, maxContactForce);
-      }
-      contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(objectiveSize);
-
-      int rowStart = 0;
-      DMatrixRMaj objectiveVector = valueObjective.getObjectiveVector();
-      objectiveVector.reshape(objectiveSize, 1);
-      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
-      {
-         MPCContactPlane contactPlaneHelper = contactHandler.getContactPlane(segmentNumber, i);
-         MatrixTools.setMatrixBlock(objectiveVector, rowStart, 0, contactPlaneHelper.getRhoMaxMatrix(), 0, 0, contactPlaneHelper.getRhoSize(), 1, 1.0);
-
-         rowStart += contactPlaneHelper.getRhoSize();
+         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
       }
 
       return valueObjective;
