@@ -178,18 +178,19 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Check snapped footstep placement
+      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason;
       if (parameters.getUseStepReachabilityMap())
       {
-         // TODO perform ik-based reachability check
+         poseRejectionReason = reachabilityChecker.checkStepValidity(candidateStep, stanceStep);
       }
       else
       {
-         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = heuristicPoseChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
-         if (poseRejectionReason != null)
-         {
-            rejectionReason.set(poseRejectionReason);
-            return false;
-         }
+         poseRejectionReason = heuristicPoseChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
+      }
+      if (poseRejectionReason != null)
+      {
+         rejectionReason.set(poseRejectionReason);
+         return false;
       }
 
       // Check for obstacle collisions (vertically extruded line between steps)
