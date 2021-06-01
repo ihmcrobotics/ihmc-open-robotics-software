@@ -19,6 +19,7 @@ import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.MultiContactScriptMatcher;
 import us.ihmc.avatar.multiContact.MultiContactScriptPostProcessor;
 import us.ihmc.avatar.multiContact.MultiContactScriptReader;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxControllerTest;
@@ -193,9 +194,9 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    }
 
    public void runRawScriptTest(TestInfo testInfo,
-                                InputStream scriptInputStream,
                                 DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
-                                CommonAvatarEnvironmentInterface environment)
+                                CommonAvatarEnvironmentInterface environment,
+                                InputStream... scriptInputStreams)
          throws Exception
    {
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
@@ -212,26 +213,32 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       YoInteger totalNumberOfFrames = new YoInteger("totalNumberOfFrames", scs.getRootRegistry());
       YoInteger frameIndex = new YoInteger("frameIndex", scs.getRootRegistry());
       scs.setupGraph(totalNumberOfFrames.getFullNameString(), frameIndex.getFullNameString());
-      
-      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
-      assertTrue(scriptReader.hasNext(), "Script is empty");
-      totalNumberOfFrames.set(scriptReader.size());
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-
-      OneDoFJointReadOnly[] allJoints = FullRobotModelUtils.getAllJointsExcludingHands(drcSimulationTestHelper.getControllerFullRobotModel());
-
-      double itemDuration = 1.0;
-
-      while (scriptReader.hasNext())
+      for (InputStream scriptInputStream : scriptInputStreams)
       {
-         KinematicsToolboxSnapshotDescription nextItem = scriptReader.next();
-         frameIndex.increment();
-         WholeBodyJointspaceTrajectoryMessage message = toWholeBodyJointspaceTrajectoryMessage(nextItem.getIkSolution(), allJoints, itemDuration);
-         setSCSRobotConfiguration(nextItem.getIkSolution(), allJoints, ghostRobot);
-         drcSimulationTestHelper.publishToController(message);
-         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(itemDuration + 0.1));
+         MultiContactScriptMatcher scriptMatcher = new MultiContactScriptMatcher(getRobotModel(), drcSimulationTestHelper.getControllerFullRobotModel());
+         MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+         assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
+         assertTrue(scriptReader.hasNext(), "Script is empty");
+         scriptMatcher.computeTransform(scriptReader.getFirst());
+         scriptReader.applyTransform(scriptMatcher.getScriptTransform());
+         totalNumberOfFrames.set(scriptReader.size());
+
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+         OneDoFJointReadOnly[] allJoints = FullRobotModelUtils.getAllJointsExcludingHands(drcSimulationTestHelper.getControllerFullRobotModel());
+
+         double itemDuration = 1.0;
+
+         while (scriptReader.hasNext())
+         {
+            KinematicsToolboxSnapshotDescription nextItem = scriptReader.next();
+            frameIndex.increment();
+            WholeBodyJointspaceTrajectoryMessage message = toWholeBodyJointspaceTrajectoryMessage(nextItem.getIkSolution(), allJoints, itemDuration);
+            setSCSRobotConfiguration(nextItem.getIkSolution(), allJoints, ghostRobot);
+            drcSimulationTestHelper.publishToController(message);
+            assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(itemDuration + 0.1));
+         }
       }
    }
 
@@ -252,24 +259,28 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    }
 
    public void runProcessedScriptTest(TestInfo testInfo,
-                                      InputStream scriptInputStream,
                                       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
-                                      CommonAvatarEnvironmentInterface environment)
+                                      CommonAvatarEnvironmentInterface environment,
+                                      InputStream... scriptInputStreams)
          throws Exception
    {
       createSimulation(testInfo, initialSetup, environment);
-      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
-      assertTrue(scriptReader.hasNext(), "Script is empty");
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
-      WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
+      for (InputStream scriptInputStream : scriptInputStreams)
+      {
+         MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+         assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
+         assertTrue(scriptReader.hasNext(), "Script is empty");
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
-      drcSimulationTestHelper.publishToController(message);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast()
-                                                                                   .getTime()
-            + 2.0));
+         MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
+         WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
+
+         drcSimulationTestHelper.publishToController(message);
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(message.getJointTrajectoryMessages().get(0).getTrajectoryPoints().getLast()
+                                                                                      .getTime()
+               + 2.0));
+      }
    }
 
    public static WholeBodyJointspaceTrajectoryMessage toWholeBodyJointspaceTrajectoryMessage(KinematicsToolboxOutputStatus ikSolution,

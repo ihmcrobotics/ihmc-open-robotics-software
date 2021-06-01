@@ -64,8 +64,8 @@ public class ValkyriePositionControlledRobotSimulationEndToEndTest extends Human
    public void testCrawl1ToDabScript(TestInfo testInfo) throws Exception
    {
       runProcessedScriptTest(testInfo,
-                             ValkyrieRobotModel.class.getClassLoader().getResourceAsStream("multiContact/scripts/20200930_144631_Crawl1ToDab.json"),
                              ValkyrieInitialSetupFactories.newCrawl1(getRobotModel().getJointMap()),
-                             new FlatGroundEnvironment());
+                             new FlatGroundEnvironment(),
+                             ValkyrieRobotModel.class.getClassLoader().getResourceAsStream("multiContact/scripts/20200930_144631_Crawl1ToDab.json"));
    }
 }
