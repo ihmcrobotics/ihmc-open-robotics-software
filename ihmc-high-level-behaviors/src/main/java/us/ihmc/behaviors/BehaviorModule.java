@@ -36,8 +36,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
-import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.FAILURE;
-import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.SUCCESS;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_MESSAGER_PORT;
 import static us.ihmc.communication.util.NetworkPorts.BEHAVIOR_MODULE_YOVARIABLESERVER_PORT;
 
@@ -129,7 +127,9 @@ public class BehaviorModule
       statusLogger = new StatusLogger(messager::submitMessage);
 
       rootNode.setName("Behavior Module");
-      rootNode.addChild(new DisabledNode());
+      BehaviorTreeCondition disabledNode = new BehaviorTreeCondition(() -> !enabled.getValue());
+      disabledNode.setName("Disabled");
+      rootNode.addChild(disabledNode);
 
       BehaviorDefinition highestLevelNodeDefinition = behaviorRegistry.getHighestLevelNode();
       BehaviorHelper helper = new BehaviorHelper(highestLevelNodeDefinition.getName(), robotModel, ros2Node);
@@ -170,27 +170,6 @@ public class BehaviorModule
          yoVariableServer.update(timestamp.getAndAdd(Conversions.secondsToNanoseconds(YO_VARIABLE_SERVER_UPDATE_PERIOD)));
       });
       yoServerUpdateThread.start();
-   }
-
-   private class DisabledNode extends BehaviorTreeNode
-   {
-      public DisabledNode()
-      {
-         setName("Disabled");
-      }
-
-      @Override
-      public BehaviorTreeNodeStatus tickInternal()
-      {
-         if (enabled.getValue())
-         {
-            return FAILURE;
-         }
-         else
-         {
-            return SUCCESS;
-         }
-      }
    }
 
    public Messager getMessager()
