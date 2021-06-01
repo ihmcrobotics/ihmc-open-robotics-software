@@ -112,6 +112,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepLength, minimumStepLength);
    }
 
+   default void getUseStepReachabilityMap(boolean useStepReachabilityMap)
+   {
+      set(FootstepPlannerParameterKeys.useReachabilityMap, useStepReachabilityMap);
+   }
+
    default void setMinimumStepWidth(double minimumStepWidth)
    {
       set(FootstepPlannerParameterKeys.minStepWidth, minimumStepWidth);

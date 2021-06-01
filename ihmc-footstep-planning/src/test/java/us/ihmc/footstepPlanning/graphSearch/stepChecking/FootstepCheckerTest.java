@@ -59,7 +59,7 @@ public class FootstepCheckerTest
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
       FootstepSnapAndWiggler snapper = new TestSnapper();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       checker.setPlanarRegions(planarRegions);
 
       DiscreteFootstep step0 = new DiscreteFootstep(-0.65, 0.15, 0.0, RobotSide.RIGHT);
@@ -141,7 +141,7 @@ public class FootstepCheckerTest
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
       FootstepSnapAndWiggler snapper = new TestSnapper();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       checker.setPlanarRegions(planarRegions);
 
       DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.2, 0.0, RobotSide.RIGHT);
@@ -210,7 +210,7 @@ public class FootstepCheckerTest
    {
       FootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
       // the checker should check for limits in z-height, pitch, and roll.
       // the valid ranges for x, y, and yaw should be considered in the node expansion.
@@ -230,7 +230,7 @@ public class FootstepCheckerTest
    {
       FootstepSnapAndWiggler snapper = new TestSnapper();
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, -0.3, 0.0, RobotSide.RIGHT);
       DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
@@ -245,7 +245,7 @@ public class FootstepCheckerTest
    public void testNodesOnSameSides()
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, new TestSnapper(), registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, new TestSnapper(), null, registry);
       DiscreteFootstep leftNode0 = new DiscreteFootstep(0.0, 0.0, 0.0, RobotSide.LEFT);
       DiscreteFootstep leftNode1 = new DiscreteFootstep(5.0, 0.0, 2.0, RobotSide.LEFT);
       DiscreteFootstep rightNode0 = new DiscreteFootstep(-1.0, 0.0, -2.5, RobotSide.RIGHT);
@@ -272,7 +272,7 @@ public class FootstepCheckerTest
       };
 
       FootstepSnapAndWiggler snapper = new TestSnapper();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
       // add planar regions, otherwise will always be valid
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
@@ -312,7 +312,7 @@ public class FootstepCheckerTest
    {
       FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters();
       FootstepSnapAndWiggler snapper = new TestSnapper();
-      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker checker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
 
       // add planar regions, otherwise will always be valid
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
@@ -425,7 +425,7 @@ public class FootstepCheckerTest
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
 
-      FootstepChecker nodeChecker = new FootstepChecker(parameters, footPolygons, snapper, registry);
+      FootstepChecker nodeChecker = new FootstepChecker(parameters, footPolygons, snapper, null, registry);
       nodeChecker.setPlanarRegions(planarRegionsList);
 
       DiscreteFootstep step0 = new DiscreteFootstep(-0.1, -0.1, 0.0, RobotSide.RIGHT);
@@ -556,7 +556,7 @@ public class FootstepCheckerTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
 
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
-      FootstepChecker checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, new YoRegistry("testRegistry"));
+      FootstepChecker checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, null, new YoRegistry("testRegistry"));
 
       DiscreteFootstep step0 = new DiscreteFootstep(0.0, -0.2, 0.0, RobotSide.RIGHT);
       DiscreteFootstep step1 = new DiscreteFootstep(0.0, 0.1, 0.0, RobotSide.LEFT);

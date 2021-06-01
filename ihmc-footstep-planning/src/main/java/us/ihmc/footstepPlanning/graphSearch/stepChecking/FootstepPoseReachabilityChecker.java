@@ -34,7 +34,10 @@ public class FootstepPoseReachabilityChecker
    private final YoFramePoseUsingYawPitchRoll yoStanceFootPose = new YoFramePoseUsingYawPitchRoll("stance", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoseUsingYawPitchRoll yoCandidateFootPose = new YoFramePoseUsingYawPitchRoll("candidate", stanceFootZUpFrame, registry);
 
-   public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper, YoRegistry parentRegistry)
+   public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters,
+                                          FootstepSnapAndWiggler snapper,
+                                          Map<FramePose3D, Boolean> reachabilityMap,
+                                          YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;

@@ -86,7 +86,7 @@ public class AStarFootstepPlanner
       this.footPolygons = footPolygons;
       this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
-      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, registry);
+      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, reachabilityMap, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
 
