@@ -1,5 +1,7 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrixSparseCSC;
@@ -53,6 +55,8 @@ public class LinearMPCQPSolver
    public final DMatrixRMaj solverOutput_beq;
    public final DMatrixRMaj solverOutput_bin;
 
+   protected final DMatrixRMaj previousSolution;
+
    public final QPInputTypeA qpInputTypeA = new QPInputTypeA(0);
    public final QPInputTypeC qpInputTypeC = new QPInputTypeC(0);
 
@@ -81,6 +85,7 @@ public class LinearMPCQPSolver
    private final MPCQPInputCalculator inputCalculator;
 
    protected final double dt;
+   protected final double dt2;
 
    public LinearMPCQPSolver(LinearMPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
@@ -97,20 +102,22 @@ public class LinearMPCQPSolver
    {
       this.indexHandler = indexHandler;
       this.dt = dt;
+      dt2 = dt * dt;
 
       rhoCoefficientRegularization.set(1e-5);
       comCoefficientRegularization.set(1e-5);
 
-      rhoRateCoefficientRegularization.set(1e-6);
-      comRateCoefficientRegularization.set(1e-6);
+      rhoRateCoefficientRegularization.set(1e-10);
+      comRateCoefficientRegularization.set(1e-10);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
       if (inverseMatrixCalculator != null)
          qpSolver.setInverseHessianCalculator(inverseMatrixCalculator);
+      qpSolver.setResetActiveSetOnSizeChange(false);
 
       inputCalculator = new MPCQPInputCalculator(indexHandler, gravityZ);
 
-      int problemSize = 4 * 4 * 4 * 2 + 10;
+      int problemSize = 3 * (2 * 4 * LinearMPCIndexHandler.coefficientsPerRho + LinearMPCIndexHandler.comCoefficientsPerSegment);
       solverInput_H = new DMatrixRMaj(problemSize, problemSize);
       solverInput_f = new DMatrixRMaj(problemSize, 1);
 
@@ -123,6 +130,8 @@ public class LinearMPCQPSolver
       solverInput_bin = new DMatrixRMaj(0, 1);
       solverOutput_bin = new DMatrixRMaj(0, 1);
       solverOutput_beq = new DMatrixRMaj(0, 1);
+
+      previousSolution = new DMatrixRMaj(0, 0);
 
       solverOutput = new DMatrixRMaj(problemSize, 1);
 
@@ -164,6 +173,12 @@ public class LinearMPCQPSolver
       this.resetActiveSet = true;
    }
 
+   public void setPreviousSolution(DMatrixRMaj previousSolution)
+   {
+      this.previousSolution.set(previousSolution);
+      addRateRegularization.set(true);
+   }
+
    private boolean pollResetActiveSet()
    {
       boolean ret = resetActiveSet;
@@ -173,12 +188,8 @@ public class LinearMPCQPSolver
 
    public void initialize()
    {
-      int previousProblemSize = problemSize;
       problemSize = indexHandler.getTotalProblemSize();
 
-      //      if (previousProblemSize != problemSize )
-      if (true)
-      {
          qpInputTypeA.setNumberOfVariables(problemSize);
          qpInputTypeC.setNumberOfVariables(problemSize);
 
@@ -191,8 +202,6 @@ public class LinearMPCQPSolver
          solverOutput.reshape(problemSize, 1);
 
          resetRateRegularization();
-         notifyResetActiveSet();
-      }
 
       solverInput_Aeq.zero();
       solverInput_beq.zero();
@@ -239,23 +248,29 @@ public class LinearMPCQPSolver
 
    public void addRateRegularization()
    {
-      double comCoefficientFactor = dt * dt / comRateCoefficientRegularization.getDoubleValue();
-      double rhoCoefficientFactor = dt * dt / rhoRateCoefficientRegularization.getDoubleValue();
+      double comCoefficientFactor = comRateCoefficientRegularization.getDoubleValue() / dt2;
+      double rhoCoefficientFactor = rhoRateCoefficientRegularization.getDoubleValue() / dt2;
 
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
          int start = indexHandler.getComCoefficientStartIndex(segmentId);
          for (int i = 0; i < LinearMPCIndexHandler.comCoefficientsPerSegment; i++)
          {
-            solverInput_H.add(start + i, start + i, 1.0 / comCoefficientFactor);
-            solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / comCoefficientFactor);
+            double previousValue = previousSolution.get(start + i, 0);
+            if (Double.isNaN(previousValue))
+               continue;
+            solverInput_H.add(start + i, start + i, comCoefficientFactor);
+            solverInput_f.add(start + i, 0, -previousValue * comCoefficientFactor);
          }
 
          start += LinearMPCIndexHandler.comCoefficientsPerSegment;
          for (int i = 0; i < indexHandler.getRhoCoefficientsInSegment(segmentId); i++)
          {
-            solverInput_H.add(start + i, start + i, 1.0 / rhoCoefficientFactor);
-            solverInput_f.add(start + i, 0, -solverOutput.get(start + i, 0) / rhoCoefficientFactor);
+            double previousValue = previousSolution.get(start + i, 0);
+            if (Double.isNaN(previousValue))
+               continue;
+            solverInput_H.add(start + i, start + i, rhoCoefficientFactor);
+            solverInput_f.add(start + i, 0, -previousValue * rhoCoefficientFactor);
          }
       }
    }
@@ -628,5 +643,35 @@ public class LinearMPCQPSolver
    public DMatrixRMaj getSolution()
    {
       return solverOutput;
+   }
+
+   public void setActiveInequalityIndices(TIntList activeInequalityIndices)
+   {
+      qpSolver.setActiveInequalityIndices(activeInequalityIndices);
+   }
+
+   public void setActiveLowerBoundIndices(TIntList activeLowerBoundIndices)
+   {
+      qpSolver.setActiveLowerBoundIndices(activeLowerBoundIndices);
+   }
+
+   public void setActiveUpperBoundIndices(TIntList activeUpperBoundIndices)
+   {
+      qpSolver.setActiveUpperBoundIndices(activeUpperBoundIndices);
+   }
+
+   public TIntList getActiveInequalityIndices()
+   {
+      return qpSolver.getActiveInequalityIndices();
+   }
+
+   public TIntList getActiveLowerBoundIndices()
+   {
+      return qpSolver.getActiveLowerBoundIndices();
+   }
+
+   public TIntList getActiveUpperBoundIndices()
+   {
+      return qpSolver.getActiveUpperBoundIndices();
    }
 }
