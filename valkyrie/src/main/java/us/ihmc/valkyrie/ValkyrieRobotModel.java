@@ -12,6 +12,7 @@ import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -602,8 +603,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public Map<FramePose3D, Boolean> getLegReachabilityMap()
    {
-      // TODO load from file
-      return null;
+      return StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
    }
 
    @Override
