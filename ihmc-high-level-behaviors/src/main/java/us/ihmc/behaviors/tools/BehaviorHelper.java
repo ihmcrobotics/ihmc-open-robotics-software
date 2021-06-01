@@ -25,6 +25,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
@@ -99,6 +100,12 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    public DoubleSupplier subscribeViaYoDouble(String variableName)
    {
       return yoVariableClientHelper.subscribeViaYoDouble(variableName);
+   }
+
+   @Override
+   public void publishDoubleToYoVariable(String variableName, double value)
+   {
+      yoVariableClientHelper.publishDoubleToYoVariable(variableName, value);
    }
 
    @Override
