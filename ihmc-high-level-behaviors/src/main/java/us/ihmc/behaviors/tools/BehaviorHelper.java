@@ -7,7 +7,10 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.behaviors.tools.interfaces.YoVariableClientPublishSubscribeAPI;
+import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
+import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
+import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
+import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.ROS2Tools;
@@ -25,7 +28,6 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
 import java.util.function.Function;
@@ -97,15 +99,27 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    // UI Communication Methods:
 
    @Override
-   public DoubleSupplier subscribeViaYoDouble(String variableName)
+   public DoubleSupplier subscribeToYoVariableDoubleValue(String variableName)
    {
-      return yoVariableClientHelper.subscribeViaYoDouble(variableName);
+      return yoVariableClientHelper.subscribeToYoVariableDoubleValue(variableName);
    }
 
    @Override
-   public void publishDoubleToYoVariable(String variableName, double value)
+   public void publishDoubleValueToYoVariable(String variableName, double value)
    {
-      yoVariableClientHelper.publishDoubleToYoVariable(variableName, value);
+      yoVariableClientHelper.publishDoubleValueToYoVariable(variableName, value);
+   }
+
+   @Override
+   public YoBooleanClientHelper subscribeToYoBoolean(String variableName)
+   {
+      return yoVariableClientHelper.subscribeToYoBoolean(variableName);
+   }
+
+   @Override
+   public YoDoubleClientHelper subscribeToYoDouble(String variableName)
+   {
+      return yoVariableClientHelper.subscribeToYoDouble(variableName);
    }
 
    @Override

@@ -1,12 +1,10 @@
-package us.ihmc.behaviors.tools;
+package us.ihmc.behaviors.tools.yo;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
-import us.ihmc.behaviors.tools.interfaces.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.YoVariablesUpdatedListener;
-import us.ihmc.robotDataVisualizer.BasicYoVariablesUpdatedListener;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -27,7 +25,7 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    public void start(String hostname, int port)
    {
       yoRegistry = new YoRegistry(registryName);
-      listener = new BasicYoVariablesUpdatedListener(yoRegistry);
+      listener = new YoVariableClientHelperUpdatedListener(yoRegistry);
       yoVariableClient = new YoVariableClient(listener);
       MutableBoolean connecting = new MutableBoolean(true);
       ThreadTools.startAThread(() ->
@@ -67,11 +65,11 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    }
 
    @Override
-   public DoubleSupplier subscribeViaYoDouble(String variableName)
+   public DoubleSupplier subscribeToYoVariableDoubleValue(String variableName)
    {
       return () ->
       {
-         YoVariable variable;
+         YoVariable variable = null;
          if (yoVariableClient != null && yoVariableClient.isConnected() && (variable = yoRegistry.findVariable(variableName)) != null)
          {
             return variable.getValueAsDouble();
@@ -81,12 +79,54 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
    }
 
    @Override
-   public void publishDoubleToYoVariable(String variableName, double value)
+   public void publishDoubleValueToYoVariable(String variableName, double value)
    {
       YoVariable variable;
       if (yoVariableClient != null && yoVariableClient.isConnected() && (variable = yoRegistry.findVariable(variableName)) != null)
       {
          variable.setValueFromDouble(value);
       }
+   }
+
+   @Override
+   public YoBooleanClientHelper subscribeToYoBoolean(String variableName)
+   {
+      return new YoBooleanClientHelper()
+      {
+         private final DoubleSupplier getter = subscribeToYoVariableDoubleValue(variableName);
+
+         @Override
+         public boolean get()
+         {
+            return getter.getAsDouble() >= 0.5;
+         }
+
+         @Override
+         public void set(boolean set)
+         {
+            publishDoubleValueToYoVariable(variableName, set ? 1.0 : 0.0);
+         }
+      };
+   }
+
+   @Override
+   public YoDoubleClientHelper subscribeToYoDouble(String variableName)
+   {
+      return new YoDoubleClientHelper()
+      {
+         private final DoubleSupplier getter = subscribeToYoVariableDoubleValue(variableName);
+
+         @Override
+         public double get()
+         {
+            return getter.getAsDouble();
+         }
+
+         @Override
+         public void set(double set)
+         {
+            publishDoubleValueToYoVariable(variableName, set);
+         }
+      };
    }
 }
