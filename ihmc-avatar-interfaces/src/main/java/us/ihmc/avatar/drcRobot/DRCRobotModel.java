@@ -13,6 +13,7 @@ import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
@@ -36,6 +37,8 @@ import us.ihmc.wholeBodyController.UIParameters;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
+
+import java.util.Map;
 
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
@@ -145,6 +148,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
+   {
+      return null;
+   }
+
+   default Map<FramePose3D, Boolean> getLegReachabilityMap()
    {
       return null;
    }

@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -18,6 +19,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
@@ -595,6 +597,13 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
       return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public Map<FramePose3D, Boolean> getLegReachabilityMap()
+   {
+      // TODO load from file
+      return null;
    }
 
    @Override
