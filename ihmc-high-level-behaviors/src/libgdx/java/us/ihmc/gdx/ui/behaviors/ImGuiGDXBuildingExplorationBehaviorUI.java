@@ -9,12 +9,12 @@ import imgui.type.ImBoolean;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
-import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiPlot;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXDoorOnlyObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
@@ -32,9 +32,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
-   private final Point2D32 nodePosition = new Point2D32(150.0f, 0.0f);
-   private final Point2D32 disabledNodePosition = new Point2D32(0.0f, 100.0f);
-   private final Point2D32 defaultNodePosition = new Point2D32();
+   private final Point2D nodePosition = new Point2D(280.0, 0.0);
    private GDXDoorOnlyObject door;
    private ImGuiLabelMap labels = new ImGuiLabelMap();
    private String[] stateNames = new String[BuildingExplorationStateName.values().length];
@@ -58,7 +56,9 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       }
 
       lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(helper);
+      addChild(lookAndStepUI);
       traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
+      addChild(traverseStairsUI);
 
       helper.subscribeToDoorLocationViaCallback(doorLocation -> door.set(doorLocation.getDoorTransformToWorld()));
       helper.subscribeViaCallback(CurrentState, state -> currentState = state);
@@ -72,6 +72,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    {
       goalAffordance.create(baseUI, goalPose -> helper.publish(Goal, goalPose), Color.GREEN);
       baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
+      baseUI.getSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
 
       door = new GDXDoorOnlyObject();
 
@@ -79,40 +80,13 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    }
 
    @Override
-   public Point2D32 getNodePosition(String nodeName)
+   public Point2D getTreeNodeInitialPosition()
    {
-      if (nodeName.equals(DEFINITION.getName()))
-      {
-         return nodePosition;
-      }
-      else if (nodeName.equals(LookAndStepBehavior.DEFINITION.getName()))
-      {
-         return lookAndStepUI.getNodePosition(nodeName);
-      }
-      else if (nodeName.contains("Disabled"))
-      {
-         return disabledNodePosition;
-      }
-      else
-      {
-         return defaultNodePosition;
-      }
+      return nodePosition;
    }
 
    @Override
-   public void renderNode(String nodeName)
-   {
-      if (nodeName.equals(DEFINITION.getName()))
-      {
-         renderForTree();
-      }
-      else
-      {
-         lookAndStepUI.renderNode(nodeName); // TODO: UIs need children
-      }
-   }
-
-   public void renderForTree()
+   public void renderTreeNode()
    {
       goalAffordance.renderPlaceGoalButton();
 
@@ -147,14 +121,14 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    }
 
    @Override
-   public void render()
+   public void renderInternal()
    {
 //      ImGui.text("Building Exploration");
 
 //      int defaultOpen = ImGuiTreeNodeFlags.DefaultOpen;
 //      if (ImGui.collapsingHeader("Look and Step", defaultOpen))
 //      {
-         lookAndStepUI.render();
+//         lookAndStepUI.render();
 //      }
    }
 
@@ -170,5 +144,11 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       goalAffordance.getRenderables(renderables, pool);
       lookAndStepUI.getRenderables(renderables, pool);
       door.getRealisticModelInstance().getRenderables(renderables, pool);
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
    }
 }

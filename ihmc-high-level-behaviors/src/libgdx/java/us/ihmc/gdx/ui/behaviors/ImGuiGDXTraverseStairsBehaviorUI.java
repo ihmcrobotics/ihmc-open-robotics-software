@@ -7,7 +7,7 @@ import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
-import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -19,7 +19,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXTraverseStairsBehaviorUI::new);
 
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
-   private Point2D32 nodePosition = new Point2D32(50.0f, 50.0f);
+   private Point2D nodePosition = new Point2D(641.0, 369.0);
 
    public ImGuiGDXTraverseStairsBehaviorUI(BehaviorHelper helper)
    {
@@ -37,22 +37,19 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public Point2D32 getNodePosition(String nodeName)
+   public Point2D getTreeNodeInitialPosition()
    {
       return nodePosition;
    }
 
    @Override
-   public void renderNode(String nodeName)
+   public void renderTreeNode()
    {
-      if (nodeName.equals(DEFINITION.getName()))
-      {
-         render();
-      }
+
    }
 
    @Override
-   public void render()
+   public void renderInternal()
    {
       footstepPlanGraphic.render();
    }
@@ -67,5 +64,11 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
       footstepPlanGraphic.getRenderables(renderables, pool);
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
    }
 }

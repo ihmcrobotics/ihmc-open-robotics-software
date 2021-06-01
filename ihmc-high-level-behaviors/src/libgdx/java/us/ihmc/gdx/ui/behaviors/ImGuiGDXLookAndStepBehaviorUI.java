@@ -5,14 +5,13 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.flag.ImGuiInputTextFlags;
-import imgui.flag.ImGuiTreeNodeFlags;
 import imgui.internal.ImGui;
 import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
-import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -43,7 +42,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper behaviorHelper;
-   private final Point2D32 nodePosition = new Point2D32(550.0f, 0.0f);
+   private final Point2D nodePosition = new Point2D(280.0, 370.0);
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -137,7 +136,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public Point2D32 getNodePosition(String nodeName)
+   public Point2D getTreeNodeInitialPosition()
    {
       return nodePosition;
    }
@@ -145,20 +144,11 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    public void renderAsWindow()
    {
       ImGui.begin(getWindowName());
-      render();
+      renderInternal();
       ImGui.end();
    }
 
-   @Override
-   public void renderNode(String nodeName)
-   {
-      if (nodeName.equals(DEFINITION.getName()))
-      {
-         renderForTree();
-      }
-   }
-
-   public void renderForTree()
+   public void renderTreeNode()
    {
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
@@ -245,7 +235,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void render()
+   public void renderInternal()
    {
       if (showLookAndStepParametersTuner.get())
          lookAndStepParameterTuner.render();
@@ -299,5 +289,11 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    public String getWindowName()
    {
       return LookAndStepBehavior.DEFINITION.getName();
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
    }
 }

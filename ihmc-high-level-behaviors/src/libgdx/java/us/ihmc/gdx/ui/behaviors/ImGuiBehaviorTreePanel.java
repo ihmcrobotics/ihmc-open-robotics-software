@@ -7,12 +7,11 @@ import imgui.internal.ImGui;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.tuple2D.Point2D32;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 
 import java.util.ArrayList;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 public class ImGuiBehaviorTreePanel
 {
@@ -28,19 +27,19 @@ public class ImGuiBehaviorTreePanel
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
    }
 
-   public void renderAsWindow(BehaviorTreeControlFlowNodeBasics tree, Consumer<String> nodeRenderer, Function<String, Point2D32> positioning)
+   public void renderAsWindow(GDXBehaviorUIInterface tree)
    {
       ImGui.begin(windowName);
-      renderWidgetsOnly(tree, nodeRenderer, positioning);
+      renderWidgetsOnly(tree);
       ImGui.end();
    }
 
-   public void renderWidgetsOnly(BehaviorTreeControlFlowNodeBasics tree, Consumer<String> nodeRenderer, Function<String, Point2D32> positioning)
+   public void renderWidgetsOnly(GDXBehaviorUIInterface tree)
    {
       ImNodes.beginNodeEditor();
       nodeIndex = 0;
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
-      renderNodeAndChildren(tree, nodeRenderer, positioning, -1, links);
+      renderNodeAndChildren(tree, -1, links);
       renderLinks(links);
 
       ImNodes.endNodeEditor();
@@ -55,11 +54,7 @@ public class ImGuiBehaviorTreePanel
       }
    }
 
-   private void renderNodeAndChildren(BehaviorTreeNodeBasics node,
-                                      Consumer<String> nodeRenderer,
-                                      Function<String, Point2D32> positioning,
-                                      int parentPin,
-                                      ArrayList<Pair<Integer, Integer>> links)
+   private void renderNodeAndChildren(GDXBehaviorUIInterface node, int parentPin, ArrayList<Pair<Integer, Integer>> links)
    {
       long timeSinceLastTick = -1;
 
@@ -89,13 +84,21 @@ public class ImGuiBehaviorTreePanel
       {
          ImGui.textUnformatted("[Async] " + (name != null ? name : "Asynchronous Node"));
       }
+      else if (node.getType().equals(BehaviorTreeAction.class))
+      {
+         ImGui.textUnformatted("[Action] " + (name != null ? name : "Action"));
+      }
+      else if (node.getType().equals(BehaviorTreeCondition.class))
+      {
+         ImGui.textUnformatted("[Condition] " + (name != null ? name : "Condition"));
+      }
       else if (node.getType().equals(OneShotAction.class))
       {
-         ImGui.textUnformatted("[1] " + (name != null ? name : "One Shot Action"));
+         ImGui.textUnformatted("[OneShot] " + (name != null ? name : "One Shot Action"));
       }
       else if (node.getType().equals(AlwaysSuccessfulAction.class))
       {
-         ImGui.textUnformatted("[A] " + (name != null ? name : "Always Successful Action"));
+         ImGui.textUnformatted("[Success] " + (name != null ? name : "Always Successful Action"));
       }
       else
       {
@@ -111,11 +114,14 @@ public class ImGuiBehaviorTreePanel
             ImGui.text("Not yet ticked.");
       }
 
-      nodeRenderer.accept(name);
+      if (!firstRun)
+         ImGui.text("Grid position: x: " + ImNodes.getNodeGridSpacePosX(nodeIndex) + " y: " + ImNodes.getNodeGridSpacePosY(nodeIndex));
+
+      node.renderTreeNode();
 
       if (firstRun)
       {
-         Point2D32 position = positioning.apply(name);
+         Point2D position = node.getTreeNodeInitialPosition();
          ImNodes.setNodeGridSpacePos(nodeIndex, position.getX32(), position.getY32());
       }
 
@@ -130,29 +136,20 @@ public class ImGuiBehaviorTreePanel
       }
 
       int nodePinIndex = pinIndex;
-      if (node instanceof BehaviorTreeControlFlowNode)
+      for (GDXBehaviorUIInterface child : node.getUIChildren())
       {
-         for (BehaviorTreeNodeBasics child : ((BehaviorTreeControlFlowNode) node).getChildren())
-         {
-            ImNodes.beginOutputAttribute(pinIndex++);
-            ImNodes.endOutputAttribute();
-         }
+         ImNodes.beginOutputAttribute(pinIndex++);
+         ImNodes.endOutputAttribute();
       }
 
       ImNodes.endNode();
       nodeIndex++;
 
-      if (node instanceof BehaviorTreeNode)
-      {
-         ImNodes.popColorStyle();
-      }
+      ImNodes.popColorStyle();
 
-      if (node instanceof BehaviorTreeControlFlowNode)
+      for (GDXBehaviorUIInterface child : node.getUIChildren())
       {
-         for (BehaviorTreeNodeBasics child : ((BehaviorTreeControlFlowNode) node).getChildren())
-         {
-            renderNodeAndChildren(child, nodeRenderer, positioning, nodePinIndex++, links);
-         }
+         renderNodeAndChildren(child, nodePinIndex++, links);
       }
    }
 }

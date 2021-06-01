@@ -3,7 +3,6 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
@@ -11,15 +10,14 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.MessagerHelper;
-import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
@@ -35,11 +33,11 @@ import java.util.function.Supplier;
 import static us.ihmc.behaviors.BehaviorModule.API.BehaviorTreeStatus;
 import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 
-public class GDXBehaviorsPanel
+public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
-   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
+   private final Point2D nodePosition = new Point2D(0.0, 0.0);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus;
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
@@ -48,11 +46,10 @@ public class GDXBehaviorsPanel
    private volatile boolean yoClientConnecting = false;
    private final YoVariableClientHelper yoVariableClientHelper;
    private final GDXBehaviorUIInterface highestLevelUI;
+   private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
    private final ImGuiBehaviorTreePanel behaviorTreePanel = new ImGuiBehaviorTreePanel("Behavior Tree");
-   private final ImBoolean imEnabled = new ImBoolean(false);
-   private final YoBooleanClientHelper yoEnabled;
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -62,8 +59,6 @@ public class GDXBehaviorsPanel
       behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       messagerHelper = behaviorHelper.getMessagerHelper();
       yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
-      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
-
       logArray.addLast(Pair.of(Level.INFO.intLevel(), "Log started at " + LocalDateTime.now()));
       behaviorHelper.subscribeViaCallback(StatusLog, logEntry ->
       {
@@ -80,13 +75,16 @@ public class GDXBehaviorsPanel
          }
       });
       behaviorTreeStatus = behaviorHelper.subscribeViaReference(BehaviorTreeStatus, new FallbackNode());
-      yoEnabled = behaviorHelper.subscribeToYoBoolean("enabled");
+      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
+      addChild(highestLevelUI);
+      disabledNodeUI = new ImGuiBehaviorModuleDisabledNodeUI(behaviorHelper);
+      addChild(disabledNodeUI);
    }
 
+   @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
       highestLevelUI.create(baseUI);
-      baseUI.getSceneManager().addRenderableProvider(highestLevelUI, GDXSceneLevel.VIRTUAL);
    }
 
    public void handleVREvents(GDXVRManager vrManager)
@@ -94,9 +92,60 @@ public class GDXBehaviorsPanel
       highestLevelUI.handleVREvents(vrManager);
    }
 
-   public void render()
+   @Override
+   public void renderInternal()
    {
       ImGui.begin(windowName);
+      synchronized (logArray)
+      {
+         ImGui.text("Behavior status log:");
+         ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
+         int numLogEntriesToShow = 20;
+         while (logArray.size() > numLogEntriesToShow)
+            logArray.removeFirst();
+         for (Pair<Integer, String> logEntry : logArray)
+         {
+            Color color = Color.WHITE;
+            float[] hsv = new float[3];
+            switch (logEntry.getLeft())
+            {
+               case 100:
+               case 200:
+                  color = Color.RED;
+                  break;
+               case 300:
+                  Color.YELLOW.toHsv(hsv);
+                  color = color.fromHsv(hsv[0], hsv[1], 0.7f);
+                  break;
+               case 400:
+                  color = Color.BLACK;
+                  break;
+               case 500:
+                  color = Color.CYAN;
+                  break;
+               case 600:
+                  color = Color.GREEN;
+                  break;
+            }
+            ImGui.textColored(color.r, color.g, color.b, 1.0f, logEntry.getRight());
+         }
+      }
+      ImGui.popItemWidth();
+      ImGui.end();
+
+      syncTree(behaviorTreeStatus.get());
+      behaviorTreePanel.renderAsWindow(this);
+   }
+
+   @Override
+   public Point2D getTreeNodeInitialPosition()
+   {
+      return nodePosition;
+   }
+
+   @Override
+   public void renderTreeNode()
+   {
       if (messagerConnecting)
       {
          ImGui.text("Messager connecting...");
@@ -173,57 +222,6 @@ public class GDXBehaviorsPanel
             disconnectYoVariableClient();
          }
       }
-
-      if (messagerHelper.isConnected())
-      {
-         if (ImGui.checkbox(labels.get("Enabled"), imEnabled))
-         {
-            yoEnabled.set(imEnabled.get());
-         }
-         ImGui.sameLine();
-         ImGui.text("Server: " + yoEnabled.get());
-         highestLevelUI.render();
-      }
-
-      synchronized (logArray)
-      {
-         ImGui.text("Behavior status log:");
-         ImGui.pushItemWidth(ImGui.getWindowWidth() - 10);
-         int numLogEntriesToShow = 20;
-         while (logArray.size() > numLogEntriesToShow)
-            logArray.removeFirst();
-         for (Pair<Integer, String> logEntry : logArray)
-         {
-            Color color = Color.WHITE;
-            float[] hsv = new float[3];
-            switch (logEntry.getLeft())
-            {
-               case 100:
-               case 200:
-                  color = Color.RED;
-                  break;
-               case 300:
-                  Color.YELLOW.toHsv(hsv);
-                  color = color.fromHsv(hsv[0], hsv[1], 0.7f);
-                  break;
-               case 400:
-                  color = Color.BLACK;
-                  break;
-               case 500:
-                  color = Color.CYAN;
-                  break;
-               case 600:
-                  color = Color.GREEN;
-                  break;
-            }
-            ImGui.textColored(color.r, color.g, color.b, 1.0f, logEntry.getRight());
-         }
-      }
-      ImGui.popItemWidth();
-
-      ImGui.end();
-
-      behaviorTreePanel.renderAsWindow(behaviorTreeStatus.get(), highestLevelUI::renderNode, highestLevelUI::getNodePosition);
    }
 
    public void connectViaKryo(String hostname)
@@ -250,6 +248,7 @@ public class GDXBehaviorsPanel
       yoVariableClientHelper.disconnect();
    }
 
+   @Override
    public void destroy()
    {
       behaviorHelper.destroy();
