@@ -1,6 +1,7 @@
 package us.ihmc.gdx.ui.behaviors.registry;
 
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
 
@@ -25,7 +26,9 @@ public abstract class GDXBehaviorUIInterface implements RenderableProvider
 
    public abstract void destroy();
 
-//   protected void enable3DVisualizations()
+   public abstract Point2D32 getNodePosition(String nodeName);
+
+   //   protected void enable3DVisualizations()
 //   {
 //   }
 //

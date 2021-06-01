@@ -2,6 +2,11 @@ package us.ihmc.behaviors.tools.behaviorTree;
 
 public class UtilitySelectorNode extends BehaviorTreeControlFlowNode
 {
+   public UtilitySelectorNode()
+   {
+      setType(UtilitySelectorNode.class);
+   }
+
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {

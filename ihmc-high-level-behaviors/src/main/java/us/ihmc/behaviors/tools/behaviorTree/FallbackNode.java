@@ -5,5 +5,8 @@ package us.ihmc.behaviors.tools.behaviorTree;
  */
 public class FallbackNode extends BehaviorTreeControlFlowNode implements FallbackNodeBasics
 {
-
+   public FallbackNode()
+   {
+      setType(FallbackNode.class);
+   }
 }

@@ -40,6 +40,10 @@ public interface BehaviorTreeNodeBasics
 
    public abstract void setName(String name);
 
+   public abstract Class<?> getType();
+
+   public abstract void setType(Class<?> type);
+
    public static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
    {
       if (status == null)

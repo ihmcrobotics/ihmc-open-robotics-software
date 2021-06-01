@@ -7,6 +7,7 @@ import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -18,6 +19,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXTraverseStairsBehaviorUI::new);
 
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
+   private Point2D32 nodePosition = new Point2D32(50.0f, 50.0f);
 
    public ImGuiGDXTraverseStairsBehaviorUI(BehaviorHelper helper)
    {
@@ -32,6 +34,12 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    public void create(GDXImGuiBasedUI baseUI)
    {
 
+   }
+
+   @Override
+   public Point2D32 getNodePosition(String nodeName)
+   {
+      return nodePosition;
    }
 
    @Override

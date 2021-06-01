@@ -9,6 +9,11 @@ public class LoopSequenceNode extends SequenceNode
 {
    private int currentChild = 0;
 
+   public LoopSequenceNode()
+   {
+      setType(LoopSequenceNode.class);
+   }
+
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {

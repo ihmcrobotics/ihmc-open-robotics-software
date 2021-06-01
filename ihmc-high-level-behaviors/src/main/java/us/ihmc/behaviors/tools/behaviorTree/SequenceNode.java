@@ -5,5 +5,8 @@ package us.ihmc.behaviors.tools.behaviorTree;
  */
 public class SequenceNode extends BehaviorTreeControlFlowNode implements SequenceNodeBasics
 {
-
+   public SequenceNode()
+   {
+      setType(SequenceNode.class);
+   }
 }
