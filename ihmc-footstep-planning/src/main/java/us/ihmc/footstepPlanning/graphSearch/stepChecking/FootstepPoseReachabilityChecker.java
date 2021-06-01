@@ -13,6 +13,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
+import java.util.Map;
+
 public class FootstepPoseReachabilityChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -59,6 +61,21 @@ public class FootstepPoseReachabilityChecker
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       yoStanceFootPose.set(stanceFootPose);
 
+      // translate candidateStep to nearest checkpoint
+      FramePose3D nearestCheckpoint = findNearestCheckpoint(candidateFootPose);
+      candidateFootPose.getPosition().set(nearestCheckpoint.getPosition());
+      candidateFootPose.getOrientation().set(nearestCheckpoint.getOrientation());
+
+      // calculate step reachability
+
+
       return null;
+   }
+
+   public FramePose3D findNearestCheckpoint(FramePose3D candidateFootPose)
+   {
+      FramePose3D nearestCheckpoint = new FramePose3D();
+      // TODO
+      return nearestCheckpoint;
    }
 }

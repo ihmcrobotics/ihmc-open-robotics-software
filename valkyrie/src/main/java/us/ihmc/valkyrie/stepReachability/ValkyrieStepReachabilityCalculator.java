@@ -104,10 +104,10 @@ public class ValkyrieStepReachabilityCalculator
 
    private enum Mode
    {
-      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_FILE_LOADING
+      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, SHOW_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
+   private static final Mode mode = Mode.SHOW_VISUALIZATION;
 
    private static final double SOLUTION_QUALITY_THRESHOLD = 5;
 
@@ -214,8 +214,8 @@ public class ValkyrieStepReachabilityCalculator
          case TEST_SINGLE_STEP:
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
-            leftFoot.getPosition().set(0.056,  0.056,  0.000);
-            leftFoot.getOrientation().setYawPitchRoll(0.000,  0.000,  0.996);
+//            leftFoot.getPosition().set(0.056,  0.056,  0.000);
+//            leftFoot.getOrientation().setYawPitchRoll(0.000,  0.000,  0.996);
             testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
             break;
          case TEST_MULTIPLE_STEPS:
@@ -229,10 +229,12 @@ public class ValkyrieStepReachabilityCalculator
                poseValidityMap.put(leftFootPose, isValid);
             }
             StepReachabilityFileTools.writeToFile(poseValidityMap);
+//            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
-         case TEST_FILE_LOADING:
+         case SHOW_VISUALIZATION:
             Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
-            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
+            new StepReachabilityVisualizer(feasibilityMap);
+//            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -297,7 +299,6 @@ public class ValkyrieStepReachabilityCalculator
          // holds the feet at current configuration
          toolboxController.updateCapturabilityBasedStatus(createCapturabilityBasedStatus(randomizedFullRobotModel, getRobotModel(), true, true));
 
-         int numberOfIterations = 150;
          runKinematicsToolboxController();
 
          assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
@@ -409,7 +410,7 @@ public class ValkyrieStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final int queriesPerAxis = 5;
+   private static final int queriesPerAxis = 10;
    private static final double minimumOffsetX = -0.5;
    private static final double maximumOffsetX = 0.5;
    private static final double minimumOffsetY = -0.5;
@@ -439,7 +440,9 @@ public class ValkyrieStepReachabilityCalculator
                pose.getPosition().set(x, y, 0.0);
                pose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
 
-               posesToCheck.add(pose);
+               // Don't add foot pose where both at origin
+               if (pose.getPosition().distanceFromOrigin() != 0)
+                  posesToCheck.add(pose);
             }
          }
       }
