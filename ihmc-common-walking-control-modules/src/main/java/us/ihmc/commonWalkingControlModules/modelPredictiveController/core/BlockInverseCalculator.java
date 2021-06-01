@@ -40,8 +40,6 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
 
          blockToInvert.reshape(blockSize, blockSize);
          invertedBlock.reshape(blockSize, blockSize);
-         blockToInvert.zero();
-         invertedBlock.zero();
 
          blockToInvert.insert(matrix, start, end, start, end, 0, 0);
 
