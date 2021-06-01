@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.stepReachability;
+package us.ihmc.avatar.reachabilityMap.footstep;
 
 import org.lwjgl.Sys;
 import us.ihmc.commons.nio.FileTools;

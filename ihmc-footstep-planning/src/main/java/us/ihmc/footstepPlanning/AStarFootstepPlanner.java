@@ -35,6 +35,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,7 +78,8 @@ public class AStarFootstepPlanner
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                SwingPlannerParametersBasics swingPlannerParameters,
-                               WalkingControllerParameters walkingControllerParameters)
+                               WalkingControllerParameters walkingControllerParameters,
+                               Map<FramePose3D, Boolean> reachabilityMap)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;

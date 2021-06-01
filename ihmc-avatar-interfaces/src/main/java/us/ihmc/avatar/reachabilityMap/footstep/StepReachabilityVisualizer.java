@@ -1,4 +1,4 @@
-package us.ihmc.valkyrie.stepReachability;
+package us.ihmc.avatar.reachabilityMap.footstep;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
