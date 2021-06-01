@@ -79,4 +79,14 @@ public class YoVariableClientHelper implements YoVariableClientPublishSubscribeA
          return Double.NaN;
       };
    }
+
+   @Override
+   public void publishDoubleToYoVariable(String variableName, double value)
+   {
+      YoVariable variable;
+      if (yoVariableClient != null && yoVariableClient.isConnected() && (variable = yoRegistry.findVariable(variableName)) != null)
+      {
+         variable.setValueFromDouble(value);
+      }
+   }
 }
