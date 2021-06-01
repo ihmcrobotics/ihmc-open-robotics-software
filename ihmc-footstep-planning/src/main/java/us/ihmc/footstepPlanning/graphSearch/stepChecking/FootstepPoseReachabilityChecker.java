@@ -14,6 +14,7 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Map;
+import java.util.Set;
 
 public class FootstepPoseReachabilityChecker
 {
@@ -21,6 +22,7 @@ public class FootstepPoseReachabilityChecker
 
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
+   private final Map<FramePose3D, Boolean> reachabilityMap;
 
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
@@ -41,6 +43,7 @@ public class FootstepPoseReachabilityChecker
    {
       this.parameters = parameters;
       this.snapper = snapper;
+      this.reachabilityMap = reachabilityMap;
       parentRegistry.addChild(registry);
    }
 
@@ -64,21 +67,30 @@ public class FootstepPoseReachabilityChecker
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       yoStanceFootPose.set(stanceFootPose);
 
-      // translate candidateStep to nearest checkpoint
-      FramePose3D nearestCheckpoint = findNearestCheckpoint(candidateFootPose);
-      candidateFootPose.getPosition().set(nearestCheckpoint.getPosition());
-      candidateFootPose.getOrientation().set(nearestCheckpoint.getOrientation());
+      // Translate candidateStep to nearest reachability checkpoint
+      FramePose3D nearestCheckpoint = findNearestCheckpoint(candidateFootPose, reachabilityMap.keySet());
 
-      // calculate step reachability
-
+      // Check reachabilityMap to see if candidateFootPose is reachable
+      if (!reachabilityMap.get(nearestCheckpoint)) return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
 
       return null;
    }
 
-   public FramePose3D findNearestCheckpoint(FramePose3D candidateFootPose)
+   // Check for closest foot pose in Reachability map keys
+   public FramePose3D findNearestCheckpoint(FramePose3D candidateFootPose, Set<FramePose3D> MapFootPoses)
    {
       FramePose3D nearestCheckpoint = new FramePose3D();
-      // TODO
+      double smallestDist = 10.0;
+      for (FramePose3D pose : MapFootPoses)
+      {
+         double poseDist = pose.getPositionDistance(candidateFootPose);
+         double orientationDistance = pose.getOrientationDistance(candidateFootPose);
+         if (poseDist+orientationDistance < smallestDist)
+         {
+            smallestDist = poseDist+orientationDistance;
+            nearestCheckpoint = pose;
+         }
+      }
       return nearestCheckpoint;
    }
 }
