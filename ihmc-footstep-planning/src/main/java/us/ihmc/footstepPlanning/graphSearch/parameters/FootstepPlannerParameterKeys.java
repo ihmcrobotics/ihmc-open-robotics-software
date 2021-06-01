@@ -23,6 +23,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  idealStepLengthAtMaxStepZ                    = keys.addDoubleKey ("Ideal step length at max step z", 0.2);
 
    // Footstep restriction parameters
+   public static final BooleanStoredPropertyKey useReachabilityMap                           = keys.addBooleanKey ("Use reachability map", false);
    public static final DoubleStoredPropertyKey  minStepWidth                                 = keys.addDoubleKey ("Min step width", 0.15);
    public static final DoubleStoredPropertyKey  minStepLength                                = keys.addDoubleKey ("Min step length", -0.25);
    public static final DoubleStoredPropertyKey  minSurfaceIncline                            = keys.addDoubleKey ("Min surface incline", Math.toRadians(45.0));

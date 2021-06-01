@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -18,6 +19,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FootstepChecker implements FootstepCheckerInterface
 {
@@ -30,7 +32,8 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final PlanarRegionCliffAvoider cliffAvoider;
    private final ObstacleBetweenStepsChecker obstacleBetweenStepsChecker;
    private final FootstepPlannerBodyCollisionDetector collisionDetector;
-   private final FootstepPoseHeuristicChecker goodPositionChecker;
+   private final FootstepPoseHeuristicChecker heuristicPoseChecker;
+   private final FootstepPoseReachabilityChecker reachabilityChecker;
 
    private PlanarRegionsList planarRegionsList = null;
    private boolean assumeFlatGround = false;
@@ -46,6 +49,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    public FootstepChecker(FootstepPlannerParametersReadOnly parameters,
                           SideDependentList<ConvexPolygon2D> footPolygons,
                           FootstepSnapAndWiggler snapper,
+                          Map<FramePose3D, Boolean> reachabilityMap,
                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -54,7 +58,8 @@ public class FootstepChecker implements FootstepCheckerInterface
       this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
       this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
-      this.goodPositionChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
+      this.heuristicPoseChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
+      this.reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
       parentRegistry.addChild(registry);
    }
 
@@ -81,7 +86,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    {
       FootstepSnapData snapData = snapper.snapFootstep(candidateStep, stanceStep, parameters.getWiggleWhilePlanning());
       candidateStepSnapData.set(snapData);
-      goodPositionChecker.setApproximateStepDimensions(candidateStep, stanceStep);
+      heuristicPoseChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
@@ -173,11 +178,18 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
 
       // Check snapped footstep placement
-      BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = goodPositionChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
-      if (poseRejectionReason != null)
+      if (parameters.getUseStepReachabilityMap())
       {
-         rejectionReason.set(poseRejectionReason);
-         return false;
+         // TODO perform ik-based reachability check
+      }
+      else
+      {
+         BipedalFootstepPlannerNodeRejectionReason poseRejectionReason = heuristicPoseChecker.checkStepValidity(candidateStep, stanceStep, startOfSwing);
+         if (poseRejectionReason != null)
+         {
+            rejectionReason.set(poseRejectionReason);
+            return false;
+         }
       }
 
       // Check for obstacle collisions (vertically extruded line between steps)
@@ -243,7 +255,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       achievedDeltaInside.setToNaN();
 
       candidateStepSnapData.clear();
-      goodPositionChecker.clearLoggedVariables();
+      heuristicPoseChecker.clearLoggedVariables();
    }
 
    public void setAssumeFlatGround(boolean assumeFlatGround)
