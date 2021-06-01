@@ -6,12 +6,15 @@ import imgui.extension.imnodes.flag.ImNodesColorStyle;
 import imgui.internal.ImGui;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ImGuiBehaviorTreePanel
 {
@@ -21,6 +24,7 @@ public class ImGuiBehaviorTreePanel
    private int pinIndex = 0;
    private int linkIndex = 0;
    private boolean firstRun = true;
+   private final HashMap<Integer, ImGuiMovingPlot> tickPlots = new HashMap<>();
 
    public ImGuiBehaviorTreePanel(String name)
    {
@@ -106,8 +110,19 @@ public class ImGuiBehaviorTreePanel
       }
       ImNodes.endNodeTitleBar();
 
+      ImGuiMovingPlot tickPlot = tickPlots.get(nodeIndex);
+      if (tickPlot == null)
+      {
+         tickPlot = new ImGuiMovingPlot("ticks", 1000, 230, 15);
+         tickPlots.put(nodeIndex, tickPlot);
+      }
       if (timeSinceLastTick > -1)
       {
+         double tickPeriod = 0.2;
+         double recentTickWindow = tickPeriod * 0.75;
+//         double v = UnitConversions.hertzToSeconds(Gdx.graphics.getFramesPerSecond());
+         boolean tickedThisFrame = Conversions.millisecondsToSeconds(timeSinceLastTick) < recentTickWindow;
+         tickPlot.render(tickedThisFrame ? 1.0f : 0.0f);
          if (node.getPreviousStatus() != null)
             ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
          else
