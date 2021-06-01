@@ -24,7 +24,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
  */
 public enum LegJointName
 {
-   FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE_PITCH, KNEE_ROLL, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
+   FUTURE_EXPANSION_TEST1, HIP_PITCH, HIP_ROLL, FUTURE_EXPANSION_TEST2, HIP_YAW, KNEE_PITCH, KNEE_YAW, KNEE_ROLL, ANKLE_ROLL, ANKLE_PITCH, FUTURE_EXPANSION_TEST3;
    
    /**
     * @deprecated Do not use this!
@@ -46,6 +46,9 @@ public enum LegJointName
 
          case KNEE_PITCH :
             return "knee_pitch";
+
+         case KNEE_YAW:
+            return "knee_yaw";
 
          case ANKLE_PITCH :
             return "ankle_pitch";
@@ -101,6 +104,9 @@ public enum LegJointName
          case KNEE_PITCH :
             return "kneePitch";
 
+         case KNEE_YAW:
+            return "kneeYaw";
+
          case ANKLE_ROLL :
             return "ankleRoll";
 
@@ -136,6 +142,9 @@ public enum LegJointName
          case KNEE_PITCH :
             return "KneePitch";
 
+         case KNEE_YAW :
+            return "KneeYaw";
+
          case ANKLE_ROLL :
             return "AnkleRoll";
 
@@ -170,6 +179,9 @@ public enum LegJointName
 
          case KNEE_PITCH :
             return yAxis();
+
+         case KNEE_YAW :
+            return zAxis();
 
          case ANKLE_PITCH :
             return yAxis();
