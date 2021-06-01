@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
@@ -10,11 +11,13 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.MessagerHelper;
-import us.ihmc.behaviors.tools.YoVariableClientHelper;
+import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
+import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -35,6 +38,7 @@ import static us.ihmc.behaviors.BehaviorModule.API.StatusLog;
 public class GDXBehaviorsPanel
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus;
    private volatile boolean messagerConnecting = false;
@@ -47,6 +51,8 @@ public class GDXBehaviorsPanel
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
    private final ImGuiBehaviorTreePanel behaviorTreePanel = new ImGuiBehaviorTreePanel("Behavior Tree");
+   private final ImBoolean imEnabled = new ImBoolean(false);
+   private final YoBooleanClientHelper yoEnabled;
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
@@ -74,6 +80,7 @@ public class GDXBehaviorsPanel
          }
       });
       behaviorTreeStatus = behaviorHelper.subscribeViaReference(BehaviorTreeStatus, new FallbackNode());
+      yoEnabled = behaviorHelper.subscribeToYoBoolean("enabled");
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -170,6 +177,12 @@ public class GDXBehaviorsPanel
       if (messagerHelper.isConnected())
       {
 //         highestLevelUI.render();
+         if (ImGui.checkbox(labels.get("Enabled"), imEnabled))
+         {
+            yoEnabled.set(imEnabled.get());
+         }
+         ImGui.sameLine();
+         ImGui.text("Server: " + yoEnabled.get());
       }
 
       synchronized (logArray)
