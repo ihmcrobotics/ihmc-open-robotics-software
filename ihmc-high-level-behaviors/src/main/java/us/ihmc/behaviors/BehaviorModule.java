@@ -128,6 +128,7 @@ public class BehaviorModule
 
       statusLogger = new StatusLogger(messager::submitMessage);
 
+      rootNode.setName("Behavior Module");
       rootNode.addChild(new DisabledNode());
 
       BehaviorDefinition highestLevelNodeDefinition = behaviorRegistry.getHighestLevelNode();
@@ -173,6 +174,11 @@ public class BehaviorModule
 
    private class DisabledNode extends BehaviorTreeNode
    {
+      public DisabledNode()
+      {
+         setName("Disabled");
+      }
+
       @Override
       public BehaviorTreeNodeStatus tickInternal()
       {

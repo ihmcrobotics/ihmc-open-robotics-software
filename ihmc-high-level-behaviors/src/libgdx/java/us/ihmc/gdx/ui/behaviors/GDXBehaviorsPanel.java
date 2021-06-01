@@ -176,13 +176,13 @@ public class GDXBehaviorsPanel
 
       if (messagerHelper.isConnected())
       {
-//         highestLevelUI.render();
          if (ImGui.checkbox(labels.get("Enabled"), imEnabled))
          {
             yoEnabled.set(imEnabled.get());
          }
          ImGui.sameLine();
          ImGui.text("Server: " + yoEnabled.get());
+         highestLevelUI.render();
       }
 
       synchronized (logArray)
@@ -223,7 +223,7 @@ public class GDXBehaviorsPanel
 
       ImGui.end();
 
-      behaviorTreePanel.renderAsWindow(behaviorTreeStatus.get(), highestLevelUI::renderNode);
+      behaviorTreePanel.renderAsWindow(behaviorTreeStatus.get(), highestLevelUI::renderNode, highestLevelUI::getNodePosition);
    }
 
    public void connectViaKryo(String hostname)

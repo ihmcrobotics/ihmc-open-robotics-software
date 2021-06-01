@@ -11,6 +11,11 @@ public abstract class AsynchronousActionNode extends BehaviorTreeControlFlowNode
    private BehaviorTreeNodeStatus finishedStatus;
    private Thread thread;
 
+   public AsynchronousActionNode()
+   {
+      setType(AsynchronousActionNode.class);
+   }
+
    @Override
    public void startAction()
    {

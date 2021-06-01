@@ -12,6 +12,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -42,7 +43,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper behaviorHelper;
-
+   private final Point2D32 nodePosition = new Point2D32(550.0f, 0.0f);
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -135,6 +136,12 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       goalAffordance.processImGui3DViewInput(input);
    }
 
+   @Override
+   public Point2D32 getNodePosition(String nodeName)
+   {
+      return nodePosition;
+   }
+
    public void renderAsWindow()
    {
       ImGui.begin(getWindowName());
@@ -147,12 +154,11 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    {
       if (nodeName.equals(DEFINITION.getName()))
       {
-         render();
+         renderForTree();
       }
    }
 
-   @Override
-   public void render()
+   public void renderForTree()
    {
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
@@ -236,7 +242,11 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 //      {
 //         ImGui.checkbox("Show tuner", showSwingPlanningParametersTuner);
 //      }
+   }
 
+   @Override
+   public void render()
+   {
       if (showLookAndStepParametersTuner.get())
          lookAndStepParameterTuner.render();
       if (showFootstepPlanningParametersTuner.get())
