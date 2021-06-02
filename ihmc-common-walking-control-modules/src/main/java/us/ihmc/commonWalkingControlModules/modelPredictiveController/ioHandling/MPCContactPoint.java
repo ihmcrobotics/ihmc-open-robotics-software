@@ -30,8 +30,6 @@ public class MPCContactPoint
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
-   private final DMatrixRMaj accelerationIntegrationHessian;
-   private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
@@ -55,8 +53,6 @@ public class MPCContactPoint
       basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
-      accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
-      accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
 
       contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
@@ -267,16 +263,6 @@ public class MPCContactPoint
    public double getRhoNormalZ()
    {
       return rhoNormalZ;
-   }
-
-   public DMatrixRMaj getAccelerationIntegrationHessian()
-   {
-      return accelerationIntegrationHessian;
-   }
-
-   public DMatrixRMaj getAccelerationIntegrationGradient()
-   {
-      return accelerationIntegrationGradient;
    }
 
    public DMatrixRMaj getJerkIntegrationHessian()
