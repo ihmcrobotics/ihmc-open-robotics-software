@@ -22,11 +22,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointLoadStatusProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ParameterizedControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StopFlamingoRecoveryCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.PushRecoverySingleSupportToTransferToCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StartPushRecoveryCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StopPushRecoveryFromSingleSupportCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.*;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -59,8 +59,6 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusProvider
 {
@@ -232,62 +230,63 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       StateMachineFactory<PushRecoveryStateEnum, PushRecoveryState> factory = new StateMachineFactory<>(PushRecoveryStateEnum.class);
       factory.setNamePrefix("recovering").setRegistry(registry).buildYoClock(yoTime);
 
-      PushRecoveryStandingState standingState = new PushRecoveryStandingState(commandInputManager, walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
-                                                      failureDetectionControlModule, pushRecoveryControllerParameters, registry);
       TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
                                                                             failureDetectionControlModule, registry);
       factory.addState(PushRecoveryStateEnum.TO_STANDING, toStandingState);
-      factory.addState(PushRecoveryStateEnum.STANDING, standingState);
 
+      DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, pushRecoveryControllerParameters.getMinimumTransferTime());
       DoubleProvider rhoMin = () -> controllerCoreOptimizationSettings.getRhoMin();
 
-      SideDependentList<TransferToFlamingoPushRecoveryStanceState> flamingoTransferStates = new SideDependentList<>();
-
+      SideDependentList<TransferToRecoveringSingleSupportState> recoveryTransferStates = new SideDependentList<>();
       for (RobotSide transferToSide : RobotSide.values)
       {
-         PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getFlamingoTransferState(transferToSide);
-         TransferToFlamingoPushRecoveryStanceState transferState = new TransferToFlamingoPushRecoveryStanceState(stateEnum, walkingMessageHandler,
-                                                                                         controllerToolbox, managerFactory, failureDetectionControlModule, null,
-                                                                                         rhoMin, registry);
-         flamingoTransferStates.put(transferToSide, transferState);
+         PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoveryTransferState(transferToSide);
+         TransferToRecoveringSingleSupportState transferState = new TransferToRecoveringSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+                 controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+                 failureDetectionControlModule, minimumTransferTime,
+                 unloadFraction, rhoMin, registry);
+         recoveryTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
 
-      SideDependentList<PushRecoveryFlamingoStanceState> flamingoSingleSupportStates = new SideDependentList<>();
-
+      SideDependentList<RecoveringSingleSupportState> recoveringSingleSupportStates = new SideDependentList<>();
       for (RobotSide supportSide : RobotSide.values)
       {
-         PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getFlamingoSingleSupportState(supportSide);
-         PushRecoveryFlamingoStanceState singleSupportState = new PushRecoveryFlamingoStanceState(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory,
-                                                                          failureDetectionControlModule, registry);
-         flamingoSingleSupportStates.put(supportSide, singleSupportState);
+         PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide);
+         RecoveringSingleSupportState singleSupportState = new RecoveringSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+                 controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+                 failureDetectionControlModule, registry);
+         recoveringSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
       }
 
-      factory.addDoneTransition(PushRecoveryStateEnum.TO_STANDING, PushRecoveryStateEnum.STANDING);
-
-      // Setup start/stop flamingo conditions
+      // Setup start/stop push recovery conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         TransferToFlamingoPushRecoveryStanceState transferState = flamingoTransferStates.get(robotSide);
-         PushRecoveryFlamingoStanceState singleSupportState = flamingoSingleSupportStates.get(robotSide);
+         TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide);
+         SingleSupportPushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
 
          PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         // Start flamingo
-         factory.addTransition(Arrays.asList(PushRecoveryStateEnum.STANDING, PushRecoveryStateEnum.TO_STANDING), transferStateEnum,
-                               new StartFlamingoCondition(transferState.getTransferToSide(), walkingMessageHandler));
+         // Start push recovery
+         factory.addTransition(PushRecoveryStateEnum.TO_STANDING, transferStateEnum,
+                 new StartPushRecoveryCondition(transferStateEnum.getTransferToSide(), walkingMessageHandler));
 
-         // Stop flamingo
-         factory.addTransition(singleSupportStateEnum, PushRecoveryStateEnum.TO_STANDING, new StopFlamingoRecoveryCondition(singleSupportState, walkingMessageHandler));
+//         // Stop push recovery when in transfer
+//         factory.addTransition(transferStateEnum, PushRecoveryStateEnum.TO_STANDING,
+//                 new StopPushRecoveryFromTransferCondition(transferState, walkingMessageHandler));
+
+         // Stop push recovery when in single support
+         factory.addTransition(singleSupportStateEnum, PushRecoveryStateEnum.TO_STANDING,
+                 new StopPushRecoveryFromSingleSupportCondition(singleSupportState, walkingMessageHandler));
       }
 
-      // Setup tranfer to flamingo stance condition
+      // Setup push recovery transfer to single support conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         TransferToFlamingoPushRecoveryStanceState transferState = flamingoTransferStates.get(robotSide);
-         PushRecoveryFlamingoStanceState singleSupportState = flamingoSingleSupportStates.get(robotSide);
+         PushRecoveryState transferState = recoveryTransferStates.get(robotSide);
+         PushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
 
          PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
@@ -295,8 +294,33 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          factory.addDoneTransition(transferStateEnum, singleSupportStateEnum);
       }
 
+      // Setup push recovery single support to transfer conditions
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         SingleSupportPushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+         PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
+
+         // Single support to transfer with same side
+         {
+            TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide);
+            PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
+
+            factory.addTransition(singleSupportStateEnum, transferStateEnum,
+                    new PushRecoverySingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
+         }
+
+         // Single support to transfer with opposite side
+         {
+            TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide.getOppositeSide());
+            PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
+
+            factory.addTransition(singleSupportStateEnum, transferStateEnum,
+                    new PushRecoverySingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
+         }
+      }
+
       // Setup the abort condition from all states to the toStandingState
-      Set<PushRecoveryStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(PushRecoveryStateEnum.STANDING, PushRecoveryStateEnum.TO_STANDING));
+      Set<PushRecoveryStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(PushRecoveryStateEnum.TO_STANDING));
       factory.addTransition(allButStandingStates, PushRecoveryStateEnum.TO_STANDING, new AbortCondition());
 
 //      // Setup transition condition for push recovery, when recovering from double support.
@@ -392,7 +416,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
     */
    public void requestImmediateTransitionToStandingAndHoldCurrent()
    {
-      stateMachine.performTransition(PushRecoveryStateEnum.STANDING);
+//      stateMachine.performTransition(PushRecoveryStateEnum.STANDING);
 
       for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
       {
