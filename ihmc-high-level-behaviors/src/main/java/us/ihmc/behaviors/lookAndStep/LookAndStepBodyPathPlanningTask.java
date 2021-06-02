@@ -142,6 +142,11 @@ public class LookAndStepBodyPathPlanningTask
                                                                            .get()));
       }
 
+      public boolean isReset()
+      {
+         return goalInput.getLatest() == null;
+      }
+
       public void reset()
       {
          executor.interruptAndReset();

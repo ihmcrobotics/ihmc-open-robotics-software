@@ -25,6 +25,7 @@ public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasic
       {
          child.clock();
       }
+      BehaviorTreeNodeBasics.super.clock();
    }
 
    public abstract <T extends BehaviorTreeNodeBasics> T addChild(T child);

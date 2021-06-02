@@ -65,6 +65,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       helper.subscribeViaCallback(DebrisDetected, detected -> debrisDetected = detected);
       helper.subscribeViaCallback(StairsDetected, detected -> stairsDetected = detected);
       helper.subscribeViaCallback(DoorDetected, detected -> doorDetected = detected);
+      helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPose);
    }
 
    @Override
