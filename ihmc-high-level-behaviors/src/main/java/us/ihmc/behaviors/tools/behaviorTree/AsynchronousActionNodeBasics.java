@@ -14,24 +14,11 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
  * An additional clock() method is used by a node to determine that the tree has gone elsewhere and that it should abort its task and reset.
  *
  */
-public interface AsynchronousActionNodeBasics extends BehaviorTreeControlFlowNodeBasics
+public interface AsynchronousActionNodeBasics extends ResettingNodeBasics
 {
-   @Override
-   public default void clock()
-   {
-      if (getLastWasClock())
-      {
-         reset();
-      }
-
-      setLastWasClock(true);
-   }
-
    @Override
    public default BehaviorTreeNodeStatus tickInternal()
    {
-      setLastWasClock(false);
-
       if (!getHasStarted())
       {
          setHasStarted(true);
@@ -75,10 +62,6 @@ public interface AsynchronousActionNodeBasics extends BehaviorTreeControlFlowNod
    public abstract boolean getIsFinished();
 
    public abstract void setIsFinished(boolean isFinished);
-
-   public abstract boolean getLastWasClock();
-
-   public abstract void setLastWasClock(boolean lastWasClock);
 
    public abstract BehaviorTreeNodeStatus getFinishedStatus();
 

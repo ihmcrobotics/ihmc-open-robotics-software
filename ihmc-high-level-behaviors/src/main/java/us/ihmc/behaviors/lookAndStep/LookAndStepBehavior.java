@@ -3,7 +3,9 @@ package us.ihmc.behaviors.lookAndStep;
 import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -34,7 +36,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepBehavior extends AsynchronousActionNode implements BehaviorInterface
+public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
@@ -138,11 +140,7 @@ public class LookAndStepBehavior extends AsynchronousActionNode implements Behav
 
       bodyPathPlanning.initialize(this);
       helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
-      helper.subscribeViaCallback(GOAL_INPUT, goal ->
-      {
-         behaviorStateReference.broadcast();
-         bodyPathPlanning.acceptGoal(goal);
-      });
+      helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
@@ -177,22 +175,22 @@ public class LookAndStepBehavior extends AsynchronousActionNode implements Behav
       }
    }
 
-   @Override
-   public void startAction()
+   public void acceptGoal(Pose3D goal)
    {
-
+      behaviorStateReference.broadcast();
+      bodyPathPlanning.acceptGoal(goal);
    }
 
    @Override
-   public BehaviorTreeNodeStatus doActionInternal()
+   public BehaviorTreeNodeStatus tickInternal()
    {
-      return null;
+      return BehaviorTreeNodeStatus.RUNNING;
    }
 
    @Override
-   public void resetInternal()
+   public void reset()
    {
-
+      reset.queueReset();
    }
 
    @Override
