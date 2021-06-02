@@ -12,6 +12,8 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
+import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.Axis3D;
@@ -23,9 +25,9 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.GDXPose3DWidget;
 import us.ihmc.log.LogTools;
@@ -53,6 +55,17 @@ public class GDXEnvironment implements RenderableProvider
    private final Quaternion tempOrientation = new Quaternion();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final Point3D tempIntersection = new Point3D();
+   private GDXDoorSimulator doorSimulator;
+
+   public GDXEnvironment()
+   {
+
+   }
+
+   public GDXEnvironment(RemoteSyncedRobotModel syncedRobot, CommunicationHelper helper)
+   {
+      doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
+   }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -153,8 +166,12 @@ public class GDXEnvironment implements RenderableProvider
             objectToPlace = new GDXLabFloorObject();
          if (ImGui.button("Place Pallet"))
             objectToPlace = new GDXPalletObject();
-         if (ImGui.button("Place Door Only"))
-            objectToPlace = new GDXDoorOnlyObject();
+         if (ImGui.button("Place Push Door Only"))
+         {
+            objectToPlace = new GDXPushDoorOnlyObject();
+            if (doorSimulator != null)
+               doorSimulator.setDoor(objectToPlace);
+         }
 //         if (ImGui.button("Place Door Frame"))
 //            objectToPlace = new GDXDoorFrameObject();
       }
@@ -220,7 +237,7 @@ public class GDXEnvironment implements RenderableProvider
             {
                ObjectNode objectNode = objectsArrayNode.addObject();
                objectNode.put("type", object.getClass().getSimpleName());
-               GDXTools.toEuclid(object.getRealisticModelInstance().transform, tempTransform);
+               tempTransform.set(object.getObjectTransform());
                tempTranslation.set(tempTransform.getTranslation());
                tempOrientation.set(tempTransform.getRotation());
                objectNode.put("x", tempTranslation.getX());
@@ -239,6 +256,9 @@ public class GDXEnvironment implements RenderableProvider
       if (show3DWidgetTuner.get())
          pose3DWidget.renderImGuiTuner();
 
+      if (doorSimulator != null)
+         doorSimulator.renderImGuiWidgets();
+
       ImGui.end();
    }
 
@@ -248,6 +268,8 @@ public class GDXEnvironment implements RenderableProvider
       objects.clear();
       selectedObject = null;
       intersectedObject = null;
+      if (doorSimulator != null)
+         doorSimulator.setDoor(null);
 
       if (loadedFilesOnce)
       {
@@ -270,6 +292,11 @@ public class GDXEnvironment implements RenderableProvider
                tempTransform.set(tempOrientation, tempTranslation);
                object.set(tempTransform);
                objects.add(object);
+
+               if (object instanceof GDXPushDoorOnlyObject && doorSimulator != null)
+               {
+                  doorSimulator.setDoor(object);
+               }
             }
          });
       }
@@ -324,8 +351,19 @@ public class GDXEnvironment implements RenderableProvider
       }
    }
 
+   public void destroy()
+   {
+      if (doorSimulator != null)
+         doorSimulator.destroy();
+   }
+
    public String getWindowName()
    {
       return WINDOW_NAME;
+   }
+
+   public GDXDoorSimulator getDoorSimulator()
+   {
+      return doorSimulator;
    }
 }

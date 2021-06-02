@@ -15,7 +15,7 @@ import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXDoorOnlyObject;
+import us.ihmc.gdx.simulation.environment.object.objects.GDXPushDoorOnlyObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
@@ -33,7 +33,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXLookAndStepBehaviorUI lookAndStepUI;
    private final ImGuiGDXTraverseStairsBehaviorUI traverseStairsUI;
    private final Point2D nodePosition = new Point2D(280.0, 0.0);
-   private GDXDoorOnlyObject door;
+   private GDXPushDoorOnlyObject door;
    private ImGuiLabelMap labels = new ImGuiLabelMap();
    private String[] stateNames = new String[BuildingExplorationStateName.values().length];
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
@@ -75,7 +75,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
       baseUI.getSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
 
-      door = new GDXDoorOnlyObject();
+      door = new GDXPushDoorOnlyObject();
 
       lookAndStepUI.create(baseUI);
    }

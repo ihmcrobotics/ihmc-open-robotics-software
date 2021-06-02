@@ -220,9 +220,9 @@ public class GDXEnvironmentObject
       {
          return new GDXPalletObject();
       }
-      else if (objectClassName.equals(GDXDoorOnlyObject.class.getSimpleName()))
+      else if (objectClassName.equals(GDXPushDoorOnlyObject.class.getSimpleName()))
       {
-         return new GDXDoorOnlyObject();
+         return new GDXPushDoorOnlyObject();
       }
       else if (objectClassName.equals(GDXDoorFrameObject.class.getSimpleName()))
       {

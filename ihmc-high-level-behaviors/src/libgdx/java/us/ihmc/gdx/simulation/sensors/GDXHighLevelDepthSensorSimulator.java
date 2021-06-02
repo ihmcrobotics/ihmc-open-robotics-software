@@ -441,6 +441,16 @@ catch (IndexOutOfBoundsException e)
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
    }
 
+   public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)
+   {
+      this.renderDepthVideoDirectly.set(renderDepthVideoDirectly);
+   }
+
+   public void setRenderColorVideoDirectly(boolean renderColorVideoDirectly)
+   {
+      this.renderColorVideoDirectly.set(renderColorVideoDirectly);
+   }
+
    public void setPublishDepthImageROS1(boolean publish)
    {
       publishDepthImageROS1.set(publish);
