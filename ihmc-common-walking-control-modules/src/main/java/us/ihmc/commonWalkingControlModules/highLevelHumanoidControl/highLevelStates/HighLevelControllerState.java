@@ -9,6 +9,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class HighLevelControllerState implements State, JointLoadStatusProvider
 {
@@ -18,6 +19,8 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
 
    private final HighLevelControllerName highLevelControllerName;
    protected final OneDoFJointBasics[] controlledJoints;
+
+   protected YoBoolean requestTransitionToPushRecovery;
 
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
                                    OneDoFJointBasics[] controlledJoints)
@@ -31,6 +34,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
       this.controlledJoints = controlledJoints;
+      requestTransitionToPushRecovery = new YoBoolean(stateEnum+"requestTransitionToPushRecovery", registry);
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
    }
 
@@ -72,7 +76,10 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    @Override
    public boolean isDone(double timeInState)
    {
-      return false;
+      boolean decision =requestTransitionToPushRecovery.getBooleanValue();
+      if(decision)
+         System.out.println("must exit walking");
+      return decision;
    }
 
    /**

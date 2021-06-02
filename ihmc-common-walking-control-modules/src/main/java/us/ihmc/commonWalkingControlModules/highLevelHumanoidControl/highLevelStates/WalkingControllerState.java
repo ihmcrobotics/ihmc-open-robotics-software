@@ -170,6 +170,9 @@ public class WalkingControllerState extends HighLevelControllerState
    public void doAction(double timeInState)
    {
       walkingController.doAction();
+      requestTransitionToPushRecovery.set(walkingController.isRobotFalling());
+      if(requestTransitionToPushRecovery.getBooleanValue())
+         isDone(timeInState);
 
       linearMomentumRateControlModule.setInputFromWalkingStateMachine(walkingController.getLinearMomentumRateControlModuleInput());
       if (!linearMomentumRateControlModule.computeControllerCoreCommands())
@@ -224,6 +227,7 @@ public class WalkingControllerState extends HighLevelControllerState
    public void onExit()
    {
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.UNKNOWN);
+      requestTransitionToPushRecovery.set(false);
    }
 
    @Override
