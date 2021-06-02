@@ -55,13 +55,13 @@ public class IntegrationInputCalculatorTest
       DMatrixRMaj calculatedHessian = new DMatrixRMaj(accelerationIntegrationHessian);
       DMatrixRMaj calculatedGradient = new DMatrixRMaj(accelerationIntegrationGradient);
 
-      IntegrationInputCalculator.computeNormalAccelerationTrackingMatrix(0,
-                                                                         calculatedGradient,
-                                                                         calculatedHessian,
-                                                                         contactPlane,
-                                                                         duration,
-                                                                         omega,
-                                                                         goalValueForPoint);
+      IntegrationInputCalculator.computeForceTrackingMatrix(0,
+                                                            calculatedGradient,
+                                                            calculatedHessian,
+                                                            contactPlane,
+                                                            duration,
+                                                            omega,
+                                                            goalValueForPoint);
 
       double tEnd = duration;
       double tStart = 0.0;
@@ -175,9 +175,168 @@ public class IntegrationInputCalculatorTest
       for (double time = 0; time <= duration; time += 0.05)
       {
          contactPlane.computeContactForce(omega, time);
-         FrameVector3DReadOnly acceleration = contactPlane.getContactAcceleration();
+         FrameVector3DReadOnly acceleration = contactPlane.getContactJerk();
          assertEquals(goalValueForPoint, acceleration.getZ(), 1e-3);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceForPoint, acceleration, 1e-3);
+      }
+   }
+
+   @Test
+   public void testComputeForceRateIntegration()
+   {
+      int numberOfBasisVectorsPerContactPoint = 2;
+      MPCContactPlane contactPlane = new MPCContactPlane(1, numberOfBasisVectorsPerContactPoint, new ZeroConeRotationCalculator());
+      double mu = 0.8;
+
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      polygon.addVertex(0.0, 0.0);
+      polygon.update();
+      FramePose3D pose = new FramePose3D();
+      pose.getPosition().set(2.5, 1.5, 0.0);
+      contactPlane.computeBasisVectors(polygon, pose, mu);
+
+      double omega = 3.0;
+      double duration = 0.7;
+      double goalValueForPoint = 0.2;
+      Vector3D goalForceForPoint = new Vector3D(0.0, 0.0, goalValueForPoint);
+
+      DMatrixRMaj accelerationIntegrationHessian = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho,
+                                                                   numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho);
+      DMatrixRMaj accelerationIntegrationGradient = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho, 1);
+
+      DMatrixRMaj calculatedHessian = new DMatrixRMaj(accelerationIntegrationHessian);
+      DMatrixRMaj calculatedGradient = new DMatrixRMaj(accelerationIntegrationGradient);
+
+      IntegrationInputCalculator.computeForceRateTrackingMatrix(0,
+                                                            calculatedGradient,
+                                                            calculatedHessian,
+                                                            contactPlane,
+                                                            duration,
+                                                            omega,
+                                                            goalValueForPoint);
+
+      double tEnd = duration;
+      double tStart = 0.0;
+
+      double c00 = computeC00Rate(omega, tEnd) - computeC00Rate(omega, tStart);
+      double c01 = computeC01Rate(omega, tEnd) - computeC01Rate(omega, tStart);
+      double c02 = computeC02Rate(omega, tEnd) - computeC02Rate(omega, tStart);
+      double c03 = 0.0;
+      double c11 = computeC11Rate(omega, tEnd) - computeC11Rate(omega, tStart);
+      double c12 = computeC12Rate(omega, tEnd) - computeC12Rate(omega, tStart);
+      double c13 = 0.0;
+      double c22 = computeC22Rate(tEnd) - computeC22Rate(tStart);
+      double c23 = 0.0;
+      double c33 = 0.0;
+
+      double g0 = computeG0Rate(omega, tEnd , 1.0) - computeG0Rate(omega, tStart, 1.0);
+      double g1 = computeG1Rate(omega, tEnd , 1.0) - computeG1Rate(omega, tStart, 1.0);
+      double g2 = computeG2Rate(tEnd , 1.0) - computeG2Rate(tStart, 1.0);
+      double g3 = 0.0;
+
+      for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
+      {
+         int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
+
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
+
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1,  c01);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2,  c02);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 3,  c03);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI,  c01);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 3, c13);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI, c02);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 3, c23);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI, c03);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 1, c13);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 2, c23);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 3, c33);
+
+         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
+         {
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+
+            double basisDot = basisVectorI.dot(basisVectorJ);
+
+            int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
+
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ, basisDot * c00);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ + 1, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ + 2, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ + 3, basisDot * c03);
+
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ + 3, basisDot * c13);
+
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ + 3, basisDot * c23);
+
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ + 1, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ + 2, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ + 3, basisDot * c33);
+
+            // we know it's symmetric, and this way we can avoid iterating as much
+
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI, basisDot * c00);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI + 1, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI + 2, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI + 3, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI + 3, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI + 3, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 1, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 2, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 3, basisDot * c33);
+         }
+
+         double goal = basisVectorI.dot(goalForceForPoint);
+
+         accelerationIntegrationGradient.unsafe_set(startIdxI, 0, g0 * goal);
+         accelerationIntegrationGradient.unsafe_set(startIdxI + 1, 0, g1 * goal);
+         accelerationIntegrationGradient.unsafe_set(startIdxI + 2, 0, g2 * goal);
+         accelerationIntegrationGradient.unsafe_set(startIdxI + 3, 0, g3 * goal);
+      }
+      CommonOps_DDRM.scale(-1.0, accelerationIntegrationGradient);
+
+
+      MatrixTestTools.assertMatrixEquals(accelerationIntegrationHessian, calculatedHessian, 1e-5);
+      MatrixTestTools.assertMatrixEquals(accelerationIntegrationGradient, calculatedGradient, 1e-5);
+
+      for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
+      {
+         int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 3, 1.0);
+      }
+
+      SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
+      solver.setQuadraticCostFunction(accelerationIntegrationHessian, accelerationIntegrationGradient, 0.0);
+      DMatrixRMaj solution = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho, 1);
+      solver.solve(solution);
+
+      contactPlane.computeContactForceCoefficientMatrix(solution, 0);
+
+      for (double time = 0; time <= duration; time += 0.05)
+      {
+         contactPlane.computeContactForce(omega, time);
+         FrameVector3DReadOnly jerk = contactPlane.getContactJerk();
+         assertEquals(goalValueForPoint, jerk.getZ(), 1e-3);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceForPoint, jerk, 1e-3);
       }
    }
 
@@ -493,5 +652,50 @@ public class IntegrationInputCalculatorTest
    private static double computeG3(double time, double goal)
    {
       return 2.0 * goal * time;
+   }
+
+   private static double computeC00Rate(double omega, double time)
+   {
+      return MathTools.pow(omega, 8) / 2.0 * Math.exp(2.0 * omega * time);
+   }
+
+   private static double computeC01Rate(double omega, double time)
+   {
+      return -MathTools.pow(omega, 9) * time;
+   }
+
+   private static double computeC02Rate(double omega, double time)
+   {
+      return 6.0 * omega * omega * Math.exp(omega * time);
+   }
+
+   private static double computeC11Rate(double omega, double time)
+   {
+      return -MathTools.pow(omega, 8) / 2.0 * Math.exp(-2.0 * time * omega);
+   }
+
+   private static double computeC12Rate(double omega, double time)
+   {
+      return 6.0 * omega * omega * Math.exp(-omega * time);
+   }
+
+   private static double computeC22Rate(double time)
+   {
+      return 36.0 * time;
+   }
+
+   private static double computeG0Rate(double omega, double time, double goal)
+   {
+      return omega * omega * goal * Math.exp(omega * time);
+   }
+
+   private static double computeG1Rate(double omega, double time, double goal)
+   {
+      return omega * omega * goal * Math.exp(-omega * time);
+   }
+
+   private static double computeG2Rate(double time, double goal)
+   {
+      return 6.0 * goal * time;
    }
 }
