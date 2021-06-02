@@ -238,7 +238,7 @@ public abstract class PushRecoveryTransferState extends PushRecoveryState
 
    public boolean isInitialTransfer()
    {
-      return getPreviousWalkingStateEnum() == PushRecoveryStateEnum.STANDING;
+      return false;  //TODO check
    }
 
    @Override
