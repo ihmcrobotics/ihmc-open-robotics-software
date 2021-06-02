@@ -45,6 +45,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
    @Override
    public void dispose()
    {
+      environment.destroy();
       baseUI.dispose();
    }
 

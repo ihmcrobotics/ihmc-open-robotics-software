@@ -1,8 +1,5 @@
 package us.ihmc.gdx.simulation;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
@@ -11,9 +8,8 @@ import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
-import us.ihmc.gdx.simulation.environment.object.objects.GDXDoorOnlyObject;
+import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.affordances.GDXPoseModifiableObject;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -25,7 +21,7 @@ public class GDXDoorSimulator
    private final ImBoolean enabled = new ImBoolean(false);
    private final PausablePeriodicThread pausablePeriodicThread;
 
-   private final GDXPoseModifiableObject modifiableDoor = new GDXPoseModifiableObject();
+   private GDXEnvironmentObject door;
 
    public GDXDoorSimulator(RemoteSyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
@@ -37,44 +33,53 @@ public class GDXDoorSimulator
       // animate door yaw when hand touches
    }
 
+   // TODO: Maybe accept id with door and support multiple doors
+   public void setDoor(GDXEnvironmentObject door)
+   {
+      this.door = door;
+   }
+
    private void update()
    {
-      helper.publish(ROS2Tools::getDoorLocationTopic,
-                     HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(modifiableDoor.getObject().getObjectTransform()),
-                                                                   DoorLocationPacket.PUSH_HANDLE_RIGHT));
+      if (door != null)
+      {
+         helper.publish(ROS2Tools::getDoorLocationTopic,
+                        HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(door.getObjectTransform()), DoorLocationPacket.PUSH_HANDLE_RIGHT));
+      }
    }
 
    public void create(GDXImGuiBasedUI baseUI)
    {
-      modifiableDoor.create(baseUI, new GDXDoorOnlyObject());
    }
 
    public void renderImGuiWindow()
    {
       ImGui.begin(windowName);
-      if (ImGui.checkbox(labels.get("Enabled"), enabled))
-      {
-         pausablePeriodicThread.setRunning(enabled.get());
-      }
+      renderImGuiWidgets();
       ImGui.end();
+   }
+
+   public void renderImGuiWidgets()
+   {
+      if (door == null)
+      {
+         ImGui.text("No door in scene.");
+         enabled.set(false);
+         pausablePeriodicThread.setRunning(false);
+      }
+      else
+      {
+         if (ImGui.checkbox(labels.get("Door simulator enabled"), enabled))
+         {
+            pausablePeriodicThread.setRunning(enabled.get());
+         }
+      }
    }
 
    public void setEnabled(boolean enabled)
    {
       this.enabled.set(enabled);
       pausablePeriodicThread.setRunning(enabled);
-   }
-
-   public void getRealRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (enabled.get())
-         modifiableDoor.getRealRenderables(renderables, pool);
-   }
-
-   public void getVirtualRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-      if (enabled.get())
-         modifiableDoor.getVirtualRenderables(renderables, pool);
    }
 
    public void destroy()

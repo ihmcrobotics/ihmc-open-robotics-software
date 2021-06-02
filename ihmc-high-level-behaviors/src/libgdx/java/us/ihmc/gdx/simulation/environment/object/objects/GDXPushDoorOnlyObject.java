@@ -14,11 +14,11 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXDoorOnlyObject extends GDXEnvironmentObject
+public class GDXPushDoorOnlyObject extends GDXEnvironmentObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   public GDXDoorOnlyObject()
+   public GDXPushDoorOnlyObject()
    {
       Model realisticModel = GDXModelLoader.loadG3DModel("door/DoorOnly.g3dj");
 
@@ -50,8 +50,8 @@ public class GDXDoorOnlyObject extends GDXEnvironmentObject
    }
 
    @Override
-   public GDXDoorOnlyObject duplicate()
+   public GDXPushDoorOnlyObject duplicate()
    {
-      return new GDXDoorOnlyObject();
+      return new GDXPushDoorOnlyObject();
    }
 }
