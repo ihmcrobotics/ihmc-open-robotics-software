@@ -66,16 +66,11 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
    {
       toRender = () ->
       {
-         LogTools.info("PoseStamped Rendered: {} {} {}",
-                       pose.getPose().getPosition().getX(),
-                       pose.getPose().getPosition().getY(),
-                       pose.getPose().getPosition().getZ());
          modelInstance = GDXModelPrimitives.createCoordinateFrameInstance(0.1);
          modelInstance.transform.translate((float) pose.getPose().getPosition().getX(),
                                            (float) pose.getPose().getPosition().getY(),
                                            (float) pose.getPose().getPosition().getZ());
          poseModels.add(modelInstance);
-         LogTools.info("Total Instance: {}", poseModels.size());
       };
    }
 
