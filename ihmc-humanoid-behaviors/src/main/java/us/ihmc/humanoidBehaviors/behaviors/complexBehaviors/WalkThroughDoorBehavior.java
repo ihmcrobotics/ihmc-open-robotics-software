@@ -494,13 +494,20 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                                             -0.7043244487834723,
                                                                             0.7098782069467541));
             
-            FootstepDataMessage fs2 = createRelativeFootStep(doorPose,
+           /* FootstepDataMessage fs2 = createRelativeFootStep(doorPose,
                                                              startStep.getOppositeSide(),
                                                              new Point3D(0.966,  0.846,  0.092),
                                                              new Quaternion(-4.624094786785623E-5,
                                                                             3.113506928734585E-6,
                                                                             -0.7043244487834723,
-                                                                            0.7098782069467541));
+                                                                            0.7098782069467541));*/
+            FootstepDataMessage fs2 = createRelativeFootStep(doorPose,
+                                                             startStep.getOppositeSide(),
+                                                             new Point3D(0.966,  0.846,  0.092),
+                                                             new Quaternion(0,
+                                                                            0,
+                                                                            -0.866,
+                                                                            0.5));
             
 
             message.getFootstepDataList().add().set(fs1);
@@ -649,7 +656,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                             WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
                             t -> setUpForWalk.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
 
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughPushDoorPlannedAction, WalkThroughDoorBehaviorState.MOVE_ARMS_BEFORE_RESET);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.MOVE_ARMS_BEFORE_RESET);
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.MOVE_ARMS_BEFORE_RESET, preResetArmPoses, WalkThroughDoorBehaviorState.RESET_ROBOT);
 
