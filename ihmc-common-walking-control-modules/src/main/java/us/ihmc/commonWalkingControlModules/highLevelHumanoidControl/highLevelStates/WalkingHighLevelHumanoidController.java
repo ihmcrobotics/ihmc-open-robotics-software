@@ -672,6 +672,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
    }
 
+   public boolean isRobotFalling()
+   {
+      return failureDetectionControlModule.isRobotFalling();
+   }
+
    public void updateManagers(WalkingState currentState)
    {
       desiredCoMVelocityAsFrameVector.setIncludingFrame(balanceManager.getDesiredCoMVelocity());
