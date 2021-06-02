@@ -35,7 +35,9 @@ public class MPCContactPoint
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
 
    private final FrameVector3D contactAcceleration = new FrameVector3D();
+   private final FrameVector3D contactJerk = new FrameVector3D();
    private final FrameVector3D[] basisMagnitudes;
+   private final FrameVector3D[] basisRates;
    private final DMatrixRMaj[] basisCoefficients;
 
    private ContactPointForceViewer viewer;
@@ -50,6 +52,7 @@ public class MPCContactPoint
       basisVectorsInWorld = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisVectorsInPlaneFrame = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisMagnitudes = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
+      basisRates = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
@@ -62,6 +65,7 @@ public class MPCContactPoint
          basisVectorsInWorld[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
          basisVectorsInPlaneFrame[i] = new FrameVector3D(planeFrame);
          basisMagnitudes[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
+         basisRates[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
          basisCoefficients[i] = new DMatrixRMaj(1, 4);
       }
 
@@ -317,6 +321,7 @@ public class MPCContactPoint
    public void computeContactForce(double omega, double time)
    {
       double omega2 = omega * omega;
+      double omega3 = omega * omega2;
       double exponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
       double negativeExponential = 1.0 / exponential;
       double a0 = omega2 * exponential;
@@ -324,7 +329,12 @@ public class MPCContactPoint
       double a2 = 6.0 * time;
       double a3 = 2.0;
 
+      double aDot0 = omega3 * exponential;
+      double aDot1 = -omega3 * negativeExponential;
+      double aDot2 = 6.0;
+
       contactAcceleration.setToZero();
+      contactJerk.setToZero();
 
       for (int rhoIdx = 0; rhoIdx < numberOfBasisVectorsPerContactPoint; rhoIdx++)
       {
@@ -333,8 +343,15 @@ public class MPCContactPoint
          rhoValue += a2 * basisCoefficients[rhoIdx].get(0, 2);
          rhoValue += a3 * basisCoefficients[rhoIdx].get(0, 3);
 
+         double rhoRate = aDot0 * basisCoefficients[rhoIdx].get(0, 0);
+         rhoRate += aDot1 * basisCoefficients[rhoIdx].get(0, 1);
+         rhoRate += aDot2 * basisCoefficients[rhoIdx].get(0, 2);
+
          basisMagnitudes[rhoIdx].setAndScale(rhoValue, basisVectorsInWorld[rhoIdx]);
+         basisRates[rhoIdx].setAndScale(rhoRate, basisVectorsInWorld[rhoIdx]);
+
          contactAcceleration.add(basisMagnitudes[rhoIdx]);
+         contactJerk.add(basisRates[rhoIdx]);
       }
 
       if (viewer != null)
@@ -355,6 +372,11 @@ public class MPCContactPoint
    public FrameVector3DReadOnly getContactAcceleration()
    {
       return contactAcceleration;
+   }
+
+   public FrameVector3DReadOnly getContactJerk()
+   {
+      return contactJerk;
    }
 
    @Override

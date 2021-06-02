@@ -310,6 +310,10 @@ public class LinearMPCQPSolver
             break;
          case FORCE_TRACKING:
             submitForceTrackingCommand((ForceTrackingCommand) command);
+            break;
+         case FORCE_RATE_TRACKING:
+            submitForceRateTrackingCommand((ForceRateTrackingCommand) command);
+            break;
          case RHO_TRACKING:
             submitRhoTrackingCommand((RhoTrackingCommand) command);
             break;
@@ -370,6 +374,13 @@ public class LinearMPCQPSolver
    public void submitForceTrackingCommand(ForceTrackingCommand command)
    {
       int offset = inputCalculator.calculateForceTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC);
+   }
+
+   public void submitForceRateTrackingCommand(ForceRateTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateForceRateTrackingObjective(qpInputTypeC, command);
       if (offset != -1)
          addInput(qpInputTypeC);
    }

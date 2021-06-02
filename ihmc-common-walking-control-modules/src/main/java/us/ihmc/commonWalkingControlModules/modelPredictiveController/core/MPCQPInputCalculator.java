@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
-import us.ihmc.matrixlib.MatrixTools;
 
 /**
  * This is a helper class that is meant to convert {@link MPCCommand}s to QP inputs that can be consumed by quadratic program solver.
@@ -377,13 +376,48 @@ public class MPCQPInputCalculator
       {
          MPCContactPlane contactPlane = objective.getContactPlaneHelper(i);
 
-         IntegrationInputCalculator.computeNormalAccelerationTrackingMatrix(startCol,
-                                                                            inputToPack.getDirectCostGradient(),
-                                                                            inputToPack.getDirectCostHessian(),
-                                                                            contactPlane,
-                                                                            duration,
-                                                                            objective.getOmega(),
-                                                                            objective.getObjectiveValue());
+         IntegrationInputCalculator.computeForceTrackingMatrix(startCol,
+                                                               inputToPack.getDirectCostGradient(),
+                                                               inputToPack.getDirectCostHessian(),
+                                                               contactPlane,
+                                                               duration,
+                                                               objective.getOmega(),
+                                                               objective.getObjectiveValue());
+
+         startCol += contactPlane.getCoefficientSize();
+      }
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+   }
+
+   public int calculateForceRateTrackingObjective(QPInputTypeC inputToPack, ForceRateTrackingCommand objective)
+   {
+      int segmentNumber = objective.getSegmentNumber();
+
+      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber));
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      double weight = objective.getWeight();
+      double duration = objective.getSegmentDuration();
+
+      int startCol = 0;
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         MPCContactPlane contactPlane = objective.getContactPlaneHelper(i);
+
+         IntegrationInputCalculator.computeForceRateTrackingMatrix(startCol,
+                                                               inputToPack.getDirectCostGradient(),
+                                                               inputToPack.getDirectCostHessian(),
+                                                               contactPlane,
+                                                               duration,
+                                                               objective.getOmega(),
+                                                               objective.getObjectiveValue());
 
          startCol += contactPlane.getCoefficientSize();
       }

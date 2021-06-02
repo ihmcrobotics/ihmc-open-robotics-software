@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -28,6 +29,8 @@ public class MPCContactPlane
    private final MPCContactPoint[] contactPoints;
    private final PoseReferenceFrame planeFrame;
 
+   private final FrameVector3D contactAcceleration = new FrameVector3D();
+   private final FrameVector3D contactJerk = new FrameVector3D();
    private final FrictionConeRotationCalculator coneRotationCalculator;
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
@@ -299,8 +302,24 @@ public class MPCContactPlane
 
    public void computeContactForce(double omega, double time)
    {
+      contactAcceleration.setToZero();
+      contactJerk.setToZero();
       for (int i = 0; i < numberOfContactPoints; i++)
+      {
          contactPoints[i].computeContactForce(omega, time);
+         contactAcceleration.add(contactPoints[i].getContactAcceleration());
+         contactJerk.add(contactPoints[i].getContactJerk());
+      }
+   }
+
+   public FrameVector3DReadOnly getContactAcceleration()
+   {
+      return contactAcceleration;
+   }
+
+   public FrameVector3DReadOnly getContactJerk()
+   {
+      return contactJerk;
    }
 
    public void clearViz()

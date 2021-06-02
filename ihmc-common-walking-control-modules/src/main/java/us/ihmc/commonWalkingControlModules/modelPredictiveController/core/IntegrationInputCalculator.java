@@ -96,13 +96,13 @@ public class IntegrationInputCalculator
       }
    }
 
-   public static void computeNormalAccelerationTrackingMatrix(int startCol,
-                                                              DMatrixRMaj gradientToPack,
-                                                              DMatrixRMaj hessianToPack,
-                                                              MPCContactPlane contactPlane,
-                                                              double duration,
-                                                              double omega,
-                                                              double goalNormalForce)
+   public static void computeForceTrackingMatrix(int startCol,
+                                                 DMatrixRMaj gradientToPack,
+                                                 DMatrixRMaj hessianToPack,
+                                                 MPCContactPlane contactPlane,
+                                                 double duration,
+                                                 double omega,
+                                                 double goalNormalForce)
    {
       duration = Math.min(duration, sufficientlyLongTime);
 
@@ -204,6 +204,90 @@ public class IntegrationInputCalculator
          gradientToPack.unsafe_set(startIdxI + 1, 0, -g1 * basisValue);
          gradientToPack.unsafe_set(startIdxI + 2, 0, -g2 * basisValue);
          gradientToPack.unsafe_set(startIdxI + 3, 0, -g3 * basisValue);
+      }
+   }
+
+   public static void computeForceRateTrackingMatrix(int startCol,
+                                                 DMatrixRMaj gradientToPack,
+                                                 DMatrixRMaj hessianToPack,
+                                                 MPCContactPlane contactPlane,
+                                                 double duration,
+                                                 double omega,
+                                                 double goalNormalForceRate)
+   {
+      duration = Math.min(duration, sufficientlyLongTime);
+
+      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
+      double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
+      double negativeExponential = 1.0 / positiveExponential;
+      double negativeExponential2 = negativeExponential * negativeExponential;
+      double omega2 = omega * omega;
+      double omega4 = omega2 * omega2;
+      double omega8 = omega4 * omega4;
+      double omega9 = omega8 * omega;
+
+      double c00 = omega8 / 2.0 * (positiveExponential2 - 1.0);
+      double c01 = -omega9 * duration;
+      double c02 = 6.0 * omega2 * (positiveExponential - 1.0);
+      double c11 = -omega8 / 2.0 * (negativeExponential2 - 1.0);
+      double c12 = 6.0 * omega2 * (negativeExponential - 1.0);
+      double c22 = 36.0 * duration;
+
+      double g0 = omega2 * (positiveExponential - 1.0);
+      double g1 = omega2 * (negativeExponential - 1.0);
+      double g2 = 6.0 * duration;
+
+      for (int basisVectorIndexI = 0; basisVectorIndexI < contactPlane.getRhoSize(); basisVectorIndexI++)
+      {
+         int startIdxI = startCol + basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
+
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
+
+         hessianToPack.unsafe_set(startIdxI, startIdxI, c00);
+         hessianToPack.unsafe_set(startIdxI, startIdxI + 1, c01);
+         hessianToPack.unsafe_set(startIdxI, startIdxI + 2, c02);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI, c01);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
+         hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI, c02);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
+         hessianToPack.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
+
+         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < contactPlane.getRhoSize(); basisVectorIndexJ++)
+         {
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+
+            double basisDot = basisVectorI.dot(basisVectorJ);
+
+            int startIdxJ = startCol + basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
+
+            hessianToPack.unsafe_set(startIdxI, startIdxJ, basisDot * c00);
+            hessianToPack.unsafe_set(startIdxI, startIdxJ + 1, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxI, startIdxJ + 2, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+
+            // we know it's symmetric, and this way we can avoid iterating as much
+            hessianToPack.unsafe_set(startIdxJ, startIdxI, basisDot * c00);
+            hessianToPack.unsafe_set(startIdxJ, startIdxI + 1, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxJ, startIdxI + 2, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+         }
+
+         double basisValue = basisVectorI.getZ() * goalNormalForceRate;
+
+         gradientToPack.unsafe_set(startIdxI, 0, -g0 * basisValue);
+         gradientToPack.unsafe_set(startIdxI + 1, 0, -g1 * basisValue);
+         gradientToPack.unsafe_set(startIdxI + 2, 0, -g2 * basisValue);
       }
    }
 }
