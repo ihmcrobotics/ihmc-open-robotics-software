@@ -32,8 +32,6 @@ public class MPCContactPlane
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
 
-   private final DMatrixRMaj accelerationIntegrationHessian;
-   private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
    private ContactPlaneForceViewer viewer;
@@ -58,8 +56,6 @@ public class MPCContactPlane
 
       int coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
-      accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
-      accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
 
       contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
@@ -123,29 +119,6 @@ public class MPCContactPlane
       return contactPoints[index].getRhoNormalZ();
    }
 
-   /**
-    * Gets the quadratic cost hessian for the cost term that aims at tracking a desired acceleration value over the segment duration.
-    * <p>
-    * The returned matrix should always be square of size {@link #getCoefficientSize()}.
-    *
-    * @return quadratic cost hessian.
-    */
-   public DMatrixRMaj getAccelerationIntegrationHessian()
-   {
-      return accelerationIntegrationHessian;
-   }
-
-   /**
-    * Gets the quadratic cost gradient for the cost term that aims at tracking a desired acceleration value over the segment duration.
-    * <p>
-    * The returned matrix should always be a vector of size {@link #getCoefficientSize()}.
-    *
-    * @return quadratic cost gradient.
-    */
-   public DMatrixRMaj getAccelerationIntegrationGradient()
-   {
-      return accelerationIntegrationGradient;
-   }
 
    private final Point3D point = new Point3D();
 
@@ -249,48 +222,6 @@ public class MPCContactPlane
       }
 
       return null;
-   }
-
-
-   /**
-    * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the plane over
-    * some time
-    *
-    * @param duration duration for the integration
-    * @param omega time constant for the motion function
-    * @param goalValueForPlane nominal value for the acceleration to track.
-    */
-   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPlane)
-   {
-      double goalValueForPoint = goalValueForPlane / numberOfContactPoints;
-      int startIdx = 0;
-      for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
-      {
-         MPCContactPoint contactPoint = contactPoints[contactPointIdx];
-//         contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValueForPoint);
-
-         MatrixTools.setMatrixBlock(accelerationIntegrationHessian,
-                                    startIdx,
-                                    startIdx,
-                                    contactPoint.getAccelerationIntegrationHessian(),
-                                    0,
-                                    0,
-                                    contactPoint.getCoefficientsSize(),
-                                    contactPoint.getCoefficientsSize(),
-                                    1.0);
-
-         MatrixTools.setMatrixBlock(accelerationIntegrationGradient,
-                                    startIdx,
-                                    0,
-                                    contactPoint.getAccelerationIntegrationGradient(),
-                                    0,
-                                    0,
-                                    contactPoint.getCoefficientsSize(),
-                                    1,
-                                    1.0);
-
-         startIdx += contactPoint.getCoefficientsSize();
-      }
    }
 
    /**

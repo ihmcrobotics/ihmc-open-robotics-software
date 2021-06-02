@@ -79,14 +79,11 @@ public class MPCContactHandler
          }
 
          List<MPCContactPlane> contactPlanes = contactData.getPlanes();
-         double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
-         double duration = contact.getTimeInterval().getDuration();
 
          for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
          {
             MPCContactPlane contactPlane = contactPlanes.get(contactId);
             contactPlane.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
-            contactPlane.computeAccelerationIntegrationMatrix(duration, omega, objectiveForce);
          }
 
          this.contactPlanes.add(contactPlanes);

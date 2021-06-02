@@ -355,7 +355,7 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
 
       return true;
-      
+
        */
    }
 
