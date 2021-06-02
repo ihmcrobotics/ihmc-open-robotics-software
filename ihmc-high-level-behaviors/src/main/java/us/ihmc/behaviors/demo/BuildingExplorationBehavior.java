@@ -80,7 +80,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final BuildingExplorationBehaviorLookAndStepState lookAndStepState;
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
-   private final AtomicReference<Pose3D> goal;
+   private final AtomicReference<Pose3D> goal = new AtomicReference<>(null);
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
@@ -95,9 +95,8 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
 
       addChild(lookAndStepBehavior);
 
-      goal = helper.subscribeViaReference(Goal, null);
-      helper.subscribeViaCallback(Goal, lookAndStepBehavior::acceptGoal);
-      helper.subscribeViaCallback(REACHED_GOAL, () -> goal.set(null));
+      helper.subscribeViaCallback(Goal, this::setGoal);
+      helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(null));
       helper.subscribeViaCallback(RequestedState, this::requestState);
       AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
 
@@ -132,6 +131,14 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       stateMachine.addStateChangedListener((from, to) -> stateChangedCallback.accept(to));
    }
 
+   private void setGoal(Pose3D newGoal)
+   {
+      goal.set(newGoal);
+      if (newGoal != null)
+         lookAndStepBehavior.acceptGoal(newGoal);
+      helper.publish(GoalForUI, goal.get());
+   }
+
    private void startWakeUpToolboxesThread()
    {
       toolboxWakerThread = new PausablePeriodicThread("ToolboxWaker", 1.0, true, () ->
@@ -147,6 +154,8 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       if (goal.get() != null)
       {
+         if (lookAndStepBehavior.isReset())
+            lookAndStepBehavior.acceptGoal(goal.get());
          return lookAndStepBehavior.tick();
       }
 
@@ -156,7 +165,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    @Override
    public void reset()
    {
-//      helper.publish(RESET);
+
    }
 
    @Override

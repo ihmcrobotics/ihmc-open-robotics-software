@@ -4,19 +4,21 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
-import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -48,9 +50,10 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
-   private final Pose3D goalPose = new Pose3D();
-   private final Point3D32 spherePosition = new Point3D32();
-   private final Vector3D32 rotationVector = new Vector3D32();
+   private final Pose3D goalPoseForReading = new Pose3D();
+   private final Point3D32 tempSpherePosition = new Point3D32();
+   private final Vector3D32 tempRotationVector = new Vector3D32();
+   private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private PlanarRegionsList latestRegions;
 
@@ -71,7 +74,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       });
       placeGoalActionMap.mapAction(GDXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
-         placedPoseConsumer.accept(goalPose);
+         placedPoseConsumer.accept(goalPoseForReading);
 
          placingGoal = false;
       });
@@ -103,7 +106,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
                if (device == vrManager.getControllers().get(RobotSide.LEFT) && button == SteamVR_Trigger)
                {
                   placingGoal = false;
-                  placedPoseConsumer.accept(goalPose);
+                  placedPoseConsumer.accept(goalPoseForReading);
                }
             }
          });
@@ -163,18 +166,18 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
          }
          else // placing orientation
          {
-            GDXTools.toEuclid(sphere.transform, spherePosition);
-            spherePosition.setZ(goalZ.get());
-            GDXTools.toGDX(spherePosition, arrow.transform);
+            GDXTools.toEuclid(sphere.transform, tempSpherePosition);
+            tempSpherePosition.setZ(goalZ.get());
+            GDXTools.toGDX(tempSpherePosition, arrow.transform);
 
-            rotationVector.set(pickPoint);
-            rotationVector.sub(spherePosition);
+            tempRotationVector.set(pickPoint);
+            tempRotationVector.sub(tempSpherePosition);
 
-            double yaw = Math.atan2(rotationVector.getY(), rotationVector.getX());
+            double yaw = Math.atan2(tempRotationVector.getY(), tempRotationVector.getX());
             arrowRotationMatrix.setToYawOrientation(yaw);
             GDXTools.toGDX(arrowRotationMatrix, arrow.transform);
 
-            goalPose.set(spherePosition, arrowRotationMatrix);
+            goalPoseForReading.set(tempSpherePosition, arrowRotationMatrix);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -227,8 +230,11 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      sphere.getRenderables(renderables, pool);
-      arrow.getRenderables(renderables, pool);
+      if (!Float.isNaN(sphere.transform.val[Matrix4.M03]))
+      {
+         sphere.getRenderables(renderables, pool);
+         arrow.getRenderables(renderables, pool);
+      }
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -236,8 +242,23 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       this.latestRegions = latestRegions;
    }
 
-   public Pose3D getGoalPose()
+   public Pose3DReadOnly getGoalPose()
    {
-      return goalPose;
+      return goalPoseForReading;
+   }
+
+   public void setGoalPose(Pose3DReadOnly pose)
+   {
+      if (pose == null)
+      {
+         sphere.transform.val[Matrix4.M03] = Float.NaN;
+         goalZ.set(0.0f);
+      }
+      else
+      {
+         GDXTools.toGDX(pose.getPosition(), sphere.transform);
+         goalZ.set((float) pose.getZ());
+         GDXTools.toGDX(pose, tempTransform, arrow.transform);
+      }
    }
 }

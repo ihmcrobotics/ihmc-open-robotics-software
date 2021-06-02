@@ -22,6 +22,7 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -165,7 +166,7 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
 
    private void queueFootstepPlanning()
    {
-      Pose3D goalPose = footstepGoal.getGoalPose();
+      Pose3DReadOnly goalPose = footstepGoal.getGoalPose();
       syncedRobotForFootstepPlanning.update();
       for (RobotSide side : RobotSide.values)
       {
