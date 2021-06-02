@@ -101,6 +101,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double maximum_step_yaw_ = -11.1;
    /**
+            * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+            */
+   public boolean use_reachability_map_;
+   /**
             * Minimum step width the planner will consider for candidate steps.
             * 
             * Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
@@ -504,6 +508,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       maximum_step_yaw_ = other.maximum_step_yaw_;
 
+      use_reachability_map_ = other.use_reachability_map_;
+
       minimum_step_width_ = other.minimum_step_width_;
 
       minimum_step_length_ = other.minimum_step_length_;
@@ -828,6 +834,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximumStepYaw()
    {
       return maximum_step_yaw_;
+   }
+
+   /**
+            * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+            */
+   public void setUseReachabilityMap(boolean use_reachability_map)
+   {
+      use_reachability_map_ = use_reachability_map;
+   }
+   /**
+            * If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+            */
+   public boolean getUseReachabilityMap()
+   {
+      return use_reachability_map_;
    }
 
    /**
@@ -2012,6 +2033,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_yaw_, other.maximum_step_yaw_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_reachability_map_, other.use_reachability_map_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_width_, other.minimum_step_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_step_length_, other.minimum_step_length_, epsilon)) return false;
@@ -2165,6 +2188,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.maximum_step_yaw_ != otherMyClass.maximum_step_yaw_) return false;
 
+      if(this.use_reachability_map_ != otherMyClass.use_reachability_map_) return false;
+
       if(this.minimum_step_width_ != otherMyClass.minimum_step_width_) return false;
 
       if(this.minimum_step_length_ != otherMyClass.minimum_step_length_) return false;
@@ -2315,6 +2340,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_step_reach_);      builder.append(", ");
       builder.append("maximum_step_yaw=");
       builder.append(this.maximum_step_yaw_);      builder.append(", ");
+      builder.append("use_reachability_map=");
+      builder.append(this.use_reachability_map_);      builder.append(", ");
       builder.append("minimum_step_width=");
       builder.append(this.minimum_step_width_);      builder.append(", ");
       builder.append("minimum_step_length=");
