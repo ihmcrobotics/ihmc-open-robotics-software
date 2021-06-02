@@ -208,6 +208,23 @@ public class MPCContactPlane
       return null;
    }
 
+   public FrameVector3DReadOnly getBasisVectorInPlaneFrame(int basisIdx)
+   {
+      int pastBases = 0;
+      for (int pointIdx = 0; pointIdx < getNumberOfContactPoints(); pointIdx++)
+      {
+         int localIdx = basisIdx - pastBases;
+         MPCContactPoint contactPoint = getContactPointHelper(pointIdx);
+
+         if (localIdx < contactPoint.getRhoSize())
+            return contactPoint.getBasisVectorInPlaneFrame(localIdx);
+
+         pastBases += contactPoint.getRhoSize();
+      }
+
+      return null;
+   }
+
    public DMatrixRMaj getBasisCoefficients(int rhoIdx)
    {
       if (rhoIdx < rhoSize)

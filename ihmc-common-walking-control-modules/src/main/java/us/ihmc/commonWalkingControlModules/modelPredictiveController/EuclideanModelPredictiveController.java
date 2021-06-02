@@ -12,8 +12,6 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -24,7 +22,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -35,8 +32,6 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.function.DoubleConsumer;
 import java.util.function.IntUnaryOperator;
@@ -590,7 +585,7 @@ public abstract class EuclideanModelPredictiveController
       return objectiveToPack;
    }
 
-   private MPCCommand<?> computeForceMinimizationObjective(ForceMinimizationCommand objectiveToPack, int segmentNumber)
+   private MPCCommand<?> computeForceMinimizationObjective(ForceObjectiveCommand objectiveToPack, int segmentNumber)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
@@ -604,7 +599,7 @@ public abstract class EuclideanModelPredictiveController
       return objectiveToPack;
    }
 
-   private MPCCommand<?> computeRhoMinimizationObjective(RhoMinimizationCommand objectiveToPack, int segmentNumber, double segmentDuration)
+   private MPCCommand<?> computeRhoMinimizationObjective(RhoTrackingCommand objectiveToPack, int segmentNumber, double segmentDuration)
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
