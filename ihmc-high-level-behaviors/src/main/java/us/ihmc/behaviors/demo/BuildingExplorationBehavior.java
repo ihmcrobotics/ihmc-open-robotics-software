@@ -54,6 +54,11 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
                                                                               BuildingExplorationBehaviorAPI.API);
 
    private static final int UPDATE_RATE_MILLIS = 50;
+   private final static Pose3D NAN_POSE = new Pose3D();
+   static
+   {
+      NAN_POSE.setToNaN();
+   }
    private static final double xyProximityToDoorToStopWalking = 1.6;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -80,7 +85,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final BuildingExplorationBehaviorLookAndStepState lookAndStepState;
    private final WalkThroughDoorState walkThroughDoorState;
    private final TraverseStairsState traverseStairsState;
-   private final AtomicReference<Pose3D> goal = new AtomicReference<>(null);
+   private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
@@ -96,7 +101,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       addChild(lookAndStepBehavior);
 
       helper.subscribeViaCallback(Goal, this::setGoal);
-      helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(null));
+      helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
       helper.subscribeViaCallback(RequestedState, this::requestState);
       AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
 
@@ -134,7 +139,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private void setGoal(Pose3D newGoal)
    {
       goal.set(newGoal);
-      if (newGoal != null)
+      if (!newGoal.containsNaN())
          lookAndStepBehavior.acceptGoal(newGoal);
       helper.publish(GoalForUI, goal.get());
    }

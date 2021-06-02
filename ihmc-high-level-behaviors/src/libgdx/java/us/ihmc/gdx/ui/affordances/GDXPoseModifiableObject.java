@@ -7,7 +7,6 @@ import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.GDXPose3DWidget;
 
@@ -56,7 +55,7 @@ public class GDXPoseModifiableObject
             if (viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left) && intesects)
             {
                isSelected = true;
-               GDXTools.toEuclid(object.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+               pose3DWidget.getTransform().set(object.getObjectTransform());
             }
          }
       }

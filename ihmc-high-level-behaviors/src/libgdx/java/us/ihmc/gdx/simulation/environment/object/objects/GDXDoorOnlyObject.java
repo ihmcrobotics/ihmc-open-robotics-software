@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Model;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -25,12 +25,13 @@ public class GDXDoorOnlyObject extends GDXEnvironmentObject
       double heightZ = 2.0447; // these were measured in blender
       double widthY = 0.9144;
       double lengthX = 0.0508;
-      Vector3D collisionShapeOffset = new Vector3D(lengthX / 2.0, widthY / 2.0, heightZ / 2.0);
+      RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
+      collisionShapeOffset.getTranslation().set(lengthX / 2.0, widthY / 2.0, heightZ / 2.0);
 
       Box3D collisionBox = new Box3D(lengthX, widthY, heightZ);
 
       Sphere3D boundingSphere = new Sphere3D(collisionBox.getSize().length() / 2.0);
-      boundingSphere.getPosition().set(collisionShapeOffset);
+      boundingSphere.getPosition().set(collisionShapeOffset.getTranslation());
 
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
       {
@@ -40,9 +41,12 @@ public class GDXDoorOnlyObject extends GDXEnvironmentObject
       }, "collisionModel" + INDEX.getAndIncrement());
       collisionGraphic.materials.get(0).set(new BlendingAttribute(true, 0.4f));
 
-      collisionBox.getPose().getTranslation().set(collisionShapeOffset);
+      collisionBox.getPose().getTranslation().set(collisionShapeOffset.getTranslation());
 
-      create(realisticModel, collisionShapeOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
+      RigidBodyTransform wholeThingOffset = new RigidBodyTransform();
+      wholeThingOffset.appendYawRotation(-Math.PI / 2.0);
+
+      create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionBox, collisionBox::isPointInside, collisionGraphic);
    }
 
    @Override

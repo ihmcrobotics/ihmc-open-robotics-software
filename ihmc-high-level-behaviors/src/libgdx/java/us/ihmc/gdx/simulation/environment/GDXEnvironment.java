@@ -74,7 +74,7 @@ public class GDXEnvironment implements RenderableProvider
                                                                                         pickRay.getPoint(),
                                                                                         pickRay.getDirection());
             selectedObject.set(pickPoint);
-            GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+            pose3DWidget.getTransform().set(selectedObject.getObjectTransform());
 
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -94,7 +94,7 @@ public class GDXEnvironment implements RenderableProvider
                   selectedObject = intersectedObject;
                   if (selectedObject != null)
                   {
-                     GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+                     pose3DWidget.getTransform().set(selectedObject.getObjectTransform());
                   }
                }
             }
@@ -109,7 +109,7 @@ public class GDXEnvironment implements RenderableProvider
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                selectedObject = intersectedObject;
-               GDXTools.toEuclid(selectedObject.getRealisticModelInstance().transform, pose3DWidget.getTransform());
+               pose3DWidget.getTransform().set(selectedObject.getObjectTransform());
             }
          }
       }
@@ -143,20 +143,20 @@ public class GDXEnvironment implements RenderableProvider
       GDXEnvironmentObject objectToPlace = null;
       if (!placing)
       {
-         if (ImGui.button("Place Small Cinder Block Roughed"))
-            objectToPlace = new GDXSmallCinderBlockRoughed();
+//         if (ImGui.button("Place Small Cinder Block Roughed"))
+//            objectToPlace = new GDXSmallCinderBlockRoughed();
          if (ImGui.button("Place Medium Cinder Block Roughed"))
             objectToPlace = new GDXMediumCinderBlockRoughed();
-         if (ImGui.button("Place Medium Cinder Block Roughed"))
-            objectToPlace = new GDXLargeCinderBlockRoughed();
+//         if (ImGui.button("Place Large Cinder Block Roughed"))
+//            objectToPlace = new GDXLargeCinderBlockRoughed();
          if (ImGui.button("Place Lab Floor"))
             objectToPlace = new GDXLabFloorObject();
          if (ImGui.button("Place Pallet"))
             objectToPlace = new GDXPalletObject();
          if (ImGui.button("Place Door Only"))
             objectToPlace = new GDXDoorOnlyObject();
-         if (ImGui.button("Place Door Frame"))
-            objectToPlace = new GDXDoorFrameObject();
+//         if (ImGui.button("Place Door Frame"))
+//            objectToPlace = new GDXDoorFrameObject();
       }
       if (objectToPlace != null)
       {
