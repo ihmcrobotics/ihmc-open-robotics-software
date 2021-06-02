@@ -10,8 +10,6 @@ public interface FallbackNodeBasics extends BehaviorTreeControlFlowNodeBasics
    @Override
    public default BehaviorTreeNodeStatus tickInternal()
    {
-      BehaviorTreeControlFlowNodeBasics.super.tickInternal();
-
       for (BehaviorTreeNodeBasics child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();

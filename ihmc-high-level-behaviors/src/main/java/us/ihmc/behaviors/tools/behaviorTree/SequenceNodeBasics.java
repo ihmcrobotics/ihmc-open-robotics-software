@@ -10,8 +10,6 @@ public interface SequenceNodeBasics extends BehaviorTreeControlFlowNodeBasics
    @Override
    public default BehaviorTreeNodeStatus tickInternal()
    {
-      BehaviorTreeControlFlowNodeBasics.super.tickInternal();
-
       for (BehaviorTreeNodeBasics child : getChildren())
       {
          BehaviorTreeNodeStatus childStatus = child.tick();

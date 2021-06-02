@@ -25,4 +25,10 @@ public class BehaviorTreeStatus extends BehaviorTreeControlFlowNode
          }
       }
    }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
+   }
 }

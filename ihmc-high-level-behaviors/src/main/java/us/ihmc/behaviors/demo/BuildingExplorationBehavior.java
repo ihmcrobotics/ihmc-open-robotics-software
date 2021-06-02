@@ -4,8 +4,8 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -45,8 +45,9 @@ import java.util.function.Consumer;
 
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.ConfirmDoor;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
-public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Building Exploration",
                                                                               BuildingExplorationBehavior::new,
@@ -86,7 +87,6 @@ public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode imp
       this.helper = helper;
       LogTools.info("Constructing");
       executorService = Executors.newSingleThreadScheduledExecutor();
-      goal = helper.subscribeViaReference(Goal, new Pose3D());
       lookAndStepBehavior = new LookAndStepBehavior(helper);
       teleopState = new BuildingExplorationBehaviorTeleopState(helper);
       lookAndStepState = new BuildingExplorationBehaviorLookAndStepState(this, helper, bombPose);
@@ -95,6 +95,9 @@ public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode imp
 
       addChild(lookAndStepBehavior);
 
+      goal = helper.subscribeViaReference(Goal, null);
+      helper.subscribeViaCallback(Goal, lookAndStepBehavior::acceptGoal);
+      helper.subscribeViaCallback(REACHED_GOAL, () -> goal.set(null));
       helper.subscribeViaCallback(RequestedState, this::requestState);
       AtomicReference<BuildingExplorationStateName> requestedState = helper.subscribeViaReference(RequestedState, BuildingExplorationStateName.TELEOP);
 
@@ -142,7 +145,18 @@ public class BuildingExplorationBehavior extends BehaviorTreeControlFlowNode imp
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {
-      return BehaviorTreeNodeStatus.SUCCESS;
+      if (goal.get() != null)
+      {
+         return lookAndStepBehavior.tick();
+      }
+
+      return BehaviorTreeNodeStatus.RUNNING;
+   }
+
+   @Override
+   public void reset()
+   {
+//      helper.publish(RESET);
    }
 
    @Override

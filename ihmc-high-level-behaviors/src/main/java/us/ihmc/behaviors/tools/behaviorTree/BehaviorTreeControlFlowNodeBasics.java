@@ -7,7 +7,7 @@ import java.util.ArrayList;
  */
 public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasics
 {
-   public default BehaviorTreeNodeStatus tickInternal()
+   public default BehaviorTreeNodeStatus tick()
    {
       if (!getHasBeenClocked())
       {
@@ -15,7 +15,7 @@ public interface BehaviorTreeControlFlowNodeBasics extends BehaviorTreeNodeBasic
       }
       setHasBeenClocked(false);
 
-      return null;
+      return BehaviorTreeNodeBasics.super.tick();
    }
 
    public default void clock()
