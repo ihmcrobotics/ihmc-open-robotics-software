@@ -12,7 +12,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.simulation.environment.object.objects.GDXDoorOnlyObject;
-import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.affordances.GDXPoseModifiableObject;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -27,7 +26,6 @@ public class GDXDoorSimulator
    private final PausablePeriodicThread pausablePeriodicThread;
 
    private final GDXPoseModifiableObject modifiableDoor = new GDXPoseModifiableObject();
-   private final RigidBodyTransform tempDoorTransform = new RigidBodyTransform();
 
    public GDXDoorSimulator(RemoteSyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
@@ -41,9 +39,9 @@ public class GDXDoorSimulator
 
    private void update()
    {
-      GDXTools.toEuclid(modifiableDoor.getObject().getRealisticModelInstance().transform, tempDoorTransform);
-      helper.publish(ROS2Tools::getDoorLocationTopic, HumanoidMessageTools.createDoorLocationPacket(tempDoorTransform,
-                                                                                                    DoorLocationPacket.PUSH_HANDLE_RIGHT));
+      helper.publish(ROS2Tools::getDoorLocationTopic,
+                     HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(modifiableDoor.getObject().getObjectTransform()),
+                                                                   DoorLocationPacket.PUSH_HANDLE_RIGHT));
    }
 
    public void create(GDXImGuiBasedUI baseUI)
