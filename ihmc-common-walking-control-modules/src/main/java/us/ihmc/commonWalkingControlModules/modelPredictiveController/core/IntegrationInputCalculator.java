@@ -76,7 +76,7 @@ public class IntegrationInputCalculator
          hessianToPack.unsafe_set(startCol, startCol, c00);
          hessianToPack.unsafe_set(startCol, startCol + 1, c01);
          hessianToPack.unsafe_set(startCol, startCol + 2, c02);
-         hessianToPack.unsafe_set(startCol, startCol + 2, c03);
+         hessianToPack.unsafe_set(startCol, startCol + 3, c03);
          hessianToPack.unsafe_set(startCol + 1, startCol, c01);
          hessianToPack.unsafe_set(startCol + 1, startCol + 1, c11);
          hessianToPack.unsafe_set(startCol + 1, startCol + 2, c12);
@@ -143,7 +143,7 @@ public class IntegrationInputCalculator
          hessianToPack.unsafe_set(startIdxI, startIdxI, c00);
          hessianToPack.unsafe_set(startIdxI, startIdxI + 1, c01);
          hessianToPack.unsafe_set(startIdxI, startIdxI + 2, c02);
-         hessianToPack.unsafe_set(startIdxI, startIdxI + 2, c03);
+         hessianToPack.unsafe_set(startIdxI, startIdxI + 3, c03);
          hessianToPack.unsafe_set(startIdxI + 1, startIdxI, c01);
          hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
          hessianToPack.unsafe_set(startIdxI + 1, startIdxI + 2, c12);

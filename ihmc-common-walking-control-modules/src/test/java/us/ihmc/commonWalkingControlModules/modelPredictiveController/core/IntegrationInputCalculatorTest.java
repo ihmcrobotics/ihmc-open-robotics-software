@@ -11,8 +11,11 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.Random;
@@ -27,7 +30,7 @@ public class IntegrationInputCalculatorTest
    @Test
    public void testComputeNormalAccelerationIntegration()
    {
-      int numberOfBasisVectorsPerContactPoint = 4;
+      int numberOfBasisVectorsPerContactPoint = 2;
       Point2D point = new Point2D(2.5, 1.5);
       MPCContactPoint contactPoint = new MPCContactPoint(numberOfBasisVectorsPerContactPoint);
       double mu = 0.8;
@@ -37,7 +40,7 @@ public class IntegrationInputCalculatorTest
       double omega = 3.0;
       double duration = 0.7;
       double goalValueForPoint = 0.2;
-      double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
+      Vector3D goalForceForPoint = new Vector3D(0.0, 0.0, goalValueForPoint);
 
       DMatrixRMaj accelerationIntegrationHessian = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho,
                                                                    numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho);
@@ -54,42 +57,36 @@ public class IntegrationInputCalculatorTest
                                                                             omega,
                                                                             goalValueForPoint);
 
-      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
-      double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
-      double negativeExponential = 1.0 / positiveExponential;
-      double negativeExponential2 = negativeExponential * negativeExponential;
-      double duration2 = duration * duration;
-      double duration3 = duration * duration2;
-      double omega2 = omega * omega;
-      double omega3 = omega * omega2;
-      double omega4 = omega2 * omega2;
-      double c00 = omega3 / 2.0 * (positiveExponential2 - 1.0);
-      double c01 = omega4 * duration;
-      double c02 = 6.0 * (positiveExponential * (omega * duration - 1.0) + 1.0);
-      double c03 = 2.0 * omega * (positiveExponential - 1.0);
-      double c11 = -omega3 / 2.0 * (negativeExponential2 - 1.0);
-      double c12 = -6.0 * (negativeExponential * (omega * duration + 1.0) - 1.0);
-      double c13 = -2.0 * omega * (negativeExponential - 1.0);
-      double c22 = 12.0 * duration3;
-      double c23 = 6.0 * duration2;
-      double c33 = 4.0 * duration;
+      double tEnd = duration;
+      double tStart = 0.0;
 
-      double g0 = omega * (positiveExponential - 1.0);
-      double g1 = -omega * (negativeExponential - 1.0);
-      double g2 = 3.0 * duration2;
-      double g3 = 2.0 * duration;
+      double c00 = computeC00(omega, tEnd) - computeC00(omega, tStart);
+      double c01 = computeC01(omega, tEnd) - computeC01(omega, tStart);
+      double c02 = computeC02(omega, tEnd) - computeC02(omega, tStart);
+      double c03 = computeC03(omega, tEnd) - computeC03(omega, tStart);
+      double c11 = computeC11(omega, tEnd) - computeC11(omega, tStart);
+      double c12 = computeC12(omega, tEnd) - computeC12(omega, tStart);
+      double c13 = computeC13(omega, tEnd) - computeC13(omega, tStart);
+      double c22 = computeC22(tEnd) - computeC22(tStart);
+      double c23 = computeC23(tEnd) - computeC23(tStart);
+      double c33 = computeC33(tEnd) - computeC33(tStart);
+
+      double g0 = computeG0(omega, tEnd , 1.0) - computeG0(omega, tStart, 1.0);
+      double g1 = computeG1(omega, tEnd , 1.0) - computeG1(omega, tStart, 1.0);
+      double g2 = computeG2(tEnd , 1.0) - computeG2(tStart, 1.0);
+      double g3 = computeG3(tEnd , 1.0) - computeG3(tStart, 1.0);
 
       for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
       {
          int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPoint.getBasisVector(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPoint.getBasisVectorInPlaneFrame(basisVectorIndexI);
 
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c02);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c03);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI, c01);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1,  c01);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2,  c02);
+         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 3,  c03);
+         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI,  c01);
          accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
          accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
          accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 3, c13);
@@ -104,64 +101,63 @@ public class IntegrationInputCalculatorTest
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPoint.getBasisVector(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPoint.getBasisVectorInPlaneFrame(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
             int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ, basisDot * c00);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 3, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ, basisDot * c00);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ + 1, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ + 2, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxJ + 3, basisDot * c03);
 
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 3, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxJ + 3, basisDot * c13);
 
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 3, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxJ + 3, basisDot * c23);
 
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 3, basisDot * c33);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ + 1, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ + 2, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxJ + 3, basisDot * c33);
 
             // we know it's symmetric, and this way we can avoid iterating as much
 
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI, basisDot * c00);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 3, basisDot * c33);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI, basisDot * c00);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI + 1, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI + 2, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ, startIdxI + 3, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI, basisDot * c01);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 1, startIdxI + 3, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI, basisDot * c02);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 2, startIdxI + 3, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI, basisDot * c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 1, basisDot * c13);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 2, basisDot * c23);
+            accelerationIntegrationHessian.unsafe_set(startIdxJ + 3, startIdxI + 3, basisDot * c33);
          }
 
-         double goal = basisVectorI.getZ() * goalValueForPoint;
+         double goal = basisVectorI.dot(goalForceForPoint);
 
          accelerationIntegrationGradient.unsafe_set(startIdxI, 0, g0 * goal);
          accelerationIntegrationGradient.unsafe_set(startIdxI + 1, 0, g1 * goal);
          accelerationIntegrationGradient.unsafe_set(startIdxI + 2, 0, g2 * goal);
          accelerationIntegrationGradient.unsafe_set(startIdxI + 3, 0, g3 * goal);
       }
-
-      //      MatrixTestTools.assertMatrixEquals(accelerationIntegrationGradient, calculatedGradient, 1e-5);
-      //      MatrixTestTools.assertMatrixEquals(accelerationIntegrationHessian, calculatedHessian, 1e-5);
-
       CommonOps_DDRM.scale(-1.0, accelerationIntegrationGradient);
+
+      MatrixTestTools.assertMatrixEquals(accelerationIntegrationGradient, calculatedGradient, 1e-5);
+      MatrixTestTools.assertMatrixEquals(accelerationIntegrationHessian, calculatedHessian, 1e-5);
 
       SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
       solver.setQuadraticCostFunction(accelerationIntegrationHessian, accelerationIntegrationGradient, 0.0);
@@ -170,12 +166,12 @@ public class IntegrationInputCalculatorTest
 
       contactPoint.computeContactForceCoefficientMatrix(solution, 0);
 
-      for (double time = 0; time <= duration; time += 0.001)
+      for (double time = 0; time <= duration; time += 0.05)
       {
          contactPoint.computeContactForce(omega, time);
          FrameVector3DReadOnly acceleration = contactPoint.getContactAcceleration();
          assertEquals(goalValueForPoint, acceleration.getZ(), 1e-3);
-         assertEquals(goalValueForPoint, acceleration.length(), 1e-3);
+         EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceForPoint, acceleration, 1e-3);
       }
    }
 
@@ -217,21 +213,24 @@ public class IntegrationInputCalculatorTest
                                                                             omega,
                                                                             goalValueForBasis);
 
-         double c00 = MathTools.pow(omega, 3) / 2.0 * (Math.exp(2.0 * duration * omega) - 1.0);
-         double c01 = MathTools.pow(omega, 4) * duration;
-         double c02 = 6.0 * (Math.exp(duration * omega) * (omega * duration - 1.0) + 1.0);
-         double c03 = 2.0 * omega * (Math.exp(duration * omega) - 1.0);
-         double c11 = -MathTools.pow(omega, 3) / 2.0 * (Math.exp(-2.0 * duration * omega) - 1.0);
-         double c12 = -6.0 * (Math.exp(-duration * omega) * (omega * duration + 1.0) - 1.0);
-         double c13 = -2.0 * omega * (Math.exp(-duration * omega) - 1.0);
-         double c22 = 12.0 * MathTools.pow(duration, 3);
-         double c23 = 6.0 * duration * duration;
-         double c33 = 4.0 * duration;
+         double tEnd = duration;
+         double tStart = 0.0;
 
-         double g0 = omega * (Math.exp(duration * omega) - 1.0) * goalValueForBasis;
-         double g1 = -omega * (Math.exp(-duration * omega) - 1.0) * goalValueForBasis;
-         double g2 = 3.0 * duration * duration * goalValueForBasis;
-         double g3 = 2.0 * duration * goalValueForBasis;
+         double c00 = computeC00(omega, tEnd) - computeC00(omega, tStart);
+         double c01 = computeC01(omega, tEnd) - computeC01(omega, tStart);
+         double c02 = computeC02(omega, tEnd) - computeC02(omega, tStart);
+         double c03 = computeC03(omega, tEnd) - computeC03(omega, tStart);
+         double c11 = computeC11(omega, tEnd) - computeC11(omega, tStart);
+         double c12 = computeC12(omega, tEnd) - computeC12(omega, tStart);
+         double c13 = computeC13(omega, tEnd) - computeC13(omega, tStart);
+         double c22 = computeC22(tEnd) - computeC22(tStart);
+         double c23 = computeC23(tEnd) - computeC23(tStart);
+         double c33 = computeC33(tEnd) - computeC33(tStart);
+
+         double g0 = computeG0(omega, tEnd , goalValueForBasis) - computeG0(omega, tStart, goalValueForBasis);
+         double g1 = computeG1(omega, tEnd , goalValueForBasis) - computeG1(omega, tStart, goalValueForBasis);
+         double g2 = computeG2(tEnd , goalValueForBasis) - computeG2(tStart, goalValueForBasis);
+         double g3 = computeG3(tEnd , goalValueForBasis) - computeG3(tStart, goalValueForBasis);
 
          for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
          {
@@ -240,7 +239,7 @@ public class IntegrationInputCalculatorTest
             accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
             accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
             accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c02);
-            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c03);
+            accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 3, c03);
             accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI, c01);
             accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
             accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
@@ -296,5 +295,197 @@ public class IntegrationInputCalculatorTest
          goalValueForBasis = RandomNumbers.nextDouble(random, 0.0, 5.0);
          duration = RandomNumbers.nextDouble(random, 0.1, 1.5);
       }
+   }
+
+   @Test
+   public void testComputeRhoAccelerationIntegrationSingleRho()
+   {
+      SimpleEfficientActiveSetQPSolver solver = new SimpleEfficientActiveSetQPSolver();
+      DMatrixRMaj solution = new DMatrixRMaj(LinearMPCIndexHandler.coefficientsPerRho, 1);
+
+      double omega = 3.0;
+
+      double goalValueForBasis = 0.2;
+      double duration = 0.7;
+
+      Random random = new Random(1738L);
+      for (int iter = 0; iter < iters; iter++)
+      {
+         DMatrixRMaj accelerationIntegrationHessian = new DMatrixRMaj(LinearMPCIndexHandler.coefficientsPerRho, LinearMPCIndexHandler.coefficientsPerRho);
+         DMatrixRMaj accelerationIntegrationGradient = new DMatrixRMaj(LinearMPCIndexHandler.coefficientsPerRho, 1);
+
+         double tEnd = duration;
+         double tStart = 0.0;
+
+         double c00 = computeC00(omega, tEnd) - computeC00(omega, tStart);
+         double c01 = computeC01(omega, tEnd) - computeC01(omega, tStart);
+         double c02 = computeC02(omega, tEnd) - computeC02(omega, tStart);
+         double c03 = computeC03(omega, tEnd) - computeC03(omega, tStart);
+         double c11 = computeC11(omega, tEnd) - computeC11(omega, tStart);
+         double c12 = computeC12(omega, tEnd) - computeC12(omega, tStart);
+         double c13 = computeC13(omega, tEnd) - computeC13(omega, tStart);
+         double c22 = computeC22(tEnd) - computeC22(tStart);
+         double c23 = computeC23(tEnd) - computeC23(tStart);
+         double c33 = computeC33(tEnd) - computeC33(tStart);
+
+         double g0 = computeG0(omega, tEnd , goalValueForBasis) - computeG0(omega, tStart, goalValueForBasis);
+         double g1 = computeG1(omega, tEnd , goalValueForBasis) - computeG1(omega, tStart, goalValueForBasis);
+         double g2 = computeG2(tEnd , goalValueForBasis) - computeG2(tStart, goalValueForBasis);
+         double g3 = computeG3(tEnd , goalValueForBasis) - computeG3(tStart, goalValueForBasis);
+
+         accelerationIntegrationHessian.unsafe_set(0, 0, c00);
+         accelerationIntegrationHessian.unsafe_set(0, 1, c01);
+         accelerationIntegrationHessian.unsafe_set(0, 2, c02);
+         accelerationIntegrationHessian.unsafe_set(0, 3, c03);
+         accelerationIntegrationHessian.unsafe_set(1, 0, c01);
+         accelerationIntegrationHessian.unsafe_set(1, 1, c11);
+         accelerationIntegrationHessian.unsafe_set(1, 2, c12);
+         accelerationIntegrationHessian.unsafe_set(1, 3, c13);
+         accelerationIntegrationHessian.unsafe_set(2, 0, c02);
+         accelerationIntegrationHessian.unsafe_set(2, 1, c12);
+         accelerationIntegrationHessian.unsafe_set(2, 2, c22);
+         accelerationIntegrationHessian.unsafe_set(2, 3, c23);
+         accelerationIntegrationHessian.unsafe_set(3, 0, c03);
+         accelerationIntegrationHessian.unsafe_set(3, 1, c13);
+         accelerationIntegrationHessian.unsafe_set(3, 2, c23);
+         accelerationIntegrationHessian.unsafe_set(3, 3, c33);
+
+         accelerationIntegrationGradient.unsafe_set(0, 0, -g0);
+         accelerationIntegrationGradient.unsafe_set(1, 0, -g1);
+         accelerationIntegrationGradient.unsafe_set(2, 0, -g2);
+         accelerationIntegrationGradient.unsafe_set(3, 0, -g3);
+
+         double weight = 1e1;
+         CommonOps_DDRM.scale(weight, accelerationIntegrationHessian);
+         CommonOps_DDRM.scale(weight, accelerationIntegrationGradient);
+         double expectedResidual = weight * 0.5 * duration * goalValueForBasis * goalValueForBasis;
+
+         solver.clear();
+         solver.setQuadraticCostFunction(accelerationIntegrationHessian, accelerationIntegrationGradient, expectedResidual);
+         solver.solve(solution);
+         double outputCost = solver.getObjectiveCost(solution);
+
+         DMatrixRMaj cost = new DMatrixRMaj(1, 1);
+         NativeCommonOps.multQuad(solution, accelerationIntegrationHessian, cost);
+         CommonOps_DDRM.scale(0.5, cost);
+         CommonOps_DDRM.multAddTransA(accelerationIntegrationGradient, solution, cost);
+
+         double runningCost = 0.0;
+         double residualCost = 0.0;
+         double runningCostB = 0.0;
+         double dt = 1e-4;
+         for (double time = 0; time <= duration; time += dt)
+         {
+            double exponential = Math.exp(omega * time);
+            double a0 = omega * omega * exponential;
+            double a1 = omega * omega / exponential;
+            double a2 = 6.0 * time;
+            double a3 = 2.0;
+
+            double rhoValue = a0 * solution.get(0, 0);
+            rhoValue += a1 * solution.get(1, 0);
+            rhoValue += a2 * solution.get(2, 0);
+            rhoValue += a3 * solution.get(3, 0);
+
+            residualCost += goalValueForBasis * goalValueForBasis * 0.5 * dt * weight;
+
+            runningCost += 0.5 * (rhoValue * rhoValue - 2.0 * goalValueForBasis * rhoValue) * dt * weight;
+            runningCostB += 0.5 * MathTools.pow(rhoValue - goalValueForBasis, 2) * dt * weight;
+         }
+         assertEquals(expectedResidual, residualCost, weight * 1e-2);
+         assertEquals(runningCostB, runningCost + residualCost, weight * 1e-3);
+         assertEquals(runningCost, cost.get(0, 0), weight * 1e-2);
+         assertEquals(outputCost, cost.get(0, 0) + expectedResidual, weight * 1e-3);
+
+         for (double time = 0; time <= duration; time += 0.05)
+         {
+
+            double exponential = Math.exp(omega * time);
+            double a0 = omega * omega * exponential;
+            double a1 = omega * omega / exponential;
+            double a2 = 6.0 * time;
+            double a3 = 2.0;
+
+            double rhoValue = a0 * solution.get(0, 0);
+            rhoValue += a1 * solution.get(1, 0);
+            rhoValue += a2 * solution.get(2, 0);
+            rhoValue += a3 * solution.get(3, 0);
+
+            assertEquals("Rho value at " + time + " is incorrect", goalValueForBasis, rhoValue, 1e-3);
+         }
+
+         goalValueForBasis = RandomNumbers.nextDouble(random, 0.0, 5.0);
+         duration = RandomNumbers.nextDouble(random, 0.1, 1.5);
+      }
+   }
+
+   private static double computeC00(double omega, double time)
+   {
+      return MathTools.pow(omega, 3) / 2.0 * Math.exp(2.0 * omega * time);
+   }
+
+   private static double computeC01(double omega, double time)
+   {
+      return MathTools.pow(omega, 4) * time;
+   }
+
+   private static double computeC02(double omega, double time)
+   {
+      return 6.0 * Math.exp(omega * time) * (omega * time - 1.0);
+   }
+
+   private static double computeC03(double omega, double time)
+   {
+      return 2.0 * omega * Math.exp(omega * time);
+   }
+
+   private static double computeC11(double omega, double time)
+   {
+      return -MathTools.pow(omega, 3) / 2.0 * Math.exp(-2.0 * time * omega);
+   }
+
+   private static double computeC12(double omega, double time)
+   {
+      return -6.0 * Math.exp(-omega * time) * (omega * time + 1.0);
+   }
+
+   private static double computeC13(double omega, double time)
+   {
+      return -2.0 * omega * Math.exp(-omega * time);
+   }
+
+   private static double computeC22(double time)
+   {
+      return 12.0 * MathTools.pow(time, 3);
+   }
+
+   private static double computeC23(double time)
+   {
+      return 6.0 * time * time;
+   }
+
+   private static double computeC33(double time)
+   {
+      return 4.0 * time;
+   }
+
+   private static double computeG0(double omega, double time, double goal)
+   {
+      return omega * goal * Math.exp(omega * time);
+   }
+
+   private static double computeG1(double omega, double time, double goal)
+   {
+      return -omega * goal * Math.exp(-omega * time);
+   }
+
+   private static double computeG2(double time, double goal)
+   {
+      return 3.0 * goal * time * time;
+   }
+
+   private static double computeG3(double time, double goal)
+   {
+      return 2.0 * goal * time;
    }
 }
