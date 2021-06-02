@@ -222,7 +222,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load()
    {
-      load(saveFileName);
+      load(saveFileName, false);
    }
 
    @Override

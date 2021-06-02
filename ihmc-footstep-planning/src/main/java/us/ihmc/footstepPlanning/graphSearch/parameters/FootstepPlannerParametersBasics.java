@@ -112,14 +112,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepLength, minimumStepLength);
    }
 
-   default void getUseStepReachabilityMap(boolean useStepReachabilityMap)
-   {
-      set(FootstepPlannerParameterKeys.useReachabilityMap, useStepReachabilityMap);
-   }
-
    default void setMinimumStepWidth(double minimumStepWidth)
    {
       set(FootstepPlannerParameterKeys.minStepWidth, minimumStepWidth);
+   }
+
+   default void setUseReachabilityMap(boolean useReachabilityMap)
+   {
+      set(FootstepPlannerParameterKeys.useReachabilityMap, useReachabilityMap);
    }
 
    default void setMinimumSurfaceInclineRadians(double surfaceInclineRadians)
@@ -376,6 +376,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepReach(parametersPacket.getMaximumStepReach());
       if (parametersPacket.getMaximumStepYaw() != noValue)
          setMaximumStepYaw(parametersPacket.getMaximumStepYaw());
+      setUseReachabilityMap(parametersPacket.getUseReachabilityMap());
       if (parametersPacket.getMinimumStepWidth() != noValue)
          setMinimumStepWidth(parametersPacket.getMinimumStepWidth());
       if (parametersPacket.getMinimumStepLength() != noValue)

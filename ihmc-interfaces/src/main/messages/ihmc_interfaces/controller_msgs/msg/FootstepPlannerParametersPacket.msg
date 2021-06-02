@@ -54,6 +54,9 @@ float64 maximum_step_reach -11.1
 # its maximum reach.
 float64 maximum_step_yaw -11.1
 
+# If true, uses IK-based precomputed reachability map instead of the heuristic step metrics
+bool use_reachability_map false
+
 # Minimum step width the planner will consider for candidate steps.
 #
 # Step width refers to the magnitude of the y-position of a footstep expressed in its parent's sole frame,
