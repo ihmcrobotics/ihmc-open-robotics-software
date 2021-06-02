@@ -13,7 +13,7 @@ import java.util.function.DoubleConsumer;
  * Whereas many other MPC algorithms provide some regularization by minimizing the CoM acceleration, this minimizes the force, so as to account for the force
  * that must be exerted to counter gravity.
  */
-public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCommand>
+public class ForceObjectiveCommand implements MPCCommand<ForceObjectiveCommand>
 {
    private int commandId;
    /**
@@ -44,7 +44,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
     */
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.FORCE_MINIMIZATION;
+      return MPCCommandType.FORCE_VALUE;
    }
 
    /**
@@ -131,7 +131,7 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
    }
 
    @Override
-   public void set(ForceMinimizationCommand other)
+   public void set(ForceObjectiveCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
@@ -162,9 +162,9 @@ public class ForceMinimizationCommand implements MPCCommand<ForceMinimizationCom
       {
          return true;
       }
-      else if (object instanceof ForceMinimizationCommand)
+      else if (object instanceof ForceObjectiveCommand)
       {
-         ForceMinimizationCommand other = (ForceMinimizationCommand) object;
+         ForceObjectiveCommand other = (ForceObjectiveCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)

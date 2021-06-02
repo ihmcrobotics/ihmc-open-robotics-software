@@ -3,10 +3,13 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
+import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.convexOptimization.quadraticProgram.SimpleEfficientActiveSetQPSolver;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -16,7 +19,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.matrixlib.NativeCommonOps;
-import us.ihmc.robotics.MatrixMissingTools;
 
 import java.util.Random;
 
@@ -31,11 +33,15 @@ public class IntegrationInputCalculatorTest
    public void testComputeNormalAccelerationIntegration()
    {
       int numberOfBasisVectorsPerContactPoint = 2;
-      Point2D point = new Point2D(2.5, 1.5);
-      MPCContactPoint contactPoint = new MPCContactPoint(numberOfBasisVectorsPerContactPoint);
+      MPCContactPlane contactPlane = new MPCContactPlane(1, numberOfBasisVectorsPerContactPoint, new ZeroConeRotationCalculator());
       double mu = 0.8;
 
-      contactPoint.computeBasisVectors(point, new FramePose3D(), 0.0, mu);
+      ConvexPolygon2D polygon = new ConvexPolygon2D();
+      polygon.addVertex(0.0, 0.0);
+      polygon.update();
+      FramePose3D pose = new FramePose3D();
+      pose.getPosition().set(2.5, 1.5, 0.0);
+      contactPlane.computeBasisVectors(polygon, pose, mu);
 
       double omega = 3.0;
       double duration = 0.7;
@@ -49,13 +55,13 @@ public class IntegrationInputCalculatorTest
       DMatrixRMaj calculatedHessian = new DMatrixRMaj(accelerationIntegrationHessian);
       DMatrixRMaj calculatedGradient = new DMatrixRMaj(accelerationIntegrationGradient);
 
-      IntegrationInputCalculator.computeNormalAccelerationIntegrationMatrix(0,
-                                                                            calculatedGradient,
-                                                                            calculatedHessian,
-                                                                            contactPoint,
-                                                                            duration,
-                                                                            omega,
-                                                                            goalValueForPoint);
+      IntegrationInputCalculator.computeNormalAccelerationTrackingMatrix(0,
+                                                                         calculatedGradient,
+                                                                         calculatedHessian,
+                                                                         contactPlane,
+                                                                         duration,
+                                                                         omega,
+                                                                         goalValueForPoint);
 
       double tEnd = duration;
       double tStart = 0.0;
@@ -80,7 +86,7 @@ public class IntegrationInputCalculatorTest
       {
          int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPoint.getBasisVectorInPlaneFrame(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
 
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
          accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1,  c01);
@@ -101,7 +107,7 @@ public class IntegrationInputCalculatorTest
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPoint.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
@@ -164,12 +170,12 @@ public class IntegrationInputCalculatorTest
       DMatrixRMaj solution = new DMatrixRMaj(numberOfBasisVectorsPerContactPoint * LinearMPCIndexHandler.coefficientsPerRho, 1);
       solver.solve(solution);
 
-      contactPoint.computeContactForceCoefficientMatrix(solution, 0);
+      contactPlane.computeContactForceCoefficientMatrix(solution, 0);
 
       for (double time = 0; time <= duration; time += 0.05)
       {
-         contactPoint.computeContactForce(omega, time);
-         FrameVector3DReadOnly acceleration = contactPoint.getContactAcceleration();
+         contactPlane.computeContactForce(omega, time);
+         FrameVector3DReadOnly acceleration = contactPlane.getContactAcceleration();
          assertEquals(goalValueForPoint, acceleration.getZ(), 1e-3);
          EuclidCoreTestTools.assertVector3DGeometricallyEquals(goalForceForPoint, acceleration, 1e-3);
       }
@@ -205,13 +211,13 @@ public class IntegrationInputCalculatorTest
          DMatrixRMaj calculatedHessian = new DMatrixRMaj(accelerationIntegrationHessian);
          DMatrixRMaj calculatedGradient = new DMatrixRMaj(accelerationIntegrationGradient);
 
-         IntegrationInputCalculator.computeRhoAccelerationIntegrationMatrix(0,
-                                                                            calculatedGradient,
-                                                                            calculatedHessian,
-                                                                            contactPoint,
-                                                                            duration,
-                                                                            omega,
-                                                                            goalValueForBasis);
+         IntegrationInputCalculator.computeRhoAccelerationTrackingMatrix(0,
+                                                                         calculatedGradient,
+                                                                         calculatedHessian,
+                                                                         contactPoint,
+                                                                         duration,
+                                                                         omega,
+                                                                         goalValueForBasis);
 
          double tEnd = duration;
          double tStart = 0.0;

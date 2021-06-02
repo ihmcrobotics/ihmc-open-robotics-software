@@ -4,7 +4,6 @@ import org.ejml.EjmlUnitTests;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
@@ -20,7 +19,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -782,20 +780,20 @@ public class MPCQPInputCalculatorTest
       LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
       indexHandler.initialize((i) -> 4, 1);
 
-      RhoMinimizationCommand rhoMinimizationCommand = new RhoMinimizationCommand();
-      rhoMinimizationCommand.setSegmentDuration(duration);
-      rhoMinimizationCommand.setOmega(omega);
-      rhoMinimizationCommand.setSegmentNumber(0);
-      rhoMinimizationCommand.setWeight(100.0);
-      rhoMinimizationCommand.setObjectiveValue(goalValueForBasis);
-      rhoMinimizationCommand.addContactPlaneHelper(contactPlane);
+      RhoTrackingCommand rhoTrackingCommand = new RhoTrackingCommand();
+      rhoTrackingCommand.setSegmentDuration(duration);
+      rhoTrackingCommand.setOmega(omega);
+      rhoTrackingCommand.setSegmentNumber(0);
+      rhoTrackingCommand.setWeight(100.0);
+      rhoTrackingCommand.setObjectiveValue(goalValueForBasis);
+      rhoTrackingCommand.addContactPlaneHelper(contactPlane);
 
       LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, 1e-3, -9.81, new YoRegistry("registry"));
 
       solver.initialize();
       solver.setRhoCoefficientRegularizationWeight(0.0);
       solver.addValueRegularization();
-      solver.submitRhoMinimizationCommand(rhoMinimizationCommand);
+      solver.submitRhoTrackingCommand(rhoTrackingCommand);
       assertTrue(solver.solve());
 
       contactPlane.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));

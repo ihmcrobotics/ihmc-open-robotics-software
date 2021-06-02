@@ -22,8 +22,8 @@ public class CommandProvider
    private final RecyclingArrayList<OrientationValueCommand> orientationValueCommandPool = new RecyclingArrayList<>(OrientationValueCommand::new);
    private final RecyclingArrayList<DirectOrientationValueCommand> directOrientationValueCommandPool = new RecyclingArrayList<>(DirectOrientationValueCommand::new);
    private final RecyclingArrayList<OrientationContinuityCommand> orientationContinuityCommandPool = new RecyclingArrayList<>(OrientationContinuityCommand::new);
-   private final RecyclingArrayList<ForceMinimizationCommand> forceMinimizationCommandPool = new RecyclingArrayList<>(ForceMinimizationCommand::new);
-   private final RecyclingArrayList<RhoMinimizationCommand> rhoMinimizationCommandPool = new RecyclingArrayList<>(RhoMinimizationCommand::new);
+   private final RecyclingArrayList<ForceObjectiveCommand> forceMinimizationCommandPool = new RecyclingArrayList<>(ForceObjectiveCommand::new);
+   private final RecyclingArrayList<RhoTrackingCommand> rhoTrackingCommandPool = new RecyclingArrayList<>(RhoTrackingCommand::new);
 
    /**
           * Clears all the commands, resetting the provider. Must be called every iteration of the MPC
@@ -46,7 +46,7 @@ public class CommandProvider
       directOrientationValueCommandPool.clear();
       orientationContinuityCommandPool.clear();
       forceMinimizationCommandPool.clear();
-      rhoMinimizationCommandPool.clear();
+      rhoTrackingCommandPool.clear();
    }
 
    public CoMPositionCommand getNextCoMPositionCommand()
@@ -124,13 +124,13 @@ public class CommandProvider
       return orientationContinuityCommandPool.add();
    }
 
-   public ForceMinimizationCommand getForceMinimizationCommand()
+   public ForceObjectiveCommand getForceMinimizationCommand()
    {
       return forceMinimizationCommandPool.add();
    }
 
-   public RhoMinimizationCommand getRhoMinimizationCommand()
+   public RhoTrackingCommand getRhoMinimizationCommand()
    {
-      return rhoMinimizationCommandPool.add();
+      return rhoTrackingCommandPool.add();
    }
 }

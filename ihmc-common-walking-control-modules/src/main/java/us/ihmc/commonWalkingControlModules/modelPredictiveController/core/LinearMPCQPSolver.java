@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
@@ -306,11 +305,13 @@ public class LinearMPCQPSolver
          case NORMAL_FORCE_BOUND:
             submitNormalForceBoundCommand((NormalForceBoundCommand) command);
             break;
-         case FORCE_MINIMIZATION:
-            submitForceMinimizationCommand((ForceMinimizationCommand) command);
+         case FORCE_VALUE:
+            submitForceValueCommand((ForceObjectiveCommand) command);
             break;
-         case RHO_MINIMIZATION:
-            submitRhoMinimizationCommand((RhoMinimizationCommand) command);
+         case FORCE_TRACKING:
+            submitForceTrackingCommand((ForceTrackingCommand) command);
+         case RHO_TRACKING:
+            submitRhoTrackingCommand((RhoTrackingCommand) command);
             break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
@@ -359,17 +360,24 @@ public class LinearMPCQPSolver
          addInput(qpInputTypeA, offset);
    }
 
-   public void submitForceMinimizationCommand(ForceMinimizationCommand command)
+   public void submitForceValueCommand(ForceObjectiveCommand command)
    {
       boolean success = inputCalculator.calculateForceMinimizationObjective(qpInputTypeC, command);
       if (success)
          addInput(qpInputTypeC);
    }
 
-   public void submitRhoMinimizationCommand(RhoMinimizationCommand command)
+   public void submitForceTrackingCommand(ForceTrackingCommand command)
    {
-      int offset = inputCalculator.calculateRhoMinimizationObjective(qpInputTypeC, command);
-      if (offset > -1)
+      int offset = inputCalculator.calculateForceTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC);
+   }
+
+   public void submitRhoTrackingCommand(RhoTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateRhoTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
          addInput(qpInputTypeC, offset);
    }
 

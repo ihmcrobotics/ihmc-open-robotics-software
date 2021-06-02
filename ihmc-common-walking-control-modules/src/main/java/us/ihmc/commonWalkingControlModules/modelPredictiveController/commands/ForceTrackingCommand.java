@@ -13,7 +13,7 @@ import java.util.function.DoubleConsumer;
  * Whereas many other MPC algorithms provide some regularization by minimizing the CoM acceleration, this minimizes the force, so as to account for the force
  * that must be exerted to counter gravity.
  */
-public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand>
+public class ForceTrackingCommand implements MPCCommand<ForceTrackingCommand>
 {
    private int commandId;
    /**
@@ -34,21 +34,16 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
     */
    private double weight;
 
-   private double segmentDuration;
+   private double duration;
 
-   private double objectiveValue = 0.0;
-
-   /**
-    * Consumer for the computed cost to go on the output of the MPC function.
-    */
-   private DoubleConsumer costToGoConsumer;
+   private double objectiveValue;
 
    /**
     * @return command type for the MPC core.
     */
    public MPCCommandType getCommandType()
    {
-      return MPCCommandType.RHO_MINIMIZATION;
+      return MPCCommandType.FORCE_TRACKING;
    }
 
    /**
@@ -57,9 +52,8 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
    public void clear()
    {
       segmentNumber = -1;
-      costToGoConsumer = null;
-      segmentDuration = Double.NaN;
-      objectiveValue = 0.0;
+      duration = Double.NaN;
+      objectiveValue = Double.NaN;
       contactPlaneHelpers.clear();
    }
 
@@ -69,16 +63,6 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
    public void setWeight(double weight)
    {
       this.weight = weight;
-   }
-
-   public void setSegmentDuration(double duration)
-   {
-      this.segmentDuration = duration;
-   }
-
-   public void setObjectiveValue(double objectiveValue)
-   {
-      this.objectiveValue = objectiveValue;
    }
 
    /**
@@ -105,6 +89,16 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
       this.omega = omega;
    }
 
+   public void setSegmentDuration(double segmentDuration)
+   {
+      this.duration = segmentDuration;
+   }
+
+   public void setObjectiveValue(double objectiveValue)
+   {
+      this.objectiveValue = objectiveValue;
+   }
+
    public int getSegmentNumber()
    {
       return segmentNumber;
@@ -113,16 +107,6 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
    public double getWeight()
    {
       return weight;
-   }
-
-   public double getSegmentDuration()
-   {
-      return segmentDuration;
-   }
-
-   public double getObjectiveValue()
-   {
-      return objectiveValue;
    }
 
    public double getOmega()
@@ -140,33 +124,26 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
       return contactPlaneHelpers.get(i);
    }
 
-   public void setCostToGoConsumer(DoubleConsumer costToGoConsumer)
+   public double getObjectiveValue()
    {
-      this.costToGoConsumer = costToGoConsumer;
+      return objectiveValue;
    }
 
-   public DoubleConsumer getCostToGoConsumer()
+   public double getSegmentDuration()
    {
-      return costToGoConsumer;
-   }
-
-   public void setCostToGo(double costToGo)
-   {
-      if (costToGoConsumer != null)
-         costToGoConsumer.accept(costToGo);
+      return duration;
    }
 
    @Override
-   public void set(RhoMinimizationCommand other)
+   public void set(ForceTrackingCommand other)
    {
       clear();
       setCommandId(other.getCommandId());
       setSegmentNumber(other.getSegmentNumber());
       setOmega(other.getOmega());
       setWeight(other.getWeight());
-      setCostToGoConsumer(other.getCostToGoConsumer());
-      setSegmentDuration(other.getSegmentDuration());
       setObjectiveValue(other.getObjectiveValue());
+      setSegmentDuration(other.getSegmentDuration());
       for (int i = 0; i < other.getNumberOfContacts(); i++)
          addContactPlaneHelper(other.getContactPlaneHelper(i));
    }
@@ -190,9 +167,9 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
       {
          return true;
       }
-      else if (object instanceof RhoMinimizationCommand)
+      else if (object instanceof ForceTrackingCommand)
       {
-         RhoMinimizationCommand other = (RhoMinimizationCommand) object;
+         ForceTrackingCommand other = (ForceTrackingCommand) object;
          if (commandId != other.commandId)
             return false;
          if (segmentNumber != other.segmentNumber)
@@ -201,11 +178,11 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
             return false;
          if (weight != other.weight)
             return false;
-         if (segmentDuration != other.segmentDuration)
-            return false;
-         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
+         if (duration != other.duration)
             return false;
          if (objectiveValue != other.objectiveValue)
+            return false;
+         if (contactPlaneHelpers.size() != other.contactPlaneHelpers.size())
             return false;
          for (int i = 0; i < contactPlaneHelpers.size(); i++)
          {
@@ -223,7 +200,8 @@ public class RhoMinimizationCommand implements MPCCommand<RhoMinimizationCommand
    @Override
    public String toString()
    {
-      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", omega: " + omega + ", weight: " + weight + ".";
+      String string = getClass().getSimpleName() + ": segment number: " + segmentNumber + ", omega: " + omega + ", weight: " + weight +
+                      ": duration: " + duration + ": objective value: " + objectiveValue + ".";
       for (int i = 0; i < getNumberOfContacts(); i++)
       {
          string += "\ncontact " + i + ": " + contactPlaneHelpers.get(i);

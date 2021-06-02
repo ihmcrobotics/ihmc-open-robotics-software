@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
@@ -313,8 +312,10 @@ public class MPCQPInputCalculator
       return true;
    }
 
-   public boolean calculateForceMinimizationObjective(QPInputTypeC inputToPack, ForceMinimizationCommand objective)
+   public boolean calculateForceMinimizationObjective(QPInputTypeC inputToPack, ForceObjectiveCommand objective)
    {
+      throw new RuntimeException("This objective is not yet properly implemented.");
+      /*
       inputToPack.setNumberOfVariables(indexHandler.getTotalProblemSize());
       inputToPack.reshape();
 
@@ -354,9 +355,11 @@ public class MPCQPInputCalculator
       inputToPack.setWeight(weight);
 
       return true;
+      
+       */
    }
 
-   public int calculateRhoMinimizationObjective(QPInputTypeC inputToPack, RhoMinimizationCommand objective)
+   public int calculateForceTrackingObjective(QPInputTypeC inputToPack, ForceTrackingCommand objective)
    {
       int segmentNumber = objective.getSegmentNumber();
 
@@ -374,13 +377,48 @@ public class MPCQPInputCalculator
       {
          MPCContactPlane contactPlane = objective.getContactPlaneHelper(i);
 
-         IntegrationInputCalculator.computeRhoAccelerationIntegrationMatrix(startCol,
+         IntegrationInputCalculator.computeNormalAccelerationTrackingMatrix(startCol,
                                                                             inputToPack.getDirectCostGradient(),
                                                                             inputToPack.getDirectCostHessian(),
-                                                                            contactPlane.getRhoSize(),
+                                                                            contactPlane,
                                                                             duration,
                                                                             objective.getOmega(),
                                                                             objective.getObjectiveValue());
+
+         startCol += contactPlane.getCoefficientSize();
+      }
+
+      inputToPack.setUseWeightScalar(true);
+      inputToPack.setWeight(weight);
+
+      return indexHandler.getRhoCoefficientStartIndex(segmentNumber);
+   }
+
+   public int calculateRhoTrackingObjective(QPInputTypeC inputToPack, RhoTrackingCommand objective)
+   {
+      int segmentNumber = objective.getSegmentNumber();
+
+      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber));
+      inputToPack.reshape();
+
+      inputToPack.getDirectCostHessian().zero();
+      inputToPack.getDirectCostGradient().zero();
+
+      double weight = objective.getWeight();
+      double duration = objective.getSegmentDuration();
+
+      int startCol = 0;
+      for (int i = 0; i < objective.getNumberOfContacts(); i++)
+      {
+         MPCContactPlane contactPlane = objective.getContactPlaneHelper(i);
+
+         IntegrationInputCalculator.computeRhoAccelerationTrackingMatrix(startCol,
+                                                                         inputToPack.getDirectCostGradient(),
+                                                                         inputToPack.getDirectCostHessian(),
+                                                                         contactPlane.getRhoSize(),
+                                                                         duration,
+                                                                         objective.getOmega(),
+                                                                         objective.getObjectiveValue());
 
          startCol += contactPlane.getCoefficientSize();
       }

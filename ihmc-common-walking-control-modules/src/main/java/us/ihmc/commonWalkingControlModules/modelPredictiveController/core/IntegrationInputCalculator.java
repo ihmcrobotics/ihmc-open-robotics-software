@@ -3,45 +3,42 @@ package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
-import us.ihmc.robotics.MatrixMissingTools;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
 
 public class IntegrationInputCalculator
 {
-   public static void computeRhoAccelerationIntegrationMatrix(int startCol,
-                                                              DMatrixRMaj gradientToPack,
-                                                              DMatrixRMaj hessianToPack,
-                                                              MPCContactPlane contactPlane,
-                                                              double duration,
-                                                              double omega,
-                                                              double goalValueForPlane)
+   public static void computeRhoAccelerationTrackingMatrix(int startCol,
+                                                           DMatrixRMaj gradientToPack,
+                                                           DMatrixRMaj hessianToPack,
+                                                           MPCContactPlane contactPlane,
+                                                           double duration,
+                                                           double omega,
+                                                           double goalValueForPlane)
    {
-      computeRhoAccelerationIntegrationMatrix(startCol, gradientToPack, hessianToPack, contactPlane.getRhoSize(), duration, omega, goalValueForPlane);
+      computeRhoAccelerationTrackingMatrix(startCol, gradientToPack, hessianToPack, contactPlane.getRhoSize(), duration, omega, goalValueForPlane);
    }
 
-   public static void computeRhoAccelerationIntegrationMatrix(int startCol,
-                                                              DMatrixRMaj gradientToPack,
-                                                              DMatrixRMaj hessianToPack,
-                                                              MPCContactPoint contactPoint,
-                                                              double duration,
-                                                              double omega,
-                                                              double goalValueForPlane)
+   public static void computeRhoAccelerationTrackingMatrix(int startCol,
+                                                           DMatrixRMaj gradientToPack,
+                                                           DMatrixRMaj hessianToPack,
+                                                           MPCContactPoint contactPoint,
+                                                           double duration,
+                                                           double omega,
+                                                           double goalValueForPlane)
    {
-      computeRhoAccelerationIntegrationMatrix(startCol, gradientToPack, hessianToPack, contactPoint.getRhoSize(), duration, omega, goalValueForPlane);
+      computeRhoAccelerationTrackingMatrix(startCol, gradientToPack, hessianToPack, contactPoint.getRhoSize(), duration, omega, goalValueForPlane);
    }
 
-   public static void computeRhoAccelerationIntegrationMatrix(int startCol,
-                                                              DMatrixRMaj gradientToPack,
-                                                              DMatrixRMaj hessianToPack,
-                                                              int numberOfBasisVectors,
-                                                              double duration,
-                                                              double omega,
-                                                              double goalValueForBasis)
+   public static void computeRhoAccelerationTrackingMatrix(int startCol,
+                                                           DMatrixRMaj gradientToPack,
+                                                           DMatrixRMaj hessianToPack,
+                                                           int numberOfBasisVectors,
+                                                           double duration,
+                                                           double omega,
+                                                           double goalValueForBasis)
    {
       duration = Math.min(duration, sufficientlyLongTime);
 
@@ -99,13 +96,13 @@ public class IntegrationInputCalculator
       }
    }
 
-   public static void computeNormalAccelerationIntegrationMatrix(int startCol,
-                                                                 DMatrixRMaj gradientToPack,
-                                                                 DMatrixRMaj hessianToPack,
-                                                                 MPCContactPoint contactPoint,
-                                                                 double duration,
-                                                                 double omega,
-                                                                 double goalNormalForce)
+   public static void computeNormalAccelerationTrackingMatrix(int startCol,
+                                                              DMatrixRMaj gradientToPack,
+                                                              DMatrixRMaj hessianToPack,
+                                                              MPCContactPlane contactPlane,
+                                                              double duration,
+                                                              double omega,
+                                                              double goalNormalForce)
    {
       duration = Math.min(duration, sufficientlyLongTime);
 
@@ -134,11 +131,11 @@ public class IntegrationInputCalculator
       double g2 = 3.0 * duration2;
       double g3 = 2.0 * duration;
 
-      for (int basisVectorIndexI = 0; basisVectorIndexI < contactPoint.getRhoSize(); basisVectorIndexI++)
+      for (int basisVectorIndexI = 0; basisVectorIndexI < contactPlane.getRhoSize(); basisVectorIndexI++)
       {
          int startIdxI = startCol + basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = contactPoint.getBasisVectorInPlaneFrame(basisVectorIndexI);
+         FrameVector3DReadOnly basisVectorI = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexI);
 
          hessianToPack.unsafe_set(startIdxI, startIdxI, c00);
          hessianToPack.unsafe_set(startIdxI, startIdxI + 1, c01);
@@ -157,48 +154,48 @@ public class IntegrationInputCalculator
          hessianToPack.unsafe_set(startIdxI + 3, startIdxI + 2, c23);
          hessianToPack.unsafe_set(startIdxI + 3, startIdxI + 3, c33);
 
-         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < contactPoint.getRhoSize(); basisVectorIndexJ++)
+         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < contactPlane.getRhoSize(); basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = contactPoint.getBasisVectorInPlaneFrame(basisVectorIndexJ);
+            FrameVector3DReadOnly basisVectorJ = contactPlane.getBasisVectorInPlaneFrame(basisVectorIndexJ);
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
             int startIdxJ = startCol + basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
 
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ, basisDot * c00);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI, startIdxJ + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ, basisDot * c01);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 1, startIdxJ + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ, basisDot * c02);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 2, startIdxJ + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ, basisDot * c03);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxI + 3, startIdxJ + 3, basisDot * c33);
+            hessianToPack.unsafe_set(startIdxI, startIdxJ, basisDot * c00);
+            hessianToPack.unsafe_set(startIdxI, startIdxJ + 1, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxI, startIdxJ + 2, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxI, startIdxJ + 3, basisDot * c03);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ + 1, basisDot * c11);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ + 2, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxI + 1, startIdxJ + 3, basisDot * c13);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ + 1, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ + 2, basisDot * c22);
+            hessianToPack.unsafe_set(startIdxI + 2, startIdxJ + 3, basisDot * c23);
+            hessianToPack.unsafe_set(startIdxI + 3, startIdxJ, basisDot * c03);
+            hessianToPack.unsafe_set(startIdxI + 3, startIdxJ + 1, basisDot * c13);
+            hessianToPack.unsafe_set(startIdxI + 3, startIdxJ + 2, basisDot * c23);
+            hessianToPack.unsafe_set(startIdxI + 3, startIdxJ + 3, basisDot * c33);
 
             // we know it's symmetric, and this way we can avoid iterating as much
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI, basisDot * c00);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ, startIdxI + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI, basisDot * c01);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 1, startIdxI + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI, basisDot * c02);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 2, startIdxI + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI, basisDot * c03);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(hessianToPack, startIdxJ + 3, startIdxI + 3, basisDot * c33);
+            hessianToPack.unsafe_set(startIdxJ, startIdxI, basisDot * c00);
+            hessianToPack.unsafe_set(startIdxJ, startIdxI + 1, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxJ, startIdxI + 2, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxJ, startIdxI + 3, basisDot * c03);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI, basisDot * c01);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI + 1, basisDot * c11);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI + 2, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxJ + 1, startIdxI + 3, basisDot * c13);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI, basisDot * c02);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI + 1, basisDot * c12);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI + 2, basisDot * c22);
+            hessianToPack.unsafe_set(startIdxJ + 2, startIdxI + 3, basisDot * c23);
+            hessianToPack.unsafe_set(startIdxJ + 3, startIdxI, basisDot * c03);
+            hessianToPack.unsafe_set(startIdxJ + 3, startIdxI + 1, basisDot * c13);
+            hessianToPack.unsafe_set(startIdxJ + 3, startIdxI + 2, basisDot * c23);
+            hessianToPack.unsafe_set(startIdxJ + 3, startIdxI + 3, basisDot * c33);
          }
 
          double basisValue = basisVectorI.getZ() * goalNormalForce;
