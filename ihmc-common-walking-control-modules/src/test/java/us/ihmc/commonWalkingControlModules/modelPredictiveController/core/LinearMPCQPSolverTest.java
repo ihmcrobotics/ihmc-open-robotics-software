@@ -664,7 +664,7 @@ public class LinearMPCQPSolverTest
                if (i == 1)
                   return 0;
                else
-                  return contactPolygon.getNumberOfVertices();
+                  return 2 * contactPolygon.getNumberOfVertices();
             }, 3);
 
       double firstSegmentDuration = 0.7;

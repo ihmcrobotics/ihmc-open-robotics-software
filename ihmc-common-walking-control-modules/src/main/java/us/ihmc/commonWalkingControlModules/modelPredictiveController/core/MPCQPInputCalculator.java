@@ -828,7 +828,7 @@ public class MPCQPInputCalculator
          return false;
 
       inputToPack.setNumberOfVariables(numberOfVariables);
-      inputToPack.reshape(4 * rhoSize);
+      inputToPack.reshape(LinearMPCIndexHandler.coefficientsPerRho * rhoSize);
 
       inputToPack.getTaskJacobian().zero();
       inputToPack.getTaskObjective().zero();
