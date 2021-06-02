@@ -294,6 +294,12 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    @Override
    public double getForceInPercentOfWeightThresholdToTrustFoot()
    {
+      return 0.35;
+   }
+
+   @Override
+   public double getForceInPercentOfWeightThresholdToNotTrustFoot()
+   {
       return 0.3;
    }
 
