@@ -1,13 +1,11 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
 import org.apache.commons.math3.util.Precision;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.TransferState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -54,7 +52,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
                                                  TouchdownErrorCompensator touchdownErrorCompensator,
                                                  HighLevelHumanoidControllerToolbox controllerToolbox,
                                                  HighLevelControlManagerFactory managerFactory,
-                                                 WalkingControllerParameters walkingControllerParameters,
+                                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                                  WalkingFailureDetectionControlModule failureDetectionControlModule,
                                                  DoubleProvider minimumTransferTime,
                                                  DoubleProvider unloadFraction,
@@ -69,9 +67,9 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
 
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
-      fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
+      fractionOfTransferToCollapseLeg.set(pushRecoveryControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
-              walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
+              pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
 
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
@@ -85,7 +83,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
 
       // This needs to check `TO_STANDING` as well as messages could be received on the very first controller tick at which point
       // the robot is not in the standing state but not yet walking either.
-      if (getPreviousWalkingStateEnum() == PushRecoveryStateEnum.STANDING || getPreviousWalkingStateEnum() == PushRecoveryStateEnum.TO_STANDING)
+      if (getPreviousWalkingStateEnum() == PushRecoveryStateEnum.TO_STANDING)
       {
          walkingMessageHandler.reportWalkingStarted();
       }
