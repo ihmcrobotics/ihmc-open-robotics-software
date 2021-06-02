@@ -318,6 +318,35 @@ public abstract class DRCPushRecoveryTest
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
    }
 
+   @Test
+   public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, true, true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      RobotSide footSide = RobotSide.LEFT;
+      FramePose3D footPose = new FramePose3D(
+              drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+      footPose.prependTranslation(0.0, 0.0, 0.2);
+      Point3D desiredFootPosition = new Point3D();
+      Quaternion desiredFootOrientation = new Quaternion();
+      footPose.get(desiredFootPosition, desiredFootOrientation);
+      FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
+      drcSimulationTestHelper.publishToController(footPosePacket);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
+      double magnitude = 180.0;
+      double duration = 0.4;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5));
+   }
+
    private void setupTest(String scriptName, boolean enablePushRecoveryControlModule, boolean enablePushRecoveryOnFailure) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -338,11 +367,11 @@ public abstract class DRCPushRecoveryTest
       }
 
       // get rid of this once push recovery is enabled by default
-      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
-      enable.set(enablePushRecoveryControlModule);
-      YoBoolean enableOnFailure = (YoBoolean) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
-            "enablePushRecoveryOnFailure");
-      enableOnFailure.set(enablePushRecoveryOnFailure);
+//      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
+//      enable.set(enablePushRecoveryControlModule);
+//      YoBoolean enableOnFailure = (YoBoolean) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+//            "enablePushRecoveryOnFailure");
+//      enableOnFailure.set(enablePushRecoveryOnFailure);
 
       for (RobotSide robotSide : RobotSide.values)
       {
