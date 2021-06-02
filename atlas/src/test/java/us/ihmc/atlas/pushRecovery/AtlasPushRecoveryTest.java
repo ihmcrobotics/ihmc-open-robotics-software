@@ -113,4 +113,12 @@ public class AtlasPushRecoveryTest extends DRCPushRecoveryTest
    {
       super.testRecoveryWhileInFlamingoStance();
    }
+
+   @Tag("humanoid-push-recovery")
+   @Override
+   @Test
+   public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      super.testRecoveryForwardWhileInFlamingoStance();
+   }
 }
