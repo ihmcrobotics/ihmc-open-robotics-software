@@ -49,7 +49,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -96,6 +95,8 @@ import java.util.stream.Collectors;
 
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyAtTargetFrame;
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.newOneDoFJointMessage;
+
 import static us.ihmc.robotics.Assert.assertTrue;
 
 /**
@@ -111,10 +112,14 @@ public class ValkyrieStepReachabilityCalculator
 
    private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
+   private static final double COM_WEIGHT = 1.0;
+   private static final double RIGID_BODY_FEET_WEIGHT = 30.0;
+   private static final double RIGID_BODY_OTHER_WEIGHT = 20.0;
+   private static final double JOINT_WEIGHT = 10.0;
    private static final double SOLUTION_QUALITY_THRESHOLD = 5;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private static final YoAppearanceRGBColor ghostApperance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
+   private static final YoAppearanceRGBColor ghostAppearance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private static final boolean visualize = simulationTestingParameters.getCreateGUI();
    static
@@ -140,6 +145,7 @@ public class ValkyrieStepReachabilityCalculator
    private final HumanoidFloatingRootJointRobot robot;
    private final HumanoidFloatingRootJointRobot ghost;
    private final RobotController toolboxUpdater;
+
 
    public static void main(String[] args) throws Exception
    {
@@ -192,7 +198,7 @@ public class ValkyrieStepReachabilityCalculator
       // Yellow initial body
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
       robotDescription.setName("Ghost");
-      recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostApperance);
+      recursivelyModifyGraphics(robotDescription.getChildrenJoints().get(0), ghostAppearance);
       ghost = ghostRobotModel.createHumanoidFloatingRootJointRobot(false);
       ghost.setDynamic(false);
       ghost.setGravity(0);
@@ -276,8 +282,8 @@ public class ValkyrieStepReachabilityCalculator
 
             // change to holdRigidBodyAtSomePose
             KinematicsToolboxRigidBodyMessage message = holdRigidBodyCurrentPose(randomizedFullRobotModel.getHand(robotSide));
-            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+            message.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+            message.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
             commandInputManager.submitMessage(message);
          }
 
@@ -286,7 +292,7 @@ public class ValkyrieStepReachabilityCalculator
             SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
             selectionMatrix.selectZAxis(false);
             message.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
-            message.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
+            message.getWeights().set(MessageTools.createWeightMatrix3DMessage(COM_WEIGHT));
             commandInputManager.submitMessage(message);
          }
 
@@ -334,13 +340,13 @@ public class ValkyrieStepReachabilityCalculator
             rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
          else
             rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
-         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(30.0));
-         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(30.0));
+         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
+         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
          commandInputManager.submitMessage(rbMessage);
 
          // OneDoFJoint objective for each knee joint
          OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, 10.0, 1.04);
+         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, JOINT_WEIGHT, 1.04);
          commandInputManager.submitMessage(jointMessage);
       }
 
@@ -349,15 +355,15 @@ public class ValkyrieStepReachabilityCalculator
       // Rigid body objective for chest, center XY pose of feet
       KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getChest(), centerFeet);
       rbMessage.getLinearSelectionMatrix().setZSelected(false);
-      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
       commandInputManager.submitMessage(rbMessage);
 
       // Rigid body objective for head, center XY pose of feet
       rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getHead(), centerFeet);
       rbMessage.getLinearSelectionMatrix().setZSelected(false);
-      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
-      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(20.0));
+      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
       commandInputManager.submitMessage(rbMessage);
 
       { // Setup CoM message
@@ -365,7 +371,7 @@ public class ValkyrieStepReachabilityCalculator
          SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
          selectionMatrix.selectZAxis(false);
          comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
-         comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(1.0));
+         comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(COM_WEIGHT));
          commandInputManager.submitMessage(comMessage);
       }
 
@@ -457,7 +463,7 @@ public class ValkyrieStepReachabilityCalculator
       return posesToCheck;
    }
 
-   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostApperance)
+   public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostAppearance)
    {
       if (joint == null)
          return;
@@ -478,7 +484,7 @@ public class ValkyrieStepReachabilityCalculator
             if (primitive instanceof Graphics3DInstruction)
             {
                Graphics3DInstruction modelInstruction = (Graphics3DInstruction) primitive;
-               modelInstruction.setAppearance(ghostApperance);
+               modelInstruction.setAppearance(ghostAppearance);
             }
          }
       }
@@ -488,7 +494,7 @@ public class ValkyrieStepReachabilityCalculator
 
       for (JointDescription child : joint.getChildrenJoints())
       {
-         recursivelyModifyGraphics(child, ghostApperance);
+         recursivelyModifyGraphics(child, ghostAppearance);
       }
    }
 
