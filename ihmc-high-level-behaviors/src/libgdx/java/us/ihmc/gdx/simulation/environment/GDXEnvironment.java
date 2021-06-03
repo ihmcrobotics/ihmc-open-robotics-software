@@ -168,9 +168,9 @@ public class GDXEnvironment implements RenderableProvider
             objectToPlace = new GDXPalletObject();
          if (ImGui.button("Place Push Door Only"))
          {
-            objectToPlace = new GDXPushDoorOnlyObject();
+            objectToPlace = new GDXPushHandleRightDoorObject();
             if (doorSimulator != null)
-               doorSimulator.setDoor(objectToPlace);
+               doorSimulator.setDoor((GDXPushHandleRightDoorObject) objectToPlace);
          }
 //         if (ImGui.button("Place Door Frame"))
 //            objectToPlace = new GDXDoorFrameObject();
@@ -293,9 +293,9 @@ public class GDXEnvironment implements RenderableProvider
                object.set(tempTransform);
                objects.add(object);
 
-               if (object instanceof GDXPushDoorOnlyObject && doorSimulator != null)
+               if (object instanceof GDXPushHandleRightDoorObject && doorSimulator != null)
                {
-                  doorSimulator.setDoor(object);
+                  doorSimulator.setDoor((GDXPushHandleRightDoorObject) object);
                }
             }
          });

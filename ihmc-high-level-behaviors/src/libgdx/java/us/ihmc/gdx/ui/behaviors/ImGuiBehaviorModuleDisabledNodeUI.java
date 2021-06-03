@@ -13,7 +13,7 @@ public class ImGuiBehaviorModuleDisabledNodeUI extends GDXBehaviorUIInterface
 {
    private final BehaviorHelper helper;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private final Point2D nodePosition = new Point2D(0.0f, 182.0f);
+   private final Point2D nodePosition = new Point2D(16.0f, 189.0f);
    private final ImBoolean imEnabled = new ImBoolean(false);
    private final YoBooleanClientHelper yoEnabled;
 

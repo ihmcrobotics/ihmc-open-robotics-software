@@ -147,7 +147,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       }
       else if (placeNewObject = ImGui.button("Place Door Only"))
       {
-         modelBeingPlaced = new GDXPushDoorOnlyObject();
+         modelBeingPlaced = new GDXPushHandleRightDoorObject();
       }
       else if (placeNewObject = ImGui.button("Place Floor"))
       {

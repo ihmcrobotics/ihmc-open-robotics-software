@@ -2,7 +2,9 @@ package us.ihmc.gdx.ui.behaviors.registry;
 
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.gdx.ui.behaviors.ImGuiGDXBuildingExplorationBehaviorUI;
+import us.ihmc.gdx.ui.behaviors.ImGuiGDXDoorBehaviorUI;
 import us.ihmc.gdx.ui.behaviors.ImGuiGDXLookAndStepBehaviorUI;
+import us.ihmc.gdx.ui.behaviors.ImGuiGDXTraverseStairsBehaviorUI;
 
 import java.util.LinkedHashSet;
 
@@ -13,6 +15,8 @@ public class GDXBehaviorUIRegistry extends BehaviorRegistry
    {
       DEFAULT_BEHAVIORS.register(ImGuiGDXLookAndStepBehaviorUI.DEFINITION);
       DEFAULT_BEHAVIORS.register(ImGuiGDXBuildingExplorationBehaviorUI.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ImGuiGDXDoorBehaviorUI.DEFINITION);
+      DEFAULT_BEHAVIORS.register(ImGuiGDXTraverseStairsBehaviorUI.DEFINITION);
    }
 
    private final LinkedHashSet<GDXBehaviorUIDefinition> uiDefinitionEntries = new LinkedHashSet<>();

@@ -198,7 +198,7 @@
     "qz" : 0.0,
     "qs" : 1.0
   }, {
-    "type" : "GDXPushDoorOnlyObject",
+    "type" : "GDXPushHandleRightDoorObject",
     "x" : 5.852588858464311,
     "y" : 0.5045198490016248,
     "z" : -6.337599855071415E-17,

@@ -185,4 +185,10 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
          behaviorHasCrashed.set(true);
       }
    }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
+   }
 }

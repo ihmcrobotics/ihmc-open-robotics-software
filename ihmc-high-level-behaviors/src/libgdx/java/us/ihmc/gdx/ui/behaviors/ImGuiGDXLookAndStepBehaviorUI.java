@@ -34,6 +34,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.Goal;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
@@ -42,7 +43,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper behaviorHelper;
-   private final Point2D nodePosition = new Point2D(280.0, 370.0);
+   private final Point2D nodePosition = new Point2D(11.0, 320.0);
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
@@ -126,6 +127,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                         () -> behaviorHelper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
       goalAffordance.create(baseUI, goalPose -> behaviorHelper.publish(GOAL_INPUT, goalPose), Color.CYAN);
+      behaviorHelper.subscribeViaCallback(Goal, goalAffordance::setGoalPose);
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
    }

@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -12,6 +13,12 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 
 public class BuildingExplorationBehaviorTools
 {
+   public final static Pose3D NAN_POSE = new Pose3D();
+   static
+   {
+      NAN_POSE.setToNaN();
+   }
+
    public static void pitchChestToSeeDoor(RemoteSyncedRobotModel syncedRobot, BehaviorHelper helper)
    {
       syncedRobot.update();
