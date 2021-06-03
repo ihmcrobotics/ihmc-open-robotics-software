@@ -1,6 +1,8 @@
 package us.ihmc.gdx.ui.missionControl.processes;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.gdx.ui.missionControl.RestartableMissionControlProcess;
 import us.ihmc.pubsub.DomainFactory;
@@ -11,12 +13,17 @@ public class ObjectDetectionProcess extends RestartableMissionControlProcess
 {
    private final Supplier<DRCRobotModel> robotModelSupplier;
    private final Supplier<DomainFactory.PubSubImplementation> pubSubImplementationSupplier;
+   private final Supplier<RobotTarget> robotTargetSupplier;
    private ObjectDetectorToolboxModule objectDetectorToolboxModule;
+   private FiducialDetectorToolboxModule fiducialDetectorToolboxModule;
 
-   public ObjectDetectionProcess(Supplier<DRCRobotModel> robotModelSupplier, Supplier<DomainFactory.PubSubImplementation> pubSubImplementationSupplier)
+   public ObjectDetectionProcess(Supplier<DRCRobotModel> robotModelSupplier,
+                                 Supplier<DomainFactory.PubSubImplementation> pubSubImplementationSupplier,
+                                 Supplier<RobotTarget> robotTargetSupplier)
    {
       this.robotModelSupplier = robotModelSupplier;
       this.pubSubImplementationSupplier = pubSubImplementationSupplier;
+      this.robotTargetSupplier = robotTargetSupplier;
    }
 
    @Override
@@ -27,12 +34,18 @@ public class ObjectDetectionProcess extends RestartableMissionControlProcess
                                                                     robotModel.createFullRobotModel(),
                                                                     robotModel.getLogModelProvider(),
                                                                     pubSubImplementationSupplier.get());
+      fiducialDetectorToolboxModule = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                        robotTargetSupplier.get(),
+                                                                        robotModel.createFullRobotModel(),
+                                                                        robotModel.getLogModelProvider(),
+                                                                        pubSubImplementationSupplier.get());
    }
 
    @Override
    protected void stopInternal()
    {
       objectDetectorToolboxModule.destroy();
+      fiducialDetectorToolboxModule.destroy();
    }
 
    @Override

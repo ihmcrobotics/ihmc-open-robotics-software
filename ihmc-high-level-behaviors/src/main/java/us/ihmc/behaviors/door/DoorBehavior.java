@@ -54,7 +54,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
          doorPose.set(doorLocationPacket.getDoorTransformToWorld());
          helper.publish(DetectedDoorPose, MutablePair.of(DoorType.fromByte(doorLocationPacket.getDetectedDoorType()), new Pose3D(doorPose)));
       });
-//      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getOutputTopic, detectedFiducialMessage ->
+//      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
 //      {
 //         detectedFiducial.set(detectedFiducialMessage);
 //         helper.publish(DetectedDoorPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));

@@ -19,6 +19,7 @@ import us.ihmc.gdx.ui.missionControl.processes.*;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
 
+import java.awt.*;
 import java.util.ArrayList;
 
 import static us.ihmc.gdx.imgui.ImGuiTools.uniqueIDOnly;
@@ -66,7 +67,7 @@ public abstract class GDXProcessManagerPanel
       behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
-      objectDetectionProcess = new ObjectDetectionProcess(this::createRobotModel, this::getROS2Mode);
+      objectDetectionProcess = new ObjectDetectionProcess(this::createRobotModel, this::getROS2Mode, this::getRobotTarget);
 
       processes.add(ros1MasterProcess);
       processes.add(behaviorModuleProcess);
@@ -79,6 +80,11 @@ public abstract class GDXProcessManagerPanel
    private PubSubImplementation getROS2Mode()
    {
       return CommunicationMode.fromOrdinal(ros2Mode.get()).getPubSubImplementation();
+   }
+
+   private RobotTarget getRobotTarget()
+   {
+      return RobotTarget.values()[robotTarget.get()];
    }
 
    public void render()

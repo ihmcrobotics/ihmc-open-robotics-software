@@ -73,9 +73,14 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
       return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic<DetectedFiducialPacket> getOutputTopic(String robotName)
+   public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName).withType(DetectedFiducialPacket.class);
+      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName);
+   }
+
+   public static ROS2Topic<DetectedFiducialPacket> getDetectedFiducialOutputTopic(String robotName)
+   {
+      return getOutputTopic(robotName).withType(DetectedFiducialPacket.class);
    }
 
    @Override
@@ -84,8 +89,13 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
       return getInputTopic(robotName);
    }
 
-   public static ROS2Topic<ToolboxStateMessage> getInputTopic(String robotName)
+   public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_INPUT.withRobot(robotName).withType(ToolboxStateMessage.class);
+      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
+   }
+
+   public static ROS2Topic<ToolboxStateMessage> getToolboxStateInputTopic(String robotName)
+   {
+      return getInputTopic(robotName).withType(ToolboxStateMessage.class);
    }
 }
