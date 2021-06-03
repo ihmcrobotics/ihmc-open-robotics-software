@@ -3,6 +3,7 @@ package us.ihmc.behaviors.demo;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
+import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
@@ -26,8 +27,9 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       NAN_POSE.setToNaN();
    }
-   private final LookAndStepBehavior lookAndStepBehavior;
    private final BehaviorHelper helper;
+   private final LookAndStepBehavior lookAndStepBehavior;
+   private final DoorBehavior doorBehavior;
    private final RemoteSyncedRobotModel syncedRobot;
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
 
@@ -35,10 +37,10 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       this.helper = helper;
       LogTools.info("Constructing");
+      syncedRobot = helper.newSyncedRobot();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
       addChild(lookAndStepBehavior);
-
-      syncedRobot = helper.newSyncedRobot();
+      doorBehavior = new DoorBehavior(helper, syncedRobot);
       helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
    }
@@ -47,7 +49,9 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       goal.set(newGoal);
       if (!newGoal.containsNaN())
+      {
          lookAndStepBehavior.acceptGoal(newGoal);
+      }
       helper.publish(GoalForUI, goal.get());
    }
 
