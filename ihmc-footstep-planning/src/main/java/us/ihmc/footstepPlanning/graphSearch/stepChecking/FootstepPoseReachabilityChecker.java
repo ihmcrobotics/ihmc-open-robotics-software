@@ -67,11 +67,14 @@ public class FootstepPoseReachabilityChecker
       stanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
       yoStanceFootPose.set(stanceFootPose);
 
-      // Translate candidateStep to nearest reachability checkpoint
+      // Get nearest reachability checkpoint, based on robot side
+      double poseY = stepSide.negateIfRightSide(candidateFootPose.getY());
+      candidateFootPose.setY(poseY);
       FramePose3D nearestCheckpoint = findNearestCheckpoint(candidateFootPose, reachabilityMap.keySet());
 
       // Check reachabilityMap to see if candidateFootPose is reachable
-      if (!reachabilityMap.get(nearestCheckpoint)) return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
+      if (!checkpointIsReachable(reachabilityMap, nearestCheckpoint))
+         return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
 
       return null;
    }
@@ -81,16 +84,28 @@ public class FootstepPoseReachabilityChecker
    {
       FramePose3D nearestCheckpoint = new FramePose3D();
       double smallestDist = 10.0;
-      for (FramePose3D pose : MapFootPoses)
+      for (FramePose3D frame : MapFootPoses)
       {
-         double poseDist = pose.getPositionDistance(candidateFootPose);
-         double orientationDistance = pose.getOrientationDistance(candidateFootPose);
+         candidateFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         double poseDist = frame.getPositionDistance(candidateFootPose);
+         double orientationDistance = frame.getOrientationDistance(candidateFootPose);
          if (poseDist+orientationDistance < smallestDist)
          {
             smallestDist = poseDist+orientationDistance;
-            nearestCheckpoint = pose;
+            nearestCheckpoint = frame;
          }
       }
       return nearestCheckpoint;
+   }
+
+   // Check for frame in Reachability map keys
+   public boolean checkpointIsReachable(Map<FramePose3D, Boolean> reachabilityMap, FramePose3D nearestCheckpoint)
+   {
+      for (FramePose3D frame : reachabilityMap.keySet())
+      {
+         if (frame.geometricallyEquals(nearestCheckpoint, 0.0001))
+            return reachabilityMap.get(frame);
+      }
+      return false;
    }
 }

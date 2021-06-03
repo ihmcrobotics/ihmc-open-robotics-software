@@ -193,6 +193,7 @@ public class FootstepChecker implements FootstepCheckerInterface
          return false;
       }
 
+
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.checkForPathCollisions())
       {

@@ -290,7 +290,7 @@ public class FootstepPoseCheckerTest
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
       Map<FramePose3D, Boolean> reachabilityMap = populateReachabilityMap();
 
-            FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
+      FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
       FramePose3D testFootPose = new FramePose3D();
       FramePose3D nearestCheckpointTrue = new FramePose3D();
       FramePose3D nearestCheckpointCalculated;
@@ -326,6 +326,28 @@ public class FootstepPoseCheckerTest
       nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(70-3*(11/70)), 0.0, 0.0);
       nearestCheckpointCalculated = reachabilityChecker.findNearestCheckpoint(testFootPose, reachabilityMap.keySet());
       assertTrue(nearestCheckpointTrue.geometricallyEquals(nearestCheckpointCalculated, 0.001));
+   }
+
+   @Test
+   public void testCheckpointIsReachable()
+   {
+      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
+      Map<FramePose3D, Boolean> reachabilityMap = populateReachabilityMap();
+
+      FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
+      FramePose3D testCheckpoint = new FramePose3D();
+
+      // Test reachable frame in map
+      testCheckpoint.getPosition().set(-0.056, -0.056, 0.0);
+      testCheckpoint.getOrientation().setYawPitchRoll(Math.toRadians(70), 0.0, 0.0);
+      assertTrue(reachabilityChecker.checkpointIsReachable(reachabilityMap, testCheckpoint));
+
+      // Test unreachable frame in map
+      testCheckpoint.getPosition().set(-0.01, -0.09, 0.0);
+      testCheckpoint.getOrientation().setYawPitchRoll(Math.toRadians(45), 0.0, 0.0);
+      assertFalse(reachabilityChecker.checkpointIsReachable(reachabilityMap, testCheckpoint));
    }
 
    private Map<FramePose3D, Boolean> populateReachabilityMap()
