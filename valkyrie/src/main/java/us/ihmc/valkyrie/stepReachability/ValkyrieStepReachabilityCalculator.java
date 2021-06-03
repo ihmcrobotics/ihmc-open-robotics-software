@@ -47,7 +47,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -55,6 +57,7 @@ import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
@@ -106,7 +109,7 @@ public class ValkyrieStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, SHOW_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.SHOW_VISUALIZATION;
+   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    private static final double SOLUTION_QUALITY_THRESHOLD = 5;
 
@@ -213,7 +216,7 @@ public class ValkyrieStepReachabilityCalculator
          case TEST_SINGLE_STEP:
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
-//            leftFoot.getPosition().set(0.056,  0.056,  0.000);
+            leftFoot.getPosition().set(0.0, 0.5, 0.000);
 //            leftFoot.getOrientation().setYawPitchRoll(0.000,  0.000,  0.996);
             testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
             break;
@@ -227,12 +230,13 @@ public class ValkyrieStepReachabilityCalculator
                boolean isValid = testSingleStep(leftFootPose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
                poseValidityMap.put(leftFootPose, isValid);
             }
-            StepReachabilityFileTools.writeToFile(poseValidityMap);
+            new StepReachabilityVisualizer(poseValidityMap, queriesPerAxis);
+//            StepReachabilityFileTools.writeToFile(poseValidityMap);
 //            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case SHOW_VISUALIZATION:
             Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
-            new StepReachabilityVisualizer(feasibilityMap);
+            new StepReachabilityVisualizer(feasibilityMap, queriesPerAxis);
 //            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
             break;
          default:
@@ -330,9 +334,14 @@ public class ValkyrieStepReachabilityCalculator
             rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
          else
             rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
-         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
-         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(50.0));
+         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(30.0));
+         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(30.0));
          commandInputManager.submitMessage(rbMessage);
+
+         // OneDoFJoint objective for each knee joint
+         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, 10.0, 1.04);
+         commandInputManager.submitMessage(jointMessage);
       }
 
       FramePose3D centerFeet = interpolateFeet(leftFoot, rightFoot);
@@ -409,13 +418,13 @@ public class ValkyrieStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final int queriesPerAxis = 10;
-   private static final double minimumOffsetX = -0.5;
-   private static final double maximumOffsetX = 0.5;
-   private static final double minimumOffsetY = -0.5;
-   private static final double maximumOffsetY = 0.5;
-   private static final double minimumOffsetYaw = - Math.toRadians(70.0);
-   private static final double maximumOffsetYaw = Math.toRadians(70.0);
+   private static final int queriesPerAxis = 3;
+   private static final double minimumOffsetX = -0.6;
+   private static final double maximumOffsetX = 0.4;
+   private static final double minimumOffsetY = -0.6;
+   private static final double maximumOffsetY = 0.6;
+   private static final double minimumOffsetYaw = - Math.toRadians(75.0);
+   private static final double maximumOffsetYaw = Math.toRadians(75.0);
 
    private static List<FramePose3D> createLeftFootPoseList()
    {
