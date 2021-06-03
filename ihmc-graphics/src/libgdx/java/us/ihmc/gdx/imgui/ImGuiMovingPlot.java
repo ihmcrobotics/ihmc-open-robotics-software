@@ -17,6 +17,7 @@ public class ImGuiMovingPlot
    private final int width;
    private final int height;
    private float nextValue = Float.NaN;
+   private boolean renderValueText = true;
 
    public ImGuiMovingPlot(String name)
    {
@@ -40,6 +41,11 @@ public class ImGuiMovingPlot
       Arrays.fill(valuesB, Float.NaN);
    }
 
+   public void setRenderValueText(boolean renderValueText)
+   {
+      this.renderValueText = renderValueText;
+   }
+
    public void setNextValue(float newValue)
    {
       nextValue = newValue;
@@ -53,11 +59,19 @@ public class ImGuiMovingPlot
 
    public void render()
    {
+      String valueText = "";
+      if (renderValueText)
+         valueText += nextValue;
+      render(valueText);
+   }
+
+   public void render(String valueText)
+   {
       System.arraycopy(isA ? valuesB : valuesA, 1, isA ? valuesA : valuesB, 0, bufferSize - 1);
       float[] values = isA ? valuesA : valuesB;
       isA = !isA;
       values[bufferSize - 1] = nextValue;
-      ImGui.plotLines(name, values, bufferSize, 0, "" + nextValue, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
+      ImGui.plotLines(name, values, bufferSize, 0, valueText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
 
       setNextValue(Float.NaN);
    }
