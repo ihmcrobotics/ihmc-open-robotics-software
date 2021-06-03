@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
+import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
+import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -67,7 +69,11 @@ public class GDXLowLevelImageSensorSimulator
       camera.far = maxRange * 2.0f; // should render camera farther
       viewport = new ScreenViewport(camera);
 
-      modelBatch = new ModelBatch();
+      DefaultShader.Config config = new DefaultShader.Config();
+      config.defaultCullFace = GL20.GL_FRONT;
+      DefaultShaderProvider defaultShaderProvider = new DefaultShaderProvider(config);
+      modelBatch = new ModelBatch(defaultShaderProvider);
+//      modelBatch = new ModelBatch();
 
       SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
       frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
@@ -91,7 +97,8 @@ public class GDXLowLevelImageSensorSimulator
 
       float clear = 0.0f;
       Gdx.gl.glClearColor(clear, clear, clear, 1.0f);
-      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+//      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT | GL32.GL_DEPTH_BUFFER_BIT);
+      Gdx.gl.glClear(GL32.GL_COLOR_BUFFER_BIT);
 
       viewport.update(imageWidth, imageHeight);
       modelBatch.begin(camera);
