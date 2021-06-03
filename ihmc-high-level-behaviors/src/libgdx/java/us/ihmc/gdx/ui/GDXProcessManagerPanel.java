@@ -44,6 +44,7 @@ public abstract class GDXProcessManagerPanel
    private final RestartableMissionControlProcess behaviorManagerProcess;
    private final RestartableMissionControlProcess footstepPlanningModuleProcess;
    private final RestartableMissionControlProcess mapsenseHeadlessProcess;
+   private final RestartableMissionControlProcess objectDetectionProcess;
    protected final EnvironmentInitialSetup environmentInitialSetup;
 
    public GDXProcessManagerPanel()
@@ -65,12 +66,14 @@ public abstract class GDXProcessManagerPanel
       behaviorManagerProcess = new BehaviorManagerProcess(this::createRobotModel);
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
+      objectDetectionProcess = new ObjectDetectionProcess(this::createRobotModel, this::getROS2Mode);
 
       processes.add(ros1MasterProcess);
       processes.add(behaviorModuleProcess);
       processes.add(behaviorManagerProcess);
       processes.add(footstepPlanningModuleProcess);
       processes.add(mapsenseHeadlessProcess);
+      processes.add(objectDetectionProcess);
    }
 
    private PubSubImplementation getROS2Mode()
@@ -125,6 +128,7 @@ public abstract class GDXProcessManagerPanel
       mapsenseHeadlessProcess.destroy();
       behaviorModuleProcess.destroy();
       footstepPlanningModuleProcess.destroy();
+      objectDetectionProcess.destroy();
 
       // destroy em all just in case
       for (MissionControlProcess process : processes)
@@ -168,6 +172,11 @@ public abstract class GDXProcessManagerPanel
    public RestartableMissionControlProcess getMapsenseHeadlessProcess()
    {
       return mapsenseHeadlessProcess;
+   }
+
+   public RestartableMissionControlProcess getObjectDetectionProcess()
+   {
+      return objectDetectionProcess;
    }
 
    public String getWindowName()

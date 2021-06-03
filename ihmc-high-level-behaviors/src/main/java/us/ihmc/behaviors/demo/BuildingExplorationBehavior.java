@@ -50,10 +50,6 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private void setGoal(Pose3D newGoal)
    {
       goal.set(newGoal);
-      if (!newGoal.containsNaN())
-      {
-         lookAndStepBehavior.acceptGoal(newGoal);
-      }
       helper.publish(GoalForUI, goal.get());
    }
 
@@ -64,7 +60,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
 
       if (!goal.get().containsNaN())
       {
-         if (doorBehavior.getDistanceToDoor() < 2.0)
+         if (doorBehavior.getDistanceToDoor() < 2.3 && doorBehavior.isFacingDoor())
          {
             return doorBehavior.tick();
          }

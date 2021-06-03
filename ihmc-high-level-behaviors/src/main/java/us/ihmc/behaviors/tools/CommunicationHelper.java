@@ -191,14 +191,21 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
       subscribeViaCallback(ObjectDetectorToolboxModule.getOutputTopic(getRobotModel().getSimpleRobotName()).withTypeName(DoorLocationPacket.class), callback);
    }
 
+   @Override
+   public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback)
+   {
+      ros2Helper.subscribeViaCallback(topicFunction, callback);
+   }
+
    public void subscribeToRobotConfigurationDataViaCallback(Consumer<RobotConfigurationData> callback)
    {
       subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
-   public <T> void publish(Function<String, ROS2Topic<T>> topic, T message)
+   @Override
+   public <T> void publish(Function<String, ROS2Topic<T>> topicFunction, T message)
    {
-      ros2Helper.publish(topic.apply(getRobotModel().getSimpleRobotName()), message);
+      ros2Helper.publish(topicFunction, message);
    }
 
    @Override

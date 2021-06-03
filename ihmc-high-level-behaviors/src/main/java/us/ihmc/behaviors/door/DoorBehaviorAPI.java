@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.door;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
 
 public class DoorBehaviorAPI
@@ -11,6 +13,8 @@ public class DoorBehaviorAPI
    public static final MessagerAPIFactory.Topic<Boolean> ReviewEnabled = topic("ReviewEnabled");
    public static final MessagerAPIFactory.Topic<Object> DoorConfirmed = topic("DoorConfirmed");
    public static final MessagerAPIFactory.Topic<Double> DistanceToDoor = topic("DistanceToDoor");
+   public static final MessagerAPIFactory.Topic<Boolean> IsFacingDoor = topic("IsFacingDoor");
+   public static final MessagerAPIFactory.Topic<MutablePair<DoorType, Pose3D>> DetectedDoorPose = topic("DetectedDoorPose");
 
    private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

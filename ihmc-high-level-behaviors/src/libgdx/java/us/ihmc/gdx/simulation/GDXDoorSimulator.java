@@ -44,8 +44,8 @@ public class GDXDoorSimulator
    {
       if (door != null)
       {
-         helper.publish(ROS2Tools::getDoorLocationTopic,
-                        HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(door.getObjectTransform()), DoorLocationPacket.PUSH_HANDLE_RIGHT));
+//         helper.publish(ROS2Tools::getDoorLocationTopic,
+//                        HumanoidMessageTools.createDoorLocationPacket(new RigidBodyTransform(door.getObjectTransform()), DoorLocationPacket.PUSH_HANDLE_RIGHT));
       }
    }
 
