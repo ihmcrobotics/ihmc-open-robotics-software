@@ -22,7 +22,7 @@ public interface AsynchronousActionNodeBasics extends ResettingNodeBasics
       if (!getHasStarted())
       {
          setHasStarted(true);
-         startAction();
+         doAction();
          return RUNNING;
       }
       else if (!getIsFinished())
@@ -38,7 +38,10 @@ public interface AsynchronousActionNodeBasics extends ResettingNodeBasics
    public default void reset()
    {
       if (getHasStarted() && !getIsFinished())
+      {
          LogTools.warn("Task was still running after it wasn't being ticked! {}", getClass().getSimpleName());
+         resetInternal();
+      }
       setHasStarted(false);
       setIsFinished(false);
    }
@@ -52,8 +55,6 @@ public interface AsynchronousActionNodeBasics extends ResettingNodeBasics
    public abstract BehaviorTreeNodeStatus doActionInternal();
 
    public abstract void resetInternal();
-
-   public abstract void startAction();
 
    public abstract boolean getHasStarted();
 

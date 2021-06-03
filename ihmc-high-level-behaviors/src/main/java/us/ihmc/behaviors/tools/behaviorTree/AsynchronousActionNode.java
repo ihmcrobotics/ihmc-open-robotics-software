@@ -15,9 +15,10 @@ public abstract class AsynchronousActionNode extends ResettingNode implements As
    }
 
    @Override
-   public void startAction()
+   public BehaviorTreeNodeStatus doActionInternal()
    {
       thread = ThreadTools.startAThread(this::doAction, getClass().getSimpleName());
+      return BehaviorTreeNodeStatus.RUNNING;
    }
 
    @Override
