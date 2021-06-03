@@ -152,7 +152,7 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   default Map<FramePose3D, Boolean> getLegReachabilityMap()
+   default Map<FramePose3D, Double> getLegReachabilityMap()
    {
       return null;
    }

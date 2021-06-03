@@ -49,7 +49,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    public FootstepChecker(FootstepPlannerParametersReadOnly parameters,
                           SideDependentList<ConvexPolygon2D> footPolygons,
                           FootstepSnapAndWiggler snapper,
-                          Map<FramePose3D, Boolean> reachabilityMap,
+                          Map<FramePose3D, Double> reachabilityMap,
                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;

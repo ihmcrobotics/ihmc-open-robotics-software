@@ -57,7 +57,7 @@ public class FootstepPlanningModuleLauncher
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      Map<FramePose3D, Boolean> legReachabilityMap = robotModel.getLegReachabilityMap();
+      Map<FramePose3D, Double> legReachabilityMap = robotModel.getLegReachabilityMap();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);

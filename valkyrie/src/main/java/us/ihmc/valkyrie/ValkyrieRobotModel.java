@@ -601,7 +601,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
-   public Map<FramePose3D, Boolean> getLegReachabilityMap()
+   public Map<FramePose3D, Double> getLegReachabilityMap()
    {
       return StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
    }

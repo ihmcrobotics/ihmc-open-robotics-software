@@ -15,7 +15,7 @@ public class StepReachabilityFileTools
 {
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
-   public static void writeToFile(Map<FramePose3D, Boolean> feasibilityMap)
+   public static void writeToFile(Map<FramePose3D, Double> feasibilityMap)
    {
       FileWriter fileWriter;
       String reachabilityDataFileName = logDirectory + "StepReachabilityMap.txt";
@@ -46,7 +46,7 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static void printFeasibilityMap(Map<FramePose3D, Boolean> feasibilityMap)
+   public static void printFeasibilityMap(Map<FramePose3D, Double> feasibilityMap)
    {
       for (FramePose3D frame : feasibilityMap.keySet())
       {
@@ -55,10 +55,10 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static Map<FramePose3D, Boolean> loadFromFile(String filename)
+   public static Map<FramePose3D, Double> loadFromFile(String filename)
    {
       String reachabilityDataFileName = logDirectory + filename;
-      Map<FramePose3D, Boolean> feasibilityMap = new HashMap<>();
+      Map<FramePose3D, Double> feasibilityMap = new HashMap<>();
 
       try
       {
@@ -81,7 +81,8 @@ public class StepReachabilityFileTools
             double orS = Double.parseDouble(data[6]);
             frame.getOrientation().set(orX, orY, orZ, orS);
 
-            feasibilityMap.put(frame, line.contains("true"));
+            double reachabilityValue = Double.parseDouble(data[7]);
+            feasibilityMap.put(frame, reachabilityValue);
          }
          scanner.close();
          System.out.println("Done loading from file");

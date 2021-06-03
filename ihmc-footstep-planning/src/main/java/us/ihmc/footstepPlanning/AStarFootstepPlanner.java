@@ -79,7 +79,7 @@ public class AStarFootstepPlanner
                                WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                SwingPlannerParametersBasics swingPlannerParameters,
                                WalkingControllerParameters walkingControllerParameters,
-                               Map<FramePose3D, Boolean> reachabilityMap)
+                               Map<FramePose3D, Double> reachabilityMap)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
