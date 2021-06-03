@@ -37,7 +37,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
 {
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
-   private final Point2D nodePosition = new Point2D(0.0, 0.0);
+   private final Point2D nodePosition = new Point2D(7.0, 5.0);
    private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus;
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";

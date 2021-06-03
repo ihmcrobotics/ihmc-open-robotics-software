@@ -10,15 +10,21 @@ import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.tools.GDXModelLoader;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class GDXPushDoorOnlyObject extends GDXEnvironmentObject
+public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
 {
    private static final AtomicInteger INDEX = new AtomicInteger();
 
-   public GDXPushDoorOnlyObject()
+   public GDXPushHandleRightDoorObject()
+   {
+      this(YoAppearance.LightSkyBlue());
+   }
+
+   public GDXPushHandleRightDoorObject(AppearanceDefinition collisionMeshColor)
    {
       Model realisticModel = GDXModelLoader.loadG3DModel("door/DoorOnly.g3dj");
 
@@ -35,7 +41,7 @@ public class GDXPushDoorOnlyObject extends GDXEnvironmentObject
 
       Model collisionGraphic = GDXModelPrimitives.buildModel(meshBuilder ->
       {
-         Color color = GDXTools.toGDX(YoAppearance.LightSkyBlue());
+         Color color = GDXTools.toGDX(collisionMeshColor);
          meshBuilder.addBox((float) lengthX, (float) widthY, (float) heightZ, color);
          meshBuilder.addMultiLineBox(collisionBox.getVertices(), 0.01, color); // some can see it better
       }, "collisionModel" + INDEX.getAndIncrement());
@@ -50,8 +56,8 @@ public class GDXPushDoorOnlyObject extends GDXEnvironmentObject
    }
 
    @Override
-   public GDXPushDoorOnlyObject duplicate()
+   public GDXPushHandleRightDoorObject duplicate()
    {
-      return new GDXPushDoorOnlyObject();
+      return new GDXPushHandleRightDoorObject();
    }
 }

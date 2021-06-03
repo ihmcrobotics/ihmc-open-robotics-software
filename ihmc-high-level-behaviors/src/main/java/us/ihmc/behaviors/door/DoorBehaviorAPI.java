@@ -8,7 +8,9 @@ public class DoorBehaviorAPI
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("DoorBehavior");
    private static final MessagerAPIFactory.CategoryTheme DoorTheme = apiFactory.createCategoryTheme("Door");
 
-   public static final MessagerAPIFactory.Topic<Boolean> DoorConfirmed = topic("DoorConfirmed");
+   public static final MessagerAPIFactory.Topic<Boolean> ReviewEnabled = topic("ReviewEnabled");
+   public static final MessagerAPIFactory.Topic<Object> DoorConfirmed = topic("DoorConfirmed");
+   public static final MessagerAPIFactory.Topic<Double> DistanceToDoor = topic("DistanceToDoor");
 
    private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
