@@ -375,7 +375,8 @@ public class LookAndStepFootstepPlanningTask
          }
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
 
-         planarRegionsHistory.removeLast();
+         if (!planarRegionsHistory.isEmpty())
+            planarRegionsHistory.removeLast();
 
          statusLogger.info("Footstep planning failure. Aborting task...");
          plannerFailedLastTime.set(true);
