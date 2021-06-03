@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticePoint;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -287,9 +288,9 @@ public class FootstepPoseCheckerTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      Map<FramePose3D, Boolean> reachabilityMap = loadFeasabilityMap();
+      Map<FramePose3D, Boolean> reachabilityMap = populateReachabilityMap();
 
-      FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
+            FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
       FramePose3D testFootPose = new FramePose3D();
       FramePose3D nearestCheckpointTrue = new FramePose3D();
       FramePose3D nearestCheckpointCalculated;
@@ -327,6 +328,44 @@ public class FootstepPoseCheckerTest
       assertTrue(nearestCheckpointTrue.geometricallyEquals(nearestCheckpointCalculated, 0.001));
    }
 
+   private Map<FramePose3D, Boolean> populateReachabilityMap()
+   {
+      Map<FramePose3D, Boolean> map = new HashMap<>();
+
+      int queriesPerAxis = 10;
+      double minimumOffsetX = -0.5;
+      double maximumOffsetX = 0.5;
+      double minimumOffsetY = -0.5;
+      double maximumOffsetY = 0.5;
+      double minimumOffsetYaw = - Math.toRadians(70.0);
+      double maximumOffsetYaw = Math.toRadians(70.0);
+
+      for (int i = 0; i < queriesPerAxis; i++)
+      {
+         for (int j = 0; j < queriesPerAxis; j++)
+         {
+            for (int k = 0; k < queriesPerAxis; k++)
+            {
+               double alphaX = ((double) i) / (queriesPerAxis - 1);
+               double alphaY = ((double) j) / (queriesPerAxis - 1);
+               double alphaYaw = ((double) k) / (queriesPerAxis - 1);
+
+               double x = EuclidCoreTools.interpolate(minimumOffsetX, maximumOffsetX, alphaX);
+               double y = EuclidCoreTools.interpolate(minimumOffsetY, maximumOffsetY, alphaY);
+               double yaw = AngleTools.interpolateAngle(minimumOffsetYaw, maximumOffsetYaw, alphaYaw);
+
+               FramePose3D pose = new FramePose3D();
+               pose.getPosition().set(x, y, 0.0);
+               pose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+
+               // Don't add foot pose where both at origin
+               if (pose.getPosition().distanceFromOrigin() != 0)
+                  map.put(pose, true);
+            }
+         }
+      }
+      return map;
+   }
 
    private static double snapToGrid(double value)
    {
