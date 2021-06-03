@@ -32,7 +32,7 @@ public class GDXPushHandleRightDoorObject extends GDXEnvironmentObject
       double widthY = 0.9144;
       double lengthX = 0.0508;
       RigidBodyTransform collisionShapeOffset = new RigidBodyTransform();
-      collisionShapeOffset.getTranslation().set(lengthX / 2.0, widthY / 2.0, heightZ / 2.0);
+      collisionShapeOffset.getTranslation().set(0.0, widthY / 2.0 + 0.003, heightZ / 2.0);
 
       Box3D collisionBox = new Box3D(lengthX, widthY, heightZ);
 
