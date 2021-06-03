@@ -38,7 +38,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
    private static final double debrisCheckBodyBoxBaseZ = 0.5;
    private static final int numberOfStepsToIgnoreDebrisAfterClearing = 4;
 
-   private final BuildingExplorationBehavior buildingExplorationBehavior;
+   private final BuildingExplorationBehaviorOld buildingExplorationBehavior;
    private final BehaviorHelper helper;
 
    private final Pose3DReadOnly bombPose;
@@ -67,7 +67,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
 
    boolean lookAndStepStarted = false;
 
-   public BuildingExplorationBehaviorLookAndStepState(BuildingExplorationBehavior buildingExplorationBehavior, BehaviorHelper helper, Pose3DReadOnly bombPose)
+   public BuildingExplorationBehaviorLookAndStepState(BuildingExplorationBehaviorOld buildingExplorationBehavior, BehaviorHelper helper, Pose3DReadOnly bombPose)
    {
       this.buildingExplorationBehavior = buildingExplorationBehavior;
       this.helper = helper;
@@ -101,7 +101,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
    @Override
    public void onEntry()
    {
-      BuildingExplorationBehavior.pitchChestToSeeDoor(syncedRobot, helper);
+      BuildingExplorationBehaviorOld.pitchChestToSeeDoor(syncedRobot, helper);
 
       LogTools.info("Entering " + getClass().getSimpleName());
 
