@@ -110,7 +110,7 @@ public class ValkyrieStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, SHOW_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
+   private static final Mode mode = Mode.SHOW_VISUALIZATION;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 30.0;
@@ -137,7 +137,6 @@ public class ValkyrieStepReachabilityCalculator
    private final YoBoolean initializationSucceeded;
    private final YoInteger numberOfIterations;
    private final YoDouble finalSolutionQuality;
-   private final YoBoolean validStep;
 
    private SimulationConstructionSet scs;
    private BlockingSimulationRunner blockingSimulationRunner;
@@ -158,7 +157,6 @@ public class ValkyrieStepReachabilityCalculator
       initializationSucceeded = new YoBoolean("initializationSucceeded", mainRegistry);
       numberOfIterations = new YoInteger("numberOfIterations", mainRegistry);
       finalSolutionQuality = new YoDouble("finalSolutionQuality", mainRegistry);
-      validStep = new YoBoolean("validStep", mainRegistry);
       yoGraphicsListRegistry = new YoGraphicsListRegistry();
       optimizationSettings = new KinematicsPlanningToolboxOptimizationSettings();
       solutionQualityConvergenceDetector = new SolutionQualityConvergenceDetector(optimizationSettings, mainRegistry);
@@ -228,20 +226,20 @@ public class ValkyrieStepReachabilityCalculator
             break;
          case TEST_MULTIPLE_STEPS:
             List<FramePose3D> leftFootPoseList = createLeftFootPoseList();
-            Map<FramePose3D, Boolean> poseValidityMap = new HashMap<>();
+            Map<FramePose3D, Double> poseValidityMap = new HashMap<>();
             FramePose3D rightFootPose = new FramePose3D();
             for (int i = 0; i < leftFootPoseList.size(); i++)
             {
                FramePose3D leftFootPose = leftFootPoseList.get(i);
-               boolean isValid = testSingleStep(leftFootPose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
-               poseValidityMap.put(leftFootPose, isValid);
+               double reachabilityValue = testSingleStep(leftFootPose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
+               poseValidityMap.put(leftFootPose, reachabilityValue);
             }
             new StepReachabilityVisualizer(poseValidityMap, queriesPerAxis);
-//            StepReachabilityFileTools.writeToFile(poseValidityMap);
+            StepReachabilityFileTools.writeToFile(poseValidityMap);
 //            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case SHOW_VISUALIZATION:
-            Map<FramePose3D, Boolean> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
+            Map<FramePose3D, Double> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
             new StepReachabilityVisualizer(feasibilityMap, queriesPerAxis);
 //            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
             break;
@@ -322,7 +320,7 @@ public class ValkyrieStepReachabilityCalculator
    /**
     * Solves IK assuming that the right foot is at the origin and left foot is at the given position
     */
-   private boolean testSingleStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
+   private double testSingleStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
    {
       LogTools.info("Entering: testStep");
       double groundHeight = 0.0;
@@ -387,12 +385,7 @@ public class ValkyrieStepReachabilityCalculator
       runKinematicsToolboxController();
 
       assertTrue(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.", initializationSucceeded.getBooleanValue());
-      double solutionQuality = toolboxController.getSolution().getSolutionQuality();
-
-      boolean isValid = (solutionQuality < solutionQualityThreshold);
-      validStep.set(isValid);
-
-      return isValid;
+      return toolboxController.getSolution().getSolutionQuality();
    }
 
    private void runKinematicsToolboxController() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
@@ -424,11 +417,11 @@ public class ValkyrieStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final int queriesPerAxis = 3;
-   private static final double minimumOffsetX = -0.6;
-   private static final double maximumOffsetX = 0.4;
-   private static final double minimumOffsetY = -0.6;
-   private static final double maximumOffsetY = 0.6;
+   private static final int queriesPerAxis = 5;
+   private static final double minimumOffsetX = -0.8;
+   private static final double maximumOffsetX = 0.8;
+   private static final double minimumOffsetY = -0.8;
+   private static final double maximumOffsetY = 0.4;
    private static final double minimumOffsetYaw = - Math.toRadians(75.0);
    private static final double maximumOffsetYaw = Math.toRadians(75.0);
 

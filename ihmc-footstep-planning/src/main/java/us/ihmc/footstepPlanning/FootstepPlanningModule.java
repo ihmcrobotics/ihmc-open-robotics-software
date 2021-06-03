@@ -99,7 +99,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons,
-                                 Map<FramePose3D, Boolean> reachabilityMap)
+                                 Map<FramePose3D, Double> reachabilityMap)
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;

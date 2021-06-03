@@ -20,9 +20,10 @@ public class FootstepPoseReachabilityChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
+   private final int SOLUTION_QUALITY_THRESHOLD = 5;
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
-   private final Map<FramePose3D, Boolean> reachabilityMap;
+   private final Map<FramePose3D, Double> reachabilityMap;
 
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
@@ -38,7 +39,7 @@ public class FootstepPoseReachabilityChecker
 
    public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters,
                                           FootstepSnapAndWiggler snapper,
-                                          Map<FramePose3D, Boolean> reachabilityMap,
+                                          Map<FramePose3D, Double> reachabilityMap,
                                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -99,12 +100,12 @@ public class FootstepPoseReachabilityChecker
    }
 
    // Check for frame in Reachability map keys
-   public boolean checkpointIsReachable(Map<FramePose3D, Boolean> reachabilityMap, FramePose3D nearestCheckpoint)
+   public boolean checkpointIsReachable(Map<FramePose3D, Double> reachabilityMap, FramePose3D nearestCheckpoint)
    {
       for (FramePose3D frame : reachabilityMap.keySet())
       {
          if (frame.geometricallyEquals(nearestCheckpoint, 0.0001))
-            return reachabilityMap.get(frame);
+            return reachabilityMap.get(frame) > SOLUTION_QUALITY_THRESHOLD;
       }
       return false;
    }

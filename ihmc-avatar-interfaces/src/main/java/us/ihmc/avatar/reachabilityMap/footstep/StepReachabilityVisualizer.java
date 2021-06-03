@@ -1,23 +1,18 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
-import java.util.HashMap;
+import java.awt.*;
 import java.util.Map;
 
 public class StepReachabilityVisualizer
 {
-   public StepReachabilityVisualizer(Map<FramePose3D, Boolean> reachabilityMap, int queriesPerAxis)
+   public StepReachabilityVisualizer(Map<FramePose3D, Double> reachabilityMap, int queriesPerAxis)
    {
       // Set up SCS and coordinate object
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters(true, 16000);
@@ -38,8 +33,11 @@ public class StepReachabilityVisualizer
          validStep.translate(0.0, 0.0, footPose.getYaw()/queriesPerAxis);
 
          // Reachability for this footpose indicated by green/red color
-         if (reachabilityMap.get(footPose)) validStep.addSphere((double) 0.1/queriesPerAxis, YoAppearance.Green());
-         else validStep.addSphere((double) 0.1/queriesPerAxis, YoAppearance.Red());
+         double reachabilityValue = reachabilityMap.get(footPose);
+         if (reachabilityValue > 40) reachabilityValue = 40;
+         System.out.println("reachabilityValue: " + reachabilityValue);
+         AppearanceDefinition appearance = YoAppearance.RGBColor(reachabilityValue/50, (50-reachabilityValue)/50, 0);
+         validStep.addSphere(0.1/queriesPerAxis, appearance);
 
          scs.addStaticLinkGraphics(validStep);
       }
