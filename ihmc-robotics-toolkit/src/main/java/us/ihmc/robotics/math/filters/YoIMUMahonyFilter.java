@@ -384,7 +384,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
 
          double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
 
-         if (Double.isFinite(normalPartMagnitude) && Math.abs(normalPartMagnitude) >= MIN_MAGNITUDE)
+         if (Double.isFinite(normalPartMagnitude) && normalPartMagnitude != 0.0)
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
             tangentialPart.sub(integralTerm, normalPart);
@@ -399,7 +399,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
          // If we don't have a magnetic vector, the error around the gravity vector cannot be estimated. So we slowly decay it.
          double normalPartMagnitude = TupleTools.dot(aRef, integralTerm);
 
-         if (Double.isFinite(normalPartMagnitude) && Math.abs(normalPartMagnitude) >= MIN_MAGNITUDE)
+         if (Double.isFinite(normalPartMagnitude) && normalPartMagnitude != 0.0)
          {
             normalPart.setAndScale(normalPartMagnitude, aRef);
             tangentialPart.sub(integralTerm, normalPart);
