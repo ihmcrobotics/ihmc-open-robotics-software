@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 
-public class PushRecoveryControllerParameters
+public abstract class PushRecoveryControllerParameters
 {
    private final LegConfigurationParameters legConfigurationParameters;
    private final JointPrivilegedConfigurationParameters jointPrivilegedConfigurationParameters;
