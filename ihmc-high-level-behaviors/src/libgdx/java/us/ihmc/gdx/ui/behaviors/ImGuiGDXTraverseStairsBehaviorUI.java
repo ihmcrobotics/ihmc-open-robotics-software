@@ -19,7 +19,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXTraverseStairsBehaviorUI::new);
 
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
-   private Point2D nodePosition = new Point2D(640.0, 431.0);
+   private Point2D nodePosition = new Point2D(597.0, 529.0);
 
    public ImGuiGDXTraverseStairsBehaviorUI(BehaviorHelper helper)
    {

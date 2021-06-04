@@ -22,7 +22,9 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -38,7 +40,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
    private final AtomicReference<Double> distanceToDoor;
-   private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose;
+   private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose = new AtomicReference<>(MutablePair.of(DoorType.UNKNOWN_TYPE, NAN_POSE));
    private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 30);
    private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 30);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
@@ -50,7 +52,11 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       helper.subscribeToBehaviorStatusViaCallback(status::set);
 //      helper.subscribeToDoorLocationViaCallback(doorLocation -> door.set(doorLocation.getDoorTransformToWorld()));
       distanceToDoor = helper.subscribeViaReference(DistanceToDoor, Double.NaN);
-      detectedDoorPose = helper.subscribeViaReference(DetectedDoorPose, MutablePair.of(DoorType.UNKNOWN_TYPE, NAN_POSE));
+      helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
+      {
+         this.detectedDoorPose.set(detectedDoorPose);
+         door.set(detectedDoorPose.getRight());
+      });
    }
 
    @Override
@@ -72,7 +78,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
 
       ImGui.text("Object & Fiducial toolboxes:");
       ImGui.sameLine();
-      ImGui.sameLine();
       if (ImGui.button(labels.get("Wake up")))
       {
          helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
@@ -89,6 +94,33 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
          helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
+      }
+      ImGui.text("Behavior control modes:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stop")))
+      {
+         helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Pause")))
+      {
+         helper.publishBehaviorControlMode(BehaviorControlModeEnum.PAUSE);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Resume")))
+      {
+         helper.publishBehaviorControlMode(BehaviorControlModeEnum.RESUME);
+      }
+      ImGui.text("Behavior types:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("STOP")))
+      {
+         helper.publishBehaviorType(HumanoidBehaviorType.STOP);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("RESET_ROBOT")))
+      {
+         helper.publishBehaviorType(HumanoidBehaviorType.RESET_ROBOT);
       }
       if (ImGui.checkbox(labels.get("Review door pose"), reviewDoorPose))
       {
