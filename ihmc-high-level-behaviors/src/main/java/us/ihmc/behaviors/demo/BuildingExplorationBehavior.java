@@ -60,7 +60,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
 
       if (!goal.get().containsNaN())
       {
-         if (doorBehavior.getDistanceToDoor() < 2.3 && doorBehavior.isFacingDoor())
+         if (doorBehavior.getDistanceToDoor() < 2.3)
          {
             return doorBehavior.tick();
          }
