@@ -9,6 +9,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.PelvisHeightTrajectoryMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -58,7 +59,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
 {
-   private final boolean DEBUG = true;
+   private final boolean DEBUG = false;
    private boolean isDoorOpen = false;
 
    public enum WalkThroughDoorBehaviorState
@@ -81,6 +82,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       SET_UP_ROBOT_FOR_DOOR_WALK,
       WAITING_FOR_USER_CONFIRMATION,
+      LOWER_HEIGHT_BEFORE_WALKING,
       WALK_THROUGH_DOOR,
       MOVE_ARMS_BEFORE_RESET,
       RESET_ROBOT,
@@ -358,6 +360,18 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
+      
+      BehaviorAction lowerHeightTask = new BehaviorAction(atlasPrimitiveActions.pelvisHeightTrajectoryBehavior)
+      {
+         @Override
+         protected void setBehaviorInput()
+         {
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75, referenceFrames.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+            atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
+            publishTextToSpeech("Decrease heigth");
+         }
+      };
+      
       BehaviorAction setUpForWalk = new BehaviorAction(atlasPrimitiveActions.leftArmTrajectoryBehavior, atlasPrimitiveActions.rightArmTrajectoryBehavior)
       {
          @Override
@@ -430,28 +444,42 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            if (DEBUG)
-            {
-               publishTextToSpeech("pre Reset Arm Poses");
-            }
-            //            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
-            //                  1.3376930879072813};
-            //            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
-            //                  -0.8771109242461594, -1.336089159719967};
-
-            //          double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
-            //          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
-
-            double[] rightArmPose = new double[] {0.5686801518480208, -0.5745299642205273, 1.2838784574319422, -1.610549649742769, -2.2288923524437196, -0.009113925869141445, -0.0667101820303015};
-            double[] leftArmPose = new double[] {-1.0582983749016706, -0.10759557429010733, 1.7373449115184447, 1.5910446701708927, -2.625841401280085, 0.6899325964606889, -1.9179535344677692};
-
-            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
-
-            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
-
-            atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
-            atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
+        	 
+        	 if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT)
+             {
+        	 
+			        if (DEBUG)
+			        {
+			           publishTextToSpeech("pre Reset Arm Poses");
+			        }
+			        //            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
+			        //                  1.3376930879072813};
+			        //            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
+			        //                  -0.8771109242461594, -1.336089159719967};
+			
+			        //          double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
+			        //          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
+			
+			        double[] rightArmPose = new double[] {0.5686801518480208, -0.5745299642205273, 1.2838784574319422, -1.610549649742769, -2.2288923524437196, -0.009113925869141445, -0.0667101820303015};
+			        double[] leftArmPose = new double[] {-1.0582983749016706, -0.10759557429010733, 1.7373449115184447, 1.5910446701708927, -2.625841401280085, 0.6899325964606889, -1.9179535344677692};
+			
+			        ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
+			
+			        ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
+			
+			        atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
+			        atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
+             }
          }
+         
+         @Override
+        public boolean isDone() {
+        	 if (searchForDoorBehavior.getDoorType() != DoorLocationPacket.PUSH_HANDLE_RIGHT)
+             {
+        		 return true;
+             }
+        	return super.isDone();
+        }
       };
 
       BehaviorAction pushPowerStance = new BehaviorAction(atlasPrimitiveActions.footstepListBehavior)
@@ -558,6 +586,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
+      
+     
+      
+      
       BehaviorAction walkThroughDoor = new BehaviorAction(atlasPrimitiveActions.footstepListBehavior)
       {
          @Override
@@ -685,14 +717,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       ///
 
-      factory.addState(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk,WalkThroughDoorBehaviorState.LOWER_HEIGHT_BEFORE_WALKING);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.LOWER_HEIGHT_BEFORE_WALKING, lowerHeightTask,WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
 
-      //factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
-      //                      WalkThroughDoorBehaviorState.OPEN_PUSH_DOOR,
-       //                     t -> setUpForWalk.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
-                            WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
-                            t -> setUpForWalk.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
+
+
+//      factory.addTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK,
+//                            WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR,
+//                            t -> setUpForWalk.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.MOVE_ARMS_BEFORE_RESET);
       //factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR, walkThroughDoor, WalkThroughDoorBehaviorState.DONE);
