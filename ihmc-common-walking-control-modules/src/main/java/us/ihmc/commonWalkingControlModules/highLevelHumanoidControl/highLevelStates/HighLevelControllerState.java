@@ -76,10 +76,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    @Override
    public boolean isDone(double timeInState)
    {
-      boolean decision =requestTransitionToPushRecovery.getBooleanValue();
-      if(decision)
-         System.out.println("must exit walking");
-      return decision;
+      return false;
    }
 
    /**
