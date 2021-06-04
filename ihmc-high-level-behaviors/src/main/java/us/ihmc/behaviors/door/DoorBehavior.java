@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.DetectedFiducialPacket;
 import org.apache.commons.lang3.tuple.MutablePair;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools;
@@ -78,6 +79,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
       distanceToDoor = doorPose.getPosition().distance(robotPose.getPosition());
       helper.publish(DistanceToDoor, distanceToDoor);
       helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
+      helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
 
       Vector3D doorTravelDirection = new Vector3D(Axis3D.Y);
 

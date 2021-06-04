@@ -6,9 +6,12 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
@@ -67,10 +70,31 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       detectedDoorPlot.render(currentDetectedDoorPose.getRight().containsNaN() ? "" : currentDetectedDoorPose.getLeft().name());
       distanceToDoorPlot.render(distanceToDoor.get().floatValue());
 
+      ImGui.text("Object & Fiducial toolboxes:");
+      ImGui.sameLine();
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Wake up")))
+      {
+         helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
+         helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.WAKE_UP);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Sleep")))
+      {
+         helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.SLEEP);
+         helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.SLEEP);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Reinitialize")))
+      {
+         helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
+         helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
+      }
       if (ImGui.checkbox(labels.get("Review door pose"), reviewDoorPose))
       {
          helper.publish(ReviewEnabled, reviewDoorPose.get());
       }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Confirm door pose and start")))
       {
          helper.publish(DoorConfirmed);
