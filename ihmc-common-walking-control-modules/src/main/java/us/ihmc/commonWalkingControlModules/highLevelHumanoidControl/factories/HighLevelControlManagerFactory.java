@@ -359,7 +359,7 @@ public class HighLevelControlManagerFactory
       template.setAllowDynamicControllerConstruction(false);
       OneDoFJointBasics[] controlledJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
-      new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
+      controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
 
       return controllerCore;
    }

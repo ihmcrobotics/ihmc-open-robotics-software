@@ -73,34 +73,13 @@ public class WalkingControllerState extends HighLevelControllerState
                                                                  controllerToolbox);
 
       // create controller core
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
-
-      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
-                                                                            jointsToOptimizeFor, centerOfMassFrame,
-                                                                            walkingControllerParameters.getMomentumOptimizationSettings(),
-                                                                            controllerToolbox.getYoGraphicsListRegistry(), registry);
-      toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
-      toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
-      if (setupInverseDynamicsSolver)
-         toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-      if (setupInverseKinematicsSolver)
-         toolbox.setupForInverseKinematicsSolver();
-      if (setupVirtualModelControlSolver)
-         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
-      fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
-      FeedbackControllerTemplate template = managerFactory.createFeedbackControlTemplate();
-      // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
-      template.setAllowDynamicControllerConstruction(false);
-      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
-      controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
+      controllerCore = managerFactory.getOrCreateWholeBodyControllerCore();
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       walkingController.setControllerCoreOutput(controllerCoreOutput);
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
+      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
       double controlDT = controllerToolbox.getControlDT();
       double gravityZ = controllerToolbox.getGravityZ();
       RigidBodyBasics elevator = fullRobotModel.getElevator();
