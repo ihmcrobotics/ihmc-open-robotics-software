@@ -91,7 +91,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    //this is the predefined walk to points relative to the door reference frame, these should eventualy be replaced by a behavior that finds the best location to walk up to given an arm task space 
    private Vector3D32 pushDoorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
    private Vector3D32 pushDoorOffsetPoint2 = new Vector3D32(0.5f, -0.6f, 0f);
-   
+
    private Point3D pushDoorWalkThroughPoint= new Point3D(0.5f, -1, 0f);
    private Point3D pullDoorWalkThroughPoint= new Point3D(0.5f, 1, 0f);
 
@@ -115,9 +115,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
    private final HumanoidReferenceFrames referenceFrames;
-   
+
    private final IHMCROS2Publisher<BehaviorStatusPacket> behaviorStatusPublisher;
-   
+
    private WalkToLocationPlannedBehavior walkThroughDoorPlannedBehavior;
 
    // If the goal is within this proximity, the robot won't turn towards the goal but will maintain it's initial orientation while walking
@@ -142,14 +142,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       //    basicTimingBehavior = new BasicTimingBehavior(robotName, ros2Node);
       //set up behaviors
-      
+
       WalkingControllerParameters walkingControllerParameters = wholeBodyControllerParameters.getWalkingControllerParameters();
 
       DoorBehaviorFootstepPlannerParameters footstepPlannerParameters = new DoorBehaviorFootstepPlannerParameters();
       walkThroughDoorPlannedBehavior = new WalkToLocationPlannedBehavior(robotName, ros2Node, fullRobotModel, referenceFrames, walkingControllerParameters,footstepPlannerParameters, yoTime);
 
-      
-      
+
+
       searchForDoorBehavior = new SearchForDoorBehavior(robotName, yoNamePrefix, ros2Node, yoTime, referenceFrames, atlasPrimitiveActions);
       walkToInteractableObjectBehavior = new WalkToInteractableObjectBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
 
@@ -168,7 +168,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                       doorOpenDetectorBehaviorService,referenceFrames,
                                                       yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      
+
       ROS2Topic outputTopic = IHMCHumanoidBehaviorManager.getOutputTopic(robotName);
       behaviorStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorStatusPacket.class, outputTopic);
 
@@ -245,7 +245,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       //this is the first search for the door, once automated searching is in place, this should be an all the time thing.
       BehaviorAction searchForDoorFar = new BehaviorAction(searchForDoorBehavior)
       {
-         
+
          @Override
          protected void setBehaviorInput()
          {
@@ -367,26 +367,64 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             {
                publishTextToSpeech("setup for walk");
             }
-            //            double[] rightArmPose = new double[] {1.5708, 0.8226007082651046, 1.2241049170121854, -1.546127437107859, -0.8486641166791746, -1.3365746544030488,
-            //                  1.3376930879072813};
-            //            double[] leftArmPose = new double[] {-1.5383305366909918, -0.9340404711083553, 1.9634792241521146, 0.9236260708644913, -0.8710518130931819,
-            //                  -0.8771109242461594, -1.336089159719967};
 
-            //          double[] rightArmPose = new double[] {1.5708, 0.46659982767419184, 1.304246503693704, -2.145974311961388, -1.4042857563420477, -1.1630658351411727, 2.0735697767004733};
-            //          double[] leftArmPose = new double[] {-1.4573707384127728, -0.8679045375063197, 1.7161679382174408, 1.5565002230277143, -0.1665184664421956, -1.2894759927886323, -2.5972820987306298};
+            if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT)
+            {
 
-            double[] rightArmPose = new double[] {1.5613054651064713, -0.9117259090941617, 1.7801731462565251, -1.714681567425272, 0.4701641267471464, 0.3553805956221843, -0.883528619644353};
-            double[] leftArmPose = new double[] {-1.5708, -0.315140943959265, 1.4699954842804037, 1.1655918121416153, -2.2416048392105234, -0.988080471516879, 2.829256909246439};
+               double[] rightArmPose = new double[] {1.5613054651064713,
+                                                     -0.9117259090941617,
+                                                     1.7801731462565251,
+                                                     -1.714681567425272,
+                                                     0.4701641267471464,
+                                                     0.3553805956221843,
+                                                     -0.883528619644353};
+               double[] leftArmPose = new double[] {-1.5708,
+                                                    -0.315140943959265,
+                                                    1.4699954842804037,
+                                                    1.1655918121416153,
+                                                    -2.2416048392105234,
+                                                    -0.988080471516879,
+                                                    2.829256909246439};
 
-            ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
+               ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
 
-            ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
+               ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
 
-            atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
-            atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
+               atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
+               atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
+            }
+            else if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT)
+            {
+
+               double[] rightArmPose = new double[] {1.5708,
+                                                     1.2513275933361405,
+                                                     1.584244779774308,
+                                                     -1.234754348573852,
+                                                     2.735749510623686,
+                                                     1.2258092638782847,
+                                                     0.18365483782053751};
+               double[] leftArmPose = new double[] {-1.5708,
+                                                    -0.22745654580053334,
+                                                    1.28623998993627,
+                                                    2.1656574657290606,
+                                                    -0.39261595484464434,
+                                                    -0.7303010812684162,
+                                                    -2.8798335374002835};
+
+               ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
+
+               ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
+
+               atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
+               atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
+            }
+            else
+            {
+               publishTextToSpeech("Behavior Not Complete for this door type");
+            }
          }
       };
-      
+
       BehaviorAction preResetArmPoses = new BehaviorAction(atlasPrimitiveActions.leftArmTrajectoryBehavior, atlasPrimitiveActions.rightArmTrajectoryBehavior)
       {
          @Override
@@ -508,7 +546,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                                             0,
                                                                             -0.866,
                                                                             0.5));
-            
+
 
             message.getFootstepDataList().add().set(fs1);
             message.getFootstepDataList().add().set(fs2);
@@ -536,8 +574,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
             atlasPrimitiveActions.footstepListBehavior.set(message);
          }
       };
-      
-      
+
+
       BehaviorAction walkThroughPushDoorPlannedAction = new BehaviorAction(walkThroughDoorPlannedBehavior)
       {
          @Override
@@ -690,7 +728,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
 	      if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PUSH_HANDLE_RIGHT)
 	      {
-	        
+
 	         unrotatedDoor.appendYawRotation(Math.toRadians(180));
 	         unrotatedDoor.appendTranslation(-0.9144, 0, 0);
 
@@ -698,26 +736,26 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 		      FramePose3D pose = offsetPointFromFrameInWorldFrame(doorPose, pushDoorWalkThroughPoint,   new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
 
 		      return pose;
-	         
-	         
+
+
 	      }
 	      if (searchForDoorBehavior.getDoorType() == DoorLocationPacket.PULL_HANDLE_LEFT)
 	      {
 
-	        
+
 
 	         doorPose.setPoseAndUpdate(unrotatedDoor);
 		      FramePose3D pose = offsetPointFromFrameInWorldFrame(doorPose, pushDoorWalkThroughPoint, new Quaternion());
 
 		      return pose;
 	      }
-	      
-	      
+
+
 	      return null;
 
-	      
+
    }
-      
+
    public FootstepDataListMessage setUpFootSteps()
    {
 
@@ -797,8 +835,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          doorPose.setPoseAndUpdate(unrotatedDoor);
 
          RobotSide startStep = RobotSide.LEFT;
-         
-         
+
+
          FootstepDataMessage fs1a = createRelativeFootStep(doorPose,
                                                            startStep.getOppositeSide(),
                                                            new Point3D(0.268 + offsetLeftRight, 0.9, -0),
@@ -814,7 +852,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                                           3.113506928734585E-6,
                                                                           -0.7043244487834723,
                                                                           0.7098782069467541));
-         
+
 
          FootstepDataMessage fs1p = createRelativeFootStep(doorPose,
                                                            startStep.getOppositeSide(),
@@ -910,8 +948,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       return pose;
    }
 
- 
-   
+
+
    @Override
    public void onBehaviorExited()
    {
