@@ -155,4 +155,9 @@ public class ImGuiStoredPropertySetTuner
    {
       return windowName;
    }
+
+   public StoredPropertySetReadOnly getParameters()
+   {
+      return storedPropertySet;
+   }
 }

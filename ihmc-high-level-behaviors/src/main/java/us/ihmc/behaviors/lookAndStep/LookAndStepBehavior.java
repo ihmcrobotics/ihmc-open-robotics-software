@@ -138,7 +138,11 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
       bodyPathPlanning.initialize(this);
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegionsListMessage ->
+      {
+         bodyPathPlanning.acceptMapRegions(planarRegionsListMessage);
+         footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
+      });
       helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
 
       bodyPathLocalization.initialize(this);
