@@ -60,7 +60,7 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
         publish(message);
    }
 
-   public Image createMessage(int width, int height, ChannelBuffer channelBuffer)
+   public Image createMessage(int width, int height, int bytesPerValue, String encoding, ChannelBuffer channelBuffer)
    {
       Image message = getMessage();
       Header header = message.getHeader();
@@ -68,10 +68,10 @@ public class RosImagePublisher extends RosTopicPublisher<Image>
       header.setSeq(seq++);
 
       message.setIsBigendian((byte) 0);
-      message.setStep(width * 2);
+      message.setStep(width * bytesPerValue);
       message.setHeight(height);
       message.setWidth(width);
-      message.setEncoding("16UC1");
+      message.setEncoding(encoding);
 
       message.setData(channelBuffer);
       return message;

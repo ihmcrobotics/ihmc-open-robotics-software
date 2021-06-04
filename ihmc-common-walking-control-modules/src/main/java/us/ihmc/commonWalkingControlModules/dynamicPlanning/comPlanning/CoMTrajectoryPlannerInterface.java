@@ -29,6 +29,7 @@ public interface CoMTrajectoryPlannerInterface
    {
       int segmentNumber = getSegmentNumber(timeInPhase);
       double timeInSegment = getTimeInSegment(segmentNumber, timeInPhase);
+      timeInSegment = Math.min(timeInSegment, CoMTrajectoryPlannerTools.sufficientlyLongTime);
       compute(segmentNumber, timeInSegment);
    }
 

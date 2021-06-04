@@ -3,6 +3,7 @@ package us.ihmc.humanoidRobotics.communication.packets;
 import static us.ihmc.euclid.tools.EuclidCoreTools.zeroVector3D;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -99,6 +100,7 @@ import controller_msgs.msg.dds.WalkToGoalBehaviorPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WallPosePacket;
 import controller_msgs.msg.dds.WaypointBasedTrajectoryMessage;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
@@ -1278,6 +1280,15 @@ public class HumanoidMessageTools
       return createFootstepDataListMessage(footstepDataList, 0.0, 0.0, finalTransferDuration, ExecutionMode.OVERRIDE);
    }
 
+
+   public static FootstepDataListMessage createFootstepDataListMessage(FootstepDataMessage... footstepDataList)
+   {
+      List<FootstepDataMessage> messageList = new ArrayList<>();
+      for (FootstepDataMessage message : footstepDataList)
+         messageList.add(message);
+
+      return createFootstepDataListMessage(messageList, -1.0);
+   }
    /**
     * Set the id of the message to {@link Packet#VALID_MESSAGE_DEFAULT_ID}.
     *
@@ -1794,6 +1805,7 @@ public class HumanoidMessageTools
    public static void configureForStreaming(WholeBodyTrajectoryMessage messageToModify, double streamIntegrationDuration, long timestamp)
    {
       configureForStreaming(messageToModify.getHeadTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
+      configureForStreaming(messageToModify.getNeckTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getChestTrajectoryMessage().getSo3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getPelvisTrajectoryMessage().getSe3Trajectory(), streamIntegrationDuration, timestamp);
       configureForStreaming(messageToModify.getLeftArmTrajectoryMessage().getJointspaceTrajectory(), streamIntegrationDuration, timestamp);
@@ -2548,5 +2560,12 @@ public class HumanoidMessageTools
    public static void resetWholeBodyTrajectoryToolboxMessage(WholeBodyTrajectoryMessage message)
    {
       message.set(EMPTY_WHOLE_BODY_TRAJECTORY_MESSAGE);
+   }
+
+   private static final WholeBodyStreamingMessage EMPTY_WHOLE_BODY_STREAMING_MESSAGE = new WholeBodyStreamingMessage();
+
+   public static void resetWholeBodyStreamingMessage(WholeBodyStreamingMessage message)
+   {
+      message.set(EMPTY_WHOLE_BODY_STREAMING_MESSAGE);
    }
 }

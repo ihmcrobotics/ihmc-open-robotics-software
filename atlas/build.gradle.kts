@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.17"
+   id("us.ihmc.ihmc-cd") version "1.20"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
@@ -37,10 +37,10 @@ mainDependencies {
    api("us.ihmc:euclid-frame-shape:0.16.2")
    api("us.ihmc:mecano:0.8.2")
    api("us.ihmc:mecano-yovariables:0.8.2")
-   api("us.ihmc:ihmc-yovariables:0.9.8")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.5")
-   api("us.ihmc:simulation-construction-set:0.21.7")
-   api("us.ihmc:ihmc-graphics-description:0.19.3")
+   api("us.ihmc:ihmc-yovariables:0.9.9")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.19.7")
+   api("us.ihmc:simulation-construction-set:0.21.9")
+   api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-robot-description:0.21.2")
    api("us.ihmc:ihmc-javafx-toolkit:0.19.3")
    api("us.ihmc:ihmc-humanoid-behaviors:source")
@@ -65,8 +65,8 @@ mainDependencies {
    api("us.ihmc:ihmc-manipulation-planning:source")
    api("us.ihmc:ihmc-parameter-tuner:source")
    api("us.ihmc:ihmc-footstep-planning-visualizers:source")
-   api("us.ihmc:ihmc-avatar-interfaces-behavior-clean-room:source")
-   api("us.ihmc:ihmc-avatar-interfaces-behavior-fx-ui:source")
+   api("us.ihmc:ihmc-high-level-behaviors:source")
+   api("us.ihmc:ihmc-high-level-behaviors-javafx:source")
 }
 
 testDependencies {

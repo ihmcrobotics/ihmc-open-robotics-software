@@ -23,7 +23,9 @@ public class BlockInverseCalculatorTest
 
       int size = indexHandler.getTotalProblemSize();
       Random random = new Random(1738L);
-      BlockInverseCalculator inverseCalculator = new BlockInverseCalculator(indexHandler);
+      BlockInverseCalculator inverseCalculator = new BlockInverseCalculator(indexHandler,
+                                                                            indexHandler::getComCoefficientStartIndex,
+                                                                            i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment);
       for (int i = 0; i < iters; i++)
       {
          DMatrixRMaj matrixRMaj = new DMatrixRMaj(size, size);
@@ -55,7 +57,9 @@ public class BlockInverseCalculatorTest
       int size = indexHandler.getTotalProblemSize();
 
       Random random = new Random(1738L);
-      BlockInverseCalculator inverseCalculator = new BlockInverseCalculator(indexHandler);
+      BlockInverseCalculator inverseCalculator = new BlockInverseCalculator(indexHandler,
+                                                                            indexHandler::getComCoefficientStartIndex,
+                                                                            i -> indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment);
       for (int i = 0; i < iters; i++)
       {
          DMatrixRMaj matrixRMaj = new DMatrixRMaj(blockSize, blockSize);

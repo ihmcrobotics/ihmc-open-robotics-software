@@ -134,6 +134,11 @@ public class OnToesState extends AbstractFootControlState
       this.usePointContact.set(usePointContact);
    }
 
+   public boolean isUsingPointContact()
+   {
+      return usePointContact.getBooleanValue();
+   }
+
    @Override
    public void doSpecificAction(double timeInState)
    {

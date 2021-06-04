@@ -7,9 +7,6 @@ import us.ihmc.avatar.drcRobot.RemoteSyncedBufferedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -26,19 +23,13 @@ public class MapSensePlanarRegionROS1Bridge
    private final ResettableExceptionHandlingExecutorService executorService;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> publisher;
    private final RemoteSyncedBufferedRobotModel syncedRobot;
-   private final ReferenceFrame sensorFrame;
    private final Timer throttleTimer = new Timer();
 
    public MapSensePlanarRegionROS1Bridge(DRCRobotModel robotModel, RosMainNode ros1Node, ROS2NodeInterface ros2Node)
    {
       syncedRobot = new RemoteSyncedBufferedRobotModel(robotModel, ros2Node);
-      RigidBodyTransformReadOnly frameToSensorTransform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      ReferenceFrame frameOfLinkThatSensorIsMountedTo = robotModel.getSensorInformation().getSteppingCameraFrame(syncedRobot.getReferenceFrames());
-      sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", frameOfLinkThatSensorIsMountedTo, frameToSensorTransform);
 
       MapsenseTools.createROS1Callback(ros1Node, this::acceptMessage);
-
-
 
       publisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.MAPSENSE_REGIONS);
 
@@ -67,7 +58,7 @@ public class MapSensePlanarRegionROS1Bridge
 
                PlanarRegionsList planarRegionsList = gpuPlanarRegionUpdater.generatePlanarRegions(rawGPUPlanarRegionList);
                planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-               planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+               planarRegionsList.applyTransform(syncedRobot.getReferenceFrames().getSteppingCameraFrame().getTransformToWorldFrame());
                publisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
             }
          });

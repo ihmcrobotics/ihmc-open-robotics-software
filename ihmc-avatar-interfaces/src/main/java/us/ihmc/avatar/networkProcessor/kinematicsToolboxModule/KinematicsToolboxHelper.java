@@ -157,6 +157,7 @@ public class KinematicsToolboxHelper
       {
          oneDoFJoints[i].setQ(newJointAngles.get(i));
          oneDoFJoints[i].setQd(0.0);
+         oneDoFJoints[i].updateFrame();
       }
 
       if (rootJoint != null)
@@ -167,7 +168,7 @@ public class KinematicsToolboxHelper
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
-         rootJoint.getPredecessor().updateFramesRecursively();
+         rootJoint.updateFrame();
       }
    }
 

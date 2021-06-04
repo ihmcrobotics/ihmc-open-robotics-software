@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class StandPrepControllerState extends HighLevelControllerState
 {
    private static final HighLevelControllerName controllerState = HighLevelControllerName.STAND_PREP_STATE;
-   private static final double MINIMUM_TIME_DONE_WITH_STAND_PREP = 0.0;
 
    private final LowLevelOneDoFJointDesiredDataHolder lowLevelOneDoFJointDesiredDataHolder = new LowLevelOneDoFJointDesiredDataHolder();
 
@@ -33,20 +32,18 @@ public class StandPrepControllerState extends HighLevelControllerState
    private final YoDouble minimumTimeDoneWithStandPrep = new YoDouble("minimumTimeDoneWithStandPrep", registry);
    private final JointDesiredOutputListReadOnly highLevelControlOutput;
 
-   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
-                                   JointDesiredOutputListReadOnly highLevelControlOutput)
-   {
-      this(controlledJoints, highLevelControllerParameters, highLevelControlOutput, MINIMUM_TIME_DONE_WITH_STAND_PREP);
-   }
+   private final DoubleProvider timeProvider;
 
-   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints, HighLevelControllerParameters highLevelControllerParameters,
-                                   JointDesiredOutputListReadOnly highLevelControlOutput, double minimumTimeDoneWithStandPrep)
+   public StandPrepControllerState(OneDoFJointBasics[] controlledJoints,
+                                   HighLevelControllerParameters highLevelControllerParameters,
+                                   JointDesiredOutputListReadOnly highLevelControlOutput,
+                                   DoubleProvider timeProvider)
    {
       super(controllerState, highLevelControllerParameters, controlledJoints);
       this.highLevelControlOutput = highLevelControlOutput;
+      this.timeProvider = timeProvider;
 
       this.timeToPrepareForStanding.set(highLevelControllerParameters.getTimeToMoveInStandPrep());
-      this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
 
       WholeBodySetpointParameters standPrepParameters = highLevelControllerParameters.getStandPrepParameters();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);
@@ -68,12 +65,20 @@ public class StandPrepControllerState extends HighLevelControllerState
 
    }
 
+   public void setMinimumTimeDoneWithStandPrep(double minimumTimeDoneWithStandPrep)
+   {
+      this.minimumTimeDoneWithStandPrep.set(minimumTimeDoneWithStandPrep);
+   }
+
    @Override
    public void onEntry()
    {
       continuousUpdate.set(false);
       reinitialize.set(false);
-      initializeSplines(0.0);
+      if (timeProvider != null)
+         initializeSplines(timeProvider.getValue());
+      else
+         initializeSplines(0.0);
    }
 
    public void initializeSplines(double startTime)
@@ -105,6 +110,12 @@ public class StandPrepControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
+      double time;
+      if (timeProvider != null)
+         time = timeProvider.getValue();
+      else
+         time = timeInState;
+
       if (continuousUpdate.getValue())
       {
          reinitialize.set(false);
@@ -113,10 +124,10 @@ public class StandPrepControllerState extends HighLevelControllerState
       else if (reinitialize.getValue())
       {
          reinitialize.set(false);
-         initializeSplines(timeInState);
+         initializeSplines(time);
       }
 
-      double timeInTrajectory = MathTools.clamp(timeInState - splineStartTime.getValue(), 0.0, timeToPrepareForStanding.getDoubleValue());
+      double timeInTrajectory = MathTools.clamp(time - splineStartTime.getValue(), 0.0, timeToPrepareForStanding.getDoubleValue());
 
       for (int jointIndex = 0; jointIndex < jointsData.size(); jointIndex++)
       {
@@ -186,5 +197,4 @@ public class StandPrepControllerState extends HighLevelControllerState
          return jointTrajectory;
       }
    }
-
 }

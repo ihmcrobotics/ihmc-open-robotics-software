@@ -377,6 +377,11 @@ public class FootControlModule
       onToesState.setUsePointContact(usePointContact);
    }
 
+   public boolean isUsingPointContactInToeOff()
+   {
+      return onToesState.isUsingPointContact();
+   }
+
    public void updateLegSingularityModule()
    {
       if (workspaceLimiterControlModule != null)

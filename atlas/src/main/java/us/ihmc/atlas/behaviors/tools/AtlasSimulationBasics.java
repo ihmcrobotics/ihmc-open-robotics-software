@@ -2,17 +2,17 @@ package us.ihmc.atlas.behaviors.tools;
 
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
-import us.ihmc.atlas.behaviors.AtlasDynamicsSimulation;
 import us.ihmc.atlas.behaviors.AtlasKinematicSimulation;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SCSLidarAndCameraSimulator;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.dynamicsSimulation.HumanoidDynamicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.CommunicationMode;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
+import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,7 +50,7 @@ public class AtlasSimulationBasics
    protected final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
    protected EnvironmentInitialSetup environmentInitialSetup;
 
-   protected AtlasDynamicsSimulation dynamicSimulation;
+   protected HumanoidDynamicsSimulation dynamicSimulation;
    protected HumanoidKinematicsSimulation kinematicsSimulation;
 
    protected boolean destroyed = false;
@@ -67,16 +67,16 @@ public class AtlasSimulationBasics
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int dataBufferSize = 10; // Reduce memory footprint; in this demo we only care about dynamics output
-      dynamicSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
-                                                         createCommonAvatarEnvironment(),
-                                                         environmentInitialSetup.getGroundZ(),
-                                                         environmentInitialSetup.getInitialX(),
-                                                         environmentInitialSetup.getInitialY(),
-                                                         environmentInitialSetup.getInitialYaw(),
-                                                         COMMUNICATION_MODE_ROS2.getPubSubImplementation(),
-                                                         recordFrequencySpeedup,
-                                                         dataBufferSize,
-                                                         LOG_TO_FILE);
+      dynamicSimulation = HumanoidDynamicsSimulation.create(createRobotModel(),
+                                                            createCommonAvatarEnvironment(),
+                                                            environmentInitialSetup.getGroundZ(),
+                                                            environmentInitialSetup.getInitialX(),
+                                                            environmentInitialSetup.getInitialY(),
+                                                            environmentInitialSetup.getInitialYaw(),
+                                                            COMMUNICATION_MODE_ROS2.getPubSubImplementation(),
+                                                            recordFrequencySpeedup,
+                                                            dataBufferSize,
+                                                            LOG_TO_FILE);
       dynamicSimulation.simulate();
    }
 

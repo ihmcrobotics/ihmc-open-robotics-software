@@ -19,6 +19,8 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.NewMessageListener;
+import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -63,8 +65,10 @@ public class ControllerNetworkSubscriber
    private final ROS2Topic<?> inputTopic;
    private final ROS2Topic<?> outputTopic;
 
-   public ControllerNetworkSubscriber(ROS2Topic<?> inputTopic, CommandInputManager controllerCommandInputManager,
-                                      ROS2Topic<?> outputTopic, StatusMessageOutputManager controllerStatusOutputManager,
+   public ControllerNetworkSubscriber(ROS2Topic<?> inputTopic,
+                                      CommandInputManager controllerCommandInputManager,
+                                      ROS2Topic<?> outputTopic,
+                                      StatusMessageOutputManager controllerStatusOutputManager,
                                       RealtimeROS2Node realtimeROS2Node)
    {
       this.inputTopic = inputTopic;
@@ -87,14 +91,25 @@ public class ControllerNetworkSubscriber
       createGlobalStatusMessageListener();
    }
 
-   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                            int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, expectedMessageSize, messageUnpacker);
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic<?> inputTopic, int expectedMessageSize,
+                                                                            ROS2Topic<?> inputTopic,
+                                                                            int expectedMessageSize,
+                                                                            MessageUnpacker<T> messageUnpacker)
+   {
+      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, null, expectedMessageSize, messageUnpacker);
+   }
+
+   public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
+                                                                            ROS2Topic<?> inputTopic,
+                                                                            ROS2QosProfile qosProfile,
+                                                                            int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
@@ -103,11 +118,25 @@ public class ControllerNetworkSubscriber
       try
       {
          T localInstance = multipleMessageType.newInstance();
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, multipleMessageType, topicName, s ->
+         NewMessageListener<T> messageListener = s ->
          {
             s.takeNextData(localInstance, null);
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
-         });
+         };
+
+         if (qosProfile == null)
+         {
+            ROS2Tools.createCallbackSubscription(realtimeROS2Node, multipleMessageType, topicName, messageListener);
+         }
+         else
+         {
+            ROS2Tools.createCallbackSubscription(realtimeROS2Node,
+                                                 multipleMessageType,
+                                                 topicName.toString(),
+                                                 messageListener,
+                                                 qosProfile,
+                                                 ROS2Tools.RUNTIME_EXCEPTION);
+         }
       }
       catch (InstantiationException | IllegalAccessException e)
       {
@@ -115,8 +144,10 @@ public class ControllerNetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass, MessageUnpacker<T> messageUnpacker,
-                                                           List<Settable<?>> unpackedMessages, T multipleMessageHolder)
+   private <T extends Settable<T>> void unpackMultiMessage(Class<T> multipleMessageHolderClass,
+                                                           MessageUnpacker<T> messageUnpacker,
+                                                           List<Settable<?>> unpackedMessages,
+                                                           T multipleMessageHolder)
    {
       if (DEBUG)
          LogTools.debug("Received message: {}, {}.", multipleMessageHolder.getClass().getSimpleName(), multipleMessageHolder);

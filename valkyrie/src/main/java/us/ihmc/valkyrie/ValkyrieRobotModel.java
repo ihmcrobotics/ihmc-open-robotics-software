@@ -22,7 +22,6 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.DRCRobotSDFLoader;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -678,14 +677,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
-      {
-         return new ValkyrieArmMassSimCollisionModel(getJointMap());
-      }
-      else
-      {
-         return new ValkyrieKinematicsCollisionModel(getJointMap());
-      }
+      return new ValkyrieKinematicsCollisionModel(getJointMap());
    }
 
    @Override

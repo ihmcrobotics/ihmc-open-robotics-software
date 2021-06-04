@@ -159,6 +159,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
       double maxSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getMaxSwingHeightFromStanceFoot();
       double minSwingHeightFromStanceFoot = 0.0;
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double customWaypointAngleThreshold = walkingControllerParameters.getSteppingParameters().getCustomWaypointAngleThreshold();
 
       YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
 
@@ -166,6 +167,7 @@ public class JumpingSwingFootState implements JumpingFootControlState
                                                                minSwingHeightFromStanceFoot,
                                                                maxSwingHeightFromStanceFoot,
                                                                defaultSwingHeightFromStanceFoot,
+                                                               customWaypointAngleThreshold,
                                                                centerOfMassFrame,
                                                                registry,
                                                                yoGraphicsListRegistry);

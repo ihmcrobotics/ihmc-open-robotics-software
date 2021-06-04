@@ -8,13 +8,29 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.HandHybridJointspaceTaskspaceTrajectoryMessage;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import controller_msgs.msg.dds.JointspaceStreamingMessage;
+import controller_msgs.msg.dds.JointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.NeckTrajectoryMessage;
+import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
+import controller_msgs.msg.dds.QueueableMessage;
+import controller_msgs.msg.dds.SE3StreamingMessage;
+import controller_msgs.msg.dds.SE3TrajectoryMessage;
+import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
+import controller_msgs.msg.dds.SO3StreamingMessage;
+import controller_msgs.msg.dds.SO3TrajectoryMessage;
+import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
 import controller_msgs.msg.dds.SpineTrajectoryMessage;
+import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
+import controller_msgs.msg.dds.WholeBodyStreamingMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage;
+import us.ihmc.communication.packets.ExecutionMode;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public final class MessageUnpackingTools
 {
@@ -99,6 +115,227 @@ public final class MessageUnpackingTools
             if (!rightFootTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().isEmpty())
                messagesToPack.add(rightFootTrajectoryMessage);
          }
+      };
+   }
+
+   public static MessageUnpacker<WholeBodyStreamingMessage> createWholeBodyStreamingMessageUnpacker()
+   {
+      return new MessageUnpacker<WholeBodyStreamingMessage>()
+      {
+         private final SideDependentList<HandTrajectoryMessage> handTrajectoryMessages = new SideDependentList<>(new HandTrajectoryMessage(),
+                                                                                                                 new HandTrajectoryMessage());
+         private final SideDependentList<ArmTrajectoryMessage> armTrajectoryMessages = new SideDependentList<>(new ArmTrajectoryMessage(),
+                                                                                                               new ArmTrajectoryMessage());
+         private final SideDependentList<HandHybridJointspaceTaskspaceTrajectoryMessage> handHybridJointspaceTaskspaceTrajectoryMessages = new SideDependentList<>(new HandHybridJointspaceTaskspaceTrajectoryMessage(),
+                                                                                                                                                                   new HandHybridJointspaceTaskspaceTrajectoryMessage());
+         private final ChestTrajectoryMessage chestTrajectoryMessage = new ChestTrajectoryMessage();
+         private final PelvisTrajectoryMessage pelvisTrajectoryMessage = new PelvisTrajectoryMessage();
+         private final NeckTrajectoryMessage neckTrajectoryMessage = new NeckTrajectoryMessage();
+
+         @Override
+         public void unpackMessage(WholeBodyStreamingMessage message, List<Settable<?>> messagesToPack)
+         {
+            long sequenceId = message.getSequenceId();
+            long uniqueId = message.getUniqueId();
+            float streamIntegrationDuration = message.getStreamIntegrationDuration();
+            long sourceTimestamp = message.getTimestamp();
+
+            if (message.getHasChestStreamingMessage())
+            {
+               chestTrajectoryMessage.setSequenceId(sequenceId);
+               chestTrajectoryMessage.setUniqueId(uniqueId);
+               toSO3TrajectoryMessage(message.getChestStreamingMessage(),
+                                      chestTrajectoryMessage.getSo3Trajectory(),
+                                      sequenceId,
+                                      uniqueId,
+                                      streamIntegrationDuration,
+                                      sourceTimestamp);
+               messagesToPack.add(chestTrajectoryMessage);
+            }
+
+            if (message.getHasPelvisStreamingMessage())
+            {
+               pelvisTrajectoryMessage.setSequenceId(sequenceId);
+               pelvisTrajectoryMessage.setUniqueId(uniqueId);
+               pelvisTrajectoryMessage.setEnableUserPelvisControl(message.getEnableUserPelvisControl());
+               toSE3TrajectoryMessage(message.getPelvisStreamingMessage(),
+                                      pelvisTrajectoryMessage.getSe3Trajectory(),
+                                      sequenceId,
+                                      uniqueId,
+                                      streamIntegrationDuration,
+                                      sourceTimestamp);
+               messagesToPack.add(pelvisTrajectoryMessage);
+            }
+
+            if (message.getHasNeckStreamingMessage())
+            {
+               neckTrajectoryMessage.setSequenceId(sequenceId);
+               neckTrajectoryMessage.setUniqueId(uniqueId);
+               toJointspaceTrajectoryMessage(message.getNeckStreamingMessage(),
+                                             neckTrajectoryMessage.getJointspaceTrajectory(),
+                                             sequenceId,
+                                             uniqueId,
+                                             streamIntegrationDuration,
+                                             sourceTimestamp);
+               messagesToPack.add(neckTrajectoryMessage);
+            }
+
+            for (RobotSide robotSide : RobotSide.values)
+            {
+               boolean hasArmStreamingMessage = select(robotSide, message.getHasLeftArmStreamingMessage(), message.getHasRightArmStreamingMessage());
+               boolean hasHandStreamingMessage = select(robotSide, message.getHasLeftHandStreamingMessage(), message.getHasRightHandStreamingMessage());
+               SE3StreamingMessage handStreamingMessage = select(robotSide, message.getLeftHandStreamingMessage(), message.getRightHandStreamingMessage());
+
+               if (hasArmStreamingMessage)
+               {
+                  JointspaceStreamingMessage armStreamingMessage = select(robotSide,
+                                                                          message.getLeftArmStreamingMessage(),
+                                                                          message.getRightArmStreamingMessage());
+
+                  if (hasHandStreamingMessage)
+                  {
+                     HandHybridJointspaceTaskspaceTrajectoryMessage hybridTrajectoryMessage = handHybridJointspaceTaskspaceTrajectoryMessages.get(robotSide);
+                     hybridTrajectoryMessage.setSequenceId(sequenceId);
+                     hybridTrajectoryMessage.setUniqueId(uniqueId);
+                     hybridTrajectoryMessage.setRobotSide(robotSide.toByte());
+                     toSE3TrajectoryMessage(handStreamingMessage,
+                                            hybridTrajectoryMessage.getTaskspaceTrajectoryMessage(),
+                                            sequenceId,
+                                            uniqueId,
+                                            streamIntegrationDuration,
+                                            sourceTimestamp);
+                     toJointspaceTrajectoryMessage(armStreamingMessage,
+                                                   hybridTrajectoryMessage.getJointspaceTrajectoryMessage(),
+                                                   sequenceId,
+                                                   uniqueId,
+                                                   streamIntegrationDuration,
+                                                   sourceTimestamp);
+                     messagesToPack.add(hybridTrajectoryMessage);
+                  }
+                  else
+                  {
+                     ArmTrajectoryMessage armTrajectoryMessage = armTrajectoryMessages.get(robotSide);
+                     armTrajectoryMessage.setSequenceId(sequenceId);
+                     armTrajectoryMessage.setUniqueId(uniqueId);
+                     armTrajectoryMessage.setRobotSide(robotSide.toByte());
+                     toJointspaceTrajectoryMessage(armStreamingMessage,
+                                                   armTrajectoryMessage.getJointspaceTrajectory(),
+                                                   sequenceId,
+                                                   uniqueId,
+                                                   streamIntegrationDuration,
+                                                   sourceTimestamp);
+                     messagesToPack.add(armTrajectoryMessage);
+                  }
+               }
+               else if (hasHandStreamingMessage)
+               {
+                  HandTrajectoryMessage handTrajectoryMessage = handTrajectoryMessages.get(robotSide);
+                  handTrajectoryMessage.setSequenceId(sequenceId);
+                  handStreamingMessage.setUniqueId(uniqueId);
+                  handTrajectoryMessage.setRobotSide(robotSide.toByte());
+                  toSE3TrajectoryMessage(handStreamingMessage,
+                                         handTrajectoryMessage.getSe3Trajectory(),
+                                         sequenceId,
+                                         uniqueId,
+                                         streamIntegrationDuration,
+                                         sourceTimestamp);
+                  messagesToPack.add(handTrajectoryMessage);
+               }
+            }
+         }
+
+         private <T> T select(RobotSide robotSide, T left, T right)
+         {
+            return robotSide == RobotSide.LEFT ? left : right;
+         }
+
+         private boolean select(RobotSide robotSide, boolean left, boolean right)
+         {
+            return robotSide == RobotSide.LEFT ? left : right;
+         }
+
+         private void toSO3TrajectoryMessage(SO3StreamingMessage source, SO3TrajectoryMessage destination, long sequenceId, long uniqueId,
+                                             double streamIntegrationDuration, long sourceTimestamp)
+         {
+            destination.setSequenceId(sequenceId);
+            destination.setUniqueId(uniqueId);
+            destination.getTaskspaceTrajectoryPoints().clear();
+            SO3TrajectoryPointMessage trajectoryPoint = destination.getTaskspaceTrajectoryPoints().add();
+            trajectoryPoint.setSequenceId(sequenceId);
+            trajectoryPoint.setUniqueId(uniqueId);
+            trajectoryPoint.setTime(0.0);
+            trajectoryPoint.getOrientation().set(source.getOrientation());
+            trajectoryPoint.getAngularVelocity().set(source.getAngularVelocity());
+            MessageTools.packSelectionMatrix3DMessage(true, destination.getSelectionMatrix());
+            destination.getFrameInformation().set(source.getFrameInformation());
+            MessageTools.packWeightMatrix3DMessage(-1.0, destination.getWeightMatrix());
+            destination.setUseCustomControlFrame(source.getUseCustomControlFrame());
+            destination.getControlFramePose().set(source.getControlFramePose());
+            configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
+         }
+
+         private void toSE3TrajectoryMessage(SE3StreamingMessage source, SE3TrajectoryMessage destination, long sequenceId, long uniqueId,
+                                             double streamIntegrationDuration, long sourceTimestamp)
+         {
+            destination.setSequenceId(sequenceId);
+            destination.setUniqueId(uniqueId);
+            destination.getTaskspaceTrajectoryPoints().clear();
+            SE3TrajectoryPointMessage trajectoryPoint = destination.getTaskspaceTrajectoryPoints().add();
+            trajectoryPoint.setSequenceId(sequenceId);
+            trajectoryPoint.setUniqueId(uniqueId);
+            trajectoryPoint.setTime(0.0);
+            trajectoryPoint.getPosition().set(source.getPosition());
+            trajectoryPoint.getOrientation().set(source.getOrientation());
+            trajectoryPoint.getLinearVelocity().set(source.getLinearVelocity());
+            trajectoryPoint.getAngularVelocity().set(source.getAngularVelocity());
+            MessageTools.packSelectionMatrix3DMessage(true, destination.getAngularSelectionMatrix());
+            MessageTools.packSelectionMatrix3DMessage(true, destination.getLinearSelectionMatrix());
+            destination.getFrameInformation().set(source.getFrameInformation());
+            MessageTools.packWeightMatrix3DMessage(-1.0, destination.getAngularWeightMatrix());
+            MessageTools.packWeightMatrix3DMessage(-1.0, destination.getLinearWeightMatrix());
+            destination.setUseCustomControlFrame(source.getUseCustomControlFrame());
+            destination.getControlFramePose().set(source.getControlFramePose());
+            configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
+         }
+
+         private void toJointspaceTrajectoryMessage(JointspaceStreamingMessage source, JointspaceTrajectoryMessage destination, long sequenceId, long uniqueId,
+                                                    double streamIntegrationDuration, long sourceTimestamp)
+         {
+            destination.setSequenceId(sequenceId);
+            destination.setUniqueId(uniqueId);
+            destination.getJointTrajectoryMessages().clear();
+
+            IDLSequence.Float positions = source.getPositions();
+            IDLSequence.Float velocities = source.getVelocities();
+
+            for (int i = 0; i < Math.min(positions.size(), velocities.size()); i++)
+            {
+               OneDoFJointTrajectoryMessage jointTrajectoryMessage = destination.getJointTrajectoryMessages().add();
+               jointTrajectoryMessage.setSequenceId(sequenceId);
+               jointTrajectoryMessage.setUniqueId(uniqueId);
+               jointTrajectoryMessage.getTrajectoryPoints().clear();
+               TrajectoryPoint1DMessage trajectoryPoint = jointTrajectoryMessage.getTrajectoryPoints().add();
+               trajectoryPoint.setSequenceId(sequenceId);
+               trajectoryPoint.setUniqueId(uniqueId);
+               trajectoryPoint.setTime(0.0);
+               trajectoryPoint.setPosition(positions.get(i));
+               trajectoryPoint.setVelocity(velocities.get(i));
+               jointTrajectoryMessage.setWeight(-1.0);
+            }
+
+            configureQueueableMessage(destination.getQueueingProperties(), sequenceId, uniqueId, streamIntegrationDuration, sourceTimestamp);
+         }
+
+         private void configureQueueableMessage(QueueableMessage messageToModify, long sequenceId, long uniqueId, double streamIntegrationDuration,
+                                                long sourceTimestamp)
+         {
+            messageToModify.setExecutionMode(ExecutionMode.STREAM.toByte());
+            messageToModify.setSequenceId(sequenceId);
+            messageToModify.setUniqueId(uniqueId);
+            messageToModify.setStreamIntegrationDuration(streamIntegrationDuration);
+            messageToModify.setTimestamp(sourceTimestamp);
+         }
+
       };
    }
 

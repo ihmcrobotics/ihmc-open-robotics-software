@@ -1,12 +1,19 @@
 package us.ihmc.gdx.imgui;
 
+import java.nio.file.Paths;
+
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 
 public class ImGuiGlfwWindow
 {
    private final String windowTitle;
    private final GlfwWindowForImGui glfwWindowForImGui;
-   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem();
+   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem(getClass(),
+                                                                                               "ihmc-open-robotics-software",
+                                                                                               "ihmc-graphics/src/libgdx/resources",
+                                                                                               Paths.get(System.getProperty("user.home"),
+                                                                                                         ".ihmc/" + "GLFWDemo"
+                                                                                                         + "ImGuiSettings.ini").toAbsolutePath().normalize());
    private final ImGuiDockingSetup dockingSetup = new ImGuiDockingSetup();
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
@@ -26,7 +33,7 @@ public class ImGuiGlfwWindow
 
       long windowHandle = glfwWindowForImGui.getWindowHandle();
 
-      imGuiDockSystem.create(windowHandle, windowTitle);
+      imGuiDockSystem.create(windowHandle);
 
       while (!glfwWindowShouldClose(windowHandle))
       {

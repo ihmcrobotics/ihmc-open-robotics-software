@@ -12,7 +12,7 @@ import java.util.Map;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 
 public class StereoVisionPointCloudDataLoader
 {
@@ -75,12 +75,12 @@ public class StereoVisionPointCloudDataLoader
 
       long timestamp = System.nanoTime();
       double minimumResolution = 0.001;
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(timestamp,
-                                                                                       pointCloudBufferResized,
-                                                                                       colorBufferResized,
-                                                                                       lineIndex,
-                                                                                       minimumResolution,
-                                                                                       null);
+      StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(timestamp,
+                                                                                             pointCloudBufferResized,
+                                                                                             colorBufferResized,
+                                                                                             lineIndex,
+                                                                                             minimumResolution,
+                                                                                             null);
       return message;
    }
 

@@ -450,6 +450,8 @@ public class CrossRobotCommandRandomTools
       next.setJointLimitDistanceForMaxVelocity(random.nextDouble());
       next.setJointLimitFilterBreakFrequency(random.nextDouble());
       next.setVelocityControlGain(random.nextDouble());
+      next.setVelocityDeadbandSize(random.nextDouble());
+      next.setRangeOfMotionMarginFraction(random.nextDouble());
       return next;
    }
 

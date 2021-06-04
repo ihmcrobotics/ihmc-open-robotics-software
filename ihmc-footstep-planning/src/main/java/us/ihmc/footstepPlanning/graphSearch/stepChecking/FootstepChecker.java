@@ -2,7 +2,6 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepPlannerBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
@@ -34,6 +33,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final FootstepPoseChecker goodPositionChecker;
 
    private PlanarRegionsList planarRegionsList = null;
+   private boolean assumeFlatGround = false;
 
    private final FootstepSnapData candidateStepSnapData = FootstepSnapData.identityData();
    private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> rejectionReason = new YoEnum<>("rejectionReason", "", registry, BipedalFootstepPlannerNodeRejectionReason.class, true);
@@ -89,11 +89,36 @@ public class FootstepChecker implements FootstepCheckerInterface
          return;
       }
 
+      // Check step placement
+      if (!assumeFlatGround && !isStepPlacementValid(candidateStep, snapData))
+      {
+         return;
+      }
+
+      // Check collisions
+      if (!isCollisionFree(candidateStep, stanceStep, startOfSwing))
+      {
+         return;
+      }
+
+      // Programmatically added custom checks
+      for (CustomFootstepChecker customFootstepChecker : customFootstepCheckers)
+      {
+         if (!customFootstepChecker.isStepValid(candidateStep, stanceStep))
+         {
+            rejectionReason.set(customFootstepChecker.getRejectionReason());
+            return;
+         }
+      }
+   }
+
+   private boolean isStepPlacementValid(DiscreteFootstep candidateStep, FootstepSnapData snapData)
+   {
       // Check valid snap
       if (candidateStepSnapData.getSnapTransform().containsNaN())
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.COULD_NOT_SNAP);
-         return;
+         return false;
       }
 
       // Check wiggle parameters satisfied
@@ -103,7 +128,7 @@ public class FootstepChecker implements FootstepCheckerInterface
          if (snapData.getAchievedInsideDelta() < parameters.getWiggleInsideDeltaMinimum())
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.WIGGLE_CONSTRAINT_NOT_MET);
-            return;
+            return false;
          }
       }
 
@@ -113,7 +138,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.SURFACE_NORMAL_TOO_STEEP_TO_SNAP);
-         return;
+         return false;
       }
 
       // Check snap area
@@ -126,20 +151,25 @@ public class FootstepChecker implements FootstepCheckerInterface
       if (!footholdAfterSnap.isEmpty() && footAreaPercentage.getValue() < (parameters.getMinimumFootholdPercent() - epsilonAreaPercentage))
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.NOT_ENOUGH_AREA);
-         return;
+         return false;
       }
 
+      return true;
+   }
+
+   private boolean isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
+   {
       // Check for ankle collision
       cliffAvoider.setPlanarRegionsList(planarRegionsList);
       if(!cliffAvoider.isStepValid(candidateStep))
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
-         return;
+         return false;
       }
 
       if (stanceStep == null)
       {
-         return;
+         return true;
       }
 
       // Check snapped footstep placement
@@ -147,19 +177,18 @@ public class FootstepChecker implements FootstepCheckerInterface
       if (poseRejectionReason != null)
       {
          rejectionReason.set(poseRejectionReason);
-         return;
+         return false;
       }
 
       // Check for obstacle collisions (vertically extruded line between steps)
       if (parameters.checkForPathCollisions())
       {
-         obstacleBetweenStepsChecker.setPlanarRegions(planarRegionsList);
          try
          {
             if (!obstacleBetweenStepsChecker.isFootstepValid(candidateStep, stanceStep))
             {
                rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY);
-               return;
+               return false;
             }
          }
          catch(Exception e)
@@ -174,18 +203,11 @@ public class FootstepChecker implements FootstepCheckerInterface
          if (boundingBoxCollisionDetected(candidateStep, stanceStep))
          {
             rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY);
-            return;
+            return false;
          }
       }
 
-      for (CustomFootstepChecker customFootstepChecker : customFootstepCheckers)
-      {
-         if (!customFootstepChecker.isStepValid(candidateStep, stanceStep))
-         {
-            rejectionReason.set(customFootstepChecker.getRejectionReason());
-            return;
-         }
-      }
+      return true;
    }
 
    private boolean boundingBoxCollisionDetected(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
@@ -210,6 +232,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    {
       this.planarRegionsList = planarRegionsList;
       collisionDetector.setPlanarRegionsList(planarRegionsList);
+      obstacleBetweenStepsChecker.setPlanarRegions(planarRegionsList);
    }
 
    private void clearLoggedVariables()
@@ -221,6 +244,11 @@ public class FootstepChecker implements FootstepCheckerInterface
 
       candidateStepSnapData.clear();
       goodPositionChecker.clearLoggedVariables();
+   }
+
+   public void setAssumeFlatGround(boolean assumeFlatGround)
+   {
+      this.assumeFlatGround = assumeFlatGround;
    }
 
    private static void checkWiggleParameters(FootstepPlannerParametersReadOnly parameters)

@@ -13,6 +13,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.GraphicsObjectsHolder;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.simulationconstructionset.graphics.joints.GraphicsJoint;
 import us.ihmc.simulationconstructionset.util.CommonJoint;
@@ -49,7 +50,6 @@ public class GraphicsIDRobot extends GraphicsRobot
          GraphicsJoint rootGraphicsJoint = createJoint(joint, Graphics3DNodeType.ROOTJOINT, graphicsObjectsHolder, useCollisionMeshes);
          getRootNode().addChild(rootGraphicsJoint);
          addInverseDynamicsJoints(joint.getSuccessor().getChildrenJoints(), rootGraphicsJoint, graphicsObjectsHolder, useCollisionMeshes, terminalRigidBodies);
-         jointToGraphicsNodeMap.put(joint, rootGraphicsJoint);
       }
 
       update();
@@ -63,9 +63,66 @@ public class GraphicsIDRobot extends GraphicsRobot
    {
       for (JointBasics joint : joints)
       {
-         GraphicsJoint graphicsJoint = createJoint(joint, Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
-         parentJoint.addChild(graphicsJoint);
-         jointToGraphicsNodeMap.put(joint, graphicsJoint);
+         GraphicsJoint graphicsJoint;
+
+         if (joint instanceof InvertedFourBarJoint)
+         {
+            InvertedFourBarJoint invertedFourBar = (InvertedFourBarJoint) joint;
+
+            if (invertedFourBar.getJointA().isLoopClosure())
+            {
+               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               parentJoint.addChild(graphicsJointB);
+               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointB.addChild(graphicsJointC);
+               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointC.addChild(graphicsJointD);
+               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointD.addChild(graphicsJointA);
+               graphicsJoint = graphicsJointC;
+            }
+            else if (invertedFourBar.getJointB().isLoopClosure())
+            {
+               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               parentJoint.addChild(graphicsJointA);
+               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointA.addChild(graphicsJointD);
+               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointD.addChild(graphicsJointC);
+               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointC.addChild(graphicsJointB);
+               graphicsJoint = graphicsJointD;
+            }
+            else if (invertedFourBar.getJointC().isLoopClosure())
+            {
+               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               parentJoint.addChild(graphicsJointA);
+               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               parentJoint.addChild(graphicsJointB);
+               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointA.addChild(graphicsJointD);
+               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointD.addChild(graphicsJointC);
+               graphicsJoint = graphicsJointD;
+            }
+            else
+            {
+               GraphicsJoint graphicsJointA = createJoint(invertedFourBar.getJointA(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               parentJoint.addChild(graphicsJointA);
+               GraphicsJoint graphicsJointB = createJoint(invertedFourBar.getJointB(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               parentJoint.addChild(graphicsJointB);
+               GraphicsJoint graphicsJointC = createJoint(invertedFourBar.getJointC(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointB.addChild(graphicsJointC);
+               GraphicsJoint graphicsJointD = createJoint(invertedFourBar.getJointD(), Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+               graphicsJointC.addChild(graphicsJointD);
+               graphicsJoint = graphicsJointC;
+            }
+         }
+         else
+         {
+            graphicsJoint = createJoint(joint, Graphics3DNodeType.JOINT, graphicsObjectsHolder, useCollisionMeshes);
+            parentJoint.addChild(graphicsJoint);
+         }
 
          if (terminalRigidBodies == null || !terminalRigidBodies.contains(joint.getSuccessor()))
          {
@@ -74,7 +131,9 @@ public class GraphicsIDRobot extends GraphicsRobot
       }
    }
 
-   private GraphicsJoint createJoint(JointBasics inverseDynamicsJoint, Graphics3DNodeType nodeType, GraphicsObjectsHolder graphicsObjectsHolder,
+   private GraphicsJoint createJoint(JointBasics inverseDynamicsJoint,
+                                     Graphics3DNodeType nodeType,
+                                     GraphicsObjectsHolder graphicsObjectsHolder,
                                      boolean useCollisionMeshes)
    {
       Graphics3DObject graphics3DObject;
@@ -91,6 +150,7 @@ public class GraphicsIDRobot extends GraphicsRobot
       GraphicsJoint graphicsJoint = new GraphicsJoint(inverseDynamicsJoint.getName(), wrapJointBasics, graphics3DObject, nodeType);
 
       registerJoint(wrapJointBasics, graphicsJoint);
+      jointToGraphicsNodeMap.put(inverseDynamicsJoint, graphicsJoint);
       return graphicsJoint;
    }
 
@@ -114,7 +174,7 @@ public class GraphicsIDRobot extends GraphicsRobot
          {
             return new RigidBodyTransform(jointToWrap.getFrameBeforeJoint().getTransformToParent());
          }
-         
+
          @Override
          public RigidBodyTransform getJointTransform3D()
          {

@@ -12,6 +12,8 @@ import us.ihmc.robotics.time.TimeIntervalProvider;
 
 public class PolynomialEstimator implements TimeIntervalProvider, Settable<PolynomialEstimator>
 {
+   private static final boolean debug = false;
+
    private static final double regularization = 1e-5;
    private static final double defaultWeight = 1.0;
 
@@ -112,6 +114,11 @@ public class PolynomialEstimator implements TimeIntervalProvider, Settable<Polyn
 
          timeI *= time;
       }
+
+      if (debug && MatrixTools.containsNaN(hessian))
+         throw new RuntimeException("Error.");
+      if (debug && MatrixTools.containsNaN(gradient))
+         throw new RuntimeException("Error.");
    }
 
    public void addObjectiveVelocity(double time, double value)
@@ -143,6 +150,11 @@ public class PolynomialEstimator implements TimeIntervalProvider, Settable<Polyn
 
          timeI *= time;
       }
+
+      if (debug && MatrixTools.containsNaN(hessian))
+         throw new RuntimeException("Error.");
+      if (debug && MatrixTools.containsNaN(gradient))
+         throw new RuntimeException("Error.");
    }
 
    public void addObjectiveAcceleration(double time, double value)
@@ -176,6 +188,11 @@ public class PolynomialEstimator implements TimeIntervalProvider, Settable<Polyn
 
          timeI *= time;
       }
+
+      if (debug && MatrixTools.containsNaN(hessian))
+         throw new RuntimeException("Error.");
+      if (debug && MatrixTools.containsNaN(gradient))
+         throw new RuntimeException("Error.");
    }
 
    public void addConstraintPosition(double time, double value)
@@ -257,6 +274,8 @@ public class PolynomialEstimator implements TimeIntervalProvider, Settable<Polyn
       solver.setA(A);
       solver.solve(b, coefficientsAndLagrangeMultipliers);
 
+      if (debug && MatrixTools.containsNaN(coefficientsAndLagrangeMultipliers))
+         throw new RuntimeException("Error.");
       MatrixTools.setMatrixBlock(coefficients, 0, 0, coefficientsAndLagrangeMultipliers, 0, 0, order, 1, 1.0);
    }
 

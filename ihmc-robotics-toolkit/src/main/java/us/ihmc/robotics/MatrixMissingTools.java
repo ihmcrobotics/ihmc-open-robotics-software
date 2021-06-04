@@ -1,13 +1,18 @@
 package us.ihmc.robotics;
 
+import org.ejml.MatrixDimensionException;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix1Row;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.matrixlib.MatrixTools;
 
 public class MatrixMissingTools
@@ -180,6 +185,108 @@ public class MatrixMissingTools
       return skewSymmetric;
    }
 
+   public static void fromSkewSymmetricMatrix(DMatrixRMaj skewSymmetric, Vector3DBasics vectorToPack)
+   {
+      vectorToPack.setX(skewSymmetric.get(2, 1));
+      vectorToPack.setY(skewSymmetric.get(0, 2));
+      vectorToPack.setZ(skewSymmetric.get(1, 0));
+   }
+
+   public static void fromSkewSymmetricMatrix(Matrix3DReadOnly skewSymmetric, Vector3DBasics vectorToPack)
+   {
+      vectorToPack.setX(skewSymmetric.getM21());
+      vectorToPack.setY(skewSymmetric.getM02());
+      vectorToPack.setZ(skewSymmetric.getM10());
+   }
+
+   public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, DMatrixRMaj skewSymmetricToPack)
+   {
+      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack, 0, 0);
+   }
+
+   public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack, rowStart, colStart);
+   }
+
+   public static void toSkewSymmetricMatrix(double scalar, Tuple3DReadOnly vector, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      toSkewSymmetricMatrix(scalar, vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack, rowStart, colStart);
+   }
+
+   public static void toSkewSymmetricMatrix(DMatrix1Row vector, DMatrixRMaj skewSymmetricToPack)
+   {
+      toSkewSymmetricMatrix(vector, skewSymmetricToPack, 0, 0);
+   }
+
+   public static void toSkewSymmetricMatrix(DMatrix1Row vector, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      toSkewSymmetricMatrix(vector.get(0), vector.get(1), vector.get(2), skewSymmetricToPack, rowStart, colStart);
+   }
+
+   public static void toSkewSymmetricMatrix(double x, double y, double z, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      int row1 = rowStart + 1;
+      int row2 = rowStart + 2;
+      int col1 = colStart + 1;
+      int col2 = colStart + 2;
+      skewSymmetricToPack.set(rowStart, colStart, 0.0);
+      skewSymmetricToPack.set(rowStart, col1, -z);
+      skewSymmetricToPack.set(rowStart, col2, y);
+
+      skewSymmetricToPack.set(row1, colStart, z);
+      skewSymmetricToPack.set(row1, col1, 0.0);
+      skewSymmetricToPack.set(row1, col2, -x);
+
+      skewSymmetricToPack.set(row2, colStart, -y);
+      skewSymmetricToPack.set(row2, col1, x);
+      skewSymmetricToPack.set(row2, col2, 0.0);
+   }
+
+   public static void toSkewSymmetricMatrix(double scalar, double x, double y, double z, DMatrixRMaj skewSymmetricToPack, int rowStart, int colStart)
+   {
+      int row1 = rowStart + 1;
+      int row2 = rowStart + 2;
+      int col1 = colStart + 1;
+      int col2 = colStart + 2;
+      skewSymmetricToPack.set(rowStart, colStart, 0.0);
+      skewSymmetricToPack.set(rowStart, col1, -scalar * z);
+      skewSymmetricToPack.set(rowStart, col2, scalar * y);
+
+      skewSymmetricToPack.set(row1, colStart, scalar * z);
+      skewSymmetricToPack.set(row1, col1, 0.0);
+      skewSymmetricToPack.set(row1, col2, -scalar * x);
+
+      skewSymmetricToPack.set(row2, colStart, -scalar * y);
+      skewSymmetricToPack.set(row2, col1, scalar * x);
+      skewSymmetricToPack.set(row2, col2, 0.0);
+   }
+
+   public static void toSkewSymmetricMatrix(Tuple3DReadOnly vector, Matrix3DBasics skewSymmetricToPack)
+   {
+      toSkewSymmetricMatrix(vector.getX(), vector.getY(), vector.getZ(), skewSymmetricToPack);
+   }
+
+   public static void toSkewSymmetricMatrix(DMatrix1Row vector, Matrix3DBasics skewSymmetricToPack)
+   {
+      toSkewSymmetricMatrix(vector.get(0), vector.get(1), vector.get(2), skewSymmetricToPack);
+   }
+
+   public static void toSkewSymmetricMatrix(double x, double y, double z, Matrix3DBasics skewSymmetricToPack)
+   {
+      skewSymmetricToPack.setM00(0.0);
+      skewSymmetricToPack.setM01(-z);
+      skewSymmetricToPack.setM02(y);
+
+      skewSymmetricToPack.setM10(z);
+      skewSymmetricToPack.setM11(0.0);
+      skewSymmetricToPack.setM12(-x);
+
+      skewSymmetricToPack.setM20(-y);
+      skewSymmetricToPack.setM21(x);
+      skewSymmetricToPack.setM22(0.0);
+   }
+
    public static void unsafe_add(DMatrixRMaj matrix, int row, int col, double value)
    {
       matrix.data[ row * matrix.numCols + col ] += value;
@@ -193,5 +300,50 @@ public class MatrixMissingTools
    public static void addMatrixBlock(DMatrix1Row dest, int destStartRow, int destStartColumn, DMatrix1Row src, double scale)
    {
       MatrixTools.addMatrixBlock(dest, destStartRow, destStartColumn, src, 0, 0, src.getNumRows(), src.getNumCols(), scale);
+   }
+
+   /**
+    * <p>
+    * Performs the following operation:<br>
+    * <br>
+    * c = a * b </br>
+    * </p>
+    * where we are only modifying a block of the c matrix, starting a rowStart, colStart
+    *
+    * @param a The left matrix in the multiplication operation. Not modified.
+    * @param b The right matrix in the multiplication operation. Not modified.
+    * @param c Where the results of the operation are stored. Modified.
+    */
+   public static void multSetBlock(DMatrix1Row a, DMatrix1Row b, DMatrix1Row c, int rowStart, int colStart)
+   {
+      if (a == c || b == c)
+         throw new IllegalArgumentException("Neither 'a' or 'b' can be the same matrix as 'c'");
+      else if (a.numCols != b.numRows)
+      {
+         throw new MatrixDimensionException("The 'a' and 'b' matrices do not have compatible dimensions");
+      }
+
+      int aIndexStart = 0;
+
+      for (int i = 0; i < a.numRows; i++)
+      {
+         for (int j = 0; j < b.numCols; j++)
+         {
+            double total = 0;
+
+            int indexA = aIndexStart;
+            int indexB = j;
+            int end = indexA + b.numRows;
+            while (indexA < end)
+            {
+               total += a.data[indexA++] * b.data[indexB];
+               indexB += b.numCols;
+            }
+
+            int cIndex = (i + rowStart) * c.numCols + j + colStart;
+            c.data[cIndex] = total;
+         }
+         aIndexStart += a.numCols;
+      }
    }
 }

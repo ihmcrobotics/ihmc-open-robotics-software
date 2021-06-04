@@ -2,8 +2,8 @@ package us.ihmc.valkyrie.jfxvisualizer;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
 
 /**
@@ -15,7 +15,7 @@ public class ValkyrieBehaviorUI
    {
       DRCRobotModel drcRobotModel = new ValkyrieRobotModel(RobotTarget.REAL_ROBOT);
 
-      BehaviorUI.createInterprocess(BehaviorUIRegistry.DEFAULT_BEHAVIORS, drcRobotModel, "localhost");
+      JavaFXBehaviorUI.createInterprocess(JavaFXBehaviorUIRegistry.DEFAULT_BEHAVIORS, drcRobotModel, "localhost");
    }
 
    public static void main(String[] args)

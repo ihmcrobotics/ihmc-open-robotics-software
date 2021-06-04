@@ -597,18 +597,6 @@ public class ICPControllerTest
          return false;
       }
 
-      @Override
-      public double getMinimumFootstepWeight()
-      {
-         return 0.0001;
-      }
-
-      @Override
-      public double getMinimumFeedbackWeight()
-      {
-         return 0.0001;
-      }
-
 
       @Override
       public double getMinimumTimeRemaining()

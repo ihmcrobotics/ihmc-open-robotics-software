@@ -267,4 +267,9 @@ public class RosMainNode implements NodeMain, RosNodeInterface
    {
       nodeMainExecutor.shutdown();
    }
+
+   public ConnectedNode getConnectedNode()
+   {
+      return connectedNode;
+   }
 }

@@ -33,11 +33,11 @@ float64 resolution
 int32 number_of_points
 
 # The compressed pointcloud.
-# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
 int8[] point_cloud
 
 # The compressed colors.
-# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression for more info on the compression protocol.
 int8[] colors
 
 

@@ -11,16 +11,15 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.*;
 
 public class GDXImGuiWindowAndDockSystem
 {
-   private Path imGuiSettingsPath;
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
@@ -30,10 +29,31 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
-   public void create(long windowHandle, String windowTitle)
+   private Path imGuiUserSettingsPath;
+   private Class<?> classForLoading;
+   private String directoryNameToAssumePresent;
+   private String subsequentPathToResourceFolder;
+   private boolean loadSaveEnabled = false;
+
+   public GDXImGuiWindowAndDockSystem()
+   {
+   }
+
+   public GDXImGuiWindowAndDockSystem(Class<?> classForLoading,
+                                      String directoryNameToAssumePresent,
+                                      String subsequentPathToResourceFolder,
+                                      Path imGuiUserSettingsPath)
+   {
+      this.classForLoading = classForLoading;
+      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
+      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+      this.imGuiUserSettingsPath = imGuiUserSettingsPath;
+      loadSaveEnabled = true;
+   }
+
+   public void create(long windowHandle)
    {
       this.windowHandle = windowHandle;
-      imGuiSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + windowTitle.replaceAll(" ", "") + "ImGuiSettings.ini").toAbsolutePath().normalize();
 
       GLFWErrorCallback.createPrint(System.err).set();
 
@@ -84,11 +104,9 @@ public class GDXImGuiWindowAndDockSystem
 
    public void beforeWindowManagement()
    {
-      if (isFirstRenderCall && Files.exists(imGuiSettingsPath))
+      if (isFirstRenderCall)
       {
-         String settingsPath = imGuiSettingsPath.toString();
-         LogTools.info("Loading ImGui settings from {}", settingsPath);
-         ImGui.loadIniSettingsFromDisk(settingsPath);
+         loadImGuiLayout();
       }
 
       imGuiGlfw.newFrame();
@@ -101,6 +119,40 @@ public class GDXImGuiWindowAndDockSystem
 //      flags += ImGuiDockNodeFlags.AutoHideTabBar;
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
+   }
+
+   private void loadImGuiLayout()
+   {
+      Path pathToFile;
+      if (Files.exists(imGuiUserSettingsPath))
+      {
+         pathToFile = imGuiUserSettingsPath;
+         LogTools.info("Loading ImGui settings from {}", pathToFile.toString());
+      }
+      else // see if there are defaults
+      {
+         pathToFile = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui")
+                                        .resolve(imGuiUserSettingsPath.getFileName());
+         LogTools.info("{} not found. Loading default ImGui settings from {}", imGuiUserSettingsPath.toString(), pathToFile.toString());
+      }
+      ImGui.loadIniSettingsFromDisk(pathToFile.toString());
+   }
+
+   public void saveImGuiLayout(boolean saveDefault)
+   {
+      Path settingsPath;
+      if (loadSaveEnabled && saveDefault)
+      {
+         String resourcePathString = "imgui/" + imGuiUserSettingsPath.getFileName().toString();
+         settingsPath = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString);
+      }
+      else
+      {
+         settingsPath = imGuiUserSettingsPath;
+      }
+      String settingsPathString = settingsPath.toString();
+      LogTools.info("Saving ImGui settings to {}", settingsPathString);
+      ImGui.saveIniSettingsToDisk(settingsPathString);
    }
 
    public void afterWindowManagement()
@@ -144,10 +196,5 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiImplGl3 getImGuiGl3()
    {
       return imGuiGl3;
-   }
-
-   public Path getImGuiSettingsPath()
-   {
-      return imGuiSettingsPath;
    }
 }

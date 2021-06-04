@@ -1,13 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerIndexHandler;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectorySegment;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.MultipleCoMSegmentTrajectoryGenerator;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -15,6 +12,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.matrixlib.MatrixTools;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DBasics;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
@@ -53,8 +51,9 @@ public class LinearMPCTrajectoryHandler
    private final RecyclingArrayList<Polynomial3DBasics> vrpTrajectories = new RecyclingArrayList<>(() -> new Polynomial3D(4));
 
    private final CoMTrajectorySegment comSegmentToAppend = new CoMTrajectorySegment();
-   private final ContactPlaneProvider contactPlaneToAppend = new ContactPlaneProvider();
    private final ContactSegmentHelper contactSegmentHelper = new ContactSegmentHelper();
+
+   private boolean hasTrajectory = false;
 
    public LinearMPCTrajectoryHandler(LinearMPCIndexHandler indexHandler, double gravityZ, double nominalCoMHeight, YoRegistry registry)
    {
@@ -73,6 +72,12 @@ public class LinearMPCTrajectoryHandler
       comTrajectory.clear();
       vrpTrajectories.clear();
       fullContactSet.clear();
+      hasTrajectory = false;
+   }
+
+   public boolean hasTrajectory()
+   {
+      return hasTrajectory;
    }
 
    /**
@@ -110,6 +115,14 @@ public class LinearMPCTrajectoryHandler
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
    }
 
+   public void initializeTrajectory(FramePoint3DReadOnly end, double omega, double duration)
+   {
+      positionInitializationCalculator.initializeTrajectory(end, duration);
+      overwriteTrajectoryOutsidePreviewWindow(omega);
+
+      hasTrajectory = true;
+   }
+
    private final FramePoint3D vrpStartPosition = new FramePoint3D();
    private final FrameVector3D vrpStartVelocity = new FrameVector3D();
    private final FramePoint3D vrpEndPosition = new FramePoint3D();
@@ -119,12 +132,12 @@ public class LinearMPCTrajectoryHandler
     * Extracts the solution from the MPC module into the CoM and VRP trajectories for the preview window
     * @param solutionCoefficients full set of coefficients that go into calculate the motion function.
     * @param planningWindow nominal contact sequence for the preview window used to compute the solution coefficients
-    * @param contactPlaneHelpers contact planes that contain the generalized contact vectors for the MPC planning window
+    * @param contactPlanes contact planes that contain the generalized contact vectors for the MPC planning window
     * @param omega time constant for the motion function
     */
    public void extractSolutionForPreviewWindow(DMatrixRMaj solutionCoefficients,
                                                List<ContactPlaneProvider> planningWindow,
-                                               List<? extends List<MPCContactPlane>> contactPlaneHelpers,
+                                               List<? extends List<MPCContactPlane>> contactPlanes,
                                                List<ContactPlaneProvider> fullContactSequence,
                                                double omega)
    {
@@ -134,7 +147,7 @@ public class LinearMPCTrajectoryHandler
          this.planningWindowForSolution.add().set(planningWindow.get(i));
 
       computeCoMSegmentCoefficients(solutionCoefficients,
-                                    contactPlaneHelpers,
+                                    contactPlanes,
                                     xCoefficientVector,
                                     yCoefficientVector,
                                     zCoefficientVector);
@@ -174,6 +187,8 @@ public class LinearMPCTrajectoryHandler
 
       overwriteTrajectoryOutsidePreviewWindow(omega);
       overwriteContactsOutsidePreviewWindow(fullContactSequence);
+
+      hasTrajectory = true;
 
       if (vrpTrajectories.size() != fullContactSet.size())
          throw new RuntimeException("Somehow these didn't match up.");
@@ -322,6 +337,30 @@ public class LinearMPCTrajectoryHandler
       return positionInitializationCalculator.getDesiredVRPPosition();
    }
 
+   public void removeCompletedSegments(double timeToCrop)
+   {
+      throw new NotImplementedException();
+      /*
+      while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
+         comTrajectory.removeSegment(0);
+
+      if (comTrajectory.getCurrentNumberOfSegments() < 1)
+      {
+         hasTrajectory = false;
+         return;
+      }
+
+      for (int i = 0; i < comTrajectory.getCurrentNumberOfSegments(); i++)
+         comTrajectory.getSegment(i).getTimeInterval().shiftInterval(-timeToCrop);
+
+       */
+   }
+
+   public MultipleCoMSegmentTrajectoryGenerator getComTrajectory()
+   {
+      return comTrajectory;
+   }
+
    public List<? extends Polynomial3DReadOnly> getVrpTrajectories()
    {
       return vrpTrajectories;
@@ -330,6 +369,11 @@ public class LinearMPCTrajectoryHandler
    public List<ContactPlaneProvider> getFullPlanningSequence()
    {
       return fullContactSet;
+   }
+
+   public List<ContactPlaneProvider> getPlanningWindowForSolution()
+   {
+      return planningWindowForSolution;
    }
 
    public FramePoint3DReadOnly getDesiredCoMPosition()
@@ -383,12 +427,12 @@ public class LinearMPCTrajectoryHandler
    }
 
    private void computeCoMSegmentCoefficients(DMatrixRMaj solutionCoefficients,
-                                              List<? extends List<MPCContactPlane>> contactPlaneHelpers,
+                                              List<? extends List<MPCContactPlane>> contactPlanes,
                                               DMatrixRMaj xCoefficientVectorToPack,
                                               DMatrixRMaj yCoefficientVectorToPack,
                                               DMatrixRMaj zCoefficientVectorToPack)
    {
-      int numberOfPhases = contactPlaneHelpers.size();
+      int numberOfPhases = contactPlanes.size();
 
       xCoefficientVectorToPack.reshape(6 * numberOfPhases, 1);
       yCoefficientVectorToPack.reshape(6 * numberOfPhases, 1);
@@ -397,13 +441,13 @@ public class LinearMPCTrajectoryHandler
       yCoefficientVectorToPack.zero();
       zCoefficientVectorToPack.zero();
 
-      for (int sequence = 0; sequence < contactPlaneHelpers.size(); sequence++)
+      for (int sequence = 0; sequence < contactPlanes.size(); sequence++)
       {
          int coeffStartIdx = indexHandler.getRhoCoefficientStartIndex(sequence);
 
-         for (int contact = 0; contact < contactPlaneHelpers.get(sequence).size(); contact++)
+         for (int contact = 0; contact < contactPlanes.get(sequence).size(); contact++)
          {
-            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.get(sequence).get(contact);
+            MPCContactPlane contactPlaneHelper = contactPlanes.get(sequence).get(contact);
             contactPlaneHelper.computeContactForceCoefficientMatrix(solutionCoefficients, coeffStartIdx);
             coeffStartIdx += contactPlaneHelper.getCoefficientSize();
          }
@@ -421,9 +465,9 @@ public class LinearMPCTrajectoryHandler
          yCoefficientVectorToPack.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 1) + 1, 0));
          zCoefficientVectorToPack.set(positionVectorStart + 5, 0, solutionCoefficients.get(indexHandler.getComCoefficientStartIndex(i, 2) + 1, 0));
 
-         for (int contactIdx = 0; contactIdx < contactPlaneHelpers.get(i).size(); contactIdx++)
+         for (int contactIdx = 0; contactIdx < contactPlanes.get(i).size(); contactIdx++)
          {
-            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.get(i).get(contactIdx);
+            MPCContactPlane contactPlaneHelper = contactPlanes.get(i).get(contactIdx);
             DMatrixRMaj contactCoefficientMatrix = contactPlaneHelper.getContactWrenchCoefficientMatrix();
 
             xCoefficientVectorToPack.add(positionVectorStart, 0, contactCoefficientMatrix.get(0, 0));

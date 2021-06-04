@@ -11,19 +11,18 @@ import us.ihmc.avatar.simulationStarter.DRCSimulationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.stairs.TraverseStairsBehavior;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
-import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
-import us.ihmc.humanoidBehaviors.tools.perception.PeriodicPlanarRegionPublisher;
-import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorRegistry;
+import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
+import us.ihmc.behaviors.tools.PlanarRegionSLAMMapper;
+import us.ihmc.behaviors.tools.perception.MultisenseHeadStereoSimulator;
+import us.ihmc.behaviors.tools.perception.PeriodicPlanarRegionPublisher;
+import us.ihmc.behaviors.tools.perception.RealsensePelvisSimulator;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUI;
+import us.ihmc.behaviors.javafx.JavaFXBehaviorUIRegistry;
+import us.ihmc.behaviors.javafx.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -84,12 +83,12 @@ public class AtlasPhaseOneDemo
       simulationStarter.getSimulationConstructionSet().addButton(ignoreDebrisButton);
 
       // Start Look and Step behavior
-      BehaviorRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION, TraverseStairsBehavior.DEFINITION);
+      BehaviorRegistry behaviorRegistry = JavaFXBehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION, TraverseStairsBehavior.DEFINITION);
       BehaviorModule.createInterprocess(behaviorRegistry, robotModel);
 
       if (START_LOOK_AND_STEP_UI)
       {
-         BehaviorUI.createInterprocess(BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION), robotModel, "127.0.0.1");
+         JavaFXBehaviorUI.createInterprocess(JavaFXBehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION), robotModel, "127.0.0.1");
       }
 
       ThreadTools.startAsDaemon(this::startPerceptionStack, "PerceptionStack");
