@@ -244,6 +244,7 @@ public class LookAndStepFootstepPlanningTask
    protected void performTask()
    {
       if (planarRegionsHistory.isEmpty()
+       && lookAndStepParameters.getPlanarRegionsHistorySize() > 0
        && lookAndStepParameters.getUseInitialSupportRegions()
        && capturabilityBasedStatusReceptionTimerSnapshot.isRunning()
        && robotConfigurationDataReceptionTimerSnapshot.isRunning())
@@ -374,7 +375,8 @@ public class LookAndStepFootstepPlanningTask
          }
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
 
-         planarRegionsHistory.removeLast();
+         if (!planarRegionsHistory.isEmpty())
+            planarRegionsHistory.removeLast();
 
          statusLogger.info("Footstep planning failure. Aborting task...");
          plannerFailedLastTime.set(true);

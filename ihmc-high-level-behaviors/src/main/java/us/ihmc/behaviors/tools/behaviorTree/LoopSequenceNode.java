@@ -9,17 +9,22 @@ public class LoopSequenceNode extends SequenceNode
 {
    private int currentChild = 0;
 
-   @Override
-   public BehaviorTreeNodeStatus tick()
+   public LoopSequenceNode()
    {
-      super.tick();
+      setType(LoopSequenceNode.class);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      super.tickInternal();
 
       if (currentChild >= getChildren().size())
       {
          currentChild = 0; // this loops back to first child
       }
 
-      BehaviorTreeNode.checkStatusInNotNull(getChildren().get(currentChild++).tick());
+      BehaviorTreeNodeBasics.checkStatusInNotNull(getChildren().get(currentChild++).tick());
 
       return RUNNING;
    }

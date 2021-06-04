@@ -11,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
+import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshot;
 
@@ -26,11 +27,11 @@ public abstract class MessageSyncedRobotModel
    private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
-   public MessageSyncedRobotModel(FullHumanoidRobotModel fullRobotModel)
+   public MessageSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
       this.fullRobotModel = fullRobotModel;
       robotConfigurationData = new RobotConfigurationData();
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, sensorInformation);
       allJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       jointNameHash = RobotConfigurationDataFactory.calculateJointNameHash(allJoints,
                                                                            fullRobotModel.getForceSensorDefinitions(),

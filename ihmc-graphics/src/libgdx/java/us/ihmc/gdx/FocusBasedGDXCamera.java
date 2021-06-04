@@ -232,7 +232,7 @@ public class FocusBasedGDXCamera extends Camera
          mouseDragged(input.getMouseDraggedX(), input.getMouseDraggedY());
       }
 
-      if (input.isWindowHovered())
+      if (input.isWindowHovered() && !ImGui.getIO().getKeyCtrl())
       {
          scrolled(input.getMouseWheelDelta());
       }

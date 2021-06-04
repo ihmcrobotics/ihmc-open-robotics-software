@@ -7,8 +7,10 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ros2.ROS2Helper;
 import us.ihmc.communication.ros2.ROS2PublishSubscribeAPI;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class ROS2ControllerHelper extends ROS2Helper implements ROS2PublishSubscribeAPI, ROS2ControllerPublishSubscribeAPI
 {
@@ -23,9 +25,21 @@ public class ROS2ControllerHelper extends ROS2Helper implements ROS2PublishSubsc
    }
 
    @Override
+   public <T> void subscribeViaCallback(Function<String, ROS2Topic<T>> topicFunction, Consumer<T> callback)
+   {
+      subscribeViaCallback(topicFunction.apply(robotModel.getSimpleRobotName()), callback);
+   }
+
+   @Override
    public void publishToController(Object message)
    {
       ros2ControllerPublisherMap.publish(message);
+   }
+
+   @Override
+   public <T> void publish(Function<String, ROS2Topic<T>> topic, T message)
+   {
+      publish(topic.apply(robotModel.getSimpleRobotName()), message);
    }
 
    @Override

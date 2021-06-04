@@ -154,6 +154,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupFiducialDetectorToolboxModule();
       networkProcessor.setupObjectDetectorToolboxModule();
       networkProcessor.setupFootstepPlanningToolboxModule();
+      networkProcessor.setupBehaviorModule(false, false, 0);
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
