@@ -5,6 +5,7 @@ import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.robotics.math.trajectories.core.Polynomial3D;
 import us.ihmc.robotics.math.trajectories.interfaces.Polynomial3DReadOnly;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
@@ -204,6 +205,15 @@ public class LQRMomentumController
    public AlgebraicS2Segment getS2Segment(int segmentNumber)
    {
       return s2Function.getSegment(segmentNumber);
+   }
+
+   private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
+   public void computeControlInput(FramePoint3DReadOnly currentCoMPosition, FrameVector3DReadOnly currentCoMVelocity, double time)
+   {
+      currentCoMPosition.get(currentState);
+      currentCoMVelocity.get(3, currentState);
+
+      computeControlInput(currentState, time);
    }
 
    /**

@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -235,10 +236,12 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (desiredFullRobotModel.getHand(robotSide) != null)
-            listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
+         listOfControllableRigidBodies.add(desiredFullRobotModel.getHand(robotSide));
          listOfControllableRigidBodies.add(desiredFullRobotModel.getFoot(robotSide));
       }
+
+      // Some robots may not have some the bodies.
+      listOfControllableRigidBodies.removeIf(Objects::isNull);
 
       return listOfControllableRigidBodies;
    }

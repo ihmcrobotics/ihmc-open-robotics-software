@@ -3,11 +3,11 @@ package us.ihmc.communication;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import controller_msgs.msg.dds.REAStateRequestMessage;
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Test;
 
 import std_msgs.msg.dds.Int64;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
@@ -48,7 +48,11 @@ class ROS2ToolsTest
 
       IHMCROS2Publisher<Int64> intPublisher = new IHMCROS2Publisher<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
 
-      new ROS2Callback<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT, this::acceptMessage);
+      MutableInt count = new MutableInt();
+      new ROS2Callback<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT, message ->
+      {
+         LogTools.info("Received int #{}: {}", count.getAndIncrement(), message);
+      });
 
       new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
       {
@@ -58,11 +62,6 @@ class ROS2ToolsTest
          intPublisher.publish(num);
       }, 1.0);
 
-      ExceptionTools.handle(() -> Thread.currentThread().join(), DefaultExceptionHandler.PRINT_STACKTRACE);
-   }
-
-   private void acceptMessage(Int64 message)
-   {
-      LogTools.info("Received int: {}", message);
+      ThreadTools.sleepForever();
    }
 }

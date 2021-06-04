@@ -583,7 +583,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
    @Override
    public double getDefaultInitialTransferTime()
    {
-      return (target == RobotTarget.REAL_ROBOT) ? 2.0 : 1.0;
+      return 1.0;
    }
 
    @Override
@@ -735,7 +735,7 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
    /** {@inheritDoc} */
    @Override
-   public JointLimitParameters getJointLimitParametersForJointsWithRestictiveLimits()
+   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
    {
       JointLimitParameters parameters = new JointLimitParameters();
       parameters.setMaxAbsJointVelocity(1.5);

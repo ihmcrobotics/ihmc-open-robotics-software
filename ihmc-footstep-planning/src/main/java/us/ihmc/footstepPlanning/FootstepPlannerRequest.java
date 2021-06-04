@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -100,7 +101,8 @@ public class FootstepPlannerRequest
    private PlanarRegionsList planarRegionsList;
 
    /**
-    * If true, will ignore planar regions and plan on flat ground
+    * If true, will ignore planar regions and plan on flat ground.
+    * Note that collision checks will still be performed if enabled, such as {@link FootstepPlannerParametersReadOnly#checkForBodyBoxCollisions}
     */
    private boolean assumeFlatGround;
 

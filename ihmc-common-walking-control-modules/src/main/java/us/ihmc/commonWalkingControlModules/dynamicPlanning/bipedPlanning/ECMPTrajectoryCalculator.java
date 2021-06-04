@@ -1,26 +1,29 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.generators.MultipleSegmentPositionTrajectoryGenerator;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlannerTools.sufficientlyLongTime;
 
-public class ECMPTrajectoryCalculator
+public class ECMPTrajectoryCalculator<T extends ContactStateBasics<T>>
 {
+   private static final boolean debug = false;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+   private final RecyclingArrayList<T> contactStateProviders;
    private final double weight;
 
    private static final int maxPoints = 20;
@@ -28,10 +31,11 @@ public class ECMPTrajectoryCalculator
    private final List<YoFrameVector2D> ecmpStartOffsets = new ArrayList<>();
    private final List<YoFrameVector2D> ecmpEndOffsets = new ArrayList<>();
 
-   public ECMPTrajectoryCalculator(double mass, double gravity, YoRegistry parentRegistry)
+   public ECMPTrajectoryCalculator(double mass, double gravity, Supplier<T> contactStateSupplier, YoRegistry parentRegistry)
    {
       gravity = Math.abs(gravity);
 
+      contactStateProviders = new RecyclingArrayList<>(contactStateSupplier);
       YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
       for (int i = 0; i < maxPoints; i++)
@@ -56,7 +60,7 @@ public class ECMPTrajectoryCalculator
 
    private final FrameVector2D offset = new FrameVector2D();
 
-   public List<? extends ContactStateProvider> computeECMPTrajectory(List<? extends ContactStateProvider> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> desiredAngularMomentumTrajectories)
+   public List<T> computeECMPTrajectory(List<T> copTrajectories, MultipleSegmentPositionTrajectoryGenerator<?> desiredAngularMomentumTrajectories)
    {
       contactStateProviders.clear();
       int length = copTrajectories.size();
@@ -69,7 +73,7 @@ public class ECMPTrajectoryCalculator
       int i = 0;
       for (; i < length - 1; i++)
       {
-         ContactStateProvider copTrajectory = copTrajectories.get(i);
+         T copTrajectory = copTrajectories.get(i);
          double startTime = Math.min(copTrajectory.getTimeInterval().getStartTime(), sufficientlyLongTime);
          double endTime = Math.min(copTrajectory.getTimeInterval().getEndTime(), sufficientlyLongTime);
 
@@ -84,12 +88,20 @@ public class ECMPTrajectoryCalculator
             break;
          }
 
-         SettableContactStateProvider eCMPTrajectory = contactStateProviders.get(i);
+         T eCMPTrajectory = contactStateProviders.get(i);
+
+         if (!eCMPTrajectory.getContactState().isLoadBearing())
+            continue;
 
          desiredAngularMomentumTrajectories.compute(startTime + 1e-8);
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPStartVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
+
+         if (debug && offset.containsNaN())
+            LogTools.info("Error.");
+         if (debug && ecmpVelocity.containsNaN())
+            LogTools.info("Error.");
 
          ecmpPosition.set(copTrajectory.getECMPStartPosition());
          ecmpPosition.add(offset.getX(), offset.getY(), 0.0);
@@ -103,6 +115,11 @@ public class ECMPTrajectoryCalculator
 
          computeECMPOffset(desiredAngularMomentumTrajectories.getVelocity(), offset);
          computeECMPVelocity(copTrajectory.getECMPEndVelocity(), desiredAngularMomentumTrajectories.getAcceleration(), ecmpVelocity);
+
+         if (debug && offset.containsNaN())
+            LogTools.info("Error.");
+         if (debug && ecmpVelocity.containsNaN())
+            LogTools.info("Error.");
 
          ecmpPosition.set(copTrajectory.getECMPEndPosition());
          ecmpPosition.add(offset.getX(), offset.getY(), 0.0);
@@ -145,7 +162,7 @@ public class ECMPTrajectoryCalculator
       ecmpVelocityToPack.add(desiredCopVelocity);
    }
 
-   public RecyclingArrayList<SettableContactStateProvider> getContactStateProviders()
+   public RecyclingArrayList<T> getContactStateProviders()
    {
       return contactStateProviders;
    }

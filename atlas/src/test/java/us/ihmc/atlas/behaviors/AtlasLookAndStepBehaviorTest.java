@@ -11,6 +11,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.dynamicsSimulation.HumanoidDynamicsSimulation;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -28,15 +29,15 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.behaviors.BehaviorRegistry;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
+import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
-import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepRemoteVisualizer;
-import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
+import us.ihmc.behaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
+import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -52,7 +53,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
+import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.LOOK_AND_STEP_PARAMETERS;
 
 // TODO: Add reviewing; Add status logger to visualizer
 @Execution(ExecutionMode.SAME_THREAD)
@@ -74,7 +75,7 @@ public class AtlasLookAndStepBehaviorTest
    private PausablePeriodicThread monitorThread;
    private LookAndStepRemoteVisualizer lookAndStepVisualizer;
    private HumanoidKinematicsSimulation kinematicsSimulation;
-   private AtlasDynamicsSimulation dynamicsSimulation;
+   private HumanoidDynamicsSimulation dynamicsSimulation;
    private AtlasPerceptionSimulation perceptionStack;
 
    private static class TestWaypoint
@@ -352,16 +353,16 @@ public class AtlasLookAndStepBehaviorTest
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int scsDataBufferSize = 10;
-      dynamicsSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
-                                                          createCommonAvatarEnvironment(environment),
-                                                          environment.getGroundZ(),
-                                                          environment.getInitialX(),
-                                                          environment.getInitialY(),
-                                                          environment.getInitialYaw(),
-                                                          COMMUNICATION_MODE.getPubSubImplementation(),
-                                                          recordFrequencySpeedup,
-                                                          scsDataBufferSize,
-                                                          true);
+      dynamicsSimulation = HumanoidDynamicsSimulation.create(createRobotModel(),
+                                                             createCommonAvatarEnvironment(environment),
+                                                             environment.getGroundZ(),
+                                                             environment.getInitialX(),
+                                                             environment.getInitialY(),
+                                                             environment.getInitialYaw(),
+                                                             COMMUNICATION_MODE.getPubSubImplementation(),
+                                                             recordFrequencySpeedup,
+                                                             scsDataBufferSize,
+                                                             true);
       dynamicsSimulation.simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();

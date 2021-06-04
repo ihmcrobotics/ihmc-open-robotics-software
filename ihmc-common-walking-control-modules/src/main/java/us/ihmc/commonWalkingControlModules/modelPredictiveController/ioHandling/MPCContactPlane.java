@@ -317,6 +317,10 @@ public class MPCContactPlane
       contactPoints[contactPointIndex].clear();
    }
 
+   public void reset()
+   {
+   }
+
    /**
     * Computes the collapsed wrench function. That is, it adds all the generalized contact force functions together in Euclidean space to get a much more
     * compact time function.
@@ -332,7 +336,7 @@ public class MPCContactPlane
       {
          MPCContactPoint contactPointHelper = contactPoints[contactPointIdx];
          contactPointHelper.computeContactForceCoefficientMatrix(solutionVector, startIdx);
-         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactWrenchCoefficientMatrix());
+         CommonOps_DDRM.addEquals(contactWrenchCoefficientMatrix, contactPointHelper.getContactForceCoefficientMatrix());
          startIdx += contactPointHelper.getCoefficientsSize();
       }
    }
@@ -346,6 +350,22 @@ public class MPCContactPlane
    public DMatrixRMaj getContactWrenchCoefficientMatrix()
    {
       return contactWrenchCoefficientMatrix;
+   }
+
+   public void computeContactForce(double omega, double time)
+   {
+      for (MPCContactPoint contactPoint : contactPoints)
+      {
+         contactPoint.computeContactForce(omega, time);
+      }
+   }
+
+   public void clearViz()
+   {
+      for (MPCContactPoint contactPoint : contactPoints)
+      {
+         contactPoint.clearViz();
+      }
    }
 
    @Override

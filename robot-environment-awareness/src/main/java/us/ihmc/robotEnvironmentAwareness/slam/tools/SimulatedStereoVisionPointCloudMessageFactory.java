@@ -8,7 +8,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 
 public class SimulatedStereoVisionPointCloudMessageFactory
 {
@@ -58,7 +58,7 @@ public class SimulatedStereoVisionPointCloudMessageFactory
       int[] colors = new int[pointCloudList.size()];
       Point3D[] pointCloudArray = pointCloudList.toArray(new Point3D[pointCloudList.size()]);
 
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(0, pointCloudArray, colors, pointCloudArray.length, 0.001, null);
+      StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(0, pointCloudArray, colors, pointCloudArray.length, 0.001, null);
       message.getSensorOrientation().set(sensorPose.getRotation());
       message.getSensorPosition().set(sensorPose.getTranslation());
 

@@ -50,6 +50,7 @@ public class RigidBodyPositionControlHelper
     * over the network.
     */
    private final YoDouble streamTimestampOffset;
+   private final YoDouble streamTimestampSource;
 
    private boolean messageWeightValid = false;
    private final BooleanProvider useWeightFromMessage;
@@ -130,6 +131,8 @@ public class RigidBodyPositionControlHelper
 
       streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
       streamTimestampOffset.setToNaN();
+      streamTimestampSource = new YoDouble(prefix + "StreamTimestampSource", registry);
+      streamTimestampSource.setToNaN();
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -257,7 +260,10 @@ public class RigidBodyPositionControlHelper
       }
 
       if (done)
+      {
          streamTimestampOffset.setToNaN();
+         streamTimestampSource.setToNaN();
+      }
 
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
@@ -330,8 +336,49 @@ public class RigidBodyPositionControlHelper
 
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FrameQuaternionBasics currentDesiredOrientation)
    {
-      // The timestamp is being cleared in the clear method, need to save it to use it further down.
-      double previousStreamTimestampOffset = streamTimestampOffset.getValue();
+      double streamTimeOffset = 0.0;
+      double streamTimestampOffset = this.streamTimestampOffset.getValue();
+      double streamTimestampSource = this.streamTimestampSource.getValue();
+
+      if (command.getExecutionMode() == ExecutionMode.STREAM)
+      { // Need to do time checks before moving on.
+         if (command.getTimestamp() <= 0)
+         {
+            streamTimestampOffset = Double.NaN;
+            streamTimestampSource = Double.NaN;
+         }
+         else
+         {
+            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
+
+            if (!Double.isNaN(streamTimestampSource) && senderTime < streamTimestampSource)
+            {
+               // Messages are out of order which is fine, we just don't want to handle the new message.
+               return true;
+            }
+
+            streamTimestampSource = senderTime;
+
+            streamTimeOffset = time.getValue() - senderTime;
+
+            if (Double.isNaN(streamTimestampOffset))
+            {
+               streamTimestampOffset = streamTimeOffset;
+            }
+            else
+            {
+               /*
+                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
+                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
+                * for safety.
+                */
+               if (Math.abs(streamTimeOffset - streamTimestampOffset) > 0.5)
+                  streamTimestampOffset = streamTimeOffset;
+               else
+                  streamTimestampOffset = Math.min(streamTimeOffset, streamTimestampOffset);
+            }
+         }
+      }
 
       // Both OVERRIDE and STREAM clear the current trajectory.
       if (command.getExecutionMode() != ExecutionMode.QUEUE || isEmpty())
@@ -384,34 +431,9 @@ public class RigidBodyPositionControlHelper
 
       if (command.getExecutionMode() == ExecutionMode.STREAM)
       {
-         double timeOffset = 0.0;
-
-         if (command.getTimestamp() <= 0)
-         {
-            streamTimestampOffset.setToNaN();
-         }
-         else
-         {
-            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
-            timeOffset = time.getValue() - senderTime;
-            if (Double.isNaN(previousStreamTimestampOffset))
-            {
-               streamTimestampOffset.set(timeOffset);
-            }
-            else
-            {
-               /*
-                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
-                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
-                * for safety.
-                */
-               if (Math.abs(timeOffset - previousStreamTimestampOffset) > 0.5)
-                  streamTimestampOffset.set(timeOffset);
-               else
-                  streamTimestampOffset.set(Math.min(timeOffset, previousStreamTimestampOffset));
-            }
-         }
-
+         this.streamTimestampOffset.set(streamTimestampOffset);
+         this.streamTimestampSource.set(streamTimestampSource);
+      
          if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
          {
             LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
@@ -432,8 +454,8 @@ public class RigidBodyPositionControlHelper
             return false;
 
          initialPoint.setIncludingFrame(trajectoryPoint);
-         if (!streamTimestampOffset.isNaN())
-            initialPoint.setTime(streamTimestampOffset.getValue() - timeOffset);
+         if (!Double.isNaN(streamTimestampOffset))
+            initialPoint.setTime(streamTimestampOffset - streamTimeOffset);
 
          FrameEuclideanTrajectoryPoint integratedPoint = addPoint();
 
@@ -558,6 +580,7 @@ public class RigidBodyPositionControlHelper
       setDefaultControlFrame();
       pointQueue.clear();
       streamTimestampOffset.setToNaN();
+      streamTimestampSource.setToNaN();
    }
 
    public void disable()

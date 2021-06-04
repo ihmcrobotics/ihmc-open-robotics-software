@@ -1,8 +1,11 @@
 package us.ihmc.avatar.sensors.realsense;
 
 import map_sense.RawGPUPlanarRegionList;
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -16,6 +19,21 @@ public class MapsenseTools
    {
       zForwardXRightToZUpXForward.appendPitchRotation(Math.PI / 2.0);
       zForwardXRightToZUpXForward.appendYawRotation(-Math.PI / 2.0);
+   }
+
+   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
+                                                                                                   DRCRobotModel robotModel,
+                                                                                                   Consumer<PlanarRegionsList> callback)
+   {
+      return subscribeToPlanarRegionsWithDelayCompensation(ros2Node, robotModel, RosTools.MAPSENSE_REGIONS, callback);
+   }
+
+   public static DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsWithDelayCompensation(ROS2NodeInterface ros2Node,
+                                                                                                   DRCRobotModel robotModel,
+                                                                                                   String topic,
+                                                                                                   Consumer<PlanarRegionsList> callback)
+   {
+      return new DelayFixedPlanarRegionsSubscription(ros2Node, robotModel, topic, callback);
    }
 
    public static AbstractRosTopicSubscriber<RawGPUPlanarRegionList> createROS1Callback(RosNodeInterface ros1Node, Consumer<RawGPUPlanarRegionList> callback)

@@ -114,7 +114,7 @@ public class StepGeneratorParametersPaneController
       minStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getMinStepWidth(), 0.025));
       maxStepWidthSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getMaxStepWidth(), 0.05));
       turnStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, initialParameters.getTurnStepWidth(), 0.05));
-      turnMaxAngleInwardSpinner.setValueFactory(newAngleSpinnerValueFactory(0.0,
+      turnMaxAngleInwardSpinner.setValueFactory(newAngleSpinnerValueFactory(-Math.PI / 4.0,
                                                                             Math.PI / 2.0,
                                                                             initialParameters.getTurnMaxAngleInward(),
                                                                             Math.toRadians(5.0)));

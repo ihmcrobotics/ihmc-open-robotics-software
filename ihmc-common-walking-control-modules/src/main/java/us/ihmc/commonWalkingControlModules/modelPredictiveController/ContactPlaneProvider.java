@@ -1,8 +1,11 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
+import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateBasics;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -21,7 +24,7 @@ import java.util.List;
  * This class both implements and extends the {@link ContactStateProvider} to also provide contact planes, the vertices of which are needed to compute the
  * admissible contact forces for the model predictive controller.
  */
-public class ContactPlaneProvider implements ContactStateProvider
+public class ContactPlaneProvider implements ContactStateBasics<ContactPlaneProvider>
 {
    private int planeProviderId = -1;
    private ContactState contactState = ContactState.IN_CONTACT;
@@ -35,6 +38,14 @@ public class ContactPlaneProvider implements ContactStateProvider
    private final List<FramePose3DReadOnly> contactPoses = new ArrayList<>();
 
    private int totalContactPoints = 0;
+
+   private int hashCode;
+   private int planeHashCode;
+   private int timeHashCode;
+   private int startHashCode;
+   private int startVelHashCode;
+   private int endHashCode;
+   private int endVelHashCode;
 
    public ContactPlaneProvider()
    {
@@ -54,6 +65,9 @@ public class ContactPlaneProvider implements ContactStateProvider
       totalContactPoints = 0;
       contactPointsInBodyFrame.clear();
       contactPoses.clear();
+
+      planeHashCode = 0;
+      hashCode = -1;
    }
 
    /**
@@ -62,12 +76,9 @@ public class ContactPlaneProvider implements ContactStateProvider
     */
    public void set(ContactPlaneProvider other)
    {
-      reset();
+      this.set((ContactStateProvider<?>) other);
+
       setPlaneProviderId(other.getPlaneProviderId());
-      setStartECMPPosition(other.getECMPStartPosition());
-      setEndECMPPosition(other.getECMPEndPosition());
-      setTimeInterval(other.getTimeInterval());
-      setContactState(other.getContactState());
       for (int i = 0; i < other.getNumberOfContactPlanes(); i++)
          addContact(other.getContactPose(i), other.getContactsInBodyFrame(i));
    }
@@ -97,6 +108,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setStartECMPPosition(FramePoint3DReadOnly startECMPPosition)
    {
       this.startECMPPosition.set(startECMPPosition);
+      startHashCode = ContactPlaneProviderTools.computePointHashCode(this.startECMPPosition);
    }
 
    /**
@@ -107,6 +119,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setStartECMPPosition(FramePoint2DReadOnly startECMPPosition, double height)
    {
       this.startECMPPosition.set(startECMPPosition, height);
+      startHashCode = ContactPlaneProviderTools.computePointHashCode(this.startECMPPosition);
    }
 
    /**
@@ -117,6 +130,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setStartECMPPosition(Point2DReadOnly startECMPPosition, double height)
    {
       this.startECMPPosition.set(startECMPPosition, height);
+      startHashCode = ContactPlaneProviderTools.computePointHashCode(this.startECMPPosition);
    }
 
    /**
@@ -126,6 +140,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setStartECMPVelocity(FrameVector3DReadOnly startECMPVelocity)
    {
       this.startECMPVelocity.set(startECMPVelocity);
+      startVelHashCode = ContactPlaneProviderTools.computeVectorHashCode(this.startECMPVelocity);
    }
 
    /**
@@ -135,6 +150,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setEndECMPPosition(FramePoint3DReadOnly endECMPPosition)
    {
       this.endECMPPosition.set(endECMPPosition);
+      endHashCode = ContactPlaneProviderTools.computePointHashCode(this.endECMPPosition);
    }
 
    /**
@@ -145,6 +161,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setEndECMPPosition(FramePoint2DReadOnly endECMPPosition, double height)
    {
       this.endECMPPosition.set(endECMPPosition, height);
+      endHashCode = ContactPlaneProviderTools.computePointHashCode(this.endECMPPosition);
    }
 
    /**
@@ -155,6 +172,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setEndECMPPosition(Point2DReadOnly endECMPPosition, double height)
    {
       this.endECMPPosition.set(endECMPPosition, height);
+      endHashCode = ContactPlaneProviderTools.computePointHashCode(this.endECMPPosition);
    }
 
    /**
@@ -164,6 +182,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setEndECMPVelocity(FrameVector3DReadOnly endECMPVelocity)
    {
       this.endECMPVelocity.set(endECMPVelocity);
+      endVelHashCode = ContactPlaneProviderTools.computeVectorHashCode(this.endECMPVelocity);
    }
 
    /**
@@ -175,6 +194,8 @@ public class ContactPlaneProvider implements ContactStateProvider
       startECMPVelocity.sub(getECMPEndPosition(), getECMPStartPosition());
       startECMPVelocity.scale(1.0 / Math.min(getTimeInterval().getDuration(), 10.0));
       endECMPVelocity.set(startECMPVelocity);
+      startVelHashCode = ContactPlaneProviderTools.computeVectorHashCode(this.startECMPVelocity);
+      endVelHashCode = startVelHashCode;
    }
 
    /**
@@ -184,6 +205,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setTimeInterval(TimeIntervalReadOnly timeInterval)
    {
       this.timeInterval.set(timeInterval);
+      timeHashCode = ContactPlaneProviderTools.computeTimeHashCode(this.timeInterval);
    }
 
    /**
@@ -265,6 +287,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setStartTime(double startTime)
    {
       getTimeInterval().setStartTime(startTime);
+      timeHashCode = ContactPlaneProviderTools.computeTimeHashCode(this.timeInterval);
    }
 
    /**
@@ -274,6 +297,7 @@ public class ContactPlaneProvider implements ContactStateProvider
    public void setEndTime(double endTime)
    {
       getTimeInterval().setEndTime(endTime);
+      timeHashCode = ContactPlaneProviderTools.computeTimeHashCode(this.timeInterval);
    }
 
    /**
@@ -286,6 +310,7 @@ public class ContactPlaneProvider implements ContactStateProvider
       this.contactPoses.add(contactPose);
       this.contactPointsInBodyFrame.add(contactPointsInBodyFrame);
       totalContactPoints += contactPointsInBodyFrame.getNumberOfVertices();
+      planeHashCode += ContactPlaneProviderTools.prime * ContactPlaneProviderTools.computePlaneHashCode(contactPose, contactPointsInBodyFrame);
    }
 
    /**
@@ -346,4 +371,67 @@ public class ContactPlaneProvider implements ContactStateProvider
    {
       return contactPoses.get(contactPlane);
    }
+
+   @Override
+   public int hashCode()
+   {
+      if (hashCode == -1)
+      {
+         hashCode = ContactPlaneProviderTools.computePlaneProviderHashCode(planeHashCode, timeHashCode, startHashCode, startVelHashCode, endHashCode, endVelHashCode);
+      }
+      return hashCode;
+   }
+
+   @Override
+   public boolean equals(Object obj)
+   {
+      if (this == obj)
+         return true;
+      if (obj == null)
+         return false;
+      if (getClass() != obj.getClass())
+         return false;
+      ContactPlaneProvider other = (ContactPlaneProvider) obj;
+
+      return equals(this, other);
+   }
+
+   private static final double timeEpsilon = 1e-2;
+   private static final double positionEpsilon = 5e-3;
+
+   private static boolean equals(ContactPlaneProvider planeA, ContactPlaneProvider planeB)
+   {
+      return epsilonEquals(planeA, planeB, timeEpsilon, positionEpsilon);
+   }
+
+   public static boolean epsilonEquals(ContactPlaneProvider planeA, ContactPlaneProvider planeB, double timeEpsilon, double positionEpsilon)
+   {
+      if (planeA == null || planeB == null)
+         return false;
+
+      if (!MathTools.epsilonEquals(planeA.getTimeInterval().getEndTime(), planeB.getTimeInterval().getEndTime(), timeEpsilon))
+         return false;
+
+      if (planeA.getContactState() != planeB.getContactState())
+         return false;
+
+      if (planeA.getContactState() == ContactState.FLIGHT)
+         return true;
+
+      if (planeA.getNumberOfContactPlanes() != planeB.getNumberOfContactPlanes())
+         return false;
+
+      for (int i = 0; i < planeA.getNumberOfContactPlanes(); i++)
+      {
+         if (planeA.getNumberOfContactPointsInPlane(i) != planeB.getNumberOfContactPointsInPlane(i))
+            return false;
+
+         if (planeA.getContactPose(i).getPosition().distanceXYSquared(planeB.getContactPose(i).getPosition()) >  positionEpsilon * positionEpsilon)
+            return false;
+      }
+
+      return true;
+   }
+
+
 }

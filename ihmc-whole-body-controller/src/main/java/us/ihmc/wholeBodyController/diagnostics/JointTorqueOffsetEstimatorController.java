@@ -10,7 +10,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLe
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.DiagnosticsWhenHangingHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -63,7 +63,9 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
    private final YoDouble currentTime;
 
    public JointTorqueOffsetEstimatorController(WholeBodySetpointParameters wholeBodySetpointParameters,
-                                               HighLevelHumanoidControllerToolbox highLevelControllerToolbox, TorqueOffsetPrinter torqueOffsetPrinter, boolean useArms)
+                                               HighLevelHumanoidControllerToolbox highLevelControllerToolbox,
+                                               TorqueOffsetPrinter torqueOffsetPrinter,
+                                               JointTorqueOffsetEstimatorParameters parameters)
    {
       this.bipedSupportPolygons = highLevelControllerToolbox.getBipedSupportPolygons();
       this.footContactStates = highLevelControllerToolbox.getFootContactStates();
@@ -85,7 +87,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(jointArray);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(jointArray, JointDesiredControlMode.EFFORT);
 
-      createHelpers(true, useArms);
+      createHelpers(true, parameters);
 
       for (int i = 0; i < oneDoFJoints.size(); i++)
       {
@@ -101,10 +103,15 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
          PDController controller = new PDController(jointName + "Calibration", registry);
          pdControllers.put(joint, controller);
-
       }
 
-      setDefaultPDControllerGains(useArms);
+      setDefaultPDControllerGains();
+   }
+
+   public void setDither(double amplitude, double frequency)
+   {
+      ditherAmplitude.set(amplitude);
+      ditherFrequency.set(frequency);
    }
 
    public void attachJointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
@@ -192,7 +199,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
          if (hasReachedMaximumTorqueOffset.getBooleanValue()
                && Math.abs(diagnosticsWhenHangingHelper.getTorqueOffset()) == maximumTorqueOffset.getDoubleValue())
          {
-            PrintTools.warn(this, "Reached maximum torque for at least one joint.");
+            LogTools.warn("Reached maximum torque for at least one joint.");
             hasReachedMaximumTorqueOffset.set(true);
          }
       }
@@ -201,42 +208,45 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       oneDoFJoint.setTau(tau + ditherTorque);
    }
 
-   private void createHelpers(boolean robotIsHanging, boolean useArms)
+   private void createHelpers(boolean robotIsHanging, JointTorqueOffsetEstimatorParameters parameters)
    {
-      if (useArms)
+      if (parameters.hasArmJoints())
       {
          for (RobotSide robotSide : RobotSide.values)
          {
-            makeArmJointHelper(robotSide, true, ArmJointName.SHOULDER_PITCH);
-            makeArmJointHelper(robotSide, false, ArmJointName.SHOULDER_ROLL);
-            makeArmJointHelper(robotSide, false, ArmJointName.SHOULDER_YAW);
-            makeArmJointHelper(robotSide, true, ArmJointName.ELBOW_PITCH);
+            for (ArmJointName armJointName : parameters.getArmJointsToRun())
+            {
+               boolean preserveY = armJointName.name().endsWith("PITCH");
+               makeArmJointHelper(robotSide, preserveY, armJointName);
+            }
          }
       }
 
-      SideDependentList<JointBasics> topLegJoints = new SideDependentList<JointBasics>();
-      for (RobotSide robotSide : RobotSide.values)
+      if (parameters.hasLegJoints() && parameters.hasSpineJoints())
       {
-         topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW));
+         SideDependentList<JointBasics> topLegJoints = new SideDependentList<JointBasics>();
+         for (RobotSide robotSide : RobotSide.values)
+            topLegJoints.set(robotSide, fullRobotModel.getLegJoint(robotSide, parameters.getLegJointsToRun()[0]));
+
+         for (SpineJointName spineJointName : parameters.getSpineJointsToRun())
+         {
+            boolean preserveY = spineJointName.name().endsWith("PITCH");
+            OneDoFJointBasics spineJoint = fullRobotModel.getSpineJoint(spineJointName);
+            helpers.put(spineJoint, new DiagnosticsWhenHangingHelper(spineJoint, preserveY, robotIsHanging, topLegJoints, registry));
+         }
+
       }
 
-      OneDoFJointBasics spineJoint = fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW);
-      helpers.put(spineJoint, new DiagnosticsWhenHangingHelper(spineJoint, false, robotIsHanging, topLegJoints, registry));
-
-      spineJoint = fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH);
-      helpers.put(spineJoint, new DiagnosticsWhenHangingHelper(spineJoint, true, robotIsHanging, topLegJoints, registry));
-
-      spineJoint = fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL);
-      helpers.put(spineJoint, new DiagnosticsWhenHangingHelper(spineJoint, false, robotIsHanging, topLegJoints, registry));
-
-      for (RobotSide robotSide : RobotSide.values)
+      if (parameters.hasLegJoints())
       {
-         makeLegJointHelper(robotSide, false, LegJointName.HIP_YAW);
-         makeLegJointHelper(robotSide, true, LegJointName.HIP_PITCH);
-         makeLegJointHelper(robotSide, false, LegJointName.HIP_ROLL);
-         makeLegJointHelper(robotSide, true, LegJointName.KNEE_PITCH);
-         makeLegJointHelper(robotSide, true, LegJointName.ANKLE_PITCH);
-         makeLegJointHelper(robotSide, false, LegJointName.ANKLE_ROLL);
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            for (LegJointName legJointName : parameters.getLegJointsToRun())
+            {
+               boolean preserveY = legJointName.name().endsWith("PITCH");
+               makeLegJointHelper(robotSide, preserveY, legJointName);
+            }
+         }
       }
    }
 
@@ -252,54 +262,49 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       helpers.put(legJoint, new DiagnosticsWhenHangingHelper(legJoint, preserveY, registry));
    }
 
-   private void setDefaultPDControllerGains(boolean useArms)
+   private void setDefaultPDControllerGains()
    {
-      if (useArms)
+      for (RobotSide robotSide : RobotSide.values)
       {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setProportionalGain(30.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW)).setDerivativeGain(3.0);
+         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_YAW), 30.0, 3.0);
 
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH)).setProportionalGain(50.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH)).setDerivativeGain(5.0);
+         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_PITCH), 50.0, 5.0);
 
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setProportionalGain(50.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL)).setDerivativeGain(5.0);
+         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.SHOULDER_ROLL), 50.0, 5.0);
 
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setProportionalGain(40.0);
-            pdControllers.get(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH)).setDerivativeGain(4.0);
-         }
+         setPDControllerGains(fullRobotModel.getArmJoint(robotSide, ArmJointName.ELBOW_PITCH), 40.0, 4.0);
       }
 
-      pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setProportionalGain(30.0);
-      pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW)).setDerivativeGain(2.0);
+      setPDControllerGains(fullRobotModel.getSpineJoint(SpineJointName.SPINE_YAW), 30.0, 2.0);
 
-      pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setProportionalGain(150.0);
-      pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH)).setDerivativeGain(8.0);
+      setPDControllerGains(fullRobotModel.getSpineJoint(SpineJointName.SPINE_PITCH), 150.0, 8.0);
 
-      pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setProportionalGain(150.0);
-      pdControllers.get(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL)).setDerivativeGain(8.0);
+      setPDControllerGains(fullRobotModel.getSpineJoint(SpineJointName.SPINE_ROLL), 150.0, 8.0);
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setProportionalGain(30.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW)).setDerivativeGain(2.0);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_YAW), 30.0, 2.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH)).setProportionalGain(150.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH)).setDerivativeGain(7.5);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_PITCH), 150.0, 7.5);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setProportionalGain(165);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL)).setDerivativeGain(6.0);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.HIP_ROLL), 165, 6.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setProportionalGain(80.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH)).setDerivativeGain(3.0);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), 80.0, 3.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setProportionalGain(20.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH)).setDerivativeGain(2.0);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_PITCH), 20.0, 2.0);
 
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setProportionalGain(16.0);
-         pdControllers.get(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL)).setDerivativeGain(1.0);
+         setPDControllerGains(fullRobotModel.getLegJoint(robotSide, LegJointName.ANKLE_ROLL), 16.0, 1.0);
+      }
+   }
+
+   private void setPDControllerGains(OneDoFJointBasics joint, double kp, double kd)
+   {
+      PDController pdController = pdControllers.get(joint);
+
+      if (pdController != null)
+      {
+         pdController.setProportionalGain(kp);
+         pdController.setDerivativeGain(kd);
       }
    }
 
@@ -310,7 +315,8 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
    public void exportTorqueOffsets()
    {
-      torqueOffsetPrinter.printTorqueOffsets(this);
+      if (torqueOffsetPrinter != null)
+         torqueOffsetPrinter.printTorqueOffsets(this);
    }
 
    public void transferTorqueOffsetsToOutputWriter()

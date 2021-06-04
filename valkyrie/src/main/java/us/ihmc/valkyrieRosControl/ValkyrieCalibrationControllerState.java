@@ -20,6 +20,7 @@ import us.ihmc.tools.lists.PairList;
 import us.ihmc.valkyrie.ValkyrieCalibrationParameters;
 import us.ihmc.wholeBodyController.diagnostics.CalibrationState;
 import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorController;
+import us.ihmc.wholeBodyController.diagnostics.JointTorqueOffsetEstimatorParameters;
 import us.ihmc.wholeBodyController.diagnostics.TorqueOffsetPrinter;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -66,7 +67,10 @@ public class ValkyrieCalibrationControllerState extends HighLevelControllerState
       timeForEstimatingOffset.set(highLevelControllerParameters.getCalibrationDuration());
 
       boolean useArms = ValkyrieRosControlController.VERSION.hasArms();
-      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter, useArms);
+      JointTorqueOffsetEstimatorParameters parameters = new JointTorqueOffsetEstimatorParameters();
+      if (!useArms)
+         parameters.setArmJointsToRun(null);
+      jointTorqueOffsetEstimatorController = new JointTorqueOffsetEstimatorController(calibrationParameters, highLevelControllerToolbox, torqueOffsetPrinter, parameters);
       registry.addChild(jointTorqueOffsetEstimatorController.getYoRegistry());
 
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledJoints);

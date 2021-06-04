@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.functionGenerator;
 import java.util.ArrayList;
 import java.util.Random;
 
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.robotics.math.YoSignalDerivative;
 import us.ihmc.robotics.math.YoSignalDerivative.DifferentiationMode;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
@@ -531,25 +532,10 @@ public class YoFunctionGenerator
          if (angle < 0.0)
             angle = angle + TWO_PI;
 
-         if (angle < Math.PI / 2.0)
-         {
-            double percentUp = angle / (Math.PI / 2.0);
-            value.set(offsetFiltered.getDoubleValue() + amplitudeFiltered.getDoubleValue() * percentUp);
-         }
-         else if (angle < 3.0 * Math.PI / 2.0)
-         {
-            double percentDown = (angle - Math.PI / 2.0) / (Math.PI / 2.0);
-            value.set(offsetFiltered.getDoubleValue() + amplitudeFiltered.getDoubleValue() - amplitudeFiltered.getDoubleValue() * percentDown);
-         }
-         else if (angle < TWO_PI)
-         {
-            double percentUp = (angle - 3.0 * Math.PI / 2.0) / (Math.PI / 2.0);
-            value.set(offsetFiltered.getDoubleValue() - amplitudeFiltered.getDoubleValue() + amplitudeFiltered.getDoubleValue() * percentUp);
-         }
-         else
-         {
-            value.set(offsetFiltered.getDoubleValue());
-         }
+         double percentUp = angle / (2.0 * Math.PI);
+
+         double sawtoothValue = EuclidCoreTools.interpolate(-amplitudeFiltered.getValue(), amplitudeFiltered.getValue(), percentUp);
+         value.set(offsetFiltered.getDoubleValue() + sawtoothValue);
 
          break;
       }

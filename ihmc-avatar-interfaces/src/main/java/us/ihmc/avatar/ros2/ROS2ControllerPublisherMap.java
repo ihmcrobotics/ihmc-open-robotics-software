@@ -15,10 +15,10 @@ public class ROS2ControllerPublisherMap
 
    public ROS2ControllerPublisherMap(ROS2NodeInterface ros2Node, String robotName)
    {
-      this(ros2Node, robotName, new ROS2PublisherMap(ros2Node));
+      this(robotName, new ROS2PublisherMap(ros2Node));
    }
 
-   public ROS2ControllerPublisherMap(ROS2NodeInterface ros2Node, String robotName, ROS2PublisherMap ros2PublisherMap)
+   public ROS2ControllerPublisherMap(String robotName, ROS2PublisherMap ros2PublisherMap)
    {
       this.robotName = robotName;
       this.publisherMap = ros2PublisherMap;

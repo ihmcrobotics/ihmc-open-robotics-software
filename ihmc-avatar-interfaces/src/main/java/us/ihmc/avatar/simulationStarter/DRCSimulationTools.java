@@ -75,6 +75,7 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.setUseMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
          networkProcessorParameters.setUseFiducialDetectorToolboxModule(modulesToStart.contains(Modules.FIDUCIAL_DETECTOR));
          networkProcessorParameters.setUseObjectDetectorToolboxModule(modulesToStart.contains(Modules.OBJECT_DETECTOR));
+         networkProcessorParameters.setUseDirectionalControlModule(modulesToStart.contains(Modules.DIRECTIONAL_CONTROL_TOOLBOX));
       }
       else
       {
@@ -156,6 +157,7 @@ public abstract class DRCSimulationTools
             moduleCheckBoxes.get(Modules.ROS_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.REA_MODULE).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
             moduleCheckBoxes.get(Modules.REA_UI).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
+            moduleCheckBoxes.get(Modules.DIRECTIONAL_CONTROL_TOOLBOX).setEnabled(isNetworkProcessorSelected && isNetworkProcessorEnabled);
          }
       };
 
@@ -366,7 +368,8 @@ public abstract class DRCSimulationTools
       FOOTSTEP_PLANNING_TOOLBOX,
       WHOLE_BODY_TRAJECTORY_TOOLBOX,
       FIDUCIAL_DETECTOR,
-      OBJECT_DETECTOR;
+      OBJECT_DETECTOR,
+      DIRECTIONAL_CONTROL_TOOLBOX;
 
       public String getPropertyNameForEnable()
       {

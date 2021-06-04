@@ -1,0 +1,80 @@
+#ifndef __controller_msgs__msg__WholeBodyStreamingMessage__idl__
+#define __controller_msgs__msg__WholeBodyStreamingMessage__idl__
+
+#include "controller_msgs/msg/./JointspaceStreamingMessage_.idl"
+#include "controller_msgs/msg/./SE3StreamingMessage_.idl"
+#include "controller_msgs/msg/./SO3StreamingMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * It is a lightweight version of WholeBodyTrajectoryMessage designed for streaming.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::WholeBodyStreamingMessage_")
+      struct WholeBodyStreamingMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * When receiving a trajectory message that is part of a stream, the controller will extrapolate the trajectory point in the future using a simple first order integration over the given duration.
+         * This integration allows to improve continuity of execution for streams.
+         * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
+         */
+        float stream_integration_duration;
+        /**
+         * Timestamp (in nanoseconds) when this message was created.
+         * The timestamp can be generated from the computer where this message originates.
+         */
+        long long timestamp;
+        /**
+         * Information for the left hand in task-space
+         */
+        boolean has_left_hand_streaming_message;
+        controller_msgs::msg::dds::SE3StreamingMessage left_hand_streaming_message;
+        /**
+         * Information for the right hand in task-space
+         */
+        boolean has_right_hand_streaming_message;
+        controller_msgs::msg::dds::SE3StreamingMessage right_hand_streaming_message;
+        /**
+         * Information for the left arm joints
+         */
+        boolean has_left_arm_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage left_arm_streaming_message;
+        /**
+         * Information for the right arm joints
+         */
+        boolean has_right_arm_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage right_arm_streaming_message;
+        /**
+         * Information for the chest
+         */
+        boolean has_chest_streaming_message;
+        controller_msgs::msg::dds::SO3StreamingMessage chest_streaming_message;
+        /**
+         * Information for the pelvis
+         */
+        boolean has_pelvis_streaming_message;
+        /**
+         * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
+         */
+        boolean enable_user_pelvis_control;
+        controller_msgs::msg::dds::SE3StreamingMessage pelvis_streaming_message;
+        /**
+         * Information for the neck joints
+         */
+        boolean has_neck_streaming_message;
+        controller_msgs::msg::dds::JointspaceStreamingMessage neck_streaming_message;
+      };
+    };
+  };
+};
+
+#endif

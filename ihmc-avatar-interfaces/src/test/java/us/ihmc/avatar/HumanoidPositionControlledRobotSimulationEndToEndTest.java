@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.awt.Color;
-import java.io.File;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.Collections;
@@ -141,13 +140,16 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
    }
 
-   private void createSimulation(TestInfo testInfo, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+   private void createSimulation(TestInfo testInfo,
+                                 DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                  CommonAvatarEnvironmentInterface environment)
    {
       createSimulation(testInfo, null, initialSetup, environment);
    }
 
-   private void createSimulation(TestInfo testInfo, Robot ghostRobot, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+   private void createSimulation(TestInfo testInfo,
+                                 Robot ghostRobot,
+                                 DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                  CommonAvatarEnvironmentInterface environment)
    {
       simulationTestingParameters.setUsePefectSensors(true);
@@ -188,11 +190,12 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       drcSimulationTestHelper.getSimulationConstructionSet().setFastSimulate(true, 10);
    }
 
-   public void runRawScriptTest(TestInfo testInfo, File scriptFile, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+   public void runRawScriptTest(TestInfo testInfo,
+                                InputStream scriptInputStream,
+                                DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                 CommonAvatarEnvironmentInterface environment)
          throws Exception
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       ghostRobotModel.getRobotDescription().setName("Ghost");
       KinematicsToolboxControllerTest.recursivelyModifyGraphics(ghostRobotModel.getRobotDescription().getRootJoints().get(0), ghostApperance);
@@ -203,7 +206,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
 
       createSimulation(testInfo, ghostRobot, initialSetup, environment);
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      assertTrue(scriptReader.loadScript(scriptFile), "Failed to load the script");
+      assertTrue(scriptReader.loadScript(scriptInputStream), "Failed to load the script");
       assertTrue(scriptReader.hasNext(), "Script is empty");
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
@@ -238,7 +241,9 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
       ghostRobot.update();
    }
 
-   public void runProcessedScriptTest(TestInfo testInfo, InputStream scriptInputStream, DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
+   public void runProcessedScriptTest(TestInfo testInfo,
+                                      InputStream scriptInputStream,
+                                      DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                       CommonAvatarEnvironmentInterface environment)
          throws Exception
    {
@@ -258,7 +263,8 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    }
 
    public static WholeBodyJointspaceTrajectoryMessage toWholeBodyJointspaceTrajectoryMessage(KinematicsToolboxOutputStatus ikSolution,
-                                                                                             OneDoFJointReadOnly[] allJoints, double trajectoryDuration)
+                                                                                             OneDoFJointReadOnly[] allJoints,
+                                                                                             double trajectoryDuration)
    {
       assertEquals(Arrays.hashCode(allJoints), ikSolution.getJointNameHash(), "Message incompatible with robot.");
 

@@ -24,7 +24,7 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
    private final RealtimeROS2Node ros2Node;
    private final IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
 
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
 
    private final REAStateRequestMessage clearRequestMessage = new REAStateRequestMessage();
    private final REAStateRequestMessage pauseRequestMessage = new REAStateRequestMessage();
@@ -36,7 +36,7 @@ public class HumanoidAvatarStereoREAStateUpdater implements CloseableAndDisposab
       this(robotModel, implementation, REACommunicationProperties.inputTopic);
    }
 
-   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic inputTopic)
+   public HumanoidAvatarStereoREAStateUpdater(DRCRobotModel robotModel, PubSubImplementation implementation, ROS2Topic<?> inputTopic)
    {
       String robotName = robotModel.getSimpleRobotName();
 

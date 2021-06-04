@@ -1,8 +1,8 @@
 package us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command;
 
 import controller_msgs.msg.dds.LidarScanMessage;
-import gnu.trove.list.array.TFloatArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -45,18 +45,15 @@ public class LidarScanCommand implements Command<LidarScanCommand, LidarScanMess
       sequenceId = message.getSequenceId();
       timestamp = message.getRobotTimestamp();
       lidarPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), message.getLidarPosition(), message.getLidarOrientation());
-
-      int index = 0;
-      TFloatArrayList newPointCloud = message.getScan();
       scan.clear();
 
-      while (index < newPointCloud.size())
+      LidarPointCloudCompression.decompressPointCloud(message.getScan(), message.getNumberOfPoints(), (i, x, y, z) ->
       {
          Point3D32 point = scan.add();
-         point.setX(newPointCloud.get(index++));
-         point.setY(newPointCloud.get(index++));
-         point.setZ(newPointCloud.get(index++));
-      }
+         point.setX(x);
+         point.setY(y);
+         point.setZ(z);
+      });
    }
 
    public int getNumberOfPoints()

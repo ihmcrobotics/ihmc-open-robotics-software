@@ -3,15 +3,23 @@ package us.ihmc.gdx.imgui;
 import imgui.internal.ImGui;
 
 import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImGuiPlot
 {
+   private static final AtomicInteger ID = new AtomicInteger();
+
    private final String name;
    private final int bufferSize;
    private final float[] values;
    private final int width;
    private final int height;
    private int index = 0;
+
+   public ImGuiPlot(String name)
+   {
+      this(name, 1000);
+   }
 
    public ImGuiPlot(String name, int bufferSize)
    {
@@ -20,7 +28,7 @@ public class ImGuiPlot
 
    public ImGuiPlot(String name, int bufferSize, int width, int height)
    {
-      this.name = name;
+      this.name = ImGuiTools.uniqueLabel(getClass().getSimpleName() + ID.getAndIncrement(), name);
       this.bufferSize = bufferSize;
       values = new float[bufferSize];
       this.width = width;

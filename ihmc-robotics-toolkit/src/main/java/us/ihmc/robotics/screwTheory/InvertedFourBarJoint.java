@@ -169,7 +169,7 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
    }
 
    @Override
-   public void updateFramesRecursively()
+   public void updateFrame()
    {
       fourBarFunction.updateState(true, true);
       getJointA().getFrameBeforeJoint().update();
@@ -182,11 +182,6 @@ public class InvertedFourBarJoint implements OneDoFJointBasics
       getJointD().getFrameAfterJoint().update();
 
       updateMotionSubspace();
-
-      if (getSuccessor() != null)
-      {
-         getSuccessor().updateFramesRecursively();
-      }
    }
 
    private final Twist tempTwist = new Twist();

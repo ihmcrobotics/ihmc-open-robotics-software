@@ -5,10 +5,11 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.idl.IDLSequence.Float;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
@@ -17,7 +18,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -229,7 +230,7 @@ public class REAOcTreeBuffer
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(NUMBER_OF_SAMPLES);
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
-         scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
+         scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getNumberOfPoints(), lidarMessage.getLidarPosition()));
 
          Pose3D sensorPose = new Pose3D();
          sensorPose.getPosition().set(lidarMessage.getLidarPosition());
@@ -271,23 +272,14 @@ public class REAOcTreeBuffer
    private static Scan toScan(StereoVisionPointCloudMessage stereoMessage)
    {
       PointCloud pointCloud = new PointCloud();
-      PointCloudCompression.decompressPointCloud(stereoMessage, pointCloud::add);
+      StereoPointCloudCompression.decompressPointCloud(stereoMessage, pointCloud::add);
       return new Scan(stereoMessage.getSensorPosition(), pointCloud);
    }
 
-   private static Scan toScan(Float data, Point3DReadOnly sensorPosition)
+   private static Scan toScan(IDLSequence.Byte data, int numberOfPoints, Point3DReadOnly sensorPosition)
    {
       PointCloud pointCloud = new PointCloud();
-
-      int bufferIndex = 0;
-
-      while (bufferIndex < data.size())
-      {
-         float x = data.getQuick(bufferIndex++);
-         float y = data.getQuick(bufferIndex++);
-         float z = data.getQuick(bufferIndex++);
-         pointCloud.add(x, y, z);
-      }
+      LidarPointCloudCompression.decompressPointCloud(data, numberOfPoints, (i, x, y, z) -> pointCloud.add(x, y, z));
       return new Scan(sensorPosition, pointCloud);
    }
 }

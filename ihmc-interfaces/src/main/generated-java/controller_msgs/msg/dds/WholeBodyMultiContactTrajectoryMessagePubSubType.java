@@ -73,7 +73,7 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       current_alignment += (data.getJointAngles().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPelvisPose(), current_alignment);
+      current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getRootJointPose(), current_alignment);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -92,7 +92,7 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       cdr.write_type_e(data.getJointAngles());else
           throw new RuntimeException("joint_angles field exceeds the maximum length");
 
-      geometry_msgs.msg.dds.PosePubSubType.write(data.getPelvisPose(), cdr);
+      geometry_msgs.msg.dds.PosePubSubType.write(data.getRootJointPose(), cdr);
       cdr.write_type_2(data.getJointNameHash());
 
    }
@@ -104,7 +104,7 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       data.setTrajectoryDuration(cdr.read_type_6());
       	
       cdr.read_type_e(data.getJointAngles());	
-      geometry_msgs.msg.dds.PosePubSubType.read(data.getPelvisPose(), cdr);	
+      geometry_msgs.msg.dds.PosePubSubType.read(data.getRootJointPose(), cdr);	
       data.setJointNameHash(cdr.read_type_2());
       	
 
@@ -116,7 +116,7 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_6("trajectory_duration", data.getTrajectoryDuration());
       ser.write_type_e("joint_angles", data.getJointAngles());
-      ser.write_type_a("pelvis_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPelvisPose());
+      ser.write_type_a("root_joint_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRootJointPose());
 
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
    }
@@ -127,7 +127,7 @@ public class WholeBodyMultiContactTrajectoryMessagePubSubType implements us.ihmc
       data.setSequenceId(ser.read_type_4("sequence_id"));
       data.setTrajectoryDuration(ser.read_type_6("trajectory_duration"));
       ser.read_type_e("joint_angles", data.getJointAngles());
-      ser.read_type_a("pelvis_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPelvisPose());
+      ser.read_type_a("root_joint_pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getRootJointPose());
 
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
    }
