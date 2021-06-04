@@ -160,9 +160,11 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       }
       else if (!messagerHelper.isConnected())
       {
+         ImGui.pushItemWidth(150.0f);
          int flags = ImGuiInputTextFlags.None;
          flags += ImGuiInputTextFlags.CallbackResize;
          ImGui.inputText(ImGuiTools.uniqueIDOnly(getClass(), "messagerHost"), behaviorModuleHost, flags);
+         ImGui.popItemWidth();
          ImGui.sameLine();
          if (ImGui.button("Connect messager")) // TODO: One button should connect both
          {
