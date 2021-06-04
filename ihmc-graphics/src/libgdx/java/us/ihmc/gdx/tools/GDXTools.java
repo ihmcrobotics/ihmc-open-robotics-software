@@ -10,8 +10,8 @@ import org.apache.logging.log4j.Level;
 import org.lwjgl.openvr.HmdMatrix34;
 import org.lwjgl.openvr.HmdMatrix44;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.transform.AffineTransform;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
@@ -276,6 +276,12 @@ public class GDXTools
    public static void toGDX(Point3DReadOnly euclidPoint, Matrix4 gdxAffine)
    {
       gdxAffine.setTranslation(euclidPoint.getX32(), euclidPoint.getY32(), euclidPoint.getZ32());
+   }
+
+   public static void toGDX(Pose3DReadOnly euclidPose, RigidBodyTransform tempTransform, Matrix4 gdxAffine)
+   {
+      euclidPose.get(tempTransform);
+      toGDX(tempTransform, gdxAffine);
    }
 
    public static void toGDX(javafx.scene.paint.Color javaFXColor, Color gdxColor)

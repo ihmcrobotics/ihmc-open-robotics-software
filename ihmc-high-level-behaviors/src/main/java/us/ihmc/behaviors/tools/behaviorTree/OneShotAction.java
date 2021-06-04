@@ -7,7 +7,7 @@ import static us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus.*;
  * No feedback. Task always considered successful.
  * Resettable to run the task again.
  */
-public class OneShotAction implements BehaviorTreeAction
+public class OneShotAction extends BehaviorTreeAction
 {
    private final Runnable action;
    private boolean hasRunOnce = false;
@@ -18,7 +18,7 @@ public class OneShotAction implements BehaviorTreeAction
    }
 
    @Override
-   public BehaviorTreeNodeStatus tick()
+   public BehaviorTreeNodeStatus tickInternal()
    {
       if (!hasRunOnce)
       {

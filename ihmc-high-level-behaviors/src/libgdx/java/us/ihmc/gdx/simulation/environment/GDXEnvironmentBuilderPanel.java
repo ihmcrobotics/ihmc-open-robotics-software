@@ -9,32 +9,23 @@ import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
 import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImString;
-import us.ihmc.commons.nio.BasicPathVisitor;
-import us.ihmc.commons.nio.PathTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.gdx.vr.GDXVRDevice;
 import us.ihmc.gdx.vr.GDXVRManager;
 import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.PlanarRegionFileTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.nio.file.FileVisitResult;
-import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
@@ -50,10 +41,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
 
-   private final HashMap<String, GDXPlanarRegionsGraphic> planarRegionGraphics = new HashMap<>();
-   private final ArrayList<Path> pathPlanningDataSetPaths = new ArrayList<>();
-   private final ArrayList<Path> reaDataSetPaths = new ArrayList<>();
-   private boolean loadedDatasetsOnce = false;
 //   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -160,7 +147,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       }
       else if (placeNewObject = ImGui.button("Place Door Only"))
       {
-         modelBeingPlaced = new GDXDoorOnlyObject();
+         modelBeingPlaced = new GDXPushHandleRightDoorObject();
       }
       else if (placeNewObject = ImGui.button("Place Floor"))
       {
@@ -180,88 +167,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
       ImGui.end();
 
-
-      ImGui.begin(ImGuiTools.uniqueLabel(this, "Planar Region Data Sets"));
-
-      /**
-       * Folders:
-       * ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets/20001201_205030_SingleSquare
-       *
-       */
-
-      boolean reindexClicked = ImGui.button(ImGuiTools.uniqueLabel(this, "Reindex datasets"));
-      if (!loadedDatasetsOnce || reindexClicked)
-      {
-         loadedDatasetsOnce = true;
-         Path openRoboticsSoftwarePath = PathTools.findDirectoryInline("ihmc-open-robotics-software");
-         pathPlanningDataSetPaths.clear();
-         Path pathPlanningDataSetsPath = openRoboticsSoftwarePath.resolve("ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets");
-         PathTools.walkFlat(pathPlanningDataSetsPath, (path, pathType) ->
-         {
-            if (pathType == BasicPathVisitor.PathType.DIRECTORY)
-            {
-               pathPlanningDataSetPaths.add(path.resolve("PlanarRegions"));
-            }
-            return FileVisitResult.CONTINUE;
-         });
-         reaDataSetPaths.clear();
-         Path reaDataSetsPath = openRoboticsSoftwarePath.resolve("robot-environment-awareness/Data/PlanarRegion");
-         PathTools.walkFlat(reaDataSetsPath, (path, pathType) ->
-         {
-            if (pathType == BasicPathVisitor.PathType.DIRECTORY)
-            {
-               reaDataSetPaths.add(path);
-            }
-            return FileVisitResult.CONTINUE;
-         });
-      }
-
-      ImGui.text("Path planning data sets:");
-      renderDataSetPathWidgets(pathPlanningDataSetPaths);
-      ImGui.text("REA data sets:");
-      renderDataSetPathWidgets(reaDataSetPaths);
-
-      //      ImGui.list
-
-      ImGui.end();
-
 //      pose3DWidget.render();
-
-      for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
-      {
-         if (planarRegionsGraphic != null)
-         {
-            planarRegionsGraphic.render();
-         }
-      }
-   }
-
-   private void renderDataSetPathWidgets(ArrayList<Path> dataSetPaths)
-   {
-      for (Path dataSetPath : dataSetPaths)
-      {
-         String dataSetName = dataSetPath.getFileName().toString();
-         if (dataSetName.equals("PlanarRegions"))
-         {
-            dataSetName = dataSetPath.getParent().getFileName().toString();
-         }
-         GDXPlanarRegionsGraphic graphic = planarRegionGraphics.get(dataSetName);
-         if (ImGui.checkbox(ImGuiTools.uniqueLabel(this, dataSetName), graphic != null))
-         {
-            if (graphic == null)
-            {
-               PlanarRegionsList planarRegionsList = PlanarRegionFileTools.importPlanarRegionData(dataSetPath.toFile());
-               GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
-               planarRegionsGraphic.generateMeshesAsync(planarRegionsList);
-               planarRegionGraphics.put(dataSetName, planarRegionsGraphic);
-            }
-            else
-            {
-               graphic.destroy();
-               planarRegionGraphics.put(dataSetName, null);
-            }
-         }
-      }
    }
 
    public String getWindowName()
@@ -283,14 +189,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
-      {
-         if (planarRegionsGraphic != null)
-         {
-            planarRegionsGraphic.getRenderables(renderables, pool);
-         }
-      }
-
       for (GDXEnvironmentObject placedModel : modelInput.getEnvironmentObjects())
       {
          placedModel.getRealisticModelInstance().getRenderables(renderables, pool);

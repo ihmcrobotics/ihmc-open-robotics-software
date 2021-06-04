@@ -2,6 +2,8 @@ package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -24,7 +26,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.create;
 
-public class TraverseStairsBehavior implements BehaviorInterface
+public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
    private static final int UPDATE_RATE_MILLIS = 100;
@@ -107,6 +109,12 @@ public class TraverseStairsBehavior implements BehaviorInterface
    }
 
    @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
+   }
+
+   @Override
    public void setEnabled(boolean enable)
    {
       LogTools.info((enable ? "Enable" : "Disable") + " requested");
@@ -176,5 +184,11 @@ public class TraverseStairsBehavior implements BehaviorInterface
          e.printStackTrace();
          behaviorHasCrashed.set(true);
       }
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
    }
 }

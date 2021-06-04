@@ -1,31 +1,63 @@
 package us.ihmc.gdx.ui;
 
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
+import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.behaviors.tools.ThrottledRobotStateCallback;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlannerOutput;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
+import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
+import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
-public class ImGuiGDXDirectControlPanel
+import java.util.ArrayList;
+import java.util.UUID;
+
+public class ImGuiGDXTeleoperationPanel implements RenderableProvider
 {
-   private static final String WINDOW_NAME = "Direct Control";
+   private static final String WINDOW_NAME = "Teleoperation";
    private static final double MIN_PELVIS_HEIGHT = 0.52;
    private static final double MAX_PELVIS_HEIGHT = 0.90;
    private static final double PELVIS_HEIGHT_RANGE = MAX_PELVIS_HEIGHT - MIN_PELVIS_HEIGHT;
@@ -35,22 +67,30 @@ public class ImGuiGDXDirectControlPanel
    private static final double SLIDER_RANGE = 100.0;
    private static final double ROBOT_DATA_EXPIRATION = 1.0;
    private final CommunicationHelper communicationHelper;
-   private final double neckJointJointLimitLower;
-   private final double neckJointRange;
-
    private final ThrottledRobotStateCallback throttledRobotStateCallback;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
    private final RemoteSyncedRobotModel syncedRobotForHeightSlider;
    private final RemoteSyncedRobotModel syncedRobotForChestSlider;
-
+   private final GDXFootstepPlanGraphic footstepPlanGraphic;
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final float[] stanceHeightSliderValue = new float[1];
    private final float[] leanForwardSliderValue = new float[1];
    private final float[] neckPitchSliderValue = new float[1];
-
    private final ImInt pumpPSI = new ImInt(1);
    private final String[] psiValues = new String[] {"1500", "2300", "2500", "2800"};
+   private final OneDoFJointBasics neckJoint;
+   private double neckJointJointLimitLower;
+   private double neckJointRange;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final FootstepPlanningModule footstepPlanner;
+   private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
+   private final ImBoolean showFootstepPlanningParametersWindow = new ImBoolean(false);
+   private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation");
+   private FootstepPlannerOutput footstepPlannerOutput;
+   private final RemoteSyncedRobotModel syncedRobotForFootstepPlanning;
+   private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
 
-   public ImGuiGDXDirectControlPanel(CommunicationHelper communicationHelper)
+   public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
       this.communicationHelper = communicationHelper;
       String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
@@ -68,10 +108,13 @@ public class ImGuiGDXDirectControlPanel
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
 
-      OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
-      double neckJointLimitUpper = neckJoint.getJointLimitUpper();
-      neckJointJointLimitLower = neckJoint.getJointLimitLower();
-      neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+      neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
+      if (neckJoint != null)
+      {
+         double neckJointLimitUpper = neckJoint.getJointLimitUpper();
+         neckJointJointLimitLower = neckJoint.getJointLimitLower();
+         neckJointRange = neckJointLimitUpper - neckJointJointLimitLower;
+      }
 
       throttledRobotStateCallback = new ThrottledRobotStateCallback(ros2Node, robotModel, 5.0, syncedRobot ->
       {
@@ -90,12 +133,111 @@ public class ImGuiGDXDirectControlPanel
          double flippedChestSliderValue = 100.0 - newChestSliderValue;
          leanForwardSliderValue[0] = (float) flippedChestSliderValue;
 
-         double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
-         double angleInRange = neckAngle - neckJointJointLimitLower;
-         double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
-         double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
-         neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
+         if (neckJoint != null)
+         {
+            double neckAngle = syncedRobot.getFullRobotModel().getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH).getQ();
+            double angleInRange = neckAngle - neckJointJointLimitLower;
+            double newNeckSliderValue = SLIDER_RANGE * angleInRange / neckJointRange;
+            double flippedNeckSliderValue = 100.0 - newNeckSliderValue;
+            neckPitchSliderValue[0] = (float) flippedNeckSliderValue;
+         }
       });
+
+      footstepPlanGraphic = new GDXFootstepPlanGraphic(robotModel.getContactPointParameters().getControllerFootGroundContactPoints());
+      communicationHelper.subscribeToControllerViaCallback(FootstepDataListMessage.class, footsteps ->
+      {
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
+      });
+      footstepPlannerParameters = communicationHelper.getRobotModel().getFootstepPlannerParameters();
+      footstepPlanner = communicationHelper.getOrCreateFootstepPlanner();
+      syncedRobotForFootstepPlanning = communicationHelper.newSyncedRobot();
+      startFootPoses.put(RobotSide.LEFT, new FramePose3D());
+      startFootPoses.put(RobotSide.RIGHT, new FramePose3D());
+   }
+
+   public void create(GDXImGuiBasedUI baseUI)
+   {
+      footstepGoal.create(baseUI, goal -> queueFootstepPlanning(), Color.YELLOW);
+      baseUI.addImGui3DViewInputProcessor(footstepGoal::processImGui3DViewInput);
+      footstepPlanningParametersTuner.create(footstepPlannerParameters,
+                                             FootstepPlannerParameterKeys.keys,
+                                             this::queueFootstepPlanning);
+   }
+
+   private void queueFootstepPlanning()
+   {
+      Pose3DReadOnly goalPose = footstepGoal.getGoalPose();
+      syncedRobotForFootstepPlanning.update();
+      for (RobotSide side : RobotSide.values)
+      {
+         startFootPoses.get(side).set(syncedRobotForFootstepPlanning.getFramePoseReadOnly(referenceFrames -> referenceFrames.getSoleFrame(side)));
+      }
+
+      RobotSide stanceSide;
+      if (startFootPoses.get(RobotSide.LEFT ).getPosition().distance(goalPose.getPosition())
+       <= startFootPoses.get(RobotSide.RIGHT).getPosition().distance(goalPose.getPosition()))
+      {
+         stanceSide = RobotSide.LEFT;
+      }
+      else
+      {
+         stanceSide = RobotSide.RIGHT;
+      }
+
+      FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
+      footstepPlannerRequest.setPlanBodyPath(false);
+      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
+      footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
+      // TODO: Set start footholds!!
+      footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPose);
+//      footstepPlannerRequest.setPlanarRegionsList(...);
+      footstepPlannerRequest.setAssumeFlatGround(true); // FIXME Assuming flat ground
+//      footstepPlannerRequest.setTimeout(lookAndStepParameters.getFootstepPlannerTimeout());
+//      footstepPlannerRequest.setSwingPlannerType(swingPlannerType);
+//      footstepPlannerRequest.setSnapGoalSteps(true);
+
+      footstepPlanner.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      LogTools.info("Stance side: {}", stanceSide.name());
+      LogTools.info("Planning footsteps...");
+      FootstepPlannerOutput footstepPlannerOutput = footstepPlanner.handleRequest(footstepPlannerRequest);
+      LogTools.info("Footstep planner completed with {}, {} step(s)",
+                        footstepPlannerOutput.getFootstepPlanningResult(),
+                        footstepPlannerOutput.getFootstepPlan().getNumberOfSteps());
+
+      FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanner);
+      footstepPlannerLogger.logSession();
+      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
+
+      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
+      {
+         FootstepPlannerRejectionReasonReport rejectionReasonReport = new FootstepPlannerRejectionReasonReport(footstepPlanner);
+         rejectionReasonReport.update();
+         ArrayList<Pair<Integer, Double>> rejectionReasonsMessage = new ArrayList<>();
+         for (BipedalFootstepPlannerNodeRejectionReason reason : rejectionReasonReport.getSortedReasons())
+         {
+            double rejectionPercentage = rejectionReasonReport.getRejectionReasonPercentage(reason);
+            LogTools.info("Rejection {}%: {}", FormattingTools.getFormattedToSignificantFigures(rejectionPercentage, 3), reason);
+            rejectionReasonsMessage.add(MutablePair.of(reason.ordinal(), MathTools.roundToSignificantFigures(rejectionPercentage, 3)));
+         }
+         LogTools.info("Footstep planning failure...");
+      }
+      else
+      {
+         footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+         this.footstepPlannerOutput = footstepPlannerOutput;
+      }
+   }
+
+   private void walk()
+   {
+      double swingDuration = 2.0;
+      double transferDuration = 2.0;
+      FootstepDataListMessage footstepDataListMessage
+            = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(), swingDuration, transferDuration);
+      footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
+      footstepDataListMessage.getQueueingProperties().setMessageId(UUID.randomUUID().getLeastSignificantBits());
+      communicationHelper.publishToController(footstepDataListMessage);
+      footstepPlannerOutput = null;
    }
 
    public void render()
@@ -207,7 +349,7 @@ public class ImGuiGDXDirectControlPanel
             communicationHelper.publishToController(message);
          }
       }
-      if (imGuiSlider("Neck Pitch", neckPitchSliderValue))
+      if (neckJoint != null && imGuiSlider("Neck Pitch", neckPitchSliderValue))
       {
          double percent = neckPitchSliderValue[0] / 100.0;
          percent = 1.0 - percent;
@@ -216,8 +358,27 @@ public class ImGuiGDXDirectControlPanel
          LogTools.info("Commanding neck trajectory: slider: {} angle: {}", neckPitchSliderValue[0], jointAngle);
          communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
       }
+      ImGui.text("Footstep plan:");
+      ImGui.sameLine();
+      footstepGoal.renderPlaceGoalButton();
+      if (footstepPlannerOutput != null)
+      {
+         ImGui.sameLine();
+         if (ImGui.button(labels.get("Walk")))
+         {
+            walk();
+         }
+      }
+      ImGui.checkbox("Tune footstep planning parameters", showFootstepPlanningParametersWindow);
 
       ImGui.end();
+
+      if (showFootstepPlanningParametersWindow.get())
+      {
+         footstepPlanningParametersTuner.render();
+      }
+
+      footstepPlanGraphic.render();
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -228,6 +389,13 @@ public class ImGuiGDXDirectControlPanel
       return currentValue != previousValue;
    }
 
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+      footstepPlanGraphic.getRenderables(renderables, pool);
+      footstepGoal.getRenderables(renderables, pool);
+   }
+
    private void sendPSIRequest()
    {
       robotLowLevelMessenger.setHydraulicPumpPSI(Integer.parseInt(psiValues[pumpPSI.get()]));
@@ -235,6 +403,7 @@ public class ImGuiGDXDirectControlPanel
 
    public void destroy()
    {
+      footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
    }
 

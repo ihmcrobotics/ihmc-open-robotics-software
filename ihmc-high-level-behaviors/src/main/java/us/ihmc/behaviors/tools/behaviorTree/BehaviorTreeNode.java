@@ -3,29 +3,58 @@ package us.ihmc.behaviors.tools.behaviorTree;
 /**
  * The core interface of a Behavior Tree: the node that can be ticked.
  */
-public interface BehaviorTreeNode
+public abstract class BehaviorTreeNode implements BehaviorTreeNodeBasics
 {
-   default double evaluateUtility()
+   private BehaviorTreeNodeStatus previousStatus = null;
+   private long lastTickMillis = -1;
+   private String name = getClass().getSimpleName();
+   private Class<?> type = BehaviorTreeNode.class;
+
+   @Override
+   public BehaviorTreeNodeStatus getPreviousStatus()
    {
-      return 1.0;
+      return previousStatus;
    }
 
-   /**
-    * A method that can be called on every node in the tree every time the root gets ticked
-    * in order for parallel nodes to figure out when they are no longer being selected.
-    */
-   default void clock()
+   @Override
+   public void setPreviousStatus(BehaviorTreeNodeStatus previousStatus)
    {
-
+      this.previousStatus = previousStatus;
    }
 
-   BehaviorTreeNodeStatus tick();
-
-   public static void checkStatusInNotNull(BehaviorTreeNodeStatus status)
+   @Override
+   public long getLastTickMillis()
    {
-      if (status == null)
-      {
-         throw new RuntimeException("Behavior tree node status must not be null.");
-      }
+      return lastTickMillis;
+   }
+
+   @Override
+   public String getName()
+   {
+      return name;
+   }
+
+   @Override
+   public void setName(String name)
+   {
+      this.name = name;
+   }
+
+   @Override
+   public void setLastTickMillis(long lastTickMillis)
+   {
+      this.lastTickMillis = lastTickMillis;
+   }
+
+   @Override
+   public void setType(Class<?> type)
+   {
+      this.type = type;
+   }
+
+   @Override
+   public Class<?> getType()
+   {
+      return type;
    }
 }

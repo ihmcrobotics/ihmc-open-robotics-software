@@ -16,6 +16,7 @@ import javafx.scene.text.Text;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOld;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.behaviors.javafx.editors.WalkingGoalPlacementEditor;
@@ -25,7 +26,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
-import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
@@ -41,7 +41,7 @@ import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 
 public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(BuildingExplorationBehaviorOld.DEFINITION,
                                                                                               BuildingExplorationBehaviorUI::new);
 
    @FXML private ComboBox<BuildingExplorationStateName> requestedState;
@@ -206,14 +206,14 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
    public void requestStart()
    {
       LogTools.info("Requesting start");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, new Object());
    }
 
    @FXML
    public void requestStop()
    {
       LogTools.info("Requesting stop");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, new Object());
    }
 
    @FXML
@@ -234,7 +234,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
    public void confirmDoor()
    {
       LogTools.info("Confirm door pressed");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, new Object());
    }
 
    @FXML
