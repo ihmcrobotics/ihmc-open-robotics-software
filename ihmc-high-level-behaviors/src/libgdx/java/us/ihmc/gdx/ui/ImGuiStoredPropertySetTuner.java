@@ -6,7 +6,6 @@ import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
-import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.tools.property.*;
 
 import java.nio.file.FileVisitResult;
@@ -29,7 +28,7 @@ public class ImGuiStoredPropertySetTuner
 
    public ImGuiStoredPropertySetTuner(String name)
    {
-      this.windowName = ImGuiTools.uniqueLabel(name);
+      this.windowName = name;
    }
 
    public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, Runnable onParametersUpdatedCallback)
