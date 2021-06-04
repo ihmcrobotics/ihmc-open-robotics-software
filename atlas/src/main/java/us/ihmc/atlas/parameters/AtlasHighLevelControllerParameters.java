@@ -44,6 +44,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
       switch (state)
       {
          case WALKING:
+         case PUSH_RECOVERY:
             return getDesiredJointBehaviorForWalking();
          case DO_NOTHING_BEHAVIOR:
          case FALLING_STATE:
@@ -56,7 +57,7 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
    @Override
    public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
    {
-      if (state == HighLevelControllerName.WALKING)
+      if ((state == HighLevelControllerName.WALKING) || (state == HighLevelControllerName.PUSH_RECOVERY))
          return getDesiredJointBehaviorForWalkingUnderLoad();
       else
          return null;
