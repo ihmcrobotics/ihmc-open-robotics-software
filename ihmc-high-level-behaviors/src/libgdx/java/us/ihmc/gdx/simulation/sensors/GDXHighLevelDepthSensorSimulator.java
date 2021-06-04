@@ -111,6 +111,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                                            String ros1ColorCameraInfoTopic,
                                            ROS2NodeInterface ros2Node,
                                            ROS2Topic<?> ros2Topic,
+                                           ROS2Topic<?> ros2VideoTopic,
                                            ReferenceFrame sensorFrame,
                                            LongSupplier timestampSupplier,
                                            double verticalFOV,
@@ -155,7 +156,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
          ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(4 * imageWidth * imageHeight);
       }
-      if (ros2Node != null)
+      if (ros2Node != null && ros2Topic != null)
       {
          ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
          ros2IsLidarScan = ros2Topic.getType().equals(LidarScanMessage.class);
@@ -163,6 +164,10 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
             ros2ColorsToPublish = new int[imageWidth * imageHeight];
          LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
          publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
+      }
+      if (ros2Node != null && ros2VideoTopic != null)
+      {
+
       }
 
       throttleTimer.reset();

@@ -69,14 +69,15 @@ public class GDXLowLevelImageSensorSimulator
       camera.far = maxRange * 2.0f; // should render camera farther
       viewport = new ScreenViewport(camera);
 
-      DefaultShader.Config config = new DefaultShader.Config();
-      config.defaultCullFace = GL20.GL_FRONT;
-      DefaultShaderProvider defaultShaderProvider = new DefaultShaderProvider(config);
-      modelBatch = new ModelBatch(defaultShaderProvider);
-//      modelBatch = new ModelBatch();
+//      DefaultShader.Config config = new DefaultShader.Config();
+//      config.defaultCullFace = GL20.GL_BACK;
+//      DefaultShaderProvider defaultShaderProvider = new DefaultShaderProvider(config);
+//      modelBatch = new ModelBatch(defaultShaderProvider);
+      modelBatch = new ModelBatch();
 
       SensorFrameBufferBuilder frameBufferBuilder = new SensorFrameBufferBuilder(imageWidth, imageHeight);
       frameBufferBuilder.addBasicColorTextureAttachment(Pixmap.Format.RGBA8888);
+      frameBufferBuilder.addDepthTextureAttachment(GL30.GL_DEPTH_COMPONENT32F, GL30.GL_FLOAT);
       frameBuffer = frameBufferBuilder.build();
 
       rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
