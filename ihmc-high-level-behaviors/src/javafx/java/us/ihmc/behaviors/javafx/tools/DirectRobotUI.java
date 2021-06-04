@@ -208,7 +208,7 @@ public class DirectRobotUI
                                                            ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
                                                            ROS2Tools.getControllerInputTopic(robotName));
 
-      supportRegionsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+      supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                              BipedalSupportPlanarRegionParametersMessage.class,
                                                                              BipedalSupportPlanarRegionPublisher.getTopic(robotName));
 
