@@ -14,6 +14,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.tools.TimerSnapshotWithExpiration;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -79,10 +80,12 @@ public class LookAndStepFootstepPlanningTask
 
       private final TypedInput<LookAndStepBodyPathLocalizationResult> localizationResultInput = new TypedInput<>();
       private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
+      private final TypedInput<PlanarRegionsList> lidarREAPlanarRegionsInput = new TypedInput<>();
       private final TypedInput<CapturabilityBasedStatus> capturabilityBasedStatusInput = new TypedInput<>();
       private final TypedInput<RobotConfigurationData> robotConfigurationDataInput = new TypedInput<>();
       private final Input footstepCompletedInput = new Input();
       private final Timer planarRegionsExpirationTimer = new Timer();
+      private final Timer lidarREAPlanarRegionsExpirationTimer = new Timer();
       private final Timer capturabilityBasedStatusExpirationTimer = new Timer();
       private final Timer robotConfigurationDataExpirationTimer = new Timer();
       private BehaviorTaskSuppressor suppressor;
@@ -164,6 +167,16 @@ public class LookAndStepFootstepPlanningTask
          planarRegionsInput.set(planarRegionsList);
          planarRegionsExpirationTimer.reset();
       }
+      public void acceptLidarREARegions(PlanarRegionsListMessage lidarREAPlanarRegionsListMessage)
+      {
+         acceptLidarREARegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(lidarREAPlanarRegionsListMessage));
+      }
+
+      public void acceptLidarREARegions(PlanarRegionsList lidarREAPlanarRegionsList)
+      {
+         lidarREAPlanarRegionsInput.set(lidarREAPlanarRegionsList);
+         lidarREAPlanarRegionsExpirationTimer.reset();
+      }
 
       public void acceptCapturabilityBasedStatus(CapturabilityBasedStatus capturabilityBasedStatus)
       {
@@ -193,7 +206,9 @@ public class LookAndStepFootstepPlanningTask
       private void evaluateAndRun()
       {
          planarRegions = planarRegionsInput.getLatest();
+         lidarREAPlanarRegions = lidarREAPlanarRegionsInput.getLatest();
          planarRegionReceptionTimerSnapshot = planarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
+         lidarREAPlanarRegionReceptionTimerSnapshot = lidarREAPlanarRegionsExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
          capturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
          capturabilityBasedStatusReceptionTimerSnapshot
                = capturabilityBasedStatusExpirationTimer.createSnapshot(lookAndStepParameters.getPlanarRegionsExpiration());
@@ -226,11 +241,13 @@ public class LookAndStepFootstepPlanningTask
    // snapshot data
    protected LookAndStepBodyPathLocalizationResult localizationResult;
    protected PlanarRegionsList planarRegions;
+   protected PlanarRegionsList lidarREAPlanarRegions;
    protected BipedalSupportPlanarRegionCalculator bipedalSupportPlanarRegionCalculator;
    protected ArrayDeque<PlanarRegionsList> planarRegionsHistory = new ArrayDeque<>();
    protected CapturabilityBasedStatus capturabilityBasedStatus;
    protected RobotConfigurationData robotConfigurationData;
    protected TimerSnapshotWithExpiration planarRegionReceptionTimerSnapshot;
+   protected TimerSnapshotWithExpiration lidarREAPlanarRegionReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration capturabilityBasedStatusReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration robotConfigurationDataReceptionTimerSnapshot;
    protected TimerSnapshotWithExpiration planningFailureTimerSnapshot;
@@ -291,6 +308,23 @@ public class LookAndStepFootstepPlanningTask
       statusLogger.info("Found next sub goal: {}", subGoalPoseBetweenFeet);
       // TODO: Calculate orientation based on a trajectory
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
+
+      // calculate impassibility
+      if (lidarREAPlanarRegionReceptionTimerSnapshot.isRunning())
+      {
+         Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
+         if (PlannerTools.doesPathContainBodyCollisions(rootPose,
+                                                        bodyPathPlan,
+                                                        lidarREAPlanarRegions,
+                                                        footstepPlannerParameters,
+                                                        lookAndStepParameters.getHorizonFromDebrisToStop()))
+         {
+            uiPublisher.publishToUI(ImpassibilityDetected, true);
+            doFailureAction("Impassibility detected. Aborting task...");
+            return;
+         }
+      }
+      uiPublisher.publishToUI(ImpassibilityDetected, false);
 
       // update last stepped poses to plan from; initialize to current poses
       ArrayList<MinimalFootstep> startFootPosesForUI = new ArrayList<>();
@@ -375,12 +409,7 @@ public class LookAndStepFootstepPlanningTask
          }
          uiPublisher.publishToUI(FootstepPlannerRejectionReasons, rejectionReasonsMessage);
 
-         if (!planarRegionsHistory.isEmpty())
-            planarRegionsHistory.removeLast();
-
-         statusLogger.info("Footstep planning failure. Aborting task...");
-         plannerFailedLastTime.set(true);
-         planningFailedTimer.reset();
+         doFailureAction("Footstep planning failure. Aborting task...");
       }
       else
       {
@@ -406,6 +435,16 @@ public class LookAndStepFootstepPlanningTask
             autonomousOutput.accept(footstepPlanEtc);
          }
       }
+   }
+
+   private void doFailureAction(String message)
+   {
+      if (!planarRegionsHistory.isEmpty())
+         planarRegionsHistory.removeLast();
+
+      statusLogger.info(message);
+      plannerFailedLastTime.set(true);
+      planningFailedTimer.reset();
    }
 
    private class MinimumFootstepChecker implements CustomFootstepChecker

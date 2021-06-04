@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StoredPropertySetMessage;
 import imgui.flag.ImGuiInputTextFlags;
 import imgui.internal.ImGui;
@@ -11,12 +12,17 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
@@ -30,9 +36,11 @@ import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.Goal;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
@@ -50,6 +58,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
    private long numberOfSteppingRegionsReceived = 0;
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 30);
+   private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 30);
+   private final AtomicReference<Boolean> impassibilityDetected;
    private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
@@ -102,6 +112,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       behaviorHelper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       behaviorHelper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", behaviorHelper, 1000, 250, 30);
+      impassibilityDetected = behaviorHelper.subscribeViaReference(ImpassibilityDetected, false);
    }
 
    @Override
@@ -191,6 +202,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       }
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      impassibilityDetectedPlot.render(impassibilityDetected.get() ? 1.0f : 0.0f);
       footholdVolumePlot.render();
 
       ImGui.checkbox("Show graphics", showGraphics);
