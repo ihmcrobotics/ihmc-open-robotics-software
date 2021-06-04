@@ -54,6 +54,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
 
    private final ReferenceFrame centerOfMassFrame;
    private final ReferenceFrame lidarSensorFrame;
+   private final ReferenceFrame headCameraFrame;
    private ReferenceFrame steppingCameraFrame;
    private ReferenceFrame objectDetectionCameraFrame;
 
@@ -114,6 +115,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          lidarSensorFrame = null;
       }
+      headCameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
 
       if (robotJointNames.getSpineJointNames() != null)
       {
@@ -415,6 +417,11 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
    public ReferenceFrame getLidarSensorFrame()
    {
       return lidarSensorFrame;
+   }
+
+   public ReferenceFrame getHeadCameraFrame()
+   {
+      return headCameraFrame;
    }
 
    public ReferenceFrame getSteppingCameraFrame()
