@@ -152,6 +152,13 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       return messagerHelper.subscribeViaReference(topic, initialValue);
    }
 
+   public <T> AtomicReference<T> subscribeViaReference(Function<String, ROS2Topic<T>> topicFunction, T initialValue)
+   {
+      AtomicReference<T> reference = new AtomicReference<>(initialValue);
+      ros2Helper.subscribeViaCallback(topicFunction, reference::set);
+      return reference;
+   }
+
    @Override
    public Notification subscribeTypelessViaNotification(Topic<Object> topic)
    {
