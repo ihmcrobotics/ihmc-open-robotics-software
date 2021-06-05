@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -80,6 +81,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    private boolean ros2IsLidarScan;
    private IHMCROS2Publisher<?> publisher;
    private IHMCROS2Publisher<VideoPacket> ros2VideoPublisher;
+   private ByteBuffer flippedColorByteBuffer;
    private final JPEGCompressor jpegCompressor = new JPEGCompressor();
    private RecyclingArrayList<Point3D> ros2PointsToPublish;
    private int[] ros2ColorsToPublish;
@@ -177,6 +179,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       if (ros2Node != null && ros2VideoTopic != null)
       {
          ros2VideoPublisher = ROS2Tools.createPublisher(ros2Node, ros2VideoTopic);
+         flippedColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       }
 
       throttleTimer.reset();
@@ -310,7 +313,18 @@ catch (IndexOutOfBoundsException e)
       {
          ByteBuffer colorRGB8Buffer = depthSensorSimulator.getRawColorByteBuffer();
          colorRGB8Buffer.rewind();
-         byte[] data = jpegCompressor.convertRGB8ToJPEGData(imageWidth, imageHeight, getLowLevelSimulator().getRawColorByteBuffer());
+         int capacity = colorRGB8Buffer.capacity();
+         for (int i = 0; i < capacity; i += 4)
+         {
+            // flipping RGBA to BGRA here
+            flippedColorByteBuffer.put(capacity - i - 4 + 0, colorRGB8Buffer.get(i + 2));
+            flippedColorByteBuffer.put(capacity - i - 4 + 1, colorRGB8Buffer.get(i + 1));
+            flippedColorByteBuffer.put(capacity - i - 4 + 2, colorRGB8Buffer.get(i + 0));
+            flippedColorByteBuffer.put(capacity - i - 4 + 3, colorRGB8Buffer.get(i + 3));
+         }
+         flippedColorByteBuffer.rewind();
+
+         byte[] data = jpegCompressor.convertRGB8ToJPEGData(imageWidth, imageHeight, flippedColorByteBuffer);
 
          colorROS2Executor.execute(() ->
          {
