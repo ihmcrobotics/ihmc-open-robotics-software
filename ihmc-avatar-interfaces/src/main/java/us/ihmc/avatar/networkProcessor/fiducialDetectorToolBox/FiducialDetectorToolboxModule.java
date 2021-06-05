@@ -6,7 +6,6 @@ import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -43,11 +42,11 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, s ->
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.VIDEO, videoPacket ->
       {
          if (controller != null)
          {
-            controller.receivedPacket(s.takeNextData());
+            controller.receivedPacket(videoPacket.takeNextData());
             receivedInput.set(true);
          }
       });
