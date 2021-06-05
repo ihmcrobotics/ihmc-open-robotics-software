@@ -314,13 +314,20 @@ catch (IndexOutOfBoundsException e)
          ByteBuffer colorRGB8Buffer = depthSensorSimulator.getRawColorByteBuffer();
          colorRGB8Buffer.rewind();
          int capacity = colorRGB8Buffer.capacity();
-         for (int i = 0; i < capacity; i += 4)
+         for (int y = 0; y < imageHeight; y++)
          {
-            // flipping RGBA to BGRA here
-            flippedColorByteBuffer.put(capacity - i - 4 + 0, colorRGB8Buffer.get(i + 2));
-            flippedColorByteBuffer.put(capacity - i - 4 + 1, colorRGB8Buffer.get(i + 1));
-            flippedColorByteBuffer.put(capacity - i - 4 + 2, colorRGB8Buffer.get(i + 0));
-            flippedColorByteBuffer.put(capacity - i - 4 + 3, colorRGB8Buffer.get(i + 3));
+            for (int x = 0; x < imageWidth; x++)
+//            for (int i = 0; i < capacity; i += 4)
+            {
+               int iSrc = (y * imageWidth + x) * 4;
+               int iDest = (y * imageWidth + (imageWidth - x - 1)) * 4;
+
+               // flipping RGBA to BGRA here
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 0, colorRGB8Buffer.get(iSrc + 2));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 1, colorRGB8Buffer.get(iSrc + 1));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 2, colorRGB8Buffer.get(iSrc + 0));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 3, colorRGB8Buffer.get(iSrc + 3));
+            }
          }
          flippedColorByteBuffer.rewind();
 
