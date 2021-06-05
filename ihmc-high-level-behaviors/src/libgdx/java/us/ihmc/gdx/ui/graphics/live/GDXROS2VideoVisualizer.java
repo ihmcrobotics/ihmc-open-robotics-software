@@ -1,19 +1,16 @@
 package us.ihmc.gdx.ui.graphics.live;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import controller_msgs.msg.dds.VideoPacket;
 import imgui.internal.ImGui;
-import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.imgui.ImGuiVideoWindow;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
-import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
 import us.ihmc.ros2.ROS2Topic;
@@ -22,9 +19,6 @@ import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-import java.nio.IntBuffer;
 
 public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 {
@@ -106,25 +100,9 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
             }
 
-            DataBufferByte byteBuf = (DataBufferByte) image.getRaster().getDataBuffer();
-            byte[] dataBuf2 = byteBuf.getData();
-            int bpp = 24;
-            // flip Y
-//            {
-//               int scSz = (width * bpp) / 8; // flip Y
-//               byte[] sln = new byte[scSz];
-//               int y2 = 0;
-//               for (int y1 = 0; y1 < height / 2; y1++)
-//               {
-//                  y2 = height - y1 - 1;
-//                  System.arraycopy(dataBuf2, y1 * scSz, sln, 0, scSz);
-//                  System.arraycopy(dataBuf2, y2 * scSz, dataBuf2, y1 * scSz, scSz);
-//                  System.arraycopy(sln, 0, dataBuf2, y2 * scSz, scSz);
-//               }
-//            }
+            byte[] dataBuf2 = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
 
             // image is sRGB
-
             // pack BGR
             for (int y = 0; y < height; y++)
             {
@@ -135,53 +113,10 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                   int g = dataBuf2[i + 1] & 0xFF;
                   int r = dataBuf2[i + 2] & 0xFF;
                   int a = 255;
-                  int rgb8888F = Color.rgba8888(r / 255.0f, g / 255.0f, b / 255.0f, 1.0f);
                   int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
-                  int rgb888 = (r << 16) | (g << 8) | b;
-                  if (b != 0 && b != r && r != g && b != g)
-                  {
-//                     pixmap.drawPixel(x, y, (r << 24) | (g << 16) | (b << 8) | a);
-//                     pixmap.drawPixel(x, y, rgb8888);
-//                     pixmap.drawPixel(x, y, (rgb888 << 8) | 255);
-                     int color = image.getRGB(x, y);
-                     int bR = ((color & 0x00ff0000) >>> 16);
-                     int bG = ((color & 0x0000ff00) >>> 8);
-                     int bB = ((color & 0x000000ff));
-//                     pixmap.drawPixel(x, y, (bR << 24) | (bG << 16) | (bB << 8) | a);
-                     int colorRGBA = (color << 8) | 255;
-//                     pixmap.drawPixel(x, y, colorRGBA);
-                  }
-                  else
-                  {
-//                     pixmap.drawPixel(x, y, (r << 24) | (g << 16) | (b << 8) | a);
-                  }
-                  int color = image.getRGB(x, y);
                   pixmap.drawPixel(x, y, rgb8888);
                }
             }
-
-
-//            boolean flipX = false;
-//            boolean flipY = true;
-//                  int placeX = flipX ? width  - 1 - x : x;
-//                  int placeY = flipY ? height - 1 - y : y;
-//                  try
-//                  {
-////                     int rgb = intBuffer.get();
-//                     int rgb = image.getRGB(x, y);
-//
-//
-//                     pixmap.drawPixel(placeX, placeY, rgb);
-////                     pixmap.drawPixel(x, y, rgb);
-////                     pixmap.drawPixel(y, x, rgb);
-//                  }
-//                  catch (BufferUnderflowException e)
-//                  {
-//                     i++;
-////                     LogTools.error(e.getMessage());
-//                  }
-//               }
-//            }
 
             texture.draw(pixmap, 0, 0);
             decompressedImage = null;
