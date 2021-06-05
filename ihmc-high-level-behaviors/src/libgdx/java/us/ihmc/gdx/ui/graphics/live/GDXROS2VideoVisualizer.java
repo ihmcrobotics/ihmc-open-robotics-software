@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.glutils.PixmapTextureData;
 import controller_msgs.msg.dds.VideoPacket;
 import imgui.internal.ImGui;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.gdx.imgui.ImGuiPlot;
@@ -17,8 +18,7 @@ import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
+import java.nio.ByteBuffer;
 
 public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 {
@@ -32,8 +32,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
 
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
-//   private Triple<ByteBuffer, Integer, Integer> decompressedImage;
-   private BufferedImage decompressedImage;
+   private Triple<ByteBuffer, Integer, Integer> decompressedImage;
 
    public GDXROS2VideoVisualizer(String title, ROS2Node ros2Node, ROS2Topic<VideoPacket> topic)
    {
@@ -51,8 +50,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
       {
          threadQueue.clearQueueAndExecute(() ->
          {
-//            decompressedImage = jpegDecompressor.decompressJPEGDataToRGBAByteBuffer(videoPacket.getData().toArray());
-            decompressedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
+            decompressedImage = jpegDecompressor.decompressJPEGDataToBGR8ByteBuffer(videoPacket.getData().toArray());
          });
       }
    }
@@ -73,18 +71,13 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
       super.renderGraphics();
       if (isActive())
       {
-//         Triple<ByteBuffer, Integer, Integer> image = decompressedImage; // store the latest one here
-         BufferedImage image = decompressedImage; // store the latest one here
+         Triple<ByteBuffer, Integer, Integer> image = decompressedImage; // store the latest one here
 
          if (image != null)
          {
-//            IntBuffer intBuffer = image.getLeft().asIntBuffer();
-//            intBuffer.limit(intBuffer.capacity());
-//            intBuffer.rewind();
-//            int width = image.getMiddle();
-//            int height = image.getRight();
-            int width = image.getWidth();
-            int height = image.getHeight();
+            ByteBuffer buffer = image.getLeft();
+            int width = image.getMiddle();
+            int height = image.getRight();
 
             if (texture == null || texture.getWidth() < width || texture.getHeight() < height)
             {
@@ -100,18 +93,15 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
             }
 
-            byte[] dataBuf2 = ((DataBufferByte) image.getRaster().getDataBuffer()).getData();
-
-            // image is sRGB
-            // pack BGR
+            // unpack BGR
             for (int y = 0; y < height; y++)
             {
                for (int x = 0; x < width; x++)
                {
                   int i = (y * width + x) * 3;
-                  int b = dataBuf2[i + 0] & 0xFF;
-                  int g = dataBuf2[i + 1] & 0xFF;
-                  int r = dataBuf2[i + 2] & 0xFF;
+                  int b = Byte.toUnsignedInt(buffer.get(i + 0));
+                  int g = Byte.toUnsignedInt(buffer.get(i + 1));
+                  int r = Byte.toUnsignedInt(buffer.get(i + 2));
                   int a = 255;
                   int rgb8888 = (r << 24) | (g << 16) | (b << 8) | a;
                   pixmap.drawPixel(x, y, rgb8888);
