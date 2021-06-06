@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -79,7 +78,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<DetectedFiducialPacket> getDetectedFiducialOutputTopic(String robotName)
    {
-      return getOutputTopic(robotName).withType(DetectedFiducialPacket.class);
+      return getOutputTopic(robotName).withTypeName(DetectedFiducialPacket.class);
    }
 
    @Override
@@ -91,10 +90,5 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
       return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
-   }
-
-   public static ROS2Topic<ToolboxStateMessage> getToolboxStateInputTopic(String robotName)
-   {
-      return getInputTopic(robotName).withType(ToolboxStateMessage.class);
    }
 }
