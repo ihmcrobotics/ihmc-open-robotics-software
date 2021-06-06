@@ -14,8 +14,8 @@ import us.ihmc.log.LogTools;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.Goal;
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.GoalForUI;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode.*;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
@@ -29,6 +29,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final DoorBehavior doorBehavior;
    private final RemoteSyncedRobotModel syncedRobot;
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
+   private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(AUTO);
    private final TraverseStairsBehavior traverseStairsBehavior;
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
@@ -45,6 +46,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       addChild(traverseStairsBehavior);
       helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
+      helper.subscribeViaCallback(Mode, mode::set);
    }
 
    private void setGoal(Pose3D newGoal)
@@ -58,21 +60,44 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    {
       syncedRobot.update();
 
-      if (!goal.get().containsNaN())
+      BehaviorTreeNodeStatus status = BehaviorTreeNodeStatus.RUNNING;
+      BuildingExplorationBehaviorMode currentMode = mode.get();
+      if (currentMode == AUTO)
       {
-         if (doorBehavior.getDistanceToDoor() < 2.3)
+         if (!goal.get().containsNaN())
          {
-            return doorBehavior.tick();
-         }
-         else
-         {
-            if (lookAndStepBehavior.isReset())
-               lookAndStepBehavior.acceptGoal(goal.get());
-            return lookAndStepBehavior.tick();
+            if (doorBehavior.getDistanceToDoor() < 2.3)
+            {
+               status = tickDoor();
+            }
+            else
+            {
+               status = tickLookAndStep();
+            }
          }
       }
+      else if (currentMode == DOOR)
+      {
+         status = tickDoor();
+      }
+      else if (currentMode == LOOK_AND_STEP)
+      {
+         status = tickLookAndStep();
+      }
 
-      return BehaviorTreeNodeStatus.RUNNING;
+      return status;
+   }
+
+   private BehaviorTreeNodeStatus tickDoor()
+   {
+      return doorBehavior.tick();
+   }
+
+   private BehaviorTreeNodeStatus tickLookAndStep()
+   {
+      if (lookAndStepBehavior.isReset())
+         lookAndStepBehavior.acceptGoal(goal.get());
+      return lookAndStepBehavior.tick();
    }
 
    @Override

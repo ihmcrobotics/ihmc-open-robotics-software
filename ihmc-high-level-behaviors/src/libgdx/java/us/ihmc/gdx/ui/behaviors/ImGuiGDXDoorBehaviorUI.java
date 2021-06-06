@@ -11,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolb
 import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -38,11 +39,16 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    private final BehaviorHelper helper;
    private Point2D nodePosition = new Point2D(387.0, 198.0);
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
-   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
+   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(labels.get("Door behavior status"), 1000, 250, 15);
    private final AtomicReference<Double> distanceToDoor;
+   private final Stopwatch doorDetectionMessageReceivedStopwatch = new Stopwatch().start();
+   private final ImGuiMovingPlot doorDetectionMessageReceivedPlot = new ImGuiMovingPlot("Door detection", 1000, 230, 15);
+   private final Stopwatch detectedFiducialMessageReceivedStopwatch = new Stopwatch().start();
+   private final ImGuiMovingPlot detectedFiducialReceivedPlot = new ImGuiMovingPlot("Detected fiducial", 1000, 230, 15);
+   private volatile long latestFiducialID = -1;
    private final AtomicReference<MutablePair<DoorType, Pose3D>> detectedDoorPose = new AtomicReference<>(MutablePair.of(DoorType.UNKNOWN_TYPE, NAN_POSE));
-   private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 30);
-   private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 30);
+   private final ImGuiMovingPlot distanceToDoorPlot = new ImGuiMovingPlot("Distance to door", 1000, 250, 15);
+   private final ImGuiMovingPlot detectedDoorPlot = new ImGuiMovingPlot("Detected door", 1000, 250, 15);
    private final ImBoolean reviewDoorPose = new ImBoolean(true);
    private GDXPushHandleRightDoorObject door;
 
@@ -55,7 +61,13 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
       {
          this.detectedDoorPose.set(detectedDoorPose);
+         doorDetectionMessageReceivedStopwatch.reset();
          door.set(detectedDoorPose.getRight());
+      });
+      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
+      {
+         detectedFiducialMessageReceivedStopwatch.reset();
+         latestFiducialID = detectedFiducialMessage.getFiducialId();
       });
    }
 
@@ -63,18 +75,23 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    public void create(GDXImGuiBasedUI baseUI)
    {
       door = new GDXPushHandleRightDoorObject(YoAppearance.DarkSlateBlue());
+
    }
 
    @Override
    public void renderTreeNode()
    {
       ImGui.text("Current status:");
-      CurrentBehaviorStatus currentStatus = status.get();
-      currentStatePlot.render(currentStatus == null ? -1 : currentStatus.ordinal(), currentStatus == null ? "" : currentStatus.name());
+      detectedFiducialReceivedPlot.setNextValue((float) detectedFiducialMessageReceivedStopwatch.totalElapsed());
+      detectedFiducialReceivedPlot.render("" + (latestFiducialID > 0 ? latestFiducialID : ""));
+      doorDetectionMessageReceivedPlot.setNextValue((float) doorDetectionMessageReceivedStopwatch.totalElapsed());
+      doorDetectionMessageReceivedPlot.render("");
       MutablePair<DoorType, Pose3D> currentDetectedDoorPose = detectedDoorPose.get();
       detectedDoorPlot.setNextValue(currentDetectedDoorPose.getRight().containsNaN() ? Float.NaN : (float) currentDetectedDoorPose.getLeft().ordinal());
       detectedDoorPlot.render(currentDetectedDoorPose.getRight().containsNaN() ? "" : currentDetectedDoorPose.getLeft().name());
       distanceToDoorPlot.render(distanceToDoor.get().floatValue());
+      CurrentBehaviorStatus currentStatus = status.get();
+      currentStatePlot.render(currentStatus == null ? -1 : currentStatus.ordinal(), currentStatus == null ? "" : currentStatus.name());
 
       ImGui.text("Object & Fiducial toolboxes:");
       ImGui.sameLine();

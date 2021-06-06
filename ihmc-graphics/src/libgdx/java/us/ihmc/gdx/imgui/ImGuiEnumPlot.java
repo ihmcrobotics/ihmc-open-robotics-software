@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 public class ImGuiEnumPlot
 {
+   private final String label;
    private final int bufferSize;
    private final float[] values;
    private final int width;
@@ -19,6 +20,12 @@ public class ImGuiEnumPlot
 
    public ImGuiEnumPlot(int bufferSize, int width, int height)
    {
+      this("", bufferSize, width, height);
+   }
+
+   public ImGuiEnumPlot(String label, int bufferSize, int width, int height)
+   {
+      this.label = label;
       this.bufferSize = bufferSize;
       values = new float[bufferSize];
       this.width = width;
@@ -33,7 +40,7 @@ public class ImGuiEnumPlot
       else
          values[index] = ordinal;
 
-      ImGui.plotLines("", values, bufferSize, 0, overlayText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
+      ImGui.plotLines(label, values, bufferSize, 0, overlayText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
 
       ++index;
       if (index >= bufferSize - 1)

@@ -51,7 +51,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                                                                         ImGuiGDXLookAndStepBehaviorUI::new);
 
    private final BehaviorHelper behaviorHelper;
-   private final Point2D nodePosition = new Point2D(11.0, 320.0);
+   private final Point2D nodePosition = new Point2D(11.0, 362.0);
    private String currentState = "";
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final ImBoolean operatorReview = new ImBoolean(true);
