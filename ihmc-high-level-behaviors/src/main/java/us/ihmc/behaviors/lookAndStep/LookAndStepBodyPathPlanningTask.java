@@ -56,7 +56,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private final TypedInput<Pose3D> goalInput = new TypedInput<>();
+      private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
@@ -130,7 +130,7 @@ public class LookAndStepBodyPathPlanningTask
          mapRegionsExpirationTimer.reset();
       }
 
-      public void acceptGoal(Pose3D goal)
+      public void acceptGoal(Pose3DReadOnly goal)
       {
          goalInput.set(goal);
          LogTools.info(StringTools.format("Body path goal received: {}",
@@ -181,7 +181,7 @@ public class LookAndStepBodyPathPlanningTask
    }
 
    protected PlanarRegionsList mapRegions;
-   protected Pose3D goal;
+   protected Pose3DReadOnly goal;
    protected RemoteSyncedRobotModel syncedRobot;
 
    protected void performTask()
