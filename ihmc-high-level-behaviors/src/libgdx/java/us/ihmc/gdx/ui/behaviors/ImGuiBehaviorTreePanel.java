@@ -122,13 +122,20 @@ public class ImGuiBehaviorTreePanel
          double recentTickWindow = tickPeriod * 0.75;
 //         double v = UnitConversions.hertzToSeconds(Gdx.graphics.getFramesPerSecond());
          boolean tickedThisFrame = Conversions.millisecondsToSeconds(timeSinceLastTick) < recentTickWindow;
+         boolean tickedRecently = Conversions.millisecondsToSeconds(timeSinceLastTick) < 1.0;
          BehaviorTreeNodeStatus status = node.getPreviousStatus();
          tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
-         tickPlot.render(status != null ? status.name() : "");
+         tickPlot.render(status != null && tickedRecently ? status.name() : "");
          if (status != null)
+         {
             ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
+            ImGui.sameLine();
+            ImGui.text("Last status: " + status.name());
+         }
          else
+         {
             ImGui.text("Not yet ticked.");
+         }
       }
 
       if (!firstRun)

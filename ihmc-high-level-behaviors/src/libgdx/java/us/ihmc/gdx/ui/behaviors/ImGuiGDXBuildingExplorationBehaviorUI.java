@@ -4,7 +4,11 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import imgui.internal.ImGui;
+import org.apache.commons.lang.WordUtils;
+import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
+import us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
@@ -28,6 +32,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final Point2D nodePosition = new Point2D(319.0, 6.0);
    private final ImGuiGDXDoorBehaviorUI doorUI;
    private ImGuiLabelMap labels = new ImGuiLabelMap();
+   private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.AUTO;
 
    public ImGuiGDXBuildingExplorationBehaviorUI(BehaviorHelper helper)
    {
@@ -41,6 +46,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       addChild(doorUI);
 
       helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPose);
+      helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
    }
 
    @Override
@@ -65,6 +71,15 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    public void renderTreeNode()
    {
       goalAffordance.renderPlaceGoalButton();
+      ImGui.text("Mode:");
+      for (BuildingExplorationBehaviorMode modeValue : BuildingExplorationBehaviorMode.values())
+      {
+         ImGui.sameLine();
+         if (ImGui.radioButton(labels.get(StringUtils.capitalize(modeValue.name().toLowerCase().replaceAll("_", " "))), mode.equals(modeValue)))
+         {
+            helper.publish(Mode, modeValue);
+         }
+      }
    }
 
    @Override

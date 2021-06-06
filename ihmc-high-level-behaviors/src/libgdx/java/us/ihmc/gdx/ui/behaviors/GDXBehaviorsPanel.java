@@ -13,10 +13,12 @@ import us.ihmc.behaviors.tools.MessagerHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.FallbackNode;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -38,7 +40,10 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final String windowName = ImGuiTools.uniqueLabel(getClass(), "Behaviors");
    private final ImString behaviorModuleHost = new ImString("localhost", 100);
    private final Point2D nodePosition = new Point2D(7.0, 5.0);
-   private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus;
+   private final AtomicReference<BehaviorTreeControlFlowNode> behaviorTreeStatus = new AtomicReference<>(new FallbackNode());
+   private final Stopwatch statusStopwatch = new Stopwatch();
+   private final ImGuiLabelMap labels = new ImGuiLabelMap();
+   private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Tree status", 1000, 230, 15);
    private volatile boolean messagerConnecting = false;
    private String messagerConnectedHost = "";
    private final MessagerHelper messagerHelper;
@@ -74,7 +79,11 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
             logArray.addLast(Pair.of(Level.INFO.intLevel(), textStatus.getTextToSpeakAsString()));
          }
       });
-      behaviorTreeStatus = behaviorHelper.subscribeViaReference(BehaviorTreeStatus, new FallbackNode());
+      behaviorHelper.subscribeViaCallback(BehaviorTreeStatus, status ->
+      {
+         statusStopwatch.reset();
+         behaviorTreeStatus.set(status);
+      });
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
       addChild(highestLevelUI);
       disabledNodeUI = new ImGuiBehaviorModuleDisabledNodeUI(behaviorHelper);
@@ -224,6 +233,9 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
             disconnectYoVariableClient();
          }
       }
+      statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
+      statusReceivedPlot.render("");
+//      ImGui.text("Last tree status message: " + FormattingTools.getFormattedDecimal2D(statusStopwatch.totalElapsed()) + " s ago");
    }
 
    public void connectViaKryo(String hostname)
