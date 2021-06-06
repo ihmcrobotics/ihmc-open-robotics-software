@@ -166,6 +166,10 @@ public class GDXEnvironment implements RenderableProvider
             objectToPlace = new GDXLabFloorObject();
          if (ImGui.button("Place Pallet"))
             objectToPlace = new GDXPalletObject();
+         if (ImGui.button("Place Stairs"))
+            objectToPlace = new GDXStairsObject();
+         if (ImGui.button("Place Door Frame"))
+            objectToPlace = new GDXDoorFrameObject();
          if (ImGui.button("Place Push Door Only"))
          {
             objectToPlace = new GDXPushHandleRightDoorObject();

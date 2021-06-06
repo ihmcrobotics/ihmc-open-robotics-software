@@ -220,6 +220,10 @@ public class GDXEnvironmentObject
       {
          return new GDXPalletObject();
       }
+      else if (objectClassName.equals(GDXStairsObject.class.getSimpleName()))
+      {
+         return new GDXStairsObject();
+      }
       else if (objectClassName.equals(GDXPushHandleRightDoorObject.class.getSimpleName()))
       {
          return new GDXPushHandleRightDoorObject();
