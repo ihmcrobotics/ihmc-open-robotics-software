@@ -107,13 +107,13 @@ public class ValkyrieStepReachabilityCalculator
 
    private enum Mode
    {
-      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, SHOW_VISUALIZATION
+      HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.SHOW_VISUALIZATION;
+   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    private static final double COM_WEIGHT = 1.0;
-   private static final double RIGID_BODY_FEET_WEIGHT = 30.0;
+   private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
    private static final double RIGID_BODY_OTHER_WEIGHT = 20.0;
    private static final double JOINT_WEIGHT = 10.0;
    private static final double SOLUTION_QUALITY_THRESHOLD = 5;
@@ -234,14 +234,14 @@ public class ValkyrieStepReachabilityCalculator
                double reachabilityValue = testSingleStep(leftFootPose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
                poseValidityMap.put(leftFootPose, reachabilityValue);
             }
-            new StepReachabilityVisualizer(poseValidityMap, queriesPerAxis);
+//            new StepReachabilityVisualizer(poseValidityMap, queriesPerAxis);
             StepReachabilityFileTools.writeToFile(poseValidityMap);
 //            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
-         case SHOW_VISUALIZATION:
+         case TEST_VISUALIZATION:
             Map<FramePose3D, Double> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
-            new StepReachabilityVisualizer(feasibilityMap, queriesPerAxis);
-//            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
+//            new StepReachabilityVisualizer(feasibilityMap, queriesPerAxis);
+            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -417,13 +417,13 @@ public class ValkyrieStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final int queriesPerAxis = 5;
-   private static final double minimumOffsetX = -0.8;
-   private static final double maximumOffsetX = 0.8;
-   private static final double minimumOffsetY = -0.8;
-   private static final double maximumOffsetY = 0.4;
-   private static final double minimumOffsetYaw = - Math.toRadians(75.0);
-   private static final double maximumOffsetYaw = Math.toRadians(75.0);
+   private static final int queriesPerAxis = 27;
+   private static final double minimumOffsetX = -0.7;
+   private static final double maximumOffsetX = 0.7;
+   private static final double minimumOffsetY = -0.4;
+   private static final double maximumOffsetY = 0.9;
+   private static final double minimumOffsetYaw = - Math.toRadians(80.0);
+   private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
    private static List<FramePose3D> createLeftFootPoseList()
    {

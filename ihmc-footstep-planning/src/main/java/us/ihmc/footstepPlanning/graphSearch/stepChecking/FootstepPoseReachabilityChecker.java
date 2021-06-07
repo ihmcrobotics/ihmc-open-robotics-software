@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
+import org.lwjgl.Sys;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
@@ -20,7 +21,7 @@ public class FootstepPoseReachabilityChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final int SOLUTION_QUALITY_THRESHOLD = 5;
+   private final int SOLUTION_QUALITY_THRESHOLD = 7;
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
    private final Map<FramePose3D, Double> reachabilityMap;
@@ -80,14 +81,14 @@ public class FootstepPoseReachabilityChecker
       return null;
    }
 
-   // Check for closest foot pose in Reachability map keys
+   // Check for closest foot pose in Reachability map keys (looping)
    public FramePose3D findNearestCheckpoint(FramePose3D candidateFootPose, Set<FramePose3D> MapFootPoses)
    {
-      FramePose3D nearestCheckpoint = new FramePose3D();
+      FramePose3D nearestCheckpoint = null;
       double smallestDist = 10.0;
       for (FramePose3D frame : MapFootPoses)
       {
-         candidateFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+         frame.changeFrame(candidateFootPose.getReferenceFrame());
          double poseDist = frame.getPositionDistance(candidateFootPose);
          double orientationDistance = frame.getOrientationDistance(candidateFootPose);
          if (poseDist+orientationDistance < smallestDist)
@@ -95,17 +96,49 @@ public class FootstepPoseReachabilityChecker
             smallestDist = poseDist+orientationDistance;
             nearestCheckpoint = frame;
          }
+         frame.changeFrame(ReferenceFrame.getWorldFrame());
       }
+      return nearestCheckpoint;
+   }
+
+   // Check for closest foot pose in Reachability map keys (math)
+   // wrote this to possible replace findNearestCheckpoint because checker is sometimes too slow and times out
+   // would need to find a way to get queriesPerAxis and offset values to calculate x/y/yawRatio, currently hardcoded
+   public FramePose3D updatedFindNearestCheckpoint(FramePose3D candidateFootPose, Set<FramePose3D> MapFootPoses)
+   {
+      double xRatio = 1/(1.4/52);
+      double yRatio = 1/(1.3/52);
+      double yawRatio = 1.0/(Math.toRadians(160)/52);
+
+      double newX = candidateFootPose.getX() * xRatio;
+      newX = Math.round(newX) / xRatio;
+
+      double newY = candidateFootPose.getY() * yRatio;
+      newY = Math.round(newY) / yRatio;
+
+      double newYaw = candidateFootPose.getYaw() * yawRatio;
+      newYaw = Math.round(newYaw) / yawRatio;
+      FramePose3D nearestCheckpoint = new FramePose3D();
+      nearestCheckpoint.setX(newX);
+      nearestCheckpoint.setY(newY);
+      nearestCheckpoint.getOrientation().setYawPitchRoll(newYaw, 0.0, 0.0);
+
       return nearestCheckpoint;
    }
 
    // Check for frame in Reachability map keys
    public boolean checkpointIsReachable(Map<FramePose3D, Double> reachabilityMap, FramePose3D nearestCheckpoint)
    {
+//      System.out.println(nearestCheckpoint);
+//      System.out.println(reachabilityMap);
       for (FramePose3D frame : reachabilityMap.keySet())
       {
          if (frame.geometricallyEquals(nearestCheckpoint, 0.0001))
-            return reachabilityMap.get(frame) > SOLUTION_QUALITY_THRESHOLD;
+         {
+//            System.out.println(frame);
+            double reachabilityValue = reachabilityMap.get(frame); // TODO Bug: returns null
+            return reachabilityValue < SOLUTION_QUALITY_THRESHOLD;
+         }
       }
       return false;
    }

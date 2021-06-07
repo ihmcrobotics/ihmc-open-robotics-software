@@ -22,11 +22,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -187,16 +184,23 @@ public class FootstepPoseCheckerTest
       double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, parentYaw, RobotSide.RIGHT);
 
-      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + snapDownToYaw(maxValue), RobotSide.LEFT);
+      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(),
+                                                                childPosition.getY(),
+                                                                parentYaw + snapDownToYaw(maxValue),
+                                                                RobotSide.LEFT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + snapUpToYaw(minValue), RobotSide.LEFT);
 
       assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
       assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + maxYaw, RobotSide.LEFT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + maxYaw, RobotSide.LEFT),
+                                                 parentNode,
+                                                 null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + minYaw, RobotSide.LEFT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw + minYaw, RobotSide.LEFT),
+                                                 parentNode,
+                                                 null));
    }
 
    @Test
@@ -232,16 +236,23 @@ public class FootstepPoseCheckerTest
       double minValue = InterpolationTools.linearInterpolate(minYaw, minYawAtFullLength, reachAtChild / parameters.getMaximumStepReach());
       DiscreteFootstep parentNode = new DiscreteFootstep(0.0, 0.0, parentYaw, RobotSide.LEFT);
 
-      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - snapDownToYaw(maxValue), RobotSide.RIGHT);
+      DiscreteFootstep childNodeAtMaxYaw = new DiscreteFootstep(childPosition.getX(),
+                                                                childPosition.getY(),
+                                                                parentYaw - snapDownToYaw(maxValue),
+                                                                RobotSide.RIGHT);
       DiscreteFootstep childNodeAtMinYaw = new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - snapUpToYaw(minValue), RobotSide.RIGHT);
 
       assertNull(nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
       assertNull(nodeChecker.checkStepValidity(childNodeAtMinYaw, parentNode, null));
 
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - maxYaw, RobotSide.RIGHT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - maxYaw, RobotSide.RIGHT),
+                                                 parentNode,
+                                                 null));
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH,
-                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - minYaw, RobotSide.RIGHT), parentNode, null));
+                   nodeChecker.checkStepValidity(new DiscreteFootstep(childPosition.getX(), childPosition.getY(), parentYaw - minYaw, RobotSide.RIGHT),
+                                                 parentNode,
+                                                 null));
    }
 
    @Test
@@ -282,49 +293,62 @@ public class FootstepPoseCheckerTest
       assertEquals(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH, nodeChecker.checkStepValidity(childNodeAtMaxYaw, parentNode, null));
    }
 
+   private final int queriesPerAxis = 53; // Multiple of 13
+   private final double minimumOffsetX = -0.7;
+   private final double maximumOffsetX = 0.7;
+   private final double minimumOffsetY = -0.4;
+   private final double maximumOffsetY = 0.9;
+   private final double minimumOffsetYaw = -80.0;
+   private final double maximumOffsetYaw = 80.0;
+
    @Test
    public void testFindNearestReachabilityCheckpoint()
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      Map<FramePose3D, Boolean> reachabilityMap = populateReachabilityMap();
 
+      double xSpacing = (maximumOffsetX-minimumOffsetX) / (queriesPerAxis-1);
+      double ySpacing = (maximumOffsetY-minimumOffsetY) / (queriesPerAxis-1);
+      double yawSpacing = (maximumOffsetYaw-minimumOffsetYaw) / (queriesPerAxis-1);
+
+      Map<FramePose3D, Double> reachabilityMap = updatedPopulateReachabilityMap(queriesPerAxis, minimumOffsetX, maximumOffsetX, minimumOffsetY, maximumOffsetY, minimumOffsetYaw, maximumOffsetYaw);
       FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
       FramePose3D testFootPose = new FramePose3D();
       FramePose3D nearestCheckpointTrue = new FramePose3D();
       FramePose3D nearestCheckpointCalculated;
 
       // Test same XY, different yaw
-      testFootPose.getPosition().set(-0.500, 0.056, 0.0);
-      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(69), 0.0, 0.0);
-      nearestCheckpointTrue.getPosition().set(-0.500, 0.056, 0.0);
-      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(70), 0.0, 0.0);
-      nearestCheckpointCalculated = reachabilityChecker.findNearestCheckpoint(testFootPose, reachabilityMap.keySet());
+      testFootPose.getPosition().set(2 * xSpacing, ySpacing, 0.0);
+      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * 2 + 0.001), 0.0, 0.0);
+      nearestCheckpointTrue.getPosition().set(2 * xSpacing, ySpacing, 0.0);
+      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * 2), 0.0, 0.0);
+      nearestCheckpointCalculated = reachabilityChecker.updatedFindNearestCheckpoint(testFootPose, reachabilityMap.keySet());
+//      assertEquals(nearestCheckpointTrue, nearestCheckpointCalculated);
       assertTrue(nearestCheckpointTrue.geometricallyEquals(nearestCheckpointCalculated, 0.001));
 
       // Test same X and yaw, different Y
-      testFootPose.getPosition().set(-0.278, -0.47, 0.0);
-      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(70-5*(11/70)), 0.0, 0.0);
-      nearestCheckpointTrue.getPosition().set(-0.278, -0.50, 0.0);
-      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(70-5*(11/70)), 0.0, 0.0);
-      nearestCheckpointCalculated = reachabilityChecker.findNearestCheckpoint(testFootPose, reachabilityMap.keySet());
+      testFootPose.getPosition().set(-3 * xSpacing, -1 * ySpacing + 0.001, 0.0);
+      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * 2), 0.0, 0.0);
+      nearestCheckpointTrue.getPosition().set(-3 * xSpacing, (-1 * ySpacing), 0.0);
+      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * 2), 0.0, 0.0);
+      nearestCheckpointCalculated = reachabilityChecker.updatedFindNearestCheckpoint(testFootPose, reachabilityMap.keySet());
       assertTrue(nearestCheckpointTrue.geometricallyEquals(nearestCheckpointCalculated, 0.001));
 
       // Test same Y and yaw, different X
-      testFootPose.getPosition().set(0.171, 0.056, 0.0);
-      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(70-2*(11/70)), 0.0, 0.0);
-      nearestCheckpointTrue.getPosition().set(0.167, 0.056, 0.0);
-      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(70-2*(11/70)), 0.0, 0.0);
-      nearestCheckpointCalculated = reachabilityChecker.findNearestCheckpoint(testFootPose, reachabilityMap.keySet());
+      testFootPose.getPosition().set(12 * xSpacing + 0.001, -5 * ySpacing, 0.0);
+      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * 7), 0.0, 0.0);
+      nearestCheckpointTrue.getPosition().set(12 * xSpacing, -5 * ySpacing, 0.0);
+      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * 7), 0.0, 0.0);
+      nearestCheckpointCalculated = reachabilityChecker.updatedFindNearestCheckpoint(testFootPose, reachabilityMap.keySet());
       assertTrue(nearestCheckpointTrue.geometricallyEquals(nearestCheckpointCalculated, 0.001));
 
       // Test different XY and yaw
-      testFootPose.getPosition().set(-0.48, 0.510, 0.0);
-      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(70-3*(11/70) + 5), 0.0, 0.0);
-      nearestCheckpointTrue.getPosition().set(-0.500, 0.500, 0.0);
-      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(70-3*(11/70)), 0.0, 0.0);
-      nearestCheckpointCalculated = reachabilityChecker.findNearestCheckpoint(testFootPose, reachabilityMap.keySet());
+      testFootPose.getPosition().set(8 * xSpacing - 0.001, -3 * ySpacing - 0.001, 0.0);
+      testFootPose.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * -9 + 0.001), 0.0, 0.0);
+      nearestCheckpointTrue.getPosition().set(8 * xSpacing, -3 * ySpacing, 0.0);
+      nearestCheckpointTrue.getOrientation().setYawPitchRoll(Math.toRadians(yawSpacing * -9), 0.0, 0.0);
+      nearestCheckpointCalculated = reachabilityChecker.updatedFindNearestCheckpoint(testFootPose, reachabilityMap.keySet());
       assertTrue(nearestCheckpointTrue.geometricallyEquals(nearestCheckpointCalculated, 0.001));
    }
 
@@ -334,33 +358,34 @@ public class FootstepPoseCheckerTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      Map<FramePose3D, Boolean> reachabilityMap = populateReachabilityMap();
+      Map<FramePose3D, Double> reachabilityMap = updatedPopulateReachabilityMap(queriesPerAxis, minimumOffsetX, maximumOffsetX, minimumOffsetY, maximumOffsetY, minimumOffsetYaw, maximumOffsetYaw);
 
       FootstepPoseReachabilityChecker reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
       FramePose3D testCheckpoint = new FramePose3D();
 
-      // Test reachable frame in map
-      testCheckpoint.getPosition().set(-0.056, -0.056, 0.0);
-      testCheckpoint.getOrientation().setYawPitchRoll(Math.toRadians(70), 0.0, 0.0);
+      // Test unreachable frame in map
+      testCheckpoint.getPosition().set(0.431,  0.475,  0.0);
+      testCheckpoint.getOrientation().setYawPitchRoll(0.622, 0.0, 0.0);
       assertTrue(reachabilityChecker.checkpointIsReachable(reachabilityMap, testCheckpoint));
 
-      // Test unreachable frame in map
-      testCheckpoint.getPosition().set(-0.01, -0.09, 0.0);
-      testCheckpoint.getOrientation().setYawPitchRoll(Math.toRadians(45), 0.0, 0.0);
+      // Test reachable frame in map
+      testCheckpoint.getPosition().set(-0.592, -0.300, 0.0);
+      testCheckpoint.getOrientation().setYawPitchRoll(-0.392, 0.0, 0.0);
       assertFalse(reachabilityChecker.checkpointIsReachable(reachabilityMap, testCheckpoint));
    }
 
-   private Map<FramePose3D, Boolean> populateReachabilityMap()
+   private Map<FramePose3D, Double> updatedPopulateReachabilityMap(int queriesPerAxis,
+                                                                   double minimumOffsetX,
+                                                                   double maximumOffsetX,
+                                                                   double minimumOffsetY,
+                                                                   double maximumOffsetY,
+                                                                   double minimumOffsetYaw,
+                                                                   double maximumOffsetYaw)
    {
-      Map<FramePose3D, Boolean> map = new HashMap<>();
-
-      int queriesPerAxis = 10;
-      double minimumOffsetX = -0.5;
-      double maximumOffsetX = 0.5;
-      double minimumOffsetY = -0.5;
-      double maximumOffsetY = 0.5;
-      double minimumOffsetYaw = - Math.toRadians(70.0);
-      double maximumOffsetYaw = Math.toRadians(70.0);
+      Map<FramePose3D, Double> map = new HashMap<>();
+      boolean boolSwitch = false;
+      minimumOffsetYaw = Math.toRadians(minimumOffsetYaw);
+      maximumOffsetYaw = Math.toRadians(maximumOffsetYaw);
 
       for (int i = 0; i < queriesPerAxis; i++)
       {
@@ -382,7 +407,10 @@ public class FootstepPoseCheckerTest
 
                // Don't add foot pose where both at origin
                if (pose.getPosition().distanceFromOrigin() != 0)
-                  map.put(pose, true);
+                  if (boolSwitch) map.put(pose, 20.0);
+                  else map.put(pose, 0.0);
+
+               boolSwitch = !boolSwitch;
             }
          }
       }
@@ -412,45 +440,5 @@ public class FootstepPoseCheckerTest
    private static double snapUpToYaw(double yaw)
    {
       return LatticePoint.gridSizeYaw * Math.ceil(yaw / LatticePoint.gridSizeYaw);
-   }
-
-   public static Map<FramePose3D, Boolean> loadFeasabilityMap()
-   {
-      String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-      String reachabilityDataFileName = logDirectory + "StepReachabilityMap.txt";
-      Map<FramePose3D, Boolean> feasibilityMap = new HashMap<>();
-
-      try
-      {
-         Scanner scanner = new Scanner(new File(reachabilityDataFileName));
-         while(scanner.hasNextLine())
-         {
-            String line = scanner.nextLine();
-            FramePose3D frame = new FramePose3D();
-
-            // Parse to get frame position, orientation and feasibility boolean
-            String[] data = line.split(",");
-            double posX = Double.parseDouble(data[0]);
-            double posY = Double.parseDouble(data[1]);
-            double posZ = Double.parseDouble(data[2]);
-            frame.getPosition().set(posX, posY, posZ);
-
-            double orX = Double.parseDouble(data[3]);
-            double orY = Double.parseDouble(data[4]);
-            double orZ = Double.parseDouble(data[5]);
-            double orS = Double.parseDouble(data[6]);
-            frame.getOrientation().set(orX, orY, orZ, orS);
-
-            feasibilityMap.put(frame, line.contains("true"));
-         }
-         scanner.close();
-         System.out.println("Done loading from file");
-         return feasibilityMap;
-      }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
-      }
-      return null;
    }
 }

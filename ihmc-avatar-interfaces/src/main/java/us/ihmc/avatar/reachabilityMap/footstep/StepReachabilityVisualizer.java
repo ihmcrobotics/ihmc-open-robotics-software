@@ -36,7 +36,7 @@ public class StepReachabilityVisualizer
          double reachabilityValue = reachabilityMap.get(footPose);
          if (reachabilityValue > 40) reachabilityValue = 40;
          System.out.println("reachabilityValue: " + reachabilityValue);
-         AppearanceDefinition appearance = YoAppearance.RGBColor(reachabilityValue/50, (50-reachabilityValue)/50, 0);
+         AppearanceDefinition appearance = YoAppearance.RGBColor(reachabilityValue/40, (40-reachabilityValue)/40, 0);
          validStep.addSphere(0.1/queriesPerAxis, appearance);
 
          scs.addStaticLinkGraphics(validStep);
