@@ -140,8 +140,20 @@ public class ROS2Tools
    private static final ROS2Topic<BehaviorControlModePacket> BEHAVIOR_CONTROL_MODE = BEHAVIOR_MODULE_INPUT.withTypeName(BehaviorControlModePacket.class);
    private static final ROS2Topic<HumanoidBehaviorTypePacket> BEHAVIOR_TYPE = BEHAVIOR_MODULE_INPUT.withTypeName(HumanoidBehaviorTypePacket.class);
    private static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
+   private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput().withTypeName(HandDesiredConfigurationMessage.class);
+   private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
+
+   public static ROS2Topic<HandDesiredConfigurationMessage> getHandConfigurationTopic(String robotName)
+   {
+      return HAND_CONFIGURATION.withRobot(robotName);
+   }
+
+   public static ROS2Topic<HandJointAnglePacket> getHandJointAnglesTopic(String robotName)
+   {
+      return HAND_JOINT_ANGLES.withRobot(robotName);
+   }
 
    public static ROS2Topic<DoorLocationPacket> getDoorLocationTopic(String robotName)
    {

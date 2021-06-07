@@ -18,6 +18,7 @@ import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
@@ -39,9 +40,11 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -89,6 +92,7 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
    private FootstepPlannerOutput footstepPlannerOutput;
    private final RemoteSyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
+   private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -370,6 +374,26 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
          }
       }
       ImGui.checkbox("Tune footstep planning parameters", showFootstepPlanningParametersWindow);
+
+      ImGui.text("Right hand:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Calibrate")))
+      {
+         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CALIBRATE));
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Open")))
+      {
+         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.OPEN));
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Close")))
+      {
+         communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
+                                     HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE));
+      }
 
       ImGui.end();
 
