@@ -25,6 +25,8 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeROS2Node;
 
+import java.util.List;
+
 /**
  * This class provides a visualizer for the footstep planner module.
  * It allows user to create plans, log and load plans from disk, tune parameters,
@@ -32,7 +34,6 @@ import us.ihmc.ros2.RealtimeROS2Node;
  */
 public class AtlasFootstepPlannerUI extends Application
 {
-   private static final boolean launchPlannerToolbox = true;
    private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 
    private SharedMemoryJavaFXMessager messager;
@@ -44,6 +45,9 @@ public class AtlasFootstepPlannerUI extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
+      List<String> parameters = getParameters().getRaw();
+      boolean launchPlannerToolbox = parameters == null || !parameters.contains(getSuppressToolboxFlag());
+
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       DRCRobotModel previewModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.REAL_ROBOT, false);
       messager = new SharedMemoryJavaFXMessager(FootstepPlannerMessagerAPI.API);
@@ -112,6 +116,14 @@ public class AtlasFootstepPlannerUI extends Application
          plannerModule.closeAndDispose();
 
       Platform.exit();
+   }
+
+   /**
+    * Pass this as a program argument to suppress the toolbox from being launched
+    */
+   public static String getSuppressToolboxFlag()
+   {
+      return "suppressToolbox";
    }
 
    public static void main(String[] args)

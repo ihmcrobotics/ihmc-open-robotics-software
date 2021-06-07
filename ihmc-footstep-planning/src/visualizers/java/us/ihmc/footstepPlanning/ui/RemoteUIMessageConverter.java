@@ -263,11 +263,16 @@ public class RemoteUIMessageConverter
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
-      IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
-                                      ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                .withInput());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportRegionsParametersPublisher::publish);
+      IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher =
+            ROS2Tools.createPublisher(ros2Node,
+                                      BipedalSupportPlanarRegionParametersMessage.class,
+                                      ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class));
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters,  message ->
+      {
+         LogTools.info("Publishing bipedal support regions message. Enabled: " + message.getEnable());
+         supportRegionsParametersPublisher.publish(message);
+      });
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestedArmJointAngles, request ->
       {
