@@ -31,6 +31,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
    private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(AUTO);
    private final TraverseStairsBehavior traverseStairsBehavior;
+   private volatile double distanceFromDoorToTransition = 1.8;
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
@@ -47,6 +48,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
       helper.subscribeViaCallback(Mode, mode::set);
+      helper.subscribeViaCallback(DistanceFromDoorToTransition, distanceFromDoorToTransition -> this.distanceFromDoorToTransition = distanceFromDoorToTransition);
    }
 
    private void setGoal(Pose3D newGoal)
@@ -66,7 +68,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          if (!goal.get().containsNaN())
          {
-            if (doorBehavior.getDistanceToDoor() < 2.3)
+            if (doorBehavior.getDistanceToDoor() < distanceFromDoorToTransition)
             {
                status = tickDoor();
             }

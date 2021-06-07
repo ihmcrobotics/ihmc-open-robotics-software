@@ -5,7 +5,7 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
-import org.apache.commons.lang.WordUtils;
+import imgui.type.ImDouble;
 import org.apache.commons.lang3.StringUtils;
 import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode;
@@ -33,6 +33,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final ImGuiGDXDoorBehaviorUI doorUI;
    private ImGuiLabelMap labels = new ImGuiLabelMap();
    private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.AUTO;
+   private final ImDouble distanceFromDoorToTransition = new ImDouble(1.8);
 
    public ImGuiGDXBuildingExplorationBehaviorUI(BehaviorHelper helper)
    {
@@ -71,6 +72,12 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    public void renderTreeNode()
    {
       goalAffordance.renderPlaceGoalButton();
+      ImGui.pushItemWidth(150.0f);
+      if (ImGui.inputDouble(labels.get("Distance from door to transition"), distanceFromDoorToTransition, 0.01, 0.5))
+      {
+         helper.publish(DistanceFromDoorToTransition, distanceFromDoorToTransition.get());
+      }
+      ImGui.popItemWidth();
       ImGui.text("Mode:");
       for (BuildingExplorationBehaviorMode modeValue : BuildingExplorationBehaviorMode.values())
       {
