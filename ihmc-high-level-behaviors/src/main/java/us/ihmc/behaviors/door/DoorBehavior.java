@@ -100,10 +100,10 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
          if (!reviewEnabled.get())
             startBehavior();
       }
-      if (!behaviorStarted && doorConfirmed.poll())
-      {
-         startBehavior();
-      }
+//      if (!behaviorStarted && doorConfirmed.poll())
+//      {
+//         startBehavior();
+//      }
 
       return BehaviorTreeNodeStatus.RUNNING;
    }
