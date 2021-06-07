@@ -14,11 +14,12 @@ import java.util.Scanner;
 public class StepReachabilityFileTools
 {
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+   private static final String filePath = "ihmc-open-robotics-software/valkyrie/src/main/java/us/ihmc/valkyrie/log/";
 
    public static void writeToFile(Map<FramePose3D, Double> feasibilityMap)
    {
       FileWriter fileWriter;
-      String reachabilityDataFileName = logDirectory + "StepReachabilityMap.txt";
+      String reachabilityDataFileName = filePath + "StepReachabilityMap.txt";
 
       try
       {
@@ -57,7 +58,7 @@ public class StepReachabilityFileTools
 
    public static Map<FramePose3D, Double> loadFromFile(String filename)
    {
-      String reachabilityDataFileName = logDirectory + filename;
+      String reachabilityDataFileName = filePath + filename;
       Map<FramePose3D, Double> feasibilityMap = new HashMap<>();
 
       try
