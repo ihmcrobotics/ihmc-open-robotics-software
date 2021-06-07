@@ -263,12 +263,17 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             //otherwise the robot stops the arm motion because it is to fast
             setAutomaticArmAbort(false);
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455,
-                                                                               0.15,
-                                                                               1.154,
-                                                                               1.7318790859631,
-                                                                               0.9163508562370669,
-                                                                               -0.2253954188985998,
+//            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.455,
+//                                                                               0.15,
+//                                                                               1.154,
+//                                                                               1.7318790859631,
+//                                                                               0.9163508562370669,
+//                                                                               -0.2253954188985998,
+//                                                                               RobotSide.LEFT,
+//                                                                               "Pushing Door",
+//                                                                               2));
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.317,  0.300,  1.264,
+                                                                               1.472225053162252, 0.03597891325029729, 1.5545423993328358,
                                                                                RobotSide.LEFT,
                                                                                "Pushing Door",
                                                                                2));
@@ -282,12 +287,17 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          protected void setBehaviorInput()
          {
             setAutomaticArmAbort(true);
-            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.274,
-                                                                               -0.208,
-                                                                               0.798,
-                                                                               1.2609443582725661,
-                                                                               0.02096196100421688,
-                                                                               0.27326972080173334,
+//            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.274,
+//                                                                               -0.208,
+//                                                                               0.798,
+//                                                                               1.2609443582725661,
+//                                                                               0.02096196100421688,
+//                                                                               0.27326972080173334,
+//                                                                               RobotSide.LEFT,
+//                                                                               "Pulling Left Hand Back",
+//                                                                               1));
+            atlasPrimitiveActions.leftHandTrajectoryBehavior.setInput(moveHand(0.350, -0.018,  0.882 ,
+                                                                               1.4668096379070716, 0.03925846523623192, 1.6360375489656063,
                                                                                RobotSide.LEFT,
                                                                                "Pulling Left Hand Back",
                                                                                1));
