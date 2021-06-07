@@ -139,6 +139,11 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publishBehaviorType(HumanoidBehaviorType.RESET_ROBOT);
       }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("WALK_THROUGH_DOOR")))
+      {
+         helper.publishBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR);
+      }
       if (ImGui.checkbox(labels.get("Review door pose"), reviewDoorPose))
       {
          helper.publish(ReviewEnabled, reviewDoorPose.get());
