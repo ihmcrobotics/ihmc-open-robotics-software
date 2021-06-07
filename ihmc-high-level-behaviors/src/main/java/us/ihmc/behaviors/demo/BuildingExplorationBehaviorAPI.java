@@ -3,6 +3,8 @@ package us.ihmc.behaviors.demo;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
 
+import java.util.List;
+
 public class BuildingExplorationBehaviorAPI
 {
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
@@ -13,7 +15,7 @@ public class BuildingExplorationBehaviorAPI
 
    public static final MessagerAPIFactory.Topic<Pose3D> Goal = topic("Goal");
    public static final MessagerAPIFactory.Topic<Pose3D> GoalForUI = topic("GoalForUI");
-   public static final MessagerAPIFactory.Topic<Double> DistanceFromDoorToTransition = topic("DistanceFromDoorToTransition");
+   public static final MessagerAPIFactory.Topic<List<String>> Parameters = topic("Parameters");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

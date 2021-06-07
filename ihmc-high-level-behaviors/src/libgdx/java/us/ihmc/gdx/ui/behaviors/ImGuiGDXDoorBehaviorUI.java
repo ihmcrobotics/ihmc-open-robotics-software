@@ -37,7 +37,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(DoorBehavior.DEFINITION, ImGuiGDXDoorBehaviorUI::new);
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final BehaviorHelper helper;
-   private Point2D nodePosition = new Point2D(387.0, 198.0);
+   private Point2D nodePosition = new Point2D(387.0, 221.0);
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(labels.get("Door behavior status"), 1000, 250, 15);
    private final AtomicReference<Double> distanceToDoor;

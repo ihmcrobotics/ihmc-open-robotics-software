@@ -31,12 +31,13 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
    private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(AUTO);
    private final TraverseStairsBehavior traverseStairsBehavior;
-   private volatile double distanceFromDoorToTransition = 1.8;
+   private final BuildingExplorationBehaviorParameters parameters;
 
    public BuildingExplorationBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
       LogTools.info("Constructing");
+      parameters = new BuildingExplorationBehaviorParameters();
       syncedRobot = helper.newSyncedRobot();
       lookAndStepBehavior = new LookAndStepBehavior(helper);
       addChild(lookAndStepBehavior);
@@ -45,10 +46,14 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       addChild(doorBehavior);
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
       addChild(traverseStairsBehavior);
+      helper.subscribeViaCallback(Parameters, parameters ->
+      {
+         helper.getOrCreateStatusLogger().info("Accepting new building exploration parameters");
+         this.parameters.setAllFromStrings(parameters);
+      });
       helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
       helper.subscribeViaCallback(Mode, mode::set);
-      helper.subscribeViaCallback(DistanceFromDoorToTransition, distanceFromDoorToTransition -> this.distanceFromDoorToTransition = distanceFromDoorToTransition);
    }
 
    private void setGoal(Pose3D newGoal)
@@ -68,7 +73,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          if (!goal.get().containsNaN())
          {
-            if (doorBehavior.getDistanceToDoor() < distanceFromDoorToTransition)
+            if (doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition())
             {
                status = tickDoor();
             }
