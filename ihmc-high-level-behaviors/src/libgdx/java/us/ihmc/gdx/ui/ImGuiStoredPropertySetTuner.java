@@ -78,7 +78,12 @@ public class ImGuiStoredPropertySetTuner
    public void render()
    {
       ImGui.begin(windowName);
+      renderWidgetsOnly();
+      ImGui.end();
+   }
 
+   public void renderWidgetsOnly()
+   {
       for (String version : versions)
       {
          if (ImGui.radioButton(version.isEmpty() ? "Primary" : version, storedPropertySet.getCurrentVersionSuffix().equals(version)))
@@ -129,7 +134,6 @@ public class ImGuiStoredPropertySetTuner
       {
          storedPropertySet.save();
       }
-      ImGui.end();
    }
 
    private void load()
