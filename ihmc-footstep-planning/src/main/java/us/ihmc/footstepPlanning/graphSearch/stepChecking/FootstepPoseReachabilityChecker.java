@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import org.lwjgl.Sys;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -32,9 +33,13 @@ public class FootstepPoseReachabilityChecker
    private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
    private final ZUpFrame stanceFootZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), stanceFootFrame, "stanceFootZUpFrame");
 
-   /** Robot's stance foot */
+   /**
+    * Robot's stance foot
+    */
    private final FramePose3D stanceFootPose = new FramePose3D();
-   /** Possible next robot step */
+   /**
+    * Possible next robot step
+    */
    private final FramePose3D candidateFootPose = new FramePose3D();
 
    private final YoFramePoseUsingYawPitchRoll yoStanceFootPose = new YoFramePoseUsingYawPitchRoll("stance", ReferenceFrame.getWorldFrame(), registry);
@@ -51,8 +56,7 @@ public class FootstepPoseReachabilityChecker
       parentRegistry.addChild(registry);
    }
 
-   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep,
-                                                                      DiscreteFootstep stanceStep)
+   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep)
    {
       RobotSide stepSide = candidateStep.getRobotSide();
 
@@ -83,20 +87,25 @@ public class FootstepPoseReachabilityChecker
          double stepYaw = candidateFootPose.getYaw();
          double stepPitch = candidateFootPose.getPitch();
          double stepRoll = candidateFootPose.getRoll();
-         candidateFootPose.getOrientation().setYawPitchRoll(- stepYaw, stepPitch, stepRoll);
+         candidateFootPose.getOrientation().setYawPitchRoll(-stepYaw, stepPitch, stepRoll);
       }
 
-      FramePose3DReadOnly nearestCheckpoint = findNearestCheckpoint(candidateFootPose, reachabilityMap.keySet());
+      StepReachabilityLatticePoint nearestReachabilityCheckpoint = new StepReachabilityLatticePoint(candidateFootPose.getX(),
+                                                                                                    candidateFootPose.getY(),
+                                                                                                    candidateFootPose.getYaw(),
+                                                                                                    stepReachabilityData.getXySpacing(),
+                                                                                                    stepReachabilityData.getYawDivisions(),
+                                                                                                    stepReachabilityData.getGridSizeYaw()/stepReachabilityData.getYawDivisions());
 
       // Check reachabilityMap to see if candidateFootPose is reachable
-      if (!checkpointIsReachable(reachabilityMap, nearestCheckpoint))
+      if (stepReachabilityData.getLegReachabilityMap().get(nearestReachabilityCheckpoint) < SOLUTION_QUALITY_THRESHOLD)
          return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
 
       return null;
    }
 
    // Check for closest foot pose in Reachability map keys (looping)
-   public FramePose3DReadOnly findNearestCheckpoint(FramePose3D candidateFootPose, Set<? extends FramePose3DReadOnly> mapFootPoses)
+   public FramePose3DReadOnly findNearestCheckpoint(FramePose3D candidateFootPose, Set<FramePose3D> mapFootPoses)
    {
       FramePose3DReadOnly nearestCheckpoint = null;
       double smallestDist = 10.0;
@@ -104,9 +113,9 @@ public class FootstepPoseReachabilityChecker
       {
          double poseDist = frame.getPositionDistance(candidateFootPose);
          double orientationDistance = frame.getOrientationDistance(candidateFootPose);
-         if (poseDist+orientationDistance < smallestDist)
+         if (poseDist + orientationDistance < smallestDist)
          {
-            smallestDist = poseDist+orientationDistance;
+            smallestDist = poseDist + orientationDistance;
             nearestCheckpoint = frame;
          }
       }
@@ -118,9 +127,9 @@ public class FootstepPoseReachabilityChecker
    // would need to find a way to get queriesPerAxis and offset values to calculate x/y/yawRatio, currently hardcoded
    public FramePose3D updatedFindNearestCheckpoint(FramePose3D candidateFootPose, Set<FramePose3D> MapFootPoses)
    {
-      double xRatio = 1/(1.4/52);
-      double yRatio = 1/(1.3/52);
-      double yawRatio = 1.0/(Math.toRadians(160)/52);
+      double xRatio = 1 / (1.4 / 52);
+      double yRatio = 1 / (1.3 / 52);
+      double yawRatio = 1.0 / (Math.toRadians(160) / 52);
 
       double newX = candidateFootPose.getX() * xRatio;
       newX = Math.round(newX) / xRatio;
@@ -141,13 +150,13 @@ public class FootstepPoseReachabilityChecker
    // Check for frame in Reachability map keys
    public boolean checkpointIsReachable(Map<? extends FramePose3DReadOnly, Double> reachabilityMap, FramePose3DReadOnly nearestCheckpoint)
    {
-//      System.out.println(nearestCheckpoint);
-//      System.out.println(reachabilityMap);
+      //      System.out.println(nearestCheckpoint);
+      //      System.out.println(reachabilityMap);
       for (FramePose3DReadOnly frame : reachabilityMap.keySet())
       {
          if (frame.geometricallyEquals(nearestCheckpoint, 0.0001))
          {
-//            System.out.println(frame);
+            //            System.out.println(frame);
             double reachabilityValue = reachabilityMap.get(frame); // TODO Bug: returns null
             return reachabilityValue < SOLUTION_QUALITY_THRESHOLD;
          }

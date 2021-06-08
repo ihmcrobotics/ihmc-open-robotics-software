@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.stepReachability;
 
 import controller_msgs.msg.dds.*;
+import org.lwjgl.Sys;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -10,6 +11,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityVisualizer;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
@@ -220,7 +222,6 @@ public class ValkyrieStepReachabilityCalculator
             FramePose3D leftFoot = new FramePose3D();
             FramePose3D rightFoot = new FramePose3D();
             leftFoot.getPosition().set(0.0, 0.5, 0.000);
-//            leftFoot.getOrientation().setYawPitchRoll(0.000,  0.000,  0.996);
             testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
             break;
          case TEST_MULTIPLE_STEPS:
@@ -239,14 +240,12 @@ public class ValkyrieStepReachabilityCalculator
                double reachabilityValue = testSingleStep(leftFootFramePose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
                poseValidityMap.put(leftFootPose, reachabilityValue);
             }
-//            new StepReachabilityVisualizer(poseValidityMap, queriesPerAxis);
             StepReachabilityFileTools.writeToFile(poseValidityMap, spacingXY, yawDivisions, yawSpacing);
-//            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case TEST_VISUALIZATION:
             StepReachabilityData stepReachabilityData = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
-//            new StepReachabilityVisualizer(feasibilityMap, queriesPerAxis);
-            StepReachabilityFileTools.printFeasibilityMap(stepReachabilityData);
+            new StepReachabilityVisualizer(stepReachabilityData);
+//            StepReachabilityFileTools.printFeasibilityMap(stepReachabilityData);
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -422,16 +421,16 @@ public class ValkyrieStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final double spacingXY = 0.05;
-   private static final int yawDivisions = 10;
-   private static final double yawSpacing = 2.0 * Math.PI / yawDivisions;
-
    private static final double minimumOffsetX = -0.7;
    private static final double maximumOffsetX = 0.7;
    private static final double minimumOffsetY = -0.4;
    private static final double maximumOffsetY = 0.9;
    private static final double minimumOffsetYaw = - Math.toRadians(80.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
+
+   private static final double spacingXY = 0.05;
+   private static final int yawDivisions = 10;
+   private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
    {
@@ -441,7 +440,7 @@ public class ValkyrieStepReachabilityCalculator
       int maximumXIndex = (int) Math.round(maximumOffsetX / spacingXY);
       int minimumYIndex = (int) Math.round(minimumOffsetY / spacingXY);
       int maximumYIndex = (int) Math.round(maximumOffsetY / spacingXY);
-      int minimumYawIndex = Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
+      int minimumYawIndex = - Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
       int maximumYawIndex = Math.floorMod((int) (Math.round((maximumOffsetYaw) / yawSpacing)), yawDivisions);
 
       for (int xIndex = minimumXIndex; xIndex <= maximumXIndex; xIndex++)
@@ -450,14 +449,11 @@ public class ValkyrieStepReachabilityCalculator
          {
             for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
             {
-               double x = xIndex * spacingXY;
-               double y = yIndex * spacingXY;
-               double yaw = yawIndex * yawSpacing;
-
-               if (x == 0 && y == 0 && yaw == 0)
+               if (xIndex == 0 && yIndex == 0 && yawIndex == 0)
                   continue;
 
                StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
+               LogTools.info(latticePoint);
                posesToCheck.add(latticePoint);
             }
          }
