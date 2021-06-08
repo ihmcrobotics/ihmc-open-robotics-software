@@ -1,15 +1,11 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.ros2.ROS2Topic;
-
-import java.util.List;
 
 public class TraverseStairsBehaviorAPI
 {
@@ -49,6 +45,7 @@ public class TraverseStairsBehaviorAPI
    private static final MessagerAPIFactory.CategoryTheme BehaviorTheme = apiFactory.createCategoryTheme("TraverseStairs");
 
    public static final MessagerAPIFactory.Topic<Boolean> Enabled = topic("Enabled");
+   public static final MessagerAPIFactory.Topic<String> State = topic("State");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

@@ -24,7 +24,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.create;
+import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
@@ -84,6 +84,9 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
       executeStepsState = new TraverseStairsExecuteStepsState(helper, parameters, planStepsState::getOutput);
 
       stateMachine = buildStateMachine();
+
+      helper.subscribeViaCallback(START, this::start);
+      helper.subscribeViaCallback(STOP, this::stop);
    }
 
    private StateMachine<TraverseStairsStateName, State> buildStateMachine()
@@ -104,6 +107,7 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.EXECUTE_STEPS, planStepsState::shouldTransitionToExecute);
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.PAUSE, planStepsState::shouldTransitionBackToPause);
       factory.addDoneTransition(TraverseStairsStateName.EXECUTE_STEPS, TraverseStairsStateName.PAUSE);
+      factory.addStateChangedListener((from, to) -> helper.publish(TraverseStairsBehaviorAPI.State, to.name()));
 
       return factory.build(TraverseStairsStateName.SQUARE_UP);
    }
@@ -121,45 +125,52 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
 
       if (enable)
       {
-         if (isRunning.getAndSet(true))
-         {
-            return;
-         }
-
-         planStepsState.reset();
-         executeStepsState.clearWalkingCompleteFlag();
-
-         hasPublishedCompleted.set(false);
-         behaviorHasCrashed.set(false);
-         helper.setCommunicationCallbacksEnabled(true);
-         stateMachine.resetToInitialState();
-         behaviorTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
-
-         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
-         supportRegionParametersMessage.setEnable(false);
-         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+         start();
       }
       else
       {
-         if (!isRunning.getAndSet(false))
-         {
-            return;
-         }
-
-         if (behaviorTask != null)
-         {
-            // TODO send pause walking command
-            behaviorTask.cancel(true);
-            behaviorTask = null;
-         }
-
-         BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
-         supportRegionParametersMessage.setEnable(true);
-         supportRegionParametersMessage.setSupportRegionScaleFactor(2.0);
-         supportRegionParametersPublisher.publish(supportRegionParametersMessage);
-
-         helper.setCommunicationCallbacksEnabled(false);
+         stop();
       }
+   }
+
+   private void stop()
+   {
+      if (!isRunning.getAndSet(false))
+      {
+         return;
+      }
+
+      if (behaviorTask != null)
+      {
+         // TODO send pause walking command
+         behaviorTask.cancel(true);
+         behaviorTask = null;
+      }
+
+//      BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+//      supportRegionParametersMessage.setEnable(true);
+//      supportRegionParametersMessage.setSupportRegionScaleFactor(2.0);
+//      supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+   }
+
+   private void start()
+   {
+      if (isRunning.getAndSet(true))
+      {
+         return;
+      }
+
+      planStepsState.reset();
+      executeStepsState.clearWalkingCompleteFlag();
+
+      hasPublishedCompleted.set(false);
+      behaviorHasCrashed.set(false);
+      stateMachine.resetToInitialState();
+      behaviorTask = executorService.scheduleAtFixedRate(this::update, 0, UPDATE_RATE_MILLIS, TimeUnit.MILLISECONDS);
+
+      BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
+      supportRegionParametersMessage.setEnable(false);
+      supportRegionParametersPublisher.publish(supportRegionParametersMessage);
    }
 
    private void update()

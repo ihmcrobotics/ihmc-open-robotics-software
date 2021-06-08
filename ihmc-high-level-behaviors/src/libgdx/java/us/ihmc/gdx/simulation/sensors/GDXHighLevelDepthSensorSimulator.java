@@ -422,8 +422,11 @@ catch (IndexOutOfBoundsException e)
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth image (ROS 1)"), publishDepthImageROS1);
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 1)"), publishColorImageROS1);
-      ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
+      if (flippedColorByteBuffer != null)
+      {
+         ImGui.sameLine();
+         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
+      }
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud (ROS 2)"), publishPointCloudROS2);
       getLowLevelSimulator().renderTuningSliders();
