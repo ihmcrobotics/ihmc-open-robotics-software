@@ -428,8 +428,8 @@ public class ValkyrieStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(80.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXY = 0.05;
-   private static final int yawDivisions = 10;
+   private static final double spacingXY = 0.3; // 0.05
+   private static final int yawDivisions = 3;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()

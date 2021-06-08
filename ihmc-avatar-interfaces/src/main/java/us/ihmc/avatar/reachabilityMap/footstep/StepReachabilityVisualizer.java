@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 
@@ -37,7 +38,7 @@ public class StepReachabilityVisualizer
          // Reachability for this footpose indicated by green/red color
          double reachabilityValue = stepReachabilityData.getLegReachabilityMap().get(latticePoint);
          if (reachabilityValue > 40) reachabilityValue = 40;
-         System.out.println("reachabilityValue: " + reachabilityValue);
+         LogTools.info("Reachability value: " + reachabilityValue);
          AppearanceDefinition appearance = YoAppearance.RGBColor(reachabilityValue/40, (40-reachabilityValue)/40, 0);
          validStep.addSphere(yawDivisions, appearance);
 

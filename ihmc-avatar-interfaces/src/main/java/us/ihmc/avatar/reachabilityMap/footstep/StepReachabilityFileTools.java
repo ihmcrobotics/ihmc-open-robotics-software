@@ -39,7 +39,7 @@ public class StepReachabilityFileTools
          }
 
          fileWriter.flush();
-         System.out.println("Done writing to file");
+         LogTools.info("Done writing to file");
       }
       catch (Exception e)
       {
@@ -65,7 +65,7 @@ public class StepReachabilityFileTools
       {
          Scanner scanner = new Scanner(new File(reachabilityDataFileName));
 
-         // read grid spacing
+         // Read grid spacing
          String gridData = scanner.nextLine();
          String[] gridDataStrings = gridData.split(",");
          double spacingXY = Double.parseDouble(gridDataStrings[0]);
