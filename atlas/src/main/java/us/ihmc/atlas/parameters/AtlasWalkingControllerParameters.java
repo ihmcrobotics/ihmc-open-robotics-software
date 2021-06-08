@@ -442,6 +442,12 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    }
 
    @Override
+   public String[] getInactiveJoints()
+   {
+      return new String[] {jointMap.getArmJointName(RobotSide.LEFT, ArmJointName.SECOND_WRIST_PITCH)};
+   }
+
+   @Override
    public MomentumOptimizationSettings getMomentumOptimizationSettings()
    {
       return momentumOptimizationSettings;
