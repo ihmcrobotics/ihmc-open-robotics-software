@@ -229,7 +229,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
       enableHeightFeedbackControl.set(walkingControllerParameters.enableHeightFeedbackControl());
 
-      failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
+      failureDetectionControlModule = controllerToolbox.getFailureDetectionControlModule();
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       commandConsumer = new WalkingCommandConsumer(commandInputManager, statusOutputManager, controllerToolbox, managerFactory, walkingControllerParameters,
@@ -670,11 +670,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          if (balanceManager.isPushRecoveryEnabled() && balanceManager.isRobotBackToSafeState())
             balanceManager.disablePushRecovery();
       }
-   }
-
-   public boolean isRobotFalling()
-   {
-      return failureDetectionControlModule.isRobotFalling();
    }
 
    public void updateManagers(WalkingState currentState)
