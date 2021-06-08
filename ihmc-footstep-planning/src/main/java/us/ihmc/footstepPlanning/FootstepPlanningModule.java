@@ -10,6 +10,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -99,7 +100,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons,
-                                 Map<FramePose3D, Double> reachabilityMap)
+                                 StepReachabilityData stepReachabilityData)
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;
@@ -116,7 +117,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                            bodyPathPlanHolder,
                                                            swingPlannerParameters,
                                                            walkingControllerParameters,
-                                                           reachabilityMap);
+                                                           stepReachabilityData);
       this.variableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));

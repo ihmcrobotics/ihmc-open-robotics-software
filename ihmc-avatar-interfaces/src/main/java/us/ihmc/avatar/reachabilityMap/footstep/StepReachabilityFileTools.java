@@ -1,13 +1,11 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
-import org.lwjgl.Sys;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.commons.nio.FileTools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.ihmcPerception.linemod.LineModTemplate;
 import us.ihmc.log.LogTools;
 
 import java.io.*;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -16,7 +14,7 @@ public class StepReachabilityFileTools
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
    private static final String filePath = "ihmc-open-robotics-software/valkyrie/src/main/java/us/ihmc/valkyrie/log/";
 
-   public static void writeToFile(Map<FramePose3D, Double> feasibilityMap)
+   public static void writeToFile(Map<StepReachabilityLatticePoint, Double> feasibilityMap, double spacingXY, int yawDivisions, double yawSpacing)
    {
       FileWriter fileWriter;
       String reachabilityDataFileName = filePath + "StepReachabilityMap.txt";
@@ -27,13 +25,16 @@ public class StepReachabilityFileTools
          FileTools.ensureFileExists(reachabilityDataFile.toPath());
          fileWriter = new FileWriter(reachabilityDataFile);
 
-         for (FramePose3D frame : feasibilityMap.keySet())
+         fileWriter.write(spacingXY + ", ");
+         fileWriter.write(yawDivisions + ", ");
+         fileWriter.write(yawSpacing + "\n");
+
+         for (StepReachabilityLatticePoint latticePoint : feasibilityMap.keySet())
          {
-            String position = frame.toString().substring(21,44);
-            String orientation = frame.toString().substring(62,92);
-            fileWriter.write(position + ", ");
-            fileWriter.write(orientation + ", ");
-            fileWriter.write(String.valueOf(feasibilityMap.get(frame)));
+            fileWriter.write(latticePoint.getXIndex() + ", ");
+            fileWriter.write(latticePoint.getYIndex() + ", ");
+            fileWriter.write(latticePoint.getYawIndex() + ", ");
+            fileWriter.write(String.valueOf(feasibilityMap.get(latticePoint)));
             fileWriter.write("\n");
          }
 
@@ -47,47 +48,48 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static void printFeasibilityMap(Map<FramePose3D, Double> feasibilityMap)
+   public static void printFeasibilityMap(StepReachabilityData stepReachabilityData)
    {
-      for (FramePose3D frame : feasibilityMap.keySet())
+      for (StepReachabilityLatticePoint latticePoint : stepReachabilityData.getLegReachabilityMap().keySet())
       {
-         System.out.print("Frame: " + frame);
-         System.out.println(", Feasiblility: " + feasibilityMap.get(frame));
+         System.out.print(latticePoint);
       }
    }
 
-   public static Map<FramePose3D, Double> loadFromFile(String filename)
+   public static StepReachabilityData loadFromFile(String filename)
    {
       String reachabilityDataFileName = filePath + filename;
-      Map<FramePose3D, Double> feasibilityMap = new HashMap<>();
+      StepReachabilityData reachabilityData = new StepReachabilityData();
 
       try
       {
          Scanner scanner = new Scanner(new File(reachabilityDataFileName));
+
+         // read grid spacing
+         String gridData = scanner.nextLine();
+         String[] gridDataStrings = gridData.split(",");
+         double spacingXY = Double.parseDouble(gridDataStrings[0]);
+         int yawDivisions = Integer.parseInt(gridDataStrings[1]);
+         double yawSpacing = Double.parseDouble(gridDataStrings[2]);
+         reachabilityData.setGridData(spacingXY, yawSpacing, yawDivisions);
+
          while(scanner.hasNextLine())
          {
             String line = scanner.nextLine();
-            FramePose3D frame = new FramePose3D();
 
             // Parse to get frame position, orientation and feasibility boolean
             String[] data = line.split(",");
-            double posX = Double.parseDouble(data[0]);
-            double posY = Double.parseDouble(data[1]);
-            double posZ = Double.parseDouble(data[2]);
-            frame.getPosition().set(posX, posY, posZ);
+            int xIndex = Integer.parseInt(data[0]);
+            int yIndex = Integer.parseInt(data[1]);
+            int yawIndex = Integer.parseInt(data[2]);
+            double reachabilityValue = Double.parseDouble(data[3]);
+            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
 
-            double orX = Double.parseDouble(data[3]);
-            double orY = Double.parseDouble(data[4]);
-            double orZ = Double.parseDouble(data[5]);
-            double orS = Double.parseDouble(data[6]);
-            frame.getOrientation().set(orX, orY, orZ, orS);
-
-            double reachabilityValue = Double.parseDouble(data[7]);
-            feasibilityMap.put(frame, reachabilityValue);
+            reachabilityData.getLegReachabilityMap().put(latticePoint, reachabilityValue);
          }
          scanner.close();
-         System.out.println("Done loading from file");
-         return feasibilityMap;
+         LogTools.info("Done loading from file");
+         return reachabilityData;
       }
       catch (FileNotFoundException e)
       {

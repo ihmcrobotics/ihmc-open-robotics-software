@@ -10,8 +10,9 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematic
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxCommandConverter;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
-import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityVisualizer;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
@@ -30,7 +31,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -54,7 +54,6 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
@@ -225,23 +224,29 @@ public class ValkyrieStepReachabilityCalculator
             testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
             break;
          case TEST_MULTIPLE_STEPS:
-            List<FramePose3D> leftFootPoseList = createLeftFootPoseList();
-            Map<FramePose3D, Double> poseValidityMap = new HashMap<>();
+            List<StepReachabilityLatticePoint> leftFootPoseList = createLeftFootPoseList();
+            Map<StepReachabilityLatticePoint, Double> poseValidityMap = new HashMap<>();
             FramePose3D rightFootPose = new FramePose3D();
             for (int i = 0; i < leftFootPoseList.size(); i++)
             {
-               FramePose3D leftFootPose = leftFootPoseList.get(i);
-               double reachabilityValue = testSingleStep(leftFootPose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
+               StepReachabilityLatticePoint leftFootPose = leftFootPoseList.get(i);
+
+               FramePose3D leftFootFramePose = new FramePose3D();
+               leftFootFramePose.getPosition().setX(spacingXY * leftFootPose.getXIndex());
+               leftFootFramePose.getPosition().setY(spacingXY * leftFootPose.getYIndex());
+               leftFootFramePose.getOrientation().setToYawOrientation(yawSpacing * leftFootPose.getYawIndex());
+
+               double reachabilityValue = testSingleStep(leftFootFramePose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
                poseValidityMap.put(leftFootPose, reachabilityValue);
             }
 //            new StepReachabilityVisualizer(poseValidityMap, queriesPerAxis);
-            StepReachabilityFileTools.writeToFile(poseValidityMap);
+            StepReachabilityFileTools.writeToFile(poseValidityMap, spacingXY, yawDivisions, yawSpacing);
 //            StepReachabilityFileTools.printFeasibilityMap(poseValidityMap);
             break;
          case TEST_VISUALIZATION:
-            Map<FramePose3D, Double> feasibilityMap = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
+            StepReachabilityData stepReachabilityData = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
 //            new StepReachabilityVisualizer(feasibilityMap, queriesPerAxis);
-            StepReachabilityFileTools.printFeasibilityMap(feasibilityMap);
+            StepReachabilityFileTools.printFeasibilityMap(stepReachabilityData);
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -417,7 +422,10 @@ public class ValkyrieStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final int queriesPerAxis = 27;
+   private static final double spacingXY = 0.05;
+   private static final int yawDivisions = 10;
+   private static final double yawSpacing = 2.0 * Math.PI / yawDivisions;
+
    private static final double minimumOffsetX = -0.7;
    private static final double maximumOffsetX = 0.7;
    private static final double minimumOffsetY = -0.4;
@@ -425,31 +433,32 @@ public class ValkyrieStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(80.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static List<FramePose3D> createLeftFootPoseList()
+   private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
    {
-      List<FramePose3D> posesToCheck = new ArrayList<>();
+      List<StepReachabilityLatticePoint> posesToCheck = new ArrayList<>();
 
-      for (int i = 0; i < queriesPerAxis; i++)
+      int minimumXIndex = (int) Math.round(minimumOffsetX / spacingXY);
+      int maximumXIndex = (int) Math.round(maximumOffsetX / spacingXY);
+      int minimumYIndex = (int) Math.round(minimumOffsetY / spacingXY);
+      int maximumYIndex = (int) Math.round(maximumOffsetY / spacingXY);
+      int minimumYawIndex = Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
+      int maximumYawIndex = Math.floorMod((int) (Math.round((maximumOffsetYaw) / yawSpacing)), yawDivisions);
+
+      for (int xIndex = minimumXIndex; xIndex <= maximumXIndex; xIndex++)
       {
-         for (int j = 0; j < queriesPerAxis; j++)
+         for (int yIndex = minimumYIndex; yIndex <= maximumYIndex; yIndex++)
          {
-            for (int k = 0; k < queriesPerAxis; k++)
+            for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
             {
-               double alphaX = ((double) i) / (queriesPerAxis - 1);
-               double alphaY = ((double) j) / (queriesPerAxis - 1);
-               double alphaYaw = ((double) k) / (queriesPerAxis - 1);
+               double x = xIndex * spacingXY;
+               double y = yIndex * spacingXY;
+               double yaw = yawIndex * yawSpacing;
 
-               double x = EuclidCoreTools.interpolate(minimumOffsetX, maximumOffsetX, alphaX);
-               double y = EuclidCoreTools.interpolate(minimumOffsetY, maximumOffsetY, alphaY);
-               double yaw = AngleTools.interpolateAngle(minimumOffsetYaw, maximumOffsetYaw, alphaYaw);
+               if (x == 0 && y == 0 && yaw == 0)
+                  continue;
 
-               FramePose3D pose = new FramePose3D();
-               pose.getPosition().set(x, y, 0.0);
-               pose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
-
-               // Don't add foot pose where both at origin
-               if (pose.getPosition().distanceFromOrigin() != 0)
-                  posesToCheck.add(pose);
+               StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
+               posesToCheck.add(latticePoint);
             }
          }
       }

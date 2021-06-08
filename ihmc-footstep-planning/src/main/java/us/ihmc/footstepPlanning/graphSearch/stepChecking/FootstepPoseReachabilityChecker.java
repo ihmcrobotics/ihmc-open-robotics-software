@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
 import org.lwjgl.Sys;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -25,7 +26,7 @@ public class FootstepPoseReachabilityChecker
    private final int SOLUTION_QUALITY_THRESHOLD = 7;
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
-   private final Map<? extends FramePose3DReadOnly, Double> reachabilityMap;
+   private final StepReachabilityData stepReachabilityData;
 
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
@@ -41,12 +42,12 @@ public class FootstepPoseReachabilityChecker
 
    public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters,
                                           FootstepSnapAndWiggler snapper,
-                                          Map<? extends FramePose3DReadOnly, Double> reachabilityMap,
+                                          StepReachabilityData stepReachabilityData,
                                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
-      this.reachabilityMap = reachabilityMap;
+      this.stepReachabilityData = stepReachabilityData;
       parentRegistry.addChild(registry);
    }
 
