@@ -202,7 +202,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       enableHeightFeedbackControl.set(pushRecoveryControllerParameters.enableHeightFeedbackControl());
 
-      failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
+      failureDetectionControlModule = controllerToolbox.getFailureDetectionControlModule();
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
 
@@ -228,7 +228,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private StateMachine<PushRecoveryStateEnum, PushRecoveryState> setupStateMachine()
    {
       StateMachineFactory<PushRecoveryStateEnum, PushRecoveryState> factory = new StateMachineFactory<>(PushRecoveryStateEnum.class);
-      factory.setNamePrefix("recovering").setRegistry(registry).buildYoClock(yoTime);
+      factory.setNamePrefix("pushRecovery").setRegistry(registry).buildYoClock(yoTime);
 
       TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
                                                                             failureDetectionControlModule, registry);
