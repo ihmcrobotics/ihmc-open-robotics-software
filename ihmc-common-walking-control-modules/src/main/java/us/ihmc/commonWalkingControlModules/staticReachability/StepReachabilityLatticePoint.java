@@ -10,7 +10,7 @@ public class StepReachabilityLatticePoint
 
    public StepReachabilityLatticePoint(double x, double y, double yaw, double xySpacing, int yawDivisions, double yawSpacing)
    {
-      this((int) Math.round(x / xySpacing), (int) Math.round(y / yawSpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
+      this((int) Math.round(x / xySpacing), (int) Math.round(y / xySpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
    }
 
    public StepReachabilityLatticePoint(int xIndex, int yIndex, int yawIndex)

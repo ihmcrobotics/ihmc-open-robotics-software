@@ -32,4 +32,9 @@ public class StepReachabilityData
       return gridSizeYaw;
    }
 
+   public int getYawDivisions()
+   {
+      return yawDivisions;
+   }
+
 }
