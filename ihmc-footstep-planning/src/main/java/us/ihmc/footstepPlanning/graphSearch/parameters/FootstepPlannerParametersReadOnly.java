@@ -103,6 +103,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Solution quality threshold when using IK-based feasibility check, only used when {@link #getUseStepReachabilityMap} is true.
+    */
+   default double getSolutionQualityThreshold()
+   {
+      return get(solutionQualityThreshold);
+   }
+
+   /**
     * Minimum step width the planner will consider for candidate steps.
     * If this value is too low, for example below the foot's width, the planner could place consecutive footsteps
     * on top of each other. If too high, footsteps might not be kinematically feasible.

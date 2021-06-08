@@ -62,6 +62,7 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepReach(parameters.getMaximumStepReach());
       packet.setMaximumStepYaw(parameters.getMaximumStepYaw());
       packet.setUseReachabilityMap(parameters.getUseStepReachabilityMap());
+      packet.setSolutionQualityThreshold(parameters.getSolutionQualityThreshold());
       packet.setMinimumStepWidth(parameters.getMinimumStepWidth());
       packet.setMinimumStepLength(parameters.getMinimumStepLength());
       packet.setMinimumStepYaw(parameters.getMinimumStepYaw());

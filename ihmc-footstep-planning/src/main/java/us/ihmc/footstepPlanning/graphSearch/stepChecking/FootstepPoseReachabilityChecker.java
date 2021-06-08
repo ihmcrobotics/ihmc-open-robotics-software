@@ -1,11 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
-import org.lwjgl.Sys;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -18,13 +16,11 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.Map;
-import java.util.Set;
 
 public class FootstepPoseReachabilityChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
-   private final int SOLUTION_QUALITY_THRESHOLD = 7;
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
    private final StepReachabilityData stepReachabilityData;
@@ -110,7 +106,7 @@ public class FootstepPoseReachabilityChecker
       {
          if (latticePoint.equals(nearestCheckpoint))
          {
-            return reachabilityMap.get(latticePoint) < SOLUTION_QUALITY_THRESHOLD;
+            return reachabilityMap.get(latticePoint) < parameters.getSolutionQualityThreshold();
          }
       }
       return false;
