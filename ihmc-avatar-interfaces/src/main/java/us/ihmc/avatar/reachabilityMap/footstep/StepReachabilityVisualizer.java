@@ -33,14 +33,14 @@ public class StepReachabilityVisualizer
       {
          // Represent footpose as sphere, yaw as z-axis translation
          Graphics3DObject validStep = new Graphics3DObject();
-         validStep.translate(latticePoint.getXIndex(), latticePoint.getYIndex(), latticePoint.getYawIndex()/(1/yawDivisions));
+         validStep.translate(latticePoint.getXIndex(), latticePoint.getYIndex(), latticePoint.getYawIndex());
 
          // Reachability for this footpose indicated by green/red color
          double reachabilityValue = stepReachabilityData.getLegReachabilityMap().get(latticePoint);
          if (reachabilityValue > 40) reachabilityValue = 40;
-         LogTools.info("Reachability value: " + reachabilityValue);
+//         LogTools.info("Reachability value: " + reachabilityValue);
          AppearanceDefinition appearance = YoAppearance.RGBColor(reachabilityValue/40, (40-reachabilityValue)/40, 0);
-         validStep.addSphere(yawDivisions, appearance);
+         validStep.addSphere(0.5/yawDivisions, appearance);
 
          scs.addStaticLinkGraphics(validStep);
       }

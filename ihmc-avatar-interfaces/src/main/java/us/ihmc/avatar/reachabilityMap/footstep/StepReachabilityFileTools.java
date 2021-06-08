@@ -64,7 +64,7 @@ public class StepReachabilityFileTools
          String gridData = scanner.nextLine();
          String[] gridDataStrings = gridData.split(",");
          double spacingXY = Double.parseDouble(gridDataStrings[0]);
-         int yawDivisions = Integer.parseInt(gridDataStrings[1]);
+         int yawDivisions = Integer.parseInt(gridDataStrings[1].substring(1));
          double yawSpacing = Double.parseDouble(gridDataStrings[2]);
          reachabilityData.setGridData(spacingXY, yawSpacing, yawDivisions);
 
@@ -75,8 +75,8 @@ public class StepReachabilityFileTools
             // Parse to get frame position, orientation and feasibility boolean
             String[] data = line.split(",");
             int xIndex = Integer.parseInt(data[0]);
-            int yIndex = Integer.parseInt(data[1]);
-            int yawIndex = Integer.parseInt(data[2]);
+            int yIndex = Integer.parseInt(data[1].substring(1));
+            int yawIndex = Integer.parseInt(data[2].substring(1));
             double reachabilityValue = Double.parseDouble(data[3]);
             StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
 
