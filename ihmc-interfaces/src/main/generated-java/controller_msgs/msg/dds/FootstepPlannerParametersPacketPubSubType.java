@@ -100,6 +100,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -232,6 +234,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -440,6 +445,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_7(data.getUseReachabilityMap());
 
+      cdr.write_type_6(data.getSolutionQualityThreshold());
+
       cdr.write_type_6(data.getMinimumStepWidth());
 
       cdr.write_type_6(data.getMinimumStepLength());
@@ -586,6 +593,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setUseReachabilityMap(cdr.read_type_7());
       	
+      data.setSolutionQualityThreshold(cdr.read_type_6());
+      	
       data.setMinimumStepWidth(cdr.read_type_6());
       	
       data.setMinimumStepLength(cdr.read_type_6());
@@ -721,6 +730,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("maximum_step_reach", data.getMaximumStepReach());
       ser.write_type_6("maximum_step_yaw", data.getMaximumStepYaw());
       ser.write_type_7("use_reachability_map", data.getUseReachabilityMap());
+      ser.write_type_6("solution_quality_threshold", data.getSolutionQualityThreshold());
       ser.write_type_6("minimum_step_width", data.getMinimumStepWidth());
       ser.write_type_6("minimum_step_length", data.getMinimumStepLength());
       ser.write_type_6("minimum_step_yaw", data.getMinimumStepYaw());
@@ -797,6 +807,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumStepReach(ser.read_type_6("maximum_step_reach"));
       data.setMaximumStepYaw(ser.read_type_6("maximum_step_yaw"));
       data.setUseReachabilityMap(ser.read_type_7("use_reachability_map"));
+      data.setSolutionQualityThreshold(ser.read_type_6("solution_quality_threshold"));
       data.setMinimumStepWidth(ser.read_type_6("minimum_step_width"));
       data.setMinimumStepLength(ser.read_type_6("minimum_step_length"));
       data.setMinimumStepYaw(ser.read_type_6("minimum_step_yaw"));
