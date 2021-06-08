@@ -19,7 +19,6 @@ import us.ihmc.gdx.ui.missionControl.processes.*;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.impl.intraprocess.IntraProcessDomain;
 
-import java.awt.*;
 import java.util.ArrayList;
 
 import static us.ihmc.gdx.imgui.ImGuiTools.uniqueIDOnly;
@@ -46,6 +45,7 @@ public abstract class GDXProcessManagerPanel
    private final RestartableMissionControlProcess footstepPlanningModuleProcess;
    private final RestartableMissionControlProcess mapsenseHeadlessProcess;
    private final RestartableMissionControlProcess objectDetectionProcess;
+   private final RestartableMissionControlProcess lidarREAProcess;
    protected final EnvironmentInitialSetup environmentInitialSetup;
 
    public GDXProcessManagerPanel()
@@ -68,6 +68,7 @@ public abstract class GDXProcessManagerPanel
       footstepPlanningModuleProcess = new FootstepPlanningModuleProcess(this::createRobotModel, this::getROS2Mode);
       mapsenseHeadlessProcess = new MapSenseHeadlessProcess();
       objectDetectionProcess = new ObjectDetectionProcess(this::createRobotModel, this::getROS2Mode, this::getRobotTarget);
+      lidarREAProcess = new LidarREAProcess();
 
       processes.add(ros1MasterProcess);
       processes.add(behaviorModuleProcess);
@@ -75,6 +76,7 @@ public abstract class GDXProcessManagerPanel
       processes.add(footstepPlanningModuleProcess);
       processes.add(mapsenseHeadlessProcess);
       processes.add(objectDetectionProcess);
+      processes.add(lidarREAProcess);
    }
 
    private PubSubImplementation getROS2Mode()
@@ -135,6 +137,7 @@ public abstract class GDXProcessManagerPanel
       behaviorModuleProcess.destroy();
       footstepPlanningModuleProcess.destroy();
       objectDetectionProcess.destroy();
+      lidarREAProcess.destroy();
 
       // destroy em all just in case
       for (MissionControlProcess process : processes)
@@ -183,6 +186,11 @@ public abstract class GDXProcessManagerPanel
    public RestartableMissionControlProcess getObjectDetectionProcess()
    {
       return objectDetectionProcess;
+   }
+
+   public RestartableMissionControlProcess getLidarREAProcess()
+   {
+      return lidarREAProcess;
    }
 
    public String getWindowName()

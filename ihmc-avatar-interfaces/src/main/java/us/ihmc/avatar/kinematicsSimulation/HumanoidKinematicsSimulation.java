@@ -38,6 +38,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.*;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotDataLogger.YoVariableServer;
@@ -388,6 +389,14 @@ public class HumanoidKinematicsSimulation
 
       integrator.setIntegrationDT(kinematicsSimulationParameters.getDt());
       integrator.doubleIntegrateFromAcceleration(Arrays.asList(controllerToolbox.getControlledJoints()));
+
+      // spin lidar
+      JointBasics hokuyoJoint = fullRobotModel.getLidarJoint("head_hokuyo_sensor");
+      if (hokuyoJoint instanceof RevoluteJoint)
+      {
+         RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
+         revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + 2.5 * kinematicsSimulationParameters.getUpdatePeriod());
+      }
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);
       if (kinematicsSimulationParameters.getLogToFile())
