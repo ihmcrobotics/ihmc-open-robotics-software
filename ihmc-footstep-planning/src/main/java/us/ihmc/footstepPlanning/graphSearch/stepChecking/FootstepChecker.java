@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -49,7 +50,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    public FootstepChecker(FootstepPlannerParametersReadOnly parameters,
                           SideDependentList<ConvexPolygon2D> footPolygons,
                           FootstepSnapAndWiggler snapper,
-                          Map<FramePose3D, Double> reachabilityMap,
+                          StepReachabilityData stepReachabilityData,
                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -59,7 +60,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       this.obstacleBetweenStepsChecker = new ObstacleBetweenStepsChecker(parameters, snapper);
       this.collisionDetector = new FootstepPlannerBodyCollisionDetector(parameters);
       this.heuristicPoseChecker = new FootstepPoseHeuristicChecker(parameters, snapper, registry);
-      this.reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, reachabilityMap, registry);
+      this.reachabilityChecker = new FootstepPoseReachabilityChecker(parameters, snapper, stepReachabilityData, registry);
       parentRegistry.addChild(registry);
    }
 

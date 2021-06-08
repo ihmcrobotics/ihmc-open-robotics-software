@@ -2,10 +2,10 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerAPI;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -30,7 +30,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class FootstepPlanningModuleLauncher
@@ -57,7 +56,7 @@ public class FootstepPlanningModuleLauncher
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
-      Map<FramePose3D, Double> legReachabilityMap = robotModel.getLegReachabilityMap();
+      StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
@@ -68,7 +67,7 @@ public class FootstepPlanningModuleLauncher
                                         swingPlannerParameters,
                                         walkingControllerParameters,
                                         footPolygons,
-                                        legReachabilityMap);
+                                        stepReachabilityData);
    }
 
    /**
