@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.stepChecking;
 import org.lwjgl.Sys;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
@@ -24,7 +25,7 @@ public class FootstepPoseReachabilityChecker
    private final int SOLUTION_QUALITY_THRESHOLD = 7;
    private final FootstepPlannerParametersReadOnly parameters;
    private final FootstepSnapAndWiggler snapper;
-   private final Map<FramePose3D, Double> reachabilityMap;
+   private final Map<? extends FramePose3DReadOnly, Double> reachabilityMap;
 
    private final TransformReferenceFrame stanceFootFrame = new TransformReferenceFrame("stanceFootFrame", ReferenceFrame.getWorldFrame());
    private final TransformReferenceFrame candidateFootFrame = new TransformReferenceFrame("candidateFootFrame", ReferenceFrame.getWorldFrame());
@@ -40,7 +41,7 @@ public class FootstepPoseReachabilityChecker
 
    public FootstepPoseReachabilityChecker(FootstepPlannerParametersReadOnly parameters,
                                           FootstepSnapAndWiggler snapper,
-                                          Map<FramePose3D, Double> reachabilityMap,
+                                          Map<? extends FramePose3DReadOnly, Double> reachabilityMap,
                                           YoRegistry parentRegistry)
    {
       this.parameters = parameters;
@@ -70,9 +71,21 @@ public class FootstepPoseReachabilityChecker
       yoStanceFootPose.set(stanceFootPose);
 
       // Get nearest reachability checkpoint, based on robot side
-      double poseY = stepSide.negateIfRightSide(candidateFootPose.getY());
-      candidateFootPose.setY(poseY);
-      FramePose3D nearestCheckpoint = findNearestCheckpoint(candidateFootPose, reachabilityMap.keySet());
+      candidateFootPose.setReferenceFrame(ReferenceFrame.getWorldFrame());
+
+      // adjust candidate foot position as if it were left footstep
+      if (candidateStep.getRobotSide() == RobotSide.RIGHT)
+      {
+         double stepY = candidateFootPose.getY();
+         candidateFootPose.setY(-stepY);
+
+         double stepYaw = candidateFootPose.getYaw();
+         double stepPitch = candidateFootPose.getPitch();
+         double stepRoll = candidateFootPose.getRoll();
+         candidateFootPose.getOrientation().setYawPitchRoll(- stepYaw, stepPitch, stepRoll);
+      }
+
+      FramePose3DReadOnly nearestCheckpoint = findNearestCheckpoint(candidateFootPose, reachabilityMap.keySet());
 
       // Check reachabilityMap to see if candidateFootPose is reachable
       if (!checkpointIsReachable(reachabilityMap, nearestCheckpoint))
@@ -82,13 +95,12 @@ public class FootstepPoseReachabilityChecker
    }
 
    // Check for closest foot pose in Reachability map keys (looping)
-   public FramePose3D findNearestCheckpoint(FramePose3D candidateFootPose, Set<FramePose3D> MapFootPoses)
+   public FramePose3DReadOnly findNearestCheckpoint(FramePose3D candidateFootPose, Set<? extends FramePose3DReadOnly> mapFootPoses)
    {
-      FramePose3D nearestCheckpoint = null;
+      FramePose3DReadOnly nearestCheckpoint = null;
       double smallestDist = 10.0;
-      for (FramePose3D frame : MapFootPoses)
+      for (FramePose3DReadOnly frame : mapFootPoses)
       {
-         frame.changeFrame(candidateFootPose.getReferenceFrame());
          double poseDist = frame.getPositionDistance(candidateFootPose);
          double orientationDistance = frame.getOrientationDistance(candidateFootPose);
          if (poseDist+orientationDistance < smallestDist)
@@ -96,7 +108,6 @@ public class FootstepPoseReachabilityChecker
             smallestDist = poseDist+orientationDistance;
             nearestCheckpoint = frame;
          }
-         frame.changeFrame(ReferenceFrame.getWorldFrame());
       }
       return nearestCheckpoint;
    }
@@ -127,11 +138,11 @@ public class FootstepPoseReachabilityChecker
    }
 
    // Check for frame in Reachability map keys
-   public boolean checkpointIsReachable(Map<FramePose3D, Double> reachabilityMap, FramePose3D nearestCheckpoint)
+   public boolean checkpointIsReachable(Map<? extends FramePose3DReadOnly, Double> reachabilityMap, FramePose3DReadOnly nearestCheckpoint)
    {
 //      System.out.println(nearestCheckpoint);
 //      System.out.println(reachabilityMap);
-      for (FramePose3D frame : reachabilityMap.keySet())
+      for (FramePose3DReadOnly frame : reachabilityMap.keySet())
       {
          if (frame.geometricallyEquals(nearestCheckpoint, 0.0001))
          {
