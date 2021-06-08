@@ -12,6 +12,7 @@ import us.ihmc.behaviors.door.DoorBehavior;
 import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -23,6 +24,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
@@ -56,7 +58,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
-//      helper.subscribeToDoorLocationViaCallback(doorLocation -> door.set(doorLocation.getDoorTransformToWorld()));
       distanceToDoor = helper.subscribeViaReference(DistanceToDoor, Double.NaN);
       helper.subscribeViaCallback(DetectedDoorPose, detectedDoorPose ->
       {
@@ -93,6 +94,11 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       CurrentBehaviorStatus currentStatus = status.get();
       currentStatePlot.render(currentStatus == null ? -1 : currentStatus.ordinal(), currentStatus == null ? "" : currentStatus.name());
 
+      if (ImGui.button(labels.get("Resend latest door location")))
+      {
+         helper.publish(ROS2Tools::getDoorLocationTopic,
+                        HumanoidMessageTools.createDoorLocationPacket(detectedDoorPose.get().getRight(), detectedDoorPose.get().getLeft().toByte()));
+      }
       ImGui.text("Object & Fiducial toolboxes:");
       ImGui.sameLine();
       if (ImGui.button(labels.get("Wake up")))
