@@ -91,6 +91,10 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          status = tickLookAndStep();
       }
+      else if (currentMode == STAIRS)
+      {
+         status = traverseStairsBehavior.tick();
+      }
 
       return status;
    }
