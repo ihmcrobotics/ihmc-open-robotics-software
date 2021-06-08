@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateContro
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -38,6 +39,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -273,10 +275,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          factory.addTransition(PushRecoveryStateEnum.TO_STANDING, transferStateEnum,
                  new StartPushRecoveryCondition(transferStateEnum.getTransferToSide(), walkingMessageHandler));
 
-//         // Stop push recovery when in transfer
-//         factory.addTransition(transferStateEnum, PushRecoveryStateEnum.TO_STANDING,
-//                 new StopPushRecoveryFromTransferCondition(transferState, walkingMessageHandler));
-
          // Stop push recovery when in single support
          factory.addTransition(singleSupportStateEnum, PushRecoveryStateEnum.TO_STANDING,
                  new StopPushRecoveryFromSingleSupportCondition(singleSupportState, walkingMessageHandler));
@@ -323,16 +321,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       Set<PushRecoveryStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(PushRecoveryStateEnum.TO_STANDING));
       factory.addTransition(allButStandingStates, PushRecoveryStateEnum.TO_STANDING, new AbortCondition());
 
-//      // Setup transition condition for push recovery, when recovering from double support.
-//      Set<PushRecoveryStateEnum> allDoubleSupportStates = Stream.of(PushRecoveryStateEnum.values).filter(state -> state.isDoubleSupport()).collect(Collectors.toSet());
-//
-//      for (RobotSide robotSide : RobotSide.values)
-//      {
-//         PushRecoveryStateEnum singleSupportStateEnum = PushRecoveryStateEnum.getFlamingoSingleSupportState(robotSide);
-//         RobotSide swingSide = singleSupportStateEnum.getSupportSide().getOppositeSide();
-//         factory.addTransition(allDoubleSupportStates, singleSupportStateEnum, new DoubSuppToSingSuppCond4DistRecov(swingSide, balanceManager));
-//      }
-
       // Update the previous state info for each state using state changed listeners.
       factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousWalkingStateEnum(from)));
       factory.addStateChangedListener((from, to) -> controllerToolbox.reportControllerStateChangeToListeners(from, to));
@@ -352,9 +340,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    public void initialize()
    {
-      controllerCoreCommand.requestReinitialization();
-      controllerToolbox.initialize();
-      managerFactory.initializeManagers();
 
       commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
@@ -370,75 +355,32 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
-      initializeContacts();
-
       for (RobotSide robotSide : RobotSide.values)
       {
          footDesiredCoPs.get(robotSide).setToZero(feet.get(robotSide).getSoleFrame());
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
+//      PushRecoveryStateEnum nextState = getInitialPushRecoveryState();
+//      stateMachine.performTransition(nextState);
       stateMachine.resetToInitialState();
-
-      initializeManagers();
 
       firstTick = true;
    }
 
-   private void initializeManagers()
+   private PushRecoveryStateEnum getInitialPushRecoveryState()
    {
-      balanceManager.disablePelvisXYControl();
-
-      double stepTime = walkingMessageHandler.getDefaultStepTime();
-      pelvisOrientationManager.setTrajectoryTime(stepTime);
-
-      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      if(feetManager.getCurrentConstraintType(RobotSide.LEFT) == FootControlModule.ConstraintType.FULL ||
+              feetManager.getCurrentConstraintType(RobotSide.RIGHT) == FootControlModule.ConstraintType.SWING)
       {
-         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
-         if (bodyManager != null)
-            bodyManager.initialize();
+         return PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT;
       }
-
-
-      pelvisOrientationManager.initialize();
-//      balanceManager.initialize();  // already initialized, so don't run it again, or else the state machine gets reset.
-      feetManager.initialize();
-      comHeightManager.initialize();
-      feetManager.resetHeightCorrectionParametersForSingularityAvoidance();
-   }
-
-   /**
-    * Request the controller to set all its desireds to match the current configuration of the robot.
-    * <p>
-    * Calling that method right after {@link #initialize()} will cause the controller to maintain the
-    * current robot configuration.
-    * </p>
-    */
-   public void requestImmediateTransitionToStandingAndHoldCurrent()
-   {
-//      stateMachine.performTransition(PushRecoveryStateEnum.STANDING);
-
-      for (int managerIdx = 0; managerIdx < bodyManagers.size(); managerIdx++)
+      else if(feetManager.getCurrentConstraintType(RobotSide.RIGHT) == FootControlModule.ConstraintType.FULL ||
+         feetManager.getCurrentConstraintType(RobotSide.LEFT) == FootControlModule.ConstraintType.SWING)
       {
-         RigidBodyControlManager bodyManager = bodyManagers.get(managerIdx);
-         if (bodyManager != null)
-            bodyManager.hold();
+         return PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
       }
-
-      pelvisOrientationManager.setToHoldCurrentInWorldFrame();
-      comHeightManager.initializeDesiredHeightToCurrent();
-      balanceManager.requestICPPlannerToHoldCurrentCoM();
-   }
-
-   private void initializeContacts()
-   {
-      controllerToolbox.clearContacts();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         controllerToolbox.resetFootPlaneContactPoint(robotSide);
-         feetManager.setFlatFootContactState(robotSide);
-      }
+      return PushRecoveryStateEnum.TO_STANDING;
    }
 
    private class AbortCondition implements StateTransitionCondition
@@ -466,7 +408,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    {
       PushRecoveryState currentState;
 
-      updateFailureDetection();
+//      updateFailureDetection();
 
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
