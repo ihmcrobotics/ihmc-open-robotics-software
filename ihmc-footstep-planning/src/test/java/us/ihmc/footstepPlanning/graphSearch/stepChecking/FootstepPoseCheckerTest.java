@@ -388,32 +388,6 @@ public class FootstepPoseCheckerTest
       assertFalse(testChecker.checkpointIsReachable(stepReachabilityData.getLegReachabilityMap(), testLatticePoint));
    }
 
-   @Test
-   public void testLatticePointEquals()
-   {
-      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      StepReachabilityData stepReachabilityData = createTestReachabilityData();
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepSnapAndWiggler snapper = new FootstepSnapAndWiggler(footPolygons, parameters);
-      FootstepPoseReachabilityChecker testChecker = new FootstepPoseReachabilityChecker(parameters, snapper, stepReachabilityData, registry);
-
-      StepReachabilityLatticePoint testLatticePoint = new StepReachabilityLatticePoint(-9,
-                                                                                       3,
-                                                                                       5,
-                                                                                       stepReachabilityData.getXySpacing(),
-                                                                                       stepReachabilityData.getYawDivisions(),
-                                                                                       stepReachabilityData.getGridSizeYaw()
-                                                                                       / stepReachabilityData.getYawDivisions());
-      StepReachabilityLatticePoint identicalLatticePoint = new StepReachabilityLatticePoint(-9,
-                                                                                            3,
-                                                                                            5,
-                                                                                            stepReachabilityData.getXySpacing(),
-                                                                                            stepReachabilityData.getYawDivisions(),
-                                                                                            stepReachabilityData.getGridSizeYaw()
-                                                                                            / stepReachabilityData.getYawDivisions());
-      assertEquals(testLatticePoint, identicalLatticePoint);
-   }
-
    private StepReachabilityData createTestReachabilityData()
    {
       StepReachabilityData testReachabilityData = new StepReachabilityData();
