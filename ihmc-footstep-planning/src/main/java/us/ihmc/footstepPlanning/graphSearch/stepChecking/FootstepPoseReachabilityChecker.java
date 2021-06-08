@@ -97,23 +97,22 @@ public class FootstepPoseReachabilityChecker
                                                                                                     stepReachabilityData.getGridSizeYaw()/stepReachabilityData.getYawDivisions());
 
       // Check reachability map to see if candidate foot position is reachable
-      if (stepReachabilityData.getLegReachabilityMap().get(nearestReachabilityCheckpoint) < SOLUTION_QUALITY_THRESHOLD)
+      if (!checkpointIsReachable(stepReachabilityData.getLegReachabilityMap(), nearestReachabilityCheckpoint))
          return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
 
       return null;
    }
 
-//   // Check for frame in Reachability map keys
-//   public boolean checkpointIsReachable(Map<? extends FramePose3DReadOnly, Double> reachabilityMap, FramePose3DReadOnly nearestCheckpoint)
-//   {
-//      for (FramePose3DReadOnly frame : reachabilityMap.keySet())
-//      {
-//         if (frame.geometricallyEquals(nearestCheckpoint, 0.0001))
-//         {
-//            double reachabilityValue = reachabilityMap.get(frame);
-//            return reachabilityValue < SOLUTION_QUALITY_THRESHOLD;
-//         }
-//      }
-//      return false;
-//   }
+   // Check for frame in Reachability map keys
+   public boolean checkpointIsReachable(Map<StepReachabilityLatticePoint, Double> reachabilityMap, StepReachabilityLatticePoint nearestCheckpoint)
+   {
+      for (StepReachabilityLatticePoint latticePoint : reachabilityMap.keySet())
+      {
+         if (latticePoint.equals(nearestCheckpoint))
+         {
+            return reachabilityMap.get(latticePoint) < SOLUTION_QUALITY_THRESHOLD;
+         }
+      }
+      return false;
+   }
 }
