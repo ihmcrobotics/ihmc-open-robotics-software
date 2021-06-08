@@ -155,12 +155,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if(previousStateEnum != null && previousStateEnum.isSingleSupport())
          balanceManager.setHoldSplitFractions(true);
 
-      // This can happen if walking is paused or aborted while the robot is on its toes already. In that case
-      // restore the full foot contact.
-      // TODO don't restore the foot to full contact necessarily. need to figure out how to detect that it's ok
-      if (previousStateEnum != null && previousStateEnum.isDoubleSupport())
-         feetManager.initializeContactStatesForDoubleSupport(null);
-
       RobotSide previousSupportSide = null;
       if (previousStateEnum != null)
       {
@@ -168,14 +162,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
             previousSupportSide = previousStateEnum.getSupportSide();
          else if (previousStateEnum.getTransferToSide() != null)
             previousSupportSide = previousStateEnum.getTransferToSide();
-      }
-
-      if (doFootExplorationInTransferToStanding.getBooleanValue())
-      {
-         if (previousSupportSide != null)
-         {
-            feetManager.initializeFootExploration(previousSupportSide.getOppositeSide());
-         }
       }
 
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
