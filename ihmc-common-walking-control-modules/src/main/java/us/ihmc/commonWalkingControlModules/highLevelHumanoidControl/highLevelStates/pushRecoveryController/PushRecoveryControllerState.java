@@ -103,10 +103,8 @@ public class PushRecoveryControllerState extends HighLevelControllerState
 
    public void initialize()
    {
-      controllerCore.initialize();
       pushRecoveryController.initialize();
       requestIntegratorReset = true;
-      requestTransitionToPushRecovery.set(false);
    }
 
    @Override

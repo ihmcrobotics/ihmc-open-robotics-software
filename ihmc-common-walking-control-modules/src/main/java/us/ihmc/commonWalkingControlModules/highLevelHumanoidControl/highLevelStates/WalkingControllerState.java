@@ -203,7 +203,6 @@ public class WalkingControllerState extends HighLevelControllerState
    public void onExit()
    {
       controllerToolbox.reportChangeOfRobotMotionStatus(RobotMotionStatus.UNKNOWN);
-      requestTransitionToPushRecovery.set(false);
    }
 
    @Override

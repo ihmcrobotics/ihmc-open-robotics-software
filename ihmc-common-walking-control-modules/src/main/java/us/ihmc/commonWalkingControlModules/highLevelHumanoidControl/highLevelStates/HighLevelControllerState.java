@@ -20,8 +20,6 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    private final HighLevelControllerName highLevelControllerName;
    protected final OneDoFJointBasics[] controlledJoints;
 
-   protected YoBoolean requestTransitionToPushRecovery;
-
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
                                    OneDoFJointBasics[] controlledJoints)
    {
@@ -34,7 +32,6 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
       registry = new YoRegistry(namePrefix + getClass().getSimpleName());
       this.highLevelControllerName = stateEnum;
       this.controlledJoints = controlledJoints;
-      requestTransitionToPushRecovery = new YoBoolean(stateEnum+"requestTransitionToPushRecovery", registry);
       jointSettingsHelper = new JointSettingsHelper(parameters, controlledJoints, this, stateEnum, registry);
    }
 
