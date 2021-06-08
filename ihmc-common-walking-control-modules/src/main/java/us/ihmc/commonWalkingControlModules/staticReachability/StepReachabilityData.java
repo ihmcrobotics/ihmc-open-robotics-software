@@ -8,11 +8,16 @@ public class StepReachabilityData
    private double xySpacing;
    private double gridSizeYaw;
    private int yawDivisions;
-   private final Map<StepReachabilityLatticePoint, Double> reachabilityData = new HashMap<>();
+   private Map<StepReachabilityLatticePoint, Double> reachabilityData = new HashMap<>();
 
    public Map<StepReachabilityLatticePoint, Double> getLegReachabilityMap()
    {
       return reachabilityData;
+   }
+
+   public void setLegReachabilityMap(Map<StepReachabilityLatticePoint, Double> reachabilityData)
+   {
+      this.reachabilityData = reachabilityData;
    }
 
    public void setGridData(double xySpacing, double gridSizeYaw, int yawDivisions)
