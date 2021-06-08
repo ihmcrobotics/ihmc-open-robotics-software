@@ -602,7 +602,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public StepReachabilityData getStepReachabilityData()
    {
-      return StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
+      return StepReachabilityFileTools.loadFromFile("ihmc-open-robotics-software/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/StepReachabilityMap.csv");
    }
 
    @Override

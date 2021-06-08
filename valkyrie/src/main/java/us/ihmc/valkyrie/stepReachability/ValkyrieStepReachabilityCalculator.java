@@ -111,7 +111,7 @@ public class ValkyrieStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
+   private static final Mode mode = Mode.TEST_VISUALIZATION;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
@@ -240,10 +240,13 @@ public class ValkyrieStepReachabilityCalculator
                double reachabilityValue = testSingleStep(leftFootFramePose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
                poseValidityMap.put(leftFootPose, reachabilityValue);
             }
-            StepReachabilityFileTools.writeToFile(poseValidityMap, spacingXY, yawDivisions, yawSpacing);
+
+            String fileName = "ihmc-open-robotics-software/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/StepReachabilityMap.csv";
+            StepReachabilityFileTools.writeToFile(fileName, poseValidityMap, spacingXY, yawDivisions, yawSpacing);
             break;
-         case TEST_VISUALIZATION:
-            StepReachabilityData stepReachabilityData = StepReachabilityFileTools.loadFromFile("StepReachabilityMap.txt");
+
+            case TEST_VISUALIZATION:
+            StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
             new StepReachabilityVisualizer(stepReachabilityData);
 //            StepReachabilityFileTools.printFeasibilityMap(stepReachabilityData);
             break;
@@ -451,6 +454,8 @@ public class ValkyrieStepReachabilityCalculator
             {
                if (xIndex == 0 && yIndex == 0 && yawIndex == 0)
                   continue;
+
+               n++;
 
                StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
                LogTools.info(latticePoint);
