@@ -454,9 +454,7 @@ public class ValkyrieStepReachabilityCalculator
             {
                if (xIndex == 0 && yIndex == 0 && yawIndex == 0)
                   continue;
-
-               n++;
-
+               
                StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
                LogTools.info(latticePoint);
                posesToCheck.add(latticePoint);
