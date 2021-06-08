@@ -84,6 +84,12 @@ public class WalkingControllerState extends HighLevelControllerState
                                                                             controllerToolbox.getYoGraphicsListRegistry(), registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
+      String[] inactiveJoints = walkingControllerParameters.getInactiveJoints();
+      if (inactiveJoints != null)
+      {
+         for (String inactiveJoint : inactiveJoints)
+            toolbox.addInactiveJoint(fullRobotModel.getOneDoFJointByName(inactiveJoint));
+      }
       if (setupInverseDynamicsSolver)
          toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
       if (setupInverseKinematicsSolver)

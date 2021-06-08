@@ -854,6 +854,11 @@ public class InverseDynamicsQPSolver
       CommonOps_DDRM.insert(rhoMax, solverInput_ub, numberOfDoFs, 0);
    }
 
+   public void setActiveDoF(int dofIndex, boolean active)
+   {
+      solverInput_activeIndices.set(dofIndex, 0, active ? 1.0 : 0.0);
+   }
+
    public void setActiveRhos(DMatrixRMaj activeRhoMatrix)
    {
       CommonOps_DDRM.insert(activeRhoMatrix, solverInput_activeIndices, numberOfDoFs, 0);

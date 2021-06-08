@@ -6,8 +6,19 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.LinearMomentumRateCostCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumModuleSolution;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
@@ -62,6 +73,7 @@ public class InverseDynamicsOptimizationControlModule
    private final DMatrixRMaj qDDotMinMatrix, qDDotMaxMatrix;
 
    private final JointIndexHandler jointIndexHandler;
+   private final TIntArrayList inactiveJointIndices = new TIntArrayList();
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
    private final Map<OneDoFJointBasics, YoDouble> jointMaximumAccelerations = new HashMap<>();
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumAccelerations = new HashMap<>();
@@ -89,6 +101,9 @@ public class InverseDynamicsOptimizationControlModule
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
       kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
+
+      for (OneDoFJointBasics inactiveJoint : toolbox.getInactiveOneDoFJoints())
+         inactiveJointIndices.add(jointIndexHandler.getOneDoFJointIndex(inactiveJoint));
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
 
@@ -172,6 +187,11 @@ public class InverseDynamicsOptimizationControlModule
       qpSolver.setRhoRegularizationWeight(wrenchMatrixCalculator.getRhoWeightMatrix());
       if (SETUP_RHO_TASKS)
          setupRhoTasks();
+
+      for (int i = 0; i < inactiveJointIndices.size(); i++)
+      {
+         qpSolver.setActiveDoF(inactiveJointIndices.get(i), false);
+      }
 
       qpSolver.setMinRho(rhoMin.getDoubleValue());
       qpSolver.setMaxRho(wrenchMatrixCalculator.getRhoMaxMatrix());
