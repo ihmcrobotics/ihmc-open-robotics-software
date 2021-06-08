@@ -11,29 +11,25 @@ import java.util.Scanner;
 
 public class StepReachabilityFileTools
 {
-   private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
-   private static final String filePath = "ihmc-open-robotics-software/valkyrie/src/main/java/us/ihmc/valkyrie/log/";
-
-   public static void writeToFile(Map<StepReachabilityLatticePoint, Double> feasibilityMap, double spacingXY, int yawDivisions, double yawSpacing)
+   public static void writeToFile(String fileName, Map<StepReachabilityLatticePoint, Double> feasibilityMap, double spacingXY, int yawDivisions, double yawSpacing)
    {
       FileWriter fileWriter;
-      String reachabilityDataFileName = filePath + "StepReachabilityMap.txt";
 
       try
       {
-         File reachabilityDataFile = new File(reachabilityDataFileName);
+         File reachabilityDataFile = new File(fileName);
          FileTools.ensureFileExists(reachabilityDataFile.toPath());
          fileWriter = new FileWriter(reachabilityDataFile);
 
-         fileWriter.write(spacingXY + ", ");
-         fileWriter.write(yawDivisions + ", ");
+         fileWriter.write(spacingXY + ",");
+         fileWriter.write(yawDivisions + ",");
          fileWriter.write(yawSpacing + "\n");
 
          for (StepReachabilityLatticePoint latticePoint : feasibilityMap.keySet())
          {
-            fileWriter.write(latticePoint.getXIndex() + ", ");
-            fileWriter.write(latticePoint.getYIndex() + ", ");
-            fileWriter.write(latticePoint.getYawIndex() + ", ");
+            fileWriter.write(latticePoint.getXIndex() + ",");
+            fileWriter.write(latticePoint.getYIndex() + ",");
+            fileWriter.write(latticePoint.getYawIndex() + ",");
             fileWriter.write(String.valueOf(feasibilityMap.get(latticePoint)));
             fileWriter.write("\n");
          }
@@ -58,12 +54,11 @@ public class StepReachabilityFileTools
 
    public static StepReachabilityData loadFromFile(String filename)
    {
-      String reachabilityDataFileName = filePath + filename;
       StepReachabilityData reachabilityData = new StepReachabilityData();
 
       try
       {
-         Scanner scanner = new Scanner(new File(reachabilityDataFileName));
+         Scanner scanner = new Scanner(new File(filename));
 
          // Read grid spacing
          String gridData = scanner.nextLine();
