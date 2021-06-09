@@ -29,10 +29,11 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final int numberOfFootstepsToConsider;
-   private final Footstep[] footsteps;
-   private final FootstepTiming[] footstepTimings;
+   private final Footstep footsteps;
+   private final FootstepTiming footstepTimings;
 
    private final DoubleProvider minimumTransferTime;
+   private final DoubleProvider minimumSwingTime;
 
    private final LegConfigurationManager legConfigurationManager;
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
@@ -55,6 +56,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
                                                  PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                                  WalkingFailureDetectionControlModule failureDetectionControlModule,
                                                  DoubleProvider minimumTransferTime,
+                                                 DoubleProvider minimumSwingTime,
                                                  DoubleProvider unloadFraction,
                                                  DoubleProvider rhoMin,
                                                  YoRegistry parentRegistry)
@@ -63,6 +65,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
             rhoMin, parentRegistry);
 
       this.minimumTransferTime = minimumTransferTime;
+      this.minimumSwingTime = minimumSwingTime;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
@@ -71,9 +74,9 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
               pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
 
-      numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
-      footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
-      footstepTimings = FootstepTiming.createTimings(numberOfFootstepsToConsider);
+      numberOfFootstepsToConsider = 1;    //TODO move to pushRecoveryControllerParameters
+      footsteps = new Footstep();
+      footstepTimings = new FootstepTiming();
    }
 
    @Override
@@ -81,55 +84,42 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
    {
       super.updateICPPlan();
 
-      // This needs to check `TO_STANDING` as well as messages could be received on the very first controller tick at which point
-      // the robot is not in the standing state but not yet walking either.
-      if (getPreviousWalkingStateEnum() == PushRecoveryStateEnum.TO_STANDING)
-      {
-         walkingMessageHandler.reportWalkingStarted();
-      }
-
-      if (isInitialTransfer())
-      {
-         pelvisOrientationManager.moveToAverageInSupportFoot(transferToSide);
-      }
-      else
-      {
-         // In middle of walking or leaving foot pose, pelvis is good leave it like that.
-         pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      }
+      // In middle of walking or leaving foot pose, pelvis is good leave it like that.
+      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
-      int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
-      if (stepsToAdd < 1)
-      {
-         throw new RuntimeException("Can not go to walking single support if there are no upcoming footsteps.");
-      }
-      for (int i = 0; i < stepsToAdd; i++)
-      {
-         Footstep footstep = footsteps[i];
-         FootstepTiming timing = footstepTimings[i];
-         walkingMessageHandler.peekFootstep(i, footstep);
-         walkingMessageHandler.peekTiming(i, timing);
+//      int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+//      if (stepsToAdd < 1)
+//      {
+//         throw new RuntimeException("Can not go to walking single support if there are no upcoming footsteps.");
+//      }
+//      for (int i = 0; i < stepsToAdd; i++)
+//      {
+//         Footstep footstep = footsteps[i];
+//         FootstepTiming timing = footstepTimings[i];
+//         walkingMessageHandler.peekFootstep(i, footstep);
+//         walkingMessageHandler.peekTiming(i, timing);
+//
+//         if (i == 0)
+//         {
+//            adjustTiming(timing);
+//            walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
+//         }
+//
+//         balanceManager.addFootstepToPlan(footstep, timing);
+//      }
 
-         if (i == 0)
-         {
-            adjustTiming(timing);
-            walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
-         }
 
-         balanceManager.addFootstepToPlan(footstep, timing);
-      }
-
-      FootstepTiming firstTiming = footstepTimings[0];
-      currentTransferDuration.set(firstTiming.getTransferTime());
+      currentTransferDuration.set(minimumTransferTime.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
-      balanceManager.initializeICPPlanForTransfer();
+      balanceManager.initializeICPPlanForTransferToRecovery();
 
-      pelvisOrientationManager.setUpcomingFootstep(footsteps[0]);
-      pelvisOrientationManager.initializeTransfer(transferToSide, firstTiming.getTransferTime(), firstTiming.getSwingTime());
+//      pelvisOrientationManager.setUpcomingFootstep(footsteps);
+      pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
+      pelvisOrientationManager.initializeTransfer(transferToSide, minimumTransferTime.getValue(), minimumSwingTime.getValue());
 
       legConfigurationManager.beginStraightening(transferToSide);
       legConfigurationManager.setFullyExtendLeg(transferToSide, false);
@@ -146,7 +136,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
       if (!doManualLiftOff())
       {
          if (switchToToeOffIfPossible())
-            feetManager.initializeSwingTrajectoryPreview(swingSide, footsteps[0], footstepTimings[0].getSwingTime());
+            feetManager.initializeSwingTrajectoryPreview(swingSide, footsteps, footstepTimings.getSwingTime());
       }
 
       super.doAction(timeInState);
@@ -161,10 +151,10 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
 
       updateFootPlanOffset();
 
-      double toeOffDuration = footstepTimings[0].getLiftoffDuration();
+      double toeOffDuration = footstepTimings.getLiftoffDuration();
       if (doManualLiftOff() && transferDuration - timeInState < toeOffDuration)
       {
-         Footstep upcomingFootstep = footsteps[0];
+         Footstep upcomingFootstep = footsteps;
          FrameSE3TrajectoryPoint firstWaypoint = upcomingFootstep.getSwingTrajectory().get(0);
          MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide.getOppositeSide());
          tempOrientation.setIncludingFrame(firstWaypoint.getOrientation());
@@ -177,7 +167,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
 
    private boolean doManualLiftOff()
    {
-      Footstep upcomingFootstep = footsteps[0];
+      Footstep upcomingFootstep = footsteps;
       return upcomingFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(upcomingFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
    }
 
@@ -186,7 +176,7 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
    {
       super.onEntry();
 
-      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());
+      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps, footstepTimings.getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
 
       updateFootPlanOffset();
