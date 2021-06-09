@@ -362,7 +362,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
-//      PushRecoveryStateEnum nextState = getInitialPushRecoveryState();
+//      PushRecoveryStateEnum nextState = balanceManager.getInitialPushRecoveryState();
 //      stateMachine.performTransition(nextState);
       stateMachine.resetToInitialState();
 
