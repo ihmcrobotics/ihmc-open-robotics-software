@@ -124,6 +124,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
+                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters)
    {
       this(contactableBodiesFactory,
@@ -132,6 +133,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
            wristSensorNames,
            highLevelControllerParameters,
            walkingControllerParameters,
+           pushRecoveryControllerParameters,
            copTrajectoryParameters,
            new DefaultSplitFractionCalculatorParameters());
    }
@@ -142,12 +144,13 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                              SideDependentList<String> wristSensorNames,
                                              HighLevelControllerParameters highLevelControllerParameters,
                                              WalkingControllerParameters walkingControllerParameters,
+                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              CoPTrajectoryParameters copTrajectoryParameters,
                                              SplitFractionCalculatorParametersReadOnly splitFractionCalculatorParameters)
    {
       this.highLevelControllerParameters = highLevelControllerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
-      this.pushRecoveryControllerParameters = new PushRecoveryControllerParameters();
+      this.pushRecoveryControllerParameters = pushRecoveryControllerParameters;
       this.copTrajectoryParameters = copTrajectoryParameters;
       this.contactableBodiesFactory = contactableBodiesFactory;
       this.footSensorNames = footForceSensorNames;
