@@ -1,7 +1,6 @@
 package us.ihmc.valkyrie.stepReachability;
 
 import controller_msgs.msg.dds.*;
-import org.lwjgl.Sys;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
@@ -94,9 +93,7 @@ import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyAtTargetFrame;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
-import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.newOneDoFJointMessage;
+import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.*;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -111,7 +108,7 @@ public class ValkyrieStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.TEST_VISUALIZATION;
+   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
@@ -219,26 +216,35 @@ public class ValkyrieStepReachabilityCalculator
             testHandPose();
             break;
          case TEST_SINGLE_STEP:
-            FramePose3D leftFoot = new FramePose3D();
+            StepReachabilityLatticePoint leftFoot = new StepReachabilityLatticePoint(0, 1, 0);
             FramePose3D rightFoot = new FramePose3D();
-            leftFoot.getPosition().set(0.0, 0.5, 0.000);
-            testSingleStep(leftFoot, rightFoot, SOLUTION_QUALITY_THRESHOLD);
+            testSingleStep(leftFoot, rightFoot, false);
             break;
          case TEST_MULTIPLE_STEPS:
             List<StepReachabilityLatticePoint> leftFootPoseList = createLeftFootPoseList();
             Map<StepReachabilityLatticePoint, Double> poseValidityMap = new HashMap<>();
             FramePose3D rightFootPose = new FramePose3D();
-            for (int i = 0; i < leftFootPoseList.size(); i++)
+            // Loop through XYs, free yaw
+            for (int xyLoopIndex = 0; xyLoopIndex < leftFootPoseList.size(); xyLoopIndex++)
             {
-               StepReachabilityLatticePoint leftFootPose = leftFootPoseList.get(i);
+               StepReachabilityLatticePoint leftFootPose = leftFootPoseList.get(xyLoopIndex);
+               double reachabilityValue = testSingleStep(leftFootPose, rightFootPose, true);
 
-               FramePose3D leftFootFramePose = new FramePose3D();
-               leftFootFramePose.getPosition().setX(spacingXY * leftFootPose.getXIndex());
-               leftFootFramePose.getPosition().setY(spacingXY * leftFootPose.getYIndex());
-               leftFootFramePose.getOrientation().setToYawOrientation(yawSpacing * leftFootPose.getYawIndex());
+               LogTools.info("Reachability value: " + reachabilityValue);
 
-               double reachabilityValue = testSingleStep(leftFootFramePose, rightFootPose, SOLUTION_QUALITY_THRESHOLD);
-               poseValidityMap.put(leftFootPose, reachabilityValue);
+               // If there is a valid configuration, sweep through yaws for that XY pose
+               if (reachabilityValue < SOLUTION_QUALITY_THRESHOLD)
+               {
+                  LogTools.info("Entering yaw sweep");
+                  List<StepReachabilityLatticePoint> leftFootYawSweepList = createLeftFootYawSweepList(leftFootPose);
+
+                  for (int yawLoopIndex = 0; yawLoopIndex < leftFootYawSweepList.size(); yawLoopIndex++)
+                  {
+                     leftFootPose = leftFootYawSweepList.get(yawLoopIndex);
+                     reachabilityValue = testSingleStep(leftFootPose, rightFootPose, false);
+                     poseValidityMap.put(leftFootPose, reachabilityValue);
+                  }
+               }
             }
 
             String fileName = "ihmc-open-robotics-software/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/StepReachabilityMap.csv";
@@ -327,9 +333,11 @@ public class ValkyrieStepReachabilityCalculator
    /**
     * Solves IK assuming that the right foot is at the origin and left foot is at the given position
     */
-   private double testSingleStep(FramePose3D leftFoot, FramePose3D rightFoot, double solutionQualityThreshold) throws SimulationExceededMaximumTimeException
+   private double testSingleStep(StepReachabilityLatticePoint leftFootLatticePoint, FramePose3D rightFoot, boolean freeYaw) throws SimulationExceededMaximumTimeException
    {
-      LogTools.info("Entering: testStep");
+      if (freeYaw) LogTools.info("Entering: testStep");
+      else LogTools.info("Sweeping yaw");
+
       double groundHeight = 0.0;
       Point2D offset = new Point2D(0.0, 0.15);
       double offsetYaw = 0.0;
@@ -337,14 +345,30 @@ public class ValkyrieStepReachabilityCalculator
       FullHumanoidRobotModel targetFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(targetFullRobotModel);
 
+      FramePose3D leftFoot = new FramePose3D();
+      leftFoot.getPosition().setX(spacingXY * leftFootLatticePoint.getXIndex());
+      leftFoot.getPosition().setY(spacingXY * leftFootLatticePoint.getYIndex());
+      leftFoot.getOrientation().setToYawOrientation(yawSpacing * leftFootLatticePoint.getYawIndex());
+
       for (RobotSide robotSide : RobotSide.values)
       {
          // Rigid body objective for each foot
          KinematicsToolboxRigidBodyMessage rbMessage;
-         if (robotSide == RobotSide.LEFT)
-            rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
+         if (freeYaw)
+         {
+            if (robotSide == RobotSide.LEFT)
+               rbMessage = holdRigidBodyFreeYaw(targetFullRobotModel.getFoot(robotSide), leftFoot);
+            else
+               rbMessage = holdRigidBodyFreeYaw(targetFullRobotModel.getFoot(robotSide), rightFoot);
+         }
          else
-            rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
+         {
+            if (robotSide == RobotSide.LEFT)
+               rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
+            else
+               rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
+         }
+
          rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
          rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
          commandInputManager.submitMessage(rbMessage);
@@ -431,8 +455,8 @@ public class ValkyrieStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(80.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXY = 0.3; // 0.05
-   private static final int yawDivisions = 3;   // 10
+   private static final double spacingXY = 0.05; // 0.05
+   private static final int yawDivisions = 2;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
@@ -443,25 +467,35 @@ public class ValkyrieStepReachabilityCalculator
       int maximumXIndex = (int) Math.round(maximumOffsetX / spacingXY);
       int minimumYIndex = (int) Math.round(minimumOffsetY / spacingXY);
       int maximumYIndex = (int) Math.round(maximumOffsetY / spacingXY);
-      int minimumYawIndex = - Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
-      int maximumYawIndex = Math.floorMod((int) (Math.round((maximumOffsetYaw) / yawSpacing)), yawDivisions);
 
       for (int xIndex = minimumXIndex; xIndex <= maximumXIndex; xIndex++)
       {
          for (int yIndex = minimumYIndex; yIndex <= maximumYIndex; yIndex++)
          {
-            for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
-            {
-               if (xIndex == 0 && yIndex == 0 && yawIndex == 0)
-                  continue;
-               
-               StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
-               LogTools.info(latticePoint);
-               posesToCheck.add(latticePoint);
-            }
+            if (xIndex == 0 && yIndex == 0)
+               continue;
+
+            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, 0);
+            posesToCheck.add(latticePoint);
          }
       }
       return posesToCheck;
+   }
+
+   private static List<StepReachabilityLatticePoint> createLeftFootYawSweepList(StepReachabilityLatticePoint leftFootPose)
+   {
+      List<StepReachabilityLatticePoint> leftFootYawSweepList = new ArrayList<>();
+
+      int minimumYawIndex = - Math.floorMod((int) (Math.round((minimumOffsetYaw) / yawSpacing)), yawDivisions);
+      int maximumYawIndex = Math.floorMod((int) (Math.round((maximumOffsetYaw) / yawSpacing)), yawDivisions);
+
+      for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
+      {
+         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootPose.getXIndex(), leftFootPose.getYIndex(), yawIndex);
+         leftFootYawSweepList.add(latticePoint);
+      }
+
+      return leftFootYawSweepList;
    }
 
    public static void recursivelyModifyGraphics(JointDescription joint, AppearanceDefinition ghostAppearance)
