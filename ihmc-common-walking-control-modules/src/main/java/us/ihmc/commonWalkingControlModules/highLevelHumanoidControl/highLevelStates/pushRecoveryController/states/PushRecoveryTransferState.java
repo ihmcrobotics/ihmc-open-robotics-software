@@ -220,15 +220,7 @@ public abstract class PushRecoveryTransferState extends PushRecoveryState
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
       balanceManager.setHoldSplitFractions(false);
 
-      if (walkingMessageHandler.hasUpcomingFootsteps())
-      {
-         walkingMessageHandler.peekFootstep(0, nextFootstep);
-         failureDetectionControlModule.setNextFootstep(nextFootstep);
-      }
-      else
-      {
-         failureDetectionControlModule.setNextFootstep(null);
-      }
+      failureDetectionControlModule.setNextFootstep(null);
 
       balanceManager.resetPushRecovery();
 

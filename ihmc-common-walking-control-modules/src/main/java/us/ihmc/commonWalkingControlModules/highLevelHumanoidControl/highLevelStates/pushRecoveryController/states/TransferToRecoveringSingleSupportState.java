@@ -91,28 +91,6 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryTransfer
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
-//      int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
-//      if (stepsToAdd < 1)
-//      {
-//         throw new RuntimeException("Can not go to walking single support if there are no upcoming footsteps.");
-//      }
-//      for (int i = 0; i < stepsToAdd; i++)
-//      {
-//         Footstep footstep = footsteps[i];
-//         FootstepTiming timing = footstepTimings[i];
-//         walkingMessageHandler.peekFootstep(i, footstep);
-//         walkingMessageHandler.peekTiming(i, timing);
-//
-//         if (i == 0)
-//         {
-//            adjustTiming(timing);
-//            walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
-//         }
-//
-//         balanceManager.addFootstepToPlan(footstep, timing);
-//      }
-
-
       currentTransferDuration.set(minimumTransferTime.getValue());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToRecovery();

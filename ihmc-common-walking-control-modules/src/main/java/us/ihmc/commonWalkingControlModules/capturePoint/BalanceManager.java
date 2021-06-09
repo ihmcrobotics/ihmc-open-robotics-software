@@ -11,6 +11,7 @@ import java.util.List;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
+import org.ojalgo.matrix.store.BigDenseStore;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation.SplitFractionCalculatorParametersReadOnly;
@@ -32,6 +33,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.Flaming
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.WalkingCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.messageHandlers.CenterOfMassTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.MomentumTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
@@ -82,6 +84,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 public class BalanceManager
 {
@@ -224,6 +227,8 @@ public class BalanceManager
    private final int maxNumberOfStepsToConsider;
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
    private final BooleanProvider maintainInitialCoMVelocityContinuityTransfer;
+
+   private PushRecoveryStateEnum initialPushRecoveryState = null;
 
    public BalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                          WalkingControllerParameters walkingControllerParameters,
@@ -421,6 +426,11 @@ public class BalanceManager
          initialPushRecoveryState = PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
       else
          initialPushRecoveryState = null;
+   }
+
+   public PushRecoveryStateEnum getInitialPushRecoveryState()
+   {
+      return initialPushRecoveryState;
    }
 
    public void clearICPPlan()
@@ -920,6 +930,34 @@ public class BalanceManager
       timeInSupportSequence.set(0.0);
       currentStateDuration.set(currentTiming.getTransferTime());
       totalStateDuration.set(currentTiming.getStepTime());
+
+      inSingleSupport.set(false);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
+
+      initializeOnStateChange = true;
+      icpPlannerDone.set(false);
+   }
+
+   public void initializeICPPlanForTransferToRecovery()
+   {
+      computeAngularMomentumOffset.set(useAngularMomentumOffset.getValue());
+      if (holdICPToCurrentCoMLocationInNextDoubleSupport.getBooleanValue())
+      {
+         requestICPPlannerToHoldCurrentCoM();
+         holdICPToCurrentCoMLocationInNextDoubleSupport.set(false);
+      }
+
+      stepAdjustmentController.reset();
+
+      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
+
+      copTrajectoryState.setInitialCoP(yoPerfectCoP);
+      copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
+      timeInSupportSequence.set(0.0);
+      currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
+      totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
       inSingleSupport.set(false);
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
