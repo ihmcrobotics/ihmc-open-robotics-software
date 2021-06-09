@@ -633,6 +633,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          commandInputManager.clearAllCommands();
 
          commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
+         balanceManager.setStartingStateForPushRecovery();
 
          if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
          {

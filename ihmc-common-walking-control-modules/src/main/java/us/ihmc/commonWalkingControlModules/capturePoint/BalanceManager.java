@@ -411,6 +411,17 @@ public class BalanceManager
       return footstepWasAdjusted;
    }
 
+   public void setStartingStateForPushRecovery()
+   {
+      YoPlaneContactState leftFootContact = controllerToolbox.getFootContactStates().get(RobotSide.LEFT);
+      YoPlaneContactState rightFootContact = controllerToolbox.getFootContactStates().get(RobotSide.RIGHT);
+      if(leftFootContact.inContact())
+         initialPushRecoveryState = PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT;
+      else if(rightFootContact.inContact())
+         initialPushRecoveryState = PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
+      else
+         initialPushRecoveryState = null;
+   }
 
    public void clearICPPlan()
    {
