@@ -237,6 +237,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       factory.addState(PushRecoveryStateEnum.TO_STANDING, toStandingState);
 
       DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, pushRecoveryControllerParameters.getMinimumTransferTime());
+      DoubleProvider minimumSwingTime = new DoubleParameter("MinimumSwingTime", registry, pushRecoveryControllerParameters.getMinimumSwingTime());
       DoubleProvider rhoMin = () -> controllerCoreOptimizationSettings.getRhoMin();
 
       SideDependentList<TransferToRecoveringSingleSupportState> recoveryTransferStates = new SideDependentList<>();
@@ -245,7 +246,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoveryTransferState(transferToSide);
          TransferToRecoveringSingleSupportState transferState = new TransferToRecoveringSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
                  controllerToolbox, managerFactory, pushRecoveryControllerParameters,
-                 failureDetectionControlModule, minimumTransferTime,
+                 failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
                  unloadFraction, rhoMin, registry);
          recoveryTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
