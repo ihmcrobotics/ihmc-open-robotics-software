@@ -5,7 +5,6 @@ public class StepReachabilityLatticePoint
    private final int xIndex;
    private final int yIndex;
    private final int yawIndex;
-
    private final int hashCode;
 
    public StepReachabilityLatticePoint(double x, double y, double yaw, double xySpacing, int yawDivisions, double yawSpacing)
@@ -18,7 +17,7 @@ public class StepReachabilityLatticePoint
       this.xIndex = xIndex;
       this.yIndex = yIndex;
       this.yawIndex = yawIndex;
-      hashCode = computeHashCode(this);
+      this.hashCode = computeHashCode(this);
    }
 
    public int getXIndex()
