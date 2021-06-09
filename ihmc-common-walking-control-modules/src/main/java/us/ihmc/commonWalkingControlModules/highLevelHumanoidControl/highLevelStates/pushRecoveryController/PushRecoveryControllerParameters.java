@@ -52,6 +52,14 @@ public abstract class PushRecoveryControllerParameters
       return 0.1;
    }
 
+   /**
+    * This is the minimum swing time that the controller will allow when adjusting transfer times to achieve certain step
+    * times in footstep plans.
+    */
+   public double getMinimumSwingTime()
+   {
+      return 0.8;
+   }
 
    /**
     * Returns the {@link MomentumOptimizationSettings} for this robot. These parameters define the weights
