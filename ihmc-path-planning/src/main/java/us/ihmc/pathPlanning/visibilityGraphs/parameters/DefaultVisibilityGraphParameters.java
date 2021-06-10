@@ -29,7 +29,7 @@ public class DefaultVisibilityGraphParameters extends StoredPropertySet implemen
       }
       else
       {
-         load();
+         loadUnsafe();
       }
    }
 
