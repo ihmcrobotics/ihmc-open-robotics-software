@@ -86,8 +86,6 @@ public class PushRecoveryBalanceManager
    private final BagOfBalls perfectCoPTrajectory;
    private final BagOfBalls perfectCMPTrajectory;
 
-   private final YoBoolean useMomentumRecoveryModeForBalance = new YoBoolean("useMomentumRecoveryModeForBalance", registry);
-
    private final ReferenceFrame centerOfMassFrame;
 
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
@@ -104,14 +102,7 @@ public class PushRecoveryBalanceManager
 
    private final FrameVector2D icpError2d = new FrameVector2D();
 
-   private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
-   private final DoubleProvider maxICPErrorBeforeSingleSupportForwardX;
-   private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
-   private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
-   private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
-
    private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
-   private final DoubleProvider ellipticICPErrorForMomentumRecovery = new DoubleParameter("ellipticICPErrorForMomentumRecovery", registry, 2.0);
 
    /**
     * Duration parameter used to linearly decrease the desired ICP velocity once the current state is
@@ -165,7 +156,6 @@ public class PushRecoveryBalanceManager
    private PushRecoveryStateEnum initialPushRecoveryState = null;
 
    public PushRecoveryBalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                     WalkingControllerParameters walkingControllerParameters,
                                      CoPTrajectoryParameters copTrajectoryParameters,
                                      YoRegistry parentRegistry)
    {
@@ -178,11 +168,6 @@ public class PushRecoveryBalanceManager
       centerOfMassFrame = referenceFrames.getCenterOfMassFrame();
 
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
-
-      maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
-      maxICPErrorBeforeSingleSupportBackwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportBackwardX", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportBackwardX());
-      maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
-      maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY", registry, walkingControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
 
       FrameConvexPolygon2D defaultSupportPolygon = controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT);
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
@@ -245,11 +230,6 @@ public class PushRecoveryBalanceManager
       yoPerfectCoPVelocity.setToNaN();
 
       parentRegistry.addChild(registry);
-   }
-
-   public void setUseMomentumRecoveryModeForBalance(boolean useMomentumRecoveryModeForBalance)
-   {
-      this.useMomentumRecoveryModeForBalance.set(useMomentumRecoveryModeForBalance);
    }
 
    public void addFootstepToPlan(Footstep footstep, FootstepTiming timing)
@@ -362,7 +342,7 @@ public class PushRecoveryBalanceManager
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
-      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
+      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(false); // TODO
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
       linearMomentumRateControlModuleInput.setPerfectCMP(perfectCMP2d);
@@ -607,27 +587,6 @@ public class PushRecoveryBalanceManager
 
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
-   }
-
-   public void computeNormalizedEllipticICPError(RobotSide transferToSide)
-   {
-      getICPError(icpError2d);
-      ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
-      icpError2d.changeFrame(leadingSoleZUpFrame);
-      boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
-      double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue() : maxICPErrorBeforeSingleSupportBackwardX.getValue();
-      double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue() : maxICPErrorBeforeSingleSupportOuterY.getValue();
-      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX) + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
-   }
-
-   public double getNormalizedEllipticICPError()
-   {
-      return normalizedICPError.getValue();
-   }
-
-   public double getEllipticICPErrorForMomentumRecovery()
-   {
-      return ellipticICPErrorForMomentumRecovery.getValue();
    }
 
    public double getICPDistanceOutsideSupportForStep()
