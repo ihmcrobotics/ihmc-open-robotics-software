@@ -1,10 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -33,11 +31,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.simulationConstructionSetTools.util.ground.PlanarRegionTerrainObject;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.ArrayList;
@@ -412,6 +408,20 @@ public class FootstepSnapAndWigglerTest
       distance = FootstepSnapAndWiggler.computeAchievedDeltaInside(stepPolygon, planarRegion, true);
       expectedDistance = - dy / Math.sqrt(2.0);
       Assertions.assertTrue(Math.abs(distance - expectedDistance) < epsilon, "FootstepNodeSnapAndWiggler.computeAchievedDeltaInside failing for concave region");
+   }
+
+   @Test
+   public void testSnappingToFlatGroundHeight()
+   {
+      double flatGroundHeight = 0.7;
+      snapAndWiggler.setFlatGroundHeight(flatGroundHeight);
+      snapAndWiggler.setPlanarRegions(null);
+
+      DiscreteFootstep footstep = new DiscreteFootstep(3, -2, 5, RobotSide.LEFT);
+      FootstepSnapData snapData = snapAndWiggler.snapFootstep(footstep);
+      RigidBodyTransform snappedStepTransform = snapData.getSnappedStepTransform(footstep);
+      double epsilon = 1e-7;
+      Assertions.assertEquals(snappedStepTransform.getTranslation().getZ(), flatGroundHeight, epsilon, "Flat ground snap height is not equal");
    }
 
    public void testStanceFootClearance()
