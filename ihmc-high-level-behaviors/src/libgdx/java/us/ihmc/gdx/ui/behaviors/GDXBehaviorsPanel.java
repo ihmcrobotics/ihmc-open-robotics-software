@@ -93,6 +93,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
+      behaviorTreePanel.create();
       highestLevelUI.create(baseUI);
    }
 
