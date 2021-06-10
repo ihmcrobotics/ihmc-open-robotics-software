@@ -66,12 +66,12 @@ public class TraverseStairsPlanStepsState implements State
       helper.subscribeViaCallback(FootstepPlannerParameters, parametersAsStrings ->
       {
          helper.getOrCreateStatusLogger().info("Accepting new footstep planner parameters");
-         footstepPlannerParameters.setAllFromStrings(parametersAsStrings);
+         planningModule.getFootstepPlannerParameters().setAllFromStrings(parametersAsStrings);
       });
       helper.subscribeViaCallback(SwingPlannerParameters, parametersAsStrings ->
       {
          helper.getOrCreateStatusLogger().info("Accepting new swing planner parameters");
-         swingPlannerParameters.setAllFromStrings(parametersAsStrings);
+         planningModule.getSwingPlannerParameters().setAllFromStrings(parametersAsStrings);
       });
 
       footstepListPublisher = new IHMCROS2Publisher<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
