@@ -32,6 +32,7 @@ public class ImGuiBehaviorTreePanel
 
    private final HashMap<Integer, ImVec2> nametagSize = new HashMap<>();
    private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
+   private final HashMap<Integer, ImVec2> nodeSizeCorrection = new HashMap<>();
 
    private NodeEditorContext context = null;
 
@@ -234,20 +235,17 @@ public class ImGuiBehaviorTreePanel
 
       if (!shouldRender)
       {
-         ImVec2 size = nodeSize.get(nodeIndex);
+         ImVec2 size = nodeSizeCorrection.get(nodeIndex);
 
-         //Push font here
+         ImGui.pushFont(ImGuiTools.getBigFont());
 
          ImVec2 textSize = new ImVec2();
          ImGui.calcTextSize(textSize, nodeName);
          ImGui.text(nodeName);
 
-         //Pop font here
+         ImGui.popFont();
 
-         ImGui.sameLine();
-
-         //I do not know why multiplying by six at the end here is necessary.
-         ImGui.dummy(size.x - textSize.x - ImGui.getStyle().getItemSpacingX(), size.y - nametagSize.get(nodeIndex).y - ImGui.getStyle().getItemSpacingY() * 6);
+         ImGui.dummy(size.x, size.y);
       }
 
       NodeEditor.endNode();
@@ -255,6 +253,11 @@ public class ImGuiBehaviorTreePanel
       if (firstRun)
       {
          nodeSize.put(nodeIndex, new ImVec2(NodeEditor.getNodeSizeX(nodeIndex), NodeEditor.getNodeSizeY(nodeIndex)));
+         nodeSizeCorrection.put(nodeIndex, new ImVec2(0, 0));
+      } else if (!shouldRender && nodeSizeCorrection.get(nodeIndex).x == 0) {
+         ImVec2 correction = nodeSizeCorrection.get(nodeIndex);
+         correction.x = nodeSize.get(nodeIndex).x - ImGui.getStyle().getItemSpacingX() - 8; //8 is probably not arbitrary?
+         correction.y = nodeSize.get(nodeIndex).y - NodeEditor.getNodeSizeY(nodeIndex) - 8;
       }
 
       nodeIndex++;
