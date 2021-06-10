@@ -6,6 +6,7 @@ import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiDir;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
@@ -23,7 +24,8 @@ public class GDXBehaviorTreeDevelopmentUI
    private final GDXImGuiBasedUI baseUI;
 
    private final ImGuiBehaviorTreePanel treePanel;
-   private final GDXBehaviorUIInterface tree;
+   private final BehaviorTreeControlFlowNode tree;
+   private final GDXBehaviorUIInterface treeGui;
 
    private final Timer timer;
 
@@ -39,9 +41,9 @@ public class GDXBehaviorTreeDevelopmentUI
 
       timer = new Timer();
 
-      tree = new ExampleSequenceGDXBehaviorUIInterface();
-      ExampleFallbackGDXBehaviorUIInterface node = new ExampleFallbackGDXBehaviorUIInterface();
-      node.addChild(new ExampleAbstractGDXBehaviorUIInterface()
+      tree = new SequenceNode();
+      BehaviorTreeControlFlowNode node = new FallbackNode();
+      node.addChild(new BehaviorTreeNode()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -57,7 +59,7 @@ public class GDXBehaviorTreeDevelopmentUI
             return "Primary";
          }
       });
-      node.addChild(new ExampleAbstractGDXBehaviorUIInterface()
+      node.addChild(new BehaviorTreeNode()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -73,7 +75,7 @@ public class GDXBehaviorTreeDevelopmentUI
             return "Secondary";
          }
       });
-      node.addChild(new ExampleAbstractGDXBehaviorUIInterface()
+      node.addChild(new BehaviorTreeNode()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -92,7 +94,7 @@ public class GDXBehaviorTreeDevelopmentUI
 
       tree.addChild(node);
 
-      tree.addChild(new ExampleAbstractGDXBehaviorUIInterface()
+      tree.addChild(new BehaviorTreeNode()
       {
          @Override
          public BehaviorTreeNodeStatus tickInternal()
@@ -110,6 +112,14 @@ public class GDXBehaviorTreeDevelopmentUI
       });
 
       treePanel = new ImGuiBehaviorTreePanel("Test");
+
+      treeGui = new ExampleSimpleNodeInterface("SequenceNode");
+      GDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
+      nodeGui.addChild(new ExampleSimpleNodeInterface("Primary"));
+      nodeGui.addChild(new ExampleSimpleNodeInterface("Secondary"));
+      nodeGui.addChild(new ExampleSimpleNodeInterface("Tertiary"));
+      treeGui.addChild(nodeGui);
+      treeGui.addChild(new ExampleSimpleNodeInterface("Other thing"));
 
       timer.scheduleAtFixedRate(new TimerTask()
       {
@@ -139,8 +149,9 @@ public class GDXBehaviorTreeDevelopmentUI
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
-            Point2D32 point = new Point2D32();
-            treePanel.renderAsWindow(tree);
+
+            treeGui.syncTree(tree);
+            treePanel.renderAsWindow(treeGui);
 
             ImGui.begin("Tree Control");
 
