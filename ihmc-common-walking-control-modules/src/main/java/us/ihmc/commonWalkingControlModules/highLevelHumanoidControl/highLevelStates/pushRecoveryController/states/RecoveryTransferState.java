@@ -164,7 +164,6 @@ public class RecoveryTransferState extends PushRecoveryState
    {
       RobotSide swingSide = transferToSide.getOppositeSide();
       feetManager.updateSwingTrajectoryPreview(swingSide);
-      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
       if (!doManualLiftOff())
@@ -253,14 +252,7 @@ public class RecoveryTransferState extends PushRecoveryState
    @Override
    public boolean isDone(double timeInState)
    {
-      //If we're using a precomputed icp trajectory we can't rely on the icp planner's state to dictate when to exit transfer.
-      boolean transferTimeElapsedUnderPrecomputedICPPlan = false;
-      if (balanceManager.isPrecomputedICPPlannerActive())
-      {
-         transferTimeElapsedUnderPrecomputedICPPlan = timeInState > walkingMessageHandler.getNextTransferTime();
-      }
-
-      if (balanceManager.isICPPlanDone() || transferTimeElapsedUnderPrecomputedICPPlan)
+      if (balanceManager.isICPPlanDone())
       {
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
          FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();

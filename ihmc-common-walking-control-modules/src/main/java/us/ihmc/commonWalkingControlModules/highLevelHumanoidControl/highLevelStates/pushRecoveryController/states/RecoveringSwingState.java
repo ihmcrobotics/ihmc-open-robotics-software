@@ -126,7 +126,6 @@ public class RecoveringSwingState extends PushRecoveryState
    @Override
    public void doAction(double timeInState)
    {
-      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
       walkingMessageHandler.clearFootTrajectory();
@@ -186,7 +185,6 @@ public class RecoveringSwingState extends PushRecoveryState
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
-      balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport();
 
       updateHeightManager();
@@ -200,7 +198,6 @@ public class RecoveringSwingState extends PushRecoveryState
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
       }
 
-      balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          balanceManager.computeICPPlan();
