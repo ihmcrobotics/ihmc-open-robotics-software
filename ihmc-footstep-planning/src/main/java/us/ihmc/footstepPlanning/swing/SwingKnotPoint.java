@@ -164,8 +164,17 @@ public class SwingKnotPoint
    // projects onto the YZ plane of the adjustment frame
    public void project(Vector3DBasics shiftDirection)
    {
-      double xAlpha = adjustmentFrameX.dot(shiftDirection);
-      scaleAdd(shiftDirection, -xAlpha, adjustmentFrameX);
+      if (swingPlannerParameters.getAllowLateralMotion())
+      {
+         double xAlpha = adjustmentFrameX.dot(shiftDirection);
+         scaleAdd(shiftDirection, -xAlpha, adjustmentFrameX);
+      }
+      else
+      {
+         double zAlpha = adjustmentFrameZ.dot(shiftDirection);
+         shiftDirection.set(adjustmentFrameZ);
+         shiftDirection.scale(zAlpha);
+      }
    }
 
    public YoFramePose3D getStartingWaypoint()

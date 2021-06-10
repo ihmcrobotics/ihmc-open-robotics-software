@@ -218,6 +218,11 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.motionCorrelationAlpha);
    }
 
+   default boolean getAllowLateralMotion()
+   {
+      return get(SwingPlannerParameterKeys.allowLateralMotion);
+   }
+
    default SwingPlannerParametersPacket getAsPacket()
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();
@@ -257,6 +262,7 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       packet.setMaxDisplacementLow(getMaxDisplacementLow());
       packet.setMaxDisplacementHigh(getMaxDisplacementHigh());
       packet.setMotionCorrelationAlpha(getMotionCorrelationAlpha());
+      packet.setAllowLateralMotion(getAllowLateralMotion());
 
       return packet;
    }

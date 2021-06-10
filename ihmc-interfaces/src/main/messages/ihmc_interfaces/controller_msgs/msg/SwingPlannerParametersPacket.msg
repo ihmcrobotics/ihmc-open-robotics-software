@@ -54,6 +54,9 @@ float64 waypoint_proportion_shift_for_stub_avoidance -1.0
 # If using the custom position swing planner, will add additional swing time if the trajectory is expanded
 float64 additional_swing_time_if_expanded -1.0
 
+# If true, the swing plan allows lateral relative to the nominal trajectory.
+bool allow_lateral_motion true
+
 # The parameters below are used in the class CollisionFreeSwingCalculator, which computes a trajectory with ~10 knot points.
 # The naming below is used to describe a trapezoid curve, such that parameters have a low and high value, and are interpolated
 # between them based on a low and high percentage through the trajectory.

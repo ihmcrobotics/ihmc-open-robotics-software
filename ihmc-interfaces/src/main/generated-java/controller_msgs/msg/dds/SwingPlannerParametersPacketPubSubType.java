@@ -74,6 +74,8 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -172,6 +174,9 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -263,6 +268,8 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_6(data.getAdditionalSwingTimeIfExpanded());
 
+      cdr.write_type_7(data.getAllowLateralMotion());
+
       cdr.write_type_6(data.getPercentageExtraSizeXLow());
 
       cdr.write_type_6(data.getPercentageExtraSizeXHigh());
@@ -335,6 +342,8 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       	
       data.setAdditionalSwingTimeIfExpanded(cdr.read_type_6());
       	
+      data.setAllowLateralMotion(cdr.read_type_7());
+      	
       data.setPercentageExtraSizeXLow(cdr.read_type_6());
       	
       data.setPercentageExtraSizeXHigh(cdr.read_type_6());
@@ -392,6 +401,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       ser.write_type_6("foot_stub_clearance", data.getFootStubClearance());
       ser.write_type_6("waypoint_proportion_shift_for_stub_avoidance", data.getWaypointProportionShiftForStubAvoidance());
       ser.write_type_6("additional_swing_time_if_expanded", data.getAdditionalSwingTimeIfExpanded());
+      ser.write_type_7("allow_lateral_motion", data.getAllowLateralMotion());
       ser.write_type_6("percentage_extra_size_x_low", data.getPercentageExtraSizeXLow());
       ser.write_type_6("percentage_extra_size_x_high", data.getPercentageExtraSizeXHigh());
       ser.write_type_6("extra_size_x_low", data.getExtraSizeXLow());
@@ -431,6 +441,7 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       data.setFootStubClearance(ser.read_type_6("foot_stub_clearance"));
       data.setWaypointProportionShiftForStubAvoidance(ser.read_type_6("waypoint_proportion_shift_for_stub_avoidance"));
       data.setAdditionalSwingTimeIfExpanded(ser.read_type_6("additional_swing_time_if_expanded"));
+      data.setAllowLateralMotion(ser.read_type_7("allow_lateral_motion"));
       data.setPercentageExtraSizeXLow(ser.read_type_6("percentage_extra_size_x_low"));
       data.setPercentageExtraSizeXHigh(ser.read_type_6("percentage_extra_size_x_high"));
       data.setExtraSizeXLow(ser.read_type_6("extra_size_x_low"));
