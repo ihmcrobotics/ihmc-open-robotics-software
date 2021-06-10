@@ -44,14 +44,6 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static void printFeasibilityMap(StepReachabilityData stepReachabilityData)
-   {
-      for (StepReachabilityLatticePoint latticePoint : stepReachabilityData.getLegReachabilityMap().keySet())
-      {
-         System.out.print(latticePoint);
-      }
-   }
-
    public static StepReachabilityData loadFromFile(String filename)
    {
       StepReachabilityData reachabilityData = new StepReachabilityData();

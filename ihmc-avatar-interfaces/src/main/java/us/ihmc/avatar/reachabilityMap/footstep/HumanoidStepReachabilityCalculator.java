@@ -104,7 +104,7 @@ public abstract class HumanoidStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
+   private static final Mode mode = Mode.TEST_VISUALIZATION;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
@@ -235,14 +235,12 @@ public abstract class HumanoidStepReachabilityCalculator
                   }
                }
             }
-
             StepReachabilityFileTools.writeToFile(robotModel.getStepReachabilityResourceName(), poseValidityMap, spacingXY, yawDivisions, yawSpacing);
             break;
 
             case TEST_VISUALIZATION:
             StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
             new StepReachabilityVisualizer(stepReachabilityData);
-//            StepReachabilityFileTools.printFeasibilityMap(stepReachabilityData);
             break;
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
@@ -450,8 +448,8 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(80.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXY = 0.05; // 0.05
-   private static final int yawDivisions = 2;   // 10
+   private static final double spacingXY = 0.3; // 0.05
+   private static final int yawDivisions = 3;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
