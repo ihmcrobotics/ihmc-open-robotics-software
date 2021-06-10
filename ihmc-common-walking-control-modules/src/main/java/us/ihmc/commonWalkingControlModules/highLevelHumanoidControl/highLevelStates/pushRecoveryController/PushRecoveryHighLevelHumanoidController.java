@@ -39,7 +39,6 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -240,25 +239,25 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       DoubleProvider minimumSwingTime = new DoubleParameter("MinimumSwingTime", registry, pushRecoveryControllerParameters.getMinimumSwingTime());
       DoubleProvider rhoMin = () -> controllerCoreOptimizationSettings.getRhoMin();
 
-      SideDependentList<TransferToRecoveringSingleSupportState> recoveryTransferStates = new SideDependentList<>();
+      SideDependentList<RecoveryTransferState> recoveryTransferStates = new SideDependentList<>();
       for (RobotSide transferToSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoveryTransferState(transferToSide);
-         TransferToRecoveringSingleSupportState transferState = new TransferToRecoveringSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
-                 controllerToolbox, managerFactory, pushRecoveryControllerParameters,
-                 failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
-                 unloadFraction, rhoMin, registry);
+         RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+                                                                         controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+                                                                         failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
+                                                                         unloadFraction, rhoMin, registry);
          recoveryTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
 
-      SideDependentList<RecoveringSingleSupportState> recoveringSingleSupportStates = new SideDependentList<>();
+      SideDependentList<RecoveringSwingState> recoveringSingleSupportStates = new SideDependentList<>();
       for (RobotSide supportSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide);
-         RecoveringSingleSupportState singleSupportState = new RecoveringSingleSupportState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
-                 controllerToolbox, managerFactory, pushRecoveryControllerParameters,
-                 failureDetectionControlModule, registry);
+         RecoveringSwingState singleSupportState = new RecoveringSwingState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+                                                                            controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+                                                                            failureDetectionControlModule, registry);
          recoveringSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
       }
@@ -266,8 +265,8 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       // Setup start/stop push recovery conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide);
-         RecoveringSingleSupportState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+         RecoveryTransferState transferState = recoveryTransferStates.get(robotSide);
+         RecoveringSwingState singleSupportState = recoveringSingleSupportStates.get(robotSide);
 
          PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
@@ -296,12 +295,12 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       // Setup push recovery single support to transfer conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         RecoveringSingleSupportState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+         RecoveringSwingState singleSupportState = recoveringSingleSupportStates.get(robotSide);
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Single support to transfer with same side
          {
-            TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide);
+            RecoveryTransferState transferState = recoveryTransferStates.get(robotSide);
             PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
 
             factory.addTransition(singleSupportStateEnum, transferStateEnum,
@@ -310,7 +309,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
          // Single support to transfer with opposite side
          {
-            TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide.getOppositeSide());
+            RecoveryTransferState transferState = recoveryTransferStates.get(robotSide.getOppositeSide());
             PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
 
             factory.addTransition(singleSupportStateEnum, transferStateEnum,

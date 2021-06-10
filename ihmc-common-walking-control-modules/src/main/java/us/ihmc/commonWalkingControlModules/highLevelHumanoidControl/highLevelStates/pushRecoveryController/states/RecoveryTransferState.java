@@ -31,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class TransferToRecoveringSingleSupportState extends PushRecoveryState
+public class RecoveryTransferState extends PushRecoveryState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -79,18 +79,18 @@ public class TransferToRecoveringSingleSupportState extends PushRecoveryState
    private final DoubleProvider unloadFraction;
    private final DoubleProvider rhoMin;
 
-   public TransferToRecoveringSingleSupportState(PushRecoveryStateEnum stateEnum,
-                                                 WalkingMessageHandler walkingMessageHandler,
-                                                 TouchdownErrorCompensator touchdownErrorCompensator,
-                                                 HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                 HighLevelControlManagerFactory managerFactory,
-                                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
-                                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                                 DoubleProvider minimumTransferTime,
-                                                 DoubleProvider minimumSwingTime,
-                                                 DoubleProvider unloadFraction,
-                                                 DoubleProvider rhoMin,
-                                                 YoRegistry parentRegistry)
+   public RecoveryTransferState(PushRecoveryStateEnum stateEnum,
+                                WalkingMessageHandler walkingMessageHandler,
+                                TouchdownErrorCompensator touchdownErrorCompensator,
+                                HighLevelHumanoidControllerToolbox controllerToolbox,
+                                HighLevelControlManagerFactory managerFactory,
+                                PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                                WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                DoubleProvider minimumTransferTime,
+                                DoubleProvider minimumSwingTime,
+                                DoubleProvider unloadFraction,
+                                DoubleProvider rhoMin,
+                                YoRegistry parentRegistry)
    {
       super(stateEnum, parentRegistry);
 

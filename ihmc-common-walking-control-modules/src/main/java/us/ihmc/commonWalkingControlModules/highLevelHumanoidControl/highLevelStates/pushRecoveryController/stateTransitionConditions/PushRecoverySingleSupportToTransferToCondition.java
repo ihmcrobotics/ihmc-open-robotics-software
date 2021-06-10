@@ -1,17 +1,17 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveringSingleSupportState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.TransferToRecoveringSingleSupportState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveringSwingState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveryTransferState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class PushRecoverySingleSupportToTransferToCondition implements StateTransitionCondition
 {
-   private final RecoveringSingleSupportState singleSupportState;
-   private final TransferToRecoveringSingleSupportState transferState;
+   private final RecoveringSwingState singleSupportState;
+   private final RecoveryTransferState transferState;
    private final WalkingMessageHandler walkingMessageHandler;
 
-   public PushRecoverySingleSupportToTransferToCondition(RecoveringSingleSupportState singleSupportState, TransferToRecoveringSingleSupportState transferState, WalkingMessageHandler walkingMessageHandler)
+   public PushRecoverySingleSupportToTransferToCondition(RecoveringSwingState singleSupportState, RecoveryTransferState transferState, WalkingMessageHandler walkingMessageHandler)
    {
       this.singleSupportState = singleSupportState;
       this.transferState = transferState;
