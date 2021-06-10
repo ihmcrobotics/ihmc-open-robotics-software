@@ -83,6 +83,10 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
             * If using the custom position swing planner, will add additional swing time if the trajectory is expanded
             */
    public double additional_swing_time_if_expanded_ = -1.0;
+   /**
+            * If true, the swing plan allows lateral relative to the nominal trajectory.
+            */
+   public boolean allow_lateral_motion_ = true;
    public double percentage_extra_size_x_low_ = -1.0;
    public double percentage_extra_size_x_high_ = -1.0;
    public double extra_size_x_low_ = -1.0;
@@ -146,6 +150,8 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       waypoint_proportion_shift_for_stub_avoidance_ = other.waypoint_proportion_shift_for_stub_avoidance_;
 
       additional_swing_time_if_expanded_ = other.additional_swing_time_if_expanded_;
+
+      allow_lateral_motion_ = other.allow_lateral_motion_;
 
       percentage_extra_size_x_low_ = other.percentage_extra_size_x_low_;
 
@@ -440,6 +446,21 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       return additional_swing_time_if_expanded_;
    }
 
+   /**
+            * If true, the swing plan allows lateral relative to the nominal trajectory.
+            */
+   public void setAllowLateralMotion(boolean allow_lateral_motion)
+   {
+      allow_lateral_motion_ = allow_lateral_motion;
+   }
+   /**
+            * If true, the swing plan allows lateral relative to the nominal trajectory.
+            */
+   public boolean getAllowLateralMotion()
+   {
+      return allow_lateral_motion_;
+   }
+
    public void setPercentageExtraSizeXLow(double percentage_extra_size_x_low)
    {
       percentage_extra_size_x_low_ = percentage_extra_size_x_low;
@@ -645,6 +666,8 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.additional_swing_time_if_expanded_, other.additional_swing_time_if_expanded_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.allow_lateral_motion_, other.allow_lateral_motion_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_x_low_, other.percentage_extra_size_x_low_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.percentage_extra_size_x_high_, other.percentage_extra_size_x_high_, epsilon)) return false;
@@ -726,6 +749,8 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
       if(this.additional_swing_time_if_expanded_ != otherMyClass.additional_swing_time_if_expanded_) return false;
 
+      if(this.allow_lateral_motion_ != otherMyClass.allow_lateral_motion_) return false;
+
       if(this.percentage_extra_size_x_low_ != otherMyClass.percentage_extra_size_x_low_) return false;
 
       if(this.percentage_extra_size_x_high_ != otherMyClass.percentage_extra_size_x_high_) return false;
@@ -804,6 +829,8 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       builder.append(this.waypoint_proportion_shift_for_stub_avoidance_);      builder.append(", ");
       builder.append("additional_swing_time_if_expanded=");
       builder.append(this.additional_swing_time_if_expanded_);      builder.append(", ");
+      builder.append("allow_lateral_motion=");
+      builder.append(this.allow_lateral_motion_);      builder.append(", ");
       builder.append("percentage_extra_size_x_low=");
       builder.append(this.percentage_extra_size_x_low_);      builder.append(", ");
       builder.append("percentage_extra_size_x_high=");

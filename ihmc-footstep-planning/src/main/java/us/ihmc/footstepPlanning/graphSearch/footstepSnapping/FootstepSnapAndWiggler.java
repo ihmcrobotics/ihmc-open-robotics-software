@@ -37,6 +37,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final RigidBodyTransform legCollisionShapeToSoleTransform = new RigidBodyTransform();
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
    private final GradientDescentStepConstraintInput gradientDescentStepConstraintInput = new GradientDescentStepConstraintInput();
+   private double flatGroundHeight = 0.0;
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
@@ -75,6 +76,11 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapDataHolder.clear();
    }
 
+   public void setFlatGroundHeight(double flatGroundHeight)
+   {
+      this.flatGroundHeight = flatGroundHeight;
+   }
+
    public void initialize()
    {
       updateWiggleParameters(wiggleParameters, parameters);
@@ -109,7 +115,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
       else if (flatGroundMode())
       {
-         return FootstepSnapData.identityData();
+         return FootstepSnapData.identityData(flatGroundHeight);
       }
       else
       {

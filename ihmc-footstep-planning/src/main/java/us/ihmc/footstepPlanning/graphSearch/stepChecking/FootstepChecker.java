@@ -32,7 +32,7 @@ public class FootstepChecker implements FootstepCheckerInterface
    private final FootstepPlannerBodyCollisionDetector collisionDetector;
    private final FootstepPoseChecker goodPositionChecker;
 
-   private PlanarRegionsList planarRegionsList = null;
+   private PlanarRegionsList regionsForCollisionChecking = null;
    private boolean assumeFlatGround = false;
 
    private final FootstepSnapData candidateStepSnapData = FootstepSnapData.identityData();
@@ -84,7 +84,7 @@ public class FootstepChecker implements FootstepCheckerInterface
       goodPositionChecker.setApproximateStepDimensions(candidateStep, stanceStep);
       achievedDeltaInside.set(snapData.getAchievedInsideDelta());
 
-      if (planarRegionsList == null || planarRegionsList.isEmpty())
+      if (regionsForCollisionChecking == null || regionsForCollisionChecking.isEmpty())
       {
          return;
       }
@@ -160,7 +160,6 @@ public class FootstepChecker implements FootstepCheckerInterface
    private boolean isCollisionFree(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwing)
    {
       // Check for ankle collision
-      cliffAvoider.setPlanarRegionsList(planarRegionsList);
       if(!cliffAvoider.isStepValid(candidateStep))
       {
          rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
@@ -228,11 +227,12 @@ public class FootstepChecker implements FootstepCheckerInterface
       return collisionDetected;
    }
 
-   public void setPlanarRegions(PlanarRegionsList planarRegionsList)
+   public void setPlanarRegions(PlanarRegionsList regionsForCollisionChecking)
    {
-      this.planarRegionsList = planarRegionsList;
-      collisionDetector.setPlanarRegionsList(planarRegionsList);
-      obstacleBetweenStepsChecker.setPlanarRegions(planarRegionsList);
+      this.regionsForCollisionChecking = regionsForCollisionChecking;
+      collisionDetector.setPlanarRegionsList(regionsForCollisionChecking);
+      obstacleBetweenStepsChecker.setPlanarRegions(regionsForCollisionChecking);
+      cliffAvoider.setPlanarRegionsList(regionsForCollisionChecking);
    }
 
    private void clearLoggedVariables()
