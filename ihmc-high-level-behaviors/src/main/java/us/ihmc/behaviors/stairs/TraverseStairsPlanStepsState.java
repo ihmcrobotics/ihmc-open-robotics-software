@@ -14,7 +14,9 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
@@ -27,11 +29,10 @@ import us.ihmc.robotics.stateMachine.core.State;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
+
 public class TraverseStairsPlanStepsState implements State
 {
-   private static final String footstepPlannerParameterFileName = "atlasFootstepPlannerParameters_Stairs.ini";
-   private static final String swingParameterFileName = "atlasSwingPlannerParameters_Stairs.ini";
-
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
    private final AtomicReference<Pose3D> goalInput = new AtomicReference<>();
@@ -58,8 +59,20 @@ public class TraverseStairsPlanStepsState implements State
 
       remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
-      planningModule.getFootstepPlannerParameters().load(footstepPlannerParameterFileName);
-      planningModule.getSwingPlannerParameters().load(swingParameterFileName);
+      FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
+      planningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
+      SwingPlannerParametersBasics swingPlannerParameters = helper.getRobotModel().getSwingPlannerParameters("_Stairs");
+      planningModule.getSwingPlannerParameters().set(swingPlannerParameters);
+      helper.subscribeViaCallback(FootstepPlannerParameters, parametersAsStrings ->
+      {
+         helper.getOrCreateStatusLogger().info("Accepting new footstep planner parameters");
+         footstepPlannerParameters.setAllFromStrings(parametersAsStrings);
+      });
+      helper.subscribeViaCallback(SwingPlannerParameters, parametersAsStrings ->
+      {
+         helper.getOrCreateStatusLogger().info("Accepting new swing planner parameters");
+         swingPlannerParameters.setAllFromStrings(parametersAsStrings);
+      });
 
       footstepListPublisher = new IHMCROS2Publisher<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.PLANNED_STEPS);
       new IHMCROS2Callback<>(helper.getROS2Node(), TraverseStairsBehaviorAPI.EXECUTE_STEPS, r -> executeStepsSignaled.set(true));
