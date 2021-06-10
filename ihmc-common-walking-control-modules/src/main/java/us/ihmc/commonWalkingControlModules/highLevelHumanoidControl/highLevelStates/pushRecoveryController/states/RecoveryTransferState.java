@@ -174,28 +174,6 @@ public class RecoveryTransferState extends PushRecoveryState
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       //      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
 
-      balanceManager.computeNormalizedEllipticICPError(transferToSide);
-
-      if (isUnloading != null && unloadFraction.getValue() > 0.0)
-      {
-         double percentInTransfer = MathTools.clamp(timeInState / stepTiming.getTransferTime(), 0.0, 1.0);
-
-         if (!isUnloading.getValue())
-         {
-            isUnloading.set(percentInTransfer > unloadFraction.getValue());
-         }
-
-         if (isUnloading.getValue())
-         {
-            double nominalPercentInUnloading = (percentInTransfer - unloadFraction.getValue()) / (1.0 - unloadFraction.getValue());
-            double icpBasedPercentInUnloading = 1.0 - MathTools.clamp(balanceManager.getNormalizedEllipticICPError() - 1.0, 0.0, 1.0);
-            double percentInUnloading = Math.min(nominalPercentInUnloading, icpBasedPercentInUnloading);
-            feetManager.unload(transferToSide.getOppositeSide(), percentInUnloading, rhoMin.getValue());
-         }
-      }
-
-      if (balanceManager.getNormalizedEllipticICPError() > balanceManager.getEllipticICPErrorForMomentumRecovery())
-         balanceManager.setUseMomentumRecoveryModeForBalance(true);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
 
@@ -260,10 +238,8 @@ public class RecoveryTransferState extends PushRecoveryState
 
          if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
             return true;
-         else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
-            return true;
-         else
-            balanceManager.setUseMomentumRecoveryModeForBalance(true);
+//         else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
+//            return true;
       }
 
       return feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
@@ -278,7 +254,6 @@ public class RecoveryTransferState extends PushRecoveryState
          feetManager.resetLoadConstraints(transferToSide.getOppositeSide());
       }
       feetManager.reset();
-      balanceManager.setUseMomentumRecoveryModeForBalance(false);
 
       balanceManager.minimizeAngularMomentumRateZ(false);
    }
