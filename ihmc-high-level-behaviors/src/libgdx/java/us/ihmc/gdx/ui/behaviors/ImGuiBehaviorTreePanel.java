@@ -1,8 +1,10 @@
 package us.ihmc.gdx.ui.behaviors;
 
-import imgui.ImColor;
-import imgui.extension.imnodes.ImNodes;
-import imgui.extension.imnodes.flag.ImNodesColorStyle;
+import imgui.extension.nodeditor.NodeEditor;
+import imgui.extension.nodeditor.NodeEditorContext;
+import imgui.extension.nodeditor.flag.NodeEditorPinKind;
+import imgui.extension.nodeditor.flag.NodeEditorStyleColor;
+import imgui.extension.nodeditor.flag.NodeEditorStyleVar;
 import imgui.internal.ImGui;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
@@ -26,9 +28,25 @@ public class ImGuiBehaviorTreePanel
    private boolean firstRun = true;
    private final HashMap<Integer, ImGuiMovingPlot> tickPlots = new HashMap<>();
 
+   private NodeEditorContext context = null;
+
+   /***
+    * Note that create() and dispose() should be called for creating and destroying the context.
+    *
+    * @param name The name of the window
+    */
    public ImGuiBehaviorTreePanel(String name)
    {
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
+   }
+
+   public void create() {
+      context = NodeEditor.createEditor();
+      NodeEditor.setCurrentEditor(context);
+
+      NodeEditor.pushStyleColor(NodeEditorStyleColor.Bg, 0.9f, 0.9f, 0.9f, 1);
+      NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBg, 0.8f, 0.8f, 0.8f, 1);
+      NodeEditor.pushStyleVar(NodeEditorStyleVar.NodeBorderWidth, 5);
    }
 
    public void renderAsWindow(GDXBehaviorUIInterface tree)
@@ -40,13 +58,14 @@ public class ImGuiBehaviorTreePanel
 
    public void renderWidgetsOnly(GDXBehaviorUIInterface tree)
    {
-      ImNodes.beginNodeEditor();
-      nodeIndex = 0;
+      NodeEditor.setCurrentEditor(context);
+      NodeEditor.begin(windowName);
+      nodeIndex = 1;
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
       renderNodeAndChildren(tree, -1, links);
       renderLinks(links);
 
-      ImNodes.endNodeEditor();
+      NodeEditor.end();
       firstRun = false;
    }
 
@@ -54,7 +73,7 @@ public class ImGuiBehaviorTreePanel
    {
       for (Pair<Integer, Integer> p : links)
       {
-         ImNodes.link(linkIndex++, p.getFirst(), p.getSecond());
+         NodeEditor.link(linkIndex++, p.getFirst(), p.getSecond(), 0, 0, 0, 1, 2);
       }
    }
 
@@ -66,15 +85,20 @@ public class ImGuiBehaviorTreePanel
       boolean isTickRecent = timeSinceLastTick < 5000;
 
       if (node.getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
-         ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#32a852"));
+      {
+         NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBorder, 0.19607843f, 0.658823529412f, 0.321568627451f, 1);
+      }
       else if (node.getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
-         ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#a83232"));
+      {
+         NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBorder, 0.658823529412f, 0.19607843f, 0.19607843f, 1);
+      }
       else
-         ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, ImColor.rgbToColor("#3452eb"));
+      {
+         NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBorder, 0.19607843f, 0.321568627451f, 0.921568627451f, 1);
+      }
 
-      ImNodes.beginNode(nodeIndex);
+      NodeEditor.beginNode(nodeIndex);
 
-      ImNodes.beginNodeTitleBar();
       String name = node.getName();
       if (node.getType().equals(SequenceNode.class))
       {
@@ -108,7 +132,27 @@ public class ImGuiBehaviorTreePanel
       {
          ImGui.textUnformatted("[*] " + (name != null ? name : "Behavior " + nodeIndex));
       }
-      ImNodes.endNodeTitleBar();
+
+      if (parentPin != -1)
+      {
+         ImGui.sameLine();
+
+         NodeEditor.beginPin(pinIndex, NodeEditorPinKind.Input);
+         ImGui.dummy(1f, 1f);
+         NodeEditor.endPin();
+
+         links.add(new Pair<>(parentPin, pinIndex++));
+      }
+
+      int nodePinIndex = pinIndex;
+      for (GDXBehaviorUIInterface child : node.getUIChildren())
+      {
+         ImGui.sameLine();
+
+         NodeEditor.beginPin(pinIndex++, NodeEditorPinKind.Output);
+         ImGui.dummy(1f, 1f);
+         NodeEditor.endPin();
+      }
 
       ImGuiMovingPlot tickPlot = tickPlots.get(nodeIndex);
       if (tickPlot == null)
@@ -138,42 +182,26 @@ public class ImGuiBehaviorTreePanel
          }
       }
 
-      if (!firstRun)
-         ImGui.text("Grid position: x: " + ImNodes.getNodeGridSpacePosX(nodeIndex) + " y: " + ImNodes.getNodeGridSpacePosY(nodeIndex));
-
       node.renderTreeNode();
 
       if (firstRun)
       {
          Point2D position = node.getTreeNodeInitialPosition();
-         ImNodes.setNodeGridSpacePos(nodeIndex, position.getX32(), position.getY32());
+         NodeEditor.setNodePosition(nodeIndex, position.getX32(), position.getY32());
       }
 
-//      ImGui.dummy(120f, 20f);
-
-      if (parentPin != -1)
-      {
-         ImNodes.beginInputAttribute(pinIndex);
-         ImNodes.endInputAttribute();
-
-         links.add(new Pair<>(parentPin, pinIndex++));
-      }
-
-      int nodePinIndex = pinIndex;
-      for (GDXBehaviorUIInterface child : node.getUIChildren())
-      {
-         ImNodes.beginOutputAttribute(pinIndex++);
-         ImNodes.endOutputAttribute();
-      }
-
-      ImNodes.endNode();
+      NodeEditor.endNode();
       nodeIndex++;
 
-      ImNodes.popColorStyle();
+      NodeEditor.popStyleColor(1);
 
       for (GDXBehaviorUIInterface child : node.getUIChildren())
       {
          renderNodeAndChildren(child, nodePinIndex++, links);
       }
+   }
+
+   public void dispose() {
+      NodeEditor.destroyEditor(context);
    }
 }

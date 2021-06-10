@@ -2,12 +2,9 @@ package us.ihmc.gdx.ui.behaviors;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
-import imgui.extension.imnodes.ImNodes;
 import imgui.flag.ImGuiDir;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.behaviorTree.*;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Point2D32;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -142,7 +139,7 @@ public class GDXBehaviorTreeDevelopmentUI
             baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.getImGuiDockingSetup().splitAdd("Behavior Tree Development UI", ImGuiDir.Right, 0.20);
 
-            ImNodes.createContext();
+            treePanel.create();
          }
 
          @Override
@@ -171,7 +168,7 @@ public class GDXBehaviorTreeDevelopmentUI
          @Override
          public void dispose()
          {
-            ImNodes.destroyContext();
+            treePanel.dispose();
             baseUI.dispose();
          }
       });
