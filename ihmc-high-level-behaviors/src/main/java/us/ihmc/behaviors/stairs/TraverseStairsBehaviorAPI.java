@@ -7,6 +7,8 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.ros2.ROS2Topic;
 
+import java.util.List;
+
 public class TraverseStairsBehaviorAPI
 {
    private static final String ROS_TOPIC_QUALIFIER = "/stairs";
@@ -46,6 +48,8 @@ public class TraverseStairsBehaviorAPI
 
    public static final MessagerAPIFactory.Topic<Boolean> Enabled = topic("Enabled");
    public static final MessagerAPIFactory.Topic<String> State = topic("State");
+   public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
+   public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
