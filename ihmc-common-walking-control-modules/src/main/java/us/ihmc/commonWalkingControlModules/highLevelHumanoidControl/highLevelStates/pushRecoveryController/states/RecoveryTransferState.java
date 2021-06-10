@@ -134,11 +134,8 @@ public class RecoveryTransferState extends PushRecoveryState
    {
       balanceManager.clearICPPlan();
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
-      balanceManager.setHoldSplitFractions(false);
 
       failureDetectionControlModule.setNextFootstep(null);
-
-      balanceManager.resetPushRecovery();
 
       double transferTime = walkingMessageHandler.getNextTransferTime();
       pelvisOrientationManager.setTrajectoryTime(transferTime);

@@ -147,7 +147,6 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
-      balanceManager.setHoldSplitFractions(false);
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
 
@@ -201,7 +200,6 @@ public class RecoveringSwingState extends PushRecoveryState
       if (balanceManager.isRecoveringFromDoubleSupportFall())
       {
          balanceManager.computeICPPlan();
-         balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
       }
 
 
@@ -226,8 +224,6 @@ public class RecoveringSwingState extends PushRecoveryState
    @Override
    public void onExit()
    {
-      balanceManager.resetPushRecovery();
-
       balanceManager.minimizeAngularMomentumRateZ(false);
 
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
