@@ -97,11 +97,6 @@ public class PushRecoveryBalanceManager
    private final FramePoint2D perfectCMP2d = new FramePoint2D();
    private final FramePoint2D perfectCoP2d = new FramePoint2D();
 
-   private final FramePoint2D adjustedDesiredCapturePoint2d = new FramePoint2D();
-   private final YoFramePoint2D yoAdjustedDesiredCapturePoint = new YoFramePoint2D("adjustedDesiredICP", worldFrame, registry);
-
-   private final FrameVector2D icpError2d = new FrameVector2D();
-
    private final DoubleProvider icpDistanceOutsideSupportForStep = new DoubleParameter("icpDistanceOutsideSupportForStep", registry, 0.03);
 
    /**
@@ -196,17 +191,14 @@ public class PushRecoveryBalanceManager
             perfectCMPTrajectory = null;
          }
 
-         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
+//         comTrajectoryPlanner.setCornerPointViewer(new CornerPointViewer(true, false, registry, yoGraphicsListRegistry));
 //         copTrajectory.setWaypointViewer(new CoPPointViewer(registry, yoGraphicsListRegistry));
 
-         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
-         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect CMP", yoPerfectCMP, 0.002, BlueViolet());
-         YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
-
-         YoGraphicPosition adjustedDesiredCapturePointViz = new YoGraphicPosition("Adjusted Desired Capture Point", yoAdjustedDesiredCapturePoint, 0.005, Yellow(), GraphicType.DIAMOND);
-         yoGraphicsListRegistry.registerArtifact(graphicListName, adjustedDesiredCapturePointViz.createArtifact());
+         YoGraphicPosition desiredCapturePointViz = new YoGraphicPosition("Desired Recovery Capture Point", yoDesiredCapturePoint, 0.01, Yellow(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition finalDesiredCapturePointViz = new YoGraphicPosition("Final Desired Recovery Capture Point", yoFinalDesiredICP, 0.01, Beige(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition finalDesiredCoMViz = new YoGraphicPosition("Final Desired Recovery CoM", yoFinalDesiredCoM, 0.01, Black(), GraphicType.BALL_WITH_ROTATED_CROSS);
+         YoGraphicPosition perfectCMPViz = new YoGraphicPosition("Perfect Recovery CMP", yoPerfectCMP, 0.002, BlueViolet());
+         YoGraphicPosition perfectCoPViz = new YoGraphicPosition("Perfect Recovery CoP", yoPerfectCoP, 0.002, DarkViolet(), GraphicType.BALL_WITH_CROSS);
 
          yoGraphicsListRegistry.registerArtifact(graphicListName, desiredCapturePointViz.createArtifact());
          yoGraphicsListRegistry.registerArtifact(graphicListName, finalDesiredCapturePointViz.createArtifact());
@@ -294,9 +286,6 @@ public class PushRecoveryBalanceManager
 //         pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
       // --- compute adjusted desired capture point
-      controllerToolbox.getAdjustedDesiredCapturePoint(desiredCapturePoint2d, adjustedDesiredCapturePoint2d);
-      yoAdjustedDesiredCapturePoint.set(adjustedDesiredCapturePoint2d);
-      desiredCapturePoint2d.setIncludingFrame(adjustedDesiredCapturePoint2d);
       // ---
 
 
