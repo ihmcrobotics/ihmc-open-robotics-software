@@ -172,17 +172,17 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       }
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
 
-      pushRecoveryManagerFactory = new PushRecoveryControlManagerFactory(registry);
-      pushRecoveryManagerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
-      pushRecoveryManagerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      pushRecoveryManagerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
-      pushRecoveryManagerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
-
       managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
       managerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
+
+      pushRecoveryManagerFactory = new PushRecoveryControlManagerFactory(managerFactory, registry);
+      pushRecoveryManagerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
+      pushRecoveryManagerFactory.setWalkingControllerParameters(walkingControllerParameters);
+      pushRecoveryManagerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
+      pushRecoveryManagerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
 
       controllerCoreFactory = new WholeBodyControllerCoreFactory(registry);
       controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);

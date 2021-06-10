@@ -74,7 +74,7 @@ public class FeetManager
    private final CoMHeightTimeDerivativesDataBasics rightLegCoMHeightData = new CoMHeightTimeDerivativesData();
    private final SideDependentList<CoMHeightTimeDerivativesDataBasics> legComHeightData = new SideDependentList<>(leftLegCoMHeightData, rightLegCoMHeightData);
 
-   public FeetManager(String prefix, HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   public FeetManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
                       PIDSE3GainsReadOnly swingFootGains, PIDSE3GainsReadOnly holdFootGains, PIDSE3GainsReadOnly toeOffFootGains,
                       YoRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -125,8 +125,7 @@ public class FeetManager
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(prefix,
-                                                                     robotSide,
+         FootControlModule footControlModule = new FootControlModule(robotSide,
                                                                      toeOffCalculator,
                                                                      walkingControllerParameters,
                                                                      swingTrajectoryParameters,
