@@ -130,13 +130,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    {
       balanceManager.clearICPPlan();
 
-      balanceManager.resetPushRecovery();
-
-      PushRecoveryStateEnum previousStateEnum = getPreviousWalkingStateEnum();
-
-      if(previousStateEnum != null && previousStateEnum.isSingleSupport())
-         balanceManager.setHoldSplitFractions(true);
-
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
