@@ -150,6 +150,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
+   default String getStepReachabilityResourceName()
+   {
+      return null;
+   }
+
    default StepReachabilityData getStepReachabilityData()
    {
       return null;
