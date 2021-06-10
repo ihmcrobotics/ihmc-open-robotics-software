@@ -3,6 +3,7 @@ package us.ihmc.atlas.stepReachability;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasKinematicsCollisionModel;
+import us.ihmc.atlas.parameters.AtlasSimulationCollisionModel;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.reachabilityMap.footstep.HumanoidStepReachabilityCalculator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
