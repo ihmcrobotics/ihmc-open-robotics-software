@@ -101,7 +101,8 @@ public class FootControlModule
    private final ContactWrenchCommand minWrenchCommand;
    private final int numberOfBasisVectors;
 
-   public FootControlModule(RobotSide robotSide,
+   public FootControlModule(String prefix,
+                            RobotSide robotSide,
                             ToeOffCalculator toeOffCalculator,
                             WalkingControllerParameters walkingControllerParameters,
                             YoSwingTrajectoryParameters swingTrajectoryParameters,
@@ -124,7 +125,8 @@ public class FootControlModule
       String namePrefix = sidePrefix + "Foot";
       registry = new YoRegistry(sidePrefix + getClass().getSimpleName());
       parentRegistry.addChild(registry);
-      footControlHelper = new FootControlHelper(robotSide,
+      footControlHelper = new FootControlHelper(prefix,
+                                                robotSide,
                                                 walkingControllerParameters,
                                                 swingTrajectoryParameters,
                                                 workspaceLimiterParameters,

@@ -92,6 +92,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControlManagerFactory managerFactory;
+   private final WholeBodyControllerCoreFactory controllerCoreFactory;
    private final PushRecoveryControlManagerFactory pushRecoveryManagerFactory;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
@@ -182,6 +183,10 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
       managerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
       managerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
+
+      controllerCoreFactory = new WholeBodyControllerCoreFactory(registry);
+      controllerCoreFactory.setWalkingControllerParameters(walkingControllerParameters);
+      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
    }
 
    private ContinuousStepGenerator continuousStepGenerator;
@@ -529,6 +534,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
       pushRecoveryManagerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      controllerCoreFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);
@@ -544,6 +550,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
                                                                                   controllerFactoriesMap,
                                                                                   stateTransitionFactories,
                                                                                   managerFactory,
+                                                                                  controllerCoreFactory,
                                                                                   controllerToolbox,
                                                                                   centerOfPressureDataHolderForEstimator,
                                                                                   forceSensorDataHolder,
