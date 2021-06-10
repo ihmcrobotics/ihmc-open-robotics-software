@@ -91,6 +91,11 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded, additionalSwingTimeIfExpanded);
    }
 
+   default void setAllowLateralMotion(boolean allowLateralMotion)
+   {
+      set(SwingPlannerParameterKeys.allowLateralMotion, allowLateralMotion);
+   }
+
    default void setExtraSizePercentageLow(Axis3D axis, double extraSizePercentageLow)
    {
       switch (axis)
@@ -253,5 +258,6 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       setMaxDisplacementLow(packet.getMaxDisplacementLow());
       setMaxDisplacementHigh(packet.getMaxDisplacementHigh());
       setMotionCorrelationAlpha(packet.getMotionCorrelationAlpha());
+      setAllowLateralMotion(packet.getAllowLateralMotion());
    }
 }
