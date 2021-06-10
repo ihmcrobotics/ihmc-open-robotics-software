@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -80,13 +82,13 @@ public class RecoveringSwingState extends PushRecoveryState
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final BalanceManager balanceManager;
+   private final PushRecoveryBalanceManager balanceManager;
 
    public RecoveringSwingState(PushRecoveryStateEnum stateEnum,
                                WalkingMessageHandler walkingMessageHandler,
                                TouchdownErrorCompensator touchdownErrorCompensator,
                                HighLevelHumanoidControllerToolbox controllerToolbox,
-                               HighLevelControlManagerFactory managerFactory,
+                               PushRecoveryControlManagerFactory managerFactory,
                                PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                WalkingFailureDetectionControlModule failureDetectionControlModule,
                                YoRegistry parentRegistry)
@@ -102,7 +104,7 @@ public class RecoveringSwingState extends PushRecoveryState
       footSwitches = controllerToolbox.getFootSwitches();
       fullRobotModel = controllerToolbox.getFullRobotModel();
 
-      balanceManager = managerFactory.getOrCreateBalanceManager();
+      this.balanceManager = managerFactory.getOrCreateBalanceManager();
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       this.controllerToolbox = controllerToolbox;

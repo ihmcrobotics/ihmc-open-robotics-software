@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTraj
 import us.ihmc.commonWalkingControlModules.falling.FallingControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HumanoidHighLevelControllerManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
@@ -91,6 +92,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusMessageOutputManager;
    private final HighLevelControlManagerFactory managerFactory;
+   private final PushRecoveryControlManagerFactory pushRecoveryManagerFactory;
    private final WalkingControllerParameters walkingControllerParameters;
    private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private final CoPTrajectoryParameters copTrajectoryParameters;
@@ -168,6 +170,12 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
          e.printStackTrace();
       }
       statusMessageOutputManager = new StatusMessageOutputManager(ControllerAPIDefinition.getControllerSupportedStatusMessages());
+
+      pushRecoveryManagerFactory = new PushRecoveryControlManagerFactory(registry);
+      pushRecoveryManagerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
+      pushRecoveryManagerFactory.setWalkingControllerParameters(walkingControllerParameters);
+      pushRecoveryManagerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
+      pushRecoveryManagerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
 
       managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
@@ -352,7 +360,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void useDefaultPushRecoveryControlState()
    {
-      PushRecoveryControllerStateFactory controllerStateFactory = new PushRecoveryControllerStateFactory();
+      PushRecoveryControllerStateFactory controllerStateFactory = new PushRecoveryControllerStateFactory(pushRecoveryManagerFactory);
 
       controllerStateFactories.add(controllerStateFactory);
       controllerFactoriesMap.put(HighLevelControllerName.PUSH_RECOVERY, controllerStateFactory);
@@ -520,6 +528,7 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       controllerToolbox.setWalkingMessageHandler(walkingMessageHandler);
 
       managerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
+      pushRecoveryManagerFactory.setHighLevelHumanoidControllerToolbox(controllerToolbox);
 
       ReferenceFrameHashCodeResolver referenceFrameHashCodeResolver = controllerToolbox.getReferenceFrameHashCodeResolver();
       FrameMessageCommandConverter commandConversionHelper = new FrameMessageCommandConverter(referenceFrameHashCodeResolver);

@@ -68,12 +68,12 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final YoDouble yoTime;
 
-   private final HighLevelControlManagerFactory managerFactory;
+   private final PushRecoveryControlManagerFactory managerFactory;
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
-   private final BalanceManager balanceManager;    //TODO replace with PushRecoverManager?
+   private final PushRecoveryBalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
@@ -123,7 +123,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    public PushRecoveryHighLevelHumanoidController(CommandInputManager commandInputManager,
                                                   StatusMessageOutputManager statusOutputManager,
-                                                  HighLevelControlManagerFactory managerFactory,
+                                                  PushRecoveryControlManagerFactory managerFactory,
                                                   PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                                   HighLevelHumanoidControllerToolbox controllerToolbox)
    {

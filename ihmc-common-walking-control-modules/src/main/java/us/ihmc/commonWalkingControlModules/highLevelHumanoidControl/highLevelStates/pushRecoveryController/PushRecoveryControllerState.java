@@ -71,7 +71,7 @@ public class PushRecoveryControllerState extends HighLevelControllerState
 
    public PushRecoveryControllerState(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusOutputManager,
-                                      HighLevelControlManagerFactory managerFactory,
+                                      PushRecoveryControlManagerFactory managerFactory,
                                       HighLevelHumanoidControllerToolbox controllerToolbox,
                                       HighLevelControllerParameters highLevelControllerParameters,
                                       PushRecoveryControllerParameters pushRecoveryControllerParameters)
