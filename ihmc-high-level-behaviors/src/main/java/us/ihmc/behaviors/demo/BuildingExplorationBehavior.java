@@ -53,7 +53,11 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       });
       helper.subscribeViaCallback(Goal, this::setGoal);
       helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
-      helper.subscribeViaCallback(Mode, mode::set);
+      helper.subscribeViaCallback(Mode, newValue ->
+      {
+         LogTools.info("Received mode: {}", newValue);
+         mode.set(newValue);
+      });
    }
 
    private void setGoal(Pose3D newGoal)
