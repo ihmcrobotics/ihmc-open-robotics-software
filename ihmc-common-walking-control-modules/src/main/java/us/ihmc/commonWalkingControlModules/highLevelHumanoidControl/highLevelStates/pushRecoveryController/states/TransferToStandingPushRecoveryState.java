@@ -29,14 +29,9 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToStandingPushRecoveryState extends PushRecoveryState
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
 
-   private final YoBoolean doFootExplorationInTransferToStanding = new YoBoolean("doFootExplorationInTransferToStanding", registry);
-
    private final WalkingMessageHandler walkingMessageHandler;
-   private final TouchdownErrorCompensator touchdownErrorCompensator;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
@@ -44,13 +39,10 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    private final PushRecoveryBalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
-
-   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
 
    private final Point3D midFootPosition = new Point3D();
 
-   public TransferToStandingPushRecoveryState(WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
+   public TransferToStandingPushRecoveryState(WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox, PushRecoveryControlManagerFactory managerFactory,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule,
                                               YoRegistry parentRegistry)
@@ -59,7 +51,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       maxICPErrorToSwitchToStanding.set(0.025);
 
       this.walkingMessageHandler = walkingMessageHandler;
-      this.touchdownErrorCompensator = touchdownErrorCompensator;
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
@@ -68,9 +59,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      doFootExplorationInTransferToStanding.set(false);
    }
 
    @Override
@@ -159,15 +147,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if(previousStateEnum != null && previousStateEnum.isSingleSupport())
          balanceManager.setHoldSplitFractions(true);
 
-      RobotSide previousSupportSide = null;
-      if (previousStateEnum != null)
-      {
-         if (previousStateEnum.getSupportSide() != null)
-            previousSupportSide = previousStateEnum.getSupportSide();
-         else if (previousStateEnum.getTransferToSide() != null)
-            previousSupportSide = previousStateEnum.getTransferToSide();
-      }
-
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
@@ -193,24 +172,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
-
-      touchdownErrorCompensator.clear();
-
-      if (previousSupportSide != null)
-      {
-         RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
-
-         legConfigurationManager.setFullyExtendLeg(previousSwingSide, false);
-         legConfigurationManager.beginStraightening(previousSwingSide);
-      }
-      else
-      {
-         for (RobotSide robotSide : RobotSide.values)
-         {
-            legConfigurationManager.setFullyExtendLeg(robotSide, false);
-            legConfigurationManager.setStraight(robotSide);
-         }
-      }
    }
 
    @Override
