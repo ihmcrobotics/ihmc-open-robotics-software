@@ -1,9 +1,13 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import java.awt.Color;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
+import us.ihmc.communication.net.ObjectProducer;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
@@ -20,18 +24,18 @@ public class CaptureRegionVisualizer
 
    private final YoFrameConvexPolygon2D yoCaptureRegionPolygon;
    private final FrameConvexPolygon2D captureRegionPolygon = new FrameConvexPolygon2D();
-   private final OneStepCaptureRegionCalculator captureRegionCalculator;
+   private final Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider;
 
-   public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public CaptureRegionVisualizer(Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider, YoGraphicsListRegistry yoGraphicsListRegistry,
                                   YoRegistry parentRegistry)
    {
-      this(captureRegionCalculator, "", yoGraphicsListRegistry, parentRegistry);
+      this(captureRegionProvider, "", yoGraphicsListRegistry, parentRegistry);
    }
 
-   public CaptureRegionVisualizer(OneStepCaptureRegionCalculator captureRegionCalculator, String suffix, YoGraphicsListRegistry yoGraphicsListRegistry,
+   public CaptureRegionVisualizer(Supplier<FrameConvexPolygon2DReadOnly> captureRegionProvider, String suffix, YoGraphicsListRegistry yoGraphicsListRegistry,
          YoRegistry parentRegistry)
    {
-      this.captureRegionCalculator = captureRegionCalculator;
+      this.captureRegionProvider = captureRegionProvider;
 
       yoCaptureRegionPolygon = new YoFrameConvexPolygon2D(caption, suffix, worldFrame, 30, registry);
 
@@ -48,7 +52,7 @@ public class CaptureRegionVisualizer
 
    public void update()
    {
-      captureRegionPolygon.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
+      captureRegionPolygon.setIncludingFrame(captureRegionProvider.get());
       captureRegionPolygon.changeFrameAndProjectToXYPlane(worldFrame);
 
       if (yoCaptureRegionPolygon != null)

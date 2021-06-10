@@ -73,6 +73,10 @@ float64 waypoint_proportion_shift_for_stub_avoidance
 # Field default value -1.0
 float64 additional_swing_time_if_expanded
 
+# If true, the swing plan allows lateral relative to the nominal trajectory.
+# Field default value True
+bool allow_lateral_motion
+
 # Field default value -1.0
 float64 percentage_extra_size_x_low
 
