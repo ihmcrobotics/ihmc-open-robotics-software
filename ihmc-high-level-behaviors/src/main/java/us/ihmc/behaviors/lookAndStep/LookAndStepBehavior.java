@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -130,9 +129,7 @@ public class LookAndStepBehavior extends ResettingNode implements BehaviorInterf
       lastStanceSide = new AtomicReference<>();
       lastCommandedFootsteps = new SideDependentList<>();
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
-      controllerStatusTracker = new ControllerStatusTracker(statusLogger,
-                                                            helper.getROS2Node(),
-                                                            helper.getRobotModel().getSimpleRobotName());
+      controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
       reset.initialize(this);
       helper.subscribeViaCallback(RESET, reset::queueReset);
       helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
