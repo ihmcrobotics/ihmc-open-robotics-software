@@ -366,7 +366,15 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          protected void setBehaviorInput()
          {
-            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75, referenceFrames.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+        	 
+        	 //attempting to track down a bug
+        	 
+//            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+            
+            
+            double footZ2 = referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ();
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, footZ2+0.75, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+            
             atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
             publishTextToSpeech("Decrease heigth");
          }
