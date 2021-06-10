@@ -10,6 +10,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
@@ -62,7 +64,7 @@ public class RecoveryTransferState extends PushRecoveryState
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    protected final CenterOfMassHeightManager comHeightManager;
-   protected final BalanceManager balanceManager;
+   protected final PushRecoveryBalanceManager balanceManager;
    protected final PelvisOrientationManager pelvisOrientationManager;
    protected final FeetManager feetManager;
 
@@ -83,7 +85,7 @@ public class RecoveryTransferState extends PushRecoveryState
                                 WalkingMessageHandler walkingMessageHandler,
                                 TouchdownErrorCompensator touchdownErrorCompensator,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
-                                HighLevelControlManagerFactory managerFactory,
+                                PushRecoveryControlManagerFactory managerFactory,
                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
                                 DoubleProvider minimumTransferTime,
@@ -100,9 +102,9 @@ public class RecoveryTransferState extends PushRecoveryState
       this.controllerToolbox = controllerToolbox;
       this.unloadFraction = unloadFraction;
       this.rhoMin = rhoMin;
+      this.balanceManager = managerFactory.getOrCreateBalanceManager();
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 

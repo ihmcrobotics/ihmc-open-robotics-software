@@ -9,6 +9,8 @@ import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegCo
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
@@ -39,7 +41,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final CenterOfMassHeightManager comHeightManager;
-   private final BalanceManager balanceManager;
+   private final PushRecoveryBalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
    private final LegConfigurationManager legConfigurationManager;
@@ -49,8 +51,9 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    private final Point3D midFootPosition = new Point3D();
 
    public TransferToStandingPushRecoveryState(WalkingMessageHandler walkingMessageHandler, TouchdownErrorCompensator touchdownErrorCompensator,
-                                              HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-                                              WalkingFailureDetectionControlModule failureDetectionControlModule, YoRegistry parentRegistry)
+                                              HighLevelHumanoidControllerToolbox controllerToolbox, PushRecoveryControlManagerFactory managerFactory,
+                                              WalkingFailureDetectionControlModule failureDetectionControlModule,
+                                              YoRegistry parentRegistry)
    {
       super(PushRecoveryStateEnum.TO_STANDING, parentRegistry);
       maxICPErrorToSwitchToStanding.set(0.025);
@@ -60,8 +63,9 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
 
+      this.balanceManager = managerFactory.getOrCreateBalanceManager();
+
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
-      balanceManager = managerFactory.getOrCreateBalanceManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
