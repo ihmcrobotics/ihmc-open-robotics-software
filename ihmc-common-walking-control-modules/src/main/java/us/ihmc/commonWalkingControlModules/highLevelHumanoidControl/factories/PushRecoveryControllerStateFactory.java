@@ -10,6 +10,7 @@ public class PushRecoveryControllerStateFactory implements HighLevelControllerSt
 {
    private PushRecoveryControllerState pushRecoveryControllerState;
    private final PushRecoveryControlManagerFactory managerFactory;
+   
    public PushRecoveryControllerStateFactory(PushRecoveryControlManagerFactory managerFactory)
    {
       this.managerFactory = managerFactory;
@@ -21,9 +22,10 @@ public class PushRecoveryControllerStateFactory implements HighLevelControllerSt
       if (pushRecoveryControllerState == null)
       {
          pushRecoveryControllerState = new PushRecoveryControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
-                                                             managerFactory, controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
-                                                             controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                             controllerFactoryHelper.getPushRecoveryControllerParameters());
+                                                                       managerFactory, controllerFactoryHelper.getWholeBodyControllerCoreFactory(),
+                                                                       controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+                                                                       controllerFactoryHelper.getHighLevelControllerParameters(),
+                                                                       controllerFactoryHelper.getPushRecoveryControllerParameters());
       }
 
       return pushRecoveryControllerState;
