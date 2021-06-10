@@ -310,7 +310,7 @@ public class LookAndStepFootstepPlanningTask
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // calculate impassibility
-      if (lidarREAPlanarRegionReceptionTimerSnapshot.isRunning())
+      if (lookAndStepParameters.getStopForImpassibilities() && lidarREAPlanarRegionReceptionTimerSnapshot.isRunning())
       {
          Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
          if (PlannerTools.doesPathContainBodyCollisions(rootPose,

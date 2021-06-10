@@ -155,6 +155,12 @@ public class ImGuiStoredPropertySetTuner
       onParametersUpdatedCallback.run();
    }
 
+   public <T> void changeParameter(StoredPropertyKey<T> key, T value)
+   {
+      storedPropertySet.set(key, value);
+      onParametersUpdatedCallback.run();
+   }
+
    public String getWindowName()
    {
       return windowName;
