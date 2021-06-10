@@ -54,23 +54,12 @@ public class RecoveringSwingState extends PushRecoveryState
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-   private final LegConfigurationManager legConfigurationManager;
-
-   private final YoDouble fractionOfSwingToStraightenSwingLeg = new YoDouble("fractionOfSwingToStraightenSwingLeg", registry);
-   private final YoDouble fractionOfSwingToCollapseStanceLeg = new YoDouble("fractionOfSwingToCollapseStanceLeg", registry);
-
-   private final YoDouble remainingSwingTimeAccordingToPlan = new YoDouble("remainingSwingTimeAccordingToPlan", registry);
-   private final YoDouble estimatedRemainingSwingTimeUnderDisturbance = new YoDouble("estimatedRemainingSwingTimeUnderDisturbance", registry);
-   private final YoDouble optimizedRemainingSwingTime = new YoDouble("optimizedRemainingSwingTime", registry);
-   private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
    private final BooleanProvider minimizeAngularMomentumRateZDuringSwing;
 
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
-
-   private final TouchdownErrorCompensator touchdownErrorCompensator;
 
    protected final RobotSide swingSide;
    protected final RobotSide supportSide;
@@ -86,7 +75,6 @@ public class RecoveringSwingState extends PushRecoveryState
 
    public RecoveringSwingState(PushRecoveryStateEnum stateEnum,
                                WalkingMessageHandler walkingMessageHandler,
-                               TouchdownErrorCompensator touchdownErrorCompensator,
                                HighLevelHumanoidControllerToolbox controllerToolbox,
                                PushRecoveryControlManagerFactory managerFactory,
                                PushRecoveryControllerParameters pushRecoveryControllerParameters,
@@ -109,14 +97,9 @@ public class RecoveringSwingState extends PushRecoveryState
 
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
-      this.touchdownErrorCompensator = touchdownErrorCompensator;
 
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      fractionOfSwingToStraightenSwingLeg.set(pushRecoveryControllerParameters.getLegConfigurationParameters().getFractionOfSwingToStraightenLeg());
-      fractionOfSwingToCollapseStanceLeg.set(pushRecoveryControllerParameters.getLegConfigurationParameters().getFractionOfSwingToCollapseStanceLeg());
 
 //      finishSingleSupportWhenICPPlannerIsDone.set(pushRecoveryControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
       minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing", registry,
@@ -126,15 +109,6 @@ public class RecoveringSwingState extends PushRecoveryState
       additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
-
-      setYoVariablesToNaN();
-   }
-
-   private void setYoVariablesToNaN()
-   {
-      optimizedRemainingSwingTime.setToNaN();
-      estimatedRemainingSwingTimeUnderDisturbance.setToNaN();
-      remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
    public RobotSide getSwingSide()
@@ -155,70 +129,7 @@ public class RecoveringSwingState extends PushRecoveryState
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
-      boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
-
-      if (walkingMessageHandler.hasRequestedFootstepAdjustment())
-      {
-         boolean footstepHasBeenAdjusted = walkingMessageHandler.pollRequestedFootstepAdjustment(nextFootstep);
-
-         if (footstepHasBeenAdjusted)
-         {
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-
-            balanceManager.adjustFootstep(nextFootstep);
-            balanceManager.computeICPPlan();
-
-            updateHeightManager();
-         }
-      }
-      else
-      {
-         boolean footstepIsBeingAdjusted = balanceManager.checkAndUpdateStepAdjustment(nextFootstep);
-
-         if (footstepIsBeingAdjusted)
-         {
-            requestSwingSpeedUp = true;
-            walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-            failureDetectionControlModule.setNextFootstep(nextFootstep);
-            updateFootstepParameters();
-
-            feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-
-            balanceManager.adjustFootstep(nextFootstep);
-            balanceManager.computeICPPlan();
-
-            updateHeightManager();
-         }
-
-         // if the footstep was adjusted, shift the CoM plan, if there is one.
-         walkingMessageHandler.setPlanOffsetFromAdjustment(balanceManager.getEffectiveICPAdjustment());
-      }
-
-      if (requestSwingSpeedUp)
-      {
-         double swingTimeRemaining = requestSwingSpeedUpIfNeeded();
-         balanceManager.updateSwingTimeRemaining(swingTimeRemaining);
-      }
-      boolean feetAreWellPositioned = legConfigurationManager.areFeetWellPositionedForCollapse(swingSide.getOppositeSide(),
-                                                                                               nextFootstep.getSoleReferenceFrame());
-
-      if (timeInState > fractionOfSwingToStraightenSwingLeg.getDoubleValue() * swingTime)
-      {
-         legConfigurationManager.straightenLegDuringSwing(swingSide);
-      }
-      if (timeInState > fractionOfSwingToCollapseStanceLeg.getDoubleValue() * swingTime && !legConfigurationManager.isLegCollapsed(supportSide)
-            && feetAreWellPositioned)
-      {
-         legConfigurationManager.collapseLegDuringSwing(swingSide.getOppositeSide());
-      }
-
       walkingMessageHandler.clearFootTrajectory();
-
-      switchToToeOffIfPossible(supportSide);
    }
 
    @Override
@@ -255,11 +166,7 @@ public class RecoveringSwingState extends PushRecoveryState
          walkingMessageHandler.reportWalkingAbortRequested();
          walkingMessageHandler.clearFootsteps();
       }
-      else
-      {
-         swingTime = walkingMessageHandler.getNextSwingTime();
-         walkingMessageHandler.poll(nextFootstep, footstepTiming);
-      }
+
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
       feetManager.setContactStateForSwing(swingSide);
@@ -301,10 +208,6 @@ public class RecoveringSwingState extends PushRecoveryState
       }
 
 
-      legConfigurationManager.startSwing(swingSide);
-      legConfigurationManager.useHighWeight(swingSide.getOppositeSide());
-      legConfigurationManager.setStepDuration(supportSide, footstepTiming.getStepTime());
-
       if (isLastStep)
       {
          pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, 0.0);
@@ -333,8 +236,6 @@ public class RecoveringSwingState extends PushRecoveryState
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
 
-      touchdownErrorCompensator.registerDesiredFootstepPosition(swingSide, desiredFootPoseInWorld.getPosition());
-
       walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
@@ -343,96 +244,17 @@ public class RecoveringSwingState extends PushRecoveryState
       tempOrientation.changeFrame(soleZUpFrame);
       double pitch = tempOrientation.getPitch();
 
-      if (doManualTouchdown())
-      {
-         // Get the initial condition from the swing trajectory
-         FrameSE3TrajectoryPoint lastWaypoint = nextFootstep.getSwingTrajectory().get(nextFootstep.getSwingTrajectory().size() - 1);
-         tempOrientation.setIncludingFrame(lastWaypoint.getOrientation());
-         tempOrientation.changeFrame(soleZUpFrame);
-         tempAngularVelocity.setIncludingFrame(lastWaypoint.getAngularVelocity());
-         tempAngularVelocity.changeFrame(soleZUpFrame); // The y component is equivalent to the pitch rate since the yaw and roll rate are 0.0
-      }
-      else
-      {
          // Get the initial condition from the robot state
          MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(nextFootstep.getRobotSide());
          tempOrientation.setToZero(soleFrame);
          tempOrientation.changeFrame(soleZUpFrame);
          tempAngularVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getAngularPart());
          tempAngularVelocity.changeFrame(soleZUpFrame);
-      }
       double initialPitch = tempOrientation.getPitch();
       double initialPitchVelocity = tempAngularVelocity.getY();
       feetManager.touchDown(nextFootstep.getRobotSide(), initialPitch, initialPitchVelocity, pitch, footstepTiming.getTouchdownDuration());
-
-      setYoVariablesToNaN();
    }
 
-   private boolean doManualTouchdown()
-   {
-      return nextFootstep.getTrajectoryType() == TrajectoryType.WAYPOINTS && Precision.equals(nextFootstep.getSwingTrajectory().get(0).getTime(), 0.0);
-   }
-
-   private final FramePoint2D filteredDesiredCoP = new FramePoint2D(worldFrame);
-   private final FramePoint2D desiredCoP = new FramePoint2D(worldFrame);
-   private final FramePoint2D currentICP = new FramePoint2D(worldFrame);
-
-   public void switchToToeOffIfPossible(RobotSide supportSide)
-   {
-      boolean shouldComputeToeLineContact = feetManager.shouldComputeToeLineContact();
-      boolean shouldComputeToePointContact = feetManager.shouldComputeToePointContact();
-
-      if (shouldComputeToeLineContact || shouldComputeToePointContact)
-      {
-         currentICP.setIncludingFrame(balanceManager.getCapturePoint());
-
-         controllerToolbox.getDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), desiredCoP);
-         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(supportSide), filteredDesiredCoP);
-
-         FramePoint3DReadOnly supportFootExitCMP = balanceManager.getFirstExitCMPForToeOff(false);
-
-         feetManager.updateToeOffStatusSingleSupport(nextFootstep,
-                                                     supportFootExitCMP,
-                                                     balanceManager.getDesiredCMP(),
-                                                     desiredCoP,
-                                                     balanceManager.getDesiredICP(),
-                                                     currentICP,
-                                                     balanceManager.getFinalDesiredICP());
-
-         if (feetManager.okForPointToeOff() && shouldComputeToePointContact)
-            feetManager.requestPointToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
-         else if (feetManager.okForLineToeOff() && shouldComputeToeLineContact)
-            feetManager.requestLineToeOff(supportSide, supportFootExitCMP, filteredDesiredCoP);
-
-//         updateHeightManager();
-      }
-   }
-
-   /**
-    * Request the swing trajectory to speed up using
-    * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}.
-    * It is clamped w.r.t. to
-    *
-    * @return the current swing time remaining for the swing foot trajectory
-    */
-   private double requestSwingSpeedUpIfNeeded()
-   {
-      remainingSwingTimeAccordingToPlan.set(balanceManager.getTimeRemainingInCurrentState());
-
-      double remainingTime = balanceManager.estimateTimeRemainingForSwingUnderDisturbance();
-      estimatedRemainingSwingTimeUnderDisturbance.set(remainingTime);
-
-      if (remainingTime > 1.0e-3)
-      {
-         double swingSpeedUpFactor = remainingSwingTimeAccordingToPlan.getDoubleValue() / remainingTime;
-         return feetManager.requestSwingSpeedUp(swingSide, swingSpeedUpFactor);
-      }
-      else if (remainingSwingTimeAccordingToPlan.getDoubleValue() > 1.0e-3)
-      {
-         return feetManager.requestSwingSpeedUp(swingSide, Double.POSITIVE_INFINITY);
-      }
-      return remainingSwingTimeAccordingToPlan.getDoubleValue();
-   }
 
    private void updateFootstepParameters()
    {

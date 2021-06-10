@@ -10,7 +10,7 @@ public class PushRecoveryControllerStateFactory implements HighLevelControllerSt
 {
    private PushRecoveryControllerState pushRecoveryControllerState;
    private final PushRecoveryControlManagerFactory managerFactory;
-   
+
    public PushRecoveryControllerStateFactory(PushRecoveryControlManagerFactory managerFactory)
    {
       this.managerFactory = managerFactory;
