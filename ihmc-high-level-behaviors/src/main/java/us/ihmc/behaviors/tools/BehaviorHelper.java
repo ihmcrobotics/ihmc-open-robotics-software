@@ -7,6 +7,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
 import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
 import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
@@ -69,6 +70,7 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    private final MessagerHelper messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
    private final YoVariableClientHelper yoVariableClientHelper;
    private StatusLogger statusLogger;
+   private ControllerStatusTracker controllerStatusTracker;
 
    // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
    public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
@@ -94,6 +96,13 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       if (statusLogger == null)
          statusLogger = new StatusLogger(this::publish);
       return statusLogger;
+   }
+
+   public ControllerStatusTracker getOrCreateControllerStatusTracker()
+   {
+      if (controllerStatusTracker == null)
+         controllerStatusTracker = new ControllerStatusTracker(getOrCreateStatusLogger(), getROS2Node(), getRobotModel().getSimpleRobotName());
+      return controllerStatusTracker;
    }
 
    // UI Communication Methods:
