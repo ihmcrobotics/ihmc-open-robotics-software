@@ -267,7 +267,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       for (RobotSide robotSide : RobotSide.values)
       {
          TransferToRecoveringSingleSupportState transferState = recoveryTransferStates.get(robotSide);
-         SingleSupportPushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+         RecoveringSingleSupportState singleSupportState = recoveringSingleSupportStates.get(robotSide);
 
          PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
@@ -296,7 +296,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       // Setup push recovery single support to transfer conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         SingleSupportPushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+         RecoveringSingleSupportState singleSupportState = recoveringSingleSupportStates.get(robotSide);
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
          // Single support to transfer with same side

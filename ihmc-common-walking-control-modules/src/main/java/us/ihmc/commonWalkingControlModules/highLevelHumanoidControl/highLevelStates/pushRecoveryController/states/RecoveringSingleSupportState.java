@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
 import org.apache.commons.math3.util.Precision;
+import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -18,8 +19,11 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -27,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
+public class RecoveringSingleSupportState extends PushRecoveryState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -66,6 +70,18 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
+   protected final RobotSide swingSide;
+   protected final RobotSide supportSide;
+
+   private final YoBoolean hasMinimumTimePassed = new YoBoolean("hasMinimumTimePassed", registry);
+   private final YoDouble minimumSwingFraction = new YoDouble("minimumSwingFraction", registry);
+
+   private final WalkingMessageHandler walkingMessageHandler;
+   private final SideDependentList<FootSwitchInterface> footSwitches;
+   private final FullHumanoidRobotModel fullRobotModel;
+
+   private final BalanceManager balanceManager;
+
    public RecoveringSingleSupportState(PushRecoveryStateEnum stateEnum,
                                        WalkingMessageHandler walkingMessageHandler,
                                        TouchdownErrorCompensator touchdownErrorCompensator,
@@ -75,13 +91,24 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
                                        WalkingFailureDetectionControlModule failureDetectionControlModule,
                                        YoRegistry parentRegistry)
    {
-      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, parentRegistry);
+      super(stateEnum, parentRegistry);
+
+      this.supportSide = stateEnum.getSupportSide();
+      swingSide = supportSide.getOppositeSide();
+
+      minimumSwingFraction.set(0.5);
+
+      this.walkingMessageHandler = walkingMessageHandler;
+      footSwitches = controllerToolbox.getFootSwitches();
+      fullRobotModel = controllerToolbox.getFullRobotModel();
+
+      balanceManager = managerFactory.getOrCreateBalanceManager();
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       this.controllerToolbox = controllerToolbox;
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
@@ -108,13 +135,23 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
       remainingSwingTimeAccordingToPlan.setToNaN();
    }
 
+   public RobotSide getSwingSide()
+   {
+      return swingSide;
+   }
+
+   @Override
+   public RobotSide getSupportSide()
+   {
+      return supportSide;
+   }
+
+
    @Override
    public void doAction(double timeInState)
    {
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
-
-      super.doAction(timeInState);
 
       boolean requestSwingSpeedUp = balanceManager.getICPErrorMagnitude() > icpErrorThresholdToSpeedUpSwing.getDoubleValue();
 
@@ -185,10 +222,10 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
    @Override
    public boolean isDone(double timeInState)
    {
-      if (super.isDone(timeInState))
-      {
+      hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
+
+      if (hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround())
          return true;
-      }
 
       return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
    }
@@ -196,7 +233,11 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
    @Override
    public void onEntry()
    {
-      super.onEntry();
+      balanceManager.clearICPPlan();
+      footSwitches.get(swingSide).reset();
+      balanceManager.setHoldSplitFractions(false);
+
+      comHeightManager.setSupportLeg(swingSide.getOppositeSide());
 
       double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
       double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
@@ -283,7 +324,7 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
    @Override
    public void onExit()
    {
-      super.onExit();
+      balanceManager.resetPushRecovery();
 
       balanceManager.minimizeAngularMomentumRateZ(false);
 
@@ -369,7 +410,6 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
     * Request the swing trajectory to speed up using
     * {@link us.ihmc.commonWalkingControlModules.capturePoint.ICPPlannerInterface#estimateTimeRemainingForStateUnderDisturbance(FramePoint2DReadOnly)}.
     * It is clamped w.r.t. to
-    * {@link pushRecoveryControllerParameters#getMinimumSwingTimeForDisturbanceRecovery()}.
     *
     * @return the current swing time remaining for the swing foot trajectory
     */
@@ -415,8 +455,7 @@ public class RecoveringSingleSupportState extends SingleSupportPushRecoveryState
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
    }
 
-   @Override
-   protected boolean hasMinimumTimePassed(double timeInState)
+   private boolean hasMinimumTimePassed(double timeInState)
    {
       double minimumSwingTime;
       if (balanceManager.isRecoveringFromDoubleSupportFall())
