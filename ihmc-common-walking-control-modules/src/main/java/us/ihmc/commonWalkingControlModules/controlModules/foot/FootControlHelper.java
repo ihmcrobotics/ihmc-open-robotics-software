@@ -43,7 +43,8 @@ public class FootControlHelper
    private final SwingTrajectoryCalculator swingTrajectoryCalculator;
    private final YoSwingTrajectoryParameters swingTrajectoryParameters;
 
-   public FootControlHelper(RobotSide robotSide,
+   public FootControlHelper(String prefix,
+                            RobotSide robotSide,
                             WalkingControllerParameters walkingControllerParameters,
                             YoSwingTrajectoryParameters swingTrajectoryParameters,
                             WorkspaceLimiterParameters workspaceLimiterParameters,
@@ -61,7 +62,7 @@ public class FootControlHelper
       this.supportStateParameters = supportStateParameters;
 
       this.swingTrajectoryParameters = swingTrajectoryParameters;
-      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression(), robotSide, controllerToolbox,
+      this.swingTrajectoryCalculator = new SwingTrajectoryCalculator(robotSide.getCamelCaseNameForStartOfExpression() + prefix, robotSide, controllerToolbox,
                                                                      walkingControllerParameters,
                                                                      swingTrajectoryParameters,
                                                                      registry);
@@ -90,7 +91,7 @@ public class FootControlHelper
 
       if (walkingControllerParameters.enableLegSingularityAndKneeCollapseAvoidanceModule())
       {
-         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix,
+         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix + prefix,
                                                                            contactableFoot,
                                                                            robotSide,
                                                                            workspaceLimiterParameters,

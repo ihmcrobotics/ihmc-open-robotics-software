@@ -52,11 +52,11 @@ import java.util.Map;
 
 public class PushRecoveryControlManagerFactory
 {
-   public static final String weightRegistryName = "MomentumOptimizationSettings";
-   public static final String jointspaceGainRegistryName = "JointspaceGains";
-   public static final String rigidBodyGainRegistryName = "RigidBodyGains";
-   public static final String footGainRegistryName = "FootGains";
-   public static final String comHeightGainRegistryName = "ComHeightGains";
+   public static final String weightRegistryName = "PushRecoveryOptimizationSettings";
+   public static final String jointspaceGainRegistryName = "PushRecoveryJointspaceGains";
+   public static final String rigidBodyGainRegistryName = "PushRecoveryRigidBodyGains";
+   public static final String footGainRegistryName = "PushRecoveryFootGains";
+   public static final String comHeightGainRegistryName = "PushRecoveryComHeightGains";
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoRegistry momentumRegistry = new YoRegistry(weightRegistryName);
@@ -257,7 +257,8 @@ public class PushRecoveryControlManagerFactory
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
-      feetManager = new FeetManager(controllerToolbox,
+      feetManager = new FeetManager("pushRecovery",
+                                    controllerToolbox,
                                     walkingControllerParameters,
                                     swingFootGains,
                                     holdFootGains,

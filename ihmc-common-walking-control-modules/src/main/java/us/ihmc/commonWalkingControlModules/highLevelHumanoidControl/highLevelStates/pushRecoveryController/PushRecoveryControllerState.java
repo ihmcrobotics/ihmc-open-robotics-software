@@ -52,12 +52,7 @@ public class PushRecoveryControllerState extends HighLevelControllerState
    private final WholeBodyControllerCore controllerCore;
    private final PushRecoveryHighLevelHumanoidController pushRecoveryController;
 
-   private final PushRecoveryControlModule pushRecoveryControlModule;
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final BipedSupportPolygons bipedSupportPolygons;
-
-   private final FramePoint2D desiredCapturePoint2d = new FramePoint2D();
-   private final FramePoint2D capturePoint2d = new FramePoint2D();
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
@@ -85,9 +80,6 @@ public class PushRecoveryControllerState extends HighLevelControllerState
       pushRecoveryController = new PushRecoveryHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, pushRecoveryControllerParameters,
                                                                  controllerToolbox);
 
-      comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
-      comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
-
       // get controller core
       controllerCoreFactory.setFeedbackControllerTemplate(managerFactory.createFeedbackControlTemplate());
       controllerCore = controllerCoreFactory.getOrCreateWholeBodyControllerCore();
@@ -96,10 +88,7 @@ public class PushRecoveryControllerState extends HighLevelControllerState
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
-      managerFactory.getOrCreateBalanceManager().setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
-
       bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
-      pushRecoveryControlModule = new PushRecoveryControlModule(bipedSupportPolygons, controllerToolbox, pushRecoveryControllerParameters, registry);
 
       registry.addChild(pushRecoveryController.getYoVariableRegistry());
    }
@@ -113,14 +102,9 @@ public class PushRecoveryControllerState extends HighLevelControllerState
    @Override
    public void doAction(double timeInState)
    {
-      desiredCapturePoint2d.set(comTrajectoryPlanner.getDesiredDCMPosition());
-      capturePoint2d.setIncludingFrame(controllerToolbox.getCapturePoint());
       double omega0 = controllerToolbox.getOmega0();
 
       pushRecoveryController.doAction();
-
-
-      pushRecoveryControlModule.updateForSingleSupport(desiredCapturePoint2d, capturePoint2d, omega0);
 
       ControllerCoreCommand controllerCoreCommand = pushRecoveryController.getControllerCoreCommand();
 
