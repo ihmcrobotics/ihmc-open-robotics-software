@@ -134,11 +134,17 @@ public class AStarFootstepPlanner
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
-      PlanarRegionsList planarRegionsListForChecking = request.getPlanarRegionsList();
+      PlanarRegionsList planarRegionsListForCollisionChecking = request.getPlanarRegionsList();
+
+      if (flatGroundMode)
+      {
+         double flatGroundHeight = 0.5 * (request.getStartFootPoses().get(RobotSide.LEFT).getZ() + request.getStartFootPoses().get(RobotSide.RIGHT).getZ());
+         snapper.setFlatGroundHeight(flatGroundHeight);
+      }
 
       snapper.setPlanarRegions(planarRegionsListForStepping);
       idealStepCalculator.setPlanarRegionsList(planarRegionsListForStepping);
-      checker.setPlanarRegions(planarRegionsListForChecking);
+      checker.setPlanarRegions(planarRegionsListForCollisionChecking);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength =
@@ -259,12 +265,6 @@ public class AStarFootstepPlanner
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
-
-         if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
-         {
-            double flatGroundHeight = 0.5 * (request.getStartFootPoses().get(RobotSide.LEFT).getZ() + request.getStartFootPoses().get(RobotSide.RIGHT).getZ());
-            footstep.getFootstepPose().setZ(flatGroundHeight);
-         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {
