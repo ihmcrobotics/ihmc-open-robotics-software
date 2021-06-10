@@ -57,6 +57,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
    private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
    private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
+   private final ImBoolean stopForImpassibilities = new ImBoolean(true);
    private final ImGuiYoDoublePlot footholdVolumePlot;
 
    private boolean reviewingBodyPath = true;
@@ -104,7 +105,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       helper.subscribeViaCallback(StartAndGoalFootPosesForUI, startAndGoalFootstepsGraphic::generateMeshesAsync);
       helper.subscribeViaCallback(FootstepPlannerLatestLogPath, latestFootstepPlannerLogPath::set);
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
-      footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 30);
+      footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
       impassibilityDetected = helper.subscribeViaReference(ImpassibilityDetected, false);
    }
 
@@ -120,6 +121,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                           lookAndStepParameters.getAllAsStrings().forEach(value -> storedPropertySetMessage.getStrings().add(value));
                                           helper.publish(LOOK_AND_STEP_PARAMETERS, storedPropertySetMessage);
                                        });
+      stopForImpassibilities.set(lookAndStepParameters.getStopForImpassibilities());
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("ForLookAndStep");
       footstepPlannerParameterTuner.create(footstepPlannerParameters,
@@ -195,6 +197,10 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       }
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
+      if (ImGui.checkbox(labels.get("Stop for impassibilities"), stopForImpassibilities))
+      {
+         lookAndStepParameterTuner.changeParameter(LookAndStepBehaviorParameters.stopForImpassibilities, stopForImpassibilities.get());
+      }
       impassibilityDetectedPlot.render(impassibilityDetected.get() ? 1.0f : 0.0f);
       footholdVolumePlot.render();
 
