@@ -1,7 +1,5 @@
 package us.ihmc.gdx.ui.behaviors;
 
-import imgui.ImFont;
-import imgui.ImFontAtlas;
 import imgui.ImVec2;
 import imgui.extension.nodeditor.NodeEditor;
 import imgui.extension.nodeditor.NodeEditorContext;
@@ -9,6 +7,10 @@ import imgui.extension.nodeditor.flag.NodeEditorPinKind;
 import imgui.extension.nodeditor.flag.NodeEditorStyleColor;
 import imgui.extension.nodeditor.flag.NodeEditorStyleVar;
 import imgui.internal.ImGui;
+import org.abego.treelayout.Configuration;
+import org.abego.treelayout.NodeExtentProvider;
+import org.abego.treelayout.TreeLayout;
+import org.abego.treelayout.util.DefaultTreeForTreeLayout;
 import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.Conversions;
@@ -17,8 +19,10 @@ import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ImGuiBehaviorTreePanel
 {
@@ -73,15 +77,98 @@ public class ImGuiBehaviorTreePanel
       renderLinks(links);
 
       if (firstRun)
-         layoutNodes();
+         layoutNodes(tree);
 
       NodeEditor.end();
       firstRun = false;
    }
 
-   public void layoutNodes()
-   {
+   private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout) {
+      if (tree == null)
+         return;
 
+      for (GDXBehaviorUIInterface child : tree.getUIChildren()) {
+         layout.addChild(tree, child);
+         constructAbegoTree(child, layout);
+      }
+   }
+
+   private int getIndexOfNodeInternal(GDXBehaviorUIInterface node, GDXBehaviorUIInterface root) {
+      if (root.equals(node))
+         return nodeIndex;
+      else {
+         for (GDXBehaviorUIInterface child : root.getUIChildren()) {
+            nodeIndex++;
+            int val = getIndexOfNodeInternal(node, child);
+
+            if (val != -1)
+               return val;
+         }
+      }
+
+      return -1;
+   }
+
+   private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree) {
+      nodeIndex = 1;
+      return getIndexOfNodeInternal(node, tree);
+   }
+
+   public void layoutNodes(GDXBehaviorUIInterface tree)
+   {
+      DefaultTreeForTreeLayout<GDXBehaviorUIInterface> treeForLayout = new DefaultTreeForTreeLayout<>(tree);
+      constructAbegoTree(tree, treeForLayout);
+
+      TreeLayout<GDXBehaviorUIInterface> layout = new TreeLayout<GDXBehaviorUIInterface>(treeForLayout, new NodeExtentProvider<GDXBehaviorUIInterface>()
+      {
+
+         @Override
+         public double getWidth(GDXBehaviorUIInterface gdxBehaviorUIInterface)
+         {
+            int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
+            return nodeSize.get(index).x;
+         }
+
+         @Override
+         public double getHeight(GDXBehaviorUIInterface gdxBehaviorUIInterface)
+         {
+            int index = getIndexOfNode(gdxBehaviorUIInterface, tree);
+            return nodeSize.get(index).y;
+         }
+      }, new Configuration<GDXBehaviorUIInterface>()
+      {
+         @Override
+         public Location getRootLocation()
+         {
+            return Location.Top;
+         }
+
+         @Override
+         public AlignmentInLevel getAlignmentInLevel()
+         {
+            return AlignmentInLevel.AwayFromRoot;
+         }
+
+         @Override
+         public double getGapBetweenLevels(int nextLevel)
+         {
+            return 50;
+         }
+
+         @Override
+         public double getGapBetweenNodes(GDXBehaviorUIInterface node1, GDXBehaviorUIInterface node2)
+         {
+            return 25;
+         }
+      });
+
+      Map<GDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
+      for (GDXBehaviorUIInterface node : map.keySet()) {
+         int index = getIndexOfNode(node, tree);
+         Rectangle2D.Double pos = map.get(node);
+
+         NodeEditor.setNodePosition(index, (float)pos.x, (float)pos.y);
+      }
    }
 
    public void renderLinks(ArrayList<Pair<Integer, Integer>> links)
