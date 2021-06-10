@@ -258,8 +258,7 @@ public class HighLevelControlManagerFactory
       if (!hasMomentumOptimizationSettings(FeetManager.class))
          return null;
 
-      feetManager = new FeetManager("",
-                                    controllerToolbox,
+      feetManager = new FeetManager(controllerToolbox,
                                     walkingControllerParameters,
                                     swingFootGains,
                                     holdFootGains,
