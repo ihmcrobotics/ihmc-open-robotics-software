@@ -35,27 +35,19 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveryTransferState extends PushRecoveryState
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
-   private final int numberOfFootstepsToConsider;
    private final Footstep footsteps;
    private final FootstepTiming footstepTimings;
 
    private final DoubleProvider minimumTransferTime;
    private final DoubleProvider minimumSwingTime;
 
-   private final LegConfigurationManager legConfigurationManager;
-   private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
    private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
 
-   private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
    private final FrameQuaternion tempOrientation = new FrameQuaternion();
-
-   private final TouchdownErrorCompensator touchdownErrorCompensator;
 
    protected final RobotSide transferToSide;
 
@@ -83,7 +75,6 @@ public class RecoveryTransferState extends PushRecoveryState
 
    public RecoveryTransferState(PushRecoveryStateEnum stateEnum,
                                 WalkingMessageHandler walkingMessageHandler,
-                                TouchdownErrorCompensator touchdownErrorCompensator,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                 PushRecoveryControlManagerFactory managerFactory,
                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
@@ -119,15 +110,10 @@ public class RecoveryTransferState extends PushRecoveryState
 
       this.minimumTransferTime = minimumTransferTime;
       this.minimumSwingTime = minimumSwingTime;
-      this.touchdownErrorCompensator = touchdownErrorCompensator;
 
-      legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
-
-      fractionOfTransferToCollapseLeg.set(pushRecoveryControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
               pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
 
-      numberOfFootstepsToConsider = 1;    //TODO move to pushRecoveryControllerParameters
       footsteps = new Footstep();
       footstepTimings = new FootstepTiming();
    }
@@ -171,9 +157,6 @@ public class RecoveryTransferState extends PushRecoveryState
 //      pelvisOrientationManager.setUpcomingFootstep(footsteps);
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
       pelvisOrientationManager.initializeTransfer(transferToSide, minimumTransferTime.getValue(), minimumSwingTime.getValue());
-
-      legConfigurationManager.beginStraightening(transferToSide);
-      legConfigurationManager.setFullyExtendLeg(transferToSide, false);
    }
 
    @Override
@@ -219,14 +202,6 @@ public class RecoveryTransferState extends PushRecoveryState
          balanceManager.setUseMomentumRecoveryModeForBalance(true);
 
       double transferDuration = currentTransferDuration.getDoubleValue();
-      boolean pastMinimumTime = timeInState > fractionOfTransferToCollapseLeg.getDoubleValue() * transferDuration;
-      boolean isFootWellPosition = legConfigurationManager.areFeetWellPositionedForCollapse(transferToSide.getOppositeSide());
-      if (pastMinimumTime && isFootWellPosition && !legConfigurationManager.isLegCollapsed(transferToSide.getOppositeSide()))
-      {
-         legConfigurationManager.collapseLegDuringTransfer(transferToSide);
-      }
-
-      updateFootPlanOffset();
 
       double toeOffDuration = footstepTimings.getLiftoffDuration();
       if (doManualLiftOff() && transferDuration - timeInState < toeOffDuration)
@@ -273,8 +248,6 @@ public class RecoveryTransferState extends PushRecoveryState
 
       feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps, footstepTimings.getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
-
-      updateFootPlanOffset();
    }
 
    @Override
@@ -352,26 +325,6 @@ public class RecoveryTransferState extends PushRecoveryState
 
       // keep swing times and only adjust transfers for now
       stepTiming.setTimings(originalSwingTime, adjustedTransferTime);
-   }
-
-   private void updateFootPlanOffset()
-   {
-      PushRecoveryStateEnum previousStateEnum = getPreviousWalkingStateEnum();
-      if (previousStateEnum == null)
-         return;
-
-      RobotSide previousSupportSide = previousStateEnum.getSupportSide();
-      if (previousSupportSide == null)
-         return;
-
-      RobotSide previousSwingSide = previousSupportSide.getOppositeSide();
-      if (touchdownErrorCompensator.planShouldBeOffsetFromStep(previousSwingSide) && touchdownErrorCompensator.isFootPositionTrusted(previousSwingSide))
-      {
-         actualFootPositionInWorld.setToZero(controllerToolbox.getReferenceFrames().getSoleFrame(previousSwingSide));
-         actualFootPositionInWorld.changeFrame(worldFrame);
-
-         touchdownErrorCompensator.addOffsetVectorFromTouchdownError(previousSwingSide, actualFootPositionInWorld);
-      }
    }
 
    /**

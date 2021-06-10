@@ -76,8 +76,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final PushRecoveryBalanceManager balanceManager;
    private final CenterOfMassHeightManager comHeightManager;
 
-   private final TouchdownErrorCompensator touchdownErrorCompensator;
-
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
    private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
@@ -207,7 +205,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
 
-      touchdownErrorCompensator = new TouchdownErrorCompensator(walkingMessageHandler, controllerToolbox.getReferenceFrames().getSoleFrames(), registry);
       stateMachine = setupStateMachine();
 
       String[] jointNamesRestrictiveLimits = pushRecoveryControllerParameters.getJointsWithRestrictiveLimits();
@@ -231,7 +228,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       StateMachineFactory<PushRecoveryStateEnum, PushRecoveryState> factory = new StateMachineFactory<>(PushRecoveryStateEnum.class);
       factory.setNamePrefix("pushRecovery").setRegistry(registry).buildYoClock(yoTime);
 
-      TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, touchdownErrorCompensator, controllerToolbox, managerFactory,
+      TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, controllerToolbox, managerFactory,
                                                                             failureDetectionControlModule, registry);
       factory.addState(PushRecoveryStateEnum.TO_STANDING, toStandingState);
 
@@ -243,7 +240,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       for (RobotSide transferToSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoveryTransferState(transferToSide);
-         RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+         RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler,
                                                                          controllerToolbox, managerFactory, pushRecoveryControllerParameters,
                                                                          failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
                                                                          unloadFraction, rhoMin, registry);
@@ -255,7 +252,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       for (RobotSide supportSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide);
-         RecoveringSwingState singleSupportState = new RecoveringSwingState(stateEnum, walkingMessageHandler, touchdownErrorCompensator,
+         RecoveringSwingState singleSupportState = new RecoveringSwingState(stateEnum, walkingMessageHandler,
                                                                             controllerToolbox, managerFactory, pushRecoveryControllerParameters,
                                                                             failureDetectionControlModule, registry);
          recoveringSingleSupportStates.put(supportSide, singleSupportState);
