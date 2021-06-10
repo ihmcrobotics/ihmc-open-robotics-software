@@ -27,6 +27,8 @@ public class ImGuiTools
    public static final float FLOAT_MIN = -3.40282346638528859811704183484516925e+38F / 2.0f;
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
+   private static ImFont bigFont;
+
    public static int nextWidgetIndex()
    {
       return GLOBAL_WIDGET_INDEX.getAndIncrement();
@@ -65,6 +67,7 @@ public class ImGuiTools
    public static ImFont setupFonts(ImGuiIO io)
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
+      final ImFontConfig bigFontConfig = new ImFontConfig();
 
       // Glyphs could be added per-font as well as per config used globally like here
 //      fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
@@ -80,6 +83,7 @@ public class ImGuiTools
 //      fontConfig.setRasterizerMultiply(2.0f);
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
+      bigFontConfig.setFontBuilderFlags(fontsFlags);
 
       ImFont fontToReturn;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
@@ -88,11 +92,17 @@ public class ImGuiTools
       {
          fontConfig.setName("segoeui.ttf, 16px");
          fontToReturn = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 16.0f, fontConfig);
+
+         bigFontConfig.setName("segoeui.ttf, 42px");
+         bigFont = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 38.0f, bigFontConfig);
       }
       else
       {
          fontConfig.setName("DejaVuSans.ttf, 13px");
          fontToReturn = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
+
+         bigFontConfig.setName("DejaVuSans.ttf, 38px");
+         bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
       }
 //      fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
@@ -107,6 +117,10 @@ public class ImGuiTools
       fontConfig.destroy(); // After all fonts were added we don't need this config more
 
       return fontToReturn;
+   }
+
+   public static ImFont getBigFont() {
+      return bigFont;
    }
 
    public static byte[] loadFromResources(final String fileName)
