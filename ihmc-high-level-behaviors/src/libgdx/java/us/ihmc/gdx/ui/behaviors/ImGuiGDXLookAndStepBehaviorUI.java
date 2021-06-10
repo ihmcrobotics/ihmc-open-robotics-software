@@ -195,7 +195,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       }
       ImGui.text("Footstep planning regions recieved:");
       steppingRegionsPlot.render(numberOfSteppingRegionsReceived);
-      impassibilityDetectedPlot.render(impassibilityDetected.get() ? 1.0f : 0.0f);
+      impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? 1.0f : 0.0f);
       footholdVolumePlot.render();
 
       ImGui.checkbox("Show graphics", showGraphics);

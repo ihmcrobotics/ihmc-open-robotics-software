@@ -1,5 +1,8 @@
 package us.ihmc.gdx.ui.behaviors;
 
+import imgui.ImFont;
+import imgui.ImFontAtlas;
+import imgui.ImVec2;
 import imgui.extension.nodeditor.NodeEditor;
 import imgui.extension.nodeditor.NodeEditorContext;
 import imgui.extension.nodeditor.flag.NodeEditorPinKind;
@@ -10,7 +13,6 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -28,6 +30,9 @@ public class ImGuiBehaviorTreePanel
    private boolean firstRun = true;
    private final HashMap<Integer, ImGuiMovingPlot> tickPlots = new HashMap<>();
 
+   private final HashMap<Integer, ImVec2> nametagSize = new HashMap<>();
+   private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
+
    private NodeEditorContext context = null;
 
    /***
@@ -40,7 +45,8 @@ public class ImGuiBehaviorTreePanel
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
    }
 
-   public void create() {
+   public void create()
+   {
       context = NodeEditor.createEditor();
       NodeEditor.setCurrentEditor(context);
 
@@ -65,8 +71,16 @@ public class ImGuiBehaviorTreePanel
       renderNodeAndChildren(tree, -1, links);
       renderLinks(links);
 
+      if (firstRun)
+         layoutNodes();
+
       NodeEditor.end();
       firstRun = false;
+   }
+
+   public void layoutNodes()
+   {
+
    }
 
    public void renderLinks(ArrayList<Pair<Integer, Integer>> links)
@@ -99,38 +113,68 @@ public class ImGuiBehaviorTreePanel
 
       NodeEditor.beginNode(nodeIndex);
 
+      String nodeName;
+      String nodeType;
+
       String name = node.getName();
       if (node.getType().equals(SequenceNode.class))
       {
-         ImGui.textUnformatted("[->] " + (name != null ? name : "Sequence Node"));
+         nodeName = (name != null ? name : "Sequence Node");
+         nodeType = "[->]";
       }
       else if (node.getType().equals(FallbackNode.class))
       {
-         ImGui.textUnformatted("[?] " + (name != null ? name : "Fallback Node"));
+         nodeName = (name != null ? name : "Fallback Node");
+         nodeType = "[?]";
       }
       else if (node.getType().equals(AsynchronousActionNode.class))
       {
-         ImGui.textUnformatted("[Async] " + (name != null ? name : "Asynchronous Node"));
+         nodeName = (name != null ? name : "Asynchronous Node");
+         nodeType = "[Async]";
       }
       else if (node.getType().equals(BehaviorTreeAction.class))
       {
-         ImGui.textUnformatted("[Action] " + (name != null ? name : "Action"));
+         nodeName = (name != null ? name : "Action");
+         nodeType = "[Action]";
       }
       else if (node.getType().equals(BehaviorTreeCondition.class))
       {
-         ImGui.textUnformatted("[Condition] " + (name != null ? name : "Condition"));
+         nodeName = (name != null ? name : "Condition");
+         nodeType = "[Condition]";
       }
       else if (node.getType().equals(OneShotAction.class))
       {
-         ImGui.textUnformatted("[OneShot] " + (name != null ? name : "One Shot Action"));
+         nodeName = (name != null ? name : "One Shot Action");
+         nodeType = "[OneShot]";
       }
       else if (node.getType().equals(AlwaysSuccessfulAction.class))
       {
-         ImGui.textUnformatted("[Success] " + (name != null ? name : "Always Successful Action"));
+         nodeName = (name != null ? name : "Always Successful Action");
+         nodeType = "[Success]";
       }
       else
       {
-         ImGui.textUnformatted("[*] " + (name != null ? name : "Behavior " + nodeIndex));
+         nodeName = (name != null ? name : "Behavior " + nodeIndex);
+         nodeType = "[*]";
+      }
+
+      if (firstRun)
+      {
+         ImVec2 size = new ImVec2();
+         ImGui.calcTextSize(size, nodeType + " " + nodeName);
+         nametagSize.put(nodeIndex, size);
+      }
+
+      boolean shouldRender = NodeEditor.getCurrentZoom() < 1.5f || firstRun;
+
+      if (shouldRender)
+      {
+         ImGui.textUnformatted(nodeType + " " + nodeName);
+      }
+      else
+      {
+         ImVec2 size = nametagSize.get(nodeIndex);
+         ImGui.dummy(size.x, size.y);
       }
 
       if (parentPin != -1)
@@ -164,33 +208,55 @@ public class ImGuiBehaviorTreePanel
       {
          double tickPeriod = 0.2;
          double recentTickWindow = tickPeriod * 0.75;
-//         double v = UnitConversions.hertzToSeconds(Gdx.graphics.getFramesPerSecond());
+         //         double v = UnitConversions.hertzToSeconds(Gdx.graphics.getFramesPerSecond());
          boolean tickedThisFrame = Conversions.millisecondsToSeconds(timeSinceLastTick) < recentTickWindow;
          boolean tickedRecently = Conversions.millisecondsToSeconds(timeSinceLastTick) < 1.0;
          BehaviorTreeNodeStatus status = node.getPreviousStatus();
          tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
-         tickPlot.render(status != null && tickedRecently ? status.name() : "");
-         if (status != null)
+         tickPlot.calculate(status != null && tickedRecently ? status.name() : "", shouldRender);
+
+         if (shouldRender)
          {
-            ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
-            ImGui.sameLine();
-            ImGui.text("Last status: " + status.name());
-         }
-         else
-         {
-            ImGui.text("Not yet ticked.");
+            if (status != null)
+            {
+               ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
+               ImGui.sameLine();
+               ImGui.text("Last status: " + status.name());
+            }
+            else
+            {
+               ImGui.text("Not yet ticked.");
+            }
+
+            node.renderTreeNode();
          }
       }
 
-      node.renderTreeNode();
-
-      if (firstRun)
+      if (!shouldRender)
       {
-         Point2D position = node.getTreeNodeInitialPosition();
-         NodeEditor.setNodePosition(nodeIndex, position.getX32(), position.getY32());
+         ImVec2 size = nodeSize.get(nodeIndex);
+
+         //Push font here
+
+         ImVec2 textSize = new ImVec2();
+         ImGui.calcTextSize(textSize, nodeName);
+         ImGui.text(nodeName);
+
+         //Pop font here
+
+         ImGui.sameLine();
+
+         //I do not know why multiplying by six at the end here is necessary.
+         ImGui.dummy(size.x - textSize.x - ImGui.getStyle().getItemSpacingX(), size.y - nametagSize.get(nodeIndex).y - ImGui.getStyle().getItemSpacingY() * 6);
       }
 
       NodeEditor.endNode();
+
+      if (firstRun)
+      {
+         nodeSize.put(nodeIndex, new ImVec2(NodeEditor.getNodeSizeX(nodeIndex), NodeEditor.getNodeSizeY(nodeIndex)));
+      }
+
       nodeIndex++;
 
       NodeEditor.popStyleColor(1);
@@ -201,7 +267,8 @@ public class ImGuiBehaviorTreePanel
       }
    }
 
-   public void dispose() {
+   public void dispose()
+   {
       NodeEditor.destroyEditor(context);
    }
 }

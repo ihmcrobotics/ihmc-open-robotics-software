@@ -234,7 +234,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          }
       }
       statusReceivedPlot.setNextValue((float) statusStopwatch.totalElapsed());
-      statusReceivedPlot.render("");
+      statusReceivedPlot.calculate("");
 //      ImGui.text("Last tree status message: " + FormattingTools.getFormattedDecimal2D(statusStopwatch.totalElapsed()) + " s ago");
    }
 
