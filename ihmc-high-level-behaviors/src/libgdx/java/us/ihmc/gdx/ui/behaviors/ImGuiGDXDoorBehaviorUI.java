@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import org.apache.commons.lang3.tuple.MutablePair;
@@ -70,6 +71,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
          detectedFiducialMessageReceivedStopwatch.reset();
          latestFiducialID = detectedFiducialMessage.getFiducialId();
       });
+      helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() -> helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP));
    }
 
    @Override
