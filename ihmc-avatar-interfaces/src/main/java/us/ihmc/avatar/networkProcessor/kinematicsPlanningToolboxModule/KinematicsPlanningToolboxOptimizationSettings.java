@@ -11,6 +11,6 @@ public class KinematicsPlanningToolboxOptimizationSettings implements SolutionQu
    @Override
    public int getDefaultTerminalIteration()
    {
-      return 30;
+      return 20;
    }
 }
