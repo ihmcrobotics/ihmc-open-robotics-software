@@ -31,7 +31,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class RecoveringSingleSupportState extends PushRecoveryState
+public class RecoveringSwingState extends PushRecoveryState
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -82,14 +82,14 @@ public class RecoveringSingleSupportState extends PushRecoveryState
 
    private final BalanceManager balanceManager;
 
-   public RecoveringSingleSupportState(PushRecoveryStateEnum stateEnum,
-                                       WalkingMessageHandler walkingMessageHandler,
-                                       TouchdownErrorCompensator touchdownErrorCompensator,
-                                       HighLevelHumanoidControllerToolbox controllerToolbox,
-                                       HighLevelControlManagerFactory managerFactory,
-                                       PushRecoveryControllerParameters pushRecoveryControllerParameters,
-                                       WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                       YoRegistry parentRegistry)
+   public RecoveringSwingState(PushRecoveryStateEnum stateEnum,
+                               WalkingMessageHandler walkingMessageHandler,
+                               TouchdownErrorCompensator touchdownErrorCompensator,
+                               HighLevelHumanoidControllerToolbox controllerToolbox,
+                               HighLevelControlManagerFactory managerFactory,
+                               PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                               WalkingFailureDetectionControlModule failureDetectionControlModule,
+                               YoRegistry parentRegistry)
    {
       super(stateEnum, parentRegistry);
 
