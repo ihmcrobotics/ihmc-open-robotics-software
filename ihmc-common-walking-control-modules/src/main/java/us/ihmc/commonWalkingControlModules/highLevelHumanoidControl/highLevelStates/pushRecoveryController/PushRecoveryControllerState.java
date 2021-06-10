@@ -15,6 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJ
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMContinuousContinuityCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryPlanner;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
@@ -72,6 +73,7 @@ public class PushRecoveryControllerState extends HighLevelControllerState
    public PushRecoveryControllerState(CommandInputManager commandInputManager,
                                       StatusMessageOutputManager statusOutputManager,
                                       PushRecoveryControlManagerFactory managerFactory,
+                                      WholeBodyControllerCoreFactory controllerCoreFactory,
                                       HighLevelHumanoidControllerToolbox controllerToolbox,
                                       HighLevelControllerParameters highLevelControllerParameters,
                                       PushRecoveryControllerParameters pushRecoveryControllerParameters)
@@ -87,7 +89,8 @@ public class PushRecoveryControllerState extends HighLevelControllerState
       comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
 
       // get controller core
-      controllerCore = managerFactory.getOrCreateWholeBodyControllerCore();
+      controllerCoreFactory.setFeedbackControllerTemplate(managerFactory.createFeedbackControlTemplate());
+      controllerCore = controllerCoreFactory.getOrCreateWholeBodyControllerCore();
       ControllerCoreOutputReadOnly controllerCoreOutput = controllerCore.getOutputForHighLevelController();
       pushRecoveryController.setControllerCoreOutput(controllerCoreOutput);
 

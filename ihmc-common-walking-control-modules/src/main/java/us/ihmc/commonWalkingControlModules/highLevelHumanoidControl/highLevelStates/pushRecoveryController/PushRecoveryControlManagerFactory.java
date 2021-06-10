@@ -70,7 +70,6 @@ public class PushRecoveryControlManagerFactory
    private FeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
    private LegConfigurationManager legConfigurationManager;
-   private WholeBodyControllerCore controllerCore;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
@@ -328,39 +327,6 @@ public class PushRecoveryControlManagerFactory
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
-   }
-
-   public WholeBodyControllerCore getOrCreateWholeBodyControllerCore()
-   {
-      if (controllerCore != null)
-         return controllerCore;
-
-      if (!hasHighLevelHumanoidControllerToolbox(WholeBodyControllerCore.class))
-         return null;
-      if (!hasWalkingControllerParameters(WholeBodyControllerCore.class))
-         return null;
-
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      JointBasics[] jointsToOptimizeFor = controllerToolbox.getControlledJoints();
-
-      FloatingJointBasics rootJoint = fullRobotModel.getRootJoint();
-      ReferenceFrame centerOfMassFrame = controllerToolbox.getCenterOfMassFrame();
-      WholeBodyControlCoreToolbox toolbox = new WholeBodyControlCoreToolbox(controllerToolbox.getControlDT(), controllerToolbox.getGravityZ(), rootJoint,
-              jointsToOptimizeFor, centerOfMassFrame,
-              walkingControllerParameters.getMomentumOptimizationSettings(),
-              controllerToolbox.getYoGraphicsListRegistry(), registry);
-      toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
-      toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
-      toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-      fullRobotModel.getKinematicLoops().forEach(toolbox::addKinematicLoopFunction);
-      FeedbackControllerTemplate template = createFeedbackControlTemplate();
-      // IMPORTANT: Cannot allow dynamic construction in a real-time environment such as this controller. This needs to be false.
-      template.setAllowDynamicControllerConstruction(false);
-      OneDoFJointBasics[] controlledJoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
-      JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
-      controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
-
-      return controllerCore;
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
