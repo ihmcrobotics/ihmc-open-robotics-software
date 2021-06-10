@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
+import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_TRILLIONTH;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 import us.ihmc.commons.MathTools;
@@ -19,6 +20,8 @@ import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -502,7 +505,7 @@ public class EuclidCoreMissingTools
     * <li><tt>x<sub>n</sub></tt> is {@code inputNormalPartToPack}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input                 the tuple to extract the normal part of. Not modified.
     * @param normalAxis            the normal vector. It is normalized internally if needed. Not
     *                              modified.
@@ -535,7 +538,7 @@ public class EuclidCoreMissingTools
     * <li><tt>x<sub>n</sub></tt> is {@code inputNormalPartToPack}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input                 the tuple to extract the normal part of. Not modified.
     * @param normalAxis            the normal vector. It is normalized internally if needed. Not
     *                              modified.
@@ -565,7 +568,7 @@ public class EuclidCoreMissingTools
     * <li><tt>x<sub>n</sub></tt> is {@code inputNormalPartToPack}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input                 the tuple to extract the normal part of. Not modified.
     * @param normalAxis            the normal vector. It is normalized internally if needed. Not
     *                              modified.
@@ -596,7 +599,7 @@ public class EuclidCoreMissingTools
     * <li><tt>x<sub>t</sub></tt> is {@code inputTangentialPartToPack}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input                     the tuple to extract the tangential part of. Not modified.
     * @param normalAxis                the normal vector. It is normalized internally if needed. Not
     *                                  modified.
@@ -635,7 +638,7 @@ public class EuclidCoreMissingTools
     * <li><tt>x<sub>t</sub></tt> is {@code inputTangentialPartToPack}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input                     the tuple to extract the tangential part of. Not modified.
     * @param normalAxis                the normal vector. It is normalized internally if needed. Not
     *                                  modified.
@@ -666,7 +669,7 @@ public class EuclidCoreMissingTools
     * <li><tt>x<sub>t</sub></tt> is {@code inputTangentialPartToPack}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input                     the tuple to extract the tangential part of. Not modified.
     * @param normalAxis                the normal vector. It is normalized internally if needed. Not
     *                                  modified.
@@ -693,7 +696,7 @@ public class EuclidCoreMissingTools
     * <li><tt>y</tt> is {@code input}.
     * </ul>
     * </p>
-    * 
+    *
     * @param input         the tuple containing the normal part used to update {@code tupleToModify}.
     *                      Not modified.
     * @param normalAxis    the normal vector. It is normalized internally if needed. Not modified.
@@ -708,4 +711,181 @@ public class EuclidCoreMissingTools
       double dot = (TupleTools.dot(normalAxis, input) - TupleTools.dot(normalAxis, tupleToModify)) / normalLengthSquared;
       tupleToModify.scaleAdd(dot, normalAxis, tupleToModify);
    }
+
+   public static int intersectionBetweenLineSegment2DAndCylinder3D(double circleRadius, Point2DReadOnly circlePosition,
+                                                                   Point2DReadOnly startPoint, Point2DReadOnly endPoint,
+                                                                   Point2DBasics firstIntersectionToPack,
+                                                                   Point2DBasics secondIntersectionToPack)
+   {
+      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
+                                                endPoint.getX(), endPoint.getY(), false, firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public static int intersectionBetweenRay2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
+                                                       Point2DReadOnly startPoint, Point2DReadOnly pointOnRay,
+                                                       Point2DBasics firstIntersectionToPack,
+                                                       Point2DBasics secondIntersectionToPack)
+   {
+      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
+                                                pointOnRay.getX(), pointOnRay.getY(), true,
+                                                firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public static int intersectionBetweenRay2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
+                                                       Point2DReadOnly startPoint, Vector2DReadOnly direction,
+                                                       Point2DBasics firstIntersectionToPack,
+                                                       Point2DBasics secondIntersectionToPack)
+   {
+      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), startPoint.getX(), startPoint.getY(), false,
+                                                startPoint.getX() + direction.getX(), startPoint.getY() + direction.getY(), true,
+                                                firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   public static int intersectionBetweenLine2DAndCircle(double circleRadius, Point2DReadOnly circlePosition,
+                                                        Point2DReadOnly pointOnLine, Vector2DReadOnly direction,
+                                                        Point2DBasics firstIntersectionToPack,
+                                                        Point2DBasics secondIntersectionToPack)
+   {
+      return intersectionBetweenLine2DAndCircle(circleRadius, circlePosition.getX(), circlePosition.getY(), pointOnLine.getX(), pointOnLine.getY(), true,
+                                                pointOnLine.getX() + direction.getX(), pointOnLine.getY() + direction.getY(), true,
+                                                firstIntersectionToPack, secondIntersectionToPack);
+   }
+
+   private static int intersectionBetweenLine2DAndCircle(double circleRadius, double circlePositionX, double circlePositionY,
+                                                         double startX, double startY, boolean canIntersectionOccurBeforeStart,
+                                                         double endX, double endY, boolean canIntersectionOccurAfterEnd,
+                                                         Point2DBasics firstIntersectionToPack,
+                                                         Point2DBasics secondIntersectionToPack)
+   {
+      if (circleRadius < 0.0)
+         throw new IllegalArgumentException("The circle radius has to be positive.");
+
+      if (firstIntersectionToPack != null)
+         firstIntersectionToPack.setToNaN();
+      if (secondIntersectionToPack != null)
+         secondIntersectionToPack.setToNaN();
+
+      if (circleRadius == 0.0)
+         return 0;
+
+      double radiusSquared = circleRadius * circleRadius;
+
+      double dx = endX - startX;
+      double dy = endY - startY;
+
+      double dIntersection1 = Double.NaN;
+      double dIntersection2 = Double.NaN;
+
+      // Compute possible intersections with the circle
+      //
+      double deltaPX = startX - circlePositionX;
+      double deltaPY = startY - circlePositionY;
+
+      double A = EuclidCoreTools.normSquared(dx, dy);
+      double B = 2.0 * (dx * deltaPX + dy * deltaPY);
+      double C = EuclidCoreTools.normSquared(deltaPX, deltaPY) - radiusSquared;
+
+      double delta = EuclidCoreTools.squareRoot(B * B - 4 * A * C);
+
+      if (Double.isFinite(delta))
+      {
+         double oneOverTwoA = 0.5 / A;
+         double dCircle1 = -(B + delta) * oneOverTwoA;
+         double dCircle2 = -(B - delta) * oneOverTwoA;
+
+         double intersection1X = dCircle1 * dx + startX;
+         double intersection1Y = dCircle1 * dy + startY;
+
+         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection1X, intersection1Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius - ONE_TRILLIONTH)
+            dCircle1 = Double.NaN;
+
+         if (Double.isFinite(dCircle1))
+         {
+            if (Double.isNaN(dIntersection1) || Math.abs(dCircle1 - dIntersection1) < ONE_TRILLIONTH)
+            {
+               dIntersection1 = dCircle1;
+            }
+            else if (dCircle1 < dIntersection1)
+            {
+               dIntersection2 = dIntersection1;
+               dIntersection1 = dCircle1;
+            }
+            else
+            {
+               dIntersection2 = dCircle1;
+            }
+         }
+
+         double intersection2X = dCircle2 * dx + startX;
+         double intersection2Y = dCircle2 * dy + startY;
+
+         if (Math.abs(EuclidGeometryTools.percentageAlongLine2D(intersection2X, intersection2Y, circlePositionX, circlePositionY, 1.0, 0.0)) > circleRadius - ONE_TRILLIONTH)
+            dCircle2 = Double.NaN;
+         else if (Math.abs(dCircle1 - dCircle2) < ONE_TRILLIONTH)
+            dCircle2 = Double.NaN;
+
+         if (Double.isFinite(dCircle2))
+         {
+            if (Double.isNaN(dIntersection1))
+            {
+               dIntersection1 = dCircle2;
+            }
+            else if (dCircle2 < dIntersection1)
+            {
+               dIntersection2 = dIntersection1;
+               dIntersection1 = dCircle2;
+            }
+            else
+            {
+               dIntersection2 = dCircle2;
+            }
+         }
+
+      }
+
+      if (!canIntersectionOccurBeforeStart)
+      {
+         if (dIntersection2 < 0.0)
+            dIntersection2 = Double.NaN;
+
+         if (dIntersection1 < 0.0)
+         {
+            dIntersection1 = dIntersection2;
+            dIntersection2 = Double.NaN;
+         }
+      }
+
+      if (!canIntersectionOccurAfterEnd)
+      {
+         if (dIntersection2 > 1.0)
+            dIntersection2 = Double.NaN;
+
+         if (dIntersection1 > 1.0)
+         {
+            dIntersection1 = dIntersection2;
+            dIntersection2 = Double.NaN;
+         }
+      }
+
+      if (Double.isNaN(dIntersection1))
+         return 0;
+
+      if (firstIntersectionToPack != null)
+      {
+         firstIntersectionToPack.set(dx, dy);
+         firstIntersectionToPack.scale(dIntersection1);
+         firstIntersectionToPack.add(startX, startY);
+      }
+
+      if (Double.isNaN(dIntersection2))
+         return 1;
+
+      if (secondIntersectionToPack != null)
+      {
+         secondIntersectionToPack.set(dx, dy);
+         secondIntersectionToPack.scale(dIntersection2);
+         secondIntersectionToPack.add(startX, startY);
+      }
+
+      return 2;   }
 }
