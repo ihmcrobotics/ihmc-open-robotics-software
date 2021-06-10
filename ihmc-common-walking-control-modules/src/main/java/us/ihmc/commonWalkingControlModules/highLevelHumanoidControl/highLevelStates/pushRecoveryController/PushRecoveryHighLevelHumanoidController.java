@@ -97,8 +97,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final YoBoolean enablePushRecoveryOnFailure = new YoBoolean("enablePushRecoveryOnFailure", registry);
 
-   private final YoBoolean allowUpperBodyMotionDuringLocomotion = new YoBoolean("allowUpperBodyMotionDuringLocomotion", registry);
-
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -337,7 +335,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    public void initialize()
    {
-
       commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFootTrajectory();
@@ -521,10 +518,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
-      if (currentState.isDoubleSupportState())
-         balanceManager.compute(currentState.getTransferToSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
-      else
-         balanceManager.compute(currentState.getSupportSide(), heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+      balanceManager.compute(heightControlCommand, keepCMPInsideSupportPolygon, controlHeightWithMomentum);
    }
 
    private void reportStatusMessages()
@@ -550,10 +544,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       }
 
       TaskspaceTrajectoryStatusMessage pelvisOrientationStatus = pelvisOrientationManager.pollStatusToReport();
-      TaskspaceTrajectoryStatusMessage pelvisXYStatus = balanceManager.pollPelvisXYTranslationStatusToReport();
       TaskspaceTrajectoryStatusMessage pelvisHeightStatus = comHeightManager.pollStatusToReport();
 
-      TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisOrientationStatus, pelvisXYStatus, pelvisHeightStatus);
+      TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisOrientationStatus, pelvisHeightStatus);
 
       if (mergedPelvisStatus != null)
       {
@@ -562,19 +555,15 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    }
 
    private TaskspaceTrajectoryStatusMessage mergePelvisStatusMessages(TaskspaceTrajectoryStatusMessage pelvisOrientationStatus,
-                                                                      TaskspaceTrajectoryStatusMessage pelvisXYStatus,
                                                                       TaskspaceTrajectoryStatusMessage pelvisHeightStatus)
    {
       int numberOfStatus = pelvisOrientationStatus != null ? 1 : 0;
-      numberOfStatus += pelvisXYStatus != null ? 1 : 0;
       numberOfStatus += pelvisHeightStatus != null ? 1 : 0;
 
       if (numberOfStatus <= 1)
       {
          if (pelvisOrientationStatus != null)
             return pelvisOrientationStatus;
-         if (pelvisXYStatus != null)
-            return pelvisXYStatus;
          if (pelvisHeightStatus != null)
             return pelvisHeightStatus;
          return null;
@@ -597,15 +586,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisOrientationStatus.getTrajectoryExecutionStatus());
          desiredEndEffectorOrientation.set(pelvisOrientationStatus.getDesiredEndEffectorOrientation());
          actualEndEffectorOrientation.set(pelvisOrientationStatus.getActualEndEffectorOrientation());
-      }
-
-      if (pelvisXYStatus != null)
-      {
-         pelvisStatusMessage.setSequenceId(pelvisXYStatus.getSequenceId());
-         pelvisStatusMessage.setTimestamp(pelvisXYStatus.getTimestamp());
-         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisXYStatus.getTrajectoryExecutionStatus());
-         desiredEndEffectorPosition.set(pelvisXYStatus.getDesiredEndEffectorPosition());
-         actualEndEffectorPosition.set(pelvisXYStatus.getActualEndEffectorPosition());
       }
 
       if (pelvisHeightStatus != null)

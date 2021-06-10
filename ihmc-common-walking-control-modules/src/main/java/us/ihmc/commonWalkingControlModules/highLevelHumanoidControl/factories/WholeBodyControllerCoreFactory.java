@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
 
-import us.ihmc.commonWalkingControlModules.configurations.ParameterTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerTemplate;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
@@ -8,33 +7,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.controllers.pidGains.PID3DGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDGainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
-import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDGains;
-import us.ihmc.robotics.controllers.pidGains.implementations.ParameterizedPIDSE3Gains;
-import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class WholeBodyControllerCoreFactory
 {
-   public static final String weightRegistryName = "MomentumOptimizationSettings";
-
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
-   private final YoRegistry momentumRegistry = new YoRegistry(weightRegistryName);
 
    private WholeBodyControllerCore controllerCore;
 
@@ -42,30 +26,9 @@ public class WholeBodyControllerCoreFactory
    private WalkingControllerParameters walkingControllerParameters;
    private FeedbackControllerTemplate template;
 
-   private MomentumOptimizationSettings momentumOptimizationSettings;
-
-   private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
-   private final Map<String, PID3DGainsReadOnly> taskspaceOrientationGainMap = new HashMap<>();
-   private final Map<String, PID3DGainsReadOnly> taskspacePositionGainMap = new HashMap<>();
-
-   private final Map<String, DoubleProvider> jointspaceWeightMap = new HashMap<>();
-   private final Map<String, DoubleProvider> userModeWeightMap = new HashMap<>();
-   private final Map<String, Vector3DReadOnly> taskspaceAngularWeightMap = new HashMap<>();
-   private final Map<String, Vector3DReadOnly> taskspaceLinearWeightMap = new HashMap<>();
-   private Vector3DReadOnly loadedFootAngularWeight;
-   private Vector3DReadOnly loadedFootLinearWeight;
-   private PIDSE3GainsReadOnly swingFootGains;
-   private PIDSE3GainsReadOnly holdFootGains;
-   private PIDSE3GainsReadOnly toeOffFootGains;
-
-   private PIDGainsReadOnly walkingControllerComHeightGains;
-   private DoubleProvider walkingControllerMaxComHeightVelocity;
-   private PIDGainsReadOnly userModeComHeightGains;
-
    public WholeBodyControllerCoreFactory(YoRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
-      parentRegistry.addChild(momentumRegistry);
    }
 
    private boolean hasHighLevelHumanoidControllerToolbox(Class<?> managerClass)
@@ -105,16 +68,6 @@ public class WholeBodyControllerCoreFactory
    public void setWalkingControllerParameters(WalkingControllerParameters walkingControllerParameters)
    {
       this.walkingControllerParameters = walkingControllerParameters;
-      momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-
-      // Transform weights and gains to their parameterized versions.
-      ParameterTools.extractJointWeightMap("JointspaceWeight", momentumOptimizationSettings.getJointspaceWeights(), jointspaceWeightMap, momentumRegistry);
-      ParameterTools.extractJointWeightMap("UserModeWeight", momentumOptimizationSettings.getUserModeWeights(), userModeWeightMap, momentumRegistry);
-      ParameterTools.extract3DWeightMap("AngularWeight", momentumOptimizationSettings.getTaskspaceAngularWeights(), taskspaceAngularWeightMap, momentumRegistry);
-      ParameterTools.extract3DWeightMap("LinearWeight", momentumOptimizationSettings.getTaskspaceLinearWeights(), taskspaceLinearWeightMap, momentumRegistry);
-
-      loadedFootAngularWeight = new ParameterVector3D("LoadedFootAngularWeight", momentumOptimizationSettings.getLoadedFootAngularWeight(), momentumRegistry);
-      loadedFootLinearWeight = new ParameterVector3D("LoadedFootLinearWeight", momentumOptimizationSettings.getLoadedFootLinearWeight(), momentumRegistry);
    }
 
    public void setFeedbackControllerTemplate(FeedbackControllerTemplate template)

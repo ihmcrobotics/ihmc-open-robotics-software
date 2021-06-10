@@ -849,7 +849,8 @@ public class HighLevelHumanoidControllerToolbox
 
    public YoGraphicsListRegistry getYoGraphicsListRegistry()
    {
-      return yoGraphicsListRegistry;
+      return null;
+//      return yoGraphicsListRegistry;
    }
 
    public JointBasics[] getControlledJoints()
