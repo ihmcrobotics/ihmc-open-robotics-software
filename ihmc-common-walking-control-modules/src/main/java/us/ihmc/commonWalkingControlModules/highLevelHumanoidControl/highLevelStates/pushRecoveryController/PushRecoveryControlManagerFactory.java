@@ -119,9 +119,7 @@ public class PushRecoveryControlManagerFactory
          return null;
 
       balanceManager = new PushRecoveryBalanceManager(controllerToolbox,
-                                          walkingControllerParameters,
                                           copTrajectoryParameters,
-                                          splitFractionParameters,
                                           registry);
       return balanceManager;
    }

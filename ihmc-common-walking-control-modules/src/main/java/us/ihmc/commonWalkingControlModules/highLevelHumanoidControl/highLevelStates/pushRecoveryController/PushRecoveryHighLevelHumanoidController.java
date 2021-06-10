@@ -109,8 +109,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
-   private final DoubleProvider unloadFraction;
-
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
@@ -143,8 +141,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       pelvisStatusMessage.setEndEffectorName(pelvis.getName());
-
-      unloadFraction = pushRecoveryControllerParameters.enforceSmoothFootUnloading() ? new DoubleParameter("unloadFraction", registry, 0.5) : null;
 
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
@@ -232,7 +228,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, pushRecoveryControllerParameters.getMinimumTransferTime());
       DoubleProvider minimumSwingTime = new DoubleParameter("MinimumSwingTime", registry, pushRecoveryControllerParameters.getMinimumSwingTime());
-      DoubleProvider rhoMin = () -> controllerCoreOptimizationSettings.getRhoMin();
 
       SideDependentList<RecoveryTransferState> recoveryTransferStates = new SideDependentList<>();
       for (RobotSide transferToSide : RobotSide.values)
@@ -241,7 +236,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler,
                                                                          controllerToolbox, managerFactory, pushRecoveryControllerParameters,
                                                                          failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
-                                                                         unloadFraction, rhoMin, registry);
+                                                                         registry);
          recoveryTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);
       }
