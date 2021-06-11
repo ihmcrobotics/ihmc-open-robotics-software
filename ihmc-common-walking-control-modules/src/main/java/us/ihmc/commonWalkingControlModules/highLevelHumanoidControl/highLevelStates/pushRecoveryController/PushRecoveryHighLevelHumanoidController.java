@@ -136,7 +136,8 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       this.feetManager = managerFactory.getOrCreateFeetManager();
       this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
-      pushRecoveryControlModule = new MultiStepPushRecoveryControlModule(controllerToolbox.getBipedSupportPolygons(),
+      pushRecoveryControlModule = new MultiStepPushRecoveryControlModule(controllerToolbox.getFootContactStates(),
+                                                                         controllerToolbox.getBipedSupportPolygons(),
                                                                          controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                          controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT),
                                                                          registry,
@@ -252,8 +253,11 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       for (RobotSide supportSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide);
-         RecoveringSwingState singleSupportState = new RecoveringSwingState(stateEnum, walkingMessageHandler,
-                                                                            controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+         RecoveringSwingState singleSupportState = new RecoveringSwingState(stateEnum,
+                                                                            walkingMessageHandler,
+                                                                            controllerToolbox, managerFactory,
+                                                                            pushRecoveryControlModule,
+                                                                            pushRecoveryControllerParameters,
                                                                             failureDetectionControlModule, registry);
          recoveringSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
@@ -264,7 +268,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       {
          factory.addTransition(PushRecoveryStateEnum.TO_STANDING,
                                PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide),
-                               new StandingToSwingCondition(supportSide, pushRecoveryControlModule));
+                               new StandingToSwingCondition(supportSide.getOppositeSide(), pushRecoveryControlModule));
       }
 
       // Setup push recovery single support to transfer conditions

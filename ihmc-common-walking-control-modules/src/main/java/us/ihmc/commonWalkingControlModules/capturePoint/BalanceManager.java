@@ -831,6 +831,11 @@ public class BalanceManager
       angularMomentumHandler.resetAngularMomentum();
    }
 
+   public void prepareForDoubleSupportPushRecovery()
+   {
+//      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
+   }
+
    public void initializeICPPlanForSingleSupport()
    {
       inSingleSupport.set(true);
