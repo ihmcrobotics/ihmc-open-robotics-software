@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -30,6 +31,12 @@ public class MultiStepPushRecoveryControlModule
    private final MultiStepPushRecoveryCalculator pushRecoveryCalculator;
 
    private final BipedSupportPolygons bipedSupportPolygons;
+
+   private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
+   private final SideDependentList<RecyclingArrayList<Footstep>> recoveryFootsteps = new SideDependentList<>(new RecyclingArrayList<>(Footstep::new),
+                                                                                                             new RecyclingArrayList<>(Footstep::new));
+   private final SideDependentList<RecyclingArrayList<FootstepTiming>> recoveryTimings = new SideDependentList<>(new RecyclingArrayList<>(FootstepTiming::new),
+                                                                                                                 new RecyclingArrayList<>(FootstepTiming::new));
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -65,6 +72,21 @@ public class MultiStepPushRecoveryControlModule
       return swingSideForDoubleSupportRecovery.getEnumValue();
    }
 
+   public int getNumberOfRecoverySteps(RobotSide firstSwingSide)
+   {
+      return recoveryFootsteps.get(firstSwingSide).size();
+   }
+
+   public Footstep getRecoveryStep(RobotSide firstSwingSide, int stepIndex)
+   {
+      return recoveryFootsteps.get(firstSwingSide).get(stepIndex);
+   }
+
+   public FootstepTiming getRecoveryStepTiming(RobotSide firstSwingSide, int stepIndex)
+   {
+      return recoveryTimings.get(firstSwingSide).get(stepIndex);
+   }
+
    public void updateForDoubleSupport(FramePoint2DReadOnly capturePoint2d, double omega0)
    {
       // Initialize variables
@@ -80,16 +102,10 @@ public class MultiStepPushRecoveryControlModule
 
       isRobotBackToSafeState.set(false);
 
-      // TODO update this
-      swingSideForDoubleSupportRecovery.set(computeRecoveryStepLocations(capturePoint2d, omega0));
-   }
+      computeRecoveryStepLocations(capturePoint2d, omega0);
 
-   // TODO this is a more complicated way of doing it
-   private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
-   private final SideDependentList<RecyclingArrayList<Footstep>> recoveryFootsteps = new SideDependentList<>(new RecyclingArrayList<>(Footstep::new),
-                                                                                                             new RecyclingArrayList<>(Footstep::new));
-   private final SideDependentList<RecyclingArrayList<FootstepTiming>> recoveryTimings = new SideDependentList<>(new RecyclingArrayList<>(FootstepTiming::new),
-                                                                                                                 new RecyclingArrayList<>(FootstepTiming::new));
+      swingSideForDoubleSupportRecovery.set(computeBestRecoverySide());
+   }
 
    private RobotSide computeRecoveryStepLocations(FramePoint2DReadOnly currentICP, double omega0)
    {
@@ -123,4 +139,35 @@ public class MultiStepPushRecoveryControlModule
 
       return minStepSwingSide;
    }
+
+   private RobotSide computeBestRecoverySide()
+   {
+      boolean equalNumberOfSteps = recoveryFootsteps.get(RobotSide.LEFT).size() == recoveryFootsteps.get(RobotSide.RIGHT).size();
+
+      if (!equalNumberOfSteps)
+      {
+         if (recoveryFootsteps.get(RobotSide.LEFT).size() < recoveryFootsteps.get(RobotSide.RIGHT).size())
+            return RobotSide.LEFT;
+         else
+            return RobotSide.RIGHT;
+      }
+
+      double shortestStepLength = Double.MAX_VALUE;
+      RobotSide shortestStepSide = null;
+
+      for (RobotSide swingSide : RobotSide.values)
+      {
+         FramePoint3DReadOnly stepPosition = recoveryFootsteps.get(swingSide).get(0).getFootstepPose().getPosition();
+         double stepLength = bipedSupportPolygons.getFootPolygonInWorldFrame(swingSide).getCentroid().distanceXY(stepPosition);
+
+         if (stepLength < shortestStepLength)
+         {
+            shortestStepLength = stepLength;
+            shortestStepSide = swingSide;
+         }
+      }
+
+      return shortestStepSide;
+   }
+
 }
