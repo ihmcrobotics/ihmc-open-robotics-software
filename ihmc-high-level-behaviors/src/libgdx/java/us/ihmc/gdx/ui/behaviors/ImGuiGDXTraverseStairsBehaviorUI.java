@@ -3,12 +3,10 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.PauseableThread;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -74,12 +72,11 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
       helper.subscribeViaCallback(ROS2Tools.BIPEDAL_SUPPORT_REGIONS, regions ->
       {
-         helper.publish(TraverseStairsBehaviorAPI.STOP);
-         disableSupportRegions();
-         ++numberOfSupportRegionsReceived;
-         supportRegionsReceivedTimer.reset();
-         operatorReviewEnabled.set(true);
-         helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
+         if (regions.getConvexPolygonsSize().size() > 0 && regions.getConvexPolygonsSize().get(0) > 0)
+         {
+            ++numberOfSupportRegionsReceived;
+            supportRegionsReceivedTimer.reset();
+         }
       });
    }
 
@@ -155,6 +152,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       if (ImGui.button(labels.get("Start")))
       {
          helper.publish(TraverseStairsBehaviorAPI.START);
+         disableSupportRegions();
       }
       ImGui.sameLine();
       if (ImGui.button(labels.get("Stop")))
