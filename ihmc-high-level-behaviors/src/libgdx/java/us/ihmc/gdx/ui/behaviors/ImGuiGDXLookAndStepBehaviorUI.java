@@ -12,6 +12,7 @@ import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
@@ -25,6 +26,7 @@ import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXBodyPathPlanGraphic;
+import us.ihmc.gdx.ui.graphics.GDXBoxVisualizer;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.gdx.ui.yo.ImGuiYoDoublePlot;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
@@ -73,6 +75,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (for Look and Step)");
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
+   private final GDXBoxVisualizer obstacleBoxVisualizer = new GDXBoxVisualizer();
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
    {
@@ -106,6 +109,13 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       helper.subscribeViaCallback(FootstepPlannerRejectionReasons, reasons -> latestFootstepPlannerRejectionReasons = reasons);
       footholdVolumePlot = new ImGuiYoDoublePlot("footholdVolume", helper, 1000, 250, 15);
       impassibilityDetected = helper.subscribeViaReference(ImpassibilityDetected, false);
+      obstacleBoxVisualizer.setColor(Color.RED);
+      helper.subscribeViaCallback(Obstacle, boxDescription ->
+      {
+         Box3D box3D = new Box3D();
+         box3D.set(boxDescription.getLeft(), boxDescription.getRight());
+         obstacleBoxVisualizer.generateMeshAsync(box3D);
+      });
    }
 
    @Override
@@ -261,6 +271,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       if (showSwingPlanningParametersTuner.get())
          swingPlannerParameterTuner.render();
 
+      obstacleBoxVisualizer.render();
+
       if (areGraphicsEnabled())
       {
          footstepPlanGraphic.render();
@@ -282,6 +294,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       if (showGraphics.get())
       {
          goalAffordance.getRenderables(renderables, pool);
+         if (impassibilityDetected.get())
+            obstacleBoxVisualizer.getRenderables(renderables, pool);
       }
       if (areGraphicsEnabled())
       {
@@ -301,6 +315,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       startAndGoalFootstepsGraphic.destroy();
       planarRegionsGraphic.destroy();
       bodyPathPlanGraphic.destroy();
+      obstacleBoxVisualizer.dispose();
    }
 
    public String getWindowName()
