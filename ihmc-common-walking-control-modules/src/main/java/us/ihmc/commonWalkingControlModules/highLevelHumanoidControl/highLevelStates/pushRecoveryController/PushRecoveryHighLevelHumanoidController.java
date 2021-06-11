@@ -2,10 +2,11 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -20,14 +21,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointLoadStatusProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ParameterizedControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.PushRecoverySingleSupportToTransferToCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StartPushRecoveryCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StopPushRecoveryFromSingleSupportCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.ContinuePushRecoveryWithNextStepCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.RecoveryTransferToStandingCondition;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StandingToSwingCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -110,6 +109,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
+   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
@@ -135,6 +135,12 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
       this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
+
+      pushRecoveryControlModule = new MultiStepPushRecoveryControlModule(controllerToolbox.getBipedSupportPolygons(),
+                                                                         controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                         controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT),
+                                                                         registry,
+                                                                         controllerToolbox.getYoGraphicsListRegistry());
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
@@ -222,8 +228,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       StateMachineFactory<PushRecoveryStateEnum, PushRecoveryState> factory = new StateMachineFactory<>(PushRecoveryStateEnum.class);
       factory.setNamePrefix("pushRecovery").setRegistry(registry).buildYoClock(yoTime);
 
-      TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, controllerToolbox, managerFactory,
-                                                                            failureDetectionControlModule, registry);
+      TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, controllerToolbox,
+                                                                                                    pushRecoveryControlModule, managerFactory,
+                                                                                                    failureDetectionControlModule, registry);
       factory.addState(PushRecoveryStateEnum.TO_STANDING, toStandingState);
 
       DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, pushRecoveryControllerParameters.getMinimumTransferTime());
@@ -252,60 +259,39 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          factory.addState(stateEnum, singleSupportState);
       }
 
-      // Setup start/stop push recovery conditions
-      for (RobotSide robotSide : RobotSide.values)
+      // Setup start swing conditions
+      for (RobotSide supportSide : RobotSide.values)
       {
-         RecoveryTransferState transferState = recoveryTransferStates.get(robotSide);
-         RecoveringSwingState singleSupportState = recoveringSingleSupportStates.get(robotSide);
-
-         PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
-         PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
-
-         // Start push recovery
-         factory.addTransition(PushRecoveryStateEnum.TO_STANDING, transferStateEnum,
-                 new StartPushRecoveryCondition(transferStateEnum.getTransferToSide(), walkingMessageHandler));
-
-         // Stop push recovery when in single support
-         factory.addTransition(singleSupportStateEnum, PushRecoveryStateEnum.TO_STANDING,
-                 new StopPushRecoveryFromSingleSupportCondition(singleSupportState, walkingMessageHandler));
-      }
-
-      // Setup push recovery transfer to single support conditions
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         PushRecoveryState transferState = recoveryTransferStates.get(robotSide);
-         PushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
-
-         PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
-         PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
-
-         factory.addDoneTransition(transferStateEnum, singleSupportStateEnum);
+         factory.addTransition(PushRecoveryStateEnum.TO_STANDING,
+                               PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide),
+                               new StandingToSwingCondition(supportSide, pushRecoveryControlModule));
       }
 
       // Setup push recovery single support to transfer conditions
       for (RobotSide robotSide : RobotSide.values)
       {
-         RecoveringSwingState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+         factory.addDoneTransition(PushRecoveryStateEnum.getPushRecoverySingleSupportState(robotSide),
+                                   PushRecoveryStateEnum.getPushRecoveryTransferState(robotSide.getOppositeSide()));
+      }
+
+      // Setup push recovery transfer to single support conditions or standing
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         RecoveryTransferState transferState = recoveryTransferStates.get(robotSide);
+         PushRecoveryState singleSupportState = recoveringSingleSupportStates.get(robotSide);
+
+         PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
          PushRecoveryStateEnum singleSupportStateEnum = singleSupportState.getStateEnum();
 
-         // Single support to transfer with same side
-         {
-            RecoveryTransferState transferState = recoveryTransferStates.get(robotSide);
-            PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
+         factory.addTransition(transferStateEnum,
+                               singleSupportStateEnum,
+                               new ContinuePushRecoveryWithNextStepCondition(transferState, pushRecoveryControlModule));
 
-            factory.addTransition(singleSupportStateEnum, transferStateEnum,
-                    new PushRecoverySingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
-         }
-
-         // Single support to transfer with opposite side
-         {
-            RecoveryTransferState transferState = recoveryTransferStates.get(robotSide.getOppositeSide());
-            PushRecoveryStateEnum transferStateEnum = transferState.getStateEnum();
-
-            factory.addTransition(singleSupportStateEnum, transferStateEnum,
-                    new PushRecoverySingleSupportToTransferToCondition(singleSupportState, transferState, walkingMessageHandler));
-         }
+         factory.addTransition(transferStateEnum,
+                               singleSupportStateEnum,
+                               new RecoveryTransferToStandingCondition(transferState, pushRecoveryControlModule));
       }
+
 
       // Setup the abort condition from all states to the toStandingState
       Set<PushRecoveryStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(PushRecoveryStateEnum.TO_STANDING));
