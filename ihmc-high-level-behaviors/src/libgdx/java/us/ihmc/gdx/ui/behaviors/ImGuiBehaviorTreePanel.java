@@ -78,7 +78,19 @@ public class ImGuiBehaviorTreePanel
       renderLinks(links);
 
       if (firstRun)
-         layoutNodes(tree);
+      {
+         boolean repositionNodes = true;
+         for (int id : nodeSize.keySet()) {
+            if (NodeEditor.getNodePositionX(id) != 0.0f || NodeEditor.getNodePositionY(id) != 0.0f)
+            {
+               repositionNodes = false;
+               break;
+            }
+         }
+
+         if (repositionNodes)
+            layoutNodes(tree);
+      }
 
       NodeEditor.end();
       ImGui.popFont();
