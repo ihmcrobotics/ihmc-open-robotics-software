@@ -43,10 +43,10 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
 
       lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(helper);
       addChild(lookAndStepUI);
-      traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
-      addChild(traverseStairsUI);
       doorUI = new ImGuiGDXDoorBehaviorUI(helper);
       addChild(doorUI);
+      traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
+      addChild(traverseStairsUI);
 
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
    }
