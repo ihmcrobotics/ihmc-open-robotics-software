@@ -422,11 +422,6 @@ public class PushRecoveryBalanceManager
       icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 
-   public void packFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining, Footstep footstepToPack)
-   {
-//      pushRecoveryControlModule.packFootstepForRecoveringFromDisturbance(swingSide, swingTimeRemaining, footstepToPack);
-   }
-
    public void disablePushRecovery()
    {
 //      pushRecoveryControlModule.setIsEnabled(false);

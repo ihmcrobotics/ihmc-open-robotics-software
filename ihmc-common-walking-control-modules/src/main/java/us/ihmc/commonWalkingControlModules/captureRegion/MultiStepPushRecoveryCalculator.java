@@ -176,7 +176,7 @@ public class MultiStepPushRecoveryCalculator
       return recoveryFootstepTimings.get(stepIdx);
    }
 
-   public int calculateRecoveryStepLocations(RobotSide swingSide,
+   private int calculateRecoveryStepLocations(RobotSide swingSide,
                                              double swingTimeRemaining,
                                              double nextTransferDuration,
                                              FramePoint2DReadOnly currentICP,
@@ -212,7 +212,9 @@ public class MultiStepPushRecoveryCalculator
          stancePosition.set(stancePose.getPosition());
          numberOfRecoverySteps++;
 
-         if (polygonTools.computeIntersectionOfPolygons(captureRegion, reachableRegion, intersectingRegion))
+         polygonTools.computeIntersectionOfPolygons(captureRegion, reachableRegion, intersectingRegion);
+
+         if (!intersectingRegion.isEmpty())
          { // they do intersect
             FramePoint2DReadOnly centerOfIntersection = intersectingRegion.getCentroid();
 
