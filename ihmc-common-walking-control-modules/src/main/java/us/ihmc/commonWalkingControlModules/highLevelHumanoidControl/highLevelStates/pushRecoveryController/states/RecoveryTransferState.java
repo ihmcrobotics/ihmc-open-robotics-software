@@ -25,19 +25,12 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveryTransferState extends PushRecoveryState
 {
-   private final Footstep footsteps;
-   private final FootstepTiming footstepTimings;
-
    private final DoubleProvider minimumTransferTime;
    private final DoubleProvider minimumSwingTime;
 
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
-   private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
    private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
-
-   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
 
    protected final RobotSide transferToSide;
 
@@ -86,9 +79,6 @@ public class RecoveryTransferState extends PushRecoveryState
 
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
               pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
-
-      footsteps = new Footstep();
-      footstepTimings = new FootstepTiming();
    }
 
 
@@ -132,12 +122,9 @@ public class RecoveryTransferState extends PushRecoveryState
    @Override
    public void doAction(double timeInState)
    {
-      RobotSide swingSide = transferToSide.getOppositeSide();
-      feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.computeICPPlan();
 
-         if (switchToToeOffIfPossible())
-            feetManager.initializeSwingTrajectoryPreview(swingSide, footsteps, footstepTimings.getSwingTime());
+      switchToToeOffIfPossible();
 
       feetManager.updateContactStatesInDoubleSupport(transferToSide);
 
@@ -169,7 +156,6 @@ public class RecoveryTransferState extends PushRecoveryState
       comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
 
-      feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps, footstepTimings.getSwingTime());
       balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
    }
 
