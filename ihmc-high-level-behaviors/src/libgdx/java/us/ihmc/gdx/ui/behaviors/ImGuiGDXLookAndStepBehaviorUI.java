@@ -11,6 +11,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.behaviors.BehaviorModule;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
@@ -35,7 +36,6 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.Goal;
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
@@ -72,7 +72,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiStoredPropertySetTuner lookAndStepParameterTuner = new ImGuiStoredPropertySetTuner("Look and Step Parameters");
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (for Look and Step)");
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (for Look and Step)");
-   //private final ImGuiBehaviorTreePanel treePanel = new ImGuiBehaviorTreePanel("Look and step");
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
 
    public ImGuiGDXLookAndStepBehaviorUI(BehaviorHelper helper)
@@ -133,9 +132,13 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
                                         () -> helper.publish(SwingPlannerParameters, swingPlannerParameters.getAllAsStrings()));
 
       goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.CYAN);
-      helper.subscribeViaCallback(Goal, goalAffordance::setGoalPose);
 
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
+   }
+
+   public void setGoal(Pose3D goal)
+   {
+      goalAffordance.setGoalPose(goal);
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -201,7 +204,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       {
          lookAndStepParameterTuner.changeParameter(LookAndStepBehaviorParameters.stopForImpassibilities, stopForImpassibilities.get());
       }
-      impassibilityDetectedPlot.render(impassibilityDetected.get() ? 1.0f : 0.0f);
+      impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
+      impassibilityDetectedPlot.render(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
       footholdVolumePlot.render();
 
       ImGui.checkbox("Show graphics", showGraphics);

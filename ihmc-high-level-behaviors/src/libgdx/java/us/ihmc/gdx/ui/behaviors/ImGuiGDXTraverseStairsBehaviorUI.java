@@ -3,8 +3,10 @@ package us.ihmc.gdx.ui.behaviors;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.PauseableThread;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
@@ -12,6 +14,7 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -20,6 +23,7 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiEnumPlot;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
+import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
@@ -40,10 +44,15 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    private Point2D nodePosition = new Point2D(632.0, 582.0);
    private final Stopwatch completedStopwatch = new Stopwatch();
    private String currentState = "";
-   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 30);
+   private String currentLifecycleState = "";
+   private final ImBoolean operatorReviewEnabled = new ImBoolean(true);
+   private final ImGuiEnumPlot currentLifecycleStatePlot = new ImGuiEnumPlot(1000, 250, 15);
+   private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
+   private final ImGuiMovingPlot pauseTimeLeft = new ImGuiMovingPlot("pauseTimeLeft", 1000, 250, 15);
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
    private final ImGuiStoredPropertySetTuner footstepPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Stairs behavior)");
    private final ImGuiStoredPropertySetTuner swingPlannerParameterTuner = new ImGuiStoredPropertySetTuner("Swing Planner Parameters (Stairs behavior)");
+   private double timeLeftInPause = 0.0;
 
    public ImGuiGDXTraverseStairsBehaviorUI(BehaviorHelper helper)
    {
@@ -55,13 +64,19 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       footstepPlanGraphic.setTransparency(0.5);
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
       helper.subscribeViaCallback(State, state -> currentState = state);
+      helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
+      helper.subscribeViaCallback(TimeLeftInPause, timeLeftInPause -> this.timeLeftInPause = timeLeftInPause);
+   }
+
+   public void setGoal(Pose3D goal)
+   {
+      goalAffordance.setGoalPose(goal);
    }
 
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
       goalAffordance.create(baseUI, goalPose -> helper.publish(GOAL_INPUT, goalPose), Color.SALMON);
-      helper.subscribeViaCallback(BuildingExplorationBehaviorAPI.Goal, goalAffordance::setGoalPose);
       baseUI.addImGui3DViewInputProcessor(this::processImGui3DViewInput);
 
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
@@ -89,6 +104,15 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    public void renderTreeNode()
    {
       goalAffordance.renderPlaceGoalButton();
+      if (!currentLifecycleState.isEmpty())
+      {
+         TraverseStairsBehavior.TraverseStairsLifecycleStateName state = TraverseStairsBehavior.TraverseStairsLifecycleStateName.valueOf(currentLifecycleState);
+         currentLifecycleStatePlot.render(state.ordinal(), state.name());
+      }
+      else
+      {
+         currentLifecycleStatePlot.render(-1, "");
+      }
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
       {
@@ -99,7 +123,13 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       {
          currentStatePlot.render(-1, "");
       }
+      pauseTimeLeft.setNextValue((float) timeLeftInPause);
+      pauseTimeLeft.render(FormattingTools.getFormattedDecimal2D(timeLeftInPause));
       ImGui.text("Completed: " + FormattingTools.getFormattedDecimal2D(completedStopwatch.totalElapsed()) + " s ago.");
+      if (ImGui.checkbox(labels.get("Operator review"), operatorReviewEnabled))
+      {
+         helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
+      }
       if (ImGui.button(labels.get("Start")))
       {
          helper.publish(TraverseStairsBehaviorAPI.START);
