@@ -99,20 +99,17 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
       return this.toString().hashCode(); //maybe change later? works fine for now
    }
 
-   private void toStringInternal(StringBuilder out) {
-      out.append(this.getType());
+   @Override
+   public String toString() {
+      StringBuilder out = new StringBuilder();
 
+      out.append(this.getType());
       out.append("(");
       for (GDXBehaviorUIInterface child : this.getUIChildren()) {
          out.append(child.toString()).append(",");
       }
       out.append(")");
-   }
 
-   @Override
-   public String toString() {
-      StringBuilder out = new StringBuilder();
-      this.toStringInternal(out);
       return out.toString();
    }
 
