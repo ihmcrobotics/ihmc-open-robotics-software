@@ -238,9 +238,10 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       solveForCoefficientConstraintMatrix(contactSequence);
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
-      if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null)
+      int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
+
+      if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null && contactSequence.size() > segmentId)
       {
-         int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
          double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
          compute(segmentId,
                  time,
