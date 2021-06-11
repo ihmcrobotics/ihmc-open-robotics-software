@@ -70,6 +70,7 @@ public class ImGuiBehaviorTreePanel
    public void renderWidgetsOnly(GDXBehaviorUIInterface tree)
    {
       NodeEditor.setCurrentEditor(context);
+      ImGui.pushFont(ImGuiTools.getNodeFont());
       NodeEditor.begin(windowName);
       nodeIndex = 1;
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
@@ -80,6 +81,7 @@ public class ImGuiBehaviorTreePanel
          layoutNodes(tree);
 
       NodeEditor.end();
+      ImGui.popFont();
       firstRun = false;
    }
 
