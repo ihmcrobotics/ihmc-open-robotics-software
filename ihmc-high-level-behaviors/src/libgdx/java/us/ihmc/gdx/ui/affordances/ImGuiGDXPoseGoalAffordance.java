@@ -8,7 +8,9 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
+import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
+import imgui.internal.flag.ImGuiItemFlags;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -56,9 +58,11 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
    private final RotationMatrix arrowRotationMatrix = new RotationMatrix();
    private PlanarRegionsList latestRegions;
+   private Consumer<Pose3D> placedPoseConsumer;
 
    public void create(GDXImGuiBasedUI baseUI, Consumer<Pose3D> placedPoseConsumer, Color color)
    {
+      this.placedPoseConsumer = placedPoseConsumer;
       float sphereRadius = 0.03f;
       sphere = GDXModelPrimitives.createSphere(sphereRadius, color);
       arrow = GDXModelPrimitives.createArrow(sphereRadius * 6.0, color);
@@ -111,6 +115,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
             }
          });
       }
+
+      clear();
    }
 
    public void processImGui3DViewInput(ImGui3DViewInput input)
@@ -203,38 +209,58 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 
    public void renderPlaceGoalButton()
    {
-//      boolean pushed = false;
-//      if (placingGoal)
-//      {
-//         pushed = true;
-//         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
-//      }
-      if (ImGui.button(labels.get("Place goal")))
+      boolean pushedFlags = false;
+      if (placingGoal)
+      {
+         ImGui.pushItemFlag(ImGuiItemFlags.Disabled, true);
+         ImGui.pushStyleVar(ImGuiStyleVar.Alpha, 0.6f);
+         pushedFlags = true;
+      }
+      if (ImGui.button(labels.get(pushedFlags ? "Placing" : "Place goal")))
       {
          placeGoalActionMap.start();
       }
-//      if (pushed)
-//      {
-//         ImGui.popItemFlag();
-//      }
+      if (pushedFlags)
+      {
+         ImGui.popItemFlag();
+         ImGui.popStyleVar();
+      }
       if (ImGui.isItemHovered())
       {
          ImGui.setTooltip("Hold Ctrl and scroll the mouse wheel while placing to adjust Z.");
       }
       ImGui.sameLine();
-      ImGui.pushItemWidth(50.0f);
-      ImGui.dragFloat("Goal Z", goalZ.getData(), 0.01f);
-      ImGui.popItemWidth();
+      if (!isPlaced())
+      {
+         ImGui.text("Not placed.");
+      }
+      else
+      {
+         ImGui.pushItemWidth(50.0f);
+         ImGui.dragFloat("Goal Z", goalZ.getData(), 0.01f);
+         ImGui.popItemWidth();
+      }
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (!Float.isNaN(sphere.transform.val[Matrix4.M03]))
+      if (isPlaced())
       {
          sphere.getRenderables(renderables, pool);
          arrow.getRenderables(renderables, pool);
       }
+   }
+
+   public boolean isPlaced()
+   {
+      return !Float.isNaN(sphere.transform.val[Matrix4.M03]);
+   }
+
+   public void clear()
+   {
+      sphere.transform.val[Matrix4.M03] = Float.NaN;
+      goalZ.set(0.0f);
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -251,8 +277,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    {
       if (pose == null)
       {
-         sphere.transform.val[Matrix4.M03] = Float.NaN;
-         goalZ.set(0.0f);
+         clear();
       }
       else
       {
@@ -260,5 +285,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
          goalZ.set((float) pose.getZ());
          GDXTools.toGDX(pose, tempTransform, arrow.transform);
       }
+      goalPoseForReading.set(pose);
+      placedPoseConsumer.accept(goalPoseForReading);
    }
 }
