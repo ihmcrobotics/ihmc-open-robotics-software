@@ -3,6 +3,8 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 import org.apache.commons.math3.util.Precision;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
@@ -65,18 +67,19 @@ public class RecoveringSwingState extends PushRecoveryState
    protected final RobotSide supportSide;
 
    private final YoBoolean hasMinimumTimePassed = new YoBoolean("hasMinimumTimePassed", registry);
-   private final YoDouble minimumSwingFraction = new YoDouble("minimumSwingFraction", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final FullHumanoidRobotModel fullRobotModel;
 
+   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
    private final PushRecoveryBalanceManager balanceManager;
 
    public RecoveringSwingState(PushRecoveryStateEnum stateEnum,
                                WalkingMessageHandler walkingMessageHandler,
                                HighLevelHumanoidControllerToolbox controllerToolbox,
                                PushRecoveryControlManagerFactory managerFactory,
+                               MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                WalkingFailureDetectionControlModule failureDetectionControlModule,
                                YoRegistry parentRegistry)
@@ -84,9 +87,8 @@ public class RecoveringSwingState extends PushRecoveryState
       super(stateEnum, parentRegistry);
 
       this.supportSide = stateEnum.getSupportSide();
+      this.pushRecoveryControlModule = pushRecoveryControlModule;
       swingSide = supportSide.getOppositeSide();
-
-      minimumSwingFraction.set(0.5);
 
       this.walkingMessageHandler = walkingMessageHandler;
       footSwitches = controllerToolbox.getFootSwitches();
@@ -150,20 +152,13 @@ public class RecoveringSwingState extends PushRecoveryState
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
 
-      double defaultSwingTime = walkingMessageHandler.getDefaultSwingTime();
-      double defaultTransferTime = walkingMessageHandler.getDefaultTransferTime();
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-      {
-         swingTime = defaultSwingTime;
-         footstepTiming.setTimings(swingTime, defaultTransferTime);
-         balanceManager.packFootstepForRecoveringFromDisturbance(swingSide, defaultSwingTime, nextFootstep);
-         nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
-         nextFootstep.setIsAdjustable(true);
-         walkingMessageHandler.reportWalkingAbortRequested();
-         walkingMessageHandler.clearFootsteps();
-      }
+      nextFootstep.set(pushRecoveryControlModule.pollRecoveryStep(swingSide));
+      footstepTiming.set(pushRecoveryControlModule.pollRecoveryStepTiming(swingSide));
+
+      nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
+      swingTime = footstepTiming.getSwingTime();
 
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
@@ -175,12 +170,13 @@ public class RecoveringSwingState extends PushRecoveryState
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
-      int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+      int stepsToAdd = Math.min(additionalFootstepsToConsider, pushRecoveryControlModule.getNumberOfRecoverySteps(swingSide));
       boolean isLastStep = stepsToAdd == 0;
       for (int i = 0; i < stepsToAdd; i++)
       {
-         walkingMessageHandler.peekFootstep(i, footsteps[i]);
-         walkingMessageHandler.peekTiming(i, footstepTimings[i]);
+         footsteps[i].set(pushRecoveryControlModule.getRecoveryStep(swingSide, i));
+         footstepTimings[i].set(pushRecoveryControlModule.getRecoveryStepTiming(swingSide, i));
+
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
 
@@ -191,17 +187,12 @@ public class RecoveringSwingState extends PushRecoveryState
 
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, balanceManager.getFinalDesiredCoMVelocity(), balanceManager.getFinalDesiredCoMAcceleration());
 
+      // TODO what does this do?
       if (feetManager.adjustHeightIfNeeded(nextFootstep))
       {
          walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
          feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
       }
-
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-      {
-         balanceManager.computeICPPlan();
-      }
-
 
       if (isLastStep)
       {
@@ -237,12 +228,12 @@ public class RecoveringSwingState extends PushRecoveryState
       tempOrientation.changeFrame(soleZUpFrame);
       double pitch = tempOrientation.getPitch();
 
-         // Get the initial condition from the robot state
-         MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(nextFootstep.getRobotSide());
-         tempOrientation.setToZero(soleFrame);
-         tempOrientation.changeFrame(soleZUpFrame);
-         tempAngularVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getAngularPart());
-         tempAngularVelocity.changeFrame(soleZUpFrame);
+      // Get the initial condition from the robot state
+      MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(nextFootstep.getRobotSide());
+      tempOrientation.setToZero(soleFrame);
+      tempOrientation.changeFrame(soleZUpFrame);
+      tempAngularVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getAngularPart());
+      tempAngularVelocity.changeFrame(soleZUpFrame);
       double initialPitch = tempOrientation.getPitch();
       double initialPitchVelocity = tempAngularVelocity.getY();
       feetManager.touchDown(nextFootstep.getRobotSide(), initialPitch, initialPitchVelocity, pitch, footstepTiming.getTouchdownDuration());
@@ -258,7 +249,6 @@ public class RecoveringSwingState extends PushRecoveryState
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
-
    }
 
    private void updateHeightManager()
@@ -274,12 +264,6 @@ public class RecoveringSwingState extends PushRecoveryState
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
-      double minimumSwingTime;
-      if (balanceManager.isRecoveringFromDoubleSupportFall())
-         minimumSwingTime = 0.15;
-      else
-         minimumSwingTime = swingTime * minimumSwingFraction.getDoubleValue();
-
-      return timeInState > minimumSwingTime;
+      return timeInState > 0.15;
    }
 }
