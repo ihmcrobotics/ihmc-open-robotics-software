@@ -83,6 +83,8 @@ public class PushRecoveryBalanceManager
    /** CMP position according to the ICP planner */
    private final YoFramePoint3D yoPerfectCMP = new YoFramePoint3D("perfectCMP", worldFrame, registry);
 
+   private final YoDouble timeAtStartOfState = new YoDouble("timeAtStartOfPushRecoveryState", registry);
+
    private final BagOfBalls perfectCoPTrajectory;
    private final BagOfBalls perfectCMPTrajectory;
 
@@ -371,6 +373,12 @@ public class PushRecoveryBalanceManager
       yoFinalDesiredCoMAcceleration.set(comTrajectoryPlanner.getDesiredCoMAcceleration());
       yoFinalDesiredICP.set(comTrajectoryPlanner.getDesiredDCMPosition());
 
+      timeInSupportSequence.set(controllerToolbox.getYoTime().getValue() - timeAtStartOfState.getDoubleValue());
+      icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
+
+      if (!footsteps.isEmpty() || icpPlannerDone.getValue())
+         timeInSupportSequence.set(currentStateDuration.getDoubleValue());
+
       comTrajectoryPlanner.compute(timeInSupportSequence.getDoubleValue());
 
       if (footstepTimings.isEmpty())
@@ -381,11 +389,6 @@ public class PushRecoveryBalanceManager
          yoFinalDesiredCoMAcceleration.setToNaN();
       }
 
-      // If this condition is false we are experiencing a late touchdown or a delayed liftoff. Do not advance the time in support sequence!
-      if (footsteps.isEmpty() || !icpPlannerDone.getValue())
-         timeInSupportSequence.add(controllerToolbox.getControlDT());
-
-      icpPlannerDone.set(timeInSupportSequence.getValue() >= currentStateDuration.getValue());
       decayDesiredICPVelocity();
 
       plannerTimer.stopMeasurement();
@@ -508,7 +511,10 @@ public class PushRecoveryBalanceManager
       copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
+      timeAtStartOfState.set(controllerToolbox.getYoTime().getValue());
       timeInSupportSequence.set(0.0);
+
       inSingleSupport.set(false);
       currentStateDuration.set(Double.NaN);
       totalStateDuration.set(Double.NaN);
@@ -530,11 +536,30 @@ public class PushRecoveryBalanceManager
       currentTiming.set(footstepTimings.get(0));
       currentFootstep.set(footsteps.get(0));
 
-      timeInSupportSequence.set(currentTiming.getTransferTime());
-      currentStateDuration.set(currentTiming.getStepTime());
+      timeAtStartOfState.set(controllerToolbox.getYoTime().getValue());
+
+      currentStateDuration.set(currentTiming.getSwingTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuitySingleSupport.getValue());
+      initializeOnStateChange = true;
+      icpPlannerDone.set(false);
+   }
+
+   public void initializeICPPlanForTransfer()
+   {
+      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
+
+      copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
+      copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
+      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
+
+      currentStateDuration.set(currentTiming.getTransferTime());// FIXME these durations are wrong
+      totalStateDuration.set(currentTiming.getStepTime());
+
+      inSingleSupport.set(false);
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
+
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
    }
@@ -544,10 +569,13 @@ public class PushRecoveryBalanceManager
       comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
 
 //      copTrajectoryState.setInitialCoP(yoPerfectCoP);
+      copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
-//      timeInSupportSequence.set(0.0);
+      timeAtStartOfState.set(controllerToolbox.getYoTime().getValue());
+
+      timeInSupportSequence.set(0.0);
       currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
       totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
 
@@ -555,26 +583,6 @@ public class PushRecoveryBalanceManager
       initializeOnStateChange = true;
       comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(true);
 
-      icpPlannerDone.set(false);
-   }
-
-   public void initializeICPPlanForTransferToRecovery()
-   {
-
-      comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
-
-      copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
-      copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
-      comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
-
-      timeInSupportSequence.set(0.0);
-      currentStateDuration.set(copTrajectoryState.getFinalTransferDuration());
-      totalStateDuration.set(copTrajectoryState.getFinalTransferDuration());
-
-      inSingleSupport.set(false);
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuityTransfer.getValue());
-
-      initializeOnStateChange = true;
       icpPlannerDone.set(false);
    }
 
