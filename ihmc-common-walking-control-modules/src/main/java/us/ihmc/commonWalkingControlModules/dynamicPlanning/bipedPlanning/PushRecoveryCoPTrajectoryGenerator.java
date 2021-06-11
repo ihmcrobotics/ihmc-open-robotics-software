@@ -2,11 +2,16 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactState;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SettableContactStateProvider;
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,6 +25,8 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
 {
    private final static double continuityDuration = 0.1;
    private final RecyclingArrayList<SettableContactStateProvider> contactStateProviders = new RecyclingArrayList<>(SettableContactStateProvider::new);
+
+   private final FrameConvexPolygon2D combinedPolygon = new FrameConvexPolygon2D();
 
    private final SideDependentList<FrameConvexPolygon2D> movingPolygonsInSole = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
@@ -61,6 +68,54 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
    {
       contactStateProviders.clear();
 
+      if (state.getNumberOfFootsteps() > 0)
+         computeWithSteps(state);
+      else
+         computeTransferToStanding(state);
+   }
+
+   private void computeTransferToStanding(PushRecoveryState state)
+   {
+      combinedPolygon.clear();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         FrameConvexPolygon2DReadOnly supportPolygon = state.getFootPolygonInSole(robotSide);
+         for (int vertexId = 0; vertexId < supportPolygon.getNumberOfVertices(); vertexId++)
+            combinedPolygon.addVertexMatchingFrame(supportPolygon.getVertex(vertexId), false);
+      }
+      combinedPolygon.update();
+
+      startICP.setIncludingFrame(state.getIcpAtStartOfState());
+      if (combinedPolygon.isPointInside(startICP))
+      {
+         stanceCMP.set(startICP);
+      }
+      else
+      {
+         combinedPolygon.orthogonalProjection(startICP, stanceCMP);
+      }
+
+      FramePoint3DReadOnly leftFootPosition = state.getFootPose(RobotSide.LEFT).getPosition();
+      FramePoint3DReadOnly rightFootPosition = state.getFootPose(RobotSide.RIGHT).getPosition();
+      double percentageAlongFoot = EuclidGeometryTools.percentageAlongLineSegment2D(stanceCMP.getX(),
+                                                                                    stanceCMP.getY(),
+                                                                                    leftFootPosition.getX(),
+                                                                                    leftFootPosition.getY(),
+                                                                                    rightFootPosition.getX(),
+                                                                                    rightFootPosition.getY());
+      nextCMP.set(stanceCMP, InterpolationTools.linearInterpolate(leftFootPosition.getZ(), rightFootPosition.getZ(), percentageAlongFoot));
+
+      SettableContactStateProvider contactState = contactStateProviders.add();
+      contactState.reset();
+      contactState.setContactState(ContactState.IN_CONTACT);
+      contactState.getTimeInterval().setInterval(0.0, state.getFinalTransferDuration());
+      contactState.setStartECMPPosition(nextCMP);
+      contactState.setEndECMPPosition(nextCMP);
+      contactState.setLinearECMPVelocity();
+   }
+
+   private void computeWithSteps(PushRecoveryState state)
+   {
       DynamicPlanningFootstep recoveryFootstep = state.getFootstep(0);
 
       RobotSide swingSide = recoveryFootstep.getRobotSide();
