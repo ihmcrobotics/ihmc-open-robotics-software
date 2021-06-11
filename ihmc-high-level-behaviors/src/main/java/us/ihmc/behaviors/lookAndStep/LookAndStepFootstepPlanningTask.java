@@ -13,6 +13,8 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.tools.Timer;
@@ -310,15 +312,18 @@ public class LookAndStepFootstepPlanningTask
       subGoalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // calculate impassibility
-      if (lookAndStepParameters.getStopForImpassibilities() && lidarREAPlanarRegionReceptionTimerSnapshot.isRunning())
+      if (lookAndStepParameters.getStopForImpassibilities())
       {
          Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
-         if (PlannerTools.doesPathContainBodyCollisions(rootPose,
-                                                        bodyPathPlan,
-                                                        lidarREAPlanarRegions,
-                                                        footstepPlannerParameters,
-                                                        lookAndStepParameters.getHorizonFromDebrisToStop()))
+         BodyCollisionData collisionData = PlannerTools.detectCollisionsAlongBodyPath(rootPose,
+                                                                                      bodyPathPlan,
+                                                                                      lidarREAPlanarRegions,
+                                                                                      footstepPlannerParameters,
+                                                                                      lookAndStepParameters.getHorizonFromDebrisToStop());
+         if (collisionData != null && collisionData.isCollisionDetected())
          {
+            uiPublisher.publishToUI(Obstacle, MutablePair.of(new Pose3D(collisionData.getBodyBox().getPose()),
+                                                             new Vector3D(collisionData.getBodyBox().getSize())));
             uiPublisher.publishToUI(ImpassibilityDetected, true);
             doFailureAction("Impassibility detected. Aborting task...");
             return;

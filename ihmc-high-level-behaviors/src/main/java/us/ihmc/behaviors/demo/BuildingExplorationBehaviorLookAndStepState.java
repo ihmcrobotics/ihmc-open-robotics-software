@@ -13,6 +13,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -187,12 +188,12 @@ class BuildingExplorationBehaviorLookAndStepState implements State
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
       Pose3D rootPose = new Pose3D(new Point3D(robotConfigurationData.getRootTranslation()), robotConfigurationData.getRootOrientation());
 
-      boolean debrisDetected = PlannerTools.doesPathContainBodyCollisions(rootPose,
-                                                                          bodyPath,
-                                                                          planarRegionsList,
-                                                                          footstepPlannerParameters,
-                                                                          horizonFromDebrisToStop);
-      if (debrisDetected)
+      BodyCollisionData collisionData = PlannerTools.detectCollisionsAlongBodyPath(rootPose,
+                                                                                   bodyPath,
+                                                                                   planarRegionsList,
+                                                                                   footstepPlannerParameters,
+                                                                                   horizonFromDebrisToStop);
+      if (collisionData != null && collisionData.isCollisionDetected())
       {
          LogTools.debug("Debris detected");
          this.debrisDetected.set(true);
