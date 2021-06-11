@@ -92,13 +92,13 @@ public class TraverseStairsPlanStepsState implements State
       {
          String message = "No goal received in traverse stairs behavior";
          LogTools.info(message);
-         throw new RuntimeException(message);
+//         throw new RuntimeException(message);
       }
       else if (planarRegions.get() == null)
       {
          String message = "No regions received in traverse stairs behavior";
          LogTools.info(message);
-         throw new RuntimeException(message);
+//         throw new RuntimeException(message);
       }
    }
 
