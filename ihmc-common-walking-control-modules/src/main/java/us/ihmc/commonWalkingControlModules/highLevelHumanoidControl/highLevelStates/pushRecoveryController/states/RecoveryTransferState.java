@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -48,6 +49,10 @@ public class RecoveryTransferState extends PushRecoveryState
    private final FramePoint2D filteredDesiredCoP = new FramePoint2D();
    private final FramePoint2D desiredCoP = new FramePoint2D();
 
+   private final FramePoint2D capturePoint = new FramePoint2D();
+
+   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+
    private final FootstepTiming stepTiming = new FootstepTiming();
 
    private final Footstep nextFootstep = new Footstep();
@@ -57,6 +62,7 @@ public class RecoveryTransferState extends PushRecoveryState
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                 PushRecoveryControlManagerFactory managerFactory,
                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                                MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
                                 DoubleProvider minimumTransferTime,
                                 DoubleProvider minimumSwingTime,
@@ -69,6 +75,7 @@ public class RecoveryTransferState extends PushRecoveryState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.controllerToolbox = controllerToolbox;
       this.balanceManager = managerFactory.getOrCreateBalanceManager();
+      this.pushRecoveryControlModule = pushRecoveryControlModule;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
@@ -95,7 +102,7 @@ public class RecoveryTransferState extends PushRecoveryState
 
    private void updateICPPlan()
    {
-      balanceManager.clearICPPlan();
+//      balanceManager.clearICPPlan();
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
@@ -127,6 +134,9 @@ public class RecoveryTransferState extends PushRecoveryState
       switchToToeOffIfPossible();
 
       feetManager.updateContactStatesInDoubleSupport(transferToSide);
+
+      capturePoint.setIncludingFrame(controllerToolbox.getCapturePoint());
+      pushRecoveryControlModule.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       //      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());

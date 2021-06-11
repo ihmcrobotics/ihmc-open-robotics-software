@@ -83,17 +83,10 @@ public class WalkingControllerState extends HighLevelControllerState
 
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
-      FullHumanoidRobotModel fullRobotModel = controllerToolbox.getFullRobotModel();
-      double controlDT = controllerToolbox.getControlDT();
-      double gravityZ = controllerToolbox.getGravityZ();
-      RigidBodyBasics elevator = fullRobotModel.getElevator();
-      CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();
-      YoDouble yoTime = controllerToolbox.getYoTime();
-      YoGraphicsListRegistry yoGraphicsListRegistry = controllerToolbox.getYoGraphicsListRegistry();
-      SideDependentList<ContactableFoot> contactableFeet = controllerToolbox.getContactableFeet();
 
-      linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters,
-                                                                            gravityZ, controlDT, registry, yoGraphicsListRegistry);
+
+//      linearMomentumRateControlModule = new LinearMomentumRateControlModule(controllerToolbox, walkingControllerParameters, registry);
+      linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
       managerFactory.getOrCreateBalanceManager().setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
