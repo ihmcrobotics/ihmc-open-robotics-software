@@ -243,6 +243,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoveryTransferState(transferToSide);
          RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler,
                                                                          controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+                                                                         pushRecoveryControlModule,
                                                                          failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
                                                                          registry);
          recoveryTransferStates.put(transferToSide, transferState);

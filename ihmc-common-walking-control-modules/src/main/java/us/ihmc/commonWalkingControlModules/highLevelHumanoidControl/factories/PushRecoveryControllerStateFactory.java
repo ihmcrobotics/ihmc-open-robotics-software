@@ -25,7 +25,8 @@ public class PushRecoveryControllerStateFactory implements HighLevelControllerSt
                                                                        managerFactory, controllerFactoryHelper.getWholeBodyControllerCoreFactory(),
                                                                        controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                                        controllerFactoryHelper.getHighLevelControllerParameters(),
-                                                                       controllerFactoryHelper.getPushRecoveryControllerParameters());
+                                                                       controllerFactoryHelper.getPushRecoveryControllerParameters(),
+                                                                       controllerFactoryHelper.getWalkingControllerParameters());
       }
 
       return pushRecoveryControllerState;

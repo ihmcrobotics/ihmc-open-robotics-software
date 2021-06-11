@@ -514,7 +514,7 @@ public class PushRecoveryBalanceManager
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
 
-      currentStateDuration.set(currentTiming.getTransferTime());// FIXME these durations are wrong
+      currentStateDuration.set(currentTiming.getStepTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
       inSingleSupport.set(false);
