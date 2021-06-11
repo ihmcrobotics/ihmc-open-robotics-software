@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode.*;
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
-import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.REACHED_GOAL;
 
 public class BuildingExplorationBehavior extends ResettingNode implements BehaviorInterface
 {
@@ -51,19 +50,15 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
          helper.getOrCreateStatusLogger().info("Accepting new building exploration parameters");
          this.parameters.setAllFromStrings(parameters);
       });
-      helper.subscribeViaCallback(Goal, this::setGoal);
-      helper.subscribeViaCallback(REACHED_GOAL, () -> setGoal(NAN_POSE));
+      helper.subscribeViaCallback(Goal, newGoal ->
+      {
+         goal.set(newGoal);
+      });
       helper.subscribeViaCallback(Mode, newValue ->
       {
          LogTools.info("Received mode: {}", newValue);
          mode.set(newValue);
       });
-   }
-
-   private void setGoal(Pose3D newGoal)
-   {
-      goal.set(newGoal);
-      helper.publish(GoalForUI, goal.get());
    }
 
    @Override
