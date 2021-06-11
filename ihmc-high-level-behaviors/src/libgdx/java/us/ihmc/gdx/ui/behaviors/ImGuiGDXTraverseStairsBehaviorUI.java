@@ -41,7 +41,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    private final BehaviorHelper helper;
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private Point2D nodePosition = new Point2D(632.0, 582.0);
+   private Point2D nodePosition = new Point2D(384.0, 555.0);
    private final Stopwatch completedStopwatch = new Stopwatch();
    private String currentState = "";
    private String currentLifecycleState = "";
