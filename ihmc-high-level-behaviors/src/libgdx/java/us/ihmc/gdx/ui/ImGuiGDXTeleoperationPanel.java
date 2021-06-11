@@ -234,8 +234,8 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
 
    private void walk()
    {
-      double swingDuration = 2.0;
-      double transferDuration = 2.0;
+      double swingDuration = 1.2;
+      double transferDuration = 0.8;
       FootstepDataListMessage footstepDataListMessage
             = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlannerOutput.getFootstepPlan(), swingDuration, transferDuration);
       footstepDataListMessage.getQueueingProperties().setExecutionMode(ExecutionMode.OVERRIDE.toByte());
