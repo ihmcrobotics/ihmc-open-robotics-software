@@ -1,28 +1,29 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions;
 
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveringSwingState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveryTransferState;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
-public class PushRecoverySingleSupportToTransferToCondition implements StateTransitionCondition
+public class ContinuePushRecoveryWithNextStepCondition implements StateTransitionCondition
 {
-   private final RecoveringSwingState singleSupportState;
    private final RecoveryTransferState transferState;
-   private final WalkingMessageHandler walkingMessageHandler;
+   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
 
-   public PushRecoverySingleSupportToTransferToCondition(RecoveringSwingState singleSupportState, RecoveryTransferState transferState, WalkingMessageHandler walkingMessageHandler)
+   public ContinuePushRecoveryWithNextStepCondition(RecoveryTransferState transferState, MultiStepPushRecoveryControlModule pushRecoveryControlModule)
    {
-      this.singleSupportState = singleSupportState;
       this.transferState = transferState;
-      this.walkingMessageHandler = walkingMessageHandler;
+      this.pushRecoveryControlModule = pushRecoveryControlModule;
    }
 
    @Override
    public boolean testCondition(double timeInState)
    {
-      if (!singleSupportState.isDone(timeInState))
+      if (!transferState.isDone(timeInState))
          return false;
-      return walkingMessageHandler.isNextFootstepFor(transferState.getTransferToSide().getOppositeSide());
+
+      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport() != null;
    }
 }

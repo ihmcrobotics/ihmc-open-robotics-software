@@ -321,6 +321,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest(null, true, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
