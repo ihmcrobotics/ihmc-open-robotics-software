@@ -28,6 +28,7 @@ public class ImGuiTools
    public static final float FLOAT_MAX = 3.40282346638528859811704183484516925e+38F / 2.0f;
 
    private static ImFont bigFont;
+   private static ImFont nodeFont;
 
    public static int nextWidgetIndex()
    {
@@ -68,6 +69,7 @@ public class ImGuiTools
    {
       final ImFontConfig fontConfig = new ImFontConfig(); // Natively allocated object, should be explicitly destroyed
       final ImFontConfig bigFontConfig = new ImFontConfig();
+      final ImFontConfig nodeFontConfig = new ImFontConfig();
 
       // Glyphs could be added per-font as well as per config used globally like here
 //      fontConfig.setGlyphRanges(fontAtlas.getGlyphRangesCyrillic());
@@ -84,6 +86,7 @@ public class ImGuiTools
 //      fontConfig.setPixelSnapH(true);
       fontConfig.setFontBuilderFlags(fontsFlags);
       bigFontConfig.setFontBuilderFlags(fontsFlags);
+      nodeFontConfig.setFontBuilderFlags(fontsFlags);
 
       ImFont fontToReturn;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
@@ -93,16 +96,22 @@ public class ImGuiTools
          fontConfig.setName("segoeui.ttf, 16px");
          fontToReturn = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 16.0f, fontConfig);
 
-         bigFontConfig.setName("segoeui.ttf, 42px");
+         bigFontConfig.setName("segoeui.ttf, 38px");
          bigFont = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 38.0f, bigFontConfig);
+
+         nodeFontConfig.setName("segoeui.ttf, 32px 1/2");
+         nodeFont = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 32.0f, nodeFontConfig);
       }
       else
       {
          fontConfig.setName("DejaVuSans.ttf, 13px");
          fontToReturn = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 13.0f, fontConfig);
 
-         bigFontConfig.setName("DejaVuSans.ttf, 38px");
+         bigFontConfig.setName("DejaVuSans.ttf, 32px");
          bigFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 32.0f, bigFontConfig);
+
+         nodeFontConfig.setName("DejaVuSans.ttf, 26px 1/2");
+         nodeFont = io.getFonts().addFontFromMemoryTTF(ImGuiTools.loadFromResources("dejaVu/DejaVuSans.ttf"), 26.0f, nodeFontConfig);
       }
 //      fontConfig.setName("Roboto-Regular.ttf, 14px"); // This name will be displayed in Style Editor
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("Roboto-Regular.ttf"), size, fontConfig);
@@ -112,15 +121,23 @@ public class ImGuiTools
 //      fontConfig.setName("Segoe UI"); // We can apply a new config value every time we add a new font
 //      fontToReturn = fontAtlas.addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", size, fontConfig);
 
+      nodeFont.setScale(0.5f);
+
       ImGui.getIO().getFonts().build();
 
       fontConfig.destroy(); // After all fonts were added we don't need this config more
+      bigFontConfig.destroy();
+      nodeFontConfig.destroy();
 
       return fontToReturn;
    }
 
    public static ImFont getBigFont() {
       return bigFont;
+   }
+
+   public static ImFont getNodeFont() {
+      return nodeFont;
    }
 
    public static byte[] loadFromResources(final String fileName)
