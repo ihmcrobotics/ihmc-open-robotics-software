@@ -136,7 +136,7 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
 
       stanceCMP.setToZero(stanceFrame);
       intersectionLine.setIncludingFrame(swingPolygon.getCentroid(), state.getIcpAtStartOfState());
-      intersectionLine.changeFrame(stanceFrame);
+      intersectionLine.changeFrameAndProjectToXYPlane(stanceFrame);
 
       int intersections = stancePolygon.intersectionWithRay(intersectionLine, firstIntersection, secondIntersection);
 
