@@ -50,6 +50,10 @@ public class ImGuiBehaviorTreePanel
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
    }
 
+   private void resetNodeIndex(GDXBehaviorUIInterface tree) {
+      nodeIndex = tree.generateUID();
+   }
+
    public void create()
    {
       context = NodeEditor.createEditor();
@@ -72,7 +76,7 @@ public class ImGuiBehaviorTreePanel
       NodeEditor.setCurrentEditor(context);
       ImGui.pushFont(ImGuiTools.getNodeFont());
       NodeEditor.begin(windowName);
-      nodeIndex = 1;
+      resetNodeIndex(tree);
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
       renderNodeAndChildren(tree, -1, links);
       renderLinks(links);
@@ -124,7 +128,7 @@ public class ImGuiBehaviorTreePanel
    }
 
    private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree) {
-      nodeIndex = 1;
+      resetNodeIndex(tree);
       return getIndexOfNodeInternal(node, tree);
    }
 
