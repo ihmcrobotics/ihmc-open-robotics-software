@@ -101,9 +101,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final TaskspaceTrajectoryStatusMessage pelvisStatusMessage = new TaskspaceTrajectoryStatusMessage();
 
-   private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
-   private final YoBoolean limitCommandSent = new YoBoolean("limitCommandSent", registry);
-
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
@@ -208,18 +205,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
 
       stateMachine = setupStateMachine();
-
-      String[] jointNamesRestrictiveLimits = pushRecoveryControllerParameters.getJointsWithRestrictiveLimits();
-      OneDoFJointBasics[] jointsWithRestrictiveLimit = MultiBodySystemTools.filterJoints(ScrewTools.findJointsWithNames(allOneDoFjoints,
-                                                                                                                        jointNamesRestrictiveLimits),
-                                                                                         OneDoFJointBasics.class);
-      for (OneDoFJointBasics joint : jointsWithRestrictiveLimit)
-      {
-         JointLimitParameters limitParameters = pushRecoveryControllerParameters.getJointLimitParametersForJointsWithRestrictiveLimits(joint.getName());
-         if (limitParameters == null)
-            throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
-         jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
-      }
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = pushRecoveryControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
@@ -590,11 +575,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       planeContactStateCommandPool.clear();
 
       controllerCoreCommand.addInverseDynamicsCommand(privilegedConfigurationCommand);
-      if (!limitCommandSent.getBooleanValue())
-      {
-         controllerCoreCommand.addInverseDynamicsCommand(jointLimitEnforcementMethodCommand);
-         limitCommandSent.set(true);
-      }
 
       boolean isHighCoPDampingNeeded = controllerToolbox.estimateIfHighCoPDampingNeeded(footDesiredCoPs);
 
