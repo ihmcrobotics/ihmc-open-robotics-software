@@ -18,6 +18,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WholeBodyControllerCoreFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -178,4 +179,12 @@ public class PushRecoveryControllerState extends HighLevelControllerState
       return pushRecoveryController.isJointLoadBearing(jointName);
    }
 
+   @Override
+   public boolean isDone(double timeInState)
+   {
+      if (pushRecoveryController.getRecoveringStateEnum() != PushRecoveryStateEnum.TO_STANDING)
+         return false;
+
+      return pushRecoveryController.getRecoveringState().isDone(timeInState);
+   }
 }

@@ -78,6 +78,8 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       switchToPointToeOffIfAlreadyInLine();
 
+      pushRecoveryCalculator.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
+
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
@@ -141,8 +143,8 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (!balanceManager.isICPPlanDone())
          return false;
 
-      pushRecoveryCalculator.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
-
+      if (pushRecoveryCalculator.isRobotFallingFromDoubleSupport() != null)
+         return false;
 
       // FIXME likely remove this
       return balanceManager.getICPErrorMagnitude() < maxICPErrorToSwitchToStanding.getDoubleValue();
