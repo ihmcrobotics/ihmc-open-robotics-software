@@ -172,6 +172,8 @@ public class RecoveryTransferState extends PushRecoveryState
    @Override
    public boolean isDone(double timeInState)
    {
+      return balanceManager.isICPPlanDone();
+      /*
       if (balanceManager.isICPPlanDone())
       {
          capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
@@ -188,6 +190,8 @@ public class RecoveryTransferState extends PushRecoveryState
       }
 
       return feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
+
+       */
    }
 
    @Override

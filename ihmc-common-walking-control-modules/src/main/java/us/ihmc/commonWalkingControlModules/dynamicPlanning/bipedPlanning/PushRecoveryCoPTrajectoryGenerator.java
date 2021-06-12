@@ -86,6 +86,9 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       combinedPolygon.update();
 
       startICP.setIncludingFrame(state.getIcpAtStartOfState());
+      startICP.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+      stanceCMP.setToZero(ReferenceFrame.getWorldFrame());
+
       if (combinedPolygon.isPointInside(startICP))
       {
          stanceCMP.set(startICP);

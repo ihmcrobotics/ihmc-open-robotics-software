@@ -293,7 +293,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                new ContinuePushRecoveryWithNextStepCondition(transferState, pushRecoveryControlModule));
 
          factory.addTransition(transferStateEnum,
-                               singleSupportStateEnum,
+                               PushRecoveryStateEnum.TO_STANDING,
                                new RecoveryTransferToStandingCondition(transferState, pushRecoveryControlModule));
       }
 
@@ -654,6 +654,11 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    public PushRecoveryStateEnum getRecoveringStateEnum()
    {
       return stateMachine.getCurrentStateKey();
+   }
+
+   public PushRecoveryState getRecoveringState()
+   {
+      return stateMachine.getCurrentState();
    }
 
    @Override
