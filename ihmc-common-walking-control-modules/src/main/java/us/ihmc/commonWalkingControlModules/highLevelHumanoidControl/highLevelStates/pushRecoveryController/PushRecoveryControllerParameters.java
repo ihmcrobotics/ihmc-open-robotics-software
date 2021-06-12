@@ -8,14 +8,14 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.feedbackContr
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
 
-public abstract class PushRecoveryControllerParameters
+public interface  PushRecoveryControllerParameters
 {
 
    /**
     * This is the minimum transfer time that the controller will allow when adjusting transfer times to achieve certain step
     * times in footstep plans.
     */
-   public double getMinimumTransferTime()
+   default double getMinimumTransferTime()
    {
       return 0.1;
    }
@@ -24,7 +24,7 @@ public abstract class PushRecoveryControllerParameters
     * This is the minimum swing time that the controller will allow when adjusting transfer times to achieve certain step
     * times in footstep plans.
     */
-   public double getMinimumSwingTime()
+   default double getMinimumSwingTime()
    {
       return 0.6;
    }
@@ -33,10 +33,7 @@ public abstract class PushRecoveryControllerParameters
     * Returns the {@link MomentumOptimizationSettings} for this robot. These parameters define the weights
     * given to the objectives of the walking controller in the QP.
     */
-   public MomentumOptimizationSettings getMomentumOptimizationSettings()
-   {
-      return null;
-   }
+   MomentumOptimizationSettings getMomentumOptimizationSettings();
 
 
    /**
@@ -45,12 +42,12 @@ public abstract class PushRecoveryControllerParameters
     * Useful when the robot has heavy legs and tends to slips during swing.
     * @return
     */
-   public boolean minimizeAngularMomentumRateZDuringSwing()
+   default boolean minimizeAngularMomentumRateZDuringSwing()
    {
       return false;
    }
 
-   public boolean minimizeAngularMomentumRateZDuringTransfer()
+   default boolean minimizeAngularMomentumRateZDuringTransfer()
    {
       return false;
    }
@@ -63,16 +60,22 @@ public abstract class PushRecoveryControllerParameters
     * the desired privileged configuration in the legs.
     * @return boolean (true = control height, false = do not control height but leave it up to the optimization)
     */
-   public boolean enableHeightFeedbackControl()
+   default boolean enableHeightFeedbackControl()
    {
       return true;
    }
 
-   /**
-    * Returns parameters related to stepping such as maximum step length etc.
-    */
-   public SteppingParameters getSteppingParameters()
+   double getMaxStepLength();
+
+   default double getMaxBackwardsStepLength()
    {
-      return null;
+      return getMaxStepLength();
+   }
+
+   double getMinStepWidth();
+
+   default double getMaxStepWidth()
+   {
+      return getMaxStepLength();
    }
 }
