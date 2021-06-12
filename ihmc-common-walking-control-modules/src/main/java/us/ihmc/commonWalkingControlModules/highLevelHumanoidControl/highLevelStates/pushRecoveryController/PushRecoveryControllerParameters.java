@@ -58,7 +58,7 @@ public abstract class PushRecoveryControllerParameters
     */
    public double getMinimumSwingTime()
    {
-      return 0.8;
+      return 0.6;
    }
 
    /**

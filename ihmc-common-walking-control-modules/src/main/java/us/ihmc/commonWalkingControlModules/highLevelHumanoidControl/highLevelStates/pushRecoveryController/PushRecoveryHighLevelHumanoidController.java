@@ -140,6 +140,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                                                          controllerToolbox.getBipedSupportPolygons(),
                                                                          controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
                                                                          controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT),
+                                                                         pushRecoveryControllerParameters,
                                                                          registry,
                                                                          controllerToolbox.getYoGraphicsListRegistry());
 
@@ -234,8 +235,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                                                                                     failureDetectionControlModule, registry);
       factory.addState(PushRecoveryStateEnum.TO_STANDING, toStandingState);
 
-      DoubleProvider minimumTransferTime = new DoubleParameter("MinimumTransferTime", registry, pushRecoveryControllerParameters.getMinimumTransferTime());
-      DoubleProvider minimumSwingTime = new DoubleParameter("MinimumSwingTime", registry, pushRecoveryControllerParameters.getMinimumSwingTime());
 
       SideDependentList<RecoveryTransferState> recoveryTransferStates = new SideDependentList<>();
       for (RobotSide transferToSide : RobotSide.values)
@@ -244,7 +243,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler,
                                                                          controllerToolbox, managerFactory, pushRecoveryControllerParameters,
                                                                          pushRecoveryControlModule,
-                                                                         failureDetectionControlModule, minimumTransferTime, minimumSwingTime,
+                                                                         failureDetectionControlModule,
                                                                          registry);
          recoveryTransferStates.put(transferToSide, transferState);
          factory.addState(stateEnum, transferState);

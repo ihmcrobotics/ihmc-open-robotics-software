@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -16,15 +17,14 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class MultiStepPushRecoveryControlModule
 {
-   private static final double swingDuration = 0.6;
-   private static final double transferDuration = 0.1;
-
    private final GlitchFilteredYoBoolean isRobotBackToSafeState;
    private final YoBoolean isICPOutside;
    private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
@@ -33,6 +33,9 @@ public class MultiStepPushRecoveryControlModule
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final BipedSupportPolygons bipedSupportPolygons;
+
+   private final  DoubleProvider pushRecoveryTransferDuration;
+   private final  DoubleProvider pushRecoverySwingDuration;
 
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
    private final SideDependentList<RecyclingArrayList<Footstep>> recoveryFootsteps = new SideDependentList<>(new RecyclingArrayList<>(Footstep::new),
@@ -46,6 +49,7 @@ public class MultiStepPushRecoveryControlModule
                                              BipedSupportPolygons bipedSupportPolygons,
                                              SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                              FrameConvexPolygon2DReadOnly defaultSupportPolygon,
+                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                              YoRegistry parentRegistry,
                                              YoGraphicsListRegistry graphicsListRegistry)
    {
@@ -57,6 +61,9 @@ public class MultiStepPushRecoveryControlModule
 
       swingSideForDoubleSupportRecovery = new YoEnum<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery.set(null);
+
+      pushRecoveryTransferDuration = new DoubleParameter("pushRecoveryTransferDuration", registry, pushRecoveryControllerParameters.getMinimumTransferTime());
+      pushRecoverySwingDuration = new DoubleParameter("pushRecoverySwingDuration", registry, pushRecoveryControllerParameters.getMinimumSwingTime());
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
@@ -149,7 +156,7 @@ public class MultiStepPushRecoveryControlModule
          supportPolygonInWorld.setIncludingFrame(bipedSupportPolygons.getFootPolygonInSoleFrame(swingSide.getOppositeSide()));
          supportPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
-         pushRecoveryCalculator.computeRecoverySteps(swingSide, swingDuration, transferDuration, currentICP, omega0, supportPolygonInWorld);
+         pushRecoveryCalculator.computeRecoverySteps(swingSide, pushRecoverySwingDuration.getValue(), pushRecoveryTransferDuration.getValue(), currentICP, omega0, supportPolygonInWorld);
          int numberOfSteps = pushRecoveryCalculator.getNumberOfRecoverySteps();
 
          for (int i = 0; i < numberOfSteps; i++)
