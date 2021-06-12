@@ -73,12 +73,25 @@ public class MultiStepPushRecoveryCalculator
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
+      this(kinematicsStepRange, kinematicsStepRange, footWidth, kinematicsStepRange, soleZUpFrames, defaultFootPolygon, suffix, parentRegistry, graphicsListRegistry);
+   }
+
+   public MultiStepPushRecoveryCalculator(double maxStepLength,
+                                          double maxBackwardsStepLength,
+                                          double minStepWidth,
+                                          double maxStepWidth,
+                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                          ConvexPolygon2DReadOnly defaultFootPolygon,
+                                          String suffix,
+                                          YoRegistry parentRegistry,
+                                          YoGraphicsListRegistry graphicsListRegistry)
+   {
       this.soleZUpFrames = soleZUpFrames;
       this.defaultFootPolygon = defaultFootPolygon;
-      reachableFootholdsCalculator = new ReachableFootholdsCalculator(kinematicsStepRange,
-                                                                      kinematicsStepRange,
-                                                                      footWidth,
-                                                                      kinematicsStepRange,
+      reachableFootholdsCalculator = new ReachableFootholdsCalculator(maxStepLength,
+                                                                      maxBackwardsStepLength,
+                                                                      minStepWidth,
+                                                                      maxStepWidth,
                                                                       soleZUpFrames,
                                                                       registry);
       captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay();
