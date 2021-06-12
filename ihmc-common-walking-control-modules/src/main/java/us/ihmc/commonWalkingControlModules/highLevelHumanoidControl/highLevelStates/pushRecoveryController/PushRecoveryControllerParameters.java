@@ -56,25 +56,6 @@ public abstract class PushRecoveryControllerParameters
    }
 
    /**
-    * Returns a list of joint that should use the more restrictive joint limit enforcement
-    * in the QP. If the list is not empty the method {@link #getJointLimitParametersForJointsWithRestrictiveLimits(String)}
-    * must be overwritten to define the limit parameters.
-    */
-   public String[] getJointsWithRestrictiveLimits()
-   {
-      return new String[0];
-   }
-
-   /**
-    * Returns parameters for joint limits that will be used with the joints defined in
-    * {@link #getJointsWithRestrictiveLimits()}.
-    */
-   public JointLimitParameters getJointLimitParametersForJointsWithRestrictiveLimits(String jointName)
-   {
-      return null;
-   }
-
-   /**
     * Determines whether or not to attempt to directly control the height.
     * If true, the height will be controlled directly via a command to the controller core. This can be
     * a linear momentum z command or a feedback control command for the pelvis.
