@@ -67,8 +67,10 @@ public class MultiStepPushRecoveryControlModule
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
-      pushRecoveryCalculator = new MultiStepPushRecoveryCalculator(kinematicsStepRange,
-                                                                   footWidth,
+      pushRecoveryCalculator = new MultiStepPushRecoveryCalculator(pushRecoveryControllerParameters.getMaxStepLength(),
+                                                                   pushRecoveryControllerParameters.getMaxBackwardsStepLength(),
+                                                                   pushRecoveryControllerParameters.getMinStepWidth(),
+                                                                   pushRecoveryControllerParameters.getMaxStepWidth(),
                                                                    soleZUpFrames,
                                                                    defaultSupportPolygon,
                                                                    "",
