@@ -10,17 +10,13 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class AtlasPushRecoveryControllerParameters extends PushRecoveryControllerParameters
+public class AtlasPushRecoveryControllerParameters implements PushRecoveryControllerParameters
 {
    private final AtlasMomentumOptimizationSettings momentumOptimizationSettings;
-
-   private AtlasSteppingParameters steppingParameters;
 
    public AtlasPushRecoveryControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
-
-      steppingParameters = new AtlasSteppingParameters(jointMap);
    }
 
    @Override
@@ -29,17 +25,27 @@ public class AtlasPushRecoveryControllerParameters extends PushRecoveryControlle
       return momentumOptimizationSettings;
    }
 
-   /** {@inheritDoc} */
    @Override
-   public boolean enableHeightFeedbackControl()
+   public double getMaxStepLength()
    {
-      return true;
+      return 1.0;
    }
 
-   /** {@inheritDoc} */
    @Override
-   public SteppingParameters getSteppingParameters()
+   public double getMaxStepWidth()
    {
-      return steppingParameters;
+      return 0.6;
+   }
+
+   @Override
+   public double getMinStepWidth()
+   {
+      return 0.15;
+   }
+
+   @Override
+   public double getMaxBackwardsStepLength()
+   {
+      return 0.6;
    }
 }

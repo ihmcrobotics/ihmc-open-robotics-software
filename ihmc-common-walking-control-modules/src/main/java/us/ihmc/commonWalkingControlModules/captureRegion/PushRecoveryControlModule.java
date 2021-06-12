@@ -72,7 +72,7 @@ public class PushRecoveryControlModule
    private final FramePoint2D projectedCapturePoint2d = new FramePoint2D();
 
    public PushRecoveryControlModule(BipedSupportPolygons bipedSupportPolygons, HighLevelHumanoidControllerToolbox controllerToolbox,
-                                    PushRecoveryControllerParameters recoveryControllerParameters, YoRegistry parentRegistry)
+                                    WalkingControllerParameters recoveryControllerParameters, YoRegistry parentRegistry)
    {
       controlDT = controllerToolbox.getControlDT();
       this.bipedSupportPolygon = bipedSupportPolygons;
