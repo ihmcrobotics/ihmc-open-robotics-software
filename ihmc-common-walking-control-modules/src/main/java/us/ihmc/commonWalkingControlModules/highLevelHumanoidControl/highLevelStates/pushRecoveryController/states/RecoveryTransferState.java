@@ -26,9 +26,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveryTransferState extends PushRecoveryState
 {
-   private final DoubleProvider minimumTransferTime;
-   private final DoubleProvider minimumSwingTime;
-
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
 
    private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
@@ -64,8 +61,6 @@ public class RecoveryTransferState extends PushRecoveryState
                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                 MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
-                                DoubleProvider minimumTransferTime,
-                                DoubleProvider minimumSwingTime,
                                 YoRegistry parentRegistry)
    {
       super(stateEnum, parentRegistry);
@@ -80,9 +75,6 @@ public class RecoveryTransferState extends PushRecoveryState
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
-
-      this.minimumTransferTime = minimumTransferTime;
-      this.minimumSwingTime = minimumSwingTime;
 
       minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
               pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
@@ -107,8 +99,7 @@ public class RecoveryTransferState extends PushRecoveryState
 
       failureDetectionControlModule.setNextFootstep(null);
 
-      double transferTime = walkingMessageHandler.getNextTransferTime();
-      pelvisOrientationManager.setTrajectoryTime(transferTime);
+      pelvisOrientationManager.setTrajectoryTime(stepTiming.getTransferTime());
 
       // In middle of walking or leaving foot pose, pelvis is good leave it like that.
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
@@ -117,13 +108,13 @@ public class RecoveryTransferState extends PushRecoveryState
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
-      currentTransferDuration.set(minimumTransferTime.getValue());
+      currentTransferDuration.set(stepTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransfer();
 
 //      pelvisOrientationManager.setUpcomingFootstep(footsteps);
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
-      pelvisOrientationManager.initializeTransfer(transferToSide, minimumTransferTime.getValue(), minimumSwingTime.getValue());
+      pelvisOrientationManager.initializeTransfer(transferToSide, stepTiming.getTransferTime(), stepTiming.getSwingTime());
    }
 
    @Override
@@ -146,16 +137,9 @@ public class RecoveryTransferState extends PushRecoveryState
    @Override
    public void onEntry()
    {
+      stepTiming.set(pushRecoveryControlModule.pollRecoveryStepTiming(transferToSide));
+      nextFootstep.set(pushRecoveryControlModule.pollRecoveryStep(transferToSide));
       updateICPPlan();
-
-      if (walkingMessageHandler.hasUpcomingFootsteps())
-      {
-         walkingMessageHandler.peekTiming(0, stepTiming);
-      }
-      else
-      {
-         stepTiming.setTimings(Double.NaN, Double.NaN);
-      }
 
       double extraToeOffHeight = 0.0;
       if (feetManager.canDoDoubleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), transferToSide)) // FIXME should this be swing side?

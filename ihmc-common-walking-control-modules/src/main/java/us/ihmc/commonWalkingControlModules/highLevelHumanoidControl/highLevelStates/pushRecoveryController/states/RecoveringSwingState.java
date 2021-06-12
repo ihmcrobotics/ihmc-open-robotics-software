@@ -154,8 +154,8 @@ public class RecoveringSwingState extends PushRecoveryState
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
 
-      nextFootstep.set(pushRecoveryControlModule.pollRecoveryStep(swingSide));
-      footstepTiming.set(pushRecoveryControlModule.pollRecoveryStepTiming(swingSide));
+      nextFootstep.set(pushRecoveryControlModule.getRecoveryStep(swingSide, 0));
+      footstepTiming.set(pushRecoveryControlModule.getRecoveryStepTiming(swingSide, 0));
 
       nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
       swingTime = footstepTiming.getSwingTime();
@@ -170,9 +170,9 @@ public class RecoveringSwingState extends PushRecoveryState
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
-      int stepsToAdd = Math.min(additionalFootstepsToConsider, pushRecoveryControlModule.getNumberOfRecoverySteps(swingSide));
+      int stepsToAdd = Math.min(additionalFootstepsToConsider, pushRecoveryControlModule.getNumberOfRecoverySteps(swingSide) - 1);
       boolean isLastStep = stepsToAdd == 0;
-      for (int i = 0; i < stepsToAdd; i++)
+      for (int i = 1; i < stepsToAdd; i++)
       {
          footsteps[i].set(pushRecoveryControlModule.getRecoveryStep(swingSide, i));
          footstepTimings[i].set(pushRecoveryControlModule.getRecoveryStepTiming(swingSide, i));
