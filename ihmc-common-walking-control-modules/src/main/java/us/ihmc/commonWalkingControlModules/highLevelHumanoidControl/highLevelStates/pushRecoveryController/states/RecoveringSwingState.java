@@ -1,39 +1,27 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
-import org.apache.commons.math3.util.Precision;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
-import us.ihmc.commonWalkingControlModules.captureRegion.PushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveringSwingState extends PushRecoveryState
 {
@@ -48,7 +36,6 @@ public class RecoveringSwingState extends PushRecoveryState
    private final FootstepTiming[] footstepTimings;
 
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
-   private final FramePose3D desiredFootPoseInWorld = new FramePose3D(worldFrame);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -56,12 +43,6 @@ public class RecoveringSwingState extends PushRecoveryState
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
-
-   private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
-   private final BooleanProvider minimizeAngularMomentumRateZDuringSwing;
-
-   private final FrameQuaternion tempOrientation = new FrameQuaternion();
-   private final FrameVector3D tempAngularVelocity = new FrameVector3D();
 
    protected final RobotSide swingSide;
    protected final RobotSide supportSide;
@@ -103,11 +84,6 @@ public class RecoveringSwingState extends PushRecoveryState
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
-//      finishSingleSupportWhenICPPlannerIsDone.set(pushRecoveryControllerParameters.finishSingleSupportWhenICPPlannerIsDone());
-      minimizeAngularMomentumRateZDuringSwing = new BooleanParameter("minimizeAngularMomentumRateZDuringSwing", registry,
-              pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringSwing());
-
-
       additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
       footstepTimings = FootstepTiming.createTimings(additionalFootstepsToConsider);
@@ -138,10 +114,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       hasMinimumTimePassed.set(hasMinimumTimePassed(timeInState));
 
-      if (hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround())
-         return true;
-
-      return finishSingleSupportWhenICPPlannerIsDone.getBooleanValue() && balanceManager.isICPPlanDone();
+      return hasMinimumTimePassed.getBooleanValue() && footSwitches.get(swingSide).hasFootHitGround();
    }
 
    @Override
@@ -152,26 +125,22 @@ public class RecoveringSwingState extends PushRecoveryState
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
 
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-
       nextFootstep.set(pushRecoveryControlModule.getRecoveryStep(swingSide, 0));
       footstepTiming.set(pushRecoveryControlModule.getRecoveryStepTiming(swingSide, 0));
 
       nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
       swingTime = footstepTiming.getSwingTime();
 
-
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
       feetManager.setContactStateForSwing(swingSide);
 
       updateFootstepParameters();
 
-      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringSwing.getValue());
+      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
       int stepsToAdd = Math.min(additionalFootstepsToConsider, pushRecoveryControlModule.getNumberOfRecoverySteps(swingSide) - 1);
-      boolean isLastStep = stepsToAdd == 0;
       for (int i = 1; i < stepsToAdd; i++)
       {
          footsteps[i].set(pushRecoveryControlModule.getRecoveryStep(swingSide, i));
@@ -184,59 +153,24 @@ public class RecoveringSwingState extends PushRecoveryState
 
       updateHeightManager();
 
-
       feetManager.requestSwing(swingSide, nextFootstep, swingTime, balanceManager.getFinalDesiredCoMVelocity(), balanceManager.getFinalDesiredCoMAcceleration());
 
-      // TODO what does this do?
-      if (feetManager.adjustHeightIfNeeded(nextFootstep))
-      {
-         walkingMessageHandler.updateVisualizationAfterFootstepAdjustement(nextFootstep);
-         feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
-      }
+      pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, Double.NaN);
 
-      if (isLastStep)
-      {
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, 0.0);
-      }
-      else
-      {
-         FootstepTiming nextTiming = footstepTimings[0];
-         pelvisOrientationManager.initializeSwing(supportSide, swingTime, nextTiming.getTransferTime(), nextTiming.getSwingTime());
-      }
+      actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      nextFootstep.getPose(desiredFootPoseInWorld);
-      desiredFootPoseInWorld.changeFrame(worldFrame);
-
-      actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
-      actualFootPoseInWorld.changeFrame(worldFrame);
-      walkingMessageHandler.reportFootstepStarted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
    }
 
    @Override
    public void onExit()
    {
-      balanceManager.minimizeAngularMomentumRateZ(false);
+      actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
-      actualFootPoseInWorld.changeFrame(worldFrame);
-
-      walkingMessageHandler.reportFootstepCompleted(swingSide, desiredFootPoseInWorld, actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
-      MovingReferenceFrame soleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(nextFootstep.getRobotSide());
-      tempOrientation.setIncludingFrame(nextFootstep.getFootstepPose().getOrientation());
-      tempOrientation.changeFrame(soleZUpFrame);
-      double pitch = tempOrientation.getPitch();
-
-      // Get the initial condition from the robot state
-      MovingReferenceFrame soleFrame = controllerToolbox.getReferenceFrames().getSoleFrame(nextFootstep.getRobotSide());
-      tempOrientation.setToZero(soleFrame);
-      tempOrientation.changeFrame(soleZUpFrame);
-      tempAngularVelocity.setIncludingFrame(soleFrame.getTwistOfFrame().getAngularPart());
-      tempAngularVelocity.changeFrame(soleZUpFrame);
-      double initialPitch = tempOrientation.getPitch();
-      double initialPitchVelocity = tempAngularVelocity.getY();
-      feetManager.touchDown(nextFootstep.getRobotSide(), initialPitch, initialPitchVelocity, pitch, footstepTiming.getTouchdownDuration());
+      feetManager.touchDown(swingSide, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
    }
 
 
@@ -264,6 +198,7 @@ public class RecoveringSwingState extends PushRecoveryState
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
+      // TODO parameterize this
       return timeInState > 0.15;
    }
 }
