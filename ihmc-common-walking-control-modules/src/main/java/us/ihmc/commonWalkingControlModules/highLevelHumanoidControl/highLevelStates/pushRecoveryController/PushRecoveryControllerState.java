@@ -56,8 +56,6 @@ public class PushRecoveryControllerState extends HighLevelControllerState
    private final WholeBodyControllerCore controllerCore;
    private final PushRecoveryHighLevelHumanoidController pushRecoveryController;
 
-   private final BipedSupportPolygons bipedSupportPolygons;
-
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
    private final boolean deactivateAccelerationIntegrationInWBC;
@@ -93,8 +91,6 @@ public class PushRecoveryControllerState extends HighLevelControllerState
       deactivateAccelerationIntegrationInWBC = highLevelControllerParameters.deactivateAccelerationIntegrationInTheWBC();
 
       linearMomentumRateControlModule = controllerCoreFactory.getOrCreateLinearMomentumRateControlModule(registry);
-
-      bipedSupportPolygons = controllerToolbox.getBipedSupportPolygons();
 
       registry.addChild(pushRecoveryController.getYoVariableRegistry());
    }

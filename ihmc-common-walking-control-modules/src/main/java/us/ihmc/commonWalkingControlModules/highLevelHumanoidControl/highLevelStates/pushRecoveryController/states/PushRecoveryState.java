@@ -39,21 +39,6 @@ public abstract class PushRecoveryState implements State
       return getStateEnum().getTransferToSide();
    }
 
-   public void handleFootLoadBearingCommand(FootLoadBearingCommand command)
-   {
-      // Override in state that can handle EndEffectorLoadBearingCommand
-   }
-
-   public boolean isStateSafeToConsumePelvisTrajectoryCommand()
-   {
-      return false;
-   }
-
-   public boolean isStateSafeToConsumeManipulationCommands()
-   {
-      return false;
-   }
-
    public PushRecoveryStateEnum getStateEnum()
    {
       return recoveryStateEnum;

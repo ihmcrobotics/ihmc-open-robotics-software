@@ -12,23 +12,17 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveryTransferState extends PushRecoveryState
 {
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
-
-   private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
 
    protected final RobotSide transferToSide;
 
@@ -49,6 +43,7 @@ public class RecoveryTransferState extends PushRecoveryState
    private final FramePoint2D capturePoint = new FramePoint2D();
 
    private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+   private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
 
    private final FootstepTiming stepTiming = new FootstepTiming();
 
@@ -58,7 +53,6 @@ public class RecoveryTransferState extends PushRecoveryState
                                 WalkingMessageHandler walkingMessageHandler,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                 PushRecoveryControlManagerFactory managerFactory,
-                                PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                 MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
                                 YoRegistry parentRegistry)
@@ -76,8 +70,7 @@ public class RecoveryTransferState extends PushRecoveryState
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       feetManager = managerFactory.getOrCreateFeetManager();
 
-      minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
-              pushRecoveryControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
+      transferToAndNextFootstepsData.setTransferToSide(transferToSide);
    }
 
 
@@ -87,14 +80,8 @@ public class RecoveryTransferState extends PushRecoveryState
       return transferToSide;
    }
 
-   public boolean isInitialTransfer()
-   {
-      return false;  //TODO check
-   }
-
    private void updateICPPlan()
    {
-//      balanceManager.clearICPPlan();
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       failureDetectionControlModule.setNextFootstep(null);
@@ -130,8 +117,7 @@ public class RecoveryTransferState extends PushRecoveryState
       pushRecoveryControlModule.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
 
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
-      //      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
-
+      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
    }
 
    @Override
@@ -145,45 +131,22 @@ public class RecoveryTransferState extends PushRecoveryState
       if (feetManager.canDoDoubleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), transferToSide)) // FIXME should this be swing side?
          extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
 
-      TransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
-      transferToAndNextFootstepsData.setComAtEndOfState(balanceManager.getFinalDesiredCoMPosition());
+      transferToAndNextFootstepsData.setTransferToPosition(controllerToolbox.getReferenceFrames().getSoleFrame(transferToSide));
+
       comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-
-      balanceManager.minimizeAngularMomentumRateZ(minimizeAngularMomentumRateZDuringTransfer.getValue());
    }
 
    @Override
    public boolean isDone(double timeInState)
    {
       return balanceManager.isICPPlanDone();
-      /*
-      if (balanceManager.isICPPlanDone())
-      {
-         capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
-         FrameConvexPolygon2DReadOnly supportPolygonInWorld = controllerToolbox.getBipedSupportPolygons().getSupportPolygonInWorld();
-         FrameConvexPolygon2DReadOnly nextPolygonInWorld = failureDetectionControlModule.getCombinedFootPolygonWithNextFootstep();
-
-         double distanceToSupport = supportPolygonInWorld.distance(capturePoint2d);
-         boolean isICPInsideNextSupportPolygon = nextPolygonInWorld.isPointInside(capturePoint2d);
-
-         if (distanceToSupport > balanceManager.getICPDistanceOutsideSupportForStep() || (distanceToSupport > 0.0 && isICPInsideNextSupportPolygon))
-            return true;
-//         else if (balanceManager.getNormalizedEllipticICPError() < 1.0)
-//            return true;
-      }
-
-      return feetManager.isFootToeingOffSlipping(transferToSide.getOppositeSide());
-
-       */
    }
 
    @Override
    public void onExit()
    {
       feetManager.reset();
-
-      balanceManager.minimizeAngularMomentumRateZ(false);
    }
 
    /**
