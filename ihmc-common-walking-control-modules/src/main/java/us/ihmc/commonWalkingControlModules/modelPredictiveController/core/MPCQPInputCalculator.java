@@ -392,11 +392,13 @@ public class MPCQPInputCalculator
    {
       int segmentNumber = objective.getSegmentNumber();
 
-      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber));
+      int numberOfVariables = indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+
+      inputToPack.setNumberOfVariables(numberOfVariables);
       inputToPack.reshape();
 
-      tempHessian.reshape(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
-      tempGradient.reshape(indexHandler.getTotalProblemSize(), 1);
+      tempHessian.reshape(numberOfVariables, numberOfVariables);
+      tempGradient.reshape(numberOfVariables, 1);
       tempHessian.zero();
       tempGradient.zero();
 
@@ -432,11 +434,12 @@ public class MPCQPInputCalculator
    {
       int segmentNumber = objective.getSegmentNumber();
 
-      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber));
+      int numberOfVariables = indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+      inputToPack.setNumberOfVariables(numberOfVariables);
       inputToPack.reshape();
 
-      tempHessian.reshape(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
-      tempGradient.reshape(indexHandler.getTotalProblemSize(), 1);
+      tempHessian.reshape(numberOfVariables, numberOfVariables);
+      tempGradient.reshape(numberOfVariables, 1);
       tempHessian.zero();
       tempGradient.zero();
 
@@ -472,11 +475,12 @@ public class MPCQPInputCalculator
    {
       int segmentNumber = objective.getSegmentNumber();
 
-      inputToPack.setNumberOfVariables(indexHandler.getRhoCoefficientsInSegment(segmentNumber));
+      int numberOfVariables = indexHandler.getRhoCoefficientsInSegment(segmentNumber);
+      inputToPack.setNumberOfVariables(numberOfVariables);
       inputToPack.reshape();
 
-      tempHessian.reshape(indexHandler.getTotalProblemSize(), indexHandler.getTotalProblemSize());
-      tempGradient.reshape(indexHandler.getTotalProblemSize(), 1);
+      tempHessian.reshape(numberOfVariables, numberOfVariables);
+      tempGradient.reshape(numberOfVariables, 1);
       tempHessian.zero();
       tempGradient.zero();
 
