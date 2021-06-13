@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.EuclideanModelPredictiveController;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;f
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.NativeQPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
@@ -551,8 +551,9 @@ public class LinearMPCQPSolverTest
 
       assertTrue(solver.solve());
 
-      contactPlaneHelper1.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
-      contactPlaneHelper3.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(2));
+      DMatrixRMaj solution = new DMatrixRMaj(solver.getSolution());
+      contactPlaneHelper1.computeContactForceCoefficientMatrix(solution, indexHandler.getRhoCoefficientStartIndex(0));
+      contactPlaneHelper3.computeContactForceCoefficientMatrix(solution, indexHandler.getRhoCoefficientStartIndex(2));
 
       double epsilon = 1e-2;
 
@@ -840,8 +841,9 @@ public class LinearMPCQPSolverTest
 
       assertTrue(solver.solve());
 
-      leftContactPlaneHelper1.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
-      leftContactPlaneHelper3.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(2));
+      DMatrixRMaj solution = new DMatrixRMaj(solver.getSolution());
+      leftContactPlaneHelper1.computeContactForceCoefficientMatrix(solution, indexHandler.getRhoCoefficientStartIndex(0));
+      leftContactPlaneHelper3.computeContactForceCoefficientMatrix(solution, indexHandler.getRhoCoefficientStartIndex(2));
 
       double epsilon = 1e-2;
 
