@@ -798,7 +798,9 @@ public class MPCQPInputCalculatorTest
       solver.submitRhoTrackingCommand(rhoTrackingCommand);
       assertTrue(solver.solve());
 
-      contactPlane.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
+      DMatrixRMaj solution = new DMatrixRMaj(solver.getSolution());
+
+      contactPlane.computeContactForceCoefficientMatrix(solution, indexHandler.getRhoCoefficientStartIndex(0));
 
       for (double time = 0; time <= duration; time += 0.001)
       {
@@ -875,7 +877,9 @@ public class MPCQPInputCalculatorTest
 
       assertTrue(solver.solve());
 
-      contactPlaneHelper1.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
+      DMatrixRMaj solution = new DMatrixRMaj(solver.getSolution());
+
+      contactPlaneHelper1.computeContactForceCoefficientMatrix(solution, indexHandler.getRhoCoefficientStartIndex(0));
 
       double epsilon = 1e-2;
 
