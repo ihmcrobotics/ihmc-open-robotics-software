@@ -37,22 +37,6 @@ public interface  PushRecoveryControllerParameters
 
 
    /**
-    * When true, some of the tracking performance will be degraded to reduce the generated angular momentum rate around
-    * the vertical axis during swing only.
-    * Useful when the robot has heavy legs and tends to slips during swing.
-    * @return
-    */
-   default boolean minimizeAngularMomentumRateZDuringSwing()
-   {
-      return false;
-   }
-
-   default boolean minimizeAngularMomentumRateZDuringTransfer()
-   {
-      return false;
-   }
-
-   /**
     * Determines whether or not to attempt to directly control the height.
     * If true, the height will be controlled directly via a command to the controller core. This can be
     * a linear momentum z command or a feedback control command for the pelvis.

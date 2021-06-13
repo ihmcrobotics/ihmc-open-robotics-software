@@ -1,8 +1,6 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
-import javafx.geometry.Side;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -13,23 +11,12 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.awt.*;
 
 public class TransferToStandingPushRecoveryState extends PushRecoveryState
 {
@@ -44,7 +31,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
-   private final Point3D midFootPosition = new Point3D();
    private final FramePoint2D capturePoint = new FramePoint2D();
 
    private final MultiStepPushRecoveryControlModule pushRecoveryCalculator;
@@ -64,6 +50,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       this.balanceManager = managerFactory.getOrCreateBalanceManager();
       this.pushRecoveryCalculator = pushRecoveryControlModule;
 
+      // TODO make this a parameter
       maxICPErrorToSwitchToStanding.set(0.025);
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
@@ -95,11 +82,11 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       // switch to point toe off from line toe off
       if (feetManager.getCurrentConstraintType(sideOnToes) == FootControlModule.ConstraintType.TOES && !feetManager.isUsingPointContactInToeOff(sideOnToes) && !feetManager.useToeLineContactInTransfer())
-        {
-           FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
-            controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
-            feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
-         }
+      {
+         FramePoint3DReadOnly trailingFootExitCMP = balanceManager.getFirstExitCMPForToeOff(true);
+         controllerToolbox.getFilteredDesiredCenterOfPressure(controllerToolbox.getContactableFeet().get(sideOnToes), filteredDesiredCoP);
+         feetManager.requestPointToeOff(sideOnToes, trailingFootExitCMP, filteredDesiredCoP);
+      }
    }
 
    private RobotSide getSideThatCouldBeOnToes()
@@ -117,21 +104,30 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       return sideOnToes;
    }
 
-   private RobotSide getSideCarryingMostWeight(Footstep leftFootstep, Footstep rightFootstep)
+   private final FramePoint3D leftFootPosition = new FramePoint3D();
+   private final FramePoint3D rightFootPosition = new FramePoint3D();
+
+   private RobotSide getSideCarryingMostWeight()
    {
       PushRecoveryStateEnum previousWalkingState = getPreviousWalkingStateEnum();
       if (previousWalkingState == null)
-         return null;
+         return RobotSide.RIGHT;
 
-      RobotSide mostSupportingSide = null;
-      boolean leftStepLower = leftFootstep.getZ() <= rightFootstep.getZ();
-      boolean rightStepLower = leftFootstep.getZ() > rightFootstep.getZ();
-      if(previousWalkingState.isSingleSupport() && leftStepLower)
+      leftFootPosition.setFromReferenceFrame(controllerToolbox.getReferenceFrames().getSoleFrame(RobotSide.LEFT));
+      rightFootPosition.setFromReferenceFrame(controllerToolbox.getReferenceFrames().getSoleFrame(RobotSide.RIGHT));
+
+      boolean leftStepLower = leftFootPosition.getZ() <= rightFootPosition.getZ();
+      boolean rightStepLower = leftFootPosition.getZ() > rightFootPosition.getZ();
+
+      RobotSide mostSupportingSide;
+      if (previousWalkingState.isSingleSupport() && leftStepLower)
          mostSupportingSide = RobotSide.LEFT;
       else if(previousWalkingState.isSingleSupport() && rightStepLower)
          mostSupportingSide = RobotSide.RIGHT;
       else if (previousWalkingState.getTransferToSide() != null)
          mostSupportingSide = previousWalkingState.getTransferToSide().getOppositeSide();
+      else
+         mostSupportingSide = RobotSide.RIGHT;
 
       return mostSupportingSide;
    }
@@ -146,7 +142,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (pushRecoveryCalculator.isRobotFallingFromDoubleSupport() != null)
          return false;
 
-      // FIXME likely remove this
+      // FIXME make this a check for the normalized elliptic error
       return balanceManager.getICPErrorMagnitude() < maxICPErrorToSwitchToStanding.getDoubleValue();
    }
 
@@ -164,10 +160,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       failureDetectionControlModule.setNextFootstep(null);
 
-      Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
-      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.RIGHT);
-      RobotSide supportingSide = getSideCarryingMostWeight(footstepLeft, footstepRight);
-      supportingSide = supportingSide == null ? RobotSide.RIGHT : supportingSide;
+      RobotSide supportingSide = getSideCarryingMostWeight();
 
       double extraToeOffHeight = 0.0;
       if (feetManager.getCurrentConstraintType(supportingSide.getOppositeSide()) == FootControlModule.ConstraintType.TOES)
@@ -179,18 +172,10 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
-      midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.initializeICPPlanForTransferToStanding();
-   }
-
-
-
-   @Override
-   public void onExit()
-   {
    }
 }

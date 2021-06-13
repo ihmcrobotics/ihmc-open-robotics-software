@@ -5,7 +5,6 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
@@ -17,7 +16,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutputReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
@@ -30,8 +28,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
-import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -48,12 +44,9 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -79,11 +72,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
    private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
 
-   private final OneDoFJointBasics[] allOneDoFjoints;
-
    private final FullHumanoidRobotModel fullRobotModel;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
-   private final PushRecoveryControllerParameters pushRecoveryControllerParameters;   // TODO
+   private final PushRecoveryControllerParameters pushRecoveryControllerParameters;
 
    private final SideDependentList<? extends ContactablePlaneBody> feet;
 
@@ -126,9 +117,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       yoTime = controllerToolbox.getYoTime();
 
       feet = controllerToolbox.getContactableFeet();
-
-      allOneDoFjoints = MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJointBasics.class);
-
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
       this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
@@ -225,8 +213,10 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       for (RobotSide transferToSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoveryTransferState(transferToSide);
-         RecoveryTransferState transferState = new RecoveryTransferState(stateEnum, walkingMessageHandler,
-                                                                         controllerToolbox, managerFactory, pushRecoveryControllerParameters,
+         RecoveryTransferState transferState = new RecoveryTransferState(stateEnum,
+                                                                         walkingMessageHandler,
+                                                                         controllerToolbox,
+                                                                         managerFactory,
                                                                          pushRecoveryControlModule,
                                                                          failureDetectionControlModule,
                                                                          registry);
@@ -332,20 +322,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       firstTick = true;
    }
 
-   private PushRecoveryStateEnum getInitialPushRecoveryState()
-   {
-      if(feetManager.getCurrentConstraintType(RobotSide.LEFT) == FootControlModule.ConstraintType.FULL ||
-              feetManager.getCurrentConstraintType(RobotSide.RIGHT) == FootControlModule.ConstraintType.SWING)
-      {
-         return PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT;
-      }
-      else if(feetManager.getCurrentConstraintType(RobotSide.RIGHT) == FootControlModule.ConstraintType.FULL ||
-         feetManager.getCurrentConstraintType(RobotSide.LEFT) == FootControlModule.ConstraintType.SWING)
-      {
-         return PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
-      }
-      return PushRecoveryStateEnum.TO_STANDING;
-   }
+
 
    private class AbortCondition implements StateTransitionCondition
    {
@@ -372,6 +349,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    {
       PushRecoveryState currentState;
 
+      // FIXME add this back in
 //      updateFailureDetection();
 
       // Do transitions will request ICP planner updates.

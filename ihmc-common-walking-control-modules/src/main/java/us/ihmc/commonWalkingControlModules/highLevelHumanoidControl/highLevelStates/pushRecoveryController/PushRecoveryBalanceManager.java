@@ -118,7 +118,7 @@ public class PushRecoveryBalanceManager
    private final ExecutionTimer plannerTimer = new ExecutionTimer("icpPlannerTimer", registry);
 
    private boolean initializeOnStateChange = false;
-   private boolean minimizeAngularMomentumRateZ = false;
+   private final boolean minimizeAngularMomentumRateZ = false;
    private final FixedFramePoint2DBasics desiredCMP = new FramePoint2D();
    private final SimpleFootstep currentFootstep = new SimpleFootstep();
    private final SideDependentList<PlaneContactStateCommand> contactStateCommands = new SideDependentList<>(new PlaneContactStateCommand(),
@@ -630,11 +630,6 @@ public class PushRecoveryBalanceManager
    public FramePoint3DReadOnly getCapturePoint()
    {
       return controllerToolbox.getCapturePoint();
-   }
-
-   public void minimizeAngularMomentumRateZ(boolean minimizeAngularMomentumRateZ)
-   {
-      this.minimizeAngularMomentumRateZ = minimizeAngularMomentumRateZ;
    }
 
    public LinearMomentumRateControlModuleInput getLinearMomentumRateControlModuleInput()
