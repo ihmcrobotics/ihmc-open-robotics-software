@@ -172,7 +172,10 @@ public class KSTStreamingState implements State
       head = desiredFullRobotModel.getHead();
       pelvis = desiredFullRobotModel.getPelvis();
       chest = desiredFullRobotModel.getChest();
-      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
+      if (head == null)
+         neckJoints = new OneDoFJointBasics[0];
+      else
+         neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
       defaultNeckJointMessages = Stream.of(neckJoints).map(joint -> KinematicsToolboxMessageFactory.newOneDoFJointMessage(joint, 10.0, 0.0))
                                        .collect(Collectors.toList());
       defaultPelvisMessage.setEndEffectorHashCode(pelvis.hashCode());
@@ -182,7 +185,11 @@ public class KSTStreamingState implements State
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = desiredFullRobotModel.getHand(robotSide);
-         OneDoFJointBasics[] joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] joints;
+         if (hand == null)
+            joints = new OneDoFJointBasics[0];
+         else
+            joints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
          hands.put(robotSide, hand);
          armJoints.put(robotSide, joints);
          defaultArmJointMessages.put(robotSide,

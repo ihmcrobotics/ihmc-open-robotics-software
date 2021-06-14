@@ -54,12 +54,18 @@ public class KSTStreamingMessageFactory
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();
 
-      neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
+      if (head == null)
+         neckJoints = new OneDoFJointBasics[0];
+      else
+         neckJoints = MultiBodySystemTools.createOneDoFJointPath(chest, head);
 
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
-         armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
+         if (hand == null)
+            armJoints.put(robotSide, new OneDoFJointBasics[0]);
+         else
+            armJoints.put(robotSide, MultiBodySystemTools.createOneDoFJointPath(chest, hand));
       }
    }
 
@@ -214,7 +220,9 @@ public class KSTStreamingMessageFactory
       return robotSide == RobotSide.LEFT ? left : right;
    }
 
-   private static void angularVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+   private static void angularVelocity(MovingReferenceFrame movingFrame,
+                                       ReferenceFrame outputFrame,
+                                       boolean enableVelocity,
                                        FrameVector3DBasics angularVelocityToPack)
    {
       if (!enableVelocity)
@@ -228,7 +236,9 @@ public class KSTStreamingMessageFactory
       }
    }
 
-   private static void spatialVelocity(MovingReferenceFrame movingFrame, ReferenceFrame outputFrame, boolean enableVelocity,
+   private static void spatialVelocity(MovingReferenceFrame movingFrame,
+                                       ReferenceFrame outputFrame,
+                                       boolean enableVelocity,
                                        SpatialVectorBasics spatialVelocityToPack)
    {
       if (!enableVelocity)
@@ -255,15 +265,13 @@ public class KSTStreamingMessageFactory
       controlFrame.transformFromThisToDesiredFrame(endEffectorFrame, controlFramePose);
    }
 
-   public static void packSO3TrajectoryPointMessage(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity,
-                                                    SO3StreamingMessage messageToPack)
+   public static void packSO3TrajectoryPointMessage(Orientation3DReadOnly orientation, Vector3DReadOnly angularVelocity, SO3StreamingMessage messageToPack)
    {
       messageToPack.getOrientation().set(orientation);
       messageToPack.getAngularVelocity().set(angularVelocity);
    }
 
-   public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity,
-                                                    SE3StreamingMessage messageToPack)
+   public static void packSE3TrajectoryPointMessage(Pose3DReadOnly pose, SpatialVectorReadOnly spatialVelocity, SE3StreamingMessage messageToPack)
    {
       messageToPack.getPosition().set(pose.getPosition());
       messageToPack.getOrientation().set(pose.getOrientation());
