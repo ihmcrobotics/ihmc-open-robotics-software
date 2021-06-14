@@ -126,8 +126,8 @@ public class RecoveryTransferState extends PushRecoveryState
    @Override
    public void onEntry()
    {
-      stepTiming.set(pushRecoveryControlModule.pollRecoveryStepTiming(transferToSide));
-      nextFootstep.set(pushRecoveryControlModule.pollRecoveryStep(transferToSide));
+      stepTiming.set(pushRecoveryControlModule.pollRecoveryStepTiming());
+      nextFootstep.set(pushRecoveryControlModule.pollRecoveryStep());
       updateICPPlan();
 
       transferToAndNextFootstepsData.setTransferToPosition(controllerToolbox.getReferenceFrames().getSoleFrame(transferToSide));

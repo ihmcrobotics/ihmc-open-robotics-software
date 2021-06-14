@@ -128,8 +128,8 @@ public class RecoveringSwingState extends PushRecoveryState
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
 
-      nextFootstep.set(pushRecoveryControlModule.getRecoveryStep(swingSide, 0));
-      footstepTiming.set(pushRecoveryControlModule.getRecoveryStepTiming(swingSide, 0));
+      nextFootstep.set(pushRecoveryControlModule.getRecoveryStep(0));
+      footstepTiming.set(pushRecoveryControlModule.getRecoveryStepTiming(0));
 
       nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
       swingTime = footstepTiming.getSwingTime();
@@ -144,11 +144,11 @@ public class RecoveringSwingState extends PushRecoveryState
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 
-      int stepsToAdd = Math.min(additionalFootstepsToConsider, pushRecoveryControlModule.getNumberOfRecoverySteps(swingSide) - 1);
+      int stepsToAdd = Math.min(additionalFootstepsToConsider, pushRecoveryControlModule.getNumberOfRecoverySteps() - 1);
       for (int i = 1; i < stepsToAdd; i++)
       {
-         footsteps[i].set(pushRecoveryControlModule.getRecoveryStep(swingSide, i));
-         footstepTimings[i].set(pushRecoveryControlModule.getRecoveryStepTiming(swingSide, i));
+         footsteps[i].set(pushRecoveryControlModule.getRecoveryStep(i));
+         footstepTimings[i].set(pushRecoveryControlModule.getRecoveryStepTiming(i));
 
          balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
       }
