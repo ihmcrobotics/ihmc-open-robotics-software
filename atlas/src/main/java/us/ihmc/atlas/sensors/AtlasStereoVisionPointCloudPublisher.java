@@ -8,8 +8,10 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.StereoVisionPointCloudPublisher;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
+import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotPointCloudParameters;
@@ -41,6 +43,13 @@ public class AtlasStereoVisionPointCloudPublisher
 
       ros1Node.execute();
       multisenseStereoVisionPointCloudPublisher.start();
+
+      Runtime.getRuntime().addShutdownHook(new Thread(() ->
+     {
+        LogTools.info("Shutting down network processor modules.");
+        multisenseStereoVisionPointCloudPublisher.shutdown();
+        ThreadTools.sleep(10);
+     }, getClass().getSimpleName() + "Shutdown"));
    }
 
    public static void main(String[] args)
