@@ -43,12 +43,11 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
 
       lookAndStepUI = new ImGuiGDXLookAndStepBehaviorUI(helper);
       addChild(lookAndStepUI);
-      traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
-      addChild(traverseStairsUI);
       doorUI = new ImGuiGDXDoorBehaviorUI(helper);
       addChild(doorUI);
+      traverseStairsUI = new ImGuiGDXTraverseStairsBehaviorUI(helper);
+      addChild(traverseStairsUI);
 
-      helper.subscribeViaCallback(GoalForUI, goalAffordance::setGoalPose);
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
    }
 
@@ -57,7 +56,12 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    {
       parameters = new BuildingExplorationBehaviorParameters();
       parameterTuner.create(parameters, BuildingExplorationBehaviorParameters.keys, () -> helper.publish(Parameters, parameters.getAllAsStrings()));
-      goalAffordance.create(baseUI, goalPose -> helper.publish(Goal, goalPose), Color.GREEN);
+      goalAffordance.create(baseUI, goalPose ->
+      {
+         helper.publish(Goal, goalPose);
+         lookAndStepUI.setGoal(goalPose);
+         traverseStairsUI.setGoal(goalPose);
+      }, Color.GREEN);
       baseUI.addImGui3DViewInputProcessor(goalAffordance::processImGui3DViewInput);
       baseUI.getSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
 

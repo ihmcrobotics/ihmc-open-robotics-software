@@ -35,6 +35,7 @@ public class TraverseStairsPlanStepsState implements State
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
+   private final AtomicBoolean operatorReviewEnabled;
    private final AtomicReference<Pose3D> goalInput = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepListPublisher;
@@ -45,11 +46,13 @@ public class TraverseStairsPlanStepsState implements State
 
    private final AtomicBoolean executeStepsSignaled = new AtomicBoolean();
    private final AtomicBoolean planSteps = new AtomicBoolean();
+   private boolean isStillPlanning = false;
 
-   public TraverseStairsPlanStepsState(BehaviorHelper helper, TraverseStairsBehaviorParameters parameters)
+   public TraverseStairsPlanStepsState(BehaviorHelper helper, TraverseStairsBehaviorParameters parameters, AtomicBoolean operatorReviewEnabled)
    {
       this.helper = helper;
       this.parameters = parameters;
+      this.operatorReviewEnabled = operatorReviewEnabled;
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
       {
          LogTools.info("Received goal input: " + goalPose);
@@ -89,13 +92,13 @@ public class TraverseStairsPlanStepsState implements State
       {
          String message = "No goal received in traverse stairs behavior";
          LogTools.info(message);
-         throw new RuntimeException(message);
+//         throw new RuntimeException(message);
       }
       else if (planarRegions.get() == null)
       {
          String message = "No regions received in traverse stairs behavior";
          LogTools.info(message);
-         throw new RuntimeException(message);
+//         throw new RuntimeException(message);
       }
    }
 
@@ -117,6 +120,7 @@ public class TraverseStairsPlanStepsState implements State
 
    private void planSteps()
    {
+      isStillPlanning = true;
       if (planningModule.isPlanning())
       {
          planningModule.halt();
@@ -176,6 +180,7 @@ public class TraverseStairsPlanStepsState implements State
       FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
       planningModule.getOutput().setPacket(outputStatus);
       footstepListPublisher.publish(outputStatus.getFootstepDataList());
+      isStillPlanning = false;
    }
 
    private void mutateFirstStepDownHeight(Pose3DReadOnly initialStancePose)
@@ -197,13 +202,13 @@ public class TraverseStairsPlanStepsState implements State
       }
    }
 
-   private boolean searchWasSuccessful()
+   public boolean searchWasSuccessful()
    {
-      if (output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION)
+      if (output != null && output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION)
       {
          return true;
       }
-      else if (output.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
+      else if (output != null && output.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
       {
          int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
          return output.getFootstepPlan().getNumberOfSteps() >= targetNumberOfFootsteps;
@@ -216,7 +221,7 @@ public class TraverseStairsPlanStepsState implements State
 
    boolean shouldTransitionToExecute(double timeInState)
    {
-      return searchWasSuccessful() && executeStepsSignaled.get();
+      return searchWasSuccessful() && (!operatorReviewEnabled.get() || executeStepsSignaled.get());
    }
 
    boolean shouldTransitionBackToPause(double timeInState)
@@ -227,5 +232,10 @@ public class TraverseStairsPlanStepsState implements State
    FootstepPlannerOutput getOutput()
    {
       return output;
+   }
+
+   public boolean isStillPlanning()
+   {
+      return isStillPlanning;
    }
 }

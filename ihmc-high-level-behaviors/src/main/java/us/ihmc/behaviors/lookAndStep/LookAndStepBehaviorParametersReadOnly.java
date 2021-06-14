@@ -120,4 +120,9 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(horizonFromDebrisToStop);
    }
+
+   default boolean getStopForImpassibilities()
+   {
+      return get(stopForImpassibilities);
+   }
 }

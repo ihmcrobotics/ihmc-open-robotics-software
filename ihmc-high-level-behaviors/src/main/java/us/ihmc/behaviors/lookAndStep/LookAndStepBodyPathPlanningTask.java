@@ -132,6 +132,7 @@ public class LookAndStepBodyPathPlanningTask
 
       public void acceptGoal(Pose3DReadOnly goal)
       {
+         reset();
          goalInput.set(goal);
          LogTools.info(StringTools.format("Body path goal received: {}",
                                           goal == null ? null : StringTools.format("x: {} y: {} z: {} yaw: {}",

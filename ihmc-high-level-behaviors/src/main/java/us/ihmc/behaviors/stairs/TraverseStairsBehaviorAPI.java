@@ -46,8 +46,10 @@ public class TraverseStairsBehaviorAPI
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("TraverseStairsBehavior");
    private static final MessagerAPIFactory.CategoryTheme BehaviorTheme = apiFactory.createCategoryTheme("TraverseStairs");
 
-   public static final MessagerAPIFactory.Topic<Boolean> Enabled = topic("Enabled");
+   public static final MessagerAPIFactory.Topic<String> LifecycleState = topic("LifecycleState");
    public static final MessagerAPIFactory.Topic<String> State = topic("State");
+   public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReviewEnabled");
+   public static final MessagerAPIFactory.Topic<Double> TimeLeftInPause = topic("TimeLeftInPause");
    public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
    public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
 

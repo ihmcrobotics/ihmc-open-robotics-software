@@ -142,8 +142,15 @@ public class ROS2Tools
    private static final ROS2Topic<BehaviorStatusPacket> BEHAVIOR_STATUS = BEHAVIOR_MODULE_OUTPUT.withTypeName(BehaviorStatusPacket.class);
    private static final ROS2Topic<HandDesiredConfigurationMessage> HAND_CONFIGURATION = HUMANOID_CONTROLLER.withInput().withTypeName(HandDesiredConfigurationMessage.class);
    private static final ROS2Topic<HandJointAnglePacket> HAND_JOINT_ANGLES = HUMANOID_CONTROLLER.withOutput().withTypeName(HandJointAnglePacket.class);
+   private static final ROS2Topic<BipedalSupportPlanarRegionParametersMessage> BIPEDAL_SUPPORT_REGION_PARAMETERS
+         = BIPED_SUPPORT_REGION_PUBLISHER.withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
+
+   public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getBipedalSupportRegionParametersTopic(String robotName)
+   {
+      return BIPEDAL_SUPPORT_REGION_PARAMETERS.withRobot(robotName);
+   }
 
    public static ROS2Topic<HandDesiredConfigurationMessage> getHandConfigurationTopic(String robotName)
    {
