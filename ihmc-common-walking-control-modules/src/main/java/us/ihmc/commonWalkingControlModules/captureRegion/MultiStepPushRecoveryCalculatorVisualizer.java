@@ -66,7 +66,7 @@ public class MultiStepPushRecoveryCalculatorVisualizer
                                                                       YoGraphicPosition.GraphicType.SOLID_BALL);
             YoGraphicPosition footstepViz = new YoGraphicPosition("recoveryStepLocation" + i + suffix,
                                                                   recoveryStepLocations.get(i),
-                                                                  0.025,
+                                                                  0.01,
                                                                   YoAppearance.Blue(),
                                                                   YoGraphicPosition.GraphicType.SOLID_BALL);
 
@@ -77,6 +77,8 @@ public class MultiStepPushRecoveryCalculatorVisualizer
          }
 
          parentRegistry.addChild(registry);
+
+         reset();
       }
    }
 
