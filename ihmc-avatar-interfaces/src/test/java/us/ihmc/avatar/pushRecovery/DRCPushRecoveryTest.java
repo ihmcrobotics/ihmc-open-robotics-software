@@ -108,7 +108,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScriptFilePath(), true, false);
+      setupTest(getScriptFilePath(), true, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -127,7 +127,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScriptFilePath(), false, false);
+      setupTest(getScriptFilePath(), false, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -163,7 +163,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, false);
+      setupTest(null, false, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -199,7 +199,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, false);
+      setupTest(null, true, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -237,7 +237,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, false);
+      setupTest(null, true, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -292,7 +292,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, false);
+      setupTest(null, false, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(
@@ -380,6 +380,7 @@ public abstract class DRCPushRecoveryTest
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+
       drcSimulationTestHelper.setTestEnvironment(flatGround);
       drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
