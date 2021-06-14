@@ -288,8 +288,15 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       balanceManager.setLinearMomentumRateControlModuleOutput(output);
    }
 
+   public void reset()
+   {
+      pushRecoveryControlModule.reset();
+   }
+
    public void initialize()
    {
+      reset();
+
       commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
       walkingMessageHandler.clearFootTrajectory();
