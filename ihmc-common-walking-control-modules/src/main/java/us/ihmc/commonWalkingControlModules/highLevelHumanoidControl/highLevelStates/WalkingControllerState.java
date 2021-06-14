@@ -136,6 +136,9 @@ public class WalkingControllerState extends HighLevelControllerState
 
    public void initialize()
    {
+      if (getPreviousHighLevelControllerName() == HighLevelControllerName.PUSH_RECOVERY)
+         walkingController.setShouldKeepInitialContacts(true);
+
       controllerCore.initialize();
       walkingController.initialize();
       linearMomentumRateControlModule.reset();

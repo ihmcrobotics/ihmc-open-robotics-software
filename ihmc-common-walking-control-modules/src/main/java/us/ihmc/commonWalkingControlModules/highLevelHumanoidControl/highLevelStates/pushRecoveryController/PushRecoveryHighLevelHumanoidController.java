@@ -84,7 +84,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final StateMachine<PushRecoveryStateEnum, PushRecoveryState> stateMachine;
 
    private final WalkingMessageHandler walkingMessageHandler;
-   private final YoBoolean abortWalkingRequested = new YoBoolean("requestAbortWalking", registry);
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 

@@ -140,6 +140,22 @@ public class StateMachine<K extends Enum<K>, S extends State>
    }
 
    /**
+    * Resets this state machine back to its initial state.
+    * <p>
+    * The active state is exited immediately, calling first {@link State#onExit()}, and enters the
+    * initial state of this state machine, i.e. the state mapped to the key
+    * {@link #getInitialStateKey()}. This method will call {@link State#onEntry()} on the initial state
+    * before activating it.
+    * </p>
+    *
+    * @throws RuntimeException if there is no state mapped to {@link #getInitialStateKey()}.
+    */
+   public void resetToInitialState(boolean notifyStateChangeListeners)
+   {
+      performTransition(initialStateKey, notifyStateChangeListeners);
+   }
+
+   /**
     * Resets the active state.
     * <p>
     * More precisely, this method calls in order the active state's methods {@link State#onExit()} and
@@ -287,6 +303,27 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
     * active state.
     * </p>
+    *
+    * @param nextStateKey the key of the state to transition into.
+    * @param notifyStateChangeListeners whether or not to notify the state change listeners.
+    * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
+    */
+   public void performTransition(K nextStateKey, boolean notifyStateChangeListeners)
+   {
+      performTransition(nextStateKey, true, true, notifyStateChangeListeners);
+   }
+
+   /**
+    * Changes immediately the active state.
+    * <p>
+    * This method should be used cautiously and only for exceptional scenario, it is not the regular
+    * way of using a state machine.
+    * </p>
+    * <p>
+    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
+    * active state.
+    * </p>
     * 
     * @param nextStateKey   the key of the state to transition into.
     * @param performOnExit  whether to perform {@link State#onExit()} or the state being exited.
@@ -294,6 +331,29 @@ public class StateMachine<K extends Enum<K>, S extends State>
     * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
     */
    public void performTransition(K nextStateKey, boolean performOnExit, boolean performOnEntry)
+   {
+      performTransition(nextStateKey, performOnExit, performOnEntry, true);
+   }
+
+   /**
+    * Changes immediately the active state.
+    * <p>
+    * This method should be used cautiously and only for exceptional scenario, it is not the regular
+    * way of using a state machine.
+    * </p>
+    * <p>
+    * In order, this method calls {@link State#onExit()} on the state being exited, notifies the
+    * {@link StateChangedListener}s registered, and then calls {@link State#onEntry()} on the new
+    * active state.
+    * </p>
+    *
+    * @param nextStateKey   the key of the state to transition into.
+    * @param performOnExit  whether to perform {@link State#onExit()} or the state being exited.
+    * @param performOnEntry whether to perform {@link State#onEntry()} or the state being entered.
+    * @param notifyStateChangeListeners whether to notify the state change listeners.
+    * @throws RuntimeException if there is no state mapped to {@code nextStateKey}.
+    */
+   public void performTransition(K nextStateKey, boolean performOnExit, boolean performOnEntry, boolean notifyStateChangeListeners)
    {
       if (currentStateKey.getEnumValue() != null)
       {
@@ -305,7 +365,7 @@ public class StateMachine<K extends Enum<K>, S extends State>
       S nextState = getState(nextStateKey);
       assertStateNotNull(nextStateKey, nextState);
 
-      if (stateChangedListeners != null)
+      if (notifyStateChangeListeners && stateChangedListeners != null)
       {
          for (int i = 0; i < stateChangedListeners.size(); i++)
             stateChangedListeners.get(i).stateChanged(currentStateKey.getEnumValue(), nextStateKey);
