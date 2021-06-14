@@ -13,10 +13,21 @@ import us.ihmc.robotics.robotSide.RobotSide;
 public class AtlasPushRecoveryControllerParameters implements PushRecoveryControllerParameters
 {
    private final AtlasMomentumOptimizationSettings momentumOptimizationSettings;
+   private final RobotTarget target;
 
    public AtlasPushRecoveryControllerParameters(RobotTarget target, AtlasJointMap jointMap, AtlasContactPointParameters contactPointParameters)
    {
+      this.target = target;
       momentumOptimizationSettings = new AtlasMomentumOptimizationSettings(jointMap, contactPointParameters.getNumberOfContactableBodies());
+   }
+
+   @Override
+   public double getRecoverySwingDuration()
+   {
+      if (target == RobotTarget.SCS)
+         return 0.3;
+      else
+         return 0.6;
    }
 
    @Override
