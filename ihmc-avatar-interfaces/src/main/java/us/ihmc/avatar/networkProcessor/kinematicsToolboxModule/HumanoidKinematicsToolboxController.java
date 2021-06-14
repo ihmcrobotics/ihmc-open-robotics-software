@@ -43,6 +43,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -54,6 +55,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePose3D;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -262,7 +264,13 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
       {
-         double q_priv = robot.getOneDegreeOfFreedomJoint(joint.getName()).getQ();
+         OneDegreeOfFreedomJoint scsJoint = robot.getOneDegreeOfFreedomJoint(joint.getName());
+         if (scsJoint == null)
+         {
+            LogTools.warn("Could not find {} joint in SCS robot", joint.getName());
+            continue;
+         }
+         double q_priv = scsJoint.getQ();
          privilegedConfiguration.put(joint, q_priv);
       }
 
