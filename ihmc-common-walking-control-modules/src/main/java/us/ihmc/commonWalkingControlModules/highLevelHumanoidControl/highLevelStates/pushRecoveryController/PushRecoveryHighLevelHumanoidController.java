@@ -47,11 +47,14 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.*;
+import java.util.function.Function;
 
 public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusProvider
 {
@@ -98,6 +101,8 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
+   private final YoInteger numberOfRecoveryStepsTaken = new YoInteger("numberOfRecoveryStepsTaken", registry);
+   private final IntegerParameter maxNumberOfRecoveryStepsToTake = new IntegerParameter("maxNumberOfRecoveryStepsToTake", registry, 3);
 
    private boolean firstTick = true;
 
@@ -224,7 +229,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          factory.addState(stateEnum, transferState);
       }
 
+      Runnable stepStartedListener = numberOfRecoveryStepsTaken::increment;
       SideDependentList<RecoveringSwingState> recoveringSingleSupportStates = new SideDependentList<>();
+
       for (RobotSide supportSide : RobotSide.values)
       {
          PushRecoveryStateEnum stateEnum = PushRecoveryStateEnum.getPushRecoverySingleSupportState(supportSide);
@@ -233,7 +240,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                                                             controllerToolbox, managerFactory,
                                                                             pushRecoveryControlModule,
                                                                             pushRecoveryControllerParameters,
-                                                                            failureDetectionControlModule, registry);
+                                                                            stepStartedListener,
+                                                                            failureDetectionControlModule,
+                                                                            registry);
          recoveringSingleSupportStates.put(supportSide, singleSupportState);
          factory.addState(stateEnum, singleSupportState);
       }
@@ -296,6 +305,8 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    public void initialize()
    {
       reset();
+
+      numberOfRecoveryStepsTaken.set(0);
 
       commandInputManager.clearAllCommands();
       walkingMessageHandler.clearFootsteps();
@@ -388,7 +399,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
 
-      if (pushRecoveryControlModule.isRecoveryImpossible())
+      if (pushRecoveryControlModule.isRecoveryImpossible() || numberOfRecoveryStepsTaken.getValue() > maxNumberOfRecoveryStepsToTake.getValue())
       {
          walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
          controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());

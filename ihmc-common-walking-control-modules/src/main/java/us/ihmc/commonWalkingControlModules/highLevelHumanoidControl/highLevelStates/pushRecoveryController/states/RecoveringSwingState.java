@@ -38,6 +38,7 @@ public class RecoveringSwingState extends PushRecoveryState
    private final FramePose3D actualFootPoseInWorld = new FramePose3D(worldFrame);
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
+   private final Runnable stepStartedListener;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final PushRecoveryControllerParameters pushRecoveryParameters;
@@ -64,6 +65,7 @@ public class RecoveringSwingState extends PushRecoveryState
                                PushRecoveryControlManagerFactory managerFactory,
                                MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                PushRecoveryControllerParameters pushRecoveryParameters,
+                               Runnable stepStartedListener,
                                WalkingFailureDetectionControlModule failureDetectionControlModule,
                                YoRegistry parentRegistry)
    {
@@ -72,6 +74,7 @@ public class RecoveringSwingState extends PushRecoveryState
       this.supportSide = stateEnum.getSupportSide();
       this.pushRecoveryControlModule = pushRecoveryControlModule;
       this.pushRecoveryParameters = pushRecoveryParameters;
+      this.stepStartedListener = stepStartedListener;
       swingSide = supportSide.getOppositeSide();
 
       this.walkingMessageHandler = walkingMessageHandler;
@@ -123,6 +126,8 @@ public class RecoveringSwingState extends PushRecoveryState
    @Override
    public void onEntry()
    {
+      stepStartedListener.run();
+
       balanceManager.clearICPPlan();
       footSwitches.get(swingSide).reset();
 
@@ -133,6 +138,8 @@ public class RecoveringSwingState extends PushRecoveryState
 
       nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
       swingTime = footstepTiming.getSwingTime();
+
+      failureDetectionControlModule.setNextFootstep(nextFootstep);
 
       /** 1/08/2018 RJG this has to be done before calling #updateFootstepParameters() to make sure the contact points are up to date */
       feetManager.setContactStateForSwing(swingSide);
