@@ -453,7 +453,7 @@ public class WalkingSingleSupportState extends SingleSupportState
       }
       else
       {
-         double maximumSwingTimeRemaining = swingTime * minimumSwingFraction.getDoubleValue();
+         double maximumSwingTimeRemaining = swingTime * (1.0 - minimumSwingFraction.getDoubleValue());
          double swingTimeRemaining = feetManager.getSwingTimeRemaing(swingSide);
          return swingTimeRemaining < maximumSwingTimeRemaining;
       }
