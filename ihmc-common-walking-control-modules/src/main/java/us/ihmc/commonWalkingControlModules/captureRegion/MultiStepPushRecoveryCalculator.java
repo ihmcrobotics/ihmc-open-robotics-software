@@ -1,6 +1,5 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -19,6 +18,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -61,6 +61,7 @@ public class MultiStepPushRecoveryCalculator
    private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
    private final RecyclingArrayList<FootstepTiming> recoveryFootstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
 
+   private boolean isStateCapturable = false;
    private static final int maxRegionDepth = 3;
 
    private final int depth = 3;
@@ -149,7 +150,7 @@ public class MultiStepPushRecoveryCalculator
 
 
 
-   public void computeRecoverySteps(RobotSide swingSide,
+   public boolean computeRecoverySteps(RobotSide swingSide,
                                     double swingTimeRemaining,
                                     double nextTransferDuration,
                                     FramePoint2DReadOnly currentICP,
@@ -172,6 +173,8 @@ public class MultiStepPushRecoveryCalculator
 
          swingSide = swingSide.getOppositeSide();
       }
+
+      return isStateCapturable;
    }
 
    public int getNumberOfRecoverySteps()
@@ -204,13 +207,17 @@ public class MultiStepPushRecoveryCalculator
       stancePolygon.setIncludingFrame(footPolygon);
 
       int numberOfRecoverySteps = 0;
+      isStateCapturable = false;
 
       for (; depthIdx < depth; depthIdx++)
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
 
          if (captureRegionCalculator.calculateCaptureRegion(swingTimeRemaining, nextTransferDuration, icpAtStart, omega0, stancePose, stancePolygon))
+         {
+            isStateCapturable = true;
             break;
+         }
 
          captureRegion.setIncludingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion());
          captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
@@ -240,6 +247,7 @@ public class MultiStepPushRecoveryCalculator
                                                                                           null);
 
             recoveryStepLocations.get(depthIdx).set(capturePointsAtTouchdown.get(depthIdx));
+            isStateCapturable = true;
             depthIdx++;
             break;
          }

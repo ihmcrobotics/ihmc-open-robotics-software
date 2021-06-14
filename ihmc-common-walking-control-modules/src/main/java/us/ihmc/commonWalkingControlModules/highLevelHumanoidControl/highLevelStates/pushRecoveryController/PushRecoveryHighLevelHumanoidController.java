@@ -85,8 +85,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final YoBoolean enablePushRecoveryOnFailure = new YoBoolean("enablePushRecoveryOnFailure", registry);
-
    private final CommandInputManager commandInputManager;
    private final StatusMessageOutputManager statusOutputManager;
 
@@ -273,11 +271,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                new RecoveryTransferToStandingCondition(transferState, pushRecoveryControlModule));
       }
 
-
-      // Setup the abort condition from all states to the toStandingState
-      Set<PushRecoveryStateEnum> allButStandingStates = EnumSet.complementOf(EnumSet.of(PushRecoveryStateEnum.TO_STANDING));
-      factory.addTransition(allButStandingStates, PushRecoveryStateEnum.TO_STANDING, new AbortCondition());
-
       // Update the previous state info for each state using state changed listeners.
       factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousWalkingStateEnum(from)));
       factory.addStateChangedListener((from, to) -> controllerToolbox.reportControllerStateChangeToListeners(from, to));
@@ -317,28 +310,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
-//      PushRecoveryStateEnum nextState = balanceManager.getInitialPushRecoveryState();
-//      stateMachine.performTransition(nextState);
       stateMachine.resetToInitialState();
 
       firstTick = true;
-   }
-
-
-
-   private class AbortCondition implements StateTransitionCondition
-   {
-      @Override
-      public boolean testCondition(double timeInState)
-      {
-         if (!abortWalkingRequested.getBooleanValue())
-            return false;
-
-         walkingMessageHandler.clearFootsteps();
-         walkingMessageHandler.reportWalkingAbortRequested();
-         abortWalkingRequested.set(false);
-         return true;
-      }
    }
 
    private final FrameVector2D desiredCoMVelocityAsFrameVector = new FrameVector2D();
@@ -351,8 +325,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    {
       PushRecoveryState currentState;
 
-      // FIXME add this back in
-//      updateFailureDetection();
+      updateFailureDetection();
 
       // Do transitions will request ICP planner updates.
       if (!firstTick) // this avoids doing two transitions in a single tick if the initialize reset the state machine.
@@ -407,27 +380,11 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    {
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
-      if (failureDetectionControlModule.isRobotFalling())
-      {
-         walkingMessageHandler.clearFootsteps();
-         walkingMessageHandler.clearFootTrajectory();
-         commandInputManager.clearAllCommands();
 
-         if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
-         {
-            balanceManager.enablePushRecovery();
-         }
-         else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
-         {
-            walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
-            controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
-         }
-      }
-
-      if (enablePushRecoveryOnFailure.getBooleanValue())
+      if (pushRecoveryControlModule.isRecoveryImpossible())
       {
-         if (balanceManager.isPushRecoveryEnabled() && balanceManager.isRobotBackToSafeState())
-            balanceManager.disablePushRecovery();
+         walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
+         controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
       }
    }
 
@@ -437,7 +394,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
-      boolean isRecoveringFromPush = balanceManager.isRecovering();
 
       feetManager.compute();
       legConfigurationManager.compute();
@@ -461,7 +417,6 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
                                desiredCoMVelocityAsFrameVector,
                                isInDoubleSupport,
                                omega0,
-                               isRecoveringFromPush,
                                feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
