@@ -157,14 +157,10 @@ public class AtlasNetworkProcessor
       networkProcessor.setupBehaviorModule(false, false, 0);
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
-      sensorModule.setEnableStereoVisionPointCloudPublisher(true);
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
 
-      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setRangeFilter(0.2, 2.5);
-      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setPublisherPeriodInMillisecond(1500L);
-      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(200000);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
    }
 
@@ -182,14 +178,10 @@ public class AtlasNetworkProcessor
       sensorModule.setEnableDepthPointCloudPublisher(false);
       sensorModule.setEnableFisheyeCameraPublishers(false);
       sensorModule.setEnableLidarScanPublisher(true);
-      sensorModule.setEnableStereoVisionPointCloudPublisher(true);
       sensorModule.setEnableVideoPublisher(true);
       networkProcessor.setupSensorModule();
       sensorModule.getLidarScanPublisher().setRangeFilter(0.2, 8.0);
       sensorModule.getLidarScanPublisher().setPublisherPeriodInMillisecond(25L);
-      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setRangeFilter(0.2, 2.5);
-      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setPublisherPeriodInMillisecond(1500L);
-      sensorModule.getMultisenseStereoVisionPointCloudPublisher().setMaximumNumberOfPoints(200000);
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
 
 //      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
