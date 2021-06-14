@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -101,6 +102,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final TouchdownErrorCompensator touchdownErrorCompensator;
 
+   private final AtomicBoolean shouldKeepInitialContacts = new AtomicBoolean();
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
    private final Map<String, RigidBodyControlManager> bodyManagerByJointName = new HashMap<>();
    private final SideDependentList<Set<String>> legJointNames = new SideDependentList<>();
@@ -454,6 +456,11 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       balanceManager.setLinearMomentumRateControlModuleOutput(output);
    }
 
+   public void setShouldKeepInitialContacts(boolean shouldKeepInitialContacts)
+   {
+      this.shouldKeepInitialContacts.set(shouldKeepInitialContacts);
+   }
+
    public void initialize()
    {
       controllerCoreCommand.requestReinitialization();
@@ -474,7 +481,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
-      initializeContacts();
+      if (!shouldKeepInitialContacts.getAndSet(false))
+         initializeContacts();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -482,7 +490,12 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
          controllerToolbox.setDesiredCenterOfPressure(feet.get(robotSide), footDesiredCoPs.get(robotSide));
       }
 
-      stateMachine.resetToInitialState();
+      for (WalkingStateEnum stateName : WalkingStateEnum.values)
+      {
+         if (stateMachine.getState(stateName) != null)
+            stateMachine.getState(stateName).setPreviousWalkingStateEnum(null);
+      }
+      stateMachine.resetToInitialState(false);
 
       initializeManagers();
 
@@ -659,6 +672,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          if (enablePushRecoveryOnFailure.getBooleanValue())
          {
+            stateMachine.getState(WalkingStateEnum.TO_STANDING).setPreviousWalkingStateEnum(null);
             commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
          }
          else if (!balanceManager.isPushRecoveryEnabled())

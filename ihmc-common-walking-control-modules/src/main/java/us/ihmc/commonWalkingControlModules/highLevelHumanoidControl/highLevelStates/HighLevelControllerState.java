@@ -9,7 +9,6 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 
 public abstract class HighLevelControllerState implements State, JointLoadStatusProvider
 {
@@ -19,6 +18,7 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
 
    private final HighLevelControllerName highLevelControllerName;
    protected final OneDoFJointBasics[] controlledJoints;
+   private HighLevelControllerName previousHighLevelControllerName = null;
 
    public HighLevelControllerState(HighLevelControllerName stateEnum, HighLevelControllerParameters parameters,
                                    OneDoFJointBasics[] controlledJoints)
@@ -89,5 +89,15 @@ public abstract class HighLevelControllerState implements State, JointLoadStatus
    public HighLevelControllerName getHighLevelControllerName()
    {
       return highLevelControllerName;
+   }
+
+   public void setPreviousHighLevelControllerName(HighLevelControllerName previousHighLevelControllerName)
+   {
+      this.previousHighLevelControllerName = previousHighLevelControllerName;
+   }
+
+   public HighLevelControllerName getPreviousHighLevelControllerName()
+   {
+      return previousHighLevelControllerName;
    }
 }
