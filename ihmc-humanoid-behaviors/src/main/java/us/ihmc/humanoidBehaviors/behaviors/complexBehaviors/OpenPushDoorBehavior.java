@@ -55,7 +55,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private SleepBehavior sleepBehavior;
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
-   private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+  // private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    
    private long timeFirstDoorPushFinished = Long.MAX_VALUE;
 
@@ -66,7 +66,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    {
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
+     // this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
@@ -112,12 +112,13 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          @Override
          public boolean isDone()
          {
-            //wait for the door to be located and a baseline set for open detection
-            if (doorLocationPacket.get() != null)
-            {
-               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
-            }
-            return doorLocationPacket.get() != null;
+        	 return true;
+//            //wait for the door to be located and a baseline set for open detection
+//            if (doorLocationPacket.get() != null)
+//            {
+//               setGrabLocation(doorLocationPacket.get().getDoorTransformToWorld());
+//            }
+//            return doorLocationPacket.get() != null;
          }
 
       };
@@ -162,31 +163,31 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          }
       };
 
-      BehaviorAction setDoorDetectorStart = new BehaviorAction()
-      {
-         @Override
-         protected void setBehaviorInput()
-         {
-            publishTextToSpeech("Starting Door Open Detector Service");
-
-            doorOpenDetectorBehaviorService.reset();
-            doorOpenDetectorBehaviorService.run(true);
-         }
-
-         @Override
-         public boolean isDone()
-         {
-            //wait for the door to be located and a baseline set for open detection
-            if (doorOpenDetectorBehaviorService.doorDetected())
-            {
-               publishTextToSpeech("Door Open Detector Service has closed door position saved");
-
-            }
-            return doorOpenDetectorBehaviorService.doorDetected();
-
-         }
-
-      };
+//      BehaviorAction setDoorDetectorStart = new BehaviorAction()
+//      {
+//         @Override
+//         protected void setBehaviorInput()
+//         {
+//            publishTextToSpeech("Starting Door Open Detector Service");
+//
+//            doorOpenDetectorBehaviorService.reset();
+//            doorOpenDetectorBehaviorService.run(true);
+//         }
+//
+//         @Override
+//         public boolean isDone()
+//         {
+//            //wait for the door to be located and a baseline set for open detection
+//            if (doorOpenDetectorBehaviorService.doorDetected())
+//            {
+//               publishTextToSpeech("Door Open Detector Service has closed door position saved");
+//
+//            }
+//            return doorOpenDetectorBehaviorService.doorDetected();
+//
+//         }
+//
+//      };
 
       BehaviorAction moveRightHandToDoorKnob = new BehaviorAction(atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
@@ -315,7 +316,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                         moveLeftHandToDoor,
                                         OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
       factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_DOOR_KNOB);
-      factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
+     // factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
 
