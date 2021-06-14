@@ -19,6 +19,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 public class MultiStepPushRecoveryControlModule
@@ -27,7 +28,8 @@ public class MultiStepPushRecoveryControlModule
    private final YoBoolean isICPOutside;
    private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
 
-   private final MultiStepPushRecoveryCalculator pushRecoveryCalculator;
+   private final SideDependentList<MultiStepPushRecoveryCalculator> pushRecoveryCalculators = new SideDependentList<>();
+   private final MultiStepPushRecoveryCalculatorVisualizer pushRecoveryCalculatorVisualizer;
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final BipedSupportPolygons bipedSupportPolygons;
@@ -63,17 +65,21 @@ public class MultiStepPushRecoveryControlModule
       pushRecoveryTransferDuration = new DoubleParameter("pushRecoveryTransferDuration", registry, pushRecoveryControllerParameters.getRecoveryTransferDuration());
       pushRecoverySwingDuration = new DoubleParameter("pushRecoverySwingDuration", registry, pushRecoveryControllerParameters.getRecoverySwingDuration());
 
-      double footWidth = 0.1;
-      double kinematicsStepRange = 1.0;
-      pushRecoveryCalculator = new MultiStepPushRecoveryCalculator(pushRecoveryControllerParameters.getMaxStepLength(),
-                                                                   pushRecoveryControllerParameters.getMaxBackwardsStepLength(),
-                                                                   pushRecoveryControllerParameters.getMinStepWidth(),
-                                                                   pushRecoveryControllerParameters.getMaxStepWidth(),
-                                                                   soleZUpFrames,
-                                                                   defaultSupportPolygon,
-                                                                   "",
-                                                                   registry,
-                                                                   graphicsListRegistry);
+      DoubleParameter lengthLimit = new DoubleParameter("MaxReachabilityLength", registry, pushRecoveryControllerParameters.getMaxStepLength());
+      DoubleParameter lengthBackLimit = new DoubleParameter("MaxReachabilityBackwardLength", registry, pushRecoveryControllerParameters.getMaxBackwardsStepLength());
+      DoubleParameter innerLimit = new DoubleParameter("MinReachabilityWidth", registry, pushRecoveryControllerParameters.getMinStepWidth());
+      DoubleParameter outerLimit = new DoubleParameter("MaxReachabilityWidth", registry, pushRecoveryControllerParameters.getMaxStepWidth());
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         pushRecoveryCalculators.put(robotSide, new MultiStepPushRecoveryCalculator(lengthLimit,
+                                                                                    lengthBackLimit,
+                                                                                    innerLimit,
+                                                                                    outerLimit,
+                                                                                    soleZUpFrames,
+                                                                                    defaultSupportPolygon));
+      }
+      pushRecoveryCalculatorVisualizer = new MultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry);
 
       parentRegistry.addChild(registry);
    }
@@ -122,6 +128,7 @@ public class MultiStepPushRecoveryControlModule
    public void updateForDoubleSupport(FramePoint2DReadOnly capturePoint2d, double omega0)
    {
       // Initialize variables
+      pushRecoveryCalculatorVisualizer.reset();
       swingSideForDoubleSupportRecovery.set(null);
 
       isICPOutside.set(!bipedSupportPolygons.getSupportPolygonInWorld().isPointInside(capturePoint2d));
@@ -134,9 +141,17 @@ public class MultiStepPushRecoveryControlModule
       }
 
       isRobotBackToSafeState.set(false);
-      isRecoveryImpossible.set(!computeRecoveryStepLocations(capturePoint2d, omega0));
 
-      swingSideForDoubleSupportRecovery.set(computeBestRecoverySide());
+      if (computeRecoveryStepLocations(capturePoint2d, omega0))
+      {
+         swingSideForDoubleSupportRecovery.set(computeBestRecoverySide());
+         isRecoveryImpossible.set(false);
+         pushRecoveryCalculatorVisualizer.visualize(pushRecoveryCalculators.get(swingSideForDoubleSupportRecovery.getEnumValue()));
+      }
+      else
+      {
+         isRecoveryImpossible.set(true);
+      }
    }
 
    public Footstep getFootstepForRecoveringFromDisturbance(RobotSide swingSide, double swingTimeRemaining)
@@ -162,6 +177,8 @@ public class MultiStepPushRecoveryControlModule
          supportPolygonInWorld.setIncludingFrame(bipedSupportPolygons.getFootPolygonInSoleFrame(swingSide.getOppositeSide()));
          supportPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
+         MultiStepPushRecoveryCalculator pushRecoveryCalculator = pushRecoveryCalculators.get(swingSide);
+
          isStateCapturable |= pushRecoveryCalculator.computeRecoverySteps(swingSide,
                                                                           pushRecoverySwingDuration.getValue(),
                                                                           pushRecoveryTransferDuration.getValue(),
@@ -175,7 +192,6 @@ public class MultiStepPushRecoveryControlModule
          {
             recoveryFootsteps.get(swingSide).add().set(pushRecoveryCalculator.getRecoveryStep(i));
             recoveryTimings.get(swingSide).add().set(pushRecoveryCalculator.getRecoveryStepTiming(i));
-
          }
       }
 
