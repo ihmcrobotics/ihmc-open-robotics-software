@@ -10,12 +10,21 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 
 public interface  PushRecoveryControllerParameters
 {
+   default double getFinalTransferDurationForRecovery()
+   {
+      return 0.25;
+   }
+
+   default double getTransferDurationAfterRecovery()
+   {
+      return 1.0;
+   }
 
    /**
     * This is the minimum transfer time that the controller will allow when adjusting transfer times to achieve certain step
     * times in footstep plans.
     */
-   default double getMinimumTransferTime()
+   default double getRecoveryTransferDuration()
    {
       return 0.1;
    }
@@ -24,7 +33,7 @@ public interface  PushRecoveryControllerParameters
     * This is the minimum swing time that the controller will allow when adjusting transfer times to achieve certain step
     * times in footstep plans.
     */
-   default double getMinimumSwingTime()
+   default double getRecoverySwingDuration()
    {
       return 0.6;
    }
