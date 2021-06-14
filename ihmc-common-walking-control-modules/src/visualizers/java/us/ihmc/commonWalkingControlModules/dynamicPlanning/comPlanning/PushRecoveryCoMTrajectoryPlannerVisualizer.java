@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculatorVisualizer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -94,7 +95,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
 
-   private final MultiStepPushRecoveryCalculator captureRegionCalculator;
+   private final MultiStepPushRecoveryCalculator recoveryStepCalculator;
+   private final MultiStepPushRecoveryCalculatorVisualizer recoveryStepCalculatorVisualizer;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2,
                                                                                                   getClass(),
@@ -220,13 +222,11 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
-      captureRegionCalculator = new MultiStepPushRecoveryCalculator(kinematicsStepRange,
-                                                                    footWidth,
-                                                                    new SideDependentList<>(leftStepFrame, rightStepFrame),
-                                                                    defaultSupportPolygon,
-                                                                    "",
-                                                                    registry,
-                                                                    graphicsListRegistry);
+      recoveryStepCalculator = new MultiStepPushRecoveryCalculator(() -> kinematicsStepRange,
+                                                                   () -> footWidth,
+                                                                   new SideDependentList<>(leftStepFrame, rightStepFrame),
+                                                                   defaultSupportPolygon);
+      recoveryStepCalculatorVisualizer = new MultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry);
 
       shouldReplan = new YoBoolean("shouldReplan", registry);
       replan = new YoBoolean("replan", registry);
@@ -301,12 +301,13 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       LogTools.info("Computing recovery steps");
 
-      captureRegionCalculator.computeRecoverySteps(RobotSide.LEFT,
-                                                   swingTime.getDoubleValue(),
-                                                   transferTime.getDoubleValue(),
-                                                   icp,
-                                                   omega.getDoubleValue(),
-                                                   rightSupport);
+      recoveryStepCalculator.computeRecoverySteps(RobotSide.LEFT,
+                                                  swingTime.getDoubleValue(),
+                                                  transferTime.getDoubleValue(),
+                                                  icp,
+                                                  omega.getDoubleValue(),
+                                                  rightSupport);
+      recoveryStepCalculatorVisualizer.visualize(recoveryStepCalculator);
 
       LogTools.info("Updating CoP state");
 
@@ -314,10 +315,10 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       state.setIcpAtStartOfState(icp);
       state.setFinalTransferDuration(1.0);
       state.setFinalTransferDuration(finalTransferDuration);
-      for (int i = 0; i < captureRegionCalculator.getNumberOfRecoverySteps(); i++)
+      for (int i = 0; i < recoveryStepCalculator.getNumberOfRecoverySteps(); i++)
       {
-         state.addFootstep(captureRegionCalculator.getRecoveryStep(i));
-         state.addFootstepTiming(captureRegionCalculator.getRecoveryStepTiming(i));
+         state.addFootstep(recoveryStepCalculator.getRecoveryStep(i));
+         state.addFootstepTiming(recoveryStepCalculator.getRecoveryStepTiming(i));
       }
       //      state.addFootstep(RobotSide.LEFT, new FramePose3D(worldFrame, new Point3D(stepLength, stepWidth, 0.0), new Quaternion()), null);
       //      state.addFootstepTiming(swingTime.getDoubleValue(), transferTime.getDoubleValue());
