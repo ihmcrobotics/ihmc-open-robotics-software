@@ -446,12 +446,16 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    protected boolean hasMinimumTimePassed(double timeInState)
    {
-      double minimumSwingTime;
       if (balanceManager.isRecoveringFromDoubleSupportFall())
-         minimumSwingTime = 0.15;
+      {
+         double minimumSwingTime = 0.15;
+         return timeInState > minimumSwingTime;
+      }
       else
-         minimumSwingTime = swingTime * minimumSwingFraction.getDoubleValue();
-
-      return timeInState > minimumSwingTime;
+      {
+         double maximumSwingTimeRemaining = swingTime * minimumSwingFraction.getDoubleValue();
+         double swingTimeRemaining = feetManager.getSwingTimeRemaing(swingSide);
+         return swingTimeRemaining < maximumSwingTimeRemaining;
+      }
    }
 }
