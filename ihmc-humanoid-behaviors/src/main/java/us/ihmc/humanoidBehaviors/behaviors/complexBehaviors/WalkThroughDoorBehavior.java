@@ -369,11 +369,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
         	 
         	 //attempting to track down a bug
         	 
-//            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+//            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.85, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
             
             
             double footZ2 = referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ();
-            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, footZ2+0.75, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, footZ2+0.85, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
             
             atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
             publishTextToSpeech("Decrease heigth");
@@ -400,17 +400,18 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                      0.4701641267471464,
                                                      0.3553805956221843,
                                                      -0.883528619644353};
-               double[] leftArmPose = new double[] {-1.5708,
-                                                    -0.315140943959265,
-                                                    1.4699954842804037,
-                                                    1.1655918121416153,
-                                                    -2.2416048392105234,
-                                                    -0.988080471516879,
-                                                    2.829256909246439};
+               
+               double[] leftArmPose = new double[] {-1.5708, -0.3631767983734358, 1.9011664909181754, 1.5527215367290526, -1.5195588220209912, -0.7013407037182441, 2.2937054793555043};
+               
+					/*
+					 * double[] leftArmPose = new double[] {-1.5708, -0.315140943959265,
+					 * 1.4699954842804037, 1.1655918121416153, -2.2416048392105234,
+					 * -0.988080471516879, 2.829256909246439};
+					 */
 
-               ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
+               ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 6, rightArmPose);
 
-               ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
+               ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 6, leftArmPose);
 
                atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
                atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
@@ -433,9 +434,9 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                     -0.7303010812684162,
                                                     -2.8798335374002835};
 
-               ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 4, rightArmPose);
+               ArmTrajectoryMessage rightPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.RIGHT, 6, rightArmPose);
 
-               ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 4, leftArmPose);
+               ArmTrajectoryMessage leftPoseMessage = HumanoidMessageTools.createArmTrajectoryMessage(RobotSide.LEFT, 6, leftArmPose);
 
                atlasPrimitiveActions.leftArmTrajectoryBehavior.setInput(leftPoseMessage);
                atlasPrimitiveActions.rightArmTrajectoryBehavior.setInput(rightPoseMessage);
