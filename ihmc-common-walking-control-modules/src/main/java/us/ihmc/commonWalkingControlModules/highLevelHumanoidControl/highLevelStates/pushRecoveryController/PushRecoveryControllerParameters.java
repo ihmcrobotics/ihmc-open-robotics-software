@@ -10,6 +10,11 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 
 public interface  PushRecoveryControllerParameters
 {
+   default int getMaxStepsToGenerateForRecovery()
+   {
+      return 2;
+   }
+
    default double getFinalTransferDurationForRecovery()
    {
       return 0.25;
