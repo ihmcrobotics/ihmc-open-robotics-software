@@ -246,6 +246,8 @@ public class HumanoidHighLevelControllerManager implements RobotController
          }
       });
 
+      factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousHighLevelControllerName(from)));
+
       return factory.build(initialControllerState);
    }
 
