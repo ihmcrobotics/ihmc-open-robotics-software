@@ -84,10 +84,10 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          statusStopwatch.reset();
          behaviorTreeStatus.set(status);
       });
-      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
-      addChild(highestLevelUI);
       disabledNodeUI = new ImGuiBehaviorModuleDisabledNodeUI(behaviorHelper);
       addChild(disabledNodeUI);
+      highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
+      addChild(highestLevelUI);
    }
 
    @Override

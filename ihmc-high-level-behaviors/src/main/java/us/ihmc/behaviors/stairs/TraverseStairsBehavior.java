@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -26,7 +27,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
-public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
+public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
    private static final int UPDATE_RATE_MILLIS = 100;
@@ -45,6 +46,7 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
 
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
+   private final AtomicBoolean operatorReviewEnabled = new AtomicBoolean(true);
 
    private final StateMachine<TraverseStairsStateName, State> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -53,6 +55,7 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
    private final TraverseStairsPauseState pauseState;
    private final TraverseStairsPlanStepsState planStepsState;
    private final TraverseStairsExecuteStepsState executeStepsState;
+   private TraverseStairsStateName currentState = TraverseStairsStateName.SQUARE_UP;
 
    public enum TraverseStairsStateName
    {
@@ -64,6 +67,14 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
       PLAN_STEPS,
       /** Executes steps, blocks on this state while steps are being taken */
       EXECUTE_STEPS
+   }
+   public enum TraverseStairsLifecycleStateName
+   {
+      CRASHED,
+      RUNNING,
+      NOT_RUNNING,
+      COMPLETED,
+      AWAITING_APPROVAL,
    }
 
    public TraverseStairsBehavior(BehaviorHelper helper)
@@ -80,13 +91,18 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
 
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
-      planStepsState = new TraverseStairsPlanStepsState(helper, parameters);
+      planStepsState = new TraverseStairsPlanStepsState(helper, parameters, operatorReviewEnabled);
       executeStepsState = new TraverseStairsExecuteStepsState(helper, parameters, planStepsState::getOutput);
 
       stateMachine = buildStateMachine();
 
       helper.subscribeViaCallback(START, this::start);
       helper.subscribeViaCallback(STOP, this::stop);
+      helper.subscribeViaCallback(OperatorReviewEnabled, enabled ->
+      {
+         statusLogger.info("Operator review {}", enabled ? "enabled" : "disabled");
+         operatorReviewEnabled.set(enabled);
+      });
    }
 
    private StateMachine<TraverseStairsStateName, State> buildStateMachine()
@@ -107,7 +123,11 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.EXECUTE_STEPS, planStepsState::shouldTransitionToExecute);
       factory.addTransition(TraverseStairsStateName.PLAN_STEPS, TraverseStairsStateName.PAUSE, planStepsState::shouldTransitionBackToPause);
       factory.addDoneTransition(TraverseStairsStateName.EXECUTE_STEPS, TraverseStairsStateName.PAUSE);
-      factory.addStateChangedListener((from, to) -> helper.publish(TraverseStairsBehaviorAPI.State, to.name()));
+      factory.addStateChangedListener((from, to) ->
+      {
+         currentState = to;
+         helper.publish(TraverseStairsBehaviorAPI.State, to.name());
+      });
 
       return factory.build(TraverseStairsStateName.SQUARE_UP);
    }
@@ -115,7 +135,26 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {
+      start();
+
+      if (behaviorHasCrashed.get())
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
+      else if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete())
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.COMPLETED.name());
+      else if (currentState == TraverseStairsStateName.PLAN_STEPS && !planStepsState.isStillPlanning() && planStepsState.searchWasSuccessful())
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.AWAITING_APPROVAL.name());
+      else if (isRunning.get())
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
+      else
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.NOT_RUNNING.name());
+
       return BehaviorTreeNodeStatus.SUCCESS;
+   }
+
+   @Override
+   public void reset()
+   {
+      stop();
    }
 
    @Override
@@ -139,6 +178,7 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
       {
          return;
       }
+      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.NOT_RUNNING.name());
 
       if (behaviorTask != null)
       {
@@ -160,6 +200,8 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
          return;
       }
 
+      helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
+
       planStepsState.reset();
       executeStepsState.clearWalkingCompleteFlag();
 
@@ -177,6 +219,7 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
    {
       if (behaviorHasCrashed.get())
       {
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
          return;
       }
 
@@ -194,6 +237,7 @@ public class TraverseStairsBehavior extends BehaviorTreeControlFlowNode implemen
       {
          e.printStackTrace();
          behaviorHasCrashed.set(true);
+         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
       }
    }
 

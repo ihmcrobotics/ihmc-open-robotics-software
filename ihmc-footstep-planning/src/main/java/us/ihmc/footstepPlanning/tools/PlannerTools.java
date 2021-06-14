@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.BoundingBoxCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -191,6 +192,20 @@ public class PlannerTools
                                                        FootstepPlannerParametersReadOnly parameters,
                                                        double horizonDistanceToCheck)
    {
+      BodyCollisionData collisionData = detectCollisionsAlongBodyPath(robotPose,
+                                                                      bodyPathWaypoints,
+                                                                      planarRegionsList,
+                                                                      parameters,
+                                                                      horizonDistanceToCheck);
+      return collisionData != null && collisionData.isCollisionDetected();
+   }
+
+   public static BodyCollisionData detectCollisionsAlongBodyPath(Pose3DReadOnly robotPose,
+                                                                 List<? extends Pose3DReadOnly> bodyPathWaypoints,
+                                                                 PlanarRegionsList planarRegionsList,
+                                                                 FootstepPlannerParametersReadOnly parameters,
+                                                                 double horizonDistanceToCheck)
+   {
       WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
       bodyPathPlanHolder.setPoseWaypoints(bodyPathWaypoints);
 
@@ -222,15 +237,16 @@ public class PlannerTools
          double yaw = Math.atan2(pathLookAhead.getY() - pathLookBehind.getY(), pathLookAhead.getX() - pathLookBehind.getX());
 
          collisionDetector.setBoxPose(pathWaypoint.getX(), pathWaypoint.getY(), pathWaypoint.getZ() + parameters.getBodyBoxBaseZ(), yaw);
-         if (collisionDetector.checkForCollision().isCollisionDetected())
+         BodyCollisionData bodyCollisionData = collisionDetector.checkForCollision();
+         if (bodyCollisionData.isCollisionDetected())
          {
-            return true;
+            return bodyCollisionData;
          }
 
          alpha += deltaAlphaPerCheck;
       }
 
-      return false;
+      return null;
    }
 
    public static void extrapolatePose(Pose3DReadOnly robotPose,
