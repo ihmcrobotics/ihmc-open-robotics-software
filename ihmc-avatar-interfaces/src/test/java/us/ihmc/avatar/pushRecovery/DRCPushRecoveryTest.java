@@ -362,7 +362,7 @@ public abstract class DRCPushRecoveryTest
       footPose.get(desiredFootPosition, desiredFootOrientation);
       FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
       drcSimulationTestHelper.publishToController(footPosePacket);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
 
       // push timing:
       StateTransitionCondition pushCondition = null;
@@ -398,9 +398,9 @@ public abstract class DRCPushRecoveryTest
       // get rid of this once push recovery is enabled by default
 //      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
 //      enable.set(enablePushRecoveryControlModule);
-//      YoBoolean enableOnFailure = (YoBoolean) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
-//            "enablePushRecoveryOnFailure");
-//      enableOnFailure.set(enablePushRecoveryOnFailure);
+      YoBoolean enableOnFailure = (YoBoolean) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+            "enablePushRecoveryOnFailure");
+      enableOnFailure.set(enablePushRecoveryOnFailure);
 
       for (RobotSide robotSide : RobotSide.values)
       {
