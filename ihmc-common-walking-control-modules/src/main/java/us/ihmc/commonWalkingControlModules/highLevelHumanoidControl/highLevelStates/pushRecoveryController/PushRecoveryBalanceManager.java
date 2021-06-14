@@ -569,40 +569,10 @@ public class PushRecoveryBalanceManager
       return icpPlannerDone.getValue();
    }
 
-   public boolean isPushRecoveryEnabled()
-   {
-//      return pushRecoveryControlModule.isEnabled();
-      return true;
-   }
-
-   public boolean isRecovering()
-   {
-//      return pushRecoveryControlModule.isRecovering();
-      return false;
-   }
-
-   public boolean isRecoveringFromDoubleSupportFall()
-   {
-//      return pushRecoveryControlModule.isEnabled() && pushRecoveryControlModule.isRecoveringFromDoubleSupportFall();
-      return false;
-   }
-
    public boolean isRecoveryImpossible()
    {
 //      return pushRecoveryControlModule.isCaptureRegionEmpty();
       return false;
-   }
-
-   public boolean isRobotBackToSafeState()
-   {
-//      return pushRecoveryControlModule.isRobotBackToSafeState();
-      return false;
-   }
-
-   public RobotSide isRobotFallingFromDoubleSupport()
-   {
-//      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
-      return null;
    }
 
    public void setFinalTransferTime(double finalTransferDuration)

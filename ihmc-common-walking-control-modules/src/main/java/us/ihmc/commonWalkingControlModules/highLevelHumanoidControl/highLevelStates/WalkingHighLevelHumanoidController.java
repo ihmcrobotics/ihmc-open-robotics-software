@@ -626,30 +626,26 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
    {
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
+
       if (failureDetectionControlModule.isRobotFalling())
       {
          walkingMessageHandler.clearFootsteps();
          walkingMessageHandler.clearFootTrajectory();
+
          commandInputManager.clearAllCommands();
 
-         commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
+         // FIXME remove this
          balanceManager.setStartingStateForPushRecovery();
 
-         if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
+         if (enablePushRecoveryOnFailure.getBooleanValue())
          {
-            balanceManager.enablePushRecovery();
+            commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
          }
-         else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
+         else if (!balanceManager.isPushRecoveryEnabled())
          {
             walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
             controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
          }
-      }
-
-      if (enablePushRecoveryOnFailure.getBooleanValue())
-      {
-         if (balanceManager.isPushRecoveryEnabled() && balanceManager.isRobotBackToSafeState())
-            balanceManager.disablePushRecovery();
       }
    }
 
@@ -659,7 +655,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
-      boolean isRecoveringFromPush = balanceManager.isRecovering();
 
       feetManager.compute();
       legConfigurationManager.compute();
@@ -683,7 +678,6 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
                                desiredCoMVelocityAsFrameVector,
                                isInDoubleSupport,
                                omega0,
-                               isRecoveringFromPush,
                                feetManager);
       FeedbackControlCommand<?> heightControlCommand = comHeightManager.getHeightControlCommand();
 
