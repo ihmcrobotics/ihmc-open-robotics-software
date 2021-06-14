@@ -40,6 +40,8 @@ public class RecoveringSwingState extends PushRecoveryState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
+   private final PushRecoveryControllerParameters pushRecoveryParameters;
+
    private final CenterOfMassHeightManager comHeightManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
@@ -61,7 +63,7 @@ public class RecoveringSwingState extends PushRecoveryState
                                HighLevelHumanoidControllerToolbox controllerToolbox,
                                PushRecoveryControlManagerFactory managerFactory,
                                MultiStepPushRecoveryControlModule pushRecoveryControlModule,
-                               PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                               PushRecoveryControllerParameters pushRecoveryParameters,
                                WalkingFailureDetectionControlModule failureDetectionControlModule,
                                YoRegistry parentRegistry)
    {
@@ -69,6 +71,7 @@ public class RecoveringSwingState extends PushRecoveryState
 
       this.supportSide = stateEnum.getSupportSide();
       this.pushRecoveryControlModule = pushRecoveryControlModule;
+      this.pushRecoveryParameters = pushRecoveryParameters;
       swingSide = supportSide.getOppositeSide();
 
       this.walkingMessageHandler = walkingMessageHandler;
@@ -136,7 +139,8 @@ public class RecoveringSwingState extends PushRecoveryState
 
       updateFootstepParameters();
 
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
+
       balanceManager.setFinalTransferTime(finalTransferTime);
       balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
 

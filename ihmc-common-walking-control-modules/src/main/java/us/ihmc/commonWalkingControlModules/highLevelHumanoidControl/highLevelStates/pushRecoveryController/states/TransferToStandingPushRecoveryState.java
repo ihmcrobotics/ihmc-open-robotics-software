@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientati
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryBalanceManager;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -31,12 +32,15 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
    private final PelvisOrientationManager pelvisOrientationManager;
    private final FeetManager feetManager;
 
+   private final PushRecoveryControllerParameters pushRecoveryParameters;
+
    private final FramePoint2D capturePoint = new FramePoint2D();
 
    private final MultiStepPushRecoveryControlModule pushRecoveryCalculator;
 
    public TransferToStandingPushRecoveryState(WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox,
+                                              PushRecoveryControllerParameters pushRecoveryParameters,
                                               MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                               PushRecoveryControlManagerFactory managerFactory,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule,
@@ -49,6 +53,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       this.failureDetectionControlModule = failureDetectionControlModule;
       this.balanceManager = managerFactory.getOrCreateBalanceManager();
       this.pushRecoveryCalculator = pushRecoveryControlModule;
+      this.pushRecoveryParameters = pushRecoveryParameters;
 
       // TODO make this a parameter
       maxICPErrorToSwitchToStanding.set(0.025);
@@ -154,6 +159,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       controllerToolbox.updateBipedSupportPolygons(); // need to always update biped support polygons after a change to the contact states
 
       walkingMessageHandler.clearFootsteps();
+      walkingMessageHandler.setFinalTransferTime(pushRecoveryParameters.getTransferDurationAfterRecovery());
 
       capturePoint.setIncludingFrame(controllerToolbox.getCapturePoint());
       pushRecoveryCalculator.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
@@ -171,7 +177,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       comHeightManager.setSupportLeg(supportingSide);
       comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
