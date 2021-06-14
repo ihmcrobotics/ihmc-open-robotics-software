@@ -51,7 +51,7 @@ public class MultiStepPushRecoveryCalculator
 
    private boolean isStateCapturable = false;
 
-   private final int depth = 3;
+   private int depth = 3;
 
    public MultiStepPushRecoveryCalculator(DoubleProvider kinematicsStepRange,
                                           DoubleProvider footWidth,
@@ -75,6 +75,11 @@ public class MultiStepPushRecoveryCalculator
                                                                       minStepWidth,
                                                                       maxStepWidth);
       captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay();
+   }
+
+   public void setMaxStepsToGenerateForRecovery(int depth)
+   {
+      this.depth = depth;
    }
 
    public boolean computeRecoverySteps(RobotSide swingSide,
