@@ -445,6 +445,19 @@ public class FootControlModule
       return swingState.requestSwingSpeedUp(speedUpFactor);
    }
 
+   /**
+    * Computes and returns the swing time remaining while accounting for the active swing time speed up factor.
+    * 
+    * @return the estimated swing time remaining.
+    */
+   public double getSwingTimeRemaining()
+   {
+      if (stateMachine.getCurrentState() != swingState)
+         return Double.NaN;
+      else
+         return swingState.getSwingTimeRemaining();
+   }
+
    public InverseDynamicsCommand<?> getInverseDynamicsCommand()
    {
       inverseDynamicsCommandList.clear();
