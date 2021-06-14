@@ -142,7 +142,7 @@ public class AtlasNetworkProcessor
       sensorModule.getMultiSenseSensorManager().setVideoSettings(VideoControlSettings.configureJPEGServer(25, 10));
       
 //      networkProcessor.setupKinematicsStreamingToolboxModule(AtlasKinematicsStreamingToolboxModule.class, args, false);
-      networkProcessor.setupBehaviorModule(false, false, 0);
+//      networkProcessor.setupBehaviorModule(false, false, 0);
    }
 
    private static void behaviorNetworkProcessor(String[] args, AtlasRobotModel robotModel, HumanoidNetworkProcessor networkProcessor)
@@ -151,10 +151,10 @@ public class AtlasNetworkProcessor
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
       networkProcessor.setupHumanoidAvatarRealSenseREAStateUpdater();
-      networkProcessor.setupFiducialDetectorToolboxModule();
-      networkProcessor.setupObjectDetectorToolboxModule();
-      networkProcessor.setupFootstepPlanningToolboxModule();
-      networkProcessor.setupBehaviorModule(false, false, 0);
+//      networkProcessor.setupFiducialDetectorToolboxModule();
+//      networkProcessor.setupObjectDetectorToolboxModule();
+//      networkProcessor.setupFootstepPlanningToolboxModule();
+//      networkProcessor.setupBehaviorModule(false, false, 0);
 
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
@@ -169,8 +169,8 @@ public class AtlasNetworkProcessor
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarLidarREAStateUpdater();
-      networkProcessor.setupFiducialDetectorToolboxModule();
-      networkProcessor.setupObjectDetectorToolboxModule();
+//      networkProcessor.setupFiducialDetectorToolboxModule();
+//      networkProcessor.setupObjectDetectorToolboxModule();
       networkProcessor.setupFootstepPlanningToolboxModule();
 
 
