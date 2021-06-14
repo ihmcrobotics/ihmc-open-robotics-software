@@ -14,7 +14,6 @@ public interface  PushRecoveryControllerParameters
    {
       return 2;
    }
-
    default double getFinalTransferDurationForRecovery()
    {
       return 0.25;
@@ -31,7 +30,7 @@ public interface  PushRecoveryControllerParameters
     */
    default double getRecoveryTransferDuration()
    {
-      return 0.1;
+      return 0.05;
    }
 
    /**
@@ -40,7 +39,7 @@ public interface  PushRecoveryControllerParameters
     */
    default double getRecoverySwingDuration()
    {
-      return 0.6;
+      return 0.3;
    }
 
    /**
