@@ -204,6 +204,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       factory.setNamePrefix("pushRecovery").setRegistry(registry).buildYoClock(yoTime);
 
       TransferToStandingPushRecoveryState toStandingState = new TransferToStandingPushRecoveryState(walkingMessageHandler, controllerToolbox,
+                                                                                                    pushRecoveryControllerParameters,
                                                                                                     pushRecoveryControlModule, managerFactory,
                                                                                                     failureDetectionControlModule, registry);
       factory.addState(PushRecoveryStateEnum.TO_STANDING, toStandingState);
@@ -216,6 +217,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
          RecoveryTransferState transferState = new RecoveryTransferState(stateEnum,
                                                                          walkingMessageHandler,
                                                                          controllerToolbox,
+                                                                         pushRecoveryControllerParameters,
                                                                          managerFactory,
                                                                          pushRecoveryControlModule,
                                                                          failureDetectionControlModule,

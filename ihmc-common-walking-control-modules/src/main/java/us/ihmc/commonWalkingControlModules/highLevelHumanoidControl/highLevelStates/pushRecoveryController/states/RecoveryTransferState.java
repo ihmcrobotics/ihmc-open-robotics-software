@@ -30,6 +30,7 @@ public class RecoveryTransferState extends PushRecoveryState
    protected final HighLevelHumanoidControllerToolbox controllerToolbox;
    protected final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
+   private final PushRecoveryControllerParameters pushRecoveryParameters;
    protected final CenterOfMassHeightManager comHeightManager;
    protected final PushRecoveryBalanceManager balanceManager;
    protected final PelvisOrientationManager pelvisOrientationManager;
@@ -52,6 +53,7 @@ public class RecoveryTransferState extends PushRecoveryState
    public RecoveryTransferState(PushRecoveryStateEnum stateEnum,
                                 WalkingMessageHandler walkingMessageHandler,
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
+                                PushRecoveryControllerParameters pushRecoveryParameters,
                                 PushRecoveryControlManagerFactory managerFactory,
                                 MultiStepPushRecoveryControlModule pushRecoveryControlModule,
                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
@@ -65,6 +67,7 @@ public class RecoveryTransferState extends PushRecoveryState
       this.controllerToolbox = controllerToolbox;
       this.balanceManager = managerFactory.getOrCreateBalanceManager();
       this.pushRecoveryControlModule = pushRecoveryControlModule;
+      this.pushRecoveryParameters = pushRecoveryParameters;
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
@@ -91,7 +94,7 @@ public class RecoveryTransferState extends PushRecoveryState
       // In middle of walking or leaving foot pose, pelvis is good leave it like that.
       pelvisOrientationManager.setToHoldCurrentDesiredInSupportFoot(transferToSide);
 
-      double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
+      double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
       walkingMessageHandler.requestPlanarRegions();
       balanceManager.setFinalTransferTime(finalTransferTime);
 
@@ -127,14 +130,10 @@ public class RecoveryTransferState extends PushRecoveryState
       nextFootstep.set(pushRecoveryControlModule.pollRecoveryStep(transferToSide));
       updateICPPlan();
 
-      double extraToeOffHeight = 0.0;
-      if (feetManager.canDoDoubleSupportToeOff(nextFootstep.getFootstepPose().getPosition(), transferToSide)) // FIXME should this be swing side?
-         extraToeOffHeight = feetManager.getToeOffManager().getExtraCoMMaxHeightWithToes();
-
       transferToAndNextFootstepsData.setTransferToPosition(controllerToolbox.getReferenceFrames().getSoleFrame(transferToSide));
 
       comHeightManager.setSupportLeg(transferToSide);
-      comHeightManager.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
+      comHeightManager.initialize(transferToAndNextFootstepsData, 0.0);
    }
 
    @Override
