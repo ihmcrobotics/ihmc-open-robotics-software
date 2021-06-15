@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.ArrayList;
 import java.util.List;
 
+import gnu.trove.list.array.TByteArrayList;
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
@@ -28,6 +29,8 @@ public class JointAccelerationIntegrationCalculator
    private final TDoubleArrayList jointSpecificVelocityBreakFrequency = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxPositionError = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxVelocity = new TDoubleArrayList();
+   // This should really be a boolean list, but there's no such class, so just using a byte list with 0 == false and 1 == true.
+   private final TByteArrayList jointSpecificZeroVelocityReset = new TByteArrayList();
 
    private final YoDouble defaultPositionBreakFrequency = new YoDouble("defaultPositionBreakFrequencyIntegration", registry);
    private final YoDouble defaultVelocityBreakFrequency = new YoDouble("defaultVelocityBreakFrequencyIntegration", registry);
@@ -71,6 +74,8 @@ public class JointAccelerationIntegrationCalculator
          if (Double.isNaN(newMaxVelocity) || newMaxVelocity < 0.0)
             newMaxVelocity = defaultIntegrationMaxVelocity.getDoubleValue();
 
+         boolean zeroVelocityReset = jointParameters.getZeroVelocityReset();
+
          if (localJointIndex < 0)
          {
             jointsToComputeDesiredPositionFor.add(jointToComputeDesierdPositionFor);
@@ -78,6 +83,7 @@ public class JointAccelerationIntegrationCalculator
             jointSpecificVelocityBreakFrequency.add(newVelocityBreakFrequency);
             jointSpecificMaxPositionError.add(newMaxPositionError);
             jointSpecificMaxVelocity.add(newMaxVelocity);
+            jointSpecificZeroVelocityReset.add((byte) (zeroVelocityReset ? 1 : 0));
          }
          else
          {
@@ -85,6 +91,7 @@ public class JointAccelerationIntegrationCalculator
             jointSpecificVelocityBreakFrequency.set(localJointIndex, newVelocityBreakFrequency);
             jointSpecificMaxPositionError.set(localJointIndex, newMaxPositionError);
             jointSpecificMaxVelocity.set(localJointIndex, newMaxVelocity);
+            jointSpecificZeroVelocityReset.set(localJointIndex, (byte) (zeroVelocityReset ? 1 : 0));
          }
       }
    }
@@ -101,7 +108,13 @@ public class JointAccelerationIntegrationCalculator
 
          boolean resetIntegrators = lowLevelJointData.pollResetIntegratorsRequest();
          if (!lowLevelJointData.hasDesiredVelocity() || resetIntegrators)
-            lowLevelJointData.setDesiredVelocity(joint.getQd());
+         {
+            boolean zeroVelocityReset = jointSpecificZeroVelocityReset.get(jointIndex) > 0;
+            if (zeroVelocityReset)
+               lowLevelJointData.setDesiredVelocity(0);
+            else
+               lowLevelJointData.setDesiredVelocity(joint.getQd());
+         }
          if (!lowLevelJointData.hasDesiredPosition() || resetIntegrators)
             lowLevelJointData.setDesiredPosition(joint.getQ());
 
