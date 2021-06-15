@@ -48,6 +48,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       switch (state)
       {
          case WALKING:
+         case PUSH_RECOVERY:
             return getDesiredJointBehaviorForWalking();
          case DO_NOTHING_BEHAVIOR:
             return getDesiredJointBehaviorForDoNothing();
@@ -65,7 +66,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
    @Override
    public List<GroupParameter<JointDesiredBehaviorReadOnly>> getDesiredJointBehaviorsUnderLoad(HighLevelControllerName state)
    {
-      if (state == HighLevelControllerName.WALKING)
+      if (state == HighLevelControllerName.WALKING || state == HighLevelControllerName.PUSH_RECOVERY)
          return getDesiredJointBehaviorForWalkingUnderLoad();
       else
          return null;
@@ -344,6 +345,7 @@ public class ValkyrieHighLevelControllerParameters implements HighLevelControlle
       switch (state)
       {
          case WALKING:
+         case PUSH_RECOVERY:
             return getJointAccelerationIntegrationParametersForWalking();
          case DO_NOTHING_BEHAVIOR:
          case STAND_PREP_STATE:

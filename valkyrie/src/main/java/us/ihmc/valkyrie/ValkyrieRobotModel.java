@@ -18,6 +18,7 @@ import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -101,6 +102,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
 
    private CoPTrajectoryParameters copTrajectoryParameters;
    private WalkingControllerParameters walkingControllerParameters;
+   private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private StateEstimatorParameters stateEstimatorParameters;
    private WallTimeBasedROSClockCalculator rosClockCalculator;
    private ValkyrieRobotModelShapeCollisionSettings robotModelShapeCollisionSettings;
@@ -678,6 +680,14 @@ public class ValkyrieRobotModel implements DRCRobotModel
       if (walkingControllerParameters == null)
          walkingControllerParameters = new ValkyrieWalkingControllerParameters(getJointMap(), getRobotPhysicalProperties(), target);
       return walkingControllerParameters;
+   }
+
+   @Override
+   public PushRecoveryControllerParameters getPushRecoveryControllerParameters()
+   {
+      if (pushRecoveryControllerParameters == null)
+         pushRecoveryControllerParameters = new ValkyriePushRecoveryControllerParameters(getJointMap());
+      return pushRecoveryControllerParameters;
    }
 
    @Override
