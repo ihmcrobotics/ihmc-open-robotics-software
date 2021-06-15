@@ -76,7 +76,6 @@ public class HighLevelControlManagerFactory
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
-   private PushRecoveryControllerParameters pushRecoveryControllerParameters;
    private CoPTrajectoryParameters copTrajectoryParameters;
    private SplitFractionCalculatorParametersReadOnly splitFractionParameters = new DefaultSplitFractionCalculatorParameters();
    private MomentumOptimizationSettings momentumOptimizationSettings;
@@ -140,11 +139,6 @@ public class HighLevelControlManagerFactory
       userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
-   public void setPushRecoveryControllerParameters(PushRecoveryControllerParameters pushRecoveryControllerParameters)
-   {
-      this.pushRecoveryControllerParameters = pushRecoveryControllerParameters;
-   }
-
    public void setCopTrajectoryParameters(CoPTrajectoryParameters copTrajectoryParameters)
    {
       this.copTrajectoryParameters = copTrajectoryParameters;
@@ -163,8 +157,6 @@ public class HighLevelControlManagerFactory
       if (!hasHighLevelHumanoidControllerToolbox(BalanceManager.class))
          return null;
       if (!hasWalkingControllerParameters(BalanceManager.class))
-         return null;
-      if (!hasPushRecoveryControllerParameters(BalanceManager.class))
          return null;
       if (!hasCoPTrajectoryParameters(BalanceManager.class))
          return null;
@@ -343,14 +335,6 @@ public class HighLevelControlManagerFactory
       if (walkingControllerParameters != null)
          return true;
       missingObjectWarning(WalkingControllerParameters.class, managerClass);
-      return false;
-   }
-
-   private boolean hasPushRecoveryControllerParameters(Class<?> managerClass)
-   {
-      if (pushRecoveryControllerParameters != null)
-         return true;
-      missingObjectWarning(PushRecoveryControllerParameters.class, managerClass);
       return false;
    }
 
