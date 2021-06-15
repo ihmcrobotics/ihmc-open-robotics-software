@@ -175,7 +175,6 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
       managerFactory = new HighLevelControlManagerFactory(registry);
       managerFactory.setCopTrajectoryParameters(copTrajectoryParameters);
       managerFactory.setWalkingControllerParameters(walkingControllerParameters);
-      managerFactory.setPushRecoveryControllerParameters(pushRecoveryControllerParameters);
       managerFactory.setSplitFractionParameters(splitFractionCalculatorParameters);
 
       pushRecoveryManagerFactory = new PushRecoveryControlManagerFactory(managerFactory, registry);
