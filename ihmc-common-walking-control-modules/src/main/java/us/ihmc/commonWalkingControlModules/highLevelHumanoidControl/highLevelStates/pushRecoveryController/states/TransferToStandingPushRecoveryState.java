@@ -150,7 +150,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (pushRecoveryCalculator.isRobotFallingFromDoubleSupport() != null)
          return false;
 
-      // FIXME make this a check for the normalized elliptic error
       return balanceManager.getNormalizedEllipticICPError() < maxICPErrorToSwitchToStanding.getDoubleValue();
    }
 
