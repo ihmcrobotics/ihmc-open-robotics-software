@@ -147,6 +147,7 @@ public class MultiStepPushRecoveryCalculator
       squaringStepDirection.setToZero(soleZUpFrames.get(nextSupportSide));
       squaringStepDirection.add(0.0, nextSupportSide.negateIfLeftSide(preferredWidth));
       squaringStepDirection.changeFrame(worldFrame);
+      squareUpLocation.add(squaringStepDirection);
       squareUpPosition.set(squareUpLocation);
 
       squareUpStepToPack.setPose(squareUpPosition, stancePose.getOrientation());
