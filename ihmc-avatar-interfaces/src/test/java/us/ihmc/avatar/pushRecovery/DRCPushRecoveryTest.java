@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -57,6 +59,8 @@ public abstract class DRCPushRecoveryTest
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
 
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
+
+   private YoEnum<HighLevelControllerName> currentHighLevelState;
 
    @BeforeEach
    public void showMemoryUsageBeforeTest()
@@ -101,8 +105,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 600.0;
       double duration = 0.1;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
    }
 
    @Test
@@ -120,8 +123,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 550.0;
       double duration = 0.1;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
    }
 
    @Test
@@ -138,8 +140,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
       double magnitude = 450.0;
       double duration = 0.1;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
    }
 
    @Test
@@ -156,8 +157,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double magnitude = 450.0;
       double duration = 0.1;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
    }
 
    @Test
@@ -174,8 +174,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double magnitude = 350.0;
       double duration = 0.15;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
    }
 
    @Test
@@ -192,8 +191,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double magnitude = 350.0;
       double duration = 0.15;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
    }
 
    @Test
@@ -211,8 +209,7 @@ public abstract class DRCPushRecoveryTest
       forceDirection.normalize();
       double magnitude = 100.0;
       double duration = 1.0;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
 
    @Test
@@ -248,8 +245,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       double magnitude = 100.0;
       double duration = 1.0;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
 
    @Test
@@ -267,8 +263,7 @@ public abstract class DRCPushRecoveryTest
       forceDirection.normalize();
       double magnitude = 100.0;
       double duration = 1.0;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
 
    @Test
@@ -285,8 +280,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(-1.0, 0.0, 0.0);
       double magnitude = 100.0;
       double duration = 1.0;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(duration + 2.0));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, duration + 2.0);
    }
 
    @Test
@@ -314,8 +308,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
       double magnitude = 180.0;
       double duration = 0.2;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.5));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 1.5);
    }
 
    @Test
@@ -343,8 +336,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(1.0, 0.0, 0.0);
       double magnitude = 180.0;
       double duration = 0.4;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
    }
 
    @Test
@@ -372,8 +364,7 @@ public abstract class DRCPushRecoveryTest
       Vector3D forceDirection = new Vector3D(1.0, 1.0, 0.0);
       double magnitude = 180.0;
       double duration = 0.4;
-      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.5));
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
    }
 
    private void setupTest(String scriptName, boolean enablePushRecoveryControlModule, boolean enablePushRecoveryOnFailure) throws SimulationExceededMaximumTimeException
@@ -402,6 +393,7 @@ public abstract class DRCPushRecoveryTest
       YoBoolean enableOnFailure = (YoBoolean) scs.findVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
             "enablePushRecoveryOnFailure");
       enableOnFailure.set(enablePushRecoveryOnFailure);
+      currentHighLevelState = (YoEnum<HighLevelControllerName>) scs.findVariable("highLevelControllerNameCurrentState");
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -428,6 +420,14 @@ public abstract class DRCPushRecoveryTest
       Point3D cameraFix = new Point3D(0.0, 0.0, 0.89);
       Point3D cameraPosition = new Point3D(10.0, 2.0, 1.37);
       drcSimulationTestHelper.setupCameraForUnitTest(cameraFix, cameraPosition);
+   }
+
+   private void applyPushAndCheckFinalState(StateTransitionCondition pushCondition, double delay, Vector3D forceDirection,
+                                            double magnitude, double pushDuration, double simulationDuration) throws SimulationExceededMaximumTimeException
+   {
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, pushDuration);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration));
+      assertTrue(currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING));
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
