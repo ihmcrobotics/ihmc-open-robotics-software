@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCa
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculatorVisualizer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.DefaultPushRecoveryControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.*;
@@ -48,7 +49,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private static final double finalTransferDuration = 1.0;
    private static final double stepWidth = 0.15;
 
-   private static final double defaultSwingTime = 0.6;
+   private static final double defaultMinSwingTime = 0.4;
+   private static final double defaultMaxSwingTime = 0.8;
    private static final double defaultTransferTime = 0.05;
 
    private static final double simDt = 0.005;
@@ -88,7 +90,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final YoFrameVector3D desiredGroundReactionForce;
    private final YoFramePoint3D desiredECMPPosition;
 
-   private final YoDouble swingTime;
+   private final YoDouble minSwingTime;
+   private final YoDouble maxSwingTime;
    private final YoDouble transferTime;
 
    private final BagOfBalls dcmTrajectory;
@@ -123,7 +126,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       omega = new YoDouble("omega", registry);
       omega.set(Math.sqrt(gravity / nominalHeight));
 
-      swingTime = new YoDouble("swingTime", registry);
+      minSwingTime = new YoDouble("minSwingTime", registry);
+      maxSwingTime = new YoDouble("maxSwingTime", registry);
       transferTime = new YoDouble("transferTime", registry);
 
       dcmTrajectory = new BagOfBalls(100, 0.01, "dcmTrajectory", YoAppearance.Yellow(), YoGraphicPosition.GraphicType.SOLID_BALL, registry, graphicsListRegistry);
@@ -140,7 +144,8 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       defaultSupportPolygon.update();
       state = new PushRecoveryState(registry);
 
-      swingTime.set(defaultSwingTime);
+      minSwingTime.set(defaultMinSwingTime);
+      maxSwingTime.set(defaultMaxSwingTime);
       transferTime.set(defaultTransferTime);
 
       copPlanner = new PushRecoveryCoPTrajectoryGenerator(defaultSupportPolygon, registry);
@@ -224,6 +229,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       double kinematicsStepRange = 1.0;
       recoveryStepCalculator = new MultiStepPushRecoveryCalculator(() -> kinematicsStepRange,
                                                                    () -> footWidth,
+                                                                   new DefaultPushRecoveryControllerParameters(),
                                                                    new SideDependentList<>(leftStepFrame, rightStepFrame),
                                                                    defaultSupportPolygon);
       recoveryStepCalculatorVisualizer = new MultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry);
@@ -302,8 +308,9 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
       LogTools.info("Computing recovery steps");
 
       recoveryStepCalculator.computeRecoverySteps(RobotSide.LEFT,
-                                                  swingTime.getDoubleValue(),
                                                   transferTime.getDoubleValue(),
+                                                  minSwingTime.getDoubleValue(),
+                                                  maxSwingTime.getDoubleValue(),
                                                   icp,
                                                   omega.getDoubleValue(),
                                                   rightSupport);

@@ -8,7 +8,6 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -20,13 +19,11 @@ import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultiStepPushRecoveryControlModule
 {
-   private static final boolean ENABLE_SQUARE_UP = true;
+   private static final boolean ENABLE_SQUARE_UP = false;
 
    private final GlitchFilteredYoBoolean isRobotBackToSafeState;
    private final YoBoolean isICPOutside;
@@ -39,7 +36,8 @@ public class MultiStepPushRecoveryControlModule
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final  DoubleProvider pushRecoveryTransferDuration;
-   private final  DoubleProvider pushRecoverySwingDuration;
+   private final  DoubleProvider pushRecoveryMinSwingDuration;
+   private final  DoubleProvider pushRecoveryMaxSwingDuration;
 
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
    private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
@@ -70,7 +68,8 @@ public class MultiStepPushRecoveryControlModule
       swingSideForDoubleSupportRecovery.set(null);
 
       pushRecoveryTransferDuration = new DoubleParameter("pushRecoveryTransferDuration", registry, pushRecoveryControllerParameters.getRecoveryTransferDuration());
-      pushRecoverySwingDuration = new DoubleParameter("pushRecoverySwingDuration", registry, pushRecoveryControllerParameters.getRecoverySwingDuration());
+      pushRecoveryMinSwingDuration = new DoubleParameter("pushRecoveryMinSwingDuration", registry, pushRecoveryControllerParameters.getMinimumRecoverySwingDuration());
+      pushRecoveryMaxSwingDuration = new DoubleParameter("pushRecoveryMaxSwingDuration", registry, pushRecoveryControllerParameters.getMaximumRecoverySwingDuration());
 
 
 
@@ -85,6 +84,7 @@ public class MultiStepPushRecoveryControlModule
                                                                                     lengthBackLimit,
                                                                                     innerLimit,
                                                                                     outerLimit,
+                                                                                    pushRecoveryControllerParameters,
                                                                                     soleZUpFrames,
                                                                                     defaultSupportPolygon));
          pushRecoveryCalculators.get(robotSide).setMaxStepsToGenerateForRecovery(pushRecoveryControllerParameters.getMaxStepsToGenerateForRecovery());
@@ -97,8 +97,8 @@ public class MultiStepPushRecoveryControlModule
             pushRecoveryCalculators.get(robotSide).setMaxStepsToGenerateForRecovery(maxStepsToGenerateForRecovery.getValue());
       });
 
-      squareUpPreferredStanceWidth = new DoubleParameter("squareUpPreferredStanceWidth", registry, pushRecoveryControllerParameters.getPreferredFinalStepWidth());
-      squareUpStepTiming.setTimings(pushRecoveryControllerParameters.getRecoverySwingDuration(), pushRecoveryControllerParameters.getRecoveryTransferDuration());
+      squareUpPreferredStanceWidth = new DoubleParameter("squareUpPreferredStanceWidth", registry, pushRecoveryControllerParameters.getPreferredStepWidth());
+      squareUpStepTiming.setTimings(pushRecoveryControllerParameters.getMinimumRecoverySwingDuration(), pushRecoveryControllerParameters.getRecoveryTransferDuration());
 
       useRecoverySquareUpStep.set(ENABLE_SQUARE_UP);
       parentRegistry.addChild(registry);
@@ -242,8 +242,9 @@ public class MultiStepPushRecoveryControlModule
          MultiStepPushRecoveryCalculator pushRecoveryCalculator = pushRecoveryCalculators.get(swingSide);
 
          isStateCapturable |= pushRecoveryCalculator.computeRecoverySteps(swingSide,
-                                                                          pushRecoverySwingDuration.getValue(),
                                                                           pushRecoveryTransferDuration.getValue(),
+                                                                          pushRecoveryMinSwingDuration.getValue(),
+                                                                          pushRecoveryMaxSwingDuration.getValue(),
                                                                           currentICP,
                                                                           omega0,
                                                                           supportPolygonInWorld);

@@ -43,8 +43,9 @@ public class AchievableCaptureRegionCalculatorWithDelay
    private final PoseReferenceFrame supportFrame = new PoseReferenceFrame("supportFrame", worldFrame);
    private final ZUpFrame supportSoleZUp = new ZUpFrame(worldFrame, supportFrame, "supportZUpFrame");
 
-   public boolean calculateCaptureRegion(double swingTimeRemaining,
-                                         double nextTransferDuration,
+   public boolean calculateCaptureRegion(double nextTransferDuration,
+                                         double minSwingTimeRemaining,
+                                         double maxSwingTimeRemaining,
                                          FramePoint2DReadOnly currentICP,
                                          double omega0,
                                          FramePose3DReadOnly supportPose,
@@ -64,7 +65,8 @@ public class AchievableCaptureRegionCalculatorWithDelay
 
       predictedICPAtTouchdown.setToZero(supportSoleZUp);
 
-      swingTimeRemaining = MathTools.clamp(swingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+      minSwingTimeRemaining = MathTools.clamp(minSwingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
+      maxSwingTimeRemaining = MathTools.clamp(maxSwingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       unconstrainedCaptureRegion.clear(supportSoleZUp);
       unconstrainedCaptureRegionAtTouchdown.clear(supportSoleZUp);
@@ -84,7 +86,15 @@ public class AchievableCaptureRegionCalculatorWithDelay
          extremeCoP.setIncludingFrame(supportFootPolygon.getVertex(i));
          extremeCoP.changeFrame(supportSoleZUp);
 
-         CapturePointTools.computeDesiredCapturePointPosition(omega0, swingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
+         // compute min
+         CapturePointTools.computeDesiredCapturePointPosition(omega0, minSwingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
+         computeCoPLocationToCapture(predictedICPAtTouchdown, extremeCoP, omega0, nextTransferDuration, predictedICPAfterTransfer);
+
+         unconstrainedCaptureRegionAtTouchdown.addVertexMatchingFrame(predictedICPAtTouchdown, false);
+         unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAfterTransfer, false);
+
+         // compute max
+         CapturePointTools.computeDesiredCapturePointPosition(omega0, maxSwingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
          computeCoPLocationToCapture(predictedICPAtTouchdown, extremeCoP, omega0, nextTransferDuration, predictedICPAfterTransfer);
 
          unconstrainedCaptureRegionAtTouchdown.addVertexMatchingFrame(predictedICPAtTouchdown, false);
