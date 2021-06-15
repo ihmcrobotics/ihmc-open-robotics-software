@@ -38,9 +38,9 @@ public class ImGuiMapSenseConfigurationPanel
    private final ImInt minNumberOfNodesSlider = new ImInt(10);
    private final ImBoolean cutNarrowPassageChecked = new ImBoolean(true);
 
-   private final ImFloat mergeDistanceThresholdSlider = new ImFloat(0.02f);
+   private final ImFloat mergeDistanceThresholdSlider = new ImFloat(0.016f);
    private final ImFloat mergeAngularThresholdSlider = new ImFloat(0.82f);
-   private final ImFloat regionGrowthFactorSlider = new ImFloat(0.81f);
+   private final ImFloat regionGrowthFactorSlider = new ImFloat(0.01f);
    private final ImInt gaussianSizeSlider = new ImInt(3);
    private final ImInt gaussianSigmaSlider = new ImInt(20);
 
