@@ -225,7 +225,7 @@ public class MultiStepPushRecoveryCalculator
 
          FrameConvexPolygon2DBasics captureRegionAtTouchdown =  captureRegionsAtTouchdown.add();
 
-         captureRegionAtTouchdown.setMatchingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion(), false);
+         captureRegionAtTouchdown.setMatchingFrame(captureRegionCalculator.getCaptureRegion(), false);
          reachableRegions.add().set(reachableRegion);
 
          stancePosition.set(stancePose.getPosition());
