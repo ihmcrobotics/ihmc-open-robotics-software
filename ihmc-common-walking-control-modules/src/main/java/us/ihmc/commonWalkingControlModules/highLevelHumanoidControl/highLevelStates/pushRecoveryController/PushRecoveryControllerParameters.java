@@ -30,7 +30,7 @@ public interface  PushRecoveryControllerParameters
     */
    default double getRecoveryTransferDuration()
    {
-      return 0.05;
+      return 0.1;
    }
 
    /**
