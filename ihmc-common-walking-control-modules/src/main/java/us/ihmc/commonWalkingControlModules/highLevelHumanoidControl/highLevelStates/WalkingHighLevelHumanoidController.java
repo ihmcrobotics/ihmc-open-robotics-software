@@ -647,12 +647,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
          commandInputManager.clearAllCommands();
 
-         // FIXME remove this
-         balanceManager.setStartingStateForPushRecovery();
-
-         if (enablePushRecoveryOnFailure.getBooleanValue())
+         boolean isInSwing = stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_LEFT_SUPPORT || stateMachine.getCurrentStateKey() == WalkingStateEnum.WALKING_RIGHT_SUPPORT;
+         if (enablePushRecoveryOnFailure.getBooleanValue() && !isInSwing)
          {
-            stateMachine.getState(WalkingStateEnum.TO_STANDING).setPreviousWalkingStateEnum(null);
             commandInputManager.submitMessage(HumanoidMessageTools.createHighLevelStateMessage(HighLevelControllerName.PUSH_RECOVERY));
          }
          else if (!balanceManager.isPushRecoveryEnabled())
