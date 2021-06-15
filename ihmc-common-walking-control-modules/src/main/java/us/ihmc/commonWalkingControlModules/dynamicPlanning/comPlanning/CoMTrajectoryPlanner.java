@@ -238,30 +238,34 @@ public class CoMTrajectoryPlanner implements CoMTrajectoryProvider
       solveForCoefficientConstraintMatrix(contactSequence);
       trajectoryHandler.setCoefficientsFromSolution(omega.getValue(), contactSequence, xCoefficientVector, yCoefficientVector, zCoefficientVector);
 
-      int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
 
-      if (maintainInitialCoMVelocityContinuity.getBooleanValue() && comContinuityCalculator != null && contactSequence.size() > segmentId)
+      if (comContinuityCalculator != null)
       {
-         double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
-         compute(segmentId,
-                 time,
-                 comPositionToThrowAway,
-                 comVelocityToThrowAway,
-                 comAccelerationToThrowAway,
-                 dcmPositionToThrowAway,
-                 dcmVelocityToThrowAway,
-                 vrpStartPosition,
-                 ecmpPositionToThrowAway);
+         int segmentId = comContinuityCalculator.getDepthForCalculation() - 1;
 
-         comContinuityCalculator.setInitialCoMPosition(currentCoMPosition);
-         comContinuityCalculator.setInitialCoMVelocity(currentCoMVelocity);
-         comContinuityCalculator.setFinalICPToAchieve(dcmPositionToThrowAway);
-
-         if (comContinuityCalculator.solve(contactSequence))
+         if (maintainInitialCoMVelocityContinuity.getBooleanValue() && contactSequence.size() > segmentId)
          {
-            comContinuityCalculator.getXCoefficientOverrides(xCoefficientVector);
-            comContinuityCalculator.getYCoefficientOverrides(yCoefficientVector);
-            comContinuityCalculator.getZCoefficientOverrides(zCoefficientVector);
+            double time = contactSequence.get(segmentId).getTimeInterval().getDuration();
+            compute(segmentId,
+                    time,
+                    comPositionToThrowAway,
+                    comVelocityToThrowAway,
+                    comAccelerationToThrowAway,
+                    dcmPositionToThrowAway,
+                    dcmVelocityToThrowAway,
+                    vrpStartPosition,
+                    ecmpPositionToThrowAway);
+
+            comContinuityCalculator.setInitialCoMPosition(currentCoMPosition);
+            comContinuityCalculator.setInitialCoMVelocity(currentCoMVelocity);
+            comContinuityCalculator.setFinalICPToAchieve(dcmPositionToThrowAway);
+
+            if (comContinuityCalculator.solve(contactSequence))
+            {
+               comContinuityCalculator.getXCoefficientOverrides(xCoefficientVector);
+               comContinuityCalculator.getYCoefficientOverrides(yCoefficientVector);
+               comContinuityCalculator.getZCoefficientOverrides(zCoefficientVector);
+            }
          }
       }
 
