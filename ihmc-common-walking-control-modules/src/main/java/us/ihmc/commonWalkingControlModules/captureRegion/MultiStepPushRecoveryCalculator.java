@@ -120,7 +120,7 @@ public class MultiStepPushRecoveryCalculator
       return recoveryFootsteps.get(stepIdx);
    }
 
-   public Footstep computeSquareUpStep(double preferredWidth, RobotSide nextSupportSide)
+   public void computeSquareUpStep(double preferredWidth, RobotSide nextSupportSide, Footstep squareUpStepToPack)
    {
       recoveryStepLocations.clear();
       FramePoint2DBasics squareUpLocation = recoveryStepLocations.add();
@@ -131,11 +131,8 @@ public class MultiStepPushRecoveryCalculator
       squareUpLocation.changeFrame(worldFrame);
       squareUpPosition.set(squareUpLocation);
 
-      Footstep squareUpStep = recoveryFootsteps.add();
-      squareUpStep.setPose(squareUpPosition, stancePose.getOrientation());
-      squareUpStep.setRobotSide(nextSupportSide.getOppositeSide());
-
-      return squareUpStep;
+      squareUpStepToPack.setPose(squareUpPosition, stancePose.getOrientation());
+      squareUpStepToPack.setRobotSide(nextSupportSide.getOppositeSide());
    }
 
    public FootstepTiming getRecoveryStepTiming(int stepIdx)

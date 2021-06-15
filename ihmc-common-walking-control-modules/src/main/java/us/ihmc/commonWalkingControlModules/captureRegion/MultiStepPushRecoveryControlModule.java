@@ -26,7 +26,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultiStepPushRecoveryControlModule
 {
-   private static final boolean ENABLE_SQUARE_UP = false;
+   private static final boolean ENABLE_SQUARE_UP = true;
 
    private final GlitchFilteredYoBoolean isRobotBackToSafeState;
    private final YoBoolean isICPOutside;
@@ -176,7 +176,8 @@ public class MultiStepPushRecoveryControlModule
 
             recoveryTimings.clear();
             recoveryFootsteps.clear();
-            recoveryFootsteps.add().set(pushRecoveryCalculator.computeSquareUpStep(squareUpPreferredStanceWidth.getValue(), nextSupportSide));
+
+            pushRecoveryCalculator.computeSquareUpStep(squareUpPreferredStanceWidth.getValue(), nextSupportSide, recoveryFootsteps.add());
             recoveryTimings.add().set(squareUpStepTiming);
          }
          return;
