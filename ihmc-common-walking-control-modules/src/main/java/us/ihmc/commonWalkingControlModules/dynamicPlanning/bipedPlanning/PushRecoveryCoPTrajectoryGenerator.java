@@ -8,11 +8,10 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -132,45 +131,7 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       RobotSide swingSide = recoveryFootstep.getRobotSide();
       RobotSide stanceSide = swingSide.getOppositeSide();
 
-      FrameConvexPolygon2DBasics swingPolygon = movingPolygonsInSole.get(swingSide);
-      FrameConvexPolygon2DBasics stancePolygon = movingPolygonsInSole.get(stanceSide);
-
-      stanceFrame.setPoseAndUpdate(state.getFootPose(stanceSide));
-      stepFrame.setPoseAndUpdate(recoveryFootstep.getFootstepPose());
-
-      extractSupportPolygon(recoveryFootstep, stepFrame, nextPolygon, defaultSupportPolygon);
-      swingPolygon.setIncludingFrame(nextPolygon);
-      swingPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
-
-      stancePolygon.setIncludingFrame(state.getFootPolygonInSole(stanceSide));
-      stancePolygon.changeFrameAndProjectToXYPlane(stanceFrame);
-
-      stanceCMP.setToZero(stanceFrame);
-      intersectionLine.setIncludingFrame(swingPolygon.getCentroid(), state.getIcpAtStartOfState());
-      intersectionLine.changeFrameAndProjectToXYPlane(stanceFrame);
-
-      int intersections = stancePolygon.intersectionWithRay(intersectionLine, firstIntersection, secondIntersection);
-
-      if (intersections == 0)
-      {
-         stancePolygon.getClosestVertex(intersectionLine, stanceCMP);
-      }
-      else if (intersections == 1)
-      {
-         stanceCMP.setIncludingFrame(firstIntersection);
-      }
-      else
-      {
-         startICP.setIncludingFrame(state.getIcpAtStartOfState());
-         startICP.changeFrameAndProjectToXYPlane(stanceFrame);
-         if (firstIntersection.distanceSquared(startICP) < secondIntersection.distanceSquared(startICP))
-            stanceCMP.set(firstIntersection);
-         else
-            stanceCMP.set(secondIntersection);
-      }
-
-      nextCMP.setIncludingFrame(stanceCMP, 0.0);
-      nextCMP.changeFrame(ReferenceFrame.getWorldFrame());
+      computeCMPForFirstSwing(recoveryFootstep, state.getFootPose(stanceSide), nextCMP);
 
       double currentTime = 0.0;
 
@@ -258,5 +219,51 @@ public class PushRecoveryCoPTrajectoryGenerator extends YoSaveableModule<PushRec
       {
          footSupportPolygonToPack.setIncludingFrame(stepFrame, defaultSupportPolygon);
       }
+   }
+
+   private void computeCMPForFirstSwing(DynamicPlanningFootstep recoveryFootstep, FramePose3DReadOnly stanceFootPose, FramePoint3DBasics cmpToPack)
+   {
+      RobotSide swingSide = recoveryFootstep.getRobotSide();
+      RobotSide stanceSide = swingSide.getOppositeSide();
+
+      FrameConvexPolygon2DBasics swingPolygon = movingPolygonsInSole.get(swingSide);
+      FrameConvexPolygon2DBasics stancePolygon = movingPolygonsInSole.get(stanceSide);
+
+      stanceFrame.setPoseAndUpdate(stanceFootPose);
+      stepFrame.setPoseAndUpdate(recoveryFootstep.getFootstepPose());
+
+      extractSupportPolygon(recoveryFootstep, stepFrame, nextPolygon, defaultSupportPolygon);
+      swingPolygon.setIncludingFrame(nextPolygon);
+      swingPolygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
+
+      stancePolygon.setIncludingFrame(state.getFootPolygonInSole(stanceSide));
+      stancePolygon.changeFrameAndProjectToXYPlane(stanceFrame);
+
+      stanceCMP.setToZero(stanceFrame);
+      intersectionLine.setIncludingFrame(swingPolygon.getCentroid(), state.getIcpAtStartOfState());
+      intersectionLine.changeFrameAndProjectToXYPlane(stanceFrame);
+
+      int intersections = stancePolygon.intersectionWithRay(intersectionLine, firstIntersection, secondIntersection);
+
+      if (intersections == 0)
+      {
+         stancePolygon.getClosestVertex(intersectionLine, stanceCMP);
+      }
+      else if (intersections == 1)
+      {
+         stanceCMP.setIncludingFrame(firstIntersection);
+      }
+      else
+      {
+         startICP.setIncludingFrame(state.getIcpAtStartOfState());
+         startICP.changeFrameAndProjectToXYPlane(stanceFrame);
+         if (firstIntersection.distanceSquared(startICP) < secondIntersection.distanceSquared(startICP))
+            stanceCMP.set(firstIntersection);
+         else
+            stanceCMP.set(secondIntersection);
+      }
+
+      cmpToPack.setIncludingFrame(stanceCMP, 0.0);
+      cmpToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 }
