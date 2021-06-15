@@ -83,6 +83,11 @@ public interface  PushRecoveryControllerParameters
 
    default double getPreferredStepWidth()
    {
-      return 0.4;
+      return 0.3;
+   }
+
+   default double getMaxAllowedFinalStepXOffset()
+   {
+      return 0.1;
    }
 }
