@@ -25,7 +25,7 @@ public class AtlasPushRecoveryControllerParameters implements PushRecoveryContro
    public double getMinimumRecoverySwingDuration()
    {
       if (target == RobotTarget.SCS)
-         return 0.6;
+         return 0.3;
       else
          return 0.6;
    }

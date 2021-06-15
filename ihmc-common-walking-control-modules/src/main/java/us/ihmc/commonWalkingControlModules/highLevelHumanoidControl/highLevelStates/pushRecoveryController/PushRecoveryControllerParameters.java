@@ -42,6 +42,15 @@ public interface  PushRecoveryControllerParameters
       return 0.3;
    }
 
+   /**
+    * This is the minimum swing time that the controller will allow when adjusting transfer times to achieve certain step
+    * times in footstep plans.
+    */
+   default double getPreferredRecoverySwingDuration()
+   {
+      return 0.6;
+   }
+
    default double getMaximumRecoverySwingDuration()
    {
       return 1.0;
