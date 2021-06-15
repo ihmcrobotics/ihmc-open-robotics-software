@@ -78,6 +78,7 @@ public class PushRecoveryControlManagerFactory
          return null;
 
       balanceManager = new PushRecoveryBalanceManager(controllerToolbox,
+                                          pushRecoveryControllerParameters,
                                           copTrajectoryParameters,
                                           registry);
       return balanceManager;

@@ -76,6 +76,13 @@ public class PushRecoveryBalanceManager
    private final YoFramePoint3D yoFinalDesiredCoM = new YoFramePoint3D("finalDesiredCoM", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMVelocity = new YoFrameVector3D("finalDesiredCoMVelocity", worldFrame, registry);
    private final YoFrameVector3D yoFinalDesiredCoMAcceleration = new YoFrameVector3D("finalDesiredCoMAcceleration", worldFrame, registry);
+   private final FrameVector2D icpError2d = new FrameVector2D();
+
+   private final YoDouble normalizedICPError = new YoDouble("normalizedICPError", registry);
+   private final DoubleProvider maxICPErrorBeforeSingleSupportForwardX;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportBackwardX;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportInnerY;
+   private final DoubleProvider maxICPErrorBeforeSingleSupportOuterY;
 
    /** CMP position according to the ICP planner */
    private final YoFramePoint3D yoPerfectCMP = new YoFramePoint3D("perfectCMP", worldFrame, registry);
@@ -137,7 +144,7 @@ public class PushRecoveryBalanceManager
    private final PushRecoveryState copTrajectoryState;
    private final PushRecoveryCoPTrajectoryGenerator copTrajectory;
 
-   private final CoMTrajectoryPlanner comTrajectoryPlanner;    //TODO delete; moved to PushRecoveryControllerState
+   private final CoMTrajectoryPlanner comTrajectoryPlanner;
    private final int maxNumberOfStepsToConsider;
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
    private final BooleanProvider maintainInitialCoMVelocityContinuityTransfer;
@@ -145,6 +152,7 @@ public class PushRecoveryBalanceManager
    private PushRecoveryStateEnum initialPushRecoveryState = null;
 
    public PushRecoveryBalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                     PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                      CoPTrajectoryParameters copTrajectoryParameters,
                                      YoRegistry parentRegistry)
    {
@@ -162,6 +170,11 @@ public class PushRecoveryBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
       maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
+
+      maxICPErrorBeforeSingleSupportForwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportForwardX", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportForwardX());
+      maxICPErrorBeforeSingleSupportBackwardX = new DoubleParameter("maxICPErrorBeforeSingleSupportBackwardX", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportBackwardX());
+      maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
+      maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
 
       maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, true);
       maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, true);
@@ -536,6 +549,22 @@ public class PushRecoveryBalanceManager
    public double getICPErrorMagnitude()
    {
       return controllerToolbox.getCapturePoint().distanceXY(yoDesiredCapturePoint);
+   }
+
+   public void computeNormalizedEllipticICPError(RobotSide transferToSide)
+   {
+      getICPError(icpError2d);
+      ReferenceFrame leadingSoleZUpFrame = controllerToolbox.getReferenceFrames().getSoleZUpFrame(transferToSide);
+      icpError2d.changeFrame(leadingSoleZUpFrame);
+      boolean isICPErrorToTheInside = transferToSide == RobotSide.RIGHT ? icpError2d.getY() > 0.0 : icpError2d.getY() < 0.0;
+      double maxICPErrorBeforeSingleSupportX = icpError2d.getX() > 0.0 ? maxICPErrorBeforeSingleSupportForwardX.getValue() : maxICPErrorBeforeSingleSupportBackwardX.getValue();
+      double maxICPErrorBeforeSingleSupportY = isICPErrorToTheInside ? maxICPErrorBeforeSingleSupportInnerY.getValue() : maxICPErrorBeforeSingleSupportOuterY.getValue();
+      normalizedICPError.set(MathTools.square(icpError2d.getX() / maxICPErrorBeforeSingleSupportX) + MathTools.square(icpError2d.getY() / maxICPErrorBeforeSingleSupportY));
+   }
+
+   public double getNormalizedEllipticICPError()
+   {
+      return normalizedICPError.getValue();
    }
 
    public void getICPError(FrameVector2D icpErrorToPack)
