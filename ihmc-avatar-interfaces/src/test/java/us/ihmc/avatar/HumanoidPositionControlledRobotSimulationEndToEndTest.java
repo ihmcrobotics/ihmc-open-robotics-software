@@ -261,6 +261,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
    public void runProcessedScriptTest(TestInfo testInfo,
                                       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> initialSetup,
                                       CommonAvatarEnvironmentInterface environment,
+                                      double durationPerKeyframe,
                                       InputStream... scriptInputStreams)
          throws Exception
    {
@@ -274,6 +275,7 @@ public abstract class HumanoidPositionControlledRobotSimulationEndToEndTest impl
          assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
          MultiContactScriptPostProcessor scriptPostProcessor = new MultiContactScriptPostProcessor(getRobotModel());
+         scriptPostProcessor.setDurationPerKeyframe(durationPerKeyframe);
          WholeBodyJointspaceTrajectoryMessage message = scriptPostProcessor.process1(scriptReader.getAllItems());
 
          drcSimulationTestHelper.publishToController(message);
