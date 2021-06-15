@@ -72,6 +72,9 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       pushRecoveryCalculator.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
 
+      RobotSide supportingSide = getSideCarryingMostWeight();
+      balanceManager.computeNormalizedEllipticICPError(supportingSide);
+
       // Always do this so that when a foot slips or is loaded in the air, the height gets adjusted.
       comHeightManager.setSupportLeg(RobotSide.LEFT);
    }
@@ -148,7 +151,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
          return false;
 
       // FIXME make this a check for the normalized elliptic error
-      return balanceManager.getICPErrorMagnitude() < maxICPErrorToSwitchToStanding.getDoubleValue();
+      return balanceManager.getNormalizedEllipticICPError() < maxICPErrorToSwitchToStanding.getDoubleValue();
    }
 
    @Override

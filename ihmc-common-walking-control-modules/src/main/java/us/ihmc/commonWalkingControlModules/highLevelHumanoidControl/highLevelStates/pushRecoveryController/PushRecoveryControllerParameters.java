@@ -81,6 +81,26 @@ public interface  PushRecoveryControllerParameters
       return getMaxStepLength();
    }
 
+   default double getMaxICPErrorBeforeSingleSupportForwardX()
+   {
+      return 0.035;
+   }
+
+   default double getMaxICPErrorBeforeSingleSupportBackwardX()
+   {
+      return 0.035;
+   }
+
+   default double getMaxICPErrorBeforeSingleSupportInnerY()
+   {
+      return 0.015;
+   }
+
+   default double getMaxICPErrorBeforeSingleSupportOuterY()
+   {
+      return 0.015;
+   }
+
    default double getPreferredStepWidth()
    {
       return 0.3;
