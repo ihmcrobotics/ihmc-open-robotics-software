@@ -162,10 +162,13 @@ public class PushRecoveryBalanceManager
       soleFrames = controllerToolbox.getReferenceFrames().getSoleFrames();
       registry.addChild(copTrajectoryParameters.getRegistry());
       maxNumberOfStepsToConsider = copTrajectoryParameters.getMaxNumberOfStepsToConsider();
+
       maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, true);
       maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, true);
+
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
+
       copTrajectoryState = new PushRecoveryState(registry, maxNumberOfStepsToConsider);
       copTrajectory = new PushRecoveryCoPTrajectoryGenerator(defaultSupportPolygon, registry);
       copTrajectory.registerState(copTrajectoryState);
@@ -216,13 +219,6 @@ public class PushRecoveryBalanceManager
       footsteps.add(footstep);
       footstepTimings.add(timing);
    }
-
-//   public boolean checkAndUpdateFootstep(Footstep footstep)
-//   {
-//      return pushRecoveryControlModule.checkAndUpdateFootstep(getTimeRemainingInCurrentState(), footstep);
-//   }
-
-
 
    public void setStartingStateForPushRecovery()
    {
@@ -384,16 +380,6 @@ public class PushRecoveryBalanceManager
       icpVelocityReductionFactor.set(Math.max(0.0, scaleUpdated));
    }
 
-   public void disablePushRecovery()
-   {
-//      pushRecoveryControlModule.setIsEnabled(false);
-   }
-
-   public void enablePushRecovery()
-   {
-//      pushRecoveryControlModule.setIsEnabled(true);
-   }
-
    public int getMaxNumberOfStepsToConsider()
    {
       return maxNumberOfStepsToConsider;
@@ -461,8 +447,9 @@ public class PushRecoveryBalanceManager
       yoFinalDesiredCoMVelocity.setToNaN();
       yoFinalDesiredCoMAcceleration.setToNaN();
       yoDesiredCapturePoint.set(controllerToolbox.getCapturePoint());
+
       yoDesiredCoMPosition.setFromReferenceFrame(controllerToolbox.getCenterOfMassFrame());
-      yoDesiredCoMVelocity.setToZero();
+      yoDesiredCoMVelocity.set(controllerToolbox.getCenterOfMassJacobian().getCenterOfMassVelocity());
 
       copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
@@ -479,11 +466,6 @@ public class PushRecoveryBalanceManager
 
       initializeOnStateChange = true;
       comTrajectoryPlanner.reset();
-   }
-
-   public void prepareForDoubleSupportPushRecovery()
-   {
-//      pushRecoveryControlModule.initializeParametersForDoubleSupportPushRecovery();
    }
 
    public void initializeICPPlanForSingleSupport()
@@ -563,16 +545,9 @@ public class PushRecoveryBalanceManager
       icpErrorToPack.sub(controllerToolbox.getCapturePoint().getX(), controllerToolbox.getCapturePoint().getY());
    }
 
-
    public boolean isICPPlanDone()
    {
       return icpPlannerDone.getValue();
-   }
-
-   public boolean isRecoveryImpossible()
-   {
-//      return pushRecoveryControlModule.isCaptureRegionEmpty();
-      return false;
    }
 
    public void setFinalTransferTime(double finalTransferDuration)
