@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.swing;
 import gnu.trove.list.array.TDoubleArrayList;
 import org.apache.commons.lang3.mutable.MutableInt;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -454,13 +455,15 @@ public class CollisionFreeSwingCalculator
    private double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
    {
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
-
       double maxStepZ = footstepPlannerParameters.getMaxStepZ();
-      double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
 
-      double stepDistance = startPosition.distance(endPosition);
-      double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);
-      return swingPlannerParameters.getMinimumSwingTime() + alpha * (swingPlannerParameters.getMaximumSwingTime() - swingPlannerParameters.getMinimumSwingTime());
+      return AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
+                                                         footstepPlannerParameters.getMaximumStepReach(),
+                                                         maxStepZ,
+                                                         swingPlannerParameters.getMinimumSwingTime(),
+                                                         swingPlannerParameters.getMaximumSwingTime(),
+                                                         startPosition,
+                                                         endPosition);
    }
 
    private FootstepVisualizer getNextFootstepVisualizer(RobotSide robotSide)
