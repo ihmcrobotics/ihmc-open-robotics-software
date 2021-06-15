@@ -21,6 +21,7 @@ public class MultiStepPushRecoveryCalculatorVisualizer
    private final List<YoFramePoint2D> recoveryStepLocations = new ArrayList<>();
 
    private final List<YoFrameConvexPolygon2D> yoCaptureRegionsAtTouchdown = new ArrayList<>();
+   private final List<YoFrameConvexPolygon2D> yoIntersectingRegions = new ArrayList<>();
    private final List<YoFrameConvexPolygon2D> yoReachableRegions = new ArrayList<>();
 
    private final int maxRegionDepth;
@@ -59,6 +60,13 @@ public class MultiStepPushRecoveryCalculatorVisualizer
 
             YoArtifactPolygon reachablePolygonArtifact = new YoArtifactPolygon(reachableName + suffix, yoReachableRegionPolygon, Color.BLUE, false);
 
+            String intersectingName = "intersectingRegion" + i;
+
+            YoFrameConvexPolygon2D yoIntersectingRegion = new YoFrameConvexPolygon2D(intersectingName, suffix, worldFrame, 30, registry);
+            yoIntersectingRegions.add(yoIntersectingRegion);
+
+            YoArtifactPolygon intersectingPolygonArtifact = new YoArtifactPolygon(intersectingName + suffix, yoIntersectingRegion, Color.YELLOW, false);
+
             YoGraphicPosition touchdownICPViz = new YoGraphicPosition("capturePointTouchdown" + i + suffix,
                                                                       capturePointsAtTouchdown.get(i),
                                                                       0.01,
@@ -72,6 +80,7 @@ public class MultiStepPushRecoveryCalculatorVisualizer
 
             graphicsListRegistry.registerArtifact(listName, capturePolygonAtTouchdownArtifact);
             graphicsListRegistry.registerArtifact(listName, reachablePolygonArtifact);
+            graphicsListRegistry.registerArtifact(listName, intersectingPolygonArtifact);
             graphicsListRegistry.registerArtifact(listName, touchdownICPViz.createArtifact());
             graphicsListRegistry.registerArtifact(listName, footstepViz.createArtifact());
          }
@@ -91,6 +100,7 @@ public class MultiStepPushRecoveryCalculatorVisualizer
 
          yoCaptureRegionsAtTouchdown.get(i).setToNaN();
          yoReachableRegions.get(i).setToNaN();
+         yoIntersectingRegions.get(i).setToNaN();
       }
    }
 
@@ -104,6 +114,7 @@ public class MultiStepPushRecoveryCalculatorVisualizer
          recoveryStepLocations.get(i).set(pushRecoveryCalculator.getRecoveryStepLocation(i));
          yoReachableRegions.get(i).set(pushRecoveryCalculator.getReachableRegion(i));
          yoCaptureRegionsAtTouchdown.get(i).set(pushRecoveryCalculator.getCaptureRegionAtTouchdown(i));
+         yoIntersectingRegions.get(i).set(pushRecoveryCalculator.getIntersectingRegion(i));
       }
    }
 }
