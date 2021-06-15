@@ -25,7 +25,7 @@ public class AtlasPushRecoveryControllerParameters implements PushRecoveryContro
    public double getMinimumRecoverySwingDuration()
    {
       if (target == RobotTarget.SCS)
-         return 0.3;
+         return 0.6;
       else
          return 0.6;
    }
@@ -51,7 +51,7 @@ public class AtlasPushRecoveryControllerParameters implements PushRecoveryContro
    @Override
    public double getMinStepWidth()
    {
-      return 0.15;
+      return 0.075;
    }
 
    @Override

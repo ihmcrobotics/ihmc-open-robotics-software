@@ -34,6 +34,7 @@ public class MultiStepPushRecoveryCalculator
 
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> captureRegionsAtTouchdown = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final RecyclingArrayList<FrameConvexPolygon2DBasics> intersectingRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
    private final FramePose3D stancePose = new FramePose3D();
@@ -48,7 +49,6 @@ public class MultiStepPushRecoveryCalculator
    private final ConvexPolygon2DReadOnly defaultFootPolygon;
    private final FramePoint2D icpAtStart = new FramePoint2D();
    private final FrameConvexPolygon2DBasics stancePolygon = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2DBasics intersectingRegion = new FrameConvexPolygon2D();
 
    private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
    private final RecyclingArrayList<FootstepTiming> recoveryFootstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
@@ -177,6 +177,7 @@ public class MultiStepPushRecoveryCalculator
       capturePointsAtTouchdown.clear();
       reachableRegions.clear();
       captureRegionsAtTouchdown.clear();
+      intersectingRegions.clear();
 
       for (; depthIdx < depth; depthIdx++)
       {
@@ -188,16 +189,16 @@ public class MultiStepPushRecoveryCalculator
             break;
          }
 
-         captureRegion.setIncludingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion());
-         captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+         FrameConvexPolygon2DBasics captureRegionAtTouchdown =  captureRegionsAtTouchdown.add();
 
-         captureRegionsAtTouchdown.add().setMatchingFrame(captureRegionCalculator.getUnconstrainedCaptureRegionAtTouchdown(), false);
+         captureRegionAtTouchdown.setMatchingFrame(captureRegionCalculator.getUnconstrainedCaptureRegion(), false);
          reachableRegions.add().set(reachableRegion);
 
          stancePosition.set(stancePose.getPosition());
          numberOfRecoverySteps++;
 
-         polygonTools.computeIntersectionOfPolygons(captureRegion, reachableRegion, intersectingRegion);
+         FrameConvexPolygon2DBasics intersectingRegion = intersectingRegions.add();
+         polygonTools.computeIntersectionOfPolygons(captureRegionAtTouchdown, reachableRegion, intersectingRegion);
 
          FramePoint2DBasics recoveryStepLocation = recoveryStepLocations.add();
          FramePoint2DBasics capturePointAtTouchdown = capturePointsAtTouchdown.add();
@@ -276,4 +277,8 @@ public class MultiStepPushRecoveryCalculator
       return captureRegionsAtTouchdown.get(i);
    }
 
+   public FrameConvexPolygon2DReadOnly getIntersectingRegion(int i)
+   {
+      return intersectingRegions.get(i);
+   }
 }

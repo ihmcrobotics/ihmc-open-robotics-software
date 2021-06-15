@@ -27,6 +27,7 @@ public class AchievableCaptureRegionCalculatorWithDelay
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private static final boolean includeSlowerTimeInRegion = false;
 
    // variables for the capture region calculation
    private final FrameConvexPolygon2D supportFootPolygon = new FrameConvexPolygon2D();
@@ -94,11 +95,14 @@ public class AchievableCaptureRegionCalculatorWithDelay
          unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAfterTransfer, false);
 
          // compute max
-         CapturePointTools.computeDesiredCapturePointPosition(omega0, maxSwingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
-         computeCoPLocationToCapture(predictedICPAtTouchdown, extremeCoP, omega0, nextTransferDuration, predictedICPAfterTransfer);
+         if (includeSlowerTimeInRegion)
+         {
+            CapturePointTools.computeDesiredCapturePointPosition(omega0, maxSwingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
+            computeCoPLocationToCapture(predictedICPAtTouchdown, extremeCoP, omega0, nextTransferDuration, predictedICPAfterTransfer);
 
-         unconstrainedCaptureRegionAtTouchdown.addVertexMatchingFrame(predictedICPAtTouchdown, false);
-         unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAfterTransfer, false);
+            unconstrainedCaptureRegionAtTouchdown.addVertexMatchingFrame(predictedICPAtTouchdown, false);
+            unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAfterTransfer, false);
+         }
       }
 
       unconstrainedCaptureRegionAtTouchdown.update();
