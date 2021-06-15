@@ -4,8 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -34,6 +33,7 @@ public class MultiStepPushRecoveryControlModule
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final BipedSupportPolygons bipedSupportPolygons;
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
    private final  DoubleProvider pushRecoveryTransferDuration;
    private final  DoubleProvider pushRecoveryMinSwingDuration;
@@ -46,7 +46,9 @@ public class MultiStepPushRecoveryControlModule
 
    private final YoBoolean isRecoveryImpossible = new YoBoolean("isRecoveryImpossible", registry);
 
+   private final FramePoint2D leftToRightFootDistance = new FramePoint2D();
    private final DoubleProvider squareUpPreferredStanceWidth;
+   private final DoubleProvider maxAllowedFinalStepXOffset;
    private final FootstepTiming squareUpStepTiming = new FootstepTiming();
    private final YoBoolean useRecoverySquareUpStep = new YoBoolean("useRecoverySquareUpStep", registry);
 
@@ -60,6 +62,7 @@ public class MultiStepPushRecoveryControlModule
    {
       this.contactStates = contactStates;
       this.bipedSupportPolygons = bipedSupportPolygons;
+      this.soleZUpFrames = soleZUpFrames;
 
       isICPOutside = new YoBoolean("isICPOutside", registry);
       isRobotBackToSafeState = new GlitchFilteredYoBoolean("isRobotBackToSafeState", registry, 100);
@@ -99,6 +102,7 @@ public class MultiStepPushRecoveryControlModule
 
       squareUpPreferredStanceWidth = new DoubleParameter("squareUpPreferredStanceWidth", registry, pushRecoveryControllerParameters.getPreferredStepWidth());
       squareUpStepTiming.setTimings(pushRecoveryControllerParameters.getMinimumRecoverySwingDuration(), pushRecoveryControllerParameters.getRecoveryTransferDuration());
+      maxAllowedFinalStepXOffset = new DoubleParameter("maxAllowedFinalStepXOffset", registry, pushRecoveryControllerParameters.getMaxAllowedFinalStepXOffset());
 
       useRecoverySquareUpStep.set(ENABLE_SQUARE_UP);
       parentRegistry.addChild(registry);
@@ -210,14 +214,27 @@ public class MultiStepPushRecoveryControlModule
    private RobotSide computeSideOnCapturePoint(FramePoint2DReadOnly capturePoint2d)
    {
       // first check if feet are already close to the preferred standing pose
-//      if(isRobotStanceCloseToPreferred())
-//         return null;
+      if(isRobotStanceCloseToPreferred())
+         return null;
 
       if(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).isPointInside(capturePoint2d))
          return RobotSide.LEFT;
       else if(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).isPointInside(capturePoint2d))
          return RobotSide.RIGHT;
       return null;
+   }
+
+   private boolean isRobotStanceCloseToPreferred()
+   {
+      FramePoint2DReadOnly leftFootCentroid = bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid();
+      FramePoint2DReadOnly rightFootCentroid = bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).getCentroid();
+
+      leftToRightFootDistance.setToZero();
+      double xDistance = leftFootCentroid.getX() - rightFootCentroid.getX();
+      double yDistance = leftFootCentroid.getY() - rightFootCentroid.getY();
+      leftToRightFootDistance.set(xDistance, yDistance);
+      leftToRightFootDistance.changeFrame(soleZUpFrames.get(RobotSide.RIGHT));
+      return Math.abs(leftToRightFootDistance.getX()) < maxAllowedFinalStepXOffset.getValue();
    }
 
    public Footstep getFootstepForRecoveringFromDisturbance(double swingTimeRemaining)
