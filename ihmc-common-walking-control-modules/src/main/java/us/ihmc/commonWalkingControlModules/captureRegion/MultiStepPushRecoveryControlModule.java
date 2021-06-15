@@ -235,7 +235,6 @@ public class MultiStepPushRecoveryControlModule
          if (!contactStates.get(swingSide.getOppositeSide()).inContact())
             continue;
 
-         bipedSupportPolygons.getFootPolygonInSoleFrame(swingSide.getOppositeSide());
          supportPolygonInWorld.setIncludingFrame(bipedSupportPolygons.getFootPolygonInSoleFrame(swingSide.getOppositeSide()));
          supportPolygonInWorld.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 

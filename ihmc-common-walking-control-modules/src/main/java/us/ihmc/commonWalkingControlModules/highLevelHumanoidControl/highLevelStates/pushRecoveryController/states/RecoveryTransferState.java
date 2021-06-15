@@ -96,7 +96,6 @@ public class RecoveryTransferState extends PushRecoveryState
 
       double finalTransferTime = pushRecoveryParameters.getFinalTransferDurationForRecovery();
       walkingMessageHandler.requestPlanarRegions();
-      balanceManager.setFinalTransferTime(finalTransferTime);
 
       currentTransferDuration.set(stepTiming.getTransferTime());
       balanceManager.setFinalTransferTime(finalTransferTime);
