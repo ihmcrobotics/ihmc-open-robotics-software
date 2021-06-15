@@ -40,6 +40,7 @@ public class MultiStepPushRecoveryCalculator
    private final FramePoint2D stancePosition = new FramePoint2D();
 
    private final FramePoint3D stepPosition = new FramePoint3D();
+   private final FramePoint3D squareUpPosition = new FramePoint3D();
 
    private final ConvexPolygon2DReadOnly defaultFootPolygon;
    private final FramePoint2D icpAtStart = new FramePoint2D();
@@ -117,6 +118,24 @@ public class MultiStepPushRecoveryCalculator
    public Footstep getRecoveryStep(int stepIdx)
    {
       return recoveryFootsteps.get(stepIdx);
+   }
+
+   public Footstep computeSquareUpStep(double preferredWidth, RobotSide nextSupportSide)
+   {
+      recoveryStepLocations.clear();
+      FramePoint2DBasics squareUpLocation = recoveryStepLocations.add();
+
+      // set square position at preferred width distance from next support foot
+      squareUpLocation.setToZero(soleZUpFrames.get(nextSupportSide));
+      squareUpLocation.setY(nextSupportSide.negateIfLeftSide(preferredWidth));
+      squareUpLocation.changeFrame(worldFrame);
+      squareUpPosition.set(squareUpLocation);
+
+      Footstep squareUpStep = recoveryFootsteps.add();
+      squareUpStep.setPose(squareUpPosition, stancePose.getOrientation());
+      squareUpStep.setRobotSide(nextSupportSide.getOppositeSide());
+
+      return squareUpStep;
    }
 
    public FootstepTiming getRecoveryStepTiming(int stepIdx)

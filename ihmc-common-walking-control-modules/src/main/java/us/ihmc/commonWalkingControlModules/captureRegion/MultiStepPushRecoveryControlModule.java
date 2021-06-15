@@ -26,6 +26,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class MultiStepPushRecoveryControlModule
 {
+   private static final boolean ENABLE_SQUARE_UP = false;
+
    private final GlitchFilteredYoBoolean isRobotBackToSafeState;
    private final YoBoolean isICPOutside;
    private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
@@ -45,6 +47,10 @@ public class MultiStepPushRecoveryControlModule
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isRecoveryImpossible = new YoBoolean("isRecoveryImpossible", registry);
+
+   private final DoubleProvider squareUpPreferredStanceWidth;
+   private final FootstepTiming squareUpStepTiming = new FootstepTiming();
+   private final YoBoolean useRecoverySquareUpStep = new YoBoolean("useRecoverySquareUpStep", registry);
 
    public MultiStepPushRecoveryControlModule(SideDependentList<YoPlaneContactState> contactStates,
                                              BipedSupportPolygons bipedSupportPolygons,
@@ -91,6 +97,10 @@ public class MultiStepPushRecoveryControlModule
             pushRecoveryCalculators.get(robotSide).setMaxStepsToGenerateForRecovery(maxStepsToGenerateForRecovery.getValue());
       });
 
+      squareUpPreferredStanceWidth = new DoubleParameter("squareUpPreferredStanceWidth", registry, pushRecoveryControllerParameters.getPreferredFinalStepWidth());
+      squareUpStepTiming.setTimings(pushRecoveryControllerParameters.getRecoverySwingDuration(), pushRecoveryControllerParameters.getRecoveryTransferDuration());
+
+      useRecoverySquareUpStep.set(ENABLE_SQUARE_UP);
       parentRegistry.addChild(registry);
    }
 
@@ -154,6 +164,21 @@ public class MultiStepPushRecoveryControlModule
       {
          isRobotBackToSafeState.update(true);
          isRecoveryImpossible.set(false);
+         if(useRecoverySquareUpStep.getBooleanValue())
+         {
+            RobotSide nextSupportSide = computeSideOnCapturePoint(capturePoint2d);
+            if(nextSupportSide == null)
+               return;
+            swingSideForDoubleSupportRecovery.set(nextSupportSide.getOppositeSide());
+
+            MultiStepPushRecoveryCalculator pushRecoveryCalculator = pushRecoveryCalculators.get(nextSupportSide.getOppositeSide());
+//            pushRecoveryCalculatorVisualizer.visualize(pushRecoveryCalculator);
+
+            recoveryTimings.clear();
+            recoveryFootsteps.clear();
+            recoveryFootsteps.add().set(pushRecoveryCalculator.computeSquareUpStep(squareUpPreferredStanceWidth.getValue(), nextSupportSide));
+            recoveryTimings.add().set(squareUpStepTiming);
+         }
          return;
       }
 
@@ -179,6 +204,19 @@ public class MultiStepPushRecoveryControlModule
       {
          isRecoveryImpossible.set(true);
       }
+   }
+
+   private RobotSide computeSideOnCapturePoint(FramePoint2DReadOnly capturePoint2d)
+   {
+      // first check if feet are already close to the preferred standing pose
+//      if(isRobotStanceCloseToPreferred())
+//         return null;
+
+      if(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).isPointInside(capturePoint2d))
+         return RobotSide.LEFT;
+      else if(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).isPointInside(capturePoint2d))
+         return RobotSide.RIGHT;
+      return null;
    }
 
    public Footstep getFootstepForRecoveringFromDisturbance(double swingTimeRemaining)
