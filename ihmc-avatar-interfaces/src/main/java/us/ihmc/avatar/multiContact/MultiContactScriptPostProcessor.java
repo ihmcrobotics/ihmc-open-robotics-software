@@ -32,6 +32,7 @@ public class MultiContactScriptPostProcessor
    private final FloatingJointBasics rootJoint;
    private final int jointNameHash;
    private final OneDoFJointBasics[] oneDoFJoints;
+   private double durationPerKeyframe = 1.0;
 
    public MultiContactScriptPostProcessor(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -79,7 +80,7 @@ public class MultiContactScriptPostProcessor
 
       WholeBodyJointspaceTrajectoryMessage message = new WholeBodyJointspaceTrajectoryMessage();
       double trajectoryTimeOffset = 0.5;
-      double totalTrajectoryTime = 1.0 * numberOfConfigurations;
+      double totalTrajectoryTime = durationPerKeyframe * numberOfConfigurations;
 
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
@@ -229,5 +230,10 @@ public class MultiContactScriptPostProcessor
          output.add(0.0);
       }
       return output;
+   }
+
+   public void setDurationPerKeyframe(double durationPerKeyframe)
+   {
+      this.durationPerKeyframe = durationPerKeyframe;
    }
 }
