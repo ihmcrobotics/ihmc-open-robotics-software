@@ -75,4 +75,9 @@ public interface  PushRecoveryControllerParameters
    {
       return getMaxStepLength();
    }
+
+   default double getPreferredFinalStepWidth()
+   {
+      return 0.4;
+   }
 }
