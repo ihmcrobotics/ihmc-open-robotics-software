@@ -22,6 +22,7 @@ import us.ihmc.robotics.sensors.FootSwitchInterface;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveringSwingState extends PushRecoveryState
 {
@@ -51,6 +52,7 @@ public class RecoveringSwingState extends PushRecoveryState
    protected final RobotSide supportSide;
 
    private final YoBoolean hasMinimumTimePassed = new YoBoolean("hasMinimumTimePassed", registry);
+   protected final YoDouble minimumReactionTime = new YoDouble("minimumReactionTime", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final SideDependentList<FootSwitchInterface> footSwitches;
@@ -70,6 +72,7 @@ public class RecoveringSwingState extends PushRecoveryState
                                YoRegistry parentRegistry)
    {
       super(stateEnum, parentRegistry);
+      minimumReactionTime.set(0.15);
 
       this.supportSide = stateEnum.getSupportSide();
       this.pushRecoveryControlModule = pushRecoveryControlModule;
@@ -209,7 +212,6 @@ public class RecoveringSwingState extends PushRecoveryState
 
    private boolean hasMinimumTimePassed(double timeInState)
    {
-      // TODO parameterize this
-      return timeInState > 0.15;
+      return timeInState > minimumReactionTime.getDoubleValue();
    }
 }
