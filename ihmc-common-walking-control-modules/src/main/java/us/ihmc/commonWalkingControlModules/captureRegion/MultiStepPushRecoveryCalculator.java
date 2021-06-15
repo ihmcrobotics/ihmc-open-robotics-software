@@ -45,6 +45,7 @@ public class MultiStepPushRecoveryCalculator
 
    private final FramePoint3D stepPosition = new FramePoint3D();
    private final FramePoint3D squareUpPosition = new FramePoint3D();
+   private final FrameVector2D squaringStepDirection = new FrameVector2D();
 
    private final ConvexPolygon2DReadOnly defaultFootPolygon;
    private final FramePoint2D icpAtStart = new FramePoint2D();
@@ -139,11 +140,13 @@ public class MultiStepPushRecoveryCalculator
    {
       recoveryStepLocations.clear();
       FramePoint2DBasics squareUpLocation = recoveryStepLocations.add();
+      squareUpLocation.setToZero(soleZUpFrames.get(nextSupportSide));
+      squareUpLocation.changeFrame(worldFrame);
 
       // set square position at preferred width distance from next support foot
-      squareUpLocation.setToZero(soleZUpFrames.get(nextSupportSide));
-      squareUpLocation.setY(nextSupportSide.negateIfLeftSide(preferredWidth));
-      squareUpLocation.changeFrame(worldFrame);
+      squaringStepDirection.setToZero(soleZUpFrames.get(nextSupportSide));
+      squaringStepDirection.add(0.0, nextSupportSide.negateIfLeftSide(preferredWidth));
+      squaringStepDirection.changeFrame(worldFrame);
       squareUpPosition.set(squareUpLocation);
 
       squareUpStepToPack.setPose(squareUpPosition, stancePose.getOrientation());
