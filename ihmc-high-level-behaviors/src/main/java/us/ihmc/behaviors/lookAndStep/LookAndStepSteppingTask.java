@@ -30,7 +30,6 @@ public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
-   protected SwingPlanningModule swingPlanningModule;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
@@ -59,7 +58,6 @@ public class LookAndStepSteppingTask
          footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
          uiPublisher = lookAndStep.helper::publish;
-         swingPlanningModule = lookAndStep.helper.createFootstepPlanPostProcessor();
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
          replanFootstepsOutput = () ->
          {
@@ -112,11 +110,6 @@ public class LookAndStepSteppingTask
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
       PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
       shortenedFootstepPlan.addFootstep(footstepToTake);
-
-      swingPlanningModule.computeSwingWaypoints(footstepPlanEtc.getPlanarRegions(),
-                                                shortenedFootstepPlan,
-                                                footstepPlanEtc.getStartFootPoses(),
-                                                footstepPlanEtc.getSwingPlannerType());
 
       // TODO: Clean this up.
       // Extract swing time calculation from the proportion swing planner
