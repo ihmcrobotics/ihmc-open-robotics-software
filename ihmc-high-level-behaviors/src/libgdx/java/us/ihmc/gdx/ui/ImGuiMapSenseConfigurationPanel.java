@@ -41,7 +41,7 @@ public class ImGuiMapSenseConfigurationPanel
    private final ImFloat mergeDistanceThresholdSlider = new ImFloat(0.016f);
    private final ImFloat mergeAngularThresholdSlider = new ImFloat(0.82f);
    private final ImFloat regionGrowthFactorSlider = new ImFloat(0.01f);
-   private final ImInt gaussianSizeSlider = new ImInt(3);
+   private final ImInt gaussianSizeSlider = new ImInt(6);
    private final ImInt gaussianSigmaSlider = new ImInt(20);
 
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
