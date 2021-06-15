@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.MathTools;
@@ -44,9 +45,23 @@ public class AchievableCaptureRegionCalculatorWithDelay
    private final PoseReferenceFrame supportFrame = new PoseReferenceFrame("supportFrame", worldFrame);
    private final ZUpFrame supportSoleZUp = new ZUpFrame(worldFrame, supportFrame, "supportZUpFrame");
 
+   private final TDoubleArrayList candidateSwingTimes = new TDoubleArrayList();
+
    public boolean calculateCaptureRegion(double nextTransferDuration,
-                                         double minSwingTimeRemaining,
-                                         double maxSwingTimeRemaining,
+                                         double swingTimeRemaining,
+                                         FramePoint2DReadOnly currentICP,
+                                         double omega0,
+                                         FramePose3DReadOnly supportPose,
+                                         FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      candidateSwingTimes.reset();
+      candidateSwingTimes.add(swingTimeRemaining);
+
+      return calculateCaptureRegion(nextTransferDuration, candidateSwingTimes, currentICP, omega0, supportPose, footPolygon);
+   }
+
+   public boolean calculateCaptureRegion(double nextTransferDuration,
+                                         TDoubleArrayList candidateSwingTimes,
                                          FramePoint2DReadOnly currentICP,
                                          double omega0,
                                          FramePose3DReadOnly supportPose,
@@ -65,9 +80,6 @@ public class AchievableCaptureRegionCalculatorWithDelay
       footCentroid.setIncludingFrame(supportFootPolygon.getCentroid());
 
       predictedICPAtTouchdown.setToZero(supportSoleZUp);
-
-      minSwingTimeRemaining = MathTools.clamp(minSwingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
-      maxSwingTimeRemaining = MathTools.clamp(maxSwingTimeRemaining, 0.0, Double.POSITIVE_INFINITY);
 
       unconstrainedCaptureRegion.clear(supportSoleZUp);
       unconstrainedCaptureRegionAtTouchdown.clear(supportSoleZUp);
@@ -88,16 +100,9 @@ public class AchievableCaptureRegionCalculatorWithDelay
          extremeCoP.changeFrame(supportSoleZUp);
 
          // compute min
-         CapturePointTools.computeDesiredCapturePointPosition(omega0, minSwingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
-         computeCoPLocationToCapture(predictedICPAtTouchdown, extremeCoP, omega0, nextTransferDuration, predictedICPAfterTransfer);
-
-         unconstrainedCaptureRegionAtTouchdown.addVertexMatchingFrame(predictedICPAtTouchdown, false);
-         unconstrainedCaptureRegion.addVertexMatchingFrame(predictedICPAfterTransfer, false);
-
-         // compute max
-         if (includeSlowerTimeInRegion)
+         for (int timeIdx = 0; timeIdx < candidateSwingTimes.size(); timeIdx++)
          {
-            CapturePointTools.computeDesiredCapturePointPosition(omega0, maxSwingTimeRemaining, capturePoint, extremeCoP, predictedICPAtTouchdown);
+            CapturePointTools.computeDesiredCapturePointPosition(omega0, candidateSwingTimes.get(timeIdx), capturePoint, extremeCoP, predictedICPAtTouchdown);
             computeCoPLocationToCapture(predictedICPAtTouchdown, extremeCoP, omega0, nextTransferDuration, predictedICPAfterTransfer);
 
             unconstrainedCaptureRegionAtTouchdown.addVertexMatchingFrame(predictedICPAtTouchdown, false);

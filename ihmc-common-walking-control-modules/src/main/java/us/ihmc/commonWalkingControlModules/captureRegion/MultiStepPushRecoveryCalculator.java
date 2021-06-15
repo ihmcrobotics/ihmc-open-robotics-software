@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -27,7 +28,6 @@ public class MultiStepPushRecoveryCalculator
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
    private final FrameConvexPolygon2D reachableRegion = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
 
    private final RecyclingArrayList<FramePoint2DBasics> capturePointsAtTouchdown = new RecyclingArrayList<>(FramePoint2D::new);
    private final RecyclingArrayList<FramePoint2DBasics> recoveryStepLocations = new RecyclingArrayList<>(FramePoint2D::new);
@@ -92,6 +92,22 @@ public class MultiStepPushRecoveryCalculator
       this.depth = depth;
    }
 
+   private final TDoubleArrayList candidateSwingTimes = new TDoubleArrayList();
+
+   public boolean computePreferredRecoverySteps(RobotSide swingSide,
+                                                double nextTransferDuration,
+                                                double swingTimeRemaining,
+                                                FramePoint2DReadOnly currentICP,
+                                                double omega0,
+                                                FrameConvexPolygon2DReadOnly footPolygon)
+   {
+      candidateSwingTimes.reset();
+      candidateSwingTimes.add(swingTimeRemaining);
+
+      return computeRecoverySteps(swingSide, nextTransferDuration, swingTimeRemaining, candidateSwingTimes,
+         currentICP, omega0, footPolygon);
+   }
+
    public boolean computeRecoverySteps(RobotSide swingSide,
                                        double nextTransferDuration,
                                        double minSwingTimeRemaining,
@@ -100,10 +116,25 @@ public class MultiStepPushRecoveryCalculator
                                        double omega0,
                                        FrameConvexPolygon2DReadOnly footPolygon)
    {
+      candidateSwingTimes.reset();
+      candidateSwingTimes.add(minSwingTimeRemaining);
+      candidateSwingTimes.add(maxSwingTimeRemaining);
+
+      return computeRecoverySteps(swingSide, nextTransferDuration, minSwingTimeRemaining, candidateSwingTimes,
+                                  currentICP, omega0, footPolygon);
+   }
+
+   public boolean computeRecoverySteps(RobotSide swingSide,
+                                       double nextTransferDuration,
+                                       double swingTimeToSet,
+                                       TDoubleArrayList candidateSwingTimes,
+                                       FramePoint2DReadOnly currentICP,
+                                       double omega0,
+                                       FrameConvexPolygon2DReadOnly footPolygon)
+   {
       int numberOfRecoverySteps = calculateRecoveryStepLocations(swingSide,
                                                                  nextTransferDuration,
-                                                                 minSwingTimeRemaining,
-                                                                 maxSwingTimeRemaining,
+                                                                 candidateSwingTimes,
                                                                  currentICP,
                                                                  omega0,
                                                                  footPolygon);
@@ -118,7 +149,7 @@ public class MultiStepPushRecoveryCalculator
          recoveryFootstep.setPose(stepPosition, stancePose.getOrientation());
          recoveryFootstep.setRobotSide(swingSide);
 
-         recoveryFootstepTimings.add().setTimings(minSwingTimeRemaining, nextTransferDuration);
+         recoveryFootstepTimings.add().setTimings(swingTimeToSet, nextTransferDuration);
 
          swingSide = swingSide.getOppositeSide();
       }
@@ -161,8 +192,7 @@ public class MultiStepPushRecoveryCalculator
 
    private int calculateRecoveryStepLocations(RobotSide swingSide,
                                               double nextTransferDuration,
-                                              double minSwingTimeRemaining,
-                                              double maxSwingTimeRemaining,
+                                              TDoubleArrayList candidateSwingTimes,
                                               FramePoint2DReadOnly currentICP,
                                               double omega0,
                                               FrameConvexPolygon2DReadOnly footPolygon)
@@ -187,7 +217,7 @@ public class MultiStepPushRecoveryCalculator
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
 
-         if (captureRegionCalculator.calculateCaptureRegion(nextTransferDuration, minSwingTimeRemaining, maxSwingTimeRemaining, icpAtStart, omega0, stancePose, stancePolygon))
+         if (captureRegionCalculator.calculateCaptureRegion(nextTransferDuration, candidateSwingTimes, icpAtStart, omega0, stancePose, stancePolygon))
          {
             isStateCapturable = true;
             break;
@@ -211,14 +241,7 @@ public class MultiStepPushRecoveryCalculator
          { // they do intersect
             FramePoint2DReadOnly centerOfIntersection = intersectingRegion.getCentroid();
 
-            forwardLineAtNominalWidth.setToZero(stanceFrame);
-            forwardLineAtNominalWidth.set(stanceFrame, 0.0, swingSide.negateIfRightSide(pushRecoveryParameters.getPreferredStepWidth()), 1.0, 0.0);
-            forwardLineAtNominalWidth.changeFrame(worldFrame);
-
-            forwardLineSegmentEnd.set(forwardLineAtNominalWidth.getPoint());
-            forwardLineSegmentEnd.add(forwardLineAtNominalWidth.getDirection());
-            EuclidGeometryTools.intersectionBetweenTwoLine2Ds(stancePosition, centerOfIntersection, forwardLineAtNominalWidth.getPoint(),
-                                                              forwardLineSegmentEnd, capturePointAtTouchdown);
+            computeRecoveryStepAtNominalWidth(swingSide, stancePosition, centerOfIntersection, capturePointAtTouchdown);
 
             if (!intersectingRegion.isPointInside(capturePointAtTouchdown))
             {
@@ -239,7 +262,7 @@ public class MultiStepPushRecoveryCalculator
          else
          {
             polygonTools.computeMinimumDistancePoints(reachableRegion,
-                                                      captureRegion,
+                                                      captureRegionAtTouchdown,
                                                       recoveryStepLocation,
                                                       capturePointAtTouchdown);
          }
@@ -259,6 +282,22 @@ public class MultiStepPushRecoveryCalculator
       }
 
       return numberOfRecoverySteps;
+   }
+
+   private void computeRecoveryStepAtNominalWidth(RobotSide swingSide,
+                                                  FramePoint2DReadOnly stancePosition,
+                                                  FramePoint2DReadOnly pointInDirectionOfStep,
+                                                  FramePoint2DBasics recoveryStepLocationToPack)
+   {
+
+      forwardLineAtNominalWidth.setToZero(stanceFrame);
+      forwardLineAtNominalWidth.set(stanceFrame, 0.0, swingSide.negateIfRightSide(pushRecoveryParameters.getPreferredStepWidth()), 1.0, 0.0);
+      forwardLineAtNominalWidth.changeFrame(worldFrame);
+
+      forwardLineSegmentEnd.set(forwardLineAtNominalWidth.getPoint());
+      forwardLineSegmentEnd.add(forwardLineAtNominalWidth.getDirection());
+      EuclidGeometryTools.intersectionBetweenTwoLine2Ds(stancePosition, pointInDirectionOfStep, forwardLineAtNominalWidth.getPoint(),
+                                                        forwardLineSegmentEnd, recoveryStepLocationToPack);
    }
 
    FramePoint2DReadOnly getCapturePointAtTouchdown(int i)
