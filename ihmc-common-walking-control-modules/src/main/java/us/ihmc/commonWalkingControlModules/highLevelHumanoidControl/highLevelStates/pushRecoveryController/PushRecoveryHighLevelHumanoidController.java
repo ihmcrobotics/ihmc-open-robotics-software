@@ -400,11 +400,11 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       capturePoint2d.setIncludingFrame(balanceManager.getCapturePoint());
       failureDetectionControlModule.checkIfRobotIsFalling(capturePoint2d, balanceManager.getDesiredICP());
 
-      if (pushRecoveryControlModule.isRecoveryImpossible() || numberOfRecoveryStepsTaken.getValue() > maxNumberOfRecoveryStepsToTake.getValue())
-      {
-         walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
-         controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
-      }
+//      if (pushRecoveryControlModule.isRecoveryImpossible() || numberOfRecoveryStepsTaken.getValue() > maxNumberOfRecoveryStepsToTake.getValue())
+//      {
+//         walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
+//         controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
+//      }
    }
 
    public void updateManagers(PushRecoveryState currentState)
