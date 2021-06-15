@@ -35,8 +35,8 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    enum OpenDoorState
    {
       START,
-      MOVE_LEFT_HAND_TO_INITIAL_LOCATION,
-      MOVE_RIGHT_HAND_TO_INITIAL_LOCATION,
+      MOVE_HANDs_TO_INITIAL_LOCATION,
+      //MOVE_RIGHT_HAND_TO_INITIAL_LOCATION,
       TURN_ON_OPEN_DOOR_DETECTOR,
       TURN_DOOR_KNOB,
       PUSH_ON_DOOR,
@@ -123,7 +123,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
       };
 
-      BehaviorAction moveLeftHandToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
+      BehaviorAction moveHandsToDoor = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior,atlasPrimitiveActions.rightHandTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -139,6 +139,15 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                RobotSide.LEFT,
                                                                                "Moving Left Hand To Door",
                                                                                4));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.769,
+                    -0.095,
+                    1.032,
+                    1.549469789243062,
+                    0.08444685410187032,
+                    0.037877956817564146,
+                    RobotSide.RIGHT,
+                    "Moving Right Hand Above Door Knob",
+                    4));
 
          }
       };
@@ -261,7 +270,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
                                                                                1.472225053162252, 0.03597891325029729, 1.5545423993328358,
                                                                                RobotSide.LEFT,
                                                                                "Pushing Door",
-                                                                               2));
+                                                                               3));
          }
 
       };
@@ -311,11 +320,11 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
          }
       };
 
-      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION);
-      factory.addStateAndDoneTransition(OpenDoorState.MOVE_LEFT_HAND_TO_INITIAL_LOCATION,
-                                        moveLeftHandToDoor,
-                                        OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION);
-      factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_DOOR_KNOB);
+      factory.addStateAndDoneTransition(OpenDoorState.START, start, OpenDoorState.MOVE_HANDs_TO_INITIAL_LOCATION);
+      factory.addStateAndDoneTransition(OpenDoorState.MOVE_HANDs_TO_INITIAL_LOCATION,
+                                        moveHandsToDoor,
+                                        OpenDoorState.TURN_DOOR_KNOB);
+      //factory.addStateAndDoneTransition(OpenDoorState.MOVE_RIGHT_HAND_TO_INITIAL_LOCATION, moveRightHandToDoor, OpenDoorState.TURN_DOOR_KNOB);
      // factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
