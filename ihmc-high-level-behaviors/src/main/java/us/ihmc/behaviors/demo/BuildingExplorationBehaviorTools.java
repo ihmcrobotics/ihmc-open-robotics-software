@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.demo;
 
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
@@ -19,7 +19,7 @@ public class BuildingExplorationBehaviorTools
       NAN_POSE.setToNaN();
    }
 
-   public static void pitchChestToSeeDoor(RemoteSyncedRobotModel syncedRobot, BehaviorHelper helper)
+   public static void pitchChestToSeeDoor(ROS2SyncedRobotModel syncedRobot, BehaviorHelper helper)
    {
       syncedRobot.update();
 

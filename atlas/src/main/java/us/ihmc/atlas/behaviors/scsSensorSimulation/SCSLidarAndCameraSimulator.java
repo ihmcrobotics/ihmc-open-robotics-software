@@ -11,7 +11,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Input;
@@ -57,7 +57,7 @@ public class SCSLidarAndCameraSimulator
 {
    private final ROS2Node ros2Node;
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D tempNeckFramePose = new FramePose3D();
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
@@ -73,7 +73,7 @@ public class SCSLidarAndCameraSimulator
 
       robotConfigurationData = new ROS2Input<>(ros2Node, ROS2Tools.getRobotConfigurationDataTopic(robotModel.getSimpleRobotName()));
 
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       Robot robot = new Robot("Robot");
 

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.exploreArea;
 
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.SequenceNode;
@@ -44,7 +44,7 @@ public class ExploreAreaLookAroundNode extends SequenceNode
 
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final StatusLogger statusLogger;
 
    private final AtomicReference<Boolean> hullGotLooped = new AtomicReference<>();

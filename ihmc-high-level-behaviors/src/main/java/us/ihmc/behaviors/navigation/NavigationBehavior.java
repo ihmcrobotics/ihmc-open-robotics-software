@@ -32,7 +32,7 @@ import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.behaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
@@ -70,7 +70,7 @@ public class NavigationBehavior extends BehaviorTreeControlFlowNode implements B
    private final BehaviorHelper helper;
    private final ROS2Input<PlanarRegionsListMessage> mapRegionsInput;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
    private final VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();

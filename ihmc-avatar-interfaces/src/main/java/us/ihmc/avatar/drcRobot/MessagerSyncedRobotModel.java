@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class MessagerSyncedRobotModel extends MessageSyncedRobotModel
+public class MessagerSyncedRobotModel extends CommunicationsSyncedRobotModel
 {
    private volatile RobotConfigurationData latestMessage;
    private boolean hasReceivedFirstMessage = false;

@@ -77,6 +77,7 @@ import java.util.stream.Collectors;
 public class HumanoidKinematicsSimulation
 {
    private static final double GRAVITY_Z = 9.81;
+   private static final double LIDAR_SPINDLE_SPEED = 2.5;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final HumanoidKinematicsSimulationParameters kinematicsSimulationParameters;
    private final PausablePeriodicThread controlThread;
@@ -395,7 +396,7 @@ public class HumanoidKinematicsSimulation
       if (hokuyoJoint instanceof RevoluteJoint)
       {
          RevoluteJoint revoluteHokuyoJoint = (RevoluteJoint) hokuyoJoint;
-         revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + 2.5 * kinematicsSimulationParameters.getUpdatePeriod());
+         revoluteHokuyoJoint.setQ(revoluteHokuyoJoint.getQ() + LIDAR_SPINDLE_SPEED * kinematicsSimulationParameters.getUpdatePeriod());
       }
 
       yoVariableServerTime += Conversions.millisecondsToSeconds(1);

@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.demo;
 
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
@@ -16,7 +16,7 @@ class BuildingExplorationBehaviorWalkThroughDoorState implements State
    final AtomicBoolean isDone = new AtomicBoolean();
    final AtomicBoolean receivedOperatorConfirmation = new AtomicBoolean();
    final AtomicBoolean hasStartedBehavior = new AtomicBoolean();
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
 
    public BuildingExplorationBehaviorWalkThroughDoorState(BehaviorHelper helper)
    {

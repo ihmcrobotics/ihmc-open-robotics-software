@@ -26,7 +26,7 @@ import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.behaviors.upDownExploration.UpDownExplorer;
@@ -72,7 +72,7 @@ public class PatrolBehavior extends BehaviorTreeControlFlowNode implements Behav
 
    private final BehaviorHelper helper;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private final RemoteREAInterface rea;
 

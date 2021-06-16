@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.ros2.ROS2ControllerHelper;
@@ -115,7 +115,7 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
       return bodyPathPlanner;
    }
 
-   public RemoteSyncedRobotModel newSyncedRobot()
+   public ROS2SyncedRobotModel newSyncedRobot()
    {
       return getOrCreateRobotInterface().newSyncedRobot();
    }

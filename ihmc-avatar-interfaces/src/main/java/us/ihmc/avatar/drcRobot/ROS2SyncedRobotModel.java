@@ -9,16 +9,16 @@ import us.ihmc.ros2.ROS2NodeInterface;
 
 import java.util.function.Consumer;
 
-public class RemoteSyncedRobotModel extends MessageSyncedRobotModel
+public class ROS2SyncedRobotModel extends CommunicationsSyncedRobotModel
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationDataInput;
 
-   public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       this(robotModel, ros2Node, robotModel.createFullRobotModel());
    }
 
-   public RemoteSyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
+   public ROS2SyncedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node, FullHumanoidRobotModel fullRobotModel)
    {
       super(fullRobotModel, robotModel.getSensorInformation());
       robotConfigurationDataInput = new ROS2Input<>(ros2Node,
