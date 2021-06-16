@@ -7,6 +7,7 @@ import org.jfree.util.Log;
 import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPointFilter;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
@@ -52,7 +53,7 @@ public class DelayFixedPlanarRegionsSubscription
    private boolean posePublisherEnabled = false;
 
    private CollisionBoxProvider collisionBoxProvider;
-   private CollidingScanPointFilter collisionFilter;
+   private CollidingScanRegionFilter collisionFilter;
 
    private boolean enabled = false;
    private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
@@ -90,7 +91,7 @@ public class DelayFixedPlanarRegionsSubscription
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
 
       collisionBoxProvider = robotModel.getCollisionBoxProvider();
-      collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
+      collisionFilter = new CollidingScanRegionFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
    }
 
    public void subscribe(RosNodeInterface ros1Node)
