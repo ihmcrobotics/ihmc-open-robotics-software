@@ -67,6 +67,7 @@ public class MotionQPInputCalculator
 
    private final DMatrixRMaj tempTaskJacobian = new DMatrixRMaj(SpatialVector.SIZE, 12);
    private final NativeMatrix tempTaskJacobianNative = new NativeMatrix(SpatialVector.SIZE, 12);
+   private final NativeMatrix tempTaskVelocityJacobianNative = new NativeMatrix(SpatialVector.SIZE, 12);
    private final NativeMatrix projectedTaskJacobian = new NativeMatrix(SpatialVector.SIZE, 12);
    private final DMatrixRMaj tempTaskObjective = new DMatrixRMaj(SpatialVector.SIZE, 1);
    private final DMatrixRMaj tempTaskWeight = new DMatrixRMaj(SpatialAcceleration.SIZE, SpatialAcceleration.SIZE);
@@ -234,9 +235,9 @@ public class MotionQPInputCalculator
       if (!success)
          return false;
 
-      tempTaskJacobianNative.set(qpInputToPack.taskJacobian);
+      tempTaskVelocityJacobianNative.set(qpInputToPack.taskJacobian);
       allTaskJacobianNative.set(allTaskJacobian);
-      velocityNativeNullspaceProjector.project(tempTaskJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());;
+      velocityNativeNullspaceProjector.project(tempTaskVelocityJacobianNative, allTaskJacobianNative, projectedTaskJacobian, nullspaceProjectionAlpha.getValue());;
       projectedTaskJacobian.get(qpInputToPack.taskJacobian);
 
       return true;
