@@ -87,28 +87,19 @@ public class FootstepPoseReachabilityChecker
 
       StepReachabilityLatticePoint nearestReachabilityCheckpoint = new StepReachabilityLatticePoint(candidateFootPose.getX(),
                                                                                                     candidateFootPose.getY(),
+                                                                                                    candidateFootPose.getZ(),
                                                                                                     candidateFootPose.getYaw(),
                                                                                                     stepReachabilityData.getXySpacing(),
                                                                                                     stepReachabilityData.getYawDivisions(),
-                                                                                                    stepReachabilityData.getGridSizeYaw()/stepReachabilityData.getYawDivisions());
+                                                                                                    stepReachabilityData.getGridSizeYaw() / stepReachabilityData
+                                                                                                          .getYawDivisions());
 
       // Check reachability map to see if candidate foot position is reachable
-      if (!checkpointIsReachable(stepReachabilityData.getLegReachabilityMap(), nearestReachabilityCheckpoint))
-         return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
-
-      return null;
-   }
-
-   // Check for frame in Reachability map keys
-   public boolean checkpointIsReachable(Map<StepReachabilityLatticePoint, Double> reachabilityMap, StepReachabilityLatticePoint nearestCheckpoint)
-   {
-      for (StepReachabilityLatticePoint latticePoint : reachabilityMap.keySet())
+      if (stepReachabilityData.getLegReachabilityMap().containsKey(nearestReachabilityCheckpoint))
       {
-         if (latticePoint.equals(nearestCheckpoint))
-         {
-            return reachabilityMap.get(latticePoint) < parameters.getSolutionQualityThreshold();
-         }
+         if (stepReachabilityData.getLegReachabilityMap().get(nearestReachabilityCheckpoint) < parameters.getSolutionQualityThreshold())
+            return null;
       }
-      return false;
+      return BipedalFootstepPlannerNodeRejectionReason.REACHABILITY_CHECK;
    }
 }

@@ -4,18 +4,20 @@ public class StepReachabilityLatticePoint
 {
    private final int xIndex;
    private final int yIndex;
+   private final int zIndex;
    private final int yawIndex;
    private final int hashCode;
 
-   public StepReachabilityLatticePoint(double x, double y, double yaw, double xySpacing, int yawDivisions, double yawSpacing)
+   public StepReachabilityLatticePoint(double x, double y, double yaw, double z, double xySpacing, int yawDivisions, double yawSpacing)
    {
-      this((int) Math.round(x / xySpacing), (int) Math.round(y / xySpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
+      this((int) Math.round(x / xySpacing), (int) Math.round(y / xySpacing), (int) Math.round(z / xySpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
    }
 
-   public StepReachabilityLatticePoint(int xIndex, int yIndex, int yawIndex)
+   public StepReachabilityLatticePoint(int xIndex, int yIndex, int zIndex, int yawIndex)
    {
       this.xIndex = xIndex;
       this.yIndex = yIndex;
+      this.zIndex = zIndex;
       this.yawIndex = yawIndex;
       this.hashCode = computeHashCode(this);
    }
@@ -30,6 +32,11 @@ public class StepReachabilityLatticePoint
       return yIndex;
    }
 
+   public int getZIndex()
+   {
+      return zIndex;
+   }
+
    public int getYawIndex()
    {
       return yawIndex;
@@ -41,6 +48,7 @@ public class StepReachabilityLatticePoint
       int prime = 31;
       result += prime * cell.xIndex;
       result += prime * cell.yIndex;
+      result += prime * cell.zIndex;
       result += prime * cell.yawIndex;
       return result;
    }
@@ -66,6 +74,8 @@ public class StepReachabilityLatticePoint
          return false;
       if (yIndex != other.yIndex)
          return false;
+      if (zIndex != other.zIndex)
+         return false;
       if (yawIndex != other.yawIndex)
          return false;
       return true;
@@ -74,6 +84,6 @@ public class StepReachabilityLatticePoint
    @Override
    public String toString()
    {
-      return "(" + xIndex + ", " + yIndex + ", " + yawIndex + ")";
+      return "(" + xIndex + ", " + yIndex + ", " + zIndex + ", " + yawIndex + ")";
    }
 }

@@ -104,7 +104,7 @@ public abstract class HumanoidStepReachabilityCalculator
       HAND_POSE, TEST_SINGLE_STEP, TEST_MULTIPLE_STEPS, TEST_VISUALIZATION
    }
 
-   private static final Mode mode = Mode.TEST_VISUALIZATION;
+   private static final Mode mode = Mode.TEST_MULTIPLE_STEPS;
 
    private static final double COM_WEIGHT = 1.0;
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
@@ -205,7 +205,7 @@ public abstract class HumanoidStepReachabilityCalculator
             testHandPose();
             break;
          case TEST_SINGLE_STEP:
-            StepReachabilityLatticePoint leftFoot = new StepReachabilityLatticePoint(0, 1, 0);
+            StepReachabilityLatticePoint leftFoot = new StepReachabilityLatticePoint(0, 1, 0, 0);
             FramePose3D rightFoot = new FramePose3D();
             testSingleStep(leftFoot, rightFoot, false);
             break;
@@ -213,10 +213,10 @@ public abstract class HumanoidStepReachabilityCalculator
             List<StepReachabilityLatticePoint> leftFootPoseList = createLeftFootPoseList();
             Map<StepReachabilityLatticePoint, Double> poseValidityMap = new HashMap<>();
             FramePose3D rightFootPose = new FramePose3D();
-            // Loop through XYs, free yaw
-            for (int xyLoopIndex = 0; xyLoopIndex < leftFootPoseList.size(); xyLoopIndex++)
+            // Loop through XYZs, free yaw
+            for (int xyzLoopIndex = 0; xyzLoopIndex < leftFootPoseList.size(); xyzLoopIndex++)
             {
-               StepReachabilityLatticePoint leftFootPose = leftFootPoseList.get(xyLoopIndex);
+               StepReachabilityLatticePoint leftFootPose = leftFootPoseList.get(xyzLoopIndex);
                double reachabilityValue = testSingleStep(leftFootPose, rightFootPose, true);
 
                LogTools.info("Reachability value: " + reachabilityValue);
@@ -235,7 +235,7 @@ public abstract class HumanoidStepReachabilityCalculator
                   }
                }
             }
-            StepReachabilityFileTools.writeToFile(robotModel.getStepReachabilityResourceName(), poseValidityMap, spacingXY, yawDivisions, yawSpacing);
+            StepReachabilityFileTools.writeToFile(robotModel.getStepReachabilityResourceName(), poseValidityMap, spacingXYZ, yawDivisions, yawSpacing);
             break;
 
             case TEST_VISUALIZATION:
@@ -335,8 +335,9 @@ public abstract class HumanoidStepReachabilityCalculator
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(targetFullRobotModel);
 
       FramePose3D leftFoot = new FramePose3D();
-      leftFoot.getPosition().setX(spacingXY * leftFootLatticePoint.getXIndex());
-      leftFoot.getPosition().setY(spacingXY * leftFootLatticePoint.getYIndex());
+      leftFoot.getPosition().setX(spacingXYZ * leftFootLatticePoint.getXIndex());
+      leftFoot.getPosition().setY(spacingXYZ * leftFootLatticePoint.getYIndex());
+      leftFoot.getPosition().setZ(spacingXYZ * leftFootLatticePoint.getZIndex());
       leftFoot.getOrientation().setToYawOrientation(yawSpacing * leftFootLatticePoint.getYawIndex());
 
       for (RobotSide robotSide : RobotSide.values)
@@ -363,9 +364,9 @@ public abstract class HumanoidStepReachabilityCalculator
          commandInputManager.submitMessage(rbMessage);
 
          // OneDoFJoint objective for each knee joint
-         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
-         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, JOINT_WEIGHT, 1.04);
-         commandInputManager.submitMessage(jointMessage);
+//         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
+//         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, JOINT_WEIGHT, 1.04);
+//         commandInputManager.submitMessage(jointMessage);
       }
 
       FramePose3D centerFeet = interpolateFeet(leftFoot, rightFoot);
@@ -445,10 +446,12 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double maximumOffsetX = 0.7;
    private static final double minimumOffsetY = -0.4;
    private static final double maximumOffsetY = 0.9;
-   private static final double minimumOffsetYaw = - Math.toRadians(80.0);
+   private static final double minimumOffsetZ = 0.0;
+   private static final double maximumOffsetZ = 0.4;
+   private static final double minimumOffsetYaw = - Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXY = 0.3; // 0.05
+   private static final double spacingXYZ = 0.3; // 0.05
    private static final int yawDivisions = 3;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
@@ -456,20 +459,25 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       List<StepReachabilityLatticePoint> posesToCheck = new ArrayList<>();
 
-      int minimumXIndex = (int) Math.round(minimumOffsetX / spacingXY);
-      int maximumXIndex = (int) Math.round(maximumOffsetX / spacingXY);
-      int minimumYIndex = (int) Math.round(minimumOffsetY / spacingXY);
-      int maximumYIndex = (int) Math.round(maximumOffsetY / spacingXY);
+      int minimumXIndex = (int) Math.round(minimumOffsetX / spacingXYZ);
+      int maximumXIndex = (int) Math.round(maximumOffsetX / spacingXYZ);
+      int minimumYIndex = (int) Math.round(minimumOffsetY / spacingXYZ);
+      int maximumYIndex = (int) Math.round(maximumOffsetY / spacingXYZ);
+      int minimumZIndex = (int) Math.round(minimumOffsetZ / spacingXYZ);
+      int maximumZIndex = (int) Math.round(maximumOffsetZ / spacingXYZ);
 
       for (int xIndex = minimumXIndex; xIndex <= maximumXIndex; xIndex++)
       {
          for (int yIndex = minimumYIndex; yIndex <= maximumYIndex; yIndex++)
          {
-            if (xIndex == 0 && yIndex == 0)
-               continue;
+            for (int zIndex = minimumZIndex; zIndex <= maximumZIndex; zIndex++)
+            {
+               if (xIndex == 0 && yIndex == 0)
+                  continue;
 
-            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, 0);
-            posesToCheck.add(latticePoint);
+               StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, zIndex, 0);
+               posesToCheck.add(latticePoint);
+            }
          }
       }
       return posesToCheck;
@@ -484,7 +492,7 @@ public abstract class HumanoidStepReachabilityCalculator
 
       for (int yawIndex = minimumYawIndex; yawIndex <= maximumYawIndex; yawIndex++)
       {
-         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootPose.getXIndex(), leftFootPose.getYIndex(), yawIndex);
+         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootPose.getXIndex(), leftFootPose.getYIndex(), leftFootPose.getZIndex(), yawIndex);
          leftFootYawSweepList.add(latticePoint);
       }
 

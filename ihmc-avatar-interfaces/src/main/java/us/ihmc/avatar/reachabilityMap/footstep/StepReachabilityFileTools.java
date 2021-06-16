@@ -29,6 +29,7 @@ public class StepReachabilityFileTools
          {
             fileWriter.write(latticePoint.getXIndex() + ",");
             fileWriter.write(latticePoint.getYIndex() + ",");
+            fileWriter.write(latticePoint.getZIndex() + ",");
             fileWriter.write(latticePoint.getYawIndex() + ",");
             fileWriter.write(String.valueOf(feasibilityMap.get(latticePoint)));
             fileWriter.write("\n");
@@ -68,9 +69,10 @@ public class StepReachabilityFileTools
             String[] data = line.split(",");
             int xIndex = Integer.parseInt(data[0]);
             int yIndex = Integer.parseInt(data[1]);
-            int yawIndex = Integer.parseInt(data[2]);
-            double reachabilityValue = Double.parseDouble(data[3]);
-            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, yawIndex);
+            int zIndex = Integer.parseInt(data[2]);
+            int yawIndex = Integer.parseInt(data[3]);
+            double reachabilityValue = Double.parseDouble(data[4]);
+            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, zIndex, yawIndex);
 
             reachabilityData.getLegReachabilityMap().put(latticePoint, reachabilityValue);
          }
