@@ -55,6 +55,7 @@ public class TraverseStairsBehaviorAPI
    public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
    public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
    public static final MessagerAPIFactory.Topic<Pose3D> DetectedStairsPose = topic("DetectedStairsPose");
+   public static final MessagerAPIFactory.Topic<Double> DistanceToStairs = topic("DistanceToStairs");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

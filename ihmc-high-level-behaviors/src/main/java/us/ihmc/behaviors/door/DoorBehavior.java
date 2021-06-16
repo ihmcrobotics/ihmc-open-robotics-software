@@ -11,14 +11,13 @@ import us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
-import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -37,7 +36,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    private ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<Boolean> reviewEnabled;
    private boolean firstTick = true;
-   private boolean behaviorStarted = false;
+   private boolean doingBehavior = false;
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final AtomicReference<DetectedFiducialPacket> detectedFiducial = new AtomicReference<>();
    private final Pose3D doorPose = new Pose3D(NAN_POSE);
@@ -56,6 +55,16 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
          doorPose.set(doorLocationPacket.getDoorTransformToWorld());
          helper.publish(DetectedDoorPose, MutablePair.of(DoorType.fromByte(doorLocationPacket.getDetectedDoorType()), new Pose3D(doorPose)));
       });
+      helper.subscribeViaCallback(ROS2Tools::getBehaviorStatusTopic, status ->
+      {
+         CurrentBehaviorStatus currentBehaviorStatus = CurrentBehaviorStatus.fromByte(status.getCurrentBehaviorStatus());
+         if (currentBehaviorStatus == CurrentBehaviorStatus.BEHAVIOR_FINISHED_SUCCESS
+         || currentBehaviorStatus == CurrentBehaviorStatus.BEHAVIOR_FINISHED_FAILED)
+         {
+            doingBehavior = false;
+         }
+      });
+      helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() -> doingBehavior = false);
 //      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
 //      {
 //         detectedFiducial.set(detectedFiducialMessage);
@@ -96,10 +105,11 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
       if (firstTick)
       {
          firstTick = false;
-         BuildingExplorationBehaviorTools.pitchChestToSeeDoor(syncedRobot, helper);
 
          if (!reviewEnabled.get())
+         {
             startBehavior();
+         }
       }
 //      if (!behaviorStarted && doorConfirmed.poll())
 //      {
@@ -111,7 +121,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
 
    private void startBehavior()
    {
-      behaviorStarted = true;
+      doingBehavior = true;
       helper.publishBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR);
       LogTools.info("Sending {}", HumanoidBehaviorType.WALK_THROUGH_DOOR.name());
    }
@@ -119,9 +129,10 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    @Override
    public void reset()
    {
+      LogTools.info("Would have stopped door behavior! (but didn't)");
       firstTick = true;
-      behaviorStarted = false;
-      helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
+      doingBehavior = false;
+//      helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
    }
 
    @Override
@@ -138,6 +149,11 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    public boolean isFacingDoor()
    {
       return isFacingDoor;
+   }
+
+   public boolean isDoingBehavior()
+   {
+      return doingBehavior;
    }
 
    public boolean hasSeenDoorRecently()

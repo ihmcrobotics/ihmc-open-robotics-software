@@ -44,6 +44,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       doorBehavior.setSyncedRobot(syncedRobot);
       addChild(doorBehavior);
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
+      traverseStairsBehavior.setSyncedRobot(syncedRobot);
       addChild(traverseStairsBehavior);
       helper.subscribeViaCallback(Parameters, parameters ->
       {
@@ -72,12 +73,13 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          if (!goal.get().containsNaN())
          {
-            if (doorBehavior.hasSeenDoorRecently()
-             && doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition())
+            if (doorBehavior.isDoingBehavior()
+            || (doorBehavior.hasSeenDoorRecently() && doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition()))
             {
                status = tickDoor();
             }
-            else if (traverseStairsBehavior.hasSeenStairsecently())
+            else if (traverseStairsBehavior.isGoing()
+                 || (traverseStairsBehavior.hasSeenStairsecently() && traverseStairsBehavior.getDistanceToStairs() < parameters.getDistanceFromDoorToTransition()))
             {
                traverseStairsBehavior.tick();
             }
