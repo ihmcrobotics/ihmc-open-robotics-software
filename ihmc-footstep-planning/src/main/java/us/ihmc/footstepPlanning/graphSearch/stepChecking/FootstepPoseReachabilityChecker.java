@@ -89,7 +89,7 @@ public class FootstepPoseReachabilityChecker
                                                                                                     candidateFootPose.getY(),
                                                                                                     candidateFootPose.getZ(),
                                                                                                     candidateFootPose.getYaw(),
-                                                                                                    stepReachabilityData.getXySpacing(),
+                                                                                                    stepReachabilityData.getXyzSpacing(),
                                                                                                     stepReachabilityData.getYawDivisions(),
                                                                                                     stepReachabilityData.getGridSizeYaw() / stepReachabilityData
                                                                                                           .getYawDivisions());

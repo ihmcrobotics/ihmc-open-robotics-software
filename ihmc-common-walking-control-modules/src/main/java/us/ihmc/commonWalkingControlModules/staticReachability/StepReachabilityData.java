@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class StepReachabilityData
 {
-   private double xySpacing;
+   private double xyzSpacing;
    private double gridSizeYaw;
    private int yawDivisions;
    private Map<StepReachabilityLatticePoint, Double> reachabilityData = new HashMap<>();
@@ -20,16 +20,16 @@ public class StepReachabilityData
       this.reachabilityData = reachabilityData;
    }
 
-   public void setGridData(double xySpacing, double gridSizeYaw, int yawDivisions)
+   public void setGridData(double xyzSpacing, double gridSizeYaw, int yawDivisions)
    {
-      this.xySpacing = xySpacing;
+      this.xyzSpacing = xyzSpacing;
       this.gridSizeYaw = gridSizeYaw;
       this.yawDivisions = yawDivisions;
    }
 
-   public double getXySpacing()
+   public double getXyzSpacing()
    {
-      return xySpacing;
+      return xyzSpacing;
    }
 
    public double getGridSizeYaw()

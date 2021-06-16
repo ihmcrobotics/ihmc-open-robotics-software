@@ -8,9 +8,9 @@ public class StepReachabilityLatticePoint
    private final int yawIndex;
    private final int hashCode;
 
-   public StepReachabilityLatticePoint(double x, double y, double yaw, double z, double xySpacing, int yawDivisions, double yawSpacing)
+   public StepReachabilityLatticePoint(double x, double y, double z, double yaw, double xyzSpacing, int yawDivisions, double yawSpacing)
    {
-      this((int) Math.round(x / xySpacing), (int) Math.round(y / xySpacing), (int) Math.round(z / xySpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
+      this((int) Math.round(x / xyzSpacing), (int) Math.round(y / xyzSpacing), (int) Math.round(z / xyzSpacing), Math.floorMod((int) (Math.round((yaw) / yawSpacing)), yawDivisions));
    }
 
    public StepReachabilityLatticePoint(int xIndex, int yIndex, int zIndex, int yawIndex)
