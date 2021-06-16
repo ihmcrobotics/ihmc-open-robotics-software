@@ -8,9 +8,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.MatrixMissingTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -22,26 +20,24 @@ public class MPCContactPoint
 {
    private final int numberOfBasisVectorsPerContactPoint;
    private final int coefficientsSize;
-   private final FrameVector3D[] basisVectors;
+   private final FixedFrameVector3DBasics[] basisVectorsInWorld;
+   private final FixedFrameVector3DBasics[] basisVectorsInPlaneFrame;
    private final FramePoint3D basisVectorOrigin = new FramePoint3D();
    private final double basisVectorAngleIncrement;
    private final PoseReferenceFrame planeFrame;
 
-   private final DMatrixRMaj rhoMaxMatrix;
-
-   private double maxContactForce;
-   private double timeOfContact = Double.NaN;
+   private double rhoNormalZ;
 
    private final RotationMatrix normalContactVectorRotationMatrix = new RotationMatrix();
 
-   private final DMatrixRMaj accelerationIntegrationHessian;
-   private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
 
    private final FrameVector3D contactAcceleration = new FrameVector3D();
+   private final FrameVector3D contactJerk = new FrameVector3D();
    private final FrameVector3D[] basisMagnitudes;
+   private final FrameVector3D[] basisRates;
    private final DMatrixRMaj[] basisCoefficients;
 
    private ContactPointForceViewer viewer;
@@ -53,25 +49,23 @@ public class MPCContactPoint
 
       basisVectorAngleIncrement = 2.0 * Math.PI / numberOfBasisVectorsPerContactPoint;
 
-      rhoMaxMatrix = new DMatrixRMaj(this.numberOfBasisVectorsPerContactPoint, 1);
-
-      maxContactForce = Double.POSITIVE_INFINITY;
-
-      basisVectors = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
+      basisVectorsInWorld = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
+      basisVectorsInPlaneFrame = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisMagnitudes = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
+      basisRates = new FrameVector3D[this.numberOfBasisVectorsPerContactPoint];
       basisCoefficients = new DMatrixRMaj[this.numberOfBasisVectorsPerContactPoint];
       planeFrame = new PoseReferenceFrame("ContactFrame", ReferenceFrame.getWorldFrame());
 
-      accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
-      accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
 
       contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
 
       for (int i = 0; i < this.numberOfBasisVectorsPerContactPoint; i++)
       {
-         basisVectors[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
+         basisVectorsInWorld[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
+         basisVectorsInPlaneFrame[i] = new FrameVector3D(planeFrame);
          basisMagnitudes[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
+         basisRates[i] = new FrameVector3D(ReferenceFrame.getWorldFrame());
          basisCoefficients[i] = new DMatrixRMaj(1, 4);
       }
 
@@ -81,15 +75,6 @@ public class MPCContactPoint
    public void setContactPointForceViewer(ContactPointForceViewer viewer)
    {
       this.viewer = viewer;
-   }
-
-   /**
-    * Sets the maximum net force allowed in the normal force for this contact point.
-    * @param maxNormalForce maximum normal force
-    */
-   public void setMaxNormalForce(double maxNormalForce)
-   {
-      this.maxContactForce = maxNormalForce;
    }
 
    /**
@@ -117,7 +102,12 @@ public class MPCContactPoint
     */
    public FrameVector3DReadOnly getBasisVector(int index)
    {
-      return basisVectors[index];
+      return basisVectorsInWorld[index];
+   }
+
+   public FrameVector3DReadOnly getBasisVectorInPlaneFrame(int index)
+   {
+      return basisVectorsInPlaneFrame[index];
    }
 
    /**
@@ -138,144 +128,32 @@ public class MPCContactPoint
     */
    public void computeBasisVectors(Point2DReadOnly contactPointInPlaneFrame, FramePose3DReadOnly framePose, double rotationOffset, double mu)
    {
-      timeOfContact = Double.NaN;
       planeFrame.setPoseAndUpdate(framePose);
 
       // Compute the orientation of the normal contact vector and the corresponding transformation matrix
       computeNormalContactVectorRotation(normalContactVectorRotationMatrix);
 
-      rhoMaxMatrix.reshape(numberOfBasisVectorsPerContactPoint, 1);
-      rhoMaxMatrix.zero();
-
       int rhoIndex = 0;
 
-      double maxRhoZ = maxContactForce / numberOfBasisVectorsPerContactPoint;
       basisVectorOrigin.setIncludingFrame(planeFrame, contactPointInPlaneFrame, 0.0);
       basisVectorOrigin.changeFrame(ReferenceFrame.getWorldFrame());
 
       // rotate each friction cone approximation to point one vector towards the center of the foot
       for (int basisVectorIndex = 0; basisVectorIndex < numberOfBasisVectorsPerContactPoint; basisVectorIndex++)
       {
-         FrameVector3D basisVector = basisVectors[rhoIndex];
+         FixedFrameVector3DBasics basisVector = basisVectorsInPlaneFrame[rhoIndex];
 
          computeBasisVector(basisVectorIndex, rotationOffset, normalContactVectorRotationMatrix, basisVector, mu);
 
-         rhoMaxMatrix.set(rhoIndex, 0, maxRhoZ / basisVector.getZ());
+         basisVectorsInWorld[rhoIndex].setMatchingFrame(basisVector);
 
          rhoIndex++;
       }
+
+      rhoNormalZ = basisVectorsInWorld[0].getZ();
    }
 
 
-   /**
-    * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the point over some time
-    * @param duration duration for the integration
-    * @param omega time constant for the motion function
-    * @param goalValueForPoint nominal value for the acceleration to track.
-    */
-   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPoint)
-   {
-      duration = Math.min(duration, sufficientlyLongTime);
-      double goalValueForBasis = goalValueForPoint / numberOfBasisVectorsPerContactPoint;
-
-      double positiveExponential = Math.min(Math.exp(omega * duration), sufficientlyLargeValue);
-      double positiveExponential2 = Math.min(positiveExponential * positiveExponential, sufficientlyLargeValue);
-      double negativeExponential = 1.0 / positiveExponential;
-      double negativeExponential2 = negativeExponential * negativeExponential;
-      double duration2 = duration * duration;
-      double duration3 = duration * duration2;
-      double omega2 = omega * omega;
-      double omega3 = omega * omega2;
-      double omega4 = omega2 * omega2;
-      double c00 = omega3 / 2.0 * (positiveExponential2 - 1.0);
-      double c01 = omega4 * duration;
-      double c02 = 6.0 * (positiveExponential * (omega * duration - 1.0) + 1.0);
-      double c03 = 2.0 * omega * (positiveExponential - 1.0);
-      double c11 = -omega3 / 2.0 * (negativeExponential2 - 1.0);
-      double c12 = -6.0 * (negativeExponential * (omega * duration + 1.0) - 1.0);
-      double c13 = -2.0 * omega * (negativeExponential - 1.0);
-      double c22 = 12.0 * duration3;
-      double c23 = 6.0 * duration2;
-      double c33 = 4.0 * duration;
-
-      double g0 = omega * (positiveExponential - 1.0) * goalValueForBasis;
-      double g1 = -omega * (negativeExponential - 1.0) * goalValueForBasis;
-      double g2 = 3.0 * duration2 * goalValueForBasis;
-      double g3 = 2.0 * duration * goalValueForBasis;
-
-      for (int basisVectorIndexI = 0; basisVectorIndexI < numberOfBasisVectorsPerContactPoint; basisVectorIndexI++)
-      {
-         int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
-
-         FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
-
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c02);
-         accelerationIntegrationHessian.unsafe_set(startIdxI, startIdxI + 2, c03);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI, c01);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 1, c11);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 2, c12);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 1, startIdxI + 3, c13);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI, c02);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 1, c12);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 2, c22);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 2, startIdxI + 3, c23);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI, c03);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 1, c13);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 2, c23);
-         accelerationIntegrationHessian.unsafe_set(startIdxI + 3, startIdxI + 3, c33);
-
-         accelerationIntegrationGradient.unsafe_set(startIdxI, 0, g0);
-         accelerationIntegrationGradient.unsafe_set(startIdxI + 1, 0, g1);
-         accelerationIntegrationGradient.unsafe_set(startIdxI + 2, 0, g2);
-         accelerationIntegrationGradient.unsafe_set(startIdxI + 3, 0, g3);
-
-         for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
-         {
-            FrameVector3DReadOnly basisVectorJ = basisVectors[basisVectorIndexJ];
-
-            double basisDot = basisVectorI.dot(basisVectorJ);
-
-            int startIdxJ = basisVectorIndexJ * LinearMPCIndexHandler.coefficientsPerRho;
-
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ, basisDot * c00);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI, startIdxJ + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 1, startIdxJ + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 2, startIdxJ + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxI + 3, startIdxJ + 3, basisDot * c33);
-
-            // we know it's symmetric, and this way we can avoid iterating as much
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI, basisDot * c00);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 1, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 2, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ, startIdxI + 3, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI, basisDot * c01);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 1, basisDot * c11);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 2, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 1, startIdxI + 3, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI, basisDot * c02);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 1, basisDot * c12);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 2, basisDot * c22);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 2, startIdxI + 3, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI, basisDot * c03);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 1, basisDot * c13);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 2, basisDot * c23);
-            MatrixMissingTools.unsafe_add(accelerationIntegrationHessian, startIdxJ + 3, startIdxI + 3, basisDot * c33);
-         }
-      }
-   }
 
    /**
     * Computes the equivalent quadratic cost function components that minimize the integral of the jerk over the duration
@@ -306,7 +184,7 @@ public class MPCContactPoint
       {
          int startIdxI = basisVectorIndexI * LinearMPCIndexHandler.coefficientsPerRho;
 
-         FrameVector3DReadOnly basisVectorI = basisVectors[basisVectorIndexI];
+         FrameVector3DReadOnly basisVectorI = basisVectorsInWorld[basisVectorIndexI];
 
          jerkIntegrationHessian.unsafe_set(startIdxI, startIdxI, c00);
          jerkIntegrationHessian.unsafe_set(startIdxI, startIdxI + 1, c01);
@@ -320,7 +198,7 @@ public class MPCContactPoint
 
          for (int basisVectorIndexJ = basisVectorIndexI + 1; basisVectorIndexJ < numberOfBasisVectorsPerContactPoint; basisVectorIndexJ++)
          {
-            FrameVector3DReadOnly basisVectorJ = basisVectors[basisVectorIndexJ];
+            FrameVector3DReadOnly basisVectorJ = basisVectorsInWorld[basisVectorIndexJ];
 
             double basisDot = basisVectorI.dot(basisVectorJ);
 
@@ -360,12 +238,10 @@ public class MPCContactPoint
    public void clear()
    {
       basisVectorOrigin.setToZero(ReferenceFrame.getWorldFrame());
-      for (int rhoIndex = 0; rhoIndex < basisVectors.length; rhoIndex++)
+      for (int rhoIndex = 0; rhoIndex < basisVectorsInWorld.length; rhoIndex++)
       {
-         FrameVector3D basisVector = basisVectors[rhoIndex];
-         basisVector.setToZero(ReferenceFrame.getWorldFrame());
-
-         rhoMaxMatrix.set(rhoIndex, 0, Double.POSITIVE_INFINITY);
+         basisVectorsInWorld[rhoIndex].setToZero();
+         basisVectorsInPlaneFrame[rhoIndex].setToZero();
       }
 
       if (viewer != null)
@@ -375,33 +251,22 @@ public class MPCContactPoint
    private void computeBasisVector(int basisVectorIndex,
                                    double rotationOffset,
                                    RotationMatrix normalContactVectorRotationMatrix,
-                                   FrameVector3D basisVectorToPack,
+                                   FixedFrameVector3DBasics basisVectorToPack,
                                    double mu)
    {
       double angle = rotationOffset + basisVectorIndex * basisVectorAngleIncrement;
 
       // Compute the linear part considering a normal contact vector pointing z-up
-      basisVectorToPack.setIncludingFrame(planeFrame, Math.cos(angle) * mu, Math.sin(angle) * mu, 1.0);
+      basisVectorToPack.set(Math.cos(angle) * mu, Math.sin(angle) * mu, 1.0);
 
       // Transforming the result to consider the actual normal contact vector
       normalContactVectorRotationMatrix.transform(basisVectorToPack);
       basisVectorToPack.normalize();
-      basisVectorToPack.changeFrame(ReferenceFrame.getWorldFrame());
    }
 
-   public DMatrixRMaj getRhoMaxMatrix()
+   public double getRhoNormalZ()
    {
-      return rhoMaxMatrix;
-   }
-
-   public DMatrixRMaj getAccelerationIntegrationHessian()
-   {
-      return accelerationIntegrationHessian;
-   }
-
-   public DMatrixRMaj getAccelerationIntegrationGradient()
-   {
-      return accelerationIntegrationGradient;
+      return rhoNormalZ;
    }
 
    public DMatrixRMaj getJerkIntegrationHessian()
@@ -423,7 +288,7 @@ public class MPCContactPoint
       int startIdx = solutionStartIdx;
       for (int rhoIndex = 0; rhoIndex < numberOfBasisVectorsPerContactPoint; rhoIndex++)
       {
-         FrameVector3DReadOnly basisVector = basisVectors[rhoIndex];
+         FrameVector3DReadOnly basisVector = basisVectorsInWorld[rhoIndex];
          for (int coeffIdx = 0; coeffIdx < LinearMPCIndexHandler.coefficientsPerRho; coeffIdx++)
          {
             double rhoCoeff = solutionVector.get(startIdx, 0);
@@ -448,10 +313,15 @@ public class MPCContactPoint
       return contactWrenchCoefficientMatrix;
    }
 
+   public DMatrixRMaj getBasisCoefficients(int rhoIdx)
+   {
+      return basisCoefficients[rhoIdx];
+   }
 
    public void computeContactForce(double omega, double time)
    {
       double omega2 = omega * omega;
+      double omega3 = omega * omega2;
       double exponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
       double negativeExponential = 1.0 / exponential;
       double a0 = omega2 * exponential;
@@ -459,7 +329,12 @@ public class MPCContactPoint
       double a2 = 6.0 * time;
       double a3 = 2.0;
 
+      double aDot0 = omega3 * exponential;
+      double aDot1 = -omega3 * negativeExponential;
+      double aDot2 = 6.0;
+
       contactAcceleration.setToZero();
+      contactJerk.setToZero();
 
       for (int rhoIdx = 0; rhoIdx < numberOfBasisVectorsPerContactPoint; rhoIdx++)
       {
@@ -468,12 +343,24 @@ public class MPCContactPoint
          rhoValue += a2 * basisCoefficients[rhoIdx].get(0, 2);
          rhoValue += a3 * basisCoefficients[rhoIdx].get(0, 3);
 
-         basisMagnitudes[rhoIdx].setAndScale(rhoValue, basisVectors[rhoIdx]);
+         double rhoRate = aDot0 * basisCoefficients[rhoIdx].get(0, 0);
+         rhoRate += aDot1 * basisCoefficients[rhoIdx].get(0, 1);
+         rhoRate += aDot2 * basisCoefficients[rhoIdx].get(0, 2);
+
+         basisMagnitudes[rhoIdx].setAndScale(rhoValue, basisVectorsInWorld[rhoIdx]);
+         basisRates[rhoIdx].setAndScale(rhoRate, basisVectorsInWorld[rhoIdx]);
+
          contactAcceleration.add(basisMagnitudes[rhoIdx]);
+         contactJerk.add(basisRates[rhoIdx]);
       }
 
       if (viewer != null)
          viewer.update(basisVectorOrigin, contactAcceleration, basisMagnitudes);
+   }
+
+   public FrameVector3DReadOnly getBasisMagnitude(int rhoIdx)
+   {
+      return basisMagnitudes[rhoIdx];
    }
 
    public void clearViz()
@@ -485,6 +372,11 @@ public class MPCContactPoint
    public FrameVector3DReadOnly getContactAcceleration()
    {
       return contactAcceleration;
+   }
+
+   public FrameVector3DReadOnly getContactJerk()
+   {
+      return contactJerk;
    }
 
    @Override
@@ -505,11 +397,9 @@ public class MPCContactPoint
             return false;
          if (!basisVectorOrigin.equals(other.basisVectorOrigin))
             return false;
-         if (basisVectors.length != other.basisVectors.length)
+         if (basisVectorsInWorld.length != other.basisVectorsInWorld.length)
             return false;
-         if (timeOfContact != other.timeOfContact)
-            return false;
-         if (maxContactForce != other.maxContactForce)
+         if (rhoNormalZ != other.rhoNormalZ)
             return false;
          if (basisCoefficients.length != other.basisCoefficients.length)
             return false;
@@ -518,9 +408,9 @@ public class MPCContactPoint
             if (!basisCoefficients[i].equals(other.basisCoefficients[i]))
                return false;
          }
-         for (int i = 0; i < basisVectors.length; i++)
+         for (int i = 0; i < basisVectorsInWorld.length; i++)
          {
-            if (!basisVectors[i].equals(other.basisVectors[i]))
+            if (!basisVectorsInWorld[i].equals(other.basisVectorsInWorld[i]))
                return false;
          }
 

@@ -1,16 +1,10 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.core;
 
 import gnu.trove.list.TIntList;
-import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrixRMaj;
-import org.ejml.data.DMatrixSparseCSC;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.sparse.csc.CommonOps_DSCC;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.BlockInverseCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeC;
 import us.ihmc.convexOptimization.quadraticProgram.InverseMatrixCalculator;
@@ -111,6 +105,8 @@ public class LinearMPCQPSolver
       comRateCoefficientRegularization.set(1e-10);
 
       qpSolver = new SimpleEfficientActiveSetQPSolver();
+      qpSolver.setConvergenceThreshold(5e-6);
+      qpSolver.setConvergenceThresholdForLagrangeMultipliers(1e-4);
       if (inverseMatrixCalculator != null)
          qpSolver.setInverseHessianCalculator(inverseMatrixCalculator);
       qpSolver.setResetActiveSetOnSizeChange(false);
@@ -303,6 +299,24 @@ public class LinearMPCQPSolver
          case VRP_TRACKING:
             submitVRPTrackingCommand((VRPTrackingCommand) command);
             break;
+         case RHO_BOUND:
+            submitRhoBoundCommand((RhoBoundCommand) command);
+            break;
+         case NORMAL_FORCE_BOUND:
+            submitNormalForceBoundCommand((NormalForceBoundCommand) command);
+            break;
+         case FORCE_VALUE:
+            submitForceValueCommand((ForceObjectiveCommand) command);
+            break;
+         case FORCE_TRACKING:
+            submitForceTrackingCommand((ForceTrackingCommand) command);
+            break;
+         case FORCE_RATE_TRACKING:
+            submitForceRateTrackingCommand((ForceRateTrackingCommand) command);
+            break;
+         case RHO_TRACKING:
+            submitRhoTrackingCommand((RhoTrackingCommand) command);
+            break;
          default:
             throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
       }
@@ -332,6 +346,48 @@ public class LinearMPCQPSolver
    public void submitVRPTrackingCommand(VRPTrackingCommand command)
    {
       int offset = inputCalculator.calculateCompactVRPTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC, offset);
+   }
+
+   public void submitRhoBoundCommand(RhoBoundCommand command)
+   {
+      int offset = inputCalculator.calculateRhoBoundCommandCompact(qpInputTypeA, command);
+      if (offset != -1)
+         addInput(qpInputTypeA, offset);
+   }
+
+   public void submitNormalForceBoundCommand(NormalForceBoundCommand command)
+   {
+      int offset = inputCalculator.calculateNormalForceBoundCommandCompact(qpInputTypeA, command);
+      if (offset != -1)
+         addInput(qpInputTypeA, offset);
+   }
+
+   public void submitForceValueCommand(ForceObjectiveCommand command)
+   {
+      boolean success = inputCalculator.calculateForceMinimizationObjective(qpInputTypeC, command);
+      if (success)
+         addInput(qpInputTypeC);
+   }
+
+   public void submitForceTrackingCommand(ForceTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateForceTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC);
+   }
+
+   public void submitForceRateTrackingCommand(ForceRateTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateForceRateTrackingObjective(qpInputTypeC, command);
+      if (offset != -1)
+         addInput(qpInputTypeC);
+   }
+
+   public void submitRhoTrackingCommand(RhoTrackingCommand command)
+   {
+      int offset = inputCalculator.calculateRhoTrackingObjective(qpInputTypeC, command);
       if (offset != -1)
          addInput(qpInputTypeC, offset);
    }
