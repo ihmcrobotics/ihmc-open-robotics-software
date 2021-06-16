@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.commonWalkingControlModules.trajectories.AdaptiveSwingTimingTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -117,11 +118,14 @@ public class LookAndStepSteppingTask
       Pose3DReadOnly startStep = footstepPlanEtc.getStartFootPoses().get(endStep.getRobotSide());
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
       double maxStepZ = footstepPlannerParameters.getMaxStepZ();
-      double maximumStepDistance = EuclidCoreTools.norm(footstepPlannerParameters.getMaximumStepReach(), maxStepZ);
-      double stepDistance = startStep.getPosition().distance(endStep.getFootstepPose().getPosition());
-      double alpha = MathTools.clamp((stepDistance - idealStepLength) / (maximumStepDistance - idealStepLength), 0.0, 1.0);
-      double swingDuration = swingPlannerParameters.getMinimumSwingTime()
-            + alpha * (swingPlannerParameters.getMaximumSwingTime() - swingPlannerParameters.getMinimumSwingTime());
+      double swingDuration = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
+                                                                         footstepPlannerParameters.getMaxSwingReach(),
+                                                                         maxStepZ,
+                                                                         swingPlannerParameters.getMinimumSwingTime(),
+                                                                         swingPlannerParameters.getMaximumSwingTime(),
+                                                                         startStep.getPosition(),
+                                                                         endStep.getFootstepPose().getPosition());
+
       if (endStep.getSwingDuration() < swingDuration)
       {
          statusLogger.info("Increasing swing duration to {} s", swingDuration);
