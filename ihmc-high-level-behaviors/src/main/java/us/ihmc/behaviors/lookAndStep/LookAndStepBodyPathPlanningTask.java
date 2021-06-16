@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -56,7 +56,7 @@ public class LookAndStepBodyPathPlanningTask
    {
       private ResettableExceptionHandlingExecutorService executor;
       private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
-      private final TypedInput<Pose3D> goalInput = new TypedInput<>();
+      private final TypedInput<Pose3DReadOnly> goalInput = new TypedInput<>();
       private final Timer mapRegionsExpirationTimer = new Timer();
       private TimerSnapshotWithExpiration mapRegionsReceptionTimerSnapshot;
       private Supplier<LookAndStepBehavior.State> behaviorStateReference;
@@ -130,8 +130,9 @@ public class LookAndStepBodyPathPlanningTask
          mapRegionsExpirationTimer.reset();
       }
 
-      public void acceptGoal(Pose3D goal)
+      public void acceptGoal(Pose3DReadOnly goal)
       {
+         reset();
          goalInput.set(goal);
          LogTools.info(StringTools.format("Body path goal received: {}",
                                           goal == null ? null : StringTools.format("x: {} y: {} z: {} yaw: {}",
@@ -140,6 +141,11 @@ public class LookAndStepBodyPathPlanningTask
                                                                                    goal.getZ(),
                                                                                    goal.getYaw())
                                                                            .get()));
+      }
+
+      public boolean isReset()
+      {
+         return goalInput.getLatest() == null;
       }
 
       public void reset()
@@ -176,8 +182,8 @@ public class LookAndStepBodyPathPlanningTask
    }
 
    protected PlanarRegionsList mapRegions;
-   protected Pose3D goal;
-   protected RemoteSyncedRobotModel syncedRobot;
+   protected Pose3DReadOnly goal;
+   protected ROS2SyncedRobotModel syncedRobot;
 
    protected void performTask()
    {

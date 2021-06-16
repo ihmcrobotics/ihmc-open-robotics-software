@@ -14,7 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.RobotWalkRequester;
@@ -30,7 +30,6 @@ public class LookAndStepSteppingTask
 {
    protected StatusLogger statusLogger;
    protected UIPublisher uiPublisher;
-   protected SwingPlanningModule footstepPlanPostProcessor;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
    protected FootstepPlannerParametersReadOnly footstepPlannerParameters;
    protected SwingPlannerParametersReadOnly swingPlannerParameters;
@@ -39,7 +38,7 @@ public class LookAndStepSteppingTask
    protected Runnable replanFootstepsOutput;
 
    protected FootstepPlanEtcetera footstepPlanEtc;
-   protected RemoteSyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
    protected SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;
@@ -59,7 +58,6 @@ public class LookAndStepSteppingTask
          footstepPlannerParameters = lookAndStep.footstepPlannerParameters;
          swingPlannerParameters = lookAndStep.swingPlannerParameters;
          uiPublisher = lookAndStep.helper::publish;
-         footstepPlanPostProcessor = lookAndStep.helper.createFootstepPlanPostProcessor();
          robotWalkRequester = lookAndStep.robotInterface::requestWalk;
          replanFootstepsOutput = () ->
          {
@@ -112,11 +110,6 @@ public class LookAndStepSteppingTask
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
       PlannedFootstep footstepToTake = footstepPlanEtc.getFootstep(0);
       shortenedFootstepPlan.addFootstep(footstepToTake);
-
-      footstepPlanPostProcessor.computeSwingWaypoints(footstepPlanEtc.getPlanarRegions(),
-                                                      shortenedFootstepPlan,
-                                                      footstepPlanEtc.getStartFootPoses(),
-                                                      footstepPlanEtc.getSwingPlannerType());
 
       // TODO: Clean this up.
       // Extract swing time calculation from the proportion swing planner

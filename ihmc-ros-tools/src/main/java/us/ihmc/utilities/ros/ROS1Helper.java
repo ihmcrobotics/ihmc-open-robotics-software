@@ -3,6 +3,9 @@ package us.ihmc.utilities.ros;
 import org.ros.internal.message.Message;
 import org.ros.message.Time;
 import org.ros.node.parameter.ParameterListener;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.log.LogTools;
 import us.ihmc.utilities.ros.publisher.RosTopicPublisher;
@@ -10,6 +13,9 @@ import us.ihmc.utilities.ros.subscriber.RosTopicSubscriberInterface;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 /**
@@ -27,14 +33,18 @@ public class ROS1Helper implements RosNodeInterface
    private final HashMap<RosTopicSubscriberInterface<? extends Message>, String> subscribers = new HashMap<>();
 
    private boolean needsReconnect = true;
+   private final ScheduledExecutorService scheduler;
+   private ScheduledFuture<?> scheduledFuture;
 
    public ROS1Helper(String nodeName)
    {
       this.nodeName = nodeName;
+      scheduler = ThreadTools.newSingleDaemonThreadScheduledExecutor("ROS1HelperMaintenance");
    }
 
-   public void ensureConnected()
+   private void ensureConnected()
    {
+      scheduledFuture = null;
       if (needsReconnect)
       {
          needsReconnect = false;
@@ -57,11 +67,26 @@ public class ROS1Helper implements RosNodeInterface
       }
    }
 
+   /**
+    * Automatically tries to reconnect after new publishers are added,
+    * but only 1/3 of a second after nothing new has been attached.
+    */
+   private void scheduleTentativeReconnect()
+   {
+      if (scheduledFuture != null)
+      {
+         scheduledFuture.cancel(false);
+      }
+      scheduledFuture = scheduler.schedule(() -> ExceptionTools.handle(this::ensureConnected, DefaultExceptionHandler.PRINT_MESSAGE),
+                                           333, TimeUnit.MILLISECONDS);
+   }
+
    @Override
    public void attachPublisher(String topicName, RosTopicPublisher<? extends Message> publisher)
    {
       publishers.put(publisher, topicName);
       needsReconnect = true;
+      scheduleTentativeReconnect();
    }
 
    @Override
@@ -69,6 +94,7 @@ public class ROS1Helper implements RosNodeInterface
    {
       subscribers.put(subscriber, topicName);
       needsReconnect = true;
+      scheduleTentativeReconnect();
    }
 
    @Override
@@ -102,6 +128,7 @@ public class ROS1Helper implements RosNodeInterface
 
    public void destroy()
    {
+      scheduler.shutdown();
       ros1Node.shutdown();
    }
 

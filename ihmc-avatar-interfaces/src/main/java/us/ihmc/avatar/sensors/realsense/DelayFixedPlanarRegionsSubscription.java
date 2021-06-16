@@ -3,13 +3,21 @@ package us.ihmc.avatar.sensors.realsense;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.jfree.util.Log;
+import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPointFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -19,6 +27,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBu
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.publisher.RosPoseStampedPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 import java.util.function.Consumer;
@@ -39,6 +48,11 @@ public class DelayFixedPlanarRegionsSubscription
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
    private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
+   private RosPoseStampedPublisher sensorPosePublisher;
+   private boolean posePublisherEnabled = false;
+
+   private CollisionBoxProvider collisionBoxProvider;
+   private CollidingScanPointFilter collisionFilter;
 
    private boolean enabled = false;
    private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
@@ -71,12 +85,18 @@ public class DelayFixedPlanarRegionsSubscription
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
+      sensorPosePublisher = new RosPoseStampedPublisher(false);
+
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
+
+      collisionBoxProvider = robotModel.getCollisionBoxProvider();
+      collisionFilter = new CollidingScanPointFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
    }
 
    public void subscribe(RosNodeInterface ros1Node)
    {
       this.ros1Node = ros1Node;
+      this.ros1Node.attachPublisher("/atlas/sensors/chest_l515/pose",sensorPosePublisher);
       rosClockCalculator.subscribeToROS1Topics(ros1Node);
       subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
    }
@@ -148,6 +168,18 @@ public class DelayFixedPlanarRegionsSubscription
                {
                   planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
                   planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
+
+                  collisionFilter.update();
+                  gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
+
+                  if(posePublisherEnabled)
+                  {
+                     RigidBodyTransform transform = referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame();
+                     sensorPosePublisher.publish("chest_l515",
+                                                 (Vector3D) transform.getTranslation(),
+                                                 new Quaternion(transform.getRotation()),
+                                                 new Time(currentTimeInWall));
+                  }
                }
                catch (NotARotationMatrixException e)
                {
@@ -188,5 +220,10 @@ public class DelayFixedPlanarRegionsSubscription
    public double getDelay()
    {
       return delay;
+   }
+
+   public void setPosePublisherEnabled(boolean posePublisherEnabled)
+   {
+      this.posePublisherEnabled = posePublisherEnabled;
    }
 }
