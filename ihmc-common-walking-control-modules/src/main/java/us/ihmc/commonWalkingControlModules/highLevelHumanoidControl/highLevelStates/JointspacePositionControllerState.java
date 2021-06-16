@@ -256,7 +256,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          trajectoryDone = new YoBoolean(jointName + shortName + "Done", registry);
 
          trajectoryStartTime = new YoDouble(jointName + "_trajectoryStartTime", registry);
-         jointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(jointName, RigidBodyJointspaceControlState.maxPointsInGenerator, registry);
+         jointTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator(jointName, 50, registry);
          pointQueue = new RecyclingArrayDeque<>(RigidBodyJointspaceControlState.maxPoints, OneDoFTrajectoryPoint::new, OneDoFTrajectoryPoint::set);
 
          numberOfPointsInQueue = new YoInteger(jointName + "_numberOfPointsInQueue", registry);
@@ -317,7 +317,7 @@ public class JointspacePositionControllerState extends HighLevelControllerState
          }
 
          int currentNumberOfWaypoints = jointTrajectoryGenerator.getCurrentNumberOfWaypoints();
-         int pointsToAdd = RigidBodyJointspaceControlState.maxPointsInGenerator - currentNumberOfWaypoints;
+         int pointsToAdd = jointTrajectoryGenerator.getMaximumNumberOfWaypoints() - currentNumberOfWaypoints;
 
          for (int pointIdx = 0; pointIdx < pointsToAdd; pointIdx++)
          {
