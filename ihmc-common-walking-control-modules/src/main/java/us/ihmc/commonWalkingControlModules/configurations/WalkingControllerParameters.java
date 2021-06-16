@@ -72,6 +72,16 @@ public abstract class WalkingControllerParameters
       return false;
    }
 
+   public boolean resubmitStepsInSwingEveryTick()
+   {
+      return false;
+   }
+
+   public boolean resubmitStepsInTransferEveryTick()
+   {
+      return false;
+   }
+
    /**
     * Method returns robot specific parameters for the {@link ToeSlippingDetector}.
     * <p>

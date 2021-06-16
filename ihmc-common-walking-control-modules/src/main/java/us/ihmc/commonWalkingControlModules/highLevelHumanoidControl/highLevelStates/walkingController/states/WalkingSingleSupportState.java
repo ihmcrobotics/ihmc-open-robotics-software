@@ -66,6 +66,8 @@ public class WalkingSingleSupportState extends SingleSupportState
    private final YoDouble icpErrorThresholdToSpeedUpSwing = new YoDouble("icpErrorThresholdToSpeedUpSwing", registry);
 
    private final YoBoolean finishSingleSupportWhenICPPlannerIsDone = new YoBoolean("finishSingleSupportWhenICPPlannerIsDone", registry);
+   private final YoBoolean resubmitStepsInSwingEveryTick = new YoBoolean("resubmitStepsInSwingEveryTick", registry);
+
    private final BooleanProvider minimizeAngularMomentumRateZDuringSwing;
 
    private final DoubleProvider timeOverrunToInitializeFreeFall;
@@ -109,6 +111,7 @@ public class WalkingSingleSupportState extends SingleSupportState
                                                                                "swingTimeOverrunToInitializeFreeFall",
                                                                                registry,
                                                                                walkingControllerParameters.getSwingTimeOverrunToInitializeFreeFall());
+      resubmitStepsInSwingEveryTick.set(walkingControllerParameters.resubmitStepsInTransferEveryTick());
 
       additionalFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(additionalFootstepsToConsider);
@@ -127,6 +130,20 @@ public class WalkingSingleSupportState extends SingleSupportState
    @Override
    public void doAction(double timeInState)
    {
+      if (resubmitStepsInSwingEveryTick.getBooleanValue())
+      {
+         balanceManager.clearICPPlan();
+         balanceManager.addFootstepToPlan(nextFootstep, footstepTiming);
+
+         int stepsToAdd = Math.min(additionalFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+         for (int i = 0; i < stepsToAdd; i++)
+         {
+            walkingMessageHandler.peekFootstep(i, footsteps[i]);
+            walkingMessageHandler.peekTiming(i, footstepTimings[i]);
+            balanceManager.addFootstepToPlan(footsteps[i], footstepTimings[i]);
+         }
+      }
+
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
       balanceManager.computeICPPlan();
 
