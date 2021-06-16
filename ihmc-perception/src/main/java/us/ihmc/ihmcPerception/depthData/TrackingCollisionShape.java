@@ -105,7 +105,7 @@ public class TrackingCollisionShape
             return false;
 
          EuclidShape3DCollisionResult result = collisionDetector.evaluateCollision(shapeInLocal, shape3D);
-         return result.getSignedDistance() > 0.05;
+         return result.getSignedDistance() < -0.02;
       }
    }
 }
