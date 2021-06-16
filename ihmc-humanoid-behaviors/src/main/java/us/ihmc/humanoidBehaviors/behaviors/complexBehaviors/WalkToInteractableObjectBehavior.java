@@ -80,7 +80,7 @@ public class WalkToInteractableObjectBehavior extends StateMachineBehavior<WalkT
          protected void setBehaviorInput()
          {
             Pair<FramePose3D, Double> desiredGoalAndHeading = computeDesiredGoalAndHeading(walkToPoint1,true);
-            atlasPrimitiveActions.walkToLocationPlannedBehavior.setAssumeFlatGround(false);
+            atlasPrimitiveActions.walkToLocationPlannedBehavior.setAssumeFlatGround(true);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setPlanBodyPath(false);
             atlasPrimitiveActions.walkToLocationPlannedBehavior.setTarget(desiredGoalAndHeading.getLeft());
 
