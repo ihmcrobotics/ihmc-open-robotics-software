@@ -356,9 +356,14 @@ public class KinematicsToolboxController extends ToolboxController
     * @param yoGraphicsListRegistry  registry to register visualization to.
     * @param parentRegistry          registry to attach {@code YoVariable}s to.
     */
-   public KinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager, FloatingJointBasics rootJoint,
-                                      OneDoFJointBasics[] oneDoFJoints, Collection<? extends RigidBodyBasics> controllableRigidBodies, double updateDT,
-                                      YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public KinematicsToolboxController(CommandInputManager commandInputManager,
+                                      StatusMessageOutputManager statusOutputManager,
+                                      FloatingJointBasics rootJoint,
+                                      OneDoFJointBasics[] oneDoFJoints,
+                                      Collection<? extends RigidBodyBasics> controllableRigidBodies,
+                                      double updateDT,
+                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                      YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
       this.commandInputManager = commandInputManager;
@@ -787,8 +792,9 @@ public class KinematicsToolboxController extends ToolboxController
    private void consumeUserCommands(FeedbackControlCommandBuffer fbCommandBufferToPack, InverseKinematicsCommandBuffer ikCommandBufferToPack)
    {
       consumeUserConfigurationCommands();
-      consumeUserMotionObjectiveCommands(fbCommandBufferToPack, ikCommandBufferToPack);
-      consumeUserContactStateCommands(ikCommandBufferToPack);
+      boolean hasProcessedContactState = consumeUserMotionObjectiveCommands(fbCommandBufferToPack, ikCommandBufferToPack);
+      if (!hasProcessedContactState)
+         consumeUserContactStateCommands(ikCommandBufferToPack);
    }
 
    private void consumeUserConfigurationCommands()
@@ -864,8 +870,9 @@ public class KinematicsToolboxController extends ToolboxController
       }
    }
 
-   private void consumeUserMotionObjectiveCommands(FeedbackControlCommandBuffer fbCommandBufferToPack, InverseKinematicsCommandBuffer ikCommandBufferToPack)
+   private boolean consumeUserMotionObjectiveCommands(FeedbackControlCommandBuffer fbCommandBufferToPack, InverseKinematicsCommandBuffer ikCommandBufferToPack)
    {
+      boolean hasProcessedContactState = false;
       previousUserFBCommands.set(userFBCommands);
       userFBCommands.clear();
 
@@ -1024,6 +1031,7 @@ public class KinematicsToolboxController extends ToolboxController
          {
             KinematicsToolboxContactStateCommand contactStateInput = command.getContactStateInput();
             processUserContactStateCommand(contactStateInput, ikCommandBufferToPack);
+            hasProcessedContactState = true;
          }
       }
 
@@ -1046,6 +1054,8 @@ public class KinematicsToolboxController extends ToolboxController
          // Stats accessible from remote visualizer.
          numberOfActiveCommands.set(userFBCommands.getNumberOfCommands());
       }
+
+      return hasProcessedContactState;
    }
 
    private void consumeUserContactStateCommands(InverseKinematicsCommandBuffer bufferToPack)
@@ -1054,6 +1064,10 @@ public class KinematicsToolboxController extends ToolboxController
       {
          KinematicsToolboxContactStateCommand command = commandInputManager.pollNewestCommand(KinematicsToolboxContactStateCommand.class);
          processUserContactStateCommand(command, bufferToPack);
+      }
+      else if (isUserProvidingSupportPolygon.getValue() && !contactPointLocations.isEmpty())
+      {
+         updateSupportPolygonConstraint(contactPointLocations, bufferToPack);
       }
    }
 
