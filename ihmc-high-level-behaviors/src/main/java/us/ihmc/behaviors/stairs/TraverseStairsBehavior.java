@@ -1,8 +1,9 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
+import controller_msgs.msg.dds.DetectedFiducialPacket;
 import std_msgs.msg.dds.Empty;
-import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
@@ -13,10 +14,12 @@ import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.tools.Timer;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.concurrent.Executors;
@@ -24,6 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
@@ -47,6 +51,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
    private final AtomicBoolean operatorReviewEnabled = new AtomicBoolean(true);
+   private final AtomicReference<DetectedFiducialPacket> detectedFiducial = new AtomicReference<>();
 
    private final StateMachine<TraverseStairsStateName, State> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
@@ -56,6 +61,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    private final TraverseStairsPlanStepsState planStepsState;
    private final TraverseStairsExecuteStepsState executeStepsState;
    private TraverseStairsStateName currentState = TraverseStairsStateName.SQUARE_UP;
+   private final Timer stairsDetectedTimer = new Timer();
 
    public enum TraverseStairsStateName
    {
@@ -102,6 +108,15 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       {
          statusLogger.info("Operator review {}", enabled ? "enabled" : "disabled");
          operatorReviewEnabled.set(enabled);
+      });
+      helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
+      {
+         if (detectedFiducialMessage.getFiducialId() == 350)
+         {
+            stairsDetectedTimer.reset();
+            detectedFiducial.set(detectedFiducialMessage);
+            helper.publish(DetectedStairsPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
+         }
       });
    }
 
@@ -239,6 +254,11 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
          behaviorHasCrashed.set(true);
          helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
       }
+   }
+
+   public boolean hasSeenStairsecently()
+   {
+      return stairsDetectedTimer.isRunning(5.0);
    }
 
    @Override

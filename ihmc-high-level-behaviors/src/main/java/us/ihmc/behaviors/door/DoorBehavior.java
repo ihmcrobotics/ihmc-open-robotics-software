@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorS
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,7 +35,6 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new, DoorBehaviorAPI.create());
    private final BehaviorHelper helper;
    private ROS2SyncedRobotModel syncedRobot;
-   private final Notification doorConfirmed;
    private final AtomicReference<Boolean> reviewEnabled;
    private boolean firstTick = true;
    private boolean behaviorStarted = false;
@@ -43,15 +43,16 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    private final Pose3D doorPose = new Pose3D(NAN_POSE);
    private double distanceToDoor = 0.0;
    private boolean isFacingDoor = false;
+   private final Timer doorDetectedTimer = new Timer();
 
    public DoorBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
       helper.subscribeToBehaviorStatusViaCallback(status::set);
-      doorConfirmed = helper.subscribeTypelessViaNotification(DoorConfirmed);
       reviewEnabled = helper.subscribeViaReference(ReviewEnabled, true);
       helper.subscribeToDoorLocationViaCallback(doorLocationPacket ->
       {
+         doorDetectedTimer.reset();
          doorPose.set(doorLocationPacket.getDoorTransformToWorld());
          helper.publish(DetectedDoorPose, MutablePair.of(DoorType.fromByte(doorLocationPacket.getDetectedDoorType()), new Pose3D(doorPose)));
       });
@@ -121,7 +122,6 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
       firstTick = true;
       behaviorStarted = false;
       helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
-      doorConfirmed.poll();
    }
 
    @Override
@@ -138,6 +138,11 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
    public boolean isFacingDoor()
    {
       return isFacingDoor;
+   }
+
+   public boolean hasSeenDoorRecently()
+   {
+      return doorDetectedTimer.isRunning(5.0);
    }
 
    public double getDistanceToDoor()

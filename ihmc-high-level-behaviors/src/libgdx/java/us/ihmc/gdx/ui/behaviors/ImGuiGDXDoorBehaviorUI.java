@@ -96,10 +96,47 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       CurrentBehaviorStatus currentStatus = status.get();
       currentStatePlot.render(currentStatus == null ? -1 : currentStatus.ordinal(), currentStatus == null ? "" : currentStatus.name());
 
+      if (ImGui.checkbox(labels.get("Operator review"), reviewDoorPose))
+      {
+         helper.publish(ReviewEnabled, reviewDoorPose.get());
+      }
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Resend latest door location")))
       {
          helper.publish(ROS2Tools::getDoorLocationTopic,
                         HumanoidMessageTools.createDoorLocationPacket(detectedDoorPose.get().getRight(), detectedDoorPose.get().getLeft().toByte()));
+      }
+      ImGui.text("Behavior types:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("STOP")))
+      {
+         helper.publishBehaviorType(HumanoidBehaviorType.STOP);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("RESET_ROBOT")))
+      {
+         helper.publishBehaviorType(HumanoidBehaviorType.RESET_ROBOT);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("WALK_THROUGH_DOOR")))
+      {
+         helper.publishBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR);
+      }
+      ImGui.text("Behavior control modes:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Stop")))
+      {
+         helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Pause")))
+      {
+         helper.publishBehaviorControlMode(BehaviorControlModeEnum.PAUSE);
+      }
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Resume")))
+      {
+         helper.publishBehaviorControlMode(BehaviorControlModeEnum.RESUME);
       }
       ImGui.text("Object & Fiducial toolboxes:");
       ImGui.sameLine();
@@ -119,47 +156,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publishToolboxState(FiducialDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
          helper.publishToolboxState(ObjectDetectorToolboxModule::getInputTopic, ToolboxState.REINITIALIZE);
-      }
-      ImGui.text("Behavior control modes:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Stop")))
-      {
-         helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Pause")))
-      {
-         helper.publishBehaviorControlMode(BehaviorControlModeEnum.PAUSE);
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Resume")))
-      {
-         helper.publishBehaviorControlMode(BehaviorControlModeEnum.RESUME);
-      }
-      ImGui.text("Behavior types:");
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("STOP")))
-      {
-         helper.publishBehaviorType(HumanoidBehaviorType.STOP);
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("RESET_ROBOT")))
-      {
-         helper.publishBehaviorType(HumanoidBehaviorType.RESET_ROBOT);
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("WALK_THROUGH_DOOR")))
-      {
-         helper.publishBehaviorType(HumanoidBehaviorType.WALK_THROUGH_DOOR);
-      }
-      if (ImGui.checkbox(labels.get("Review door pose"), reviewDoorPose))
-      {
-         helper.publish(ReviewEnabled, reviewDoorPose.get());
-      }
-      ImGui.sameLine();
-      if (ImGui.button(labels.get("Confirm door pose and start")))
-      {
-         helper.publish(DoorConfirmed);
       }
    }
 
