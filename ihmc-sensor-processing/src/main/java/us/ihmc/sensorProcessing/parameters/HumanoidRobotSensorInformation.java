@@ -40,4 +40,9 @@ public interface HumanoidRobotSensorInformation extends AvatarRobotRosVisionSens
                                                                                     getObjectDetectionCameraParentFrame(referenceFrames),
                                                                                     getObjectDetectionCameraTransform());
    }
+
+   public default String getHeadCameraName()
+   {
+      return null;
+   }
 }
