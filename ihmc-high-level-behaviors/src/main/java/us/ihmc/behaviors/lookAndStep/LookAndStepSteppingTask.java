@@ -119,13 +119,13 @@ public class LookAndStepSteppingTask
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
       double maxStepZ = footstepPlannerParameters.getMaxStepZ();
       double swingDuration = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
-                                                                         footstepPlannerParameters.getMaximumStepReach(),
+                                                                         footstepPlannerParameters.getMaxSwingReach(),
                                                                          maxStepZ,
                                                                          swingPlannerParameters.getMinimumSwingTime(),
                                                                          swingPlannerParameters.getMaximumSwingTime(),
                                                                          startStep.getPosition(),
                                                                          endStep.getFootstepPose().getPosition());
-Zz
+
       if (endStep.getSwingDuration() < swingDuration)
       {
          statusLogger.info("Increasing swing duration to {} s", swingDuration);

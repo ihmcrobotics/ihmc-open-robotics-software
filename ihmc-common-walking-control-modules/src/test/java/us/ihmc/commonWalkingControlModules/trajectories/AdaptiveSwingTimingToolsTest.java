@@ -20,7 +20,7 @@ public class AdaptiveSwingTimingToolsTest
       Random random = new Random(1738L);
 
       double idealStepLength = 0.4;
-      double maxStepReach = 1.0;
+      double maxSwingReach = 2.0;
       double maxStepHeight = 0.5;
       double minTime = 0.5;
       double maxTime = 1.5;
@@ -32,12 +32,12 @@ public class AdaptiveSwingTimingToolsTest
          perfectEndPoint.addX(idealStepLength * 2.0);
 
          Point3D maxEndPoint = new Point3D(startPoint);
-         maxEndPoint.addX(maxStepReach * 2.0);
+         maxEndPoint.addX(maxSwingReach);
          maxEndPoint.addZ(2.0 * maxStepHeight);
 
 
-         double swingTimeAtIdealLengths = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength, maxStepReach, maxStepHeight, minTime, maxTime, startPoint, perfectEndPoint);
-         double swingTimeAtMaxDistances = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength, maxStepReach, maxStepHeight, minTime, maxTime, startPoint, maxEndPoint);
+         double swingTimeAtIdealLengths = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength, maxSwingReach, maxStepHeight, minTime, maxTime, startPoint, perfectEndPoint);
+         double swingTimeAtMaxDistances = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength, maxSwingReach, maxStepHeight, minTime, maxTime, startPoint, maxEndPoint);
 
          assertEquals(minTime, swingTimeAtIdealLengths, 1e-5);
          assertEquals(maxTime, swingTimeAtMaxDistances, 1e-5);
@@ -50,7 +50,7 @@ public class AdaptiveSwingTimingToolsTest
       Random random = new Random(1738L);
 
       double idealStepLength = 0.4;
-      double maxStepReach = 1.0;
+      double maxSwingReach = 2.0;
       double maxStepHeight = 0.5;
       double minTime = 0.5;
       double maxTime = 1.5;
@@ -59,7 +59,7 @@ public class AdaptiveSwingTimingToolsTest
       {
          Point3DReadOnly startPoint = EuclidCoreRandomTools.nextPoint3D(random);
 
-         double swingTime = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength, maxStepReach, maxStepHeight, minTime, maxTime, startPoint, startPoint);
+         double swingTime = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength, maxSwingReach, maxStepHeight, minTime, maxTime, startPoint, startPoint);
 
          assertEquals(minTime, swingTime, 1e-5);
       }
