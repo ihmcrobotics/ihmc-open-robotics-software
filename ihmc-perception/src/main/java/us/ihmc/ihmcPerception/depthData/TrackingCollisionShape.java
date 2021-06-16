@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DBasics;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameBoundingBox3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector;
 import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
@@ -69,12 +71,14 @@ public class TrackingCollisionShape
       private final ReferenceFrame frame;
       private final CollisionShape shape;
       private final Shape3DReadOnly shape3D;
+      private final BoundingBox3DReadOnly boundingBox;
 
       private TrackingCollisionShapeImpl(ReferenceFrame frame, CollisionShape shape)
       {
          this.frame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("CollisionFrame", frame, shape.getPose());
          this.shape = shape;
          this.shape3D = shape.getOrCreateShape3D();
+         boundingBox = shape3D.getBoundingBox();
       }
 
       private final RigidBodyTransform transform = new RigidBodyTransform();
@@ -97,7 +101,11 @@ public class TrackingCollisionShape
          ConvexPolytope3D shapeInLocal = new ConvexPolytope3D(otherShape);
          shapeInLocal.applyTransform(transform);
 
-         return collisionDetector.evaluateCollision(shapeInLocal, shape3D).areShapesColliding();
+         if (!boundingBox.intersectsExclusive(otherShape.getBoundingBox()))
+            return false;
+
+         EuclidShape3DCollisionResult result = collisionDetector.evaluateCollision(shapeInLocal, shape3D);
+         return result.getSignedDistance() > 0.05;
       }
    }
 }
