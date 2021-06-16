@@ -20,9 +20,16 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.MissingThreadTools;
@@ -31,6 +38,8 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.publisher.RosPoseStampedPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class DelayFixedPlanarRegionsSubscription
@@ -91,7 +100,15 @@ public class DelayFixedPlanarRegionsSubscription
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
 
       collisionBoxProvider = robotModel.getCollisionBoxProvider();
-      collisionFilter = new CollidingScanRegionFilter(new CollisionShapeTester(fullRobotModel, collisionBoxProvider));
+      CollisionShapeTester shapeTester = new CollisionShapeTester();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<JointBasics> joints = new ArrayList<>();
+         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
+         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
+         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
+      }
+      collisionFilter = new CollidingScanRegionFilter(shapeTester);
    }
 
    public void subscribe(RosNodeInterface ros1Node)
