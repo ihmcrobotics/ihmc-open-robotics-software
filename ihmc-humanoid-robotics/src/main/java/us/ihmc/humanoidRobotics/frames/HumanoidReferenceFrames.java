@@ -115,7 +115,7 @@ public class HumanoidReferenceFrames implements CommonHumanoidReferenceFrames
       {
          lidarSensorFrame = null;
       }
-      headCameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
+      headCameraFrame = fullRobotModel.getCameraFrame(sensorInformation.getHeadCameraName());
 
       if (robotJointNames.getSpineJointNames() != null)
       {
