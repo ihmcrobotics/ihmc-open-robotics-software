@@ -47,8 +47,6 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
 
       ImGui.end();
 
-      ros1Helper.ensureConnected();
-
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
          if (visualizer.isActive())

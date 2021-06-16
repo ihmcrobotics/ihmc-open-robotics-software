@@ -2,7 +2,7 @@ package us.ihmc.avatar.sensors.realsense;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.PointCloudData;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -29,7 +29,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    private static final double MIN_PUBLISH_PERIOD = UnitConversions.hertzToSeconds(10.0);
 
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> publisher;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final FramePose3D tempSensorFramePose = new FramePose3D();
    private final Timer throttleTimer = new Timer();
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
@@ -42,7 +42,7 @@ public class RealsensePointCloudROS1Bridge extends AbstractRosTopicSubscriber<se
    {
       super(sensor_msgs.PointCloud2._TYPE);
 
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       LogTools.info("Subscribing ROS 1: {}", ros1InputTopic);
       ros1Node.attachSubscriber(ros1InputTopic, this);

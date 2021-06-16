@@ -8,6 +8,8 @@ import us.ihmc.robotics.stateMachine.core.State;
 
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.TimeLeftInPause;
+
 public class TraverseStairsPauseState implements State
 {
    private final BehaviorHelper helper;
@@ -46,7 +48,9 @@ public class TraverseStairsPauseState implements State
       }
       else if (!minimumPauseTimeElapsed)
       {
-         LogTools.info(getClass().getSimpleName() + ": " + timeInState + "/" + parameters.get(TraverseStairsBehaviorParameters.pauseTime));
+         double totalPauseDuration = parameters.get(TraverseStairsBehaviorParameters.pauseTime);
+         LogTools.debug(getClass().getSimpleName() + ": " + timeInState + "/" + totalPauseDuration);
+         helper.publish(TimeLeftInPause, totalPauseDuration - timeInState);
       }
       else if (!receivedAnyRegions)
       {

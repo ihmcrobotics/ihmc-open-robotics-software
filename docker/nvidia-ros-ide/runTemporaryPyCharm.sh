@@ -22,4 +22,4 @@ sudo -u root docker run \
     --volume $DOCKER_JETBRAINS_CONFIG_HOME:/home/robotlab/.config/JetBrains:rw \
     --volume $DOCKER_WORKSPACE:/home/robotlab/dev/workspace:rw \
     --volume /usr/share/fonts:/usr/share/fonts \
-    ihmcrobotics/nvidia-ros-ide:0.1 pycharm
+    ihmcrobotics/nvidia-ros-ide:0.2 pycharm

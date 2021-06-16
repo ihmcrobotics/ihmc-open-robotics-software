@@ -27,7 +27,7 @@ public class AtlasVisibilityGraphParameters extends StoredPropertySet implements
    public AtlasVisibilityGraphParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
       super(VisibilityGraphParametersKeys.keys, AtlasVisibilityGraphParameters.class, projectName, pathToResources, fileNameSuffix);
-      load();
+      loadUnsafe();
    }
 
    /** Use this to update and fix the INI file */
