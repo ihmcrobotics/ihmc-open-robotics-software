@@ -24,6 +24,7 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToWalkingSingleSupportState extends TransferState
@@ -39,6 +40,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final LegConfigurationManager legConfigurationManager;
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
+   private final YoBoolean resubmitStepsInTransferEveryTick = new YoBoolean("resubmitStepsInTransferEveryTick", registry);
 
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
    private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
@@ -78,6 +80,8 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                                                            "minimumSlowTransferDuration",
                                                                            registry,
                                                                            walkingControllerParameters.getMinimumSlowTransferDuration());
+      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
+
 
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
@@ -146,6 +150,27 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      if (resubmitStepsInTransferEveryTick.getBooleanValue())
+      {
+         int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+         for (int i = 0; i < stepsToAdd; i++)
+         {
+            Footstep footstep = footsteps[i];
+            FootstepTiming timing = footstepTimings[i];
+            walkingMessageHandler.peekFootstep(i, footstep);
+            walkingMessageHandler.peekTiming(i, timing);
+
+            if (i == 0)
+            {
+               adjustTiming(timing);
+               walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
+            }
+
+            balanceManager.addFootstepToPlan(footstep, timing);
+         }
+      }
+
+
       RobotSide swingSide = transferToSide.getOppositeSide();
       feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
