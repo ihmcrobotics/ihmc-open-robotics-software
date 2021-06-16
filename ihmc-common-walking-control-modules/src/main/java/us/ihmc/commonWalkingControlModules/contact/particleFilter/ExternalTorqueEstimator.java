@@ -23,9 +23,9 @@ import java.util.Arrays;
  * Implementation based on Haddadin, et. al:
  * <a href="www.repo.uni-hannover.de/bitstream/handle/123456789/3543/VorndammeSchHad2017_accepted.pdf">Collision Detection, Isolation and Identification for Humanoids</a>
  */
-public class JointspaceExternalContactEstimator implements RobotController
+public class ExternalTorqueEstimator implements ExternalTorqueEstimatorInterface
 {
-   private static final double defaultEstimatorGain = 0.7;
+   static final double defaultEstimatorGain = 0.7;
 
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
@@ -41,7 +41,7 @@ public class JointspaceExternalContactEstimator implements RobotController
 
    private final DMatrixRMaj currentIntegrandValue;
    private final DMatrixRMaj currentIntegratedValue;
-   private final DMatrixRMaj observedExternalJointTorque;
+   private final DMatrixRMaj estimatedExternalTorque;
    private final DMatrixRMaj hqd0;
    private final DMatrixRMaj hqd;
    private final DMatrixRMaj massMatrix;
@@ -56,10 +56,10 @@ public class JointspaceExternalContactEstimator implements RobotController
 
    private boolean firstTick = true;
 
-   public JointspaceExternalContactEstimator(JointBasics[] joints,
-                                             double dt,
-                                             ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
-                                             YoRegistry parentRegistry)
+   public ExternalTorqueEstimator(JointBasics[] joints,
+                                  double dt,
+                                  ForceEstimatorDynamicMatrixUpdater dynamicMatrixUpdater,
+                                  YoRegistry parentRegistry)
    {
       this.joints = joints;
       this.dt = dt;
@@ -70,7 +70,7 @@ public class JointspaceExternalContactEstimator implements RobotController
 
       this.currentIntegrandValue = new DMatrixRMaj(dofs, 1);
       this.currentIntegratedValue = new DMatrixRMaj(dofs, 1);
-      this.observedExternalJointTorque = new DMatrixRMaj(dofs, 1);
+      this.estimatedExternalTorque = new DMatrixRMaj(dofs, 1);
       this.hqd = new DMatrixRMaj(dofs, 1);
       this.massMatrix = new DMatrixRMaj(dofs, dofs);
       this.massMatrixPrev = new DMatrixRMaj(dofs, dofs);
@@ -108,7 +108,7 @@ public class JointspaceExternalContactEstimator implements RobotController
    public void initialize()
    {
       firstTick = true;
-      CommonOps_DDRM.fill(observedExternalJointTorque, 0.0);
+      CommonOps_DDRM.fill(estimatedExternalTorque, 0.0);
       CommonOps_DDRM.fill(currentIntegratedValue, 0.0);
    }
 
@@ -158,24 +158,25 @@ public class JointspaceExternalContactEstimator implements RobotController
       currentIntegrandValue.set(tau);
       CommonOps_DDRM.subtractEquals(currentIntegrandValue, coriolisGravityTerm);
       CommonOps_DDRM.multAdd(massMatrixDot, qd, currentIntegrandValue);
-      CommonOps_DDRM.addEquals(currentIntegrandValue, observedExternalJointTorque);
+      CommonOps_DDRM.addEquals(currentIntegrandValue, estimatedExternalTorque);
       CommonOps_DDRM.addEquals(currentIntegratedValue, dt, currentIntegrandValue);
 
       // calculate observed external joint torque
       CommonOps_DDRM.mult(massMatrix, qd, hqd);
-      CommonOps_DDRM.subtract(hqd, hqd0, observedExternalJointTorque);
-      CommonOps_DDRM.subtractEquals(observedExternalJointTorque, currentIntegratedValue);
-      CommonOps_DDRM.scale(estimationGain.getDoubleValue(), observedExternalJointTorque);
+      CommonOps_DDRM.subtract(hqd, hqd0, estimatedExternalTorque);
+      CommonOps_DDRM.subtractEquals(estimatedExternalTorque, currentIntegratedValue);
+      CommonOps_DDRM.scale(estimationGain.getDoubleValue(), estimatedExternalTorque);
 
       for (int i = 0; i < dofs; i++)
       {
-         yoObservedExternalJointTorque[i].set(observedExternalJointTorque.get(i, 0));
+         yoObservedExternalJointTorque[i].set(estimatedExternalTorque.get(i, 0));
       }
    }
 
-   public DMatrixRMaj getObservedExternalJointTorque()
+   @Override
+   public DMatrixRMaj getEstimatedExternalTorque()
    {
-      return observedExternalJointTorque;
+      return estimatedExternalTorque;
    }
 
    @Override
@@ -184,11 +185,13 @@ public class JointspaceExternalContactEstimator implements RobotController
       return registry;
    }
 
+   @Override
    public void requestInitialize()
    {
       this.requestInitialize.set(true);
    }
 
+   @Override
    public void setEstimatorGain(double estimatorGain)
    {
       this.estimationGain.set(estimatorGain);
