@@ -32,6 +32,8 @@ import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.tools.Timer;
 
+import java.util.concurrent.atomic.AtomicReference;
+
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
@@ -47,10 +49,12 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    private String currentState = "";
    private String currentLifecycleState = "";
    private final ImBoolean operatorReviewEnabled = new ImBoolean(true);
+   private final AtomicReference<Double> distanceToStairs;
    private final ImGuiEnumPlot currentLifecycleStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiMovingPlot pauseTimeLeft = new ImGuiMovingPlot("Pause time left", 1000, 250, 15);
    private final ImGuiMovingPlot supportRegionsReceived = new ImGuiMovingPlot("Support regions received", 1000, 250, 15);
+   private final ImGuiMovingPlot distanceToStairsPlot = new ImGuiMovingPlot("Distance to stairs", 1000, 250, 15);
    private long numberOfSupportRegionsReceived = 0;
    private final Timer supportRegionsReceivedTimer = new Timer();
    private final ImGuiGDXPoseGoalAffordance goalAffordance = new ImGuiGDXPoseGoalAffordance();
@@ -66,6 +70,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
          footstepPlanGraphic.generateMeshesAsync(MinimalFootstep.convertFootstepDataListMessage(footsteps));
       });
       footstepPlanGraphic.setTransparency(0.5);
+      distanceToStairs = helper.subscribeViaReference(DistanceToStairs, Double.NaN);
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.COMPLETED, completedStopwatch::reset);
       helper.subscribeViaCallback(State, state -> currentState = state);
       helper.subscribeViaCallback(LifecycleState, state -> currentLifecycleState = state);
@@ -167,6 +172,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publish(TraverseStairsBehaviorAPI.REPLAN);
       }
+      distanceToStairsPlot.render(distanceToStairs.get().floatValue());
    }
 
    private void disableSupportRegions()

@@ -3,6 +3,7 @@ package us.ihmc.behaviors.stairs;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
@@ -15,6 +16,8 @@ import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
@@ -29,14 +32,17 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorTools.NAN_POSE;
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
 public class TraverseStairsBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Traverse Stairs", TraverseStairsBehavior::new, create());
    private static final int UPDATE_RATE_MILLIS = 100;
+   public static final int STAIRS_FIDUCIAL_ID = 350;
 
    private final BehaviorHelper helper;
+   private ROS2SyncedRobotModel syncedRobot;
    private final StatusLogger statusLogger;
    private final RemoteHumanoidRobotInterface robotInterface;
    private final TraverseStairsBehaviorParameters parameters = new TraverseStairsBehaviorParameters();
@@ -62,6 +68,9 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    private final TraverseStairsExecuteStepsState executeStepsState;
    private TraverseStairsStateName currentState = TraverseStairsStateName.SQUARE_UP;
    private final Timer stairsDetectedTimer = new Timer();
+   private TraverseStairsLifecycleStateName currentLifeCycleState;
+   private final Pose3D stairsPose = new Pose3D(NAN_POSE);
+   private double distanceToStairs = 0.0;
 
    public enum TraverseStairsStateName
    {
@@ -111,10 +120,11 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       });
       helper.subscribeViaCallback(FiducialDetectorToolboxModule::getDetectedFiducialOutputTopic, detectedFiducialMessage ->
       {
-         if (detectedFiducialMessage.getFiducialId() == 350)
+         if (detectedFiducialMessage.getFiducialId() == STAIRS_FIDUCIAL_ID)
          {
             stairsDetectedTimer.reset();
             detectedFiducial.set(detectedFiducialMessage);
+            stairsPose.set(detectedFiducialMessage.getFiducialTransformToWorld());
             helper.publish(DetectedStairsPose, new Pose3D(detectedFiducialMessage.getFiducialTransformToWorld()));
          }
       });
@@ -147,21 +157,47 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       return factory.build(TraverseStairsStateName.SQUARE_UP);
    }
 
+   public void setSyncedRobot(ROS2SyncedRobotModel syncedRobot)
+   {
+      this.syncedRobot = syncedRobot;
+   }
+
+   @Override
+   public void clock()
+   {
+      FramePose3DReadOnly robotPose = syncedRobot.getFramePoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
+      distanceToStairs = stairsPose.getPosition().distance(robotPose.getPosition());
+      helper.publish(DistanceToStairs, distanceToStairs);
+
+      super.clock();
+   }
+
    @Override
    public BehaviorTreeNodeStatus tickInternal()
    {
       start();
 
       if (behaviorHasCrashed.get())
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.CRASHED.name());
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.CRASHED;
+      }
       else if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete())
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.COMPLETED.name());
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.COMPLETED;
+      }
       else if (currentState == TraverseStairsStateName.PLAN_STEPS && !planStepsState.isStillPlanning() && planStepsState.searchWasSuccessful())
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.AWAITING_APPROVAL.name());
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.AWAITING_APPROVAL;
+      }
       else if (isRunning.get())
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.RUNNING;
+      }
       else
-         helper.publish(LifecycleState, TraverseStairsLifecycleStateName.NOT_RUNNING.name());
+      {
+         currentLifeCycleState = TraverseStairsLifecycleStateName.NOT_RUNNING;
+      }
+      helper.publish(LifecycleState, currentLifeCycleState.name());
 
       return BehaviorTreeNodeStatus.SUCCESS;
    }
@@ -259,6 +295,16 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    public boolean hasSeenStairsecently()
    {
       return stairsDetectedTimer.isRunning(5.0);
+   }
+
+   public double getDistanceToStairs()
+   {
+      return distanceToStairs;
+   }
+
+   public boolean isGoing()
+   {
+      return currentLifeCycleState == TraverseStairsLifecycleStateName.RUNNING || currentLifeCycleState == TraverseStairsLifecycleStateName.AWAITING_APPROVAL;
    }
 
    @Override

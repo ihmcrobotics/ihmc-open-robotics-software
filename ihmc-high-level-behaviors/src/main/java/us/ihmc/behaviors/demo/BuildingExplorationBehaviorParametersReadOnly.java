@@ -10,4 +10,9 @@ public interface BuildingExplorationBehaviorParametersReadOnly extends StoredPro
    {
       return get(distanceFromDoorToTransition);
    }
+
+   default double getDistanceFromStairsToTransition()
+   {
+      return get(distanceFromStairsToTransition);
+   }
 }
