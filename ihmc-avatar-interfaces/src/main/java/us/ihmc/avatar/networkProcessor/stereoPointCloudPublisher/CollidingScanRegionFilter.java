@@ -39,6 +39,6 @@ public class CollidingScanRegionFilter implements ScanRegionFilter
             return false;
       }
 
-      return collisionBoxNode.contains(region);
+      return !collisionBoxNode.contains(region);
    }
 }
