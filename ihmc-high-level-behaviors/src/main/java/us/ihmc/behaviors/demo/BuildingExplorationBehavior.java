@@ -72,9 +72,14 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          if (!goal.get().containsNaN())
          {
-            if (doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition())
+            if (doorBehavior.hasSeenDoorRecently()
+             && doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition())
             {
                status = tickDoor();
+            }
+            else if (traverseStairsBehavior.hasSeenStairsecently())
+            {
+               traverseStairsBehavior.tick();
             }
             else
             {
