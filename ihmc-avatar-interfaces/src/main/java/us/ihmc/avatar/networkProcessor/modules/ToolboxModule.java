@@ -30,12 +30,15 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.ros2.NewMessageListener;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
@@ -201,7 +204,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
             {
                LogTools.info("{}: Trying to start YoVariableServer using port: {}.", name, yoVariableServerSettings.getPort());
                yoVariableServer = new YoVariableServer(getClass(), modelProvider, yoVariableServerSettings, YO_VARIABLE_SERVER_DT);
-               yoVariableServer.setMainRegistry(registry, fullRobotModel.getElevator(), yoGraphicsListRegistry);
+               yoVariableServer.setMainRegistry(registry, createYoVariableServerJointList(fullRobotModel.getElevator()), yoGraphicsListRegistry);
                yoVariableServer.start();
                break;
             }
@@ -237,6 +240,28 @@ public abstract class ToolboxModule implements CloseableAndDisposable
          }
 
       }, name + "ToolboxYoVariableServer").start();
+   }
+
+   /**
+    * This method unpacks any compact joints like {@link InvertedFourBarJoint} if present in the robot.
+    */
+   public static List<JointBasics> createYoVariableServerJointList(RigidBodyBasics rootBody)
+   {
+      List<JointBasics> joints = new ArrayList<>();
+
+      for (JointBasics joint : rootBody.childrenSubtreeIterable())
+      {
+         if (joint instanceof InvertedFourBarJoint)
+         {
+            joints.addAll(((InvertedFourBarJoint) joint).getFourBarFunction().getLoopJoints());
+         }
+         else
+         {
+            joints.add(joint);
+         }
+      }
+
+      return joints;
    }
 
    public DataServerSettings getYoVariableServerSettings()
