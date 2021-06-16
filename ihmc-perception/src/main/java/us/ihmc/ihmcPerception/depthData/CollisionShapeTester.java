@@ -30,7 +30,10 @@ public class CollisionShapeTester
       }
    }
 
-   private void addJoint(CollisionBoxProvider collissionBoxProvider, JointBasics joint)
+   public CollisionShapeTester()
+   {}
+
+   public void addJoint(CollisionBoxProvider collissionBoxProvider, JointBasics joint)
    {
       List<CollisionShape> collisionMesh = collissionBoxProvider.getCollisionMesh(joint.getName());
       if (collisionMesh != null)
