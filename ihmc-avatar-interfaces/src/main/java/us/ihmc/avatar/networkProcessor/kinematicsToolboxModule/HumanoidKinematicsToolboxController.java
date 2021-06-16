@@ -43,7 +43,6 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Integer;
 import us.ihmc.idl.IDLSequence.Object;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -53,6 +52,7 @@ import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.screwTheory.InvertedFourBarJoint;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -158,18 +158,26 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
    private boolean hasMultiContactBalanceStatus = false;
    private final MultiContactBalanceStatus multiContactBalanceStatusInternal = new MultiContactBalanceStatus();
 
-   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, FullHumanoidRobotModelFactory fullRobotModelFactory,
-                                              double updateDT, YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       this(commandInputManager, statusOutputManager, desiredFullRobotModel, createListOfControllableRigidBodies(desiredFullRobotModel), fullRobotModelFactory,
            updateDT, yoGraphicsListRegistry, parentRegistry);
    }
 
-   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                              FullHumanoidRobotModel desiredFullRobotModel, Collection<? extends RigidBodyBasics> controllableRigidBodyies,
-                                              FullHumanoidRobotModelFactory fullRobotModelFactory, double updateDT,
-                                              YoGraphicsListRegistry yoGraphicsListRegistry, YoRegistry parentRegistry)
+   public HumanoidKinematicsToolboxController(CommandInputManager commandInputManager,
+                                              StatusMessageOutputManager statusOutputManager,
+                                              FullHumanoidRobotModel desiredFullRobotModel,
+                                              Collection<? extends RigidBodyBasics> controllableRigidBodyies,
+                                              FullHumanoidRobotModelFactory fullRobotModelFactory,
+                                              double updateDT,
+                                              YoGraphicsListRegistry yoGraphicsListRegistry,
+                                              YoRegistry parentRegistry)
    {
       super(commandInputManager, statusOutputManager, desiredFullRobotModel.getRootJoint(), getAllJointsExcludingHands(desiredFullRobotModel),
             controllableRigidBodyies, updateDT, yoGraphicsListRegistry, parentRegistry);
@@ -264,13 +272,26 @@ public class HumanoidKinematicsToolboxController extends KinematicsToolboxContro
 
       for (OneDoFJointBasics joint : getDesiredOneDoFJoint())
       {
-         OneDegreeOfFreedomJoint scsJoint = robot.getOneDegreeOfFreedomJoint(joint.getName());
-         if (scsJoint == null)
+         double q_priv;
+
+         if (joint instanceof InvertedFourBarJoint)
          {
-            LogTools.warn("Could not find {} joint in SCS robot", joint.getName());
-            continue;
+            InvertedFourBarJoint fourBarJoint = (InvertedFourBarJoint) joint;
+            OneDegreeOfFreedomJoint scsJointA = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointA().getName());
+            OneDegreeOfFreedomJoint scsJointB = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointB().getName());
+            OneDegreeOfFreedomJoint scsJointC = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointC().getName());
+            OneDegreeOfFreedomJoint scsJointD = robot.getOneDegreeOfFreedomJoint(fourBarJoint.getJointD().getName());
+
+            if (scsJointA != null && scsJointD != null)
+               q_priv = scsJointA.getQ() + scsJointD.getQ();
+            else
+               q_priv = scsJointB.getQ() + scsJointC.getQ();
          }
-         double q_priv = scsJoint.getQ();
+         else
+         {
+            q_priv = robot.getOneDegreeOfFreedomJoint(joint.getName()).getQ();
+         }
+
          privilegedConfiguration.put(joint, q_priv);
       }
 
