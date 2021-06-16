@@ -8,20 +8,28 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.QPInputTypeA;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+
+import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLargeValue;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public class MPCQPInputCalculatorTest
 {
@@ -755,4 +763,149 @@ public class MPCQPInputCalculatorTest
       }
    }
 
+   @Test
+   public void testRhoMinimizationCommand()
+   {
+      int numberOfBasisVectorsPerContactPoint = 4;
+      MPCContactPlane contactPlane = new MPCContactPlane(4, numberOfBasisVectorsPerContactPoint, new ZeroConeRotationCalculator());
+      double mu = 0.8;
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+      contactPlane.computeBasisVectors(contactPolygon, new FramePose3D(), mu);
+
+      double omega = 3.0;
+      double duration = 0.7;
+      double goalValueForBasis = 0.2;
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(numberOfBasisVectorsPerContactPoint);
+      indexHandler.initialize((i) -> 4, 1);
+
+      RhoTrackingCommand rhoTrackingCommand = new RhoTrackingCommand();
+      rhoTrackingCommand.setSegmentDuration(duration);
+      rhoTrackingCommand.setOmega(omega);
+      rhoTrackingCommand.setSegmentNumber(0);
+      rhoTrackingCommand.setWeight(100.0);
+      rhoTrackingCommand.setObjectiveValue(goalValueForBasis);
+      rhoTrackingCommand.addContactPlaneHelper(contactPlane);
+
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, 1e-3, -9.81, new YoRegistry("registry"));
+
+      solver.initialize();
+      solver.setRhoCoefficientRegularizationWeight(0.0);
+      solver.addValueRegularization();
+      solver.submitRhoTrackingCommand(rhoTrackingCommand);
+      assertTrue(solver.solve());
+
+      contactPlane.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
+
+      for (double time = 0; time <= duration; time += 0.001)
+      {
+         contactPlane.computeContactForce(omega, time);
+
+         double omega2 = omega * omega;
+         double exponential = Math.min(Math.exp(omega * time), sufficientlyLargeValue);
+         double a0 = omega2 * exponential;
+         double a1 = omega2 / exponential;
+         double a2 = 6.0 * time;
+         double a3 = 2.0;
+
+         for (int i = 0; i < contactPlane.getRhoSize(); i++)
+         {
+            DMatrixRMaj basisCoefficients = contactPlane.getBasisCoefficients(i);
+
+            double rhoValue = a0 * basisCoefficients.get(0, 0);
+            rhoValue += a1 * basisCoefficients.get(0, 1);
+            rhoValue += a2 * basisCoefficients.get(0, 2);
+            rhoValue += a3 * basisCoefficients.get(0, 3);
+
+            assertEquals(goalValueForBasis, rhoValue, 1e-3);
+            assertEquals(goalValueForBasis, contactPlane.getBasisMagnitude(i).length(), 1e-3);
+         }
+      }
+   }
+
+   @Test
+   public void testRhoMinCommand()
+   {
+      double gravityZ = -9.81;
+      double omega = 3.0;
+      double mu = 0.8;
+      double dt = 1e-3;
+
+      int bases = 3;
+      MPCContactPlane contactPlaneHelper1 = new MPCContactPlane(4, bases, new ZeroConeRotationCalculator());
+
+      LinearMPCIndexHandler indexHandler = new LinearMPCIndexHandler(bases);
+      LinearMPCQPSolver solver = new LinearMPCQPSolver(indexHandler, dt, gravityZ, new YoRegistry("test"));
+
+      FramePose3D contactPose = new FramePose3D();
+
+      ConvexPolygon2DReadOnly contactPolygon = MPCTestHelper.createDefaultContact();
+
+      contactPlaneHelper1.computeBasisVectors(contactPolygon, contactPose, mu);
+
+      FramePoint3D startPosition = new FramePoint3D(contactPose.getPosition());
+      startPosition.setZ(0.75);
+
+      indexHandler.initialize(i -> contactPolygon.getNumberOfVertices(), 1);
+
+      double firstSegmentDuration = 0.7;
+      double minRho = 0.001;
+      double maxGs = 2.5;
+      double maxForce = maxGs * Math.abs(gravityZ);
+      double maxRho = maxForce / (contactPolygon.getNumberOfVertices() * bases) / mu;
+
+      RhoBoundCommand rhoMinBoundsSegment1 = new RhoBoundCommand();
+      rhoMinBoundsSegment1.setOmega(omega);
+      rhoMinBoundsSegment1.setSegmentDuration(firstSegmentDuration);
+      rhoMinBoundsSegment1.setSegmentNumber(0);
+      rhoMinBoundsSegment1.addContactPlane(contactPlaneHelper1, minRho);
+      rhoMinBoundsSegment1.setConstraintType(ConstraintType.GEQ_INEQUALITY);
+
+      double regularization = 1e-5;
+      solver.setMaxNumberOfIterations(1000);
+      solver.initialize();
+
+      solver.submitMPCCommand(rhoMinBoundsSegment1);
+
+      solver.setComCoefficientRegularizationWeight(regularization);
+      solver.setRhoCoefficientRegularizationWeight(regularization);
+
+      assertTrue(solver.solve());
+
+      contactPlaneHelper1.computeContactForceCoefficientMatrix(solver.getSolution(), indexHandler.getRhoCoefficientStartIndex(0));
+
+      double epsilon = 1e-2;
+
+      double timeStep = 0.05;
+      for (double time = 0.0; time <= (firstSegmentDuration + timeStep / 10.0); time += timeStep)
+      {
+         contactPlaneHelper1.computeContactForce(omega, time);
+         for (int contactPointIdx = 0; contactPointIdx < contactPlaneHelper1.getNumberOfContactPoints(); contactPointIdx++)
+         {
+            MPCContactPoint contactPoint = contactPlaneHelper1.getContactPointHelper(contactPointIdx);
+            for (int rhoIdx = 0; rhoIdx < contactPoint.getRhoSize(); rhoIdx++)
+            {
+               FrameVector3DReadOnly basis = contactPoint.getBasisMagnitude(rhoIdx);
+               double force = basis.length();
+               String minMessage = "Force 1 is " + force + " at time " + time + ", and is expected to be above " + minRho;
+               String maxMessage = "Force 1 is " + force + " at time " + time + ", and is expected to be below " + maxRho;
+               boolean minGood = force>= minRho - epsilon;
+               boolean maxGood = force <= maxRho + epsilon;
+               if (time == 0.0 || MathTools.epsilonEquals(time, firstSegmentDuration, timeStep / 10.0))
+               {
+                  assertTrue(minMessage, minGood);
+                  //                  assertTrue(maxMessage, maxGood);
+               }
+               else
+               {
+                  if (!minGood)
+                     LogTools.info(minMessage);
+                  //                  if (!maxGood)
+                  //                     LogTools.info(maxMessage);
+               }
+            }
+         }
+      }
+   }
 }
