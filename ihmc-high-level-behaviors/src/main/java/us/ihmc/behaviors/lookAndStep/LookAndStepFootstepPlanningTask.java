@@ -32,7 +32,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -65,7 +65,7 @@ public class LookAndStepFootstepPlanningTask
    protected FootstepPlanningModule footstepPlanningModule;
    protected SideDependentList<ConvexPolygon2D> defaultFootPolygons;
    protected Supplier<Boolean> operatorReviewEnabledSupplier;
-   protected RemoteSyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected LookAndStepReview<FootstepPlanEtcetera> review = new LookAndStepReview<>();
    protected Consumer<FootstepPlanEtcetera> autonomousOutput;
    protected Timer planningFailedTimer = new Timer();

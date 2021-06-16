@@ -17,7 +17,7 @@ import us.ihmc.tools.TimerSnapshot;
 
 import java.util.function.Function;
 
-public abstract class MessageSyncedRobotModel
+public abstract class CommunicationsSyncedRobotModel
 {
    private final FullHumanoidRobotModel fullRobotModel;
    private final Timer dataReceptionTimer;
@@ -27,7 +27,7 @@ public abstract class MessageSyncedRobotModel
    private final HumanoidReferenceFrames referenceFrames;
    private final FramePose3D temporaryPoseForQuickReading = new FramePose3D();
 
-   public MessageSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
+   public CommunicationsSyncedRobotModel(FullHumanoidRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation)
    {
       this.fullRobotModel = fullRobotModel;
       robotConfigurationData = new RobotConfigurationData();

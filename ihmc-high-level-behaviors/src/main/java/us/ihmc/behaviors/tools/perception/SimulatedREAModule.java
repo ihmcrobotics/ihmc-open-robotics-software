@@ -2,7 +2,7 @@ package us.ihmc.behaviors.tools.perception;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
@@ -34,7 +34,7 @@ public class SimulatedREAModule
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
    private final IHMCROS2Publisher<PlanarRegionsListMessage> realsenseSLAMPublisher;
-   private RemoteSyncedRobotModel syncedRobot;
+   private ROS2SyncedRobotModel syncedRobot;
 
    private final HashMap<Integer, PlanarRegion> supportRegions = new HashMap<>();
    private final PausablePeriodicThread thread;
@@ -59,7 +59,7 @@ public class SimulatedREAModule
 
       if (mode == REDUCE_TO_VIEWABLE_AREA)
       {
-         syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+         syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
          neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
          double verticalFOV = 180.0; // TODO: Reduce FOV when behaviors support it better
          double horizontalFOV = 180.0;

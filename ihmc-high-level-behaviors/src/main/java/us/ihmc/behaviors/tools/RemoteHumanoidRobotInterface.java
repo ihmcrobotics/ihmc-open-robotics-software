@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -56,7 +56,7 @@ public class RemoteHumanoidRobotInterface
    private final ROS2Input<HighLevelStateChangeStatusMessage> controllerStateInput;
    private final ROS2Input<CapturabilityBasedStatus> capturabilityBasedStatusInput;
 
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
 
    private final ROS2Topic<?> topicName;
 
@@ -80,7 +80,7 @@ public class RemoteHumanoidRobotInterface
       controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.withOutput(), initialState, this::acceptStatusChange);
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.withOutput());
 
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
    }
 
    // TODO: Somehow wrap HumanoidMessageTools
@@ -105,9 +105,9 @@ public class RemoteHumanoidRobotInterface
       }
    }
 
-   public RemoteSyncedRobotModel newSyncedRobot()
+   public ROS2SyncedRobotModel newSyncedRobot()
    {
-      return new RemoteSyncedRobotModel(robotModel, ros2Node); // TODO: Is using the existing robotModel okay?
+      return new ROS2SyncedRobotModel(robotModel, ros2Node); // TODO: Is using the existing robotModel okay?
    }
 
    public ROS2Callback<FootstepStatusMessage> createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
