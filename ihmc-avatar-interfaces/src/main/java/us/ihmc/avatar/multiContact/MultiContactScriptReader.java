@@ -87,6 +87,16 @@ public class MultiContactScriptReader
       }
    }
 
+   public int size()
+   {
+      return loadedMessages.size();
+   }
+
+   public int getCurrentMessageIndex()
+   {
+      return currentMessageIndex;
+   }
+
    public boolean hasNext()
    {
       return currentMessageIndex < loadedMessages.size() - 1;

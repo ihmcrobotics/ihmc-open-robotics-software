@@ -18,7 +18,6 @@ import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessagePubSubType;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
-import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
@@ -78,8 +77,6 @@ public class KinematicsToolboxSnapshotDescription
          description.setIkPrivilegedConfiguration(ktpcmSerializer.deserialize(configurationNode.get(IK_PRIVILEGED_CONFIGURATION_JSON).toString()));
 
          description.setCenterOfMassAnchor(CenterOfMassMotionControlAnchorDescription.fromJSON(configurationNode.get(COM_ANCHOR_JSON)));
-         if (isSelectionMatrixAllFalse(description.getCenterOfMassAnchor().getInputMessage().getSelectionMatrix()))
-            description.setCenterOfMassAnchor(null);
 
          JsonNode sixDoFAnchorsNode = configurationNode.get(SIX_DOF_ANCHORS_JSON);
          ArrayList<SixDoFMotionControlAnchorDescription> sixDoFAnchors = new ArrayList<>();
@@ -99,11 +96,6 @@ public class KinematicsToolboxSnapshotDescription
       {
          throw new RuntimeException(e);
       }
-   }
-
-   private static boolean isSelectionMatrixAllFalse(SelectionMatrix3DMessage selectionMatrix)
-   {
-      return !selectionMatrix.getXSelected() && !selectionMatrix.getYSelected() && !selectionMatrix.getZSelected();
    }
 
    public JsonNode toJSON(ObjectMapper objectMapper)
