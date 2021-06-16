@@ -458,7 +458,7 @@ public class CollisionFreeSwingCalculator
       double maxStepZ = footstepPlannerParameters.getMaxStepZ();
 
       return AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
-                                                         footstepPlannerParameters.getMaximumStepReach(),
+                                                         footstepPlannerParameters.getMaxSwingReach(),
                                                          maxStepZ,
                                                          swingPlannerParameters.getMinimumSwingTime(),
                                                          swingPlannerParameters.getMaximumSwingTime(),
