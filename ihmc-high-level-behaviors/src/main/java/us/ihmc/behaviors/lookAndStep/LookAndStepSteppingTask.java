@@ -14,7 +14,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.FootstepPlanEtcetera;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.RobotWalkRequester;
@@ -38,7 +38,7 @@ public class LookAndStepSteppingTask
    protected Runnable replanFootstepsOutput;
 
    protected FootstepPlanEtcetera footstepPlanEtc;
-   protected RemoteSyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected TimerSnapshotWithExpiration robotDataReceptionTimerSnaphot;
    protected long previousStepMessageId = 0L;
    protected SideDependentList<PlannedFootstepReadOnly> lastCommandedFootsteps;

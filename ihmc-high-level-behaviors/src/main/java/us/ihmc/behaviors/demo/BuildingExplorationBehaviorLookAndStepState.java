@@ -3,7 +3,7 @@ package us.ihmc.behaviors.demo;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -54,7 +54,7 @@ class BuildingExplorationBehaviorLookAndStepState implements State
    private final AtomicBoolean stairsDetected = new AtomicBoolean();
 
    private final AtomicInteger stepCounter = new AtomicInteger();
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private int numberOfStepsToIgnoreDebris = 0;
 
    private Runnable debrisDetectedCallback = () ->
