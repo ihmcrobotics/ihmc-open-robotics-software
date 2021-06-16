@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * As soon as you ask for a point in time, it's assumed you're caught up to then, so it remove the older stuff.
  */
-public class RemoteSyncedBufferedRobotModel extends RemoteSyncedRobotModel
+public class ROS2SyncedBufferedRobotModel extends ROS2SyncedRobotModel
 {
    public static final int HISTORY_LIMIT = 3000; // 3 seconds for our fastest (1 kHz) publishers
    private final ConcurrentLinkedQueue<RobotConfigurationData> robotConfigurationDataBuffer = new ConcurrentLinkedQueue<>();
@@ -20,7 +20,7 @@ public class RemoteSyncedBufferedRobotModel extends RemoteSyncedRobotModel
    private long monotonicNanos = -1;
    private RobotConfigurationData nextRobotConfigrationData;
 
-   public RemoteSyncedBufferedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
+   public ROS2SyncedBufferedRobotModel(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
       super(robotModel, ros2Node);
 

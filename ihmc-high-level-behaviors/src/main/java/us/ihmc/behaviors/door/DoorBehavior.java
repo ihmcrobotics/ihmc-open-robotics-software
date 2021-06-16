@@ -2,7 +2,7 @@ package us.ihmc.behaviors.door;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
 import org.apache.commons.lang3.tuple.MutablePair;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -33,7 +33,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Door", DoorBehavior::new, DoorBehaviorAPI.create());
    private final BehaviorHelper helper;
-   private RemoteSyncedRobotModel syncedRobot;
+   private ROS2SyncedRobotModel syncedRobot;
    private final Notification doorConfirmed;
    private final AtomicReference<Boolean> reviewEnabled;
    private boolean firstTick = true;
@@ -62,7 +62,7 @@ public class DoorBehavior extends ResettingNode implements BehaviorInterface
 //      });
    }
 
-   public void setSyncedRobot(RemoteSyncedRobotModel syncedRobot)
+   public void setSyncedRobot(ROS2SyncedRobotModel syncedRobot)
    {
       this.syncedRobot = syncedRobot;
    }

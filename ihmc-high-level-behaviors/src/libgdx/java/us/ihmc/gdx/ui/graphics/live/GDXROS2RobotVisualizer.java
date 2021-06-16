@@ -2,7 +2,7 @@ package us.ihmc.gdx.ui.graphics.live;
 
 import javafx.scene.transform.Translate;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.gdx.FocusBasedGDXCamera;
@@ -14,7 +14,7 @@ import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
 public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
 {
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ExceptionHandlingThreadScheduler scheduler;
 
    private boolean trackRobot = false;
@@ -27,7 +27,7 @@ public class GDXROS2RobotVisualizer extends GDXRobotModelGraphic
    {
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       loadRobotModelAndGraphics(robotModel.getRobotDescription(), fullRobotModel.getElevator());
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node, fullRobotModel);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node, fullRobotModel);
       scheduler = new ExceptionHandlingThreadScheduler(getClass().getSimpleName(), DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, 1, true);
    }
 

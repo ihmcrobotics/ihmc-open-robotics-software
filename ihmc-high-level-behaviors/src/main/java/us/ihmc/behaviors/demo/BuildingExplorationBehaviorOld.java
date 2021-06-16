@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.behaviors.BehaviorDefinition;
@@ -71,7 +71,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
    private final ScheduledExecutorService executorService;
    private final LookAndStepBehavior lookAndStepBehavior;
    private final BehaviorHelper helper;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private ScheduledFuture<?> stateMachineTask = null;
    private PausablePeriodicThread toolboxWakerThread;
 
@@ -341,7 +341,7 @@ public class BuildingExplorationBehaviorOld extends ResettingNode implements Beh
       return doorDetected;
    }
 
-   public static void pitchChestToSeeDoor(RemoteSyncedRobotModel syncedRobot, BehaviorHelper helper)
+   public static void pitchChestToSeeDoor(ROS2SyncedRobotModel syncedRobot, BehaviorHelper helper)
    {
       syncedRobot.update();
 

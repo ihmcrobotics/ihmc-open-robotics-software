@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.behaviors.waypoints.Waypoint;
 import us.ihmc.behaviors.waypoints.WaypointManager;
@@ -71,7 +71,7 @@ public class UpDownExplorer
       upDownCenter = behaviorHelper.subscribeViaReference(UpDownCenter, new Point3D(0.0, 0.0, 0.0));
    }
 
-   public void onNavigateEntry(RemoteSyncedRobotModel syncedRobot)
+   public void onNavigateEntry(ROS2SyncedRobotModel syncedRobot)
    {
       // TODO this should plan only if
 

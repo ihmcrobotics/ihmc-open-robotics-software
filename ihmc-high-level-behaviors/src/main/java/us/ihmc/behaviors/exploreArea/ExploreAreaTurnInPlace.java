@@ -2,7 +2,7 @@ package us.ihmc.behaviors.exploreArea;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
@@ -33,7 +33,7 @@ public class ExploreAreaTurnInPlace extends AsynchronousActionNode
 
    private final ExploreAreaBehaviorParameters parameters;
    private final BehaviorHelper helper;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ExploreAreaLatticePlanner exploreAreaLatticePlanner;
 
    private final FootstepPlanningModule footstepPlanner;

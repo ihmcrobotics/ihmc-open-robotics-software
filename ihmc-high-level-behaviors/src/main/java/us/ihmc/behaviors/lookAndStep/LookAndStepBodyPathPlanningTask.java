@@ -23,7 +23,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.interfaces.UIPublisher;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
@@ -183,7 +183,7 @@ public class LookAndStepBodyPathPlanningTask
 
    protected PlanarRegionsList mapRegions;
    protected Pose3DReadOnly goal;
-   protected RemoteSyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
 
    protected void performTask()
    {
