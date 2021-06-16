@@ -118,7 +118,7 @@ public class LookAndStepSteppingTask
       Pose3DReadOnly startStep = footstepPlanEtc.getStartFootPoses().get(endStep.getRobotSide());
       double idealStepLength = footstepPlannerParameters.getIdealFootstepLength();
       double maxStepZ = footstepPlannerParameters.getMaxStepZ();
-      double swingDuration = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
+      double calculatedSwing = AdaptiveSwingTimingTools.calculateSwingTime(idealStepLength,
                                                                          footstepPlannerParameters.getMaxSwingReach(),
                                                                          maxStepZ,
                                                                          swingPlannerParameters.getMinimumSwingTime(),
@@ -126,21 +126,22 @@ public class LookAndStepSteppingTask
                                                                          startStep.getPosition(),
                                                                          endStep.getFootstepPose().getPosition());
 
-      if (endStep.getSwingDuration() < swingDuration)
+      if (endStep.getSwingDuration() < calculatedSwing)
       {
-         statusLogger.info("Increasing swing duration to {} s", swingDuration);
-         endStep.setSwingDuration(swingDuration);
+         statusLogger.info("Increasing swing duration to {} s", calculatedSwing);
+         endStep.setSwingDuration(calculatedSwing);
       }
-      swingDuration = endStep.getSwingDuration();
+      double swingDuration = endStep.getSwingDuration();
 
       lastCommandedFootsteps.put(footstepToTake.getRobotSide(), footstepToTake);
       uiPublisher.publishToUI(LastCommandedFootsteps, MinimalFootstep.reduceFootstepsForUIMessager(lastCommandedFootsteps));
 
       statusLogger.warn("Requesting walk");
       double transferTime = lookAndStepParameters.getTransferTime();
-      FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
-                                                                                                                    swingDuration,
-                                                                                                                    transferTime);
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      footstepDataListMessage.setOffsetFootstepsHeightWithExecutionError(true);
+      FootstepDataMessageConverter.appendPlanToMessage(shortenedFootstepPlan, footstepDataListMessage);
+      footstepDataListMessage.getFootstepDataList().forEach(message -> {message.setSwingDuration(swingDuration); message.setTransferDuration(transferTime);});
 
       ExecutionMode executionMode = previousStepMessageId == 0L ? ExecutionMode.OVERRIDE : ExecutionMode.QUEUE;
       footstepDataListMessage.getQueueingProperties().setExecutionMode(executionMode.toByte());
