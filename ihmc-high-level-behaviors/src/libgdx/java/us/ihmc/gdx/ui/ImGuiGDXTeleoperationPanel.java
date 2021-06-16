@@ -278,6 +278,21 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       {
          robotLowLevelMessenger.sendStandRequest();
       }
+      ImGui.sameLine();
+      if (ImGui.button("Abort"))
+      {
+         robotLowLevelMessenger.sendAbortWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Pause"))
+      {
+         robotLowLevelMessenger.sendPauseWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Continue"))
+      {
+         robotLowLevelMessenger.sendContinueWalkingRequest();
+      }
       if (ImGui.button("Freeze"))
       {
          robotLowLevelMessenger.sendFreezeRequest();
