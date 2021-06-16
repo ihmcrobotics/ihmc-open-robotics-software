@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.HumanoidKinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxConfigurationMessage;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -265,6 +266,8 @@ public class KinematicsToolboxController extends ToolboxController
     * the convex horizontal region that the center of mass is constrained to.
     */
    private final RecyclingArrayList<Point2D> shrunkSupportPolygonVertices = new RecyclingArrayList<>(Point2D.class);
+   private final TDoubleArrayList signedDistanceToSupportPolygonEdges = new TDoubleArrayList();
+   private final YoInteger numberOfActiveSupportPolygonEdges = new YoInteger("numberOfActiveSupportPolygonEdges", registry);
    /** Helper used for shrink the support polygon. */
    private final ConvexPolygonScaler convexPolygonScaler = new ConvexPolygonScaler();
    private final FrameConvexPolygon2D newSupportPolygon = new FrameConvexPolygon2D();
@@ -1090,6 +1093,8 @@ public class KinematicsToolboxController extends ToolboxController
 
    protected void updateSupportPolygonConstraint(List<? extends FramePoint3DReadOnly> contactPoints, InverseKinematicsCommandBuffer bufferToPack)
    {
+      numberOfActiveSupportPolygonEdges.set(-1);
+
       if (!enableSupportPolygonConstraint.getValue())
          return;
 
@@ -1125,27 +1130,72 @@ public class KinematicsToolboxController extends ToolboxController
 
       centerOfMass.setToZero(centerOfMassFrame);
       centerOfMass.changeFrame(worldFrame);
+      signedDistanceToSupportPolygonEdges.reset();
 
-      double distanceThreshold = 0.25 * centerOfMassSafeMargin.getValue();
+      Point2D vertex = shrunkSupportPolygonVertices.get(0);
+      Point2D nextVertex = ListWrappingIndexTools.getNext(0, shrunkSupportPolygonVertices);
+      int edgeIndexWithMaxDistance = 0;
+      signedDistanceToSupportPolygonEdges.add(EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass, vertex, nextVertex));
+      double percentOnEdgeWithMaxDistance = EuclidGeometryTools.percentageAlongLineSegment2D(centerOfMass, vertex, nextVertex);
+      ;
 
-      for (int i = 0; i < shrunkSupportPolygonVertices.size(); i++)
+      // Compute all signed distances w.r.t. to the support polygon
+      // Remember the edge to which the CoM is the farthest to the edge's left, we'll always add the constraint for that one.
+      for (int i = 1; i < shrunkSupportPolygonVertices.size(); i++)
       { // Only adding constraints that are close to be violated.
-         Point2DReadOnly vertex = shrunkSupportPolygonVertices.get(i);
-         Point2DReadOnly nextVertex = ListWrappingIndexTools.getNext(i, shrunkSupportPolygonVertices);
+         vertex = shrunkSupportPolygonVertices.get(i);
+         nextVertex = ListWrappingIndexTools.getNext(i, shrunkSupportPolygonVertices);
          double signedDistanceToEdge = EuclidGeometryTools.signedDistanceFromPoint2DToLine2D(centerOfMass, vertex, nextVertex);
+         signedDistanceToSupportPolygonEdges.add(signedDistanceToEdge);
 
-         if (signedDistanceToEdge > -distanceThreshold)
+         if (signedDistanceToEdge > signedDistanceToSupportPolygonEdges.get(edgeIndexWithMaxDistance))
          {
-            LinearMomentumConvexConstraint2DCommand command = bufferToPack.addLinearMomentumConvexConstraint2DCommand();
-            command.clear();
-            Vector2D h0 = command.addLinearMomentumConstraintVertex();
-            Vector2D h1 = command.addLinearMomentumConstraintVertex();
-            h0.sub(vertex, centerOfMass);
-            h1.sub(nextVertex, centerOfMass);
-            h0.scale(robotMass / updateDT);
-            h1.scale(robotMass / updateDT);
+            edgeIndexWithMaxDistance = i;
+            percentOnEdgeWithMaxDistance = EuclidGeometryTools.percentageAlongLineSegment2D(centerOfMass, vertex, nextVertex);
          }
       }
+
+      numberOfActiveSupportPolygonEdges.set(0);
+
+      vertex = shrunkSupportPolygonVertices.get(edgeIndexWithMaxDistance);
+      nextVertex = ListWrappingIndexTools.getNext(edgeIndexWithMaxDistance, shrunkSupportPolygonVertices);
+      configureEdgeConstraint(vertex, nextVertex, bufferToPack.addLinearMomentumConvexConstraint2DCommand());
+
+      double percentThreshold = 0.075;
+      double distanceThreshold = 1.0e-3;
+
+      // If the CoM is close to a corner, we need to consider the 2 edges forming the corner.
+      if (percentOnEdgeWithMaxDistance < percentThreshold || centerOfMass.distance(vertex) < distanceThreshold)
+      {
+         configureEdgeConstraint(ListWrappingIndexTools.previous(edgeIndexWithMaxDistance, shrunkSupportPolygonVertices),
+                                 shrunkSupportPolygonVertices,
+                                 bufferToPack.addLinearMomentumConvexConstraint2DCommand());
+      }
+      else if (percentOnEdgeWithMaxDistance > 1.0 - percentThreshold || centerOfMass.distance(nextVertex) < distanceThreshold)
+      {
+         configureEdgeConstraint(ListWrappingIndexTools.next(edgeIndexWithMaxDistance, shrunkSupportPolygonVertices),
+                                 shrunkSupportPolygonVertices,
+                                 bufferToPack.addLinearMomentumConvexConstraint2DCommand());
+      }
+   }
+
+   private void configureEdgeConstraint(int edgeIndex,
+                                        List<? extends Point2DReadOnly> polygonVertices,
+                                        LinearMomentumConvexConstraint2DCommand commandToConfigure)
+   {
+      configureEdgeConstraint(polygonVertices.get(edgeIndex), ListWrappingIndexTools.getNext(edgeIndex, polygonVertices), commandToConfigure);
+   }
+
+   private void configureEdgeConstraint(Point2DReadOnly vertex, Point2DReadOnly nextVertex, LinearMomentumConvexConstraint2DCommand commandToConfigure)
+   {
+      commandToConfigure.clear();
+      Vector2D h0 = commandToConfigure.addLinearMomentumConstraintVertex();
+      Vector2D h1 = commandToConfigure.addLinearMomentumConstraintVertex();
+      h0.sub(vertex, centerOfMass);
+      h1.sub(nextVertex, centerOfMass);
+      h0.scale(robotMass / updateDT);
+      h1.scale(robotMass / updateDT);
+      numberOfActiveSupportPolygonEdges.increment();
    }
 
    /**
