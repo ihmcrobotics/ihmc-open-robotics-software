@@ -261,10 +261,24 @@ public class MultiStepPushRecoveryCalculator
          }
          else
          {
-            polygonTools.computeMinimumDistancePoints(reachableRegion,
-                                                      captureRegionAtTouchdown,
-                                                      recoveryStepLocation,
-                                                      capturePointAtTouchdown);
+            if (captureRegionAtTouchdown.getNumberOfVertices() == 0)
+            {
+               isStateCapturable = false;
+               break;
+            }
+            else if (captureRegionAtTouchdown.getNumberOfVertices() == 1)
+            {
+               capturePointAtTouchdown.set(captureRegionAtTouchdown.getVertex(0));
+               reachableRegion.orthogonalProjection(capturePointAtTouchdown, recoveryStepLocation);
+            }
+            else if (captureRegionAtTouchdown.getNumberOfVertices() == 2)
+            {
+               throw new RuntimeException("The event of the capture region having two points still needs to be implemented.");
+            }
+            else
+            {
+               polygonTools.computeMinimumDistancePoints(reachableRegion, captureRegionAtTouchdown, recoveryStepLocation, capturePointAtTouchdown);
+            }
          }
 
          swingSide = swingSide.getOppositeSide();
