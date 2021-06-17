@@ -1,19 +1,17 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
+import gnu.trove.list.TIntList;
+import gnu.trove.list.array.TIntArrayList;
 import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.LinearMPCTrajectoryHandler;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.PreviewWindowCalculator;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.WrenchMPCTrajectoryHandler;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCQPSolver;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.MPCCornerPointViewer;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
-import us.ihmc.commonWalkingControlModules.wrenchDistribution.ZeroConeRotationCalculator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -31,10 +29,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint3D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
 import java.util.function.DoubleConsumer;
+import java.util.function.IntUnaryOperator;
 import java.util.function.Supplier;
 
 import static us.ihmc.commonWalkingControlModules.modelPredictiveController.core.MPCQPInputCalculator.sufficientlyLongTime;
@@ -44,6 +44,8 @@ public abstract class EuclideanModelPredictiveController
    private static final boolean includeVelocityObjective = true;
    private static final boolean includeRhoMinInequality = true;
    private static final boolean includeRhoMaxInequality = false;
+   private static final boolean includeForceMinimization = false;
+   private static final boolean includeRhoMinimization = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    protected static final int numberOfBasisVectorsPerContactPoint = 4;
@@ -60,7 +62,12 @@ public abstract class EuclideanModelPredictiveController
    private static final double mu = 0.8;
 
    public static final double defaultInitialComWeight = 5e3;
+   public static final double defaultInitialComVelocityWeight = 5e1;
+   public static final double defaultFinalComWeight = 5e2;
+   public static final double defaultFinalVRPWeight = 5e1;
    public static final double defaultVrpTrackingWeight = 1e2;
+   public static final double defaultRhoMinimizationWeight = 1e-3;
+   public static final double defaultForceMinimizationWeight = 1e-1;
 
    private final FixedFramePoint3DBasics desiredCoMPosition = new FramePoint3D(worldFrame);
    private final FixedFrameVector3DBasics desiredCoMVelocity = new FrameVector3D(worldFrame);
@@ -87,13 +94,20 @@ public abstract class EuclideanModelPredictiveController
 
    private final YoDouble minRhoValue = new YoDouble("minRhoValue", registry);
    private final YoDouble initialComWeight = new YoDouble("initialComWeight", registry);
+   private final YoDouble initialComVelocityWeight = new YoDouble("initialComVelocityWeight", registry);
+   private final YoDouble finalComWeight = new YoDouble("finalComWeight", registry);
+   private final YoDouble finalVRPWeight = new YoDouble("finalVRPWeight", registry);
    private final YoDouble vrpTrackingWeight = new YoDouble("vrpTrackingWeight", registry);
+   private final YoDouble rhoMinimizationWeight = new YoDouble("rhoMinimizationWeight", registry);
+   private final YoDouble forceMinimizationWeight = new YoDouble("forceMinimizationWeight", registry);
 
-   public final RecyclingArrayList<RecyclingArrayList<MPCContactPlane>> contactPlaneHelperPool;
+   protected final MPCContactHandler contactHandler;
 
    protected final PreviewWindowCalculator previewWindowCalculator;
    final LinearMPCTrajectoryHandler linearTrajectoryHandler;
    protected final WrenchMPCTrajectoryHandler wrenchTrajectoryHandler;
+
+   private final LinearMPCIndexHandler indexHandler;
 
    protected final CommandProvider commandProvider = new CommandProvider();
    final MPCCommandList mpcCommands = new MPCCommandList();
@@ -102,6 +116,13 @@ public abstract class EuclideanModelPredictiveController
    private final ExecutionTimer mpcAssemblyTime = new ExecutionTimer("mpcAssemblyTime", registry);
    private final ExecutionTimer mpcQPTime = new ExecutionTimer("mpcQPTime", registry);
    private final ExecutionTimer mpcExtractionTime = new ExecutionTimer("mpcExtractionTime", registry);
+
+   protected final YoBoolean useWarmStart = new YoBoolean("mpcUseWarmStart", registry);
+
+   protected final DMatrixRMaj previousSolution = new DMatrixRMaj(1, 1);
+   protected final TIntArrayList activeInequalityConstraints = new TIntArrayList();
+   protected final TIntArrayList activeLowerBoundConstraints = new TIntArrayList();
+   protected final TIntArrayList activeUpperBoundConstraints = new TIntArrayList();
 
    private MPCCornerPointViewer cornerPointViewer = null;
    private LinearMPCTrajectoryViewer trajectoryViewer = null;
@@ -116,23 +137,28 @@ public abstract class EuclideanModelPredictiveController
       YoDouble omega = new YoDouble("omegaForPlanning", registry);
       this.mass = mass;
       this.omega = omega;
+      this.indexHandler = indexHandler;
+
+      this.maxContactForce = 2.0 * Math.abs(gravityZ);
 
       previewWindowCalculator = new PreviewWindowCalculator(registry);
       linearTrajectoryHandler = new LinearMPCTrajectoryHandler(indexHandler, gravityZ, nominalCoMHeight, registry);
       wrenchTrajectoryHandler = new WrenchMPCTrajectoryHandler(registry);
-
-      this.maxContactForce = 2.0 * Math.abs(gravityZ);
+      contactHandler = new MPCContactHandler(indexHandler, gravityZ, mass);
 
       minRhoValue.set(defaultMinRhoValue);
       initialComWeight.set(defaultInitialComWeight);
+      initialComVelocityWeight.set(defaultInitialComVelocityWeight);
+      finalComWeight.set(defaultFinalComWeight);
+      finalVRPWeight.set(defaultFinalVRPWeight);
       vrpTrackingWeight.set(defaultVrpTrackingWeight);
+      rhoMinimizationWeight.set(defaultRhoMinimizationWeight);
+      forceMinimizationWeight.set(defaultForceMinimizationWeight);
 
       comHeight.addListener(v -> omega.set(Math.sqrt(Math.abs(gravityZ) / comHeight.getDoubleValue())));
       comHeight.set(nominalCoMHeight);
 
-      FrictionConeRotationCalculator coneRotationCalculator = new ZeroConeRotationCalculator();
-      Supplier<MPCContactPlane> contactPlaneHelperProvider = () -> new MPCContactPlane(6, numberOfBasisVectorsPerContactPoint, coneRotationCalculator);
-      contactPlaneHelperPool = new RecyclingArrayList<>(() -> new RecyclingArrayList<>(contactPlaneHelperProvider));
+      useWarmStart.set(true);
 
       parentRegistry.addChild(registry);
    }
@@ -149,18 +175,7 @@ public abstract class EuclideanModelPredictiveController
 
    public void setContactPlaneViewers(Supplier<ContactPlaneForceViewer> viewerSupplier)
    {
-      contactPlaneHelperPool.clear();
-      for (int i = 0; i < 2; i++)
-      {
-         RecyclingArrayList<MPCContactPlane> helpers = contactPlaneHelperPool.add();
-         helpers.clear();
-         for (int j = 0; j < 6; j++)
-         {
-            helpers.add().setContactPointForceViewer(viewerSupplier.get());
-         }
-         helpers.clear();
-      }
-      contactPlaneHelperPool.clear();
+      contactHandler.setContactPlaneViewers(viewerSupplier);
    }
 
    /**
@@ -217,7 +232,7 @@ public abstract class EuclideanModelPredictiveController
       commandProvider.reset();
       mpcCommands.clear();
 
-      computeMatrixHelpers(planningWindow);
+      contactHandler.computeMatrixHelpers(planningWindow, linearTrajectoryHandler.getPlanningWindowForSolution(), omega.getValue());
       computeObjectives(planningWindow);
 
       mpcAssemblyTime.stopMeasurement();
@@ -238,6 +253,110 @@ public abstract class EuclideanModelPredictiveController
 
       mpcExtractionTime.stopMeasurement();
       mpcTotalTime.stopMeasurement();
+   }
+
+   protected void assembleActiveSet(IntUnaryOperator startIndexGetter)
+   {
+      activeInequalityConstraints.reset();
+      activeLowerBoundConstraints.reset();
+      activeUpperBoundConstraints.reset();
+      previousSolution.reshape(indexHandler.getTotalProblemSize(), 1);
+
+      int inequalityStartIndex = 0;
+      int lowerBoundStartIndex = 0;
+      int upperBoundStartIndex = 0;
+
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      {
+         ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
+
+         MatrixTools.setMatrixBlock(previousSolution,
+                                    startIndexGetter.applyAsInt(segmentId),
+                                    0,
+                                    activeSetData.getPreviousSolution(),
+                                    0,
+                                    0,
+                                    indexHandler.getVariablesInSegment(segmentId),
+                                    1,
+                                    1.0);
+
+         for (int i = 0; i < activeSetData.getNumberOfActiveInequalityConstraints(); i++)
+         {
+            activeInequalityConstraints.add(activeSetData.getActiveInequalityIndex(i) + inequalityStartIndex);
+         }
+         for (int i = 0; i < activeSetData.getNumberOfActiveLowerBoundConstraints(); i++)
+         {
+            activeLowerBoundConstraints.add(activeSetData.getActiveLowerBoundIndex(i) + lowerBoundStartIndex);
+         }
+         for (int i = 0; i < activeSetData.getNumberOfActiveUpperBoundConstraints(); i++)
+         {
+            activeUpperBoundConstraints.add(activeSetData.getActiveUpperBoundIndex(i) + upperBoundStartIndex);
+         }
+
+         inequalityStartIndex += activeSetData.getNumberOfInequalityConstraints();
+         lowerBoundStartIndex += activeSetData.getNumberOfLowerBoundConstraints();
+         upperBoundStartIndex += activeSetData.getNumberOfUpperBoundConstraints();
+      }
+   }
+
+   protected void extractNewActiveSetData(boolean foundSolution, LinearMPCQPSolver qpSolver, IntUnaryOperator startIndexGetter)
+   {
+      TIntList activeInequalityIndices = qpSolver.getActiveInequalityIndices();
+      TIntList activeLowerBoundIndices = qpSolver.getActiveLowerBoundIndices();
+      TIntList activeUpperBoundIndices = qpSolver.getActiveUpperBoundIndices();
+
+      int inequalityStartIndex = 0;
+      int lowerBoundStartIndex = 0;
+      int upperBoundStartIndex = 0;
+
+      int currentInequalityIndex = 0;
+      int currentLowerBoundIndex = 0;
+      int currentUpperBoundIndex = 0;
+
+      for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
+      {
+         ActiveSetData activeSetData = contactHandler.getActiveSetData(segmentId);
+         activeSetData.clearActiveSet();
+
+         if (foundSolution)
+         {
+            MatrixTools.setMatrixBlock(activeSetData.getPreviousSolution(),
+                                       0,
+                                       0,
+                                       qpSolver.getSolution(),
+                                       startIndexGetter.applyAsInt(segmentId),
+                                       0,
+                                       indexHandler.getVariablesInSegment(segmentId),
+                                       1,
+                                       1.0);
+         }
+
+         int inequalityEndIndex = inequalityStartIndex + activeSetData.getNumberOfInequalityConstraints();
+         int lowerBoundEndIndex = lowerBoundStartIndex + activeSetData.getNumberOfLowerBoundConstraints();
+         int upperBoundEndIndex = upperBoundStartIndex + activeSetData.getNumberOfUpperBoundConstraints();
+
+         while (currentInequalityIndex < activeInequalityIndices.size() && activeInequalityIndices.get(currentInequalityIndex) < inequalityEndIndex)
+         {
+            activeSetData.addActiveInequalityConstraint(activeInequalityIndices.get(currentInequalityIndex) - inequalityStartIndex);
+            currentInequalityIndex++;
+         }
+
+         while (currentLowerBoundIndex < activeLowerBoundIndices.size() && activeLowerBoundIndices.get(currentLowerBoundIndex) < lowerBoundEndIndex)
+         {
+            activeSetData.addActiveLowerBoundConstraint(activeLowerBoundIndices.get(currentLowerBoundIndex) - lowerBoundStartIndex);
+            currentLowerBoundIndex++;
+         }
+
+         while (currentUpperBoundIndex < activeUpperBoundIndices.size() && activeUpperBoundIndices.get(currentUpperBoundIndex) < upperBoundEndIndex)
+         {
+            activeSetData.addActiveUpperBoundConstraint(activeUpperBoundIndices.get(currentUpperBoundIndex) - upperBoundStartIndex);
+            currentUpperBoundIndex++;
+         }
+
+         inequalityStartIndex = inequalityEndIndex;
+         lowerBoundStartIndex = lowerBoundEndIndex;
+         upperBoundStartIndex = upperBoundEndIndex;
+      }
    }
 
    protected abstract void initializeIndexHandler();
@@ -261,37 +380,21 @@ public abstract class EuclideanModelPredictiveController
    protected void extractSolution(DMatrixRMaj solutionCoefficients)
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
-      linearTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, planningWindow, contactPlaneHelperPool, previewWindowCalculator.getFullPlanningSequence(), omega.getValue());
-      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactPlaneHelperPool, mass, omega.getValue());
-   }
-
-   protected void computeMatrixHelpers(List<ContactPlaneProvider> contactSequence)
-   {
-      contactPlaneHelperPool.clear();
-
-      for (int sequenceId = 0; sequenceId < contactSequence.size(); sequenceId++)
-      {
-         ContactPlaneProvider contact = contactSequence.get(sequenceId);
-         double duration = contact.getTimeInterval().getDuration();
-
-         RecyclingArrayList<MPCContactPlane> contactPlaneHelpers = contactPlaneHelperPool.add();
-         contactPlaneHelpers.clear();
-
-         double objectiveForce = gravityZ / contact.getNumberOfContactPlanes();
-         for (int contactId = 0; contactId < contact.getNumberOfContactPlanes(); contactId++)
-         {
-            MPCContactPlane contactPlaneHelper = contactPlaneHelpers.add();
-            contactPlaneHelper.setMaxNormalForce(maxContactForce);
-            contactPlaneHelper.computeBasisVectors(contact.getContactsInBodyFrame(contactId), contact.getContactPose(contactId), mu);
-            contactPlaneHelper.computeAccelerationIntegrationMatrix(duration, omega.getValue(), objectiveForce);
-         }
-      }
+      linearTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients,
+                                                              planningWindow,
+                                                              contactHandler.getContactPlanes(),
+                                                              previewWindowCalculator.getFullPlanningSequence(),
+                                                              omega.getValue());
+      wrenchTrajectoryHandler.extractSolutionForPreviewWindow(planningWindow, contactHandler.getContactPlanes(), mass, omega.getValue());
    }
 
    protected void computeObjectives(List<ContactPlaneProvider> contactSequence)
    {
       int numberOfPhases = contactSequence.size();
       int numberOfTransitions = numberOfPhases - 1;
+
+      for (int i = 0; i < numberOfPhases; i++)
+         contactHandler.getActiveSetData(i).resetConstraintCounter();
 
       mpcCommands.addCommand(computeInitialCoMPositionObjective(commandProvider.getNextCoMPositionCommand()));
       if (includeVelocityObjective)
@@ -308,15 +411,21 @@ public abstract class EuclideanModelPredictiveController
                                                             0,
                                                             initialDuration,
                                                             null));
+         if (includeForceMinimization)
+            mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), 0));
+         if (includeRhoMinimization)
+            mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), 0, initialDuration));
          if (includeRhoMinInequality)
-            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), 0, initialDuration));
          if (includeRhoMaxInequality)
-            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), 0, 0.0));
+            mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextNormalForceBoundCommand(), 0, initialDuration));
       }
 
       for (int transition = 0; transition < numberOfTransitions; transition++)
       {
          int nextSequence = transition + 1;
+
+//         contactHandler.getActiveSetData(nextSequence).setNumberOfVariablesInSegment(indexHandler.getVariablesInSegment(nextSequence));
 
          double firstSegmentDuration = contactSequence.get(transition).getTimeInterval().getDuration();
 
@@ -328,10 +437,7 @@ public abstract class EuclideanModelPredictiveController
 
          if (contactSequence.get(transition).getContactState().isLoadBearing())
          {
-            if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
-            if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), transition, firstSegmentDuration));
+
          }
          double nextDuration = Math.min(contactSequence.get(nextSequence).getTimeInterval().getDuration(), sufficientlyLongTime);
 
@@ -343,15 +449,19 @@ public abstract class EuclideanModelPredictiveController
                                                                nextSequence,
                                                                nextDuration,
                                                                null));
+            if (includeForceMinimization)
+               mpcCommands.addCommand(computeForceMinimizationObjective(commandProvider.getForceMinimizationCommand(), nextSequence));
+            if (includeRhoMinimization)
+               mpcCommands.addCommand(computeRhoMinimizationObjective(commandProvider.getRhoMinimizationCommand(), nextSequence, nextDuration));
             if (includeRhoMinInequality)
-               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoBoundCommand(), nextSequence, nextDuration));
             if (includeRhoMaxInequality)
-               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), nextSequence, 0.0));
+               mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextNormalForceBoundCommand(), nextSequence, nextDuration));
          }
       }
 
       // set terminal constraint
-      ContactStateProvider lastContactPhase = contactSequence.get(numberOfPhases - 1);
+      ContactStateProvider<ContactPlaneProvider> lastContactPhase = contactSequence.get(numberOfPhases - 1);
       double finalDuration = Math.min(lastContactPhase.getTimeInterval().getDuration(), sufficientlyLongTime);
       mpcCommands.addCommand(computeCoMPositionObjective(commandProvider.getNextCoMPositionCommand(),
                                                          comPositionAtEndOfWindow,
@@ -364,10 +474,6 @@ public abstract class EuclideanModelPredictiveController
 
       //      mpcCommands.addCommand(computeDCMPositionObjective(commandProvider.getNextDCMPositionCommand(), dcmAtEndOfWindow, numberOfPhases - 1, finalDuration));
       mpcCommands.addCommand(computeVRPPositionObjective(commandProvider.getNextVRPPositionCommand(), vrpAtEndOfWindow, numberOfPhases - 1, finalDuration));
-      if (includeRhoMinInequality)
-         mpcCommands.addCommand(computeMinForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
-      if (includeRhoMaxInequality)
-         mpcCommands.addCommand(computeMaxForceObjective(commandProvider.getNextRhoAccelerationObjectiveCommand(), numberOfPhases - 1, finalDuration));
    }
 
    private MPCCommand<?> computeInitialCoMPositionObjective(CoMPositionCommand objectiveToPack)
@@ -379,9 +485,9 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMPosition);
-      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
       {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(0, i));
       }
 
       return objectiveToPack;
@@ -391,15 +497,13 @@ public abstract class EuclideanModelPredictiveController
    {
       objectiveToPack.clear();
       objectiveToPack.setOmega(omega.getValue());
-      //      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      objectiveToPack.setWeight(initialComWeight.getDoubleValue());
+      objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
+      objectiveToPack.setWeight(initialComVelocityWeight.getDoubleValue());
       objectiveToPack.setSegmentNumber(0);
       objectiveToPack.setTimeOfObjective(0.0);
       objectiveToPack.setObjective(currentCoMVelocity);
-      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(0); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(0, i));
 
       return objectiveToPack;
    }
@@ -412,62 +516,49 @@ public abstract class EuclideanModelPredictiveController
       continuityObjectiveToPack.setFirstSegmentDuration(firstSegmentDuration);
       continuityObjectiveToPack.setConstraintType(ConstraintType.EQUALITY);
 
-      for (int i = 0; i < contactPlaneHelperPool.get(firstSegmentNumber).size(); i++)
-      {
-         continuityObjectiveToPack.addFirstSegmentContactPlaneHelper(contactPlaneHelperPool.get(firstSegmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(firstSegmentNumber); i++)
+         continuityObjectiveToPack.addFirstSegmentContactPlaneHelper(contactHandler.getContactPlane(firstSegmentNumber, i));
 
-      for (int i = 0; i < contactPlaneHelperPool.get(firstSegmentNumber + 1).size(); i++)
-      {
-         continuityObjectiveToPack.addSecondSegmentContactPlaneHelper(contactPlaneHelperPool.get(firstSegmentNumber + 1).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(firstSegmentNumber + 1); i++)
+         continuityObjectiveToPack.addSecondSegmentContactPlaneHelper(contactHandler.getContactPlane(firstSegmentNumber + 1, i));
 
       return continuityObjectiveToPack;
    }
 
-   private MPCCommand<?> computeMinForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMinForceObjective(RhoBoundCommand valueObjective, int segmentNumber, double segmentDuration)
    {
+      int numberOfContactPlanes = contactHandler.getNumberOfContactPlanesInSegment(segmentNumber);
+      if (numberOfContactPlanes < 1)
+         return null;
+
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
-      valueObjective.setTimeOfObjective(constraintTime);
+      valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.GEQ_INEQUALITY);
-      valueObjective.setScalarObjective(minRhoValue.getDoubleValue());
-      valueObjective.setUseScalarObjective(true);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < numberOfContactPlanes; i++)
       {
-         valueObjective.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+         MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
+         valueObjective.addContactPlane(contactPlane, minRhoValue.getDoubleValue());
+         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
       }
 
       return valueObjective;
    }
 
-   private MPCCommand<?> computeMaxForceObjective(RhoAccelerationObjectiveCommand valueObjective, int segmentNumber, double constraintTime)
+   private MPCCommand<?> computeMaxForceObjective(NormalForceBoundCommand valueObjective, int segmentNumber, double segmentDuration)
    {
       valueObjective.clear();
       valueObjective.setOmega(omega.getValue());
-      valueObjective.setTimeOfObjective(constraintTime);
+      valueObjective.setSegmentDuration(segmentDuration);
       valueObjective.setSegmentNumber(segmentNumber);
       valueObjective.setConstraintType(ConstraintType.LEQ_INEQUALITY);
-      valueObjective.setUseScalarObjective(false);
 
-      int objectiveSize = 0;
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
-         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
-         objectiveSize += contactPlaneHelper.getRhoSize();
-         valueObjective.addContactPlaneHelper(contactPlaneHelper);
-      }
-
-      int rowStart = 0;
-      DMatrixRMaj objectiveVector = valueObjective.getObjectiveVector();
-      objectiveVector.reshape(objectiveSize, 1);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         MPCContactPlane contactPlaneHelper = contactPlaneHelperPool.get(segmentNumber).get(i);
-         MatrixTools.setMatrixBlock(objectiveVector, rowStart, 0, contactPlaneHelper.getRhoMaxMatrix(), 0, 0, contactPlaneHelper.getRhoSize(), 1, 1.0);
-
-         rowStart += contactPlaneHelper.getRhoSize();
+         MPCContactPlane contactPlane = contactHandler.getContactPlane(segmentNumber, i);
+         valueObjective.addContactPlane(contactPlane, maxContactForce);
+         contactHandler.getActiveSetData(segmentNumber).addInequalityConstraints(contactPlane.getRhoSize());
       }
 
       return valueObjective;
@@ -488,9 +579,36 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setStartVRP(desiredStartVRPPosition);
       objectiveToPack.setEndVRP(desiredEndVRPPosition);
       objectiveToPack.setCostToGoConsumer(costToGoConsumer);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeForceMinimizationObjective(ForceObjectiveCommand objectiveToPack, int segmentNumber)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(forceMinimizationWeight.getDoubleValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
       {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
+      }
+
+      return objectiveToPack;
+   }
+
+   private MPCCommand<?> computeRhoMinimizationObjective(RhoTrackingCommand objectiveToPack, int segmentNumber, double segmentDuration)
+   {
+      objectiveToPack.clear();
+      objectiveToPack.setOmega(omega.getValue());
+      objectiveToPack.setWeight(rhoMinimizationWeight.getDoubleValue());
+      objectiveToPack.setSegmentNumber(segmentNumber);
+      objectiveToPack.setSegmentDuration(segmentDuration);
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+      {
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
       }
 
       return objectiveToPack;
@@ -507,10 +625,8 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -525,11 +641,10 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
+      objectiveToPack.setWeight(finalComWeight.getDoubleValue());
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -544,11 +659,10 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredVelocity);
+      objectiveToPack.setWeight(finalComWeight.getDoubleValue());
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -564,11 +678,10 @@ public abstract class EuclideanModelPredictiveController
       objectiveToPack.setSegmentNumber(segmentNumber);
       objectiveToPack.setTimeOfObjective(timeOfObjective);
       objectiveToPack.setObjective(desiredPosition);
+      objectiveToPack.setWeight(finalVRPWeight.getDoubleValue());
       objectiveToPack.setConstraintType(ConstraintType.EQUALITY);
-      for (int i = 0; i < contactPlaneHelperPool.get(segmentNumber).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(segmentNumber).get(i));
-      }
+      for (int i = 0; i < contactHandler.getNumberOfContactPlanesInSegment(segmentNumber); i++)
+         objectiveToPack.addContactPlaneHelper(contactHandler.getContactPlane(segmentNumber, i));
 
       return objectiveToPack;
    }
@@ -730,5 +843,10 @@ public abstract class EuclideanModelPredictiveController
          throw new RuntimeException("CoM Trajectories are not calculated");
 
       return linearTrajectoryHandler.getComTrajectory();
+   }
+
+   public List<? extends List<MPCContactPlane>> getContactPlanes()
+   {
+      return contactHandler.getContactPlanes();
    }
 }

@@ -2,6 +2,7 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -51,9 +52,11 @@ public class FootstepPlanningModuleLauncher
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel)
    {
       String moduleName = robotModel.getSimpleRobotName();
-      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
+
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
+      FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
@@ -63,7 +66,8 @@ public class FootstepPlanningModuleLauncher
                                         footstepPlannerParameters,
                                         swingPlannerParameters,
                                         walkingControllerParameters,
-                                        footPolygons);
+                                        footPolygons,
+                                        stepReachabilityData);
    }
 
    /**

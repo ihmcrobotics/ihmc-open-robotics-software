@@ -381,6 +381,9 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          DRCSensorSuiteManager sensorSuiteManager = robotModel.getSensorSuiteManager(getOrCreateROS2Node());
 
+         if (sensorSuiteManager == null)
+            return null;
+
          checkIfModuleCanBeCreated(sensorSuiteManager.getClass());
 
          if (robotModel.getTarget() == RobotTarget.SCS)

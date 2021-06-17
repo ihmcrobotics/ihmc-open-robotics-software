@@ -106,13 +106,13 @@ public class SE3MPCVisualizer
 
          for (int i = 0; i < currentSegment; i++)
          {
-            for (int j = 0; j < mpc.contactPlaneHelperPool.get(i).size(); j++)
-               mpc.contactPlaneHelperPool.get(i).get(j).clearViz();
+            for (int j = 0; j < mpc.getContactPlanes().get(i).size(); j++)
+               mpc.getContactPlanes().get(i).get(j).clearViz();
          }
-         if (currentSegment < mpc.contactPlaneHelperPool.size())
+         if (currentSegment < mpc.getContactPlanes().size())
          {
-            for (int i = 0; i < mpc.contactPlaneHelperPool.get(currentSegment).size(); i++)
-               mpc.contactPlaneHelperPool.get(currentSegment).get(i).computeContactForce(3.0, time);
+            for (int i = 0; i < mpc.getContactPlanes().get(currentSegment).size(); i++)
+               mpc.getContactPlanes().get(currentSegment).get(i).computeContactForce(3.0, time);
          }
 
 

@@ -154,7 +154,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.getPosition().set(1.0, 0.0, -height);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
+      FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose,
+                                                         footstepPlannerParameters);
       request.setRequestedPathHeading(Math.toRadians(30.0));
 
       request.setRequestedSwingPlanner(SwingPlannerType.TWO_WAYPOINT_POSITION.toByte());
@@ -434,8 +435,13 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       }
 
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
-                                                                                                                     -1.0,
-                                                                                                                     -1.0);
+                                                                                                                     0.4,
+                                                                                                                     0.8);
+      for (FootstepDataMessage footstepDataMessage : footstepDataListMessage.footstep_data_list_)
+      {
+         footstepDataMessage.setSwingDuration(0.8);
+         footstepDataMessage.setTransferDuration(0.4);
+      }
 
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 

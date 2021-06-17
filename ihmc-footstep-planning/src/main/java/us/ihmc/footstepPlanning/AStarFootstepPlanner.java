@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -35,6 +36,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -77,14 +79,15 @@ public class AStarFootstepPlanner
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                SwingPlannerParametersBasics swingPlannerParameters,
-                               WalkingControllerParameters walkingControllerParameters)
+                               WalkingControllerParameters walkingControllerParameters,
+                               StepReachabilityData stepReachabilityData)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
       this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
-      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, registry);
+      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
 
@@ -134,11 +137,17 @@ public class AStarFootstepPlanner
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsListForStepping = flatGroundMode ? null : request.getPlanarRegionsList();
-      PlanarRegionsList planarRegionsListForChecking = request.getPlanarRegionsList();
+      PlanarRegionsList planarRegionsListForCollisionChecking = request.getPlanarRegionsList();
+
+      if (flatGroundMode)
+      {
+         double flatGroundHeight = 0.5 * (request.getStartFootPoses().get(RobotSide.LEFT).getZ() + request.getStartFootPoses().get(RobotSide.RIGHT).getZ());
+         snapper.setFlatGroundHeight(flatGroundHeight);
+      }
 
       snapper.setPlanarRegions(planarRegionsListForStepping);
       idealStepCalculator.setPlanarRegionsList(planarRegionsListForStepping);
-      checker.setPlanarRegions(planarRegionsListForChecking);
+      checker.setPlanarRegions(planarRegionsListForCollisionChecking);
 
       double pathLength = bodyPathPlanHolder.computePathLength(0.0);
       boolean imposeHorizonLength =
@@ -259,12 +268,6 @@ public class AStarFootstepPlanner
          FootstepSnapData snapData = snapper.snapFootstep(footstepNode.getSecondStep(), footstepNode.getFirstStep(), true);
          PlannedFootstep footstep = new PlannedFootstep(footstepNode.getSecondStepSide());
          footstep.getFootstepPose().set(snapData.getSnappedStepTransform(footstepNode.getSecondStep()));
-
-         if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
-         {
-            double flatGroundHeight = 0.5 * (request.getStartFootPoses().get(RobotSide.LEFT).getZ() + request.getStartFootPoses().get(RobotSide.RIGHT).getZ());
-            footstep.getFootstepPose().setZ(flatGroundHeight);
-         }
 
          if (!footstepPlannerParameters.getWiggleWhilePlanning())
          {

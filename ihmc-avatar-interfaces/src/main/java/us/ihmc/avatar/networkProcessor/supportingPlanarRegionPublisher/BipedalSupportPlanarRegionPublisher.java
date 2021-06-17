@@ -136,6 +136,6 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
    public static ROS2Topic<BipedalSupportPlanarRegionParametersMessage> getTopic(String robotName)
    {
-      return ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName).withInput().withType(BipedalSupportPlanarRegionParametersMessage.class);
+      return ROS2Tools.getBipedalSupportRegionParametersTopic(robotName);
    }
 }

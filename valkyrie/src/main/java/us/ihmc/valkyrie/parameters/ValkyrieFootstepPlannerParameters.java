@@ -42,7 +42,7 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setYawWeight(0.15);
       setForwardWeight(2.5);
 
-      load();
+      loadUnsafe();
    }
 
    public static void main(String[] args)

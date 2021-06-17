@@ -24,6 +24,7 @@ public class LinearMPCIndexHandler
    protected final TIntArrayList comStartIndices = new TIntArrayList();
    protected final TIntArrayList rhoStartIndices = new TIntArrayList();
    protected final TIntArrayList rhoCoefficientsInSegment = new TIntArrayList();
+   protected final TIntArrayList variablesInSegment = new TIntArrayList();
 
    protected final ListToSizeReturn listToSizeReturn = new ListToSizeReturn();
 
@@ -46,6 +47,7 @@ public class LinearMPCIndexHandler
       rhoStartIndices.clear();
       comStartIndices.clear();
       rhoCoefficientsInSegment.clear();
+      variablesInSegment.clear();
 
       totalProblemSize = 0;
       for (int i = 0; i < numberOfContacts; i++)
@@ -55,6 +57,7 @@ public class LinearMPCIndexHandler
 
          int rhoCoefficients = coefficientsPerRho * numberOfBasisVectorsPerContactPoint * pointsInContact.applyAsInt(i);
          rhoCoefficientsInSegment.add(rhoCoefficients);
+         variablesInSegment.add(comCoefficientsPerSegment + rhoCoefficients);
          rhoStartIndices.add(totalProblemSize);
          totalProblemSize += rhoCoefficients;
       }
@@ -99,6 +102,11 @@ public class LinearMPCIndexHandler
    public int getRhoCoefficientsInSegment(int segmentId)
    {
       return rhoCoefficientsInSegment.get(segmentId);
+   }
+
+   public int getVariablesInSegment(int segmentId)
+   {
+      return variablesInSegment.get(segmentId);
    }
 
    /**
