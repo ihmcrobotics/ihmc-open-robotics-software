@@ -10,7 +10,6 @@ import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
-import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
@@ -89,9 +88,9 @@ public class GDXROS1OdometryVisualizer extends ImGuiGDXROS1Visualizer implements
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (isActive())
       {
          if (toRender != null)

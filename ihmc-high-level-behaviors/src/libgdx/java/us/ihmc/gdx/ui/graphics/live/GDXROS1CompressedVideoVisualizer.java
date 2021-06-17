@@ -65,7 +65,7 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
       if (isActive())
       {

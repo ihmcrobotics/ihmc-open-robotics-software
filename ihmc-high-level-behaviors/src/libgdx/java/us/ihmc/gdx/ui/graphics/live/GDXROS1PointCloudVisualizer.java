@@ -145,9 +145,9 @@ public class GDXROS1PointCloudVisualizer extends ImGuiGDXROS1Visualizer implemen
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       updateMesh();
    }
 
