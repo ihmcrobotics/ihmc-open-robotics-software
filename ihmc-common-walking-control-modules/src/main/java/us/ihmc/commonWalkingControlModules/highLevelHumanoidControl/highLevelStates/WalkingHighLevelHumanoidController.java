@@ -254,11 +254,17 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
 
       if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
+      {
+         // This guy can be used to add shearing forces to the feet while measuring the distance between them. Really useful to debug and identify elasticity in the legs.
          legElasticityDebuggator = new LegElasticityDebuggator(controllerToolbox.getReferenceFrames(),
                                                                new SideDependentList<>(side -> feet.get(side).getRigidBody()),
-                                                               yoTime);
+                                                               yoTime,
+                                                               registry);
+      }
       else
+      {
          legElasticityDebuggator = null;
+      }
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
