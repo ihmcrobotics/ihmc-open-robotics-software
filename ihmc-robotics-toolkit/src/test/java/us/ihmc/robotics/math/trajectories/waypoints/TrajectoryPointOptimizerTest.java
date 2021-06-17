@@ -300,8 +300,74 @@ public class TrajectoryPointOptimizerTest
       }
    }
 
+   private static void runTimingTest()
+   {
+      int maxWaypointsToTest = 12;
+      TrajectoryPointOptimizer[] optimizers = new TrajectoryPointOptimizer[maxWaypointsToTest];
+      long[] timingData = new long[maxWaypointsToTest];
+
+      for (int i = 0; i < maxWaypointsToTest; i++)
+      {
+         optimizers[i] = setupOptimizerForSemicircularTrajectory(i + 1);
+      }
+
+      // do warm-up
+      TrajectoryPointOptimizer tempOptimizer = setupOptimizerForSemicircularTrajectory(1);
+      for (int i = 0; i < 250; i++)
+      {
+         tempOptimizer.compute();
+      }
+
+      // do timing test
+      int numberOfOptimizationsToRun = 20;
+      for (int i = 0; i < optimizers.length; i++)
+      {
+         long start = System.nanoTime();
+
+         TrajectoryPointOptimizer optimizer = optimizers[i];
+         optimizer.compute(numberOfOptimizationsToRun);
+
+         long stop = System.nanoTime();
+
+         long diff = stop - start;
+         timingData[i] = diff;
+      }
+
+      for (int i = 0; i < optimizers.length; i++)
+      {
+         System.out.println((i+1) + "\t " + (timingData[i]/(numberOfOptimizationsToRun * 1e6)) + " ms");
+      }
+   }
+
+   private static TrajectoryPointOptimizer setupOptimizerForSemicircularTrajectory(int numberOfWaypoints)
+   {
+      int dimensions = 3;
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
+
+      TDoubleArrayList x0 = new TDoubleArrayList(new double[]{0.0, 0.0, 0.0});
+      TDoubleArrayList xd0 = new TDoubleArrayList(new double[]{0.0, 0.0, 1.0});
+      TDoubleArrayList x1 = new TDoubleArrayList(new double[]{1.0, 1.0, 0.0});
+      TDoubleArrayList xd1 = new TDoubleArrayList(new double[]{0.0, 0.0, -1.0});
+
+      List<TDoubleArrayList> waypoints = new ArrayList<>();
+      double theta = Math.PI / (numberOfWaypoints + 1);
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         double xyValue = Math.cos((i + 1) * theta);
+         double zValue = Math.sin((i + 1) * theta);
+         TDoubleArrayList waypoint = new TDoubleArrayList(new double[]{xyValue, xyValue, zValue});
+         waypoints.add(waypoint);
+      }
+
+      optimizer.setEndPoints(x0, xd0, x1, xd1);
+      optimizer.setWaypoints(waypoints);
+
+      return optimizer;
+   }
+
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(TrajectoryPointOptimizer.class, TrajectoryPointOptimizerTest.class);
+      runTimingTest();
+//      MutationTestFacilitator.facilitateMutationTestForClass(TrajectoryPointOptimizer.class, TrajectoryPointOptimizerTest.class);
    }
 }
