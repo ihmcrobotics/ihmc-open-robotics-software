@@ -158,4 +158,9 @@ public class WalkingFailureDetectionControlModule
    {
       return combinedFootPolygonWithNextFootstep;
    }
+
+   public double getICPDistanceFromFootPolygonThreshold()
+   {
+      return icpDistanceFromFootPolygonThreshold.getDoubleValue();
+   }
 }
