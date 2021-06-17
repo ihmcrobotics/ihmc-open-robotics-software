@@ -350,7 +350,6 @@ public class WalkingSingleSupportState extends SingleSupportState
       double initialPitchVelocity = tempAngularVelocity.getY();
       feetManager.touchDown(nextFootstep.getRobotSide(), initialPitch, initialPitchVelocity, pitch, footstepTiming.getTouchdownDuration());
 
-      feetManager.reset();
       setYoVariablesToNaN();
    }
 
