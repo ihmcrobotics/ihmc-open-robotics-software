@@ -116,6 +116,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          box3D.set(boxDescription.getLeft(), boxDescription.getRight());
          obstacleBoxVisualizer.generateMeshAsync(box3D);
       });
+      helper.subscribeViaCallback(ResetForUI, goalAffordance::clear);
    }
 
    @Override

@@ -1,5 +1,7 @@
 package us.ihmc.behaviors.tools.behaviorTree;
 
+import us.ihmc.log.LogTools;
+
 public interface ResettingNodeBasics extends BehaviorTreeControlFlowNodeBasics
 {
    @Override
@@ -7,6 +9,7 @@ public interface ResettingNodeBasics extends BehaviorTreeControlFlowNodeBasics
    {
       if (getLastWasClock() && !isReset())
       {
+         LogTools.info("Resetting {} node", getClass().getSimpleName());
          reset();
          setIsReset(true);
       }
