@@ -370,10 +370,10 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
         	 //attempting to track down a bug
         	 
 //            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.85, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
-            
-            
-            double footZ2 = referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ();
-            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, footZ2+0.85, ReferenceFrame.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+
+            referenceFrames.updateFrames();
+
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75, referenceFrames.getMidFeetZUpFrame(),referenceFrames.getMidFeetZUpFrame());
             
             atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
             publishTextToSpeech("Decrease heigth");
@@ -969,6 +969,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private FootstepDataMessage createRelativeFootStep(PoseReferenceFrame frame, RobotSide side, Point3D location, Quaternion orientation)
    {
 
+      referenceFrames.updateFrames();
+
       FramePose3D pose = offsetPointFromFrameInWorldFrame(frame, location, orientation);
       double footZ2 = referenceFrames.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame().getTranslationZ();
 
@@ -1000,6 +1002,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    private void lookDown()
    {
+      referenceFrames.updateFrames();
+
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0.7);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
@@ -1013,6 +1017,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
    private void lookUp()
    {
+      referenceFrames.updateFrames();
+
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
