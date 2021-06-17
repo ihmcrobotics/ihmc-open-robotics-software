@@ -18,6 +18,7 @@ import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.networkProcessor.time.DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider;
 import us.ihmc.avatar.networkProcessor.time.SimulationRosClockPPSTimestampOffsetProvider;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.avatar.ros.DRCROSPPSTimestampOffsetProvider;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.RobotROSClockCalculatorFromPPSOffset;
@@ -26,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.splitFractionCalculation
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.CoPTrajectoryParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -438,6 +440,18 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          timestampOffsetProvider = new DRCROSAlwaysZeroOffsetPPSTimestampOffsetProvider();
 
       return new RobotROSClockCalculatorFromPPSOffset(timestampOffsetProvider);
+   }
+
+   @Override
+   public String getStepReachabilityResourceName()
+   {
+      return "ihmc-open-robotics-software/atlas/src/main/resources/us/ihmc/atlas/parameters/StepReachabilityMap.csv";
+   }
+
+   @Override
+   public StepReachabilityData getStepReachabilityData()
+   {
+      return StepReachabilityFileTools.loadFromFile(getStepReachabilityResourceName());
    }
 
    @Override
