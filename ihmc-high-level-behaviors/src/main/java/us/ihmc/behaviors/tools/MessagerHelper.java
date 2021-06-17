@@ -138,6 +138,12 @@ public class MessagerHelper implements MessagerPublishSubscribeAPI
    }
 
    @Override
+   public void subscribeViaCallback(MessagerAPIFactory.Topic<Object> topic, Runnable callback)
+   {
+      subscribeViaCallback(topic, object -> callback.run());
+   }
+
+   @Override
    public <T extends K, K> TypedNotification<K> subscribeViaNotification(MessagerAPIFactory.Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();

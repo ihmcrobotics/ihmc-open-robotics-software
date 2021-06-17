@@ -175,6 +175,12 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    }
 
    @Override
+   public void subscribeViaCallback(Topic<Object> topic, Runnable callback)
+   {
+      messagerHelper.subscribeViaCallback(topic, callback);
+   }
+
+   @Override
    public <T extends K, K> TypedNotification<K> subscribeViaNotification(Topic<T> topic)
    {
       TypedNotification<K> typedNotification = new TypedNotification<>();
