@@ -82,6 +82,8 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class WalkingHighLevelHumanoidController implements JointLoadStatusProvider
 {
+   private static final boolean ENABLE_LEG_ELASTICITY_DEBUGGATOR = false;
+
    private final String name = getClass().getSimpleName();
    private final YoRegistry registry = new YoRegistry(name);
 
@@ -128,6 +130,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    private final JointLimitEnforcementMethodCommand jointLimitEnforcementMethodCommand = new JointLimitEnforcementMethodCommand();
    private final YoBoolean limitCommandSent = new YoBoolean("limitCommandSent", registry);
+
+   private final LegElasticityDebuggator legElasticityDebuggator;
 
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
@@ -248,6 +252,13 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
             throw new RuntimeException("Must define joint limit parameters for joint " + joint.getName() + " if using joints with restrictive limits.");
          jointLimitEnforcementMethodCommand.addLimitEnforcementMethod(joint, JointLimitEnforcement.RESTRICTIVE, limitParameters);
       }
+
+      if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
+         legElasticityDebuggator = new LegElasticityDebuggator(controllerToolbox.getReferenceFrames(),
+                                                               new SideDependentList<>(side -> feet.get(side).getRigidBody()),
+                                                               yoTime);
+      else
+         legElasticityDebuggator = null;
 
       ControllerCoreOptimizationSettings defaultControllerCoreOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
       controllerCoreOptimizationSettings = new ParameterizedControllerCoreOptimizationSettings(defaultControllerCoreOptimizationSettings, registry);
@@ -600,6 +611,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
       statusOutputManager.reportStatusMessage(balanceManager.updateAndReturnCapturabilityBasedStatus());
 
+      if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
+         legElasticityDebuggator.update();
+
       firstTick = false;
    }
 
@@ -827,6 +841,9 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       controllerCoreCommand.addFeedbackControlCommand(comHeightManager.getFeedbackControlCommand());
 
       controllerCoreCommand.addInverseDynamicsCommand(controllerCoreOptimizationSettings.getCommand());
+
+      if (ENABLE_LEG_ELASTICITY_DEBUGGATOR)
+         controllerCoreCommand.addInverseDynamicsCommand(legElasticityDebuggator.getInverseDynamicsCommand());
    }
 
    public ControllerCoreCommand getControllerCoreCommand()
