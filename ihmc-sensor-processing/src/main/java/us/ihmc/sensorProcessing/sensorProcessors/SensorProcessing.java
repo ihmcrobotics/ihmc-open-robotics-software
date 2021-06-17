@@ -2324,6 +2324,11 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return registry;
    }
 
+   public OneDoFJointBasics getJointSensorDefinition(String jointName)
+   {
+      return jointSensorDefinitions.stream().filter(joint -> joint.getName().equals(jointName)).findFirst().orElse(null);
+   }
+
    public List<OneDoFJointBasics> getJointSensorDefinitions()
    {
       return jointSensorDefinitions;
