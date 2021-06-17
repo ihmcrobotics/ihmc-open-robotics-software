@@ -16,6 +16,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class WalkingFailureDetectionControlModule
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -33,6 +35,7 @@ public class WalkingFailureDetectionControlModule
    private final YoDouble icpDistanceFromFootPolygon;
    private final YoDouble icpDistanceFromFootPolygonThreshold;
    private final YoBoolean isRobotFalling;
+   private final AtomicBoolean fallWasReported = new AtomicBoolean(false);
    private final FrameVector2D fallingDirection2D = new FrameVector2D();
    private final FrameVector3D fallingDirection3D = new FrameVector3D();
 
@@ -109,7 +112,8 @@ public class WalkingFailureDetectionControlModule
       //      boolean isCapturePointCloseToFootPolygon = combinedFootPolygon.isPointInside(capturePoint, icpDistanceFromFootPolygonThreshold.getDoubleValue());
       boolean isCapturePointCloseToFootPolygon = icpDistanceFromFootPolygon.getDoubleValue() < icpDistanceFromFootPolygonThreshold.getDoubleValue();
       boolean isCapturePointCloseToDesiredCapturePoint = desiredCapturePoint2d.distance(capturePoint2d) < icpDistanceFromFootPolygonThreshold.getDoubleValue();
-      isRobotFalling.set(!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint);
+
+      isRobotFalling.set(fallWasReported.getAndSet(false) || (!isCapturePointCloseToFootPolygon && !isCapturePointCloseToDesiredCapturePoint));
 
       if (isRobotFalling.getBooleanValue())
       {
@@ -120,6 +124,11 @@ public class WalkingFailureDetectionControlModule
          fallingDirection2D.set(tempFallingDirection);
          fallingDirection3D.setIncludingFrame(fallingDirection2D, 0.0);
       }
+   }
+
+   public void reportRobotIsFalling()
+   {
+      fallWasReported.set(true);
    }
 
    public boolean isRobotFalling()
