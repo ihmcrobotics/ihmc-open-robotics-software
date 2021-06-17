@@ -360,8 +360,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          }
       };
 
-      
-      BehaviorAction lowerHeightTask = new BehaviorAction(atlasPrimitiveActions.pelvisHeightTrajectoryBehavior)
+      //TODO this is where you change the height before walking through the door
+      BehaviorAction setHeightBeforeWalkingTHroughDoorWayTask = new BehaviorAction(atlasPrimitiveActions.pelvisHeightTrajectoryBehavior)
       {
          @Override
          protected void setBehaviorInput()
@@ -727,7 +727,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       ///
 
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.SET_UP_ROBOT_FOR_DOOR_WALK, setUpForWalk,WalkThroughDoorBehaviorState.LOWER_HEIGHT_BEFORE_WALKING);
-      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.LOWER_HEIGHT_BEFORE_WALKING, lowerHeightTask,WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
+      factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.LOWER_HEIGHT_BEFORE_WALKING, setHeightBeforeWalkingTHroughDoorWayTask,WalkThroughDoorBehaviorState.WALK_THROUGH_DOOR);
 
 
 
