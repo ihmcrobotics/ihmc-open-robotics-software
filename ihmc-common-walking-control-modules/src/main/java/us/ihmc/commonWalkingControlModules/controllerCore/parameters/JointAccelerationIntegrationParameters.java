@@ -78,6 +78,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
       velocityBreakFrequency = other.getVelocityBreakFrequency();
       maxPositionError = other.getMaxPositionError();
       maxVelocity = other.getMaxVelocity();
+      zeroVelocityReset = other.getZeroVelocityReset();
    }
 
    /**
