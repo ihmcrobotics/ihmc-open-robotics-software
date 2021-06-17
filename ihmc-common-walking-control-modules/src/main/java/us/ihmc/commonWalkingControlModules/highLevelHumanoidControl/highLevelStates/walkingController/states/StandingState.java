@@ -87,6 +87,7 @@ public class StandingState extends WalkingState
    public void onEntry()
    {
       commandInputManager.clearAllCommands();
+      feetManager.reset();
 
       touchdownErrorCompensator.clear();
 
