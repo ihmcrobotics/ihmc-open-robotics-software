@@ -1,9 +1,7 @@
 package us.ihmc.avatar.pushRecovery;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-
 import java.io.InputStream;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,6 +13,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.PushRecoveryStateEnum;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -28,6 +27,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.LimbName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -37,6 +37,9 @@ import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulatio
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoInteger;
+
+import static us.ihmc.robotics.Assert.*;
 
 public abstract class DRCPushRecoveryTest
 {
@@ -367,6 +370,54 @@ public abstract class DRCPushRecoveryTest
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
    }
 
+   @Test
+   public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, true, true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      RobotSide footSide = RobotSide.LEFT;
+      FramePose3D footPose = new FramePose3D(
+            drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+      footPose.prependTranslation(0.0, 0.0, 0.2);
+      Point3D desiredFootPosition = new Point3D();
+      Quaternion desiredFootOrientation = new Quaternion();
+      footPose.get(desiredFootPosition, desiredFootOrientation);
+      FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
+      drcSimulationTestHelper.publishToController(footPosePacket);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3D forceDirection = new Vector3D(1.0, 1.0, 0.0);
+      double magnitude = 250.0;
+      double duration = 0.3;
+      pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
+
+      final YoEnum<PushRecoveryStateEnum> pushRecoveryState = (YoEnum<PushRecoveryStateEnum>)  drcSimulationTestHelper.getYoVariable("PushRecoveryHighLevelHumanoidController", "pushRecoveryCurrentState");
+      final YoInteger numberOfRecoveryStepsTaken = (YoInteger) drcSimulationTestHelper.getYoVariable("numberOfRecoveryStepsTaken");
+      final YoInteger maxNumberOfSteps = (YoInteger) drcSimulationTestHelper.getYoVariable("maxNumberOfRecoveryStepsToTake");
+      maxNumberOfSteps.set(1);
+
+      AtomicBoolean tookStep = new AtomicBoolean(false);
+      pushRecoveryState.addListener(state -> {
+         if (pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT
+             || pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT)
+            tookStep.set(true);
+      });
+      pushRobotController.queueForceDelayed(new PushRecoveryTransferStartCondition(pushRecoveryState), 0.02, forceDirection, magnitude, duration);
+
+      assertFalse(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(4.0));
+
+      assertEquals(numberOfRecoveryStepsTaken.getIntegerValue(), 2);
+      assertTrue(tookStep.get());
+
+//      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
+   }
+
    private void setupTest(String scriptName, boolean enablePushRecoveryControlModule, boolean enablePushRecoveryOnFailure) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
@@ -409,6 +460,9 @@ public abstract class DRCPushRecoveryTest
          doubleSupportStartConditions.put(robotSide, new DoubleSupportStartCondition(walkingState, robotSide));
       }
 
+      final YoEnum<PushRecoveryStateEnum> pushRecoveryState = (YoEnum<PushRecoveryStateEnum>) scs.findVariable("PushRecoveryController",
+                                                                                                               "pushRecoveryCurrentState");
+
       setupCamera(scs);
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       transferTime = getRobotModel().getWalkingControllerParameters().getDefaultTransferTime();
@@ -428,6 +482,23 @@ public abstract class DRCPushRecoveryTest
       pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, pushDuration);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationDuration));
       assertTrue(currentHighLevelState.getEnumValue().equals(HighLevelControllerName.WALKING));
+   }
+
+   private class PushRecoveryTransferStartCondition implements StateTransitionCondition
+   {
+      private final YoEnum<PushRecoveryStateEnum> pushRecoveryState;
+
+      public PushRecoveryTransferStartCondition(YoEnum<PushRecoveryStateEnum> pushRecoveryState)
+      {
+         this.pushRecoveryState = pushRecoveryState;
+      }
+
+      @Override
+      public boolean testCondition(double time)
+      {
+         return pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT
+                || pushRecoveryState.getEnumValue() == PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
+      }
    }
 
    private class SingleSupportStartCondition implements StateTransitionCondition
