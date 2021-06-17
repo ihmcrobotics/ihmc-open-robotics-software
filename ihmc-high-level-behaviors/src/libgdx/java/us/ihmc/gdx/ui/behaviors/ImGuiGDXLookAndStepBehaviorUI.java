@@ -182,11 +182,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          currentStatePlot.render(-1, "");
       }
 
-      if (ImGui.button(labels.get("Select behavior")))
-      {
-         helper.publish(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
-      }
-      ImGui.sameLine();
       if (ImGui.button("Reset"))
       {
          helper.publish(RESET);

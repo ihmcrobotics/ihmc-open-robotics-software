@@ -35,7 +35,6 @@ public class BehaviorModuleProcess extends RestartableMissionControlProcess
                                           robotModelSupplier.get(),
                                           CommunicationMode.fromOrdinal(ros2Mode.get()),
                                           CommunicationMode.fromOrdinal(messagerMode.get()));
-      behaviorModule.getMessager().submitMessage(BehaviorModule.API.BehaviorSelection, LookAndStepBehavior.DEFINITION.getName());
    }
 
    @Override
