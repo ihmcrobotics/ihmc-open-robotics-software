@@ -85,9 +85,9 @@ public class GDXROS1BoxVisualizer extends ImGuiGDXROS1Visualizer implements Rend
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (toRender != null)
       {
          toRender.run();
