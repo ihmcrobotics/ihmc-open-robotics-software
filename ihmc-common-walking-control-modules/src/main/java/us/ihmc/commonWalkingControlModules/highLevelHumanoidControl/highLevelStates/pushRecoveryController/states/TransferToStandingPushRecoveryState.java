@@ -21,8 +21,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToStandingPushRecoveryState extends PushRecoveryState
 {
-   private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
-
    private final WalkingMessageHandler walkingMessageHandler;
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
@@ -54,9 +52,6 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       this.balanceManager = managerFactory.getOrCreateBalanceManager();
       this.pushRecoveryCalculator = pushRecoveryControlModule;
       this.pushRecoveryParameters = pushRecoveryParameters;
-
-      // TODO make this a parameter
-      maxICPErrorToSwitchToStanding.set(0.025);
 
       comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
       pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
@@ -151,7 +146,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (pushRecoveryCalculator.isRobotFallingFromDoubleSupport() != null)
          return false;
 
-      return balanceManager.getNormalizedEllipticICPError() < maxICPErrorToSwitchToStanding.getDoubleValue();
+      return balanceManager.getNormalizedEllipticICPError() < 1.0;
    }
 
    @Override
