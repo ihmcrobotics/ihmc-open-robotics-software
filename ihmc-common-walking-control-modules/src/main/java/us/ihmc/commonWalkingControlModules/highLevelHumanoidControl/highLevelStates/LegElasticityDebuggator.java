@@ -30,7 +30,7 @@ public class LegElasticityDebuggator
    private final YoFrameVector3D footSpacingMidZUp;
    private final YoFunctionGenerator footExternalForceOffsetX, footExternalForceOffsetY;
 
-   public LegElasticityDebuggator(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<RigidBodyBasics> feet, DoubleProvider time)
+   public LegElasticityDebuggator(CommonHumanoidReferenceFrames referenceFrames, SideDependentList<RigidBodyBasics> feet, DoubleProvider time, YoRegistry parentRegistry)
    {
       this.referenceFrames = referenceFrames;
       this.feet = feet;
@@ -43,6 +43,7 @@ public class LegElasticityDebuggator
                                                                             referenceFrames.getSoleFrame(side),
                                                                             registry));
       footSpacingMidZUp = new YoFrameVector3D("FootSpacingMidZUp", midFeetZUpFrame, registry);
+      parentRegistry.addChild(registry);
    }
 
    public void update()
