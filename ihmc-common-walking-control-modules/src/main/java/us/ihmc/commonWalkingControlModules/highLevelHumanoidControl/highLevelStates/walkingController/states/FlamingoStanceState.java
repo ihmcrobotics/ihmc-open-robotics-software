@@ -97,6 +97,10 @@ public class FlamingoStanceState extends SingleSupportState
             initiateFootLoadingProcedure(swingSide);
             balanceManager.requestICPPlannerToHoldCurrentCoMInNextDoubleSupport();
          }
+         else
+         {
+            failureDetectionControlModule.reportRobotIsFalling();
+         }
       }
 
       walkingMessageHandler.clearFootTrajectory(supportSide);
