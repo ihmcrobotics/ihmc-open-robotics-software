@@ -97,7 +97,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushICPOptimiWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScriptFilePath(), true, false);
+      setupTest(getScriptFilePath(), false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -114,7 +114,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScriptFilePath(), true, true);
+      setupTest(getScriptFilePath(), true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -132,7 +132,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveringWithSwingSpeedUpWhileInSwing() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScriptFilePath(), false, true);
+      setupTest(getScriptFilePath(), true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -149,7 +149,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushWhileInTransfer() throws SimulationExceededMaximumTimeException
    {
-      setupTest(getScriptFilePath(), true, false);
+      setupTest(getScriptFilePath(), false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -166,7 +166,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -183,7 +183,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -200,7 +200,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testLongForwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -218,7 +218,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testControllerFailureKicksIn() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, false);
+      setupTest(null, false);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -237,7 +237,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testLongBackwardPushWhileStanding() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -254,7 +254,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testLongForwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -272,7 +272,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testLongBackwardPushWhileStandingAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
 
       // push timing:
@@ -289,7 +289,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveryWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, false, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(
@@ -317,7 +317,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(
@@ -343,9 +343,37 @@ public abstract class DRCPushRecoveryTest
    }
 
    @Test
+   public void testRecoverySidewaysWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
+   {
+      setupTest(null, true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+      RobotSide footSide = RobotSide.LEFT;
+      FramePose3D footPose = new FramePose3D(
+            drcSimulationTestHelper.getAvatarSimulation().getControllerFullRobotModel().getEndEffectorFrame(footSide, LimbName.LEG));
+      footPose.changeFrame(ReferenceFrame.getWorldFrame());
+      footPose.prependTranslation(0.0, 0.0, 0.2);
+      Point3D desiredFootPosition = new Point3D();
+      Quaternion desiredFootOrientation = new Quaternion();
+      footPose.get(desiredFootPosition, desiredFootOrientation);
+      FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
+      drcSimulationTestHelper.publishToController(footPosePacket);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(2.0));
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.0;
+
+      // push parameters:
+      Vector3D forceDirection = new Vector3D(0.0, 1.0, 0.0);
+      double magnitude = 200.0;
+      double duration = 0.2;
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 4.0);
+   }
+
+   @Test
    public void testRecoveryAngledWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(
@@ -365,15 +393,15 @@ public abstract class DRCPushRecoveryTest
 
       // push parameters:
       Vector3D forceDirection = new Vector3D(1.0, 1.0, 0.0);
-      double magnitude = 180.0;
-      double duration = 0.4;
+      double magnitude = 350.0;
+      double duration = 0.2;
       applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
    }
 
    @Test
    public void testFailureAfterRecoveryStep() throws SimulationExceededMaximumTimeException
    {
-      setupTest(null, true, true);
+      setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
       FramePose3D footPose = new FramePose3D(
@@ -418,7 +446,7 @@ public abstract class DRCPushRecoveryTest
 //      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, 2.5);
    }
 
-   private void setupTest(String scriptName, boolean enablePushRecoveryControlModule, boolean enablePushRecoveryOnFailure) throws SimulationExceededMaximumTimeException
+   private void setupTest(String scriptName, boolean enablePushRecoveryOnFailure) throws SimulationExceededMaximumTimeException
    {
       FlatGroundEnvironment flatGround = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
