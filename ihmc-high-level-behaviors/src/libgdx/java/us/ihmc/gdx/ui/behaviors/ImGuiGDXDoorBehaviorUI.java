@@ -71,7 +71,6 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
          detectedFiducialMessageReceivedStopwatch.reset();
          latestFiducialID = detectedFiducialMessage.getFiducialId();
       });
-      helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() -> helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP));
    }
 
    @Override
