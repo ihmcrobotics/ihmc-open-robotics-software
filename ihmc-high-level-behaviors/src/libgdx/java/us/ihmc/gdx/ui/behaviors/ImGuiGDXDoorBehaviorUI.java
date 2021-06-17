@@ -29,6 +29,8 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -40,6 +42,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    public static final GDXBehaviorUIDefinition DEFINITION = new GDXBehaviorUIDefinition(DoorBehavior.DEFINITION, ImGuiGDXDoorBehaviorUI::new);
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final BehaviorHelper helper;
+   private final ResettableExceptionHandlingExecutorService behaviorStopperExecutor = MissingThreadTools.newSingleThreadExecutor("behavior_stopper", true);
    private Point2D nodePosition = new Point2D(376.0, 213.0);
    private final AtomicReference<CurrentBehaviorStatus> status = new AtomicReference<>();
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(labels.get("Door behavior status"), 1000, 250, 15);
@@ -70,6 +73,13 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
       {
          detectedFiducialMessageReceivedStopwatch.reset();
          latestFiducialID = detectedFiducialMessage.getFiducialId();
+      });
+      helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() ->
+      {
+         behaviorStopperExecutor.submit(() ->
+         {
+            helper.publishBehaviorControlMode(BehaviorControlModeEnum.STOP);
+         });
       });
    }
 
@@ -166,6 +176,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void destroy()
    {
+      behaviorStopperExecutor.destroy();
    }
 
    @Override
