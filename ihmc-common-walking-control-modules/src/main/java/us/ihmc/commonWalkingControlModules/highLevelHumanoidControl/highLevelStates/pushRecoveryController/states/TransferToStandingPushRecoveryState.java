@@ -70,6 +70,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
       switchToPointToeOffIfAlreadyInLine();
 
+      capturePoint.set(controllerToolbox.getCapturePoint());
       pushRecoveryCalculator.updateForDoubleSupport(capturePoint, controllerToolbox.getOmega0());
 
       RobotSide supportingSide = getSideCarryingMostWeight();
