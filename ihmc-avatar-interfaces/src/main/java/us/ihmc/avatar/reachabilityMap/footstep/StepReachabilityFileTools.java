@@ -1,11 +1,20 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
+import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.MultiContactScriptReader;
+import us.ihmc.avatar.multiContact.SixDoFMotionControlAnchorDescription;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityLatticePoint;
 import us.ihmc.commons.nio.FileTools;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.io.*;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -45,46 +54,52 @@ public class StepReachabilityFileTools
       }
    }
 
-   public static StepReachabilityData loadFromFile(String filename)
+   public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
    {
-      StepReachabilityData reachabilityData = new StepReachabilityData();
-
-      try
-      {
-         Scanner scanner = new Scanner(new File(filename));
-
-         // Read grid spacing
-         String gridData = scanner.nextLine();
-         String[] gridDataStrings = gridData.split(",");
-         double spacingXY = Double.parseDouble(gridDataStrings[0]);
-         int yawDivisions = Integer.parseInt(gridDataStrings[1]);
-         double yawSpacing = Double.parseDouble(gridDataStrings[2]);
-         reachabilityData.setGridData(spacingXY, yawSpacing, yawDivisions);
-
-         while(scanner.hasNextLine())
-         {
-            String line = scanner.nextLine();
-
-            // Parse to get frame position, orientation and feasibility boolean
-            String[] data = line.split(",");
-            int xIndex = Integer.parseInt(data[0]);
-            int yIndex = Integer.parseInt(data[1]);
-            int zIndex = Integer.parseInt(data[2]);
-            int yawIndex = Integer.parseInt(data[3]);
-            double reachabilityValue = Double.parseDouble(data[4]);
-            StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(xIndex, yIndex, zIndex, yawIndex);
-
-            reachabilityData.getLegReachabilityMap().put(latticePoint, reachabilityValue);
-         }
-         scanner.close();
-         LogTools.info("Done loading from file");
-         return reachabilityData;
-      }
-      catch (FileNotFoundException e)
-      {
-         e.printStackTrace();
-      }
-      return null;
+      MultiContactScriptReader scriptReader = new MultiContactScriptReader();
+      scriptReader.loadScript(new File(robotModel.getStepReachabilityResourceName()));
+      return scriptReader.getAllItems();
    }
 
+   public static StepReachabilityData loadStepReachability(DRCRobotModel robotModel)
+   {
+      List<KinematicsToolboxSnapshotDescription> kinematicsSnapshots = loadKinematicsSnapshots(robotModel);
+      FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
+      StepReachabilityData reachabilityData = new StepReachabilityData();
+
+      for (int i = 0; i < kinematicsSnapshots.size(); i++)
+      {
+         KinematicsToolboxSnapshotDescription snapshot = kinematicsSnapshots.get(i);
+
+         // Exporter should do left foot at 0 index then right foot at 1 index. Double check this is the case.
+         SixDoFMotionControlAnchorDescription leftFoot = snapshot.getSixDoFAnchors().get(0);
+         SixDoFMotionControlAnchorDescription rightFoot = snapshot.getSixDoFAnchors().get(1);
+         assert(leftFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
+         assert(rightFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.RIGHT).getName()));
+
+         // TODO figure out a way to export this.
+         // It can be a small header file that sits next to the .json file, and we can add a method in DRCRobotModel for it's file name
+         // Or it it's possible to have MultiContactScriptWriter to export it into the json. Maybe MultiContactWriter.writeScript could optionally
+         // take in an extra json node, but it'll need to stay backwards compatible so that might get tricky.
+
+         double spacingXYZ = 0.5;
+         int yawDivisions = 2;
+         double yawSpacing = 2.61799;
+
+         // Right foot is at origin. Back out lattice point of left foot
+         Point3D leftFootDesiredPosition = leftFoot.getInputMessage().getDesiredPositionInWorld();
+         Quaternion leftFootDesiredOrientation = leftFoot.getInputMessage().getDesiredOrientationInWorld();
+         StepReachabilityLatticePoint latticePoint = new StepReachabilityLatticePoint(leftFootDesiredPosition.getX(),
+                                                                                      leftFootDesiredPosition.getY(),
+                                                                                      leftFootDesiredPosition.getZ(),
+                                                                                      leftFootDesiredOrientation.getYaw(),
+                                                                                      spacingXYZ,
+                                                                                      yawDivisions,
+                                                                                      yawSpacing);
+         double solutionQuality = snapshot.getIkSolution().getSolutionQuality();
+         reachabilityData.getLegReachabilityMap().put(latticePoint, solutionQuality);
+      }
+
+      return reachabilityData;
+   }
 }

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
+import us.ihmc.avatar.multiContact.*;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxOptimizationSettings;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.SolutionQualityConvergenceDetector;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
@@ -86,6 +87,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
+import java.io.File;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -211,18 +213,23 @@ public abstract class HumanoidStepReachabilityCalculator
             break;
          case TEST_MULTIPLE_STEPS:
             List<StepReachabilityLatticePoint> leftFootPoseList = createLeftFootPoseList();
-            Map<StepReachabilityLatticePoint, Double> poseValidityMap = new HashMap<>();
             FramePose3D rightFootPose = new FramePose3D();
+            MultiContactScriptWriter scriptWriter = new MultiContactScriptWriter();
+
+            File reachabilityFile = new File(robotModel.getStepReachabilityResourceName());
+            scriptWriter.startNewScript(reachabilityFile, true);
+
             // Loop through XYZs, free yaw
             for (int xyzLoopIndex = 0; xyzLoopIndex < leftFootPoseList.size(); xyzLoopIndex++)
             {
                StepReachabilityLatticePoint leftFootPose = leftFootPoseList.get(xyzLoopIndex);
-               double reachabilityValue = testSingleStep(leftFootPose, rightFootPose, true);
+               KinematicsToolboxSnapshotDescription snapshotDescription = testSingleStep(leftFootPose, rightFootPose, true);
 
-               LogTools.info("Reachability value: " + reachabilityValue);
+               double solutionQuality = snapshotDescription.getIkSolution().getSolutionQuality();
+               LogTools.info("Reachability value: " + solutionQuality);
 
                // If there is a valid configuration, sweep through yaws for that XY pose
-               if (reachabilityValue < SOLUTION_QUALITY_THRESHOLD)
+               if (solutionQuality < SOLUTION_QUALITY_THRESHOLD)
                {
                   LogTools.info("Entering yaw sweep");
                   List<StepReachabilityLatticePoint> leftFootYawSweepList = createLeftFootYawSweepList(leftFootPose);
@@ -230,12 +237,13 @@ public abstract class HumanoidStepReachabilityCalculator
                   for (int yawLoopIndex = 0; yawLoopIndex < leftFootYawSweepList.size(); yawLoopIndex++)
                   {
                      leftFootPose = leftFootYawSweepList.get(yawLoopIndex);
-                     reachabilityValue = testSingleStep(leftFootPose, rightFootPose, false);
-                     poseValidityMap.put(leftFootPose, reachabilityValue);
+                     snapshotDescription = testSingleStep(leftFootPose, rightFootPose, false);
+                     scriptWriter.recordConfiguration(snapshotDescription);
                   }
                }
             }
-            StepReachabilityFileTools.writeToFile(robotModel.getStepReachabilityResourceName(), poseValidityMap, spacingXYZ, yawDivisions, yawSpacing);
+
+            scriptWriter.writeScript();
             break;
 
             case TEST_VISUALIZATION:
@@ -322,10 +330,13 @@ public abstract class HumanoidStepReachabilityCalculator
    /**
     * Solves IK assuming that the right foot is at the origin and left foot is at the given position
     */
-   private double testSingleStep(StepReachabilityLatticePoint leftFootLatticePoint, FramePose3D rightFoot, boolean freeYaw) throws SimulationExceededMaximumTimeException
+   private KinematicsToolboxSnapshotDescription testSingleStep(StepReachabilityLatticePoint leftFootLatticePoint, FramePose3D rightFoot, boolean freeYaw)
+         throws SimulationExceededMaximumTimeException
    {
-      if (freeYaw) LogTools.info("Entering: testStep");
-      else LogTools.info("Sweeping yaw");
+      if (freeYaw)
+         LogTools.info("Entering: testStep");
+      else
+         LogTools.info("Sweeping yaw");
 
       double groundHeight = 0.0;
       Point2D offset = new Point2D(0.0, 0.15);
@@ -333,6 +344,9 @@ public abstract class HumanoidStepReachabilityCalculator
 
       FullHumanoidRobotModel targetFullRobotModel = createFullRobotModelAtInitialConfiguration(getRobotModel(), groundHeight, offset, offsetYaw);
       RobotConfigurationData robotConfigurationData = extractRobotConfigurationData(targetFullRobotModel);
+      KinematicsToolboxSnapshotDescription snapshotDescription = new KinematicsToolboxSnapshotDescription();
+      List<SixDoFMotionControlAnchorDescription> sixDoFMotionControlAnchorDescriptions = new ArrayList<>();
+      List<OneDoFMotionControlAnchorDescription> oneDoFMotionControlAnchorDescriptions = new ArrayList<>();
 
       FramePose3D leftFoot = new FramePose3D();
       leftFoot.getPosition().setX(spacingXYZ * leftFootLatticePoint.getXIndex());
@@ -343,25 +357,26 @@ public abstract class HumanoidStepReachabilityCalculator
       for (RobotSide robotSide : RobotSide.values)
       {
          // Rigid body objective for each foot
-         KinematicsToolboxRigidBodyMessage rbMessage;
+         KinematicsToolboxRigidBodyMessage footObjective;
          if (freeYaw)
          {
             if (robotSide == RobotSide.LEFT)
-               rbMessage = holdRigidBodyFreeYaw(targetFullRobotModel.getFoot(robotSide), leftFoot);
+               footObjective = holdRigidBodyFreeYaw(targetFullRobotModel.getFoot(robotSide), leftFoot);
             else
-               rbMessage = holdRigidBodyFreeYaw(targetFullRobotModel.getFoot(robotSide), rightFoot);
+               footObjective = holdRigidBodyFreeYaw(targetFullRobotModel.getFoot(robotSide), rightFoot);
          }
          else
          {
             if (robotSide == RobotSide.LEFT)
-               rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
+               footObjective = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), leftFoot);
             else
-               rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
+               footObjective = holdRigidBodyAtTargetFrame(targetFullRobotModel.getFoot(robotSide), rightFoot);
          }
 
-         rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
-         rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
-         commandInputManager.submitMessage(rbMessage);
+         footObjective.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
+         footObjective.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_FEET_WEIGHT));
+         commandInputManager.submitMessage(footObjective);
+         sixDoFMotionControlAnchorDescriptions.add(sixDoFMessageToDescription(targetFullRobotModel.getFoot(robotSide), footObjective));
 
          // OneDoFJoint objective for each knee joint
 //         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
@@ -372,18 +387,20 @@ public abstract class HumanoidStepReachabilityCalculator
       FramePose3D centerFeet = interpolateFeet(leftFoot, rightFoot);
 
       // Rigid body objective for chest, center XY pose of feet
-      KinematicsToolboxRigidBodyMessage rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getChest(), centerFeet);
-      rbMessage.getLinearSelectionMatrix().setZSelected(false);
-      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
-      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
-      commandInputManager.submitMessage(rbMessage);
+      KinematicsToolboxRigidBodyMessage chestObjective = holdRigidBodyAtTargetFrame(targetFullRobotModel.getChest(), centerFeet);
+      chestObjective.getLinearSelectionMatrix().setZSelected(false);
+      chestObjective.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+      chestObjective.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+      commandInputManager.submitMessage(chestObjective);
+      sixDoFMotionControlAnchorDescriptions.add(sixDoFMessageToDescription(targetFullRobotModel.getChest(), chestObjective));
 
       // Rigid body objective for head, center XY pose of feet
-      rbMessage = holdRigidBodyAtTargetFrame(targetFullRobotModel.getHead(), centerFeet);
-      rbMessage.getLinearSelectionMatrix().setZSelected(false);
-      rbMessage.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
-      rbMessage.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
-      commandInputManager.submitMessage(rbMessage);
+      KinematicsToolboxRigidBodyMessage headObjective = holdRigidBodyAtTargetFrame(targetFullRobotModel.getHead(), centerFeet);
+      headObjective.getLinearSelectionMatrix().setZSelected(false);
+      headObjective.getAngularWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+      headObjective.getLinearWeightMatrix().set(MessageTools.createWeightMatrix3DMessage(RIGID_BODY_OTHER_WEIGHT));
+      commandInputManager.submitMessage(headObjective);
+      sixDoFMotionControlAnchorDescriptions.add(sixDoFMessageToDescription(targetFullRobotModel.getHead(), headObjective));
 
       { // Setup CoM message
          KinematicsToolboxCenterOfMassMessage comMessage = MessageTools.createKinematicsToolboxCenterOfMassMessage(computeCoMForFeet(leftFoot, rightFoot));
@@ -392,6 +409,7 @@ public abstract class HumanoidStepReachabilityCalculator
          comMessage.getSelectionMatrix().set(MessageTools.createSelectionMatrix3DMessage(selectionMatrix));
          comMessage.getWeights().set(MessageTools.createWeightMatrix3DMessage(COM_WEIGHT));
          commandInputManager.submitMessage(comMessage);
+         snapshotDescription.setCenterOfMassAnchor(centerOfMassMessageToDescription(comMessage));
       }
 
       // Disable the support polygon constraint, the randomized model isn't constrained.
@@ -410,7 +428,14 @@ public abstract class HumanoidStepReachabilityCalculator
          throw new RuntimeException(KinematicsToolboxController.class.getSimpleName() + " did not manage to initialize.");
       }
 
-      return toolboxController.getSolution().getSolutionQuality();
+      // populate empty fields for these values
+      snapshotDescription.setIkSolution(toolboxController.getSolution());
+      snapshotDescription.setControllerConfiguration(new RobotConfigurationData());
+      snapshotDescription.setIkPrivilegedConfiguration(new KinematicsToolboxPrivilegedConfigurationMessage());
+      snapshotDescription.setOneDoFAnchors(oneDoFMotionControlAnchorDescriptions);
+      snapshotDescription.setSixDoFAnchors(sixDoFMotionControlAnchorDescriptions);
+
+      return snapshotDescription;
    }
 
    private void runKinematicsToolboxController() throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
@@ -451,8 +476,8 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXYZ = 0.3; // 0.05
-   private static final int yawDivisions = 3;   // 10
+   private static final double spacingXYZ = 0.5; // 0.05
+   private static final int yawDivisions = 2;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
@@ -621,22 +646,6 @@ public abstract class HumanoidStepReachabilityCalculator
       return initialFullRobotModel;
    }
 
-   public static ConvexPolygon2D extractSupportPolygon(FullHumanoidRobotModel initialFullRobotModel,
-                                                       RobotContactPointParameters<RobotSide> contactPointParameters)
-   {
-      SideDependentList<ContactablePlaneBody> contactableFeet = extractContactableFeet(initialFullRobotModel, contactPointParameters);
-      ConvexPolygon2D supportPolygon = new ConvexPolygon2D();
-
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         List<FramePoint3D> contactPoints = contactableFeet.get(robotSide).getContactPointsCopy();
-         contactPoints.forEach(cp -> cp.changeFrame(worldFrame));
-         supportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(contactPoints));
-      }
-      supportPolygon.update();
-      return supportPolygon;
-   }
-
    public static SideDependentList<ContactablePlaneBody> extractContactableFeet(FullHumanoidRobotModel robotModel,
                                                                                 RobotContactPointParameters<RobotSide> contactPointParameters)
    {
@@ -645,6 +654,22 @@ public abstract class HumanoidStepReachabilityCalculator
       factory.setReferenceFrames(new HumanoidReferenceFrames(robotModel));
       factory.setFootContactPoints(contactPointParameters.getControllerFootGroundContactPoints());
       return new SideDependentList<>(factory.createFootContactablePlaneBodies());
+   }
+
+   private static SixDoFMotionControlAnchorDescription sixDoFMessageToDescription(RigidBodyBasics rigidBody, KinematicsToolboxRigidBodyMessage rigidBodyMessage)
+   {
+      SixDoFMotionControlAnchorDescription anchorDescription = new SixDoFMotionControlAnchorDescription();
+      anchorDescription.setRigidBodyName(rigidBody.getName());
+      anchorDescription.setInputMessage(rigidBodyMessage);
+      return anchorDescription;
+   }
+
+   private OneDoFMotionControlAnchorDescription oneDoFMessageToDescription(String jointName, KinematicsToolboxOneDoFJointMessage jointMessage)
+   {
+      OneDoFMotionControlAnchorDescription jointDescription = new OneDoFMotionControlAnchorDescription();
+      jointDescription.setJointName(jointName);
+      jointDescription.setInputMessage(jointMessage);
+      return jointDescription;
    }
 
    public static ConvexPolygon2D shrinkPolygon(ConvexPolygon2DReadOnly polygonToShrink, double distance)
@@ -702,6 +727,13 @@ public abstract class HumanoidStepReachabilityCalculator
          joint.setQ(RandomNumbers.nextDouble(random, jointLimitLower, jointLimitUpper));
       }
       MultiBodySystemTools.getRootBody(joints[0].getPredecessor()).updateFramesRecursively();
+   }
+
+   private static CenterOfMassMotionControlAnchorDescription centerOfMassMessageToDescription(KinematicsToolboxCenterOfMassMessage centerOfMassMessage)
+   {
+      CenterOfMassMotionControlAnchorDescription centerOfMassDescription = new CenterOfMassMotionControlAnchorDescription();
+      centerOfMassDescription.setInputMessage(centerOfMassMessage);
+      return centerOfMassDescription;
    }
 
    // CoM at elevator
