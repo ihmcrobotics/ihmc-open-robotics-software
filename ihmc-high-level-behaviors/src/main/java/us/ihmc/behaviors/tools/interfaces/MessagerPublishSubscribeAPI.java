@@ -22,5 +22,7 @@ public interface MessagerPublishSubscribeAPI
 
    public Notification subscribeTypelessViaNotification(MessagerAPIFactory.Topic<Object> topic);
 
+   public void subscribeViaCallback(MessagerAPIFactory.Topic<Object> topic, Runnable callback);
+
    public <T extends K, K> TypedNotification<K> subscribeViaNotification(MessagerAPIFactory.Topic<T> topic);
 }

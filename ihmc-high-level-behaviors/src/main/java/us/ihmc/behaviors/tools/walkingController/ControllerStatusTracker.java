@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools.walkingController;
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.IHMCROS2Callback;
+import us.ihmc.log.LogTools;
 import us.ihmc.tools.Timer;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -27,7 +28,7 @@ public class ControllerStatusTracker
 
    private final WalkingFootstepTracker footstepTracker;
    private final StatusLogger statusLogger;
-   private volatile HighLevelControllerName currentState;
+   private volatile HighLevelControllerName latestKnownState;
    private final Vector3D lastPlanOffset = new Vector3D();
    private final Timer capturabilityBasedStatusTimer = new Timer();
    private volatile boolean isWalking = false;
@@ -55,7 +56,7 @@ public class ControllerStatusTracker
    {
       footstepTracker.reset();
       isWalking = false;
-      currentState = null;
+      latestKnownState = null;
       lastPlanOffset.setToZero();
       finishedWalkingNotification.poll();
       capturabilityBasedStatusTimer.reset();
@@ -63,13 +64,18 @@ public class ControllerStatusTracker
 
    private void acceptHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)
    {
-      HighLevelControllerName newState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
-      if (currentState == HighLevelControllerName.WALKING && newState != HighLevelControllerName.WALKING)
+      HighLevelControllerName initialState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
+      HighLevelControllerName endState = HighLevelControllerName.fromByte(message.getEndHighLevelControllerName());
+      if (latestKnownState != initialState)
+      {
+         LogTools.warn("We didn't know the state of the controller: ours: {} != controller said: {}", latestKnownState, initialState);
+      }
+      if (initialState == HighLevelControllerName.WALKING && endState != HighLevelControllerName.WALKING)
       {
          triggerNotWalkingStateAnymoreCallbacks();
       }
-      currentState = newState;
-      statusLogger.info("Controller current state: {}", currentState);
+      statusLogger.info("Controller state changed from {} to {}", initialState, endState);
+      latestKnownState = endState;
    }
 
    private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)

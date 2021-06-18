@@ -130,7 +130,7 @@ public class GDXObstacleDetectionUI
 
             ros1PointCloudVisualizer.updateMesh(0.0f);
             ros1PointCloudVisualizer2.updateMesh(1.0f);
-            boxVisualizer.renderGraphics();
+            boxVisualizer.update();
 
             //            ros1BoxVisualizer.updateMesh();
 
