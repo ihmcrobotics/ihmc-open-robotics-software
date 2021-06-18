@@ -370,7 +370,7 @@ public class GDXImGuiBasedUI
       return imGuiPanelManager;
    }
 
-   public GDX3DSceneManager getSceneManager()
+   public GDX3DSceneManager get3DSceneManager()
    {
       return sceneManager;
    }
