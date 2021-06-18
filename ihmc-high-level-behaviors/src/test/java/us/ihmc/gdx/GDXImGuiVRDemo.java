@@ -30,7 +30,7 @@ public class GDXImGuiVRDemo
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiPanelManager().addWindow("Window", this::renderPanel);
+            baseUI.getImGuiPanelManager().addPanel("Window", this::renderPanel);
          }
 
          @Override

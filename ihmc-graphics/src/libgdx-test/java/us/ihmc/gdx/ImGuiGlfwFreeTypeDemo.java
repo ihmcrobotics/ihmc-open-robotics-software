@@ -31,7 +31,7 @@ public class ImGuiGlfwFreeTypeDemo
    public ImGuiGlfwFreeTypeDemo()
    {
       imGuiGlfwWindow = new ImGuiGlfwWindow(getClass().getSimpleName(), 800, 600);
-      imGuiGlfwWindow.getPanelManager().addFirst("Window");
+      imGuiGlfwWindow.getPanelManager().addPrimaryPanel("Window");
       imGuiGlfwWindow.run(this::configure, this::render, this::dispose);
 
       fontsFlags.set(fontsFlags.get() + ImGuiFreeTypeBuilderFlags.LightHinting);
