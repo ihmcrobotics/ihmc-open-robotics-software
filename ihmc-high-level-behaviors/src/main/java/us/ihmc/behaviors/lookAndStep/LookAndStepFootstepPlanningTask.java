@@ -382,10 +382,12 @@ public class LookAndStepFootstepPlanningTask
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getSwingPlanningModule().getSwingPlannerParameters().set(swingPlannerParameters);
+      footstepPlanningModule.clearCustomTerminationConditions();
       footstepPlanningModule.addCustomTerminationCondition(
             (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= lookAndStepParameters.getMinimumNumberOfPlannedSteps());
       MinimumFootstepChecker stepInPlaceChecker = new MinimumFootstepChecker();
       stepInPlaceChecker.setStanceFeetPoses(startFootPoses.get(RobotSide.LEFT).getSolePoseInWorld(), startFootPoses.get(RobotSide.RIGHT).getSolePoseInWorld());
+      footstepPlanningModule.getChecker().clearCustomFootstepCheckers();
       footstepPlanningModule.getChecker().attachCustomFootstepChecker(stepInPlaceChecker);
 
       statusLogger.info("Stance side: {}", stanceSide.name());
