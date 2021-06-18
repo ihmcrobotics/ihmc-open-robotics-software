@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -9,17 +10,17 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepChecker;
+import us.ihmc.footstepPlanning.graphSearch.stepCost.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.stepExpansion.ParameterBasedStepExpansion;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
@@ -77,14 +78,15 @@ public class AStarFootstepPlanner
                                SideDependentList<ConvexPolygon2D> footPolygons,
                                WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder,
                                SwingPlannerParametersBasics swingPlannerParameters,
-                               WalkingControllerParameters walkingControllerParameters)
+                               WalkingControllerParameters walkingControllerParameters,
+                               StepReachabilityData stepReachabilityData)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
       this.footPolygons = footPolygons;
       this.snapper = new FootstepSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
-      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, registry);
+      this.checker = new FootstepChecker(footstepPlannerParameters, footPolygons, snapper, stepReachabilityData, registry);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker, bodyPathPlanHolder, registry);
       this.expansion = new ParameterBasedStepExpansion(footstepPlannerParameters, idealStepCalculator, footPolygons);
 

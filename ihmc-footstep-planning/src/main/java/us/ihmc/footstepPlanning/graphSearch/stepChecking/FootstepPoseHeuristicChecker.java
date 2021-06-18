@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class FootstepPoseChecker
+public class FootstepPoseHeuristicChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -52,14 +52,16 @@ public class FootstepPoseChecker
    private final YoDouble minZFromPitchContraint = new YoDouble("minZFromPitchContraint", registry);
    private final YoDouble maxXFromPitchContraint = new YoDouble("maxXFromPitchContraint", registry);
 
-   public FootstepPoseChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper, YoRegistry parentRegistry)
+   public FootstepPoseHeuristicChecker(FootstepPlannerParametersReadOnly parameters, FootstepSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
       parentRegistry.addChild(registry);
    }
 
-   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep, DiscreteFootstep stanceStep, DiscreteFootstep startOfSwingStep)
+   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(DiscreteFootstep candidateStep,
+                                                                      DiscreteFootstep stanceStep,
+                                                                      DiscreteFootstep startOfSwingStep)
    {
       RobotSide stepSide = candidateStep.getRobotSide();
 

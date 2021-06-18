@@ -11,7 +11,6 @@ public class DoorBehaviorAPI
    private static final MessagerAPIFactory.CategoryTheme DoorTheme = apiFactory.createCategoryTheme("Door");
 
    public static final MessagerAPIFactory.Topic<Boolean> ReviewEnabled = topic("ReviewEnabled");
-   public static final MessagerAPIFactory.Topic<Object> DoorConfirmed = topic("DoorConfirmed");
    public static final MessagerAPIFactory.Topic<Double> DistanceToDoor = topic("DistanceToDoor");
    public static final MessagerAPIFactory.Topic<Boolean> IsFacingDoor = topic("IsFacingDoor");
    public static final MessagerAPIFactory.Topic<MutablePair<DoorType, Pose3D>> DetectedDoorPose = topic("DetectedDoorPose");

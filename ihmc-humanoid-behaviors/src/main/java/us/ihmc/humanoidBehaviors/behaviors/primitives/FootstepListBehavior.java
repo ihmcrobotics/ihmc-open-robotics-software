@@ -21,6 +21,7 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Node;
@@ -203,6 +204,8 @@ public class FootstepListBehavior extends AbstractBehavior
       hasRobotStartedWalking.set(false);
 
       //upon leaving this behavior just make sure the walking has stopped.
+
+      LogTools.info("FootstepListBehavior: onBehaviorExited createPauseWalkingMessage(true)");
       pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
 
    }
@@ -210,6 +213,8 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorAborted()
    {
+      LogTools.info("FootstepListBehavior: onBehaviorAborted createPauseWalkingMessage(true)");
+
       pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       isStopped.set(true);
@@ -218,6 +223,8 @@ public class FootstepListBehavior extends AbstractBehavior
    @Override
    public void onBehaviorPaused()
    {
+      LogTools.info("FootstepListBehavior: onBehaviorPaused createPauseWalkingMessage(true)");
+
       pauseWalkingPublisher.publish(HumanoidMessageTools.createPauseWalkingMessage(true));
       isPaused.set(true);
       if (DEBUG)

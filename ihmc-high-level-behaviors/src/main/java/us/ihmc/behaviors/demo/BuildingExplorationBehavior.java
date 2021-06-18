@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.demo;
 
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.door.DoorBehavior;
@@ -26,7 +26,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final BehaviorHelper helper;
    private final LookAndStepBehavior lookAndStepBehavior;
    private final DoorBehavior doorBehavior;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
    private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(AUTO);
    private final TraverseStairsBehavior traverseStairsBehavior;
@@ -44,6 +44,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       doorBehavior.setSyncedRobot(syncedRobot);
       addChild(doorBehavior);
       traverseStairsBehavior = new TraverseStairsBehavior(helper);
+      traverseStairsBehavior.setSyncedRobot(syncedRobot);
       addChild(traverseStairsBehavior);
       helper.subscribeViaCallback(Parameters, parameters ->
       {
@@ -72,9 +73,15 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
       {
          if (!goal.get().containsNaN())
          {
-            if (doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition())
+            if (doorBehavior.isDoingBehavior()
+            || (doorBehavior.hasSeenDoorRecently() && doorBehavior.getDistanceToDoor() < parameters.getDistanceFromDoorToTransition()))
             {
                status = tickDoor();
+            }
+            else if (traverseStairsBehavior.isGoing()
+                 || (traverseStairsBehavior.hasSeenStairsecently() && traverseStairsBehavior.getDistanceToStairs() < parameters.getDistanceFromDoorToTransition()))
+            {
+               traverseStairsBehavior.tick();
             }
             else
             {

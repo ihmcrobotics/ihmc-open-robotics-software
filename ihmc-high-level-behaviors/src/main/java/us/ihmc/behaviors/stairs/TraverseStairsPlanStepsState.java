@@ -19,7 +19,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.behaviors.tools.BehaviorHelper;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,7 +40,7 @@ public class TraverseStairsPlanStepsState implements State
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepListPublisher;
 
-   private final RemoteSyncedRobotModel remoteSyncedRobotModel;
+   private final ROS2SyncedRobotModel ROS2SyncedRobotModel;
    private final FootstepPlanningModule planningModule;
    private FootstepPlannerOutput output;
 
@@ -60,7 +60,7 @@ public class TraverseStairsPlanStepsState implements State
       });
       helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
 
-      remoteSyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
+      ROS2SyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       planningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
@@ -138,12 +138,12 @@ public class TraverseStairsPlanStepsState implements State
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalInput.get());
       request.setPlanBodyPath(false);
 
-      remoteSyncedRobotModel.update();
+      ROS2SyncedRobotModel.update();
       SideDependentList<Pose3D> solePoses = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         MovingReferenceFrame soleFrame = remoteSyncedRobotModel.getReferenceFrames().getSoleFrame(robotSide);
+         MovingReferenceFrame soleFrame = ROS2SyncedRobotModel.getReferenceFrames().getSoleFrame(robotSide);
          FramePose3D solePose = new FramePose3D(soleFrame);
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          solePoses.put(robotSide, new Pose3D(solePose));

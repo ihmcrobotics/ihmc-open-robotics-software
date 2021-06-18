@@ -1,6 +1,6 @@
 package us.ihmc.behaviors.exploreArea;
 
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.behaviorTree.AsynchronousActionNode;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -40,7 +40,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
    private final BehaviorHelper helper;
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final Supplier<List<Point3D>> pointsObservedFromSupplier;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final Supplier<PlanarRegionsList> concatenatedMapSupplier;
    private final Supplier<BoundingBox3D> concatenatedMapBoundingBoxSupplier;
    private final StatusLogger statusLogger;
@@ -107,7 +107,7 @@ public class ExploreAreaDetermineNextLocationsNode extends AsynchronousActionNod
 
    }
 
-   private void determineNextPlacesToWalkTo(RemoteSyncedRobotModel syncedRobot)
+   private void determineNextPlacesToWalkTo(ROS2SyncedRobotModel syncedRobot)
    {
       PlanarRegionsList concatenatedMap = concatenatedMapSupplier.get();
       BoundingBox3D concatenatedMapBoundingBox = concatenatedMapBoundingBoxSupplier.get();

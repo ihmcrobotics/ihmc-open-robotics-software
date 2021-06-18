@@ -96,9 +96,9 @@ public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements R
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (isActive() && points != null)
       {
          pointsToRender.clear();
