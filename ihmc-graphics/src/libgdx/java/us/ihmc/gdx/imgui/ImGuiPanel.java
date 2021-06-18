@@ -2,29 +2,29 @@ package us.ihmc.gdx.imgui;
 
 import imgui.type.ImBoolean;
 
-public class ImGuiWindow
+public class ImGuiPanel
 {
-   private final String windowName;
+   private final String panelName;
    private final Runnable render;
    private final ImBoolean enabled;
 
-   public ImGuiWindow(String windowName, Runnable render, boolean enabled)
+   public ImGuiPanel(String panelName, Runnable render, boolean enabled)
    {
-      this.windowName = windowName;
+      this.panelName = panelName;
       this.render = render;
       this.enabled = new ImBoolean(enabled);
    }
 
-   public ImGuiWindow(String windowName, Runnable render)
+   public ImGuiPanel(String panelName, Runnable render)
    {
-      this.windowName = windowName;
+      this.panelName = panelName;
       this.render = render;
       this.enabled = new ImBoolean(false);
    }
 
-   public ImGuiWindow(String windowName)
+   public ImGuiPanel(String panelName)
    {
-      this.windowName = windowName;
+      this.panelName = panelName;
       this.render = null;
       this.enabled = null;
    }
@@ -47,8 +47,8 @@ public class ImGuiWindow
       return enabled;
    }
 
-   public String getWindowName()
+   public String getPanelName()
    {
-      return windowName;
+      return panelName;
    }
 }
