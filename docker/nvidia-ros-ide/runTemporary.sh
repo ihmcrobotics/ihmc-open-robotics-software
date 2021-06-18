@@ -4,7 +4,7 @@ set -o xtrace
 
 # Make sure it works one way or the other to reduce possible errors
 if (( EUID == 0 )); then
-    echo "Run with sudo." 1>&2
+    echo "Run without sudo." 1>&2
     exit 1
 fi
 
