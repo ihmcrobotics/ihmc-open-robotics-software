@@ -32,6 +32,7 @@ javafxDependencies {
 libgdxDependencies {
    api(ihmc.sourceSetProject("main"))
    api("org.lwjgl:lwjgl-opencl:3.2.3")
+   api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")
