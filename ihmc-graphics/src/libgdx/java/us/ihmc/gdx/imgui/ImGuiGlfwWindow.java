@@ -48,11 +48,6 @@ public class ImGuiGlfwWindow
 
          render.run();
 
-         if (imGuiDockSystem.isFirstRenderCall())
-         {
-            panelManager.build(imGuiDockSystem.getCentralDockspaceId());
-         }
-
          imGuiDockSystem.afterWindowManagement();
       }
 
