@@ -10,6 +10,7 @@ public class BuildingExplorationBehaviorParameters extends StoredPropertySet imp
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
    public static final DoubleStoredPropertyKey distanceFromDoorToTransition = keys.addDoubleKey("Distance from door to transition");
+   public static final DoubleStoredPropertyKey distanceFromStairsToTransition = keys.addDoubleKey("Distance from stairs to transition");
 
    public BuildingExplorationBehaviorParameters()
    {

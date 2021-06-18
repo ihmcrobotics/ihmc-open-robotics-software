@@ -64,9 +64,9 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    }
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (isActive())
       {
          Image image = this.image; // store the latest one here

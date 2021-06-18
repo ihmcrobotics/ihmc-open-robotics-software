@@ -51,7 +51,7 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       {
          if (visualizer.isActive())
          {
-            visualizer.renderGraphics();
+            visualizer.update();
          }
       }
    }

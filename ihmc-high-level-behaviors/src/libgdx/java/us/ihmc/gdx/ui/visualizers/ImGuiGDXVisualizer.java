@@ -30,7 +30,7 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
       activeChanged = ImGui.checkbox(title, active);
    }
 
-   public void renderGraphics()
+   public void update()
    {
       if (!createdYet)
       {

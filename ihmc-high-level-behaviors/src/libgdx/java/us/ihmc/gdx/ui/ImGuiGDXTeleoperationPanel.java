@@ -51,6 +51,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
@@ -92,6 +93,7 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
+   private final ROS2Input<PlanarRegionsListMessage> lidarREARegions;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -156,6 +158,7 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       syncedRobotForFootstepPlanning = communicationHelper.newSyncedRobot();
       startFootPoses.put(RobotSide.LEFT, new FramePose3D());
       startFootPoses.put(RobotSide.RIGHT, new FramePose3D());
+      lidarREARegions = communicationHelper.subscribe(ROS2Tools.LIDAR_REA_REGIONS);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -277,6 +280,21 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       if (ImGui.button("Stand prep"))
       {
          robotLowLevelMessenger.sendStandRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Abort"))
+      {
+         robotLowLevelMessenger.sendAbortWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Pause"))
+      {
+         robotLowLevelMessenger.sendPauseWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Continue"))
+      {
+         robotLowLevelMessenger.sendContinueWalkingRequest();
       }
       if (ImGui.button("Freeze"))
       {
