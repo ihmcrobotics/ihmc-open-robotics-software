@@ -1,14 +1,16 @@
 package us.ihmc.gdx.ui.behaviors;
 
-import com.badlogic.gdx.graphics.g3d.Renderable;
-import com.badlogic.gdx.utils.Array;
-import com.badlogic.gdx.utils.Pool;
+import imgui.ImGui;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 
-public abstract class ExampleAbstractGDXBehaviorUIInterface extends GDXBehaviorUIInterface
+public class ExampleSimpleNodeInterface extends GDXBehaviorUIInterface
 {
+   public ExampleSimpleNodeInterface(String name) {
+      setName(name);
+   }
+
    @Override
    public void create(GDXImGuiBasedUI baseUI)
    {
@@ -24,7 +26,7 @@ public abstract class ExampleAbstractGDXBehaviorUIInterface extends GDXBehaviorU
    @Override
    public void renderInternal()
    {
-
+      ImGui.dummy(80.0f, 30.0f);
    }
 
    @Override
@@ -36,18 +38,6 @@ public abstract class ExampleAbstractGDXBehaviorUIInterface extends GDXBehaviorU
    @Override
    public Point2D getTreeNodeInitialPosition()
    {
-      return new Point2D();
-   }
-
-   @Override
-   public String getName()
-   {
-      return null;
-   }
-
-   @Override
-   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
-   {
-
+      return new Point2D(0, 0);
    }
 }

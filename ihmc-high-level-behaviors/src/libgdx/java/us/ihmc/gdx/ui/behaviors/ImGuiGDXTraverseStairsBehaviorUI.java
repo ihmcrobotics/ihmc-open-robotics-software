@@ -141,10 +141,10 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
          currentStatePlot.render(-1, "");
       }
       pauseTimeLeft.setNextValue((float) timeLeftInPause);
-      pauseTimeLeft.render(FormattingTools.getFormattedDecimal2D(timeLeftInPause));
+      pauseTimeLeft.calculate(FormattingTools.getFormattedDecimal2D(timeLeftInPause));
       boolean supportRegionsReceivedRecently = supportRegionsReceivedTimer.isRunning(5.0);
       supportRegionsReceived.setNextValue(numberOfSupportRegionsReceived);
-      supportRegionsReceived.render(supportRegionsReceivedRecently ? "DANGER" : "");
+      supportRegionsReceived.calculate(supportRegionsReceivedRecently ? "DANGER" : "");
       if (ImGui.button("Disable support regions"))
       {
          disableSupportRegions();
@@ -172,7 +172,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publish(TraverseStairsBehaviorAPI.REPLAN);
       }
-      distanceToStairsPlot.render(distanceToStairs.get().floatValue());
+      distanceToStairsPlot.calculate(distanceToStairs.get().floatValue());
    }
 
    private void disableSupportRegions()
