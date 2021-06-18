@@ -36,9 +36,6 @@ public class GDXImGuiBasedUIDemo
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
-
-            renderPanel();
-
             baseUI.renderEnd();
          }
 
