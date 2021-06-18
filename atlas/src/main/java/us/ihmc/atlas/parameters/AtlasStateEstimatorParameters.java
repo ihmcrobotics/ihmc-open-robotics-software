@@ -31,6 +31,7 @@ import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 {
@@ -106,6 +107,15 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    public void configureSensorProcessing(SensorProcessing sensorProcessing)
    {
       YoRegistry registry = sensorProcessing.getYoVariableRegistry();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         for (String legJointName : jointMap.getLegJointNamesAsStrings(robotSide))
+         {
+            YoDouble bias = new YoDouble("q_offset_" + legJointName, registry);
+            sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, legJointName);
+         }
+      }
 
       if (applyJointPositionPolynomialApproximation)
       {
