@@ -277,6 +277,11 @@ public class FootstepChecker implements FootstepCheckerInterface
       }
    }
 
+   public void clearCustomFootstepCheckers()
+   {
+      customFootstepCheckers.clear();
+   }
+
    public void attachCustomFootstepChecker(CustomFootstepChecker customFootstepChecker)
    {
       customFootstepCheckers.add(customFootstepChecker);
