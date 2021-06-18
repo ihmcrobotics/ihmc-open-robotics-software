@@ -2,6 +2,7 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import imgui.internal.ImGui;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 
@@ -34,6 +35,17 @@ public class ImGuiPanelManager
    public void addPrimaryPanel(String windowName)
    {
       panels.add(new ImGuiPanel(windowName));
+   }
+
+   public void renderPanelMenu()
+   {
+      for (ImGuiPanel panel : panels)
+      {
+         if (panel.isTogglable())
+         {
+            ImGui.menuItem(panel.getPanelName(), "", panel.getEnabled());
+         }
+      }
    }
 
    public void renderPanels()
