@@ -206,11 +206,13 @@ public abstract class HumanoidStepReachabilityCalculator
          case HAND_POSE:
             testHandPose();
             break;
+
          case TEST_SINGLE_STEP:
             StepReachabilityLatticePoint leftFoot = new StepReachabilityLatticePoint(0, 1, 0, 0);
             FramePose3D rightFoot = new FramePose3D();
             testSingleStep(leftFoot, rightFoot, false);
             break;
+
          case TEST_MULTIPLE_STEPS:
             List<StepReachabilityLatticePoint> leftFootPoseList = createLeftFootPoseList();
             FramePose3D rightFootPose = new FramePose3D();
@@ -228,7 +230,7 @@ public abstract class HumanoidStepReachabilityCalculator
                double solutionQuality = snapshotDescription.getIkSolution().getSolutionQuality();
                LogTools.info("Reachability value: " + solutionQuality);
 
-               // If there is a valid configuration, sweep through yaws for that XY pose
+               // If there is a valid configuration, sweep through yaws for that XYZ pose
                if (solutionQuality < SOLUTION_QUALITY_THRESHOLD)
                {
                   LogTools.info("Entering yaw sweep");
@@ -238,6 +240,7 @@ public abstract class HumanoidStepReachabilityCalculator
                   {
                      leftFootPose = leftFootYawSweepList.get(yawLoopIndex);
                      snapshotDescription = testSingleStep(leftFootPose, rightFootPose, false);
+
                      scriptWriter.recordConfiguration(snapshotDescription);
                   }
                }
@@ -250,6 +253,7 @@ public abstract class HumanoidStepReachabilityCalculator
             StepReachabilityData stepReachabilityData = robotModel.getStepReachabilityData();
             new StepReachabilityVisualizer(stepReachabilityData);
             break;
+
          default:
             throw new RuntimeException(mode + " is not implemented yet!");
       }
@@ -429,7 +433,8 @@ public abstract class HumanoidStepReachabilityCalculator
       }
 
       // populate empty fields for these values
-      snapshotDescription.setIkSolution(toolboxController.getSolution());
+      KinematicsToolboxOutputStatus kinematicsSolution = new KinematicsToolboxOutputStatus(toolboxController.getSolution());
+      snapshotDescription.setIkSolution(kinematicsSolution);
       snapshotDescription.setControllerConfiguration(new RobotConfigurationData());
       snapshotDescription.setIkPrivilegedConfiguration(new KinematicsToolboxPrivilegedConfigurationMessage());
       snapshotDescription.setOneDoFAnchors(oneDoFMotionControlAnchorDescriptions);
@@ -476,8 +481,8 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXYZ = 0.5; // 0.05
-   private static final int yawDivisions = 2;   // 10
+   private static final double spacingXYZ = 0.3; // 0.05
+   private static final int yawDivisions = 3;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
@@ -660,7 +665,7 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       SixDoFMotionControlAnchorDescription anchorDescription = new SixDoFMotionControlAnchorDescription();
       anchorDescription.setRigidBodyName(rigidBody.getName());
-      anchorDescription.setInputMessage(rigidBodyMessage);
+      anchorDescription.setInputMessage(new KinematicsToolboxRigidBodyMessage(rigidBodyMessage));
       return anchorDescription;
    }
 
@@ -668,7 +673,7 @@ public abstract class HumanoidStepReachabilityCalculator
    {
       OneDoFMotionControlAnchorDescription jointDescription = new OneDoFMotionControlAnchorDescription();
       jointDescription.setJointName(jointName);
-      jointDescription.setInputMessage(jointMessage);
+      jointDescription.setInputMessage(new KinematicsToolboxOneDoFJointMessage(jointMessage));
       return jointDescription;
    }
 
