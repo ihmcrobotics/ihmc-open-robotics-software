@@ -455,29 +455,39 @@ catch (IndexOutOfBoundsException e)
                ros2ColorsToPublish[i] = depthSensorSimulator.getColors().get(i);
          }
 
-         pointCloudExecutor.execute(() ->
+         if (!ros2PointsToPublish.isEmpty())
          {
-            long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
-            tempSensorFramePose.setToZero(sensorFrame);
-            tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            if (ros2IsLidarScan)
+            pointCloudExecutor.execute(() ->
             {
-               LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp, ros2PointsToPublish, tempSensorFramePose);
-               ((IHMCROS2Publisher<LidarScanMessage>) publisher).publish(message);
-            }
-            else
-            {
-               int size = ros2PointsToPublish.size();
-               Point3D[] points = ros2PointsToPublish.toArray(new Point3D[size]);
-               int[] colors = Arrays.copyOf(ros2ColorsToPublish, size);
-               double minimumResolution = 0.005;
-               StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(timestamp, points, colors, size, minimumResolution, null);
-               message.getSensorPosition().set(tempSensorFramePose.getPosition());
-               message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
-               //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
-               ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
-            }
-         });
+               long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
+               tempSensorFramePose.setToZero(sensorFrame);
+               tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               if (ros2IsLidarScan)
+               {
+                  LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp,
+                                                                                       ros2PointsToPublish,
+                                                                                       tempSensorFramePose);
+                  ((IHMCROS2Publisher<LidarScanMessage>) publisher).publish(message);
+               }
+               else
+               {
+                  int size = ros2PointsToPublish.size();
+                  Point3D[] points = ros2PointsToPublish.toArray(new Point3D[size]);
+                  int[] colors = Arrays.copyOf(ros2ColorsToPublish, size);
+                  double minimumResolution = 0.005;
+                  StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(timestamp,
+                                                                                                         points,
+                                                                                                         colors,
+                                                                                                         size,
+                                                                                                         minimumResolution,
+                                                                                                         null);
+                  message.getSensorPosition().set(tempSensorFramePose.getPosition());
+                  message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
+                  //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
+                  ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
+               }
+            });
+         }
       }
    }
 
