@@ -1,7 +1,6 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import imgui.flag.ImGuiDir;
 import imgui.internal.ImGui;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.tools.BoxesDemoModel;
@@ -28,19 +27,22 @@ public class GDXImGuiVRDemo
          {
             baseUI.create();
 
-            baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            baseUI.getSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiDockingSetup().splitAdd("Window", ImGuiDir.Right, 0.20);
+            baseUI.getImGuiPanelManager().addPanel("Window", this::renderPanel);
          }
 
          @Override
          public void render()
          {
             baseUI.pollVREvents();
-
             baseUI.renderBeforeOnScreenUI();
+            baseUI.renderEnd();
+         }
 
+         private void renderPanel()
+         {
             ImGui.begin("Window");
             if (ImGui.beginTabBar("main"))
             {
@@ -60,8 +62,6 @@ public class GDXImGuiVRDemo
             }
             ImGui.plotLines("Histogram", values, 100);
             ImGui.end();
-
-            baseUI.renderEnd();
          }
 
          @Override

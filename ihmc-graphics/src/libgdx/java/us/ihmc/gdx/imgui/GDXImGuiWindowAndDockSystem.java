@@ -29,15 +29,11 @@ public class GDXImGuiWindowAndDockSystem
    private ImFont imFont;
    private int dockspaceId;
 
-   private Path imGuiUserSettingsPath;
-   private Class<?> classForLoading;
-   private String directoryNameToAssumePresent;
-   private String subsequentPathToResourceFolder;
-   private boolean loadSaveEnabled = false;
-
-   public GDXImGuiWindowAndDockSystem()
-   {
-   }
+   private final Path imGuiUserSettingsPath;
+   private final Path imGuiDefaultSettingsPath;
+   private final Class<?> classForLoading;
+   private final String directoryNameToAssumePresent;
+   private final String subsequentPathToResourceFolder;
 
    public GDXImGuiWindowAndDockSystem(Class<?> classForLoading,
                                       String directoryNameToAssumePresent,
@@ -48,7 +44,8 @@ public class GDXImGuiWindowAndDockSystem
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
       this.imGuiUserSettingsPath = imGuiUserSettingsPath;
-      loadSaveEnabled = true;
+      String resourcePathString = "imgui/" + imGuiUserSettingsPath.getFileName().toString();
+      imGuiDefaultSettingsPath = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString);
    }
 
    public void create(long windowHandle)
@@ -106,7 +103,7 @@ public class GDXImGuiWindowAndDockSystem
    {
       if (isFirstRenderCall)
       {
-         loadImGuiLayout();
+         loadImGuiLayout(true);
       }
 
       imGuiGlfw.newFrame();
@@ -121,37 +118,46 @@ public class GDXImGuiWindowAndDockSystem
 
    }
 
-   private void loadImGuiLayout()
+   public void loadImGuiLayout(boolean tryLocalFirst)
    {
-      Path pathToFile;
+      boolean loaded = tryLocalFirst && loadLocalLayout();
+      if (!loaded)
+      {
+         if (tryLocalFirst)
+            LogTools.info("{} not found", imGuiUserSettingsPath.toString());
+         if (!loadDefaultLayout())
+            LogTools.warn("No saved layouts found");
+      }
+   }
+
+   public boolean loadLocalLayout()
+   {
+      boolean success = false;
       if (Files.exists(imGuiUserSettingsPath))
       {
-         pathToFile = imGuiUserSettingsPath;
-         LogTools.info("Loading ImGui settings from {}", pathToFile.toString());
+         LogTools.info("Loading ImGui layout from {}", imGuiUserSettingsPath.toString());
+         ImGui.loadIniSettingsFromDisk(imGuiUserSettingsPath.toString());
+         success = true;
       }
-      else // see if there are defaults
+      return success;
+   }
+
+   public boolean loadDefaultLayout()
+   {
+      boolean success = false;
+      if (Files.exists(imGuiDefaultSettingsPath)) // see if there are defaults
       {
-         pathToFile = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui")
-                                        .resolve(imGuiUserSettingsPath.getFileName());
-         LogTools.info("{} not found. Loading default ImGui settings from {}", imGuiUserSettingsPath.toString(), pathToFile.toString());
+         LogTools.info("Loading default ImGui layout from {}", imGuiDefaultSettingsPath.toString());
+         ImGui.loadIniSettingsFromDisk(imGuiDefaultSettingsPath.toString());
+         success = true;
       }
-      ImGui.loadIniSettingsFromDisk(pathToFile.toString());
+      return success;
    }
 
    public void saveImGuiLayout(boolean saveDefault)
    {
-      Path settingsPath;
-      if (loadSaveEnabled && saveDefault)
-      {
-         String resourcePathString = "imgui/" + imGuiUserSettingsPath.getFileName().toString();
-         settingsPath = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString);
-      }
-      else
-      {
-         settingsPath = imGuiUserSettingsPath;
-      }
-      String settingsPathString = settingsPath.toString();
-      LogTools.info("Saving ImGui settings to {}", settingsPathString);
+      String settingsPathString = saveDefault ? imGuiDefaultSettingsPath.toString() : imGuiUserSettingsPath.toString();
+      LogTools.info("Saving ImGui layout to {}", settingsPathString);
       ImGui.saveIniSettingsToDisk(settingsPathString);
    }
 
