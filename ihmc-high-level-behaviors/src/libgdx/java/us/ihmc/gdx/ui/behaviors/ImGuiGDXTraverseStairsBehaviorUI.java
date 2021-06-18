@@ -172,7 +172,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publish(TraverseStairsBehaviorAPI.REPLAN);
       }
-      distanceToStairsPlot.render(distanceToStairs.get().floatValue());
+      distanceToStairsPlot.calculate(distanceToStairs.get().floatValue());
    }
 
    private void disableSupportRegions()
