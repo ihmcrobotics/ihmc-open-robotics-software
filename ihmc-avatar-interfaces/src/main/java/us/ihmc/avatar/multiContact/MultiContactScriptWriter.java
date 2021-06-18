@@ -68,6 +68,11 @@ public class MultiContactScriptWriter
       return messagesToWrite.isEmpty();
    }
 
+   public KinematicsToolboxSnapshotDescription getMostRecentMessage()
+   {
+      return messagesToWrite.get(messagesToWrite.size()-1);
+   }
+
    public boolean removeLast()
    {
       if (messagesToWrite.isEmpty())
