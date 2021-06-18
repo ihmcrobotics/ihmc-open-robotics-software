@@ -259,7 +259,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 
    public void clear()
    {
-      sphere.transform.val[Matrix4.M03] = Float.NaN;
+      if (sphere != null)
+         sphere.transform.val[Matrix4.M03] = Float.NaN;
       goalZ.set(0.0f);
    }
 
