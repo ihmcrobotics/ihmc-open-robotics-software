@@ -169,7 +169,6 @@ public class GDXImGuiBasedUI
       Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
       GDX3DSceneTools.glClearGray(0.3f);
       imGuiWindowAndDockSystem.beforeWindowManagement();
-
       imGuiPanelManager.renderPanels();
    }
 
@@ -178,14 +177,6 @@ public class GDXImGuiBasedUI
       ImGui.beginMainMenuBar();
       if (ImGui.beginMenu("Window"))
       {
-         for (ImGuiPanel window : imGuiPanelManager.getPanels())
-         {
-            if (window.isTogglable())
-            {
-               ImGui.menuItem(window.getPanelName(), "", window.getEnabled());
-            }
-         }
-         ImGui.separator();
          if (ImGui.menuItem("Save Configuration to ~/.ihmc"))
          {
             saveApplicationSettings(false);
@@ -202,6 +193,11 @@ public class GDXImGuiBasedUI
          {
             imGuiWindowAndDockSystem.loadDefaultLayout();
          }
+         ImGui.endMenu();
+      }
+      if (ImGui.beginMenu("Panels"))
+      {
+         imGuiPanelManager.renderPanelMenu();
          ImGui.endMenu();
       }
       if (ImGui.beginMenu("Settings"))
