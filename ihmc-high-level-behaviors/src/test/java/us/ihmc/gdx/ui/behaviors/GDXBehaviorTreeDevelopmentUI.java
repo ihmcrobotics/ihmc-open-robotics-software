@@ -137,7 +137,7 @@ public class GDXBehaviorTreeDevelopmentUI
          {
             baseUI.create();
             baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            baseUI.getImGuiDockingSetup().splitAdd("Behavior Tree Development UI", ImGuiDir.Right, 0.20);
+            baseUI.getImGuiPanelManager().splitAdd("Behavior Tree Development UI", ImGuiDir.Right, 0.20);
 
             treePanel.create();
          }

@@ -12,7 +12,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class ImGuiDockingSetup
+public class ImGuiPanelManager
 {
    private final ArrayList<ImGuiDockingSetupInstruction> instructions = new ArrayList<>();
    private final HashMap<String, Integer> windowsSpaceIds = new HashMap<>();
@@ -23,11 +23,11 @@ public class ImGuiDockingSetup
    private String subsequentPathToResourceFolder;
    private boolean loadSaveEnabled = false;
 
-   public ImGuiDockingSetup()
+   public ImGuiPanelManager()
    {
    }
 
-   public ImGuiDockingSetup(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public ImGuiPanelManager(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
       this.classForLoading = classForLoading;
       this.directoryNameToAssumePresent = directoryNameToAssumePresent;
