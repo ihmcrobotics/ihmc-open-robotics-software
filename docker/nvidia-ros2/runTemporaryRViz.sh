@@ -8,6 +8,8 @@ if (( EUID == 0 )); then
     exit 1
 fi
 
+sudo -u $(whoami) xhost +local:docker
+
 sudo -u root docker run \
     --tty \
     --interactive \
@@ -17,4 +19,6 @@ sudo -u root docker run \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
-    ihmcrobotics/nvidia:0.4 bash
+    --env DISPLAY \
+    --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
+    ihmcrobotics/nvidia-ros2:0.1 rviz2
