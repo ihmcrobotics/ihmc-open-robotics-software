@@ -1,5 +1,6 @@
 package us.ihmc.gdx.imgui;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
@@ -8,13 +9,17 @@ public class ImGuiGlfwWindow
 {
    private final String windowTitle;
    private final GlfwWindowForImGui glfwWindowForImGui;
-   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem(getClass(),
-                                                                                               "ihmc-open-robotics-software",
-                                                                                               "ihmc-graphics/src/libgdx/resources",
-                                                                                               Paths.get(System.getProperty("user.home"),
-                                                                                                         ".ihmc/" + "GLFWDemo"
-                                                                                                         + "ImGuiSettings.ini").toAbsolutePath().normalize());
-   private final ImGuiDockingSetup dockingSetup = new ImGuiDockingSetup();
+   private final Class<? extends ImGuiGlfwWindow> classForLoading = getClass();
+   private final String directoryNameToAssumePresent = "ihmc-open-robotics-software";
+   private final String subsequentPathToResourceFolder = "ihmc-graphics/src/libgdx/resources";
+   private final Path imGuiUserSettingsPath = Paths.get(System.getProperty("user.home"), ".ihmc/" + "GLFWDemo" + "ImGuiSettings.ini")
+                                                   .toAbsolutePath()
+                                                   .normalize();
+   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem(classForLoading,
+                                                                                               directoryNameToAssumePresent,
+                                                                                               subsequentPathToResourceFolder,
+                                                                                               imGuiUserSettingsPath);
+   private final ImGuiPanelManager panelManager = new ImGuiPanelManager(classForLoading, directoryNameToAssumePresent, subsequentPathToResourceFolder);
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
    {
@@ -48,11 +53,6 @@ public class ImGuiGlfwWindow
 
          render.run();
 
-         if (imGuiDockSystem.isFirstRenderCall())
-         {
-            dockingSetup.build(imGuiDockSystem.getCentralDockspaceId());
-         }
-
          imGuiDockSystem.afterWindowManagement();
       }
 
@@ -63,9 +63,9 @@ public class ImGuiGlfwWindow
       glfwWindowForImGui.dispose();
    }
 
-   public ImGuiDockingSetup getDockingSetup()
+   public ImGuiPanelManager getPanelManager()
    {
-      return dockingSetup;
+      return panelManager;
    }
 
    public GDXImGuiWindowAndDockSystem getImGuiDockSystem()
