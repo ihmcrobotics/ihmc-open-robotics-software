@@ -8,6 +8,8 @@ if (( EUID == 0 )); then
     exit 1
 fi
 
+sudo -u $(whoami) xhost +local:docker
+
 sudo -u root docker run \
     --tty \
     --interactive \
