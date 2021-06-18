@@ -2,7 +2,6 @@ package us.ihmc.gdx.ui.behaviors;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.ImGui;
-import imgui.flag.ImGuiDir;
 import imgui.type.ImBoolean;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
@@ -137,7 +136,7 @@ public class GDXBehaviorTreeDevelopmentUI
          {
             baseUI.create();
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
-            baseUI.getImGuiPanelManager().splitAdd("Behavior Tree Development UI", ImGuiDir.Right, 0.20);
+            baseUI.getImGuiPanelManager().addWindow("Tree Control", this::renderPanel);
 
             treePanel.create();
          }
@@ -149,7 +148,11 @@ public class GDXBehaviorTreeDevelopmentUI
 
             treeGui.syncTree(tree);
             treePanel.renderAsWindow(treeGui);
+            baseUI.renderEnd();
+         }
 
+         private void renderPanel()
+         {
             ImGui.begin("Tree Control");
 
             ImGui.text("Fallback Node");
@@ -161,8 +164,6 @@ public class GDXBehaviorTreeDevelopmentUI
             ImGui.checkbox("S Secondary", SEQUENCE_SECONDARY);
 
             ImGui.end();
-
-            baseUI.renderEnd();
          }
 
          @Override
