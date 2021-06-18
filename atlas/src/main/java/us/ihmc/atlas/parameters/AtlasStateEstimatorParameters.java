@@ -108,12 +108,16 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
    {
       YoRegistry registry = sensorProcessing.getYoVariableRegistry();
 
-      for (RobotSide robotSide : RobotSide.values)
+      for (LegJointName legJointName : jointMap.getLegJointNames())
       {
-         for (String legJointName : jointMap.getLegJointNamesAsStrings(robotSide))
+         for (RobotSide robotSide : RobotSide.values)
          {
-            YoDouble bias = new YoDouble("q_offset_" + legJointName, registry);
-            sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, legJointName);
+            String name = jointMap.getLegJointName(robotSide, legJointName);
+            YoDouble bias = new YoDouble("q_offset_" + name, registry);
+            if (legJointName == LegJointName.HIP_ROLL && robotSide == RobotSide.RIGHT)
+               bias.set(0.03);
+
+            sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
          }
       }
 
