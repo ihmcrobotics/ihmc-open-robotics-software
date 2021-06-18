@@ -3,6 +3,7 @@ package us.ihmc.gdx.imgui;
 import com.badlogic.gdx.Input;
 import imgui.*;
 import imgui.flag.ImGuiFreeTypeBuilderFlags;
+import org.apache.commons.lang3.SystemUtils;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -91,16 +93,24 @@ public class ImGuiTools
       ImFont fontToReturn;
 //      fontToReturn = fontAtlas.addFontDefault(); // Add a default font, which is 'ProggyClean.ttf, 13px'
 //      fontToReturn = fontAtlas.addFontFromMemoryTTF(loadFromResources("basis33.ttf"), 16, fontConfig);
-      if (Files.exists(Paths.get("/usr/share/fonts/TTF/segoeui.ttf")))
+      String fontDir;
+      if (SystemUtils.IS_OS_WINDOWS) {
+         fontDir = System.getenv("WINDIR") + "/Fonts";
+      } else {
+         fontDir = "/usr/share/fonts/TTF/";
+      }
+
+      Path segoeui = Paths.get(fontDir, "segoeui.ttf");
+      if (Files.exists(segoeui))
       {
          fontConfig.setName("segoeui.ttf, 16px");
-         fontToReturn = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 16.0f, fontConfig);
+         fontToReturn = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 16.0f, fontConfig);
 
          bigFontConfig.setName("segoeui.ttf, 38px");
-         bigFont = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 38.0f, bigFontConfig);
+         bigFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 38.0f, bigFontConfig);
 
          nodeFontConfig.setName("segoeui.ttf, 32px 1/2");
-         nodeFont = io.getFonts().addFontFromFileTTF("/usr/share/fonts/TTF/segoeui.ttf", 32.0f, nodeFontConfig);
+         nodeFont = io.getFonts().addFontFromFileTTF(segoeui.toAbsolutePath().toString(), 32.0f, nodeFontConfig);
       }
       else
       {
