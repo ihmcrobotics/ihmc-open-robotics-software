@@ -71,7 +71,12 @@ public class LZ4CompressionImplementation implements CompressionImplementation
       }
       catch (LZ4Exception e)
       {
-         LogTools.error("src.capacity = " + src.capacity() + " src.remaining = {}, target.capacity = {}, target.remaining = {}",
+         LogTools.error("src.capacity = " + src.capacity()
+                        + ", src.position = " + src.position()
+                        + ", src.remaining = {}"
+                        + ", target.capacity = {}"
+                        + ", target.position = " + target.position()
+                        + ", target.remaining = {}",
                         src.remaining(),
                         target.capacity(),
                         target.remaining());
