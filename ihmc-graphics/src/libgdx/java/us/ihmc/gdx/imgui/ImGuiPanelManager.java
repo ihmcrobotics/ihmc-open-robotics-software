@@ -26,12 +26,12 @@ public class ImGuiPanelManager
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
    }
 
-   public void addWindow(String windowName, Runnable render)
+   public void addPanel(String windowName, Runnable render)
    {
       windows.add(new ImGuiWindow(windowName, render));
    }
 
-   public void addFirst(String windowName)
+   public void addPrimaryPanel(String windowName)
    {
       windows.add(new ImGuiWindow(windowName));
    }

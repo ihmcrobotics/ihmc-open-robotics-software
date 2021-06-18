@@ -16,8 +16,8 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 
    public GDXEnvironmentBuilderUI()
    {
-      baseUI.getImGuiPanelManager().addWindow(environment.getWindowName(), environment::render);
-      baseUI.getImGuiPanelManager().addWindow(GDX3DSceneTools.TUNING_WINDOW_NAME, GDX3DSceneTools::renderTuningSliders);
+      baseUI.getImGuiPanelManager().addPanel(environment.getWindowName(), environment::render);
+      baseUI.getImGuiPanelManager().addPanel(GDX3DSceneTools.TUNING_WINDOW_NAME, GDX3DSceneTools::renderTuningSliders);
       baseUI.launchGDXApplication(this);
    }
 
@@ -27,7 +27,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
       baseUI.create();
 
       inputDebugger.create(baseUI);
-      baseUI.getImGuiPanelManager().addWindow(inputDebugger.getWindowName(), inputDebugger::render);
+      baseUI.getImGuiPanelManager().addPanel(inputDebugger.getWindowName(), inputDebugger::render);
 
       environment.create(baseUI);
    }

@@ -29,7 +29,7 @@ public class GDXImGuiBasedUIDemo
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiPanelManager().addWindow("Window", GDXImGuiBasedUIDemo.this::renderPanel);
+            baseUI.getImGuiPanelManager().addPanel("Window", GDXImGuiBasedUIDemo.this::renderPanel);
          }
 
          @Override

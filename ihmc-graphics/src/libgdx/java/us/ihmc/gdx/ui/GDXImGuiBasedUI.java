@@ -102,7 +102,7 @@ public class GDXImGuiBasedUI
 //         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
       }
 
-      imGuiPanelManager.addFirst(VIEW_3D_WINDOW_NAME);
+      imGuiPanelManager.addPrimaryPanel(VIEW_3D_WINDOW_NAME);
    }
 
    public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
