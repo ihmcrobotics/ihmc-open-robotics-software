@@ -13,7 +13,7 @@ import java.util.function.Consumer;
 
 public class ImGuiPanelManager
 {
-   private final ArrayList<ImGuiWindow> windows = new ArrayList<>();
+   private final ArrayList<ImGuiPanel> panels = new ArrayList<>();
 
    private final Class<?> classForLoading;
    private final String directoryNameToAssumePresent;
@@ -28,12 +28,23 @@ public class ImGuiPanelManager
 
    public void addPanel(String windowName, Runnable render)
    {
-      windows.add(new ImGuiWindow(windowName, render));
+      panels.add(new ImGuiPanel(windowName, render));
    }
 
    public void addPrimaryPanel(String windowName)
    {
-      windows.add(new ImGuiWindow(windowName));
+      panels.add(new ImGuiPanel(windowName));
+   }
+
+   public void renderPanels()
+   {
+      for (ImGuiPanel panel : panels)
+      {
+         if (panel.isTogglable() && panel.getEnabled().get())
+         {
+            panel.render();
+         }
+      }
    }
 
    public void loadConfiguration(Path settingsPath)
@@ -49,12 +60,12 @@ public class ImGuiPanelManager
          JsonNode windowsNode = jsonNode.get("windows");
          for (Iterator<Map.Entry<String, JsonNode>> it = windowsNode.fields(); it.hasNext(); )
          {
-            Map.Entry<String, JsonNode> window = it.next();
-            for (ImGuiWindow imGuiWindow : windows)
+            Map.Entry<String, JsonNode> panel = it.next();
+            for (ImGuiPanel imGuiPanel : panels)
             {
-               if (imGuiWindow.getWindowName().equals(window.getKey()))
+               if (imGuiPanel.getPanelName().equals(panel.getKey()))
                {
-                  imGuiWindow.getEnabled().set(window.getValue().asBoolean());
+                  imGuiPanel.getEnabled().set(panel.getValue().asBoolean());
                }
             }
          }
@@ -67,11 +78,11 @@ public class ImGuiPanelManager
       {
          ObjectNode anchorJSON = root.putObject("windows");
 
-         for (ImGuiWindow window : this.windows)
+         for (ImGuiPanel window : this.panels)
          {
             if (window.isTogglable())
             {
-               anchorJSON.put(window.getWindowName(), window.getEnabled().get());
+               anchorJSON.put(window.getPanelName(), window.getEnabled().get());
             }
          }
       };
@@ -88,8 +99,8 @@ public class ImGuiPanelManager
       }
    }
 
-   public ArrayList<ImGuiWindow> getWindows()
+   public ArrayList<ImGuiPanel> getPanels()
    {
-      return windows;
+      return panels;
    }
 }

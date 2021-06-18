@@ -170,13 +170,7 @@ public class GDXImGuiBasedUI
       GDX3DSceneTools.glClearGray(0.3f);
       imGuiWindowAndDockSystem.beforeWindowManagement();
 
-      for (ImGuiWindow window : imGuiPanelManager.getWindows())
-      {
-         if (window.isTogglable() && window.getEnabled().get())
-         {
-            window.render();
-         }
-      }
+      imGuiPanelManager.renderPanels();
    }
 
    public void renderEnd()
@@ -184,11 +178,11 @@ public class GDXImGuiBasedUI
       ImGui.beginMainMenuBar();
       if (ImGui.beginMenu("Window"))
       {
-         for (ImGuiWindow window : imGuiPanelManager.getWindows())
+         for (ImGuiPanel window : imGuiPanelManager.getPanels())
          {
             if (window.isTogglable())
             {
-               ImGui.menuItem(window.getWindowName(), "", window.getEnabled());
+               ImGui.menuItem(window.getPanelName(), "", window.getEnabled());
             }
          }
          ImGui.separator();
