@@ -51,27 +51,32 @@ public class ImGuiMovingPlot
       nextValue = newValue;
    }
 
-   public void render(float newValue)
+   public void calculate(float newValue)
    {
       setNextValue(newValue);
-      render();
+      calculate();
    }
 
-   public void render()
+   public void calculate()
    {
       String valueText = "";
       if (renderValueText)
          valueText += nextValue;
-      render(valueText);
+      calculate(valueText, true);
    }
 
-   public void render(String valueText)
+   public void calculate(String valueText) {
+      calculate(valueText, true);
+   }
+
+   public void calculate(String valueText, boolean render)
    {
       System.arraycopy(isA ? valuesB : valuesA, 1, isA ? valuesA : valuesB, 0, bufferSize - 1);
       float[] values = isA ? valuesA : valuesB;
       isA = !isA;
       values[bufferSize - 1] = nextValue;
-      ImGui.plotLines(name, values, bufferSize, 0, valueText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
+      if (render)
+         ImGui.plotLines(name, values, bufferSize, 0, valueText, Float.MAX_VALUE, Float.MAX_VALUE, width, height);
 
       setNextValue(Float.NaN);
    }

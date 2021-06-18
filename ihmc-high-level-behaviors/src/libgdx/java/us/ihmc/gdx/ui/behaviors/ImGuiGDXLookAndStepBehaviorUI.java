@@ -211,7 +211,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          lookAndStepParameterTuner.changeParameter(LookAndStepBehaviorParameters.stopForImpassibilities, stopForImpassibilities.get());
       }
       impassibilityDetectedPlot.setNextValue(impassibilityDetected.get() ? 1.0f : 0.0f);
-      impassibilityDetectedPlot.render(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
+      impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
       footholdVolumePlot.render();
 
       ImGui.checkbox("Show graphics", showGraphics);

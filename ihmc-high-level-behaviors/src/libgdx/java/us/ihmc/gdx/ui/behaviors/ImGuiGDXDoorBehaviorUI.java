@@ -95,13 +95,13 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    {
       ImGui.text("Current status:");
       detectedFiducialReceivedPlot.setNextValue((float) detectedFiducialMessageReceivedStopwatch.totalElapsed());
-      detectedFiducialReceivedPlot.render("" + (latestFiducialID > 0 ? latestFiducialID : ""));
+      detectedFiducialReceivedPlot.calculate("" + (latestFiducialID > 0 ? latestFiducialID : ""));
       doorDetectionMessageReceivedPlot.setNextValue((float) doorDetectionMessageReceivedStopwatch.totalElapsed());
-      doorDetectionMessageReceivedPlot.render("");
+      doorDetectionMessageReceivedPlot.calculate("");
       MutablePair<DoorType, Pose3D> currentDetectedDoorPose = detectedDoorPose.get();
       detectedDoorPlot.setNextValue(currentDetectedDoorPose.getRight().containsNaN() ? Float.NaN : (float) currentDetectedDoorPose.getLeft().ordinal());
-      detectedDoorPlot.render(currentDetectedDoorPose.getRight().containsNaN() ? "" : currentDetectedDoorPose.getLeft().name());
-      distanceToDoorPlot.render(distanceToDoor.get().floatValue());
+      detectedDoorPlot.calculate(currentDetectedDoorPose.getRight().containsNaN() ? "" : currentDetectedDoorPose.getLeft().name());
+      distanceToDoorPlot.calculate(distanceToDoor.get().floatValue());
       CurrentBehaviorStatus currentStatus = status.get();
       currentStatePlot.render(currentStatus == null ? -1 : currentStatus.ordinal(), currentStatus == null ? "" : currentStatus.name());
 

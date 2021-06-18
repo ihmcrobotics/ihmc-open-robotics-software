@@ -95,6 +95,24 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
+   public int generateUID() {
+      return this.toString().hashCode(); //maybe change later? works fine for now
+   }
+
+   @Override
+   public String toString() {
+      StringBuilder out = new StringBuilder();
+
+      out.append(this.getType());
+      out.append("(");
+      for (GDXBehaviorUIInterface child : this.getUIChildren()) {
+         out.append(child.toString()).append(",");
+      }
+      out.append(")");
+
+      return out.toString();
+   }
+
    //   protected void enable3DVisualizations()
 //   {
 //   }
