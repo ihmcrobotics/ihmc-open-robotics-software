@@ -14,7 +14,7 @@ public class ImGuiGlfwWindow
                                                                                                Paths.get(System.getProperty("user.home"),
                                                                                                          ".ihmc/" + "GLFWDemo"
                                                                                                          + "ImGuiSettings.ini").toAbsolutePath().normalize());
-   private final ImGuiDockingSetup dockingSetup = new ImGuiDockingSetup();
+   private final ImGuiPanelManager panelManager = new ImGuiPanelManager();
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
    {
@@ -50,7 +50,7 @@ public class ImGuiGlfwWindow
 
          if (imGuiDockSystem.isFirstRenderCall())
          {
-            dockingSetup.build(imGuiDockSystem.getCentralDockspaceId());
+            panelManager.build(imGuiDockSystem.getCentralDockspaceId());
          }
 
          imGuiDockSystem.afterWindowManagement();
@@ -63,9 +63,9 @@ public class ImGuiGlfwWindow
       glfwWindowForImGui.dispose();
    }
 
-   public ImGuiDockingSetup getDockingSetup()
+   public ImGuiPanelManager getPanelManager()
    {
-      return dockingSetup;
+      return panelManager;
    }
 
    public GDXImGuiWindowAndDockSystem getImGuiDockSystem()

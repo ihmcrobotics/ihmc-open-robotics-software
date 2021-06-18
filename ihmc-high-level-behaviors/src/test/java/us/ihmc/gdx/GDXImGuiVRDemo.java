@@ -31,7 +31,7 @@ public class GDXImGuiVRDemo
             baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.getSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiDockingSetup().splitAdd("Window", ImGuiDir.Right, 0.20);
+            baseUI.getImGuiPanelManager().splitAdd("Window", ImGuiDir.Right, 0.20);
          }
 
          @Override
