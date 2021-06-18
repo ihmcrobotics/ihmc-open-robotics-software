@@ -12,7 +12,7 @@ import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.commons.FormattingTools;
@@ -22,7 +22,6 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameYawPitchRoll;
@@ -52,6 +51,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.tools.string.StringTools;
 
@@ -72,8 +72,8 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
    private final CommunicationHelper communicationHelper;
    private final ThrottledRobotStateCallback throttledRobotStateCallback;
    private final RobotLowLevelMessenger robotLowLevelMessenger;
-   private final RemoteSyncedRobotModel syncedRobotForHeightSlider;
-   private final RemoteSyncedRobotModel syncedRobotForChestSlider;
+   private final ROS2SyncedRobotModel syncedRobotForHeightSlider;
+   private final ROS2SyncedRobotModel syncedRobotForChestSlider;
    private final GDXFootstepPlanGraphic footstepPlanGraphic;
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private final float[] stanceHeightSliderValue = new float[1];
@@ -90,9 +90,10 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
    private final ImBoolean showFootstepPlanningParametersWindow = new ImBoolean(false);
    private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation");
    private FootstepPlannerOutput footstepPlannerOutput;
-   private final RemoteSyncedRobotModel syncedRobotForFootstepPlanning;
+   private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
    private final ImGuiMovingPlot statusReceivedPlot = new ImGuiMovingPlot("Hand", 1000, 230, 15);
+   private final ROS2Input<PlanarRegionsListMessage> lidarREARegions;
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
@@ -157,6 +158,7 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       syncedRobotForFootstepPlanning = communicationHelper.newSyncedRobot();
       startFootPoses.put(RobotSide.LEFT, new FramePose3D());
       startFootPoses.put(RobotSide.RIGHT, new FramePose3D());
+      lidarREARegions = communicationHelper.subscribe(ROS2Tools.LIDAR_REA_REGIONS);
    }
 
    public void create(GDXImGuiBasedUI baseUI)
@@ -278,6 +280,21 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       if (ImGui.button("Stand prep"))
       {
          robotLowLevelMessenger.sendStandRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Abort"))
+      {
+         robotLowLevelMessenger.sendAbortWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Pause"))
+      {
+         robotLowLevelMessenger.sendPauseWalkingRequest();
+      }
+      ImGui.sameLine();
+      if (ImGui.button("Continue"))
+      {
+         robotLowLevelMessenger.sendContinueWalkingRequest();
       }
       if (ImGui.button("Freeze"))
       {

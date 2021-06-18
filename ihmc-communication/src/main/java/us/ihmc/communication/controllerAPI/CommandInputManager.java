@@ -16,24 +16,19 @@ import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
 
 /**
- * CommandInputManager is used to generate a thread-safe input API for a controller. Message
- * and {@link Command} can be submitted through the methods {@link #submitMessage(Object)} and
+ * CommandInputManager is used to generate a thread-safe input API for a controller. Message and
+ * {@link Command} can be submitted through the methods {@link #submitMessage(Object)} and
  * {@link #submitCommand(Command)}. Only registered inputs (Packet or Command) will make it through
  * to controller side. Unregistered inputs are ignored and the user is averted by a message error
- * with the information on the input class.
- * 
- * Registering inputs is done in the constructor {@link #CommandInputManager(List)}, this is how one
- * wants to define the API.
- * 
- * The list of supported inputs can be accessed using {@link #getListOfSupportedMessages()} and
- * {@link #getListOfSupportedCommands()}.
- * 
- * CommandInputManager assumes that the different methods for submitting a inputs are called from
- * another thread. ABSOLUTELY NO Packet/Command should be directly passed to controller, any
- * Packet/Command has to go through this API to ensure that multi-threading is done properly.
+ * with the information on the input class. Registering inputs is done in the constructor
+ * {@link #CommandInputManager(List)}, this is how one wants to define the API. The list of
+ * supported inputs can be accessed using {@link #getListOfSupportedMessages()} and
+ * {@link #getListOfSupportedCommands()}. CommandInputManager assumes that the different methods for
+ * submitting a inputs are called from another thread. ABSOLUTELY NO Packet/Command should be
+ * directly passed to controller, any Packet/Command has to go through this API to ensure that
+ * multi-threading is done properly.
  * 
  * @author Sylvain
- *
  */
 public class CommandInputManager
 {
@@ -42,18 +37,17 @@ public class CommandInputManager
 
    /**
     * List of all the buffers that allows the user to easily flush all new commands using
-    * {@link #clearAllCommands()}. These buffers CANNOT be visible or accessed from outside this
-    * class.
+    * {@link #clearAllCommands()}. These buffers CANNOT be visible or accessed from outside this class.
     */
    private final List<ConcurrentRingBuffer<?>> allBuffers = new ArrayList<>();
    /**
-    * Map from the registered commands to their associated buffer. These buffers CANNOT be visible
-    * or accessed from outside this class.
+    * Map from the registered commands to their associated buffer. These buffers CANNOT be visible or
+    * accessed from outside this class.
     */
    private final Map<Class<? extends Command<?, ?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> commandClassToBufferMap = new HashMap<>();
    /**
-    * Map from the registered messages to their associated buffer. These buffers CANNOT be visible
-    * or accessed from outside this class.
+    * Map from the registered messages to their associated buffer. These buffers CANNOT be visible or
+    * accessed from outside this class.
     */
    private final Map<Class<? extends Settable<?>>, ConcurrentRingBuffer<? extends Command<?, ?>>> messageClassToBufferMap = new HashMap<>();
 
@@ -72,8 +66,8 @@ public class CommandInputManager
    private final List<CommandConversionInterface> commandConverters = new ArrayList<>();
 
    /**
-    * Protocols for unpacking certain types of messages. These messages do not have to be registered
-    * at construction time.
+    * Protocols for unpacking certain types of messages. These messages do not have to be registered at
+    * construction time.
     */
    private final Map<Class<? extends Settable<?>>, MessageUnpacker<? extends Settable<?>>> messageUnpackers = new HashMap<>();
    /** Buffer used to unpack messages without making garbage. */
@@ -92,8 +86,8 @@ public class CommandInputManager
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     *
-    * @param name name used when printing statements. It should preferably be unique to distinguish
-    *           the different modules using this class.
+    * @param name               name used when printing statements. It should preferably be unique to
+    *                           distinguish the different modules using this class.
     * @param commandsToRegister list of the commands that this API should support.
     */
    public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister)
@@ -104,10 +98,10 @@ public class CommandInputManager
    /**
     * Only constructor to build a new API. No new constructors will be tolerated.
     * 
-    * @param name name used when printing statements. It should preferably be unique to distinguish
-    *           the different modules using this class.
+    * @param name               name used when printing statements. It should preferably be unique to
+    *                           distinguish the different modules using this class.
     * @param commandsToRegister list of the commands that this API should support.
-    * @param buffersCapacity the capacity of the internal buffers, should be a power of 2.
+    * @param buffersCapacity    the capacity of the internal buffers, should be a power of 2.
     */
    public CommandInputManager(String name, List<Class<? extends Command<?, ?>>> commandsToRegister, int buffersCapacity)
    {
@@ -130,8 +124,8 @@ public class CommandInputManager
    /**
     * Registers a protocol for unpacking a certain of message.
     * 
-    * @param messageClass the type of messages that holds onto multiple messages which should be
-    *           unpacked at reception.
+    * @param messageClass    the type of messages that holds onto multiple messages which should be
+    *                        unpacked at reception.
     * @param messageUnpacker the protocol for unpacking the message.
     */
    public <T extends Settable<T>> void registerMessageUnpacker(Class<T> messageClass, MessageUnpacker<T> messageUnpacker)
@@ -177,10 +171,10 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new {@link Packet} to be processed by the controller. This method can be called from
-    * any thread. The message is first copied locally and only the copy will be visible for the
-    * controller. No reference of this message will be held after calling this method. The user is
-    * free to modify the message afterwards.
+    * Submit a new {@link Packet} to be processed by the controller. This method can be called from any
+    * thread. The message is first copied locally and only the copy will be visible for the controller.
+    * No reference of this message will be held after calling this method. The user is free to modify
+    * the message afterwards.
     * 
     * @param message message to be submitted to the controller.
     */
@@ -226,9 +220,18 @@ public class CommandInputManager
 
       Class<?> commandClass = nextCommand.getClass();
 
-      if (!performCustomConversion(message, nextCommand))
+      try
       {
-         nextCommand.setFromMessage(message);
+         if (!performCustomConversion(message, nextCommand))
+         {
+            nextCommand.setFromMessage(message);
+         }
+      }
+      catch (Throwable e)
+      {
+         e.printStackTrace();
+         // TODO It would be good to be able to revert the call to next on the ConcurrentRingBuffer instead of committing a cleared Command. 
+         nextCommand.clear();
       }
 
       buffer.commit();
@@ -244,7 +247,7 @@ public class CommandInputManager
     * If no command converter is found, this method does nothing and returns {@code false}.
     * </p>
     * 
-    * @param message the message to be converted into a command. Not modified.
+    * @param message               the message to be converted into a command. Not modified.
     * @param commandToStoreMessage the command in which the message is converted. Modified.
     * @return whether the message was converted or not.
     */
@@ -264,10 +267,10 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new list of {@link Packet} to be processed by the controller. This method can be
-    * called from any thread. The message is first copied locally and only the copy will be visible
-    * for the controller. No reference of this message will be held after calling this method. The
-    * user is free to modify the message afterwards.
+    * Submit a new list of {@link Packet} to be processed by the controller. This method can be called
+    * from any thread. The message is first copied locally and only the copy will be visible for the
+    * controller. No reference of this message will be held after calling this method. The user is free
+    * to modify the message afterwards.
     * 
     * @param messages list of messages to be submitted to the controller.
     */
@@ -281,8 +284,8 @@ public class CommandInputManager
    /**
     * Submit a new {@link Command} to be processed by the controller. This method can be called from
     * any thread. The command is first copied locally and only the copy will be visible for the
-    * controller. No reference of this command will be held after calling this method. The user is
-    * free to modify the command afterwards.
+    * controller. No reference of this command will be held after calling this method. The user is free
+    * to modify the command afterwards.
     * 
     * @param command command to be submitted to the controller.
     */
@@ -313,10 +316,10 @@ public class CommandInputManager
    }
 
    /**
-    * Submit a new list of {@link Command} to be processed by the controller. This method can be
-    * called from any thread. The command is first copied locally and only the copy will be visible
-    * for the controller. No reference of this command will be held after calling this method. The
-    * user is free to modify the command afterwards.
+    * Submit a new list of {@link Command} to be processed by the controller. This method can be called
+    * from any thread. The command is first copied locally and only the copy will be visible for the
+    * controller. No reference of this command will be held after calling this method. The user is free
+    * to modify the command afterwards.
     * 
     * @param commands list of commands to be submitted to the controller.
     */
@@ -350,6 +353,7 @@ public class CommandInputManager
 
    /**
     * Throw away any new available commands.
+    * 
     * @deprecated Use {@link #clearAllCommands()} instead
     */
    @Deprecated
@@ -402,12 +406,11 @@ public class CommandInputManager
    }
 
    /**
-    * Poll all the new available commands. After calling this method, no new command will be
-    * available.
+    * Poll all the new available commands. After calling this method, no new command will be available.
     * 
     * @param commandClassToPoll Used to know what type of command is to be polled.
-    * @return the new commands to be processed stored in a list, returns an empty list if there is
-    *         no new available command.
+    * @return the new commands to be processed stored in a list, returns an empty list if there is no
+    *         new available command.
     */
    @SuppressWarnings("unchecked")
    public <C extends Command<C, ?>> List<C> pollNewCommands(Class<C> commandClassToPoll)
@@ -440,9 +443,9 @@ public class CommandInputManager
     * This method has to remain private. Reads all the new available commands from a buffer and copy
     * them in a list.
     * 
-    * @param buffer Buffer in which the new available commands are stored.
+    * @param buffer         Buffer in which the new available commands are stored.
     * @param commandsToPack Used to copy and store all the new available commands. This list will be
-    *           empty is there is no new available command.
+    *                       empty is there is no new available command.
     */
    private static <C extends Command<C, ?>> void pollNewCommands(ConcurrentRingBuffer<C> buffer, RecyclingArrayList<C> commandsToPack)
    {
@@ -461,8 +464,8 @@ public class CommandInputManager
    }
 
    /**
-    * Method to help creating a {@link ConcurrentRingBuffer} for a given class. The class has to
-    * have an empty constructor.
+    * Method to help creating a {@link ConcurrentRingBuffer} for a given class. The class has to have
+    * an empty constructor.
     * 
     * @param clazz For which a new builder needs to be created.
     * @return The new builder.

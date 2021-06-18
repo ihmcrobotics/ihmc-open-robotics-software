@@ -3,19 +3,18 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
-import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepGraphNode;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.*;
+import java.util.Comparator;
 
 public class FootstepPlannerCompletionChecker
 {
@@ -109,7 +108,7 @@ public class FootstepPlannerCompletionChecker
       {
          FootstepGraphNode childNode = iterationData.getValidChildNodes().get(i);
 
-         double cost = heuristics.compute(childNode);
+         double cost = iterationConductor.getCostFromStart(childNode) + heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;

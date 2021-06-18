@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
@@ -21,7 +21,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
    private final TransformReferenceFrame realsenseSensorFrame;
    private volatile PlanarRegionsList map;
 
-   private RemoteSyncedRobotModel syncedRobot;
+   private ROS2SyncedRobotModel syncedRobot;
    private MovingReferenceFrame pelvisFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
@@ -55,7 +55,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
    {
       this.map = map;
 
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       pelvisFrame = syncedRobot.getReferenceFrames().getPelvisFrame();
 
       realsenseSensorFrame = new TransformReferenceFrame("Realsense", pelvisFrame, transform);

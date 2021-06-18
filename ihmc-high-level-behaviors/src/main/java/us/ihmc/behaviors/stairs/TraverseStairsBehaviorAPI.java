@@ -1,7 +1,9 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
 import std_msgs.msg.dds.Empty;
+import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
@@ -52,6 +54,8 @@ public class TraverseStairsBehaviorAPI
    public static final MessagerAPIFactory.Topic<Double> TimeLeftInPause = topic("TimeLeftInPause");
    public static final MessagerAPIFactory.Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
    public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
+   public static final MessagerAPIFactory.Topic<Pose3D> DetectedStairsPose = topic("DetectedStairsPose");
+   public static final MessagerAPIFactory.Topic<Double> DistanceToStairs = topic("DistanceToStairs");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

@@ -16,7 +16,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBodyPathPlanningTask.LookAndStepBodyPathPlanning;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
@@ -48,7 +48,7 @@ public class LookAndStepLocalizationTask
    protected LookAndStepSteppingTask.LookAndStepStepping stepping;
    protected AtomicBoolean isBeingReset;
    protected LookAndStepBehaviorParametersReadOnly lookAndStepParameters;
-   protected RemoteSyncedRobotModel syncedRobot;
+   protected ROS2SyncedRobotModel syncedRobot;
    protected Consumer<LookAndStepBodyPathLocalizationResult> bodyPathLocalizationOutput;
    protected Notification finishedWalkingNotification;
    protected BehaviorStateReference<LookAndStepBehavior.State> behaviorStateReference;

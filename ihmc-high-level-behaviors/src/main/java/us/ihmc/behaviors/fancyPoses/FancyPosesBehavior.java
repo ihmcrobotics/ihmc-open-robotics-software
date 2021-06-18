@@ -19,7 +19,7 @@ import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -58,7 +58,7 @@ public class FancyPosesBehavior extends BehaviorTreeControlFlowNode implements B
    private final double trajectoryTime = 3.0;
    private final PausablePeriodicThread mainThread;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
 
    public FancyPosesBehavior(BehaviorHelper helper)
    {

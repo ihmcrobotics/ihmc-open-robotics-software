@@ -12,7 +12,7 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.CommunicationHelper;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
@@ -62,7 +62,7 @@ public class GDXEnvironment implements RenderableProvider
 
    }
 
-   public GDXEnvironment(RemoteSyncedRobotModel syncedRobot, CommunicationHelper helper)
+   public GDXEnvironment(ROS2SyncedRobotModel syncedRobot, CommunicationHelper helper)
    {
       doorSimulator = new GDXDoorSimulator(syncedRobot, helper);
    }

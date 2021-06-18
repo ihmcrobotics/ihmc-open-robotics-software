@@ -66,9 +66,9 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    int i = 0;
 
    @Override
-   public void renderGraphics()
+   public void update()
    {
-      super.renderGraphics();
+      super.update();
       if (isActive())
       {
          Triple<ByteBuffer, Integer, Integer> image = decompressedImage; // store the latest one here

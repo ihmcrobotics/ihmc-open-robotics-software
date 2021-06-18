@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.gdx.GDXGraphics3DNode;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.RobotDescription;
@@ -12,11 +13,16 @@ import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.tools.thread.Activator;
 
-public class GDXRobotModelGraphic implements RenderableProvider
+public class GDXRobotModelGraphic extends ImGuiGDXVisualizer implements RenderableProvider
 {
    private GDXGraphics3DNode robotRootNode;
    private GraphicsRobot graphicsRobot;
-   protected Activator robotLoadedActivator = new Activator();
+   private Activator robotLoadedActivator = new Activator();
+
+   public GDXRobotModelGraphic(String title)
+   {
+      super(title);
+   }
 
    public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody)
    {
@@ -38,13 +44,21 @@ public class GDXRobotModelGraphic implements RenderableProvider
       graphics3DNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }
 
+   @Override
    public void update()
    {
+      super.update();
       if (robotLoadedActivator.poll())
       {
          graphicsRobot.update();
          robotRootNode.update();
       }
+   }
+
+   @Override
+   public void renderImGuiWidgets()
+   {
+      super.renderImGuiWidgets();
    }
 
    @Override
@@ -59,6 +73,11 @@ public class GDXRobotModelGraphic implements RenderableProvider
    public void destroy()
    {
       robotRootNode.destroy();
+   }
+
+   public boolean isRobotLoaded()
+   {
+      return robotLoadedActivator.poll();
    }
 
    public GDXGraphics3DNode getRobotRootNode()
