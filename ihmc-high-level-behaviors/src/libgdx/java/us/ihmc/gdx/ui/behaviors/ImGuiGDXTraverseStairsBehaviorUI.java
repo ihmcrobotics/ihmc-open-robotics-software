@@ -185,7 +185,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void renderInternal()
    {
-      footstepPlanGraphic.render();
+      footstepPlanGraphic.update();
       footstepPlannerParameterTuner.render();
       swingPlannerParameterTuner.render();
    }

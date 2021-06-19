@@ -16,7 +16,7 @@ public class GDXEnvironmentBuilderUI extends Lwjgl3ApplicationAdapter
 
    public GDXEnvironmentBuilderUI()
    {
-      baseUI.getImGuiPanelManager().addPanel(environment.getWindowName(), environment::render);
+      baseUI.getImGuiPanelManager().addPanel(environment.getWindowName(), environment::renderImGuiWidgets);
       baseUI.getImGuiPanelManager().addPanel(GDX3DSceneTools.TUNING_WINDOW_NAME, GDX3DSceneTools::renderTuningSliders);
       baseUI.launchGDXApplication(this);
    }

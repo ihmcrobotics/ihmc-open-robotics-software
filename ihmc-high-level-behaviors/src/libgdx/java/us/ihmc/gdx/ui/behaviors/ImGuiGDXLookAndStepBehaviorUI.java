@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -267,15 +266,15 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       if (showSwingPlanningParametersTuner.get())
          swingPlannerParameterTuner.render();
 
-      obstacleBoxVisualizer.render();
+      obstacleBoxVisualizer.update();
 
       if (areGraphicsEnabled())
       {
-         footstepPlanGraphic.render();
-         commandedFootstepsGraphic.render();
-         startAndGoalFootstepsGraphic.render();
+         footstepPlanGraphic.update();
+         commandedFootstepsGraphic.update();
+         startAndGoalFootstepsGraphic.update();
          planarRegionsGraphic.render();
-         bodyPathPlanGraphic.render();
+         bodyPathPlanGraphic.update();
       }
    }
 
