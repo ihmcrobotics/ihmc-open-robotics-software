@@ -162,14 +162,14 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       return nodePosition;
    }
 
-   public void renderAsWindow()
+   @Override
+   public void update()
    {
-      ImGui.begin(getWindowName());
-      renderInternal();
-      ImGui.end();
+
    }
 
-   public void renderTreeNode()
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
@@ -257,14 +257,14 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
       if (showLookAndStepParametersTuner.get())
-         lookAndStepParameterTuner.render();
+         lookAndStepParameterTuner.renderImGuiWidgets();
       if (showFootstepPlanningParametersTuner.get())
-         footstepPlannerParameterTuner.render();
+         footstepPlannerParameterTuner.renderImGuiWidgets();
       if (showSwingPlanningParametersTuner.get())
-         swingPlannerParameterTuner.render();
+         swingPlannerParameterTuner.renderImGuiWidgets();
 
       obstacleBoxVisualizer.update();
 
@@ -273,7 +273,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          footstepPlanGraphic.update();
          commandedFootstepsGraphic.update();
          startAndGoalFootstepsGraphic.update();
-         planarRegionsGraphic.render();
+         planarRegionsGraphic.update();
          bodyPathPlanGraphic.update();
       }
    }

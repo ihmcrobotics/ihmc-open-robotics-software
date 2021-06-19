@@ -7,7 +7,7 @@ import imgui.internal.ImGui;
 import sensor_msgs.CompressedImage;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.RosTools;
@@ -22,7 +22,7 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
    private final String topic;
    private Pixmap pixmap;
    private Texture texture;
-   private ImGuiVideoWindow window;
+   private ImGuiVideoPanel window;
    private volatile CompressedImage image;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
@@ -93,7 +93,7 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
                pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic), texture, false);
+               window = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), texture, false);
             }
 
 

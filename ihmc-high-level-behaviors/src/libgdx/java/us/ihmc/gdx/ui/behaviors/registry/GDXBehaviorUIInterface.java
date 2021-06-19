@@ -32,17 +32,19 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
-   public abstract void renderTreeNode();
+   public abstract void renderTreeNodeImGuiWidgets();
 
-   public abstract void renderInternal();
+   public abstract void renderRegularPanelImGuiWidgets();
 
-   public void render()
+   public abstract void update();
+
+   public void renderRegularPanelImGuiWidgetsAndChildren()
    {
-      renderInternal();
+      renderRegularPanelImGuiWidgets();
 
       for (GDXBehaviorUIInterface child : children)
       {
-         child.render();
+         child.renderRegularPanelImGuiWidgetsAndChildren();
       }
    }
 

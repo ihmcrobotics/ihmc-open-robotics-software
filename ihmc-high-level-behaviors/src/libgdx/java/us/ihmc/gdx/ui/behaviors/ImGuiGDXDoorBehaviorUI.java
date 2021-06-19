@@ -91,7 +91,13 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderTreeNode()
+   public void update()
+   {
+
+   }
+
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       ImGui.text("Current status:");
       detectedFiducialReceivedPlot.setNextValue((float) detectedFiducialMessageReceivedStopwatch.totalElapsed());
@@ -169,7 +175,7 @@ public class ImGuiGDXDoorBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
    }
 

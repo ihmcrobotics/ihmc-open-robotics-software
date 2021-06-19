@@ -6,6 +6,7 @@ import imgui.type.ImDouble;
 import imgui.type.ImInt;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.PathTools;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.tools.property.*;
 
 import java.nio.file.FileVisitResult;
@@ -14,21 +15,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-public class ImGuiStoredPropertySetTuner
+public class ImGuiStoredPropertySetTuner extends ImGuiPanel
 {
-   private String windowName;
    private StoredPropertySetBasics storedPropertySet;
    private StoredPropertyKeyList keys;
    private Runnable onParametersUpdatedCallback;
    private final TreeSet<String> versions = new TreeSet<>();
 
-   private HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
-   private HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
-   private HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
+   private final HashMap<DoubleStoredPropertyKey, ImDouble> doubleValues = new HashMap<>();
+   private final HashMap<IntegerStoredPropertyKey, ImInt> integerValues = new HashMap<>();
+   private final HashMap<BooleanStoredPropertyKey, ImBoolean> booleanValues = new HashMap<>();
 
    public ImGuiStoredPropertySetTuner(String name)
    {
-      this.windowName = name;
+      super(name);
+      setRenderMethod(this::renderImGuiWidgets);
    }
 
    public void create(StoredPropertySetBasics storedPropertySet, StoredPropertyKeyList keys, Runnable onParametersUpdatedCallback)
@@ -75,14 +76,7 @@ public class ImGuiStoredPropertySetTuner
       }
    }
 
-   public void render()
-   {
-      ImGui.begin(windowName);
-      renderWidgetsOnly();
-      ImGui.end();
-   }
-
-   public void renderWidgetsOnly()
+   public void renderImGuiWidgets()
    {
       for (String version : versions)
       {
@@ -159,11 +153,6 @@ public class ImGuiStoredPropertySetTuner
    {
       storedPropertySet.set(key, value);
       onParametersUpdatedCallback.run();
-   }
-
-   public String getWindowName()
-   {
-      return windowName;
    }
 
    public StoredPropertySetReadOnly getParameters()

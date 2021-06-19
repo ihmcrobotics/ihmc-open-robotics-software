@@ -10,7 +10,7 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2QosProfile;
@@ -28,7 +28,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private Pixmap pixmap;
    private Texture texture;
-   private ImGuiVideoWindow window;
+   private ImGuiVideoPanel window;
 
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
@@ -90,7 +90,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
+               window = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
             }
 
             // unpack BGR
