@@ -248,8 +248,6 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
 
    public void render()
    {
-      ImGui.begin(WINDOW_NAME);
-
       if (ImGui.button("Home Pose"))
       {
          double trajectoryTime = 3.5;
@@ -418,8 +416,11 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       {
          footstepPlanningParametersTuner.render();
       }
+   }
 
-      footstepPlanGraphic.render();
+   public void update()
+   {
+      footstepPlanGraphic.update();
    }
 
    private boolean imGuiSlider(String label, float[] value)

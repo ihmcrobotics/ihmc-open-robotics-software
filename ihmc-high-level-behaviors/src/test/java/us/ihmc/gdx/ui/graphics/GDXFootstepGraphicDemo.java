@@ -53,7 +53,7 @@ public class GDXFootstepGraphicDemo
          @Override
          public void render()
          {
-            footstepPlanGraphic.render();
+            footstepPlanGraphic.update();
 
             baseUI.renderBeforeOnScreenUI();
 

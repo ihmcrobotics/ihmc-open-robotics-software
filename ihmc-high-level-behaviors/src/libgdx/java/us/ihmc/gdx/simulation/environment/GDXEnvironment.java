@@ -146,7 +146,7 @@ public class GDXEnvironment implements RenderableProvider
       return closestObject;
    }
 
-   public void render()
+   public void renderImGuiWidgets()
    {
       ImGui.begin(WINDOW_NAME);
 

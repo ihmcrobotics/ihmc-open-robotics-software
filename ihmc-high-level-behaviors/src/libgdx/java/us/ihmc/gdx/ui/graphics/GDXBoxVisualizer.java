@@ -18,7 +18,7 @@ public class GDXBoxVisualizer implements RenderableProvider
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private ModelInstance modelInstance;
    private Model lastModel;
-   private volatile Runnable toRender = null;
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private final Point3D[] vertices = new Point3D[8];
    private final Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
@@ -31,12 +31,12 @@ public class GDXBoxVisualizer implements RenderableProvider
       }
    }
 
-   public void render()
+   public void update()
    {
-      if (toRender != null)
+      if (buildMeshAndCreateModelInstance != null)
       {
-         toRender.run();
-         toRender = null;
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
       }
    }
 
@@ -55,7 +55,7 @@ public class GDXBoxVisualizer implements RenderableProvider
       box.set(box);
       box.getVertices(vertices);
 
-      toRender = () ->
+      buildMeshAndCreateModelInstance = () ->
       {
          if (lastModel != null)
             lastModel.dispose();
