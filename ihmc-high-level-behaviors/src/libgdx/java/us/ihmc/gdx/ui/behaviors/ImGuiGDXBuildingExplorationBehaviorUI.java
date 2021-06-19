@@ -77,10 +77,16 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    }
 
    @Override
-   public void renderTreeNode()
+   public void update()
+   {
+
+   }
+
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       goalAffordance.renderPlaceGoalButton();
-      parameterTuner.renderWidgetsOnly();
+      parameterTuner.renderImGuiWidgets();
       ImGui.text("Mode:");
       for (BuildingExplorationBehaviorMode modeValue : BuildingExplorationBehaviorMode.values())
       {
@@ -93,7 +99,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
    }
 

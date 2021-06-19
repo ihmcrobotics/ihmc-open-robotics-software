@@ -118,7 +118,13 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderTreeNode()
+   public void update()
+   {
+
+   }
+
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       goalAffordance.renderPlaceGoalButton();
       if (!currentLifecycleState.isEmpty())
@@ -183,11 +189,11 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
       footstepPlanGraphic.update();
-      footstepPlannerParameterTuner.render();
-      swingPlannerParameterTuner.render();
+      footstepPlannerParameterTuner.renderImGuiWidgets();
+      swingPlannerParameterTuner.renderImGuiWidgets();
    }
 
    @Override

@@ -117,7 +117,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
       super.update();
       if (isActive())
       {
-         planarRegionsGraphic.render();
+         planarRegionsGraphic.update();
       }
    }
 

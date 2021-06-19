@@ -148,8 +148,6 @@ public class GDXEnvironment implements RenderableProvider
 
    public void renderImGuiWidgets()
    {
-      ImGui.begin(WINDOW_NAME);
-
       ImGui.text("Selected: " + selectedObject);
       ImGui.text("Intersecting: " + intersectedObject);
 
@@ -262,8 +260,6 @@ public class GDXEnvironment implements RenderableProvider
 
       if (doorSimulator != null)
          doorSimulator.renderImGuiWidgets();
-
-      ImGui.end();
    }
 
    private void loadEnvironment(Path environmentFile)

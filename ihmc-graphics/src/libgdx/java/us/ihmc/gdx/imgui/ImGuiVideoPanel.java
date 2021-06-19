@@ -1,27 +1,25 @@
 package us.ihmc.gdx.imgui;
 
 import com.badlogic.gdx.graphics.Texture;
-import imgui.flag.ImGuiCond;
 import imgui.internal.ImGui;
 
-public class ImGuiVideoWindow
+public class ImGuiVideoPanel extends ImGuiPanel
 {
-   private final String name;
    private final Texture texture;
    private final boolean flipY;
 
-   public ImGuiVideoWindow(String name, Texture texture, boolean flipY)
+   public ImGuiVideoPanel(String name, Texture texture, boolean flipY)
    {
-      this.name = name;
+      super(name);
+      setRenderMethod(this::render);
       this.texture = texture;
       this.flipY = flipY;
+      setFirstTimeWidth(texture.getWidth());
+      setFirstTimeHeight(texture.getHeight());
    }
 
    public void render()
    {
-      ImGui.setNextWindowSize(texture.getWidth(), texture.getHeight(), ImGuiCond.FirstUseEver);
-      ImGui.begin(name);
-
       //      float posX = ImGui.getWindowPosX() + ImGui.getWindowContentRegionMinX();
       //      float posY = ImGui.getWindowPosY() + ImGui.getWindowContentRegionMinY();
       //      float sizeX = ImGui.getWindowContentRegionMaxX();
@@ -54,7 +52,5 @@ public class ImGuiVideoWindow
       float endY = flipY ? posY + centeringY : posY + centeringY + drawSizeY;
 
       ImGui.getWindowDrawList().addImage(texture.getTextureObjectHandle(), startX, startY, endX, endY);
-
-      ImGui.end();
    }
 }

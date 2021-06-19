@@ -19,6 +19,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -55,12 +56,12 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
    private final ImGuiBehaviorTreePanel behaviorTreePanel = new ImGuiBehaviorTreePanel("Behavior Tree");
+   private final ImGuiPanel panel = new ImGuiPanel(windowName, this::renderRegularPanelImGuiWidgetsAndChildren);
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
                             Supplier<? extends DRCRobotModel> robotModelSupplier,
                             GDXBehaviorUIRegistry behaviorRegistry)
    {
-
       behaviorHelper = new BehaviorHelper("Behaviors panel", robotModelSupplier.get(), ros2Node);
       messagerHelper = behaviorHelper.getMessagerHelper();
       yoVariableClientHelper = behaviorHelper.getYoVariableClientHelper();
@@ -84,6 +85,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          statusStopwatch.reset();
          behaviorTreeStatus.set(status);
       });
+      panel.addChild(new ImGuiPanel(behaviorTreePanel.getWindowName(), () -> behaviorTreePanel.renderWidgetsOnly(this)));
       disabledNodeUI = new ImGuiBehaviorModuleDisabledNodeUI(behaviorHelper);
       addChild(disabledNodeUI);
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
@@ -103,9 +105,14 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void update()
    {
-      ImGui.begin(windowName);
+      syncTree(behaviorTreeStatus.get());
+   }
+
+   @Override
+   public void renderRegularPanelImGuiWidgets()
+   {
       synchronized (logArray)
       {
          ImGui.text("Behavior status log:");
@@ -141,10 +148,6 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          }
       }
       ImGui.popItemWidth();
-      ImGui.end();
-
-      syncTree(behaviorTreeStatus.get());
-      behaviorTreePanel.renderAsWindow(this);
    }
 
    @Override
@@ -154,7 +157,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderTreeNode()
+   public void renderTreeNodeImGuiWidgets()
    {
       if (messagerConnecting)
       {
@@ -273,5 +276,10 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    public String getWindowName()
    {
       return windowName;
+   }
+
+   public ImGuiPanel getPanel()
+   {
+      return panel;
    }
 }

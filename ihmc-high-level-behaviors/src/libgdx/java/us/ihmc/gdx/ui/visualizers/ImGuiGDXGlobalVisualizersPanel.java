@@ -30,29 +30,27 @@ public class ImGuiGDXGlobalVisualizersPanel implements RenderableProvider
       }
    }
 
-   public void render()
+   public void update()
    {
-      ImGui.begin(WINDOW_NAME);
-
       for (ImGuiGDXVisualizer visualizer : visualizers)
       {
-         visualizer.renderImGuiWidgets();
          if (visualizer instanceof ImGuiGDXROS1Visualizer)
          {
             ((ImGuiGDXROS1Visualizer) visualizer).updateSubscribers(ros1Helper);
          }
-
-         ImGui.separator();
-      }
-
-      ImGui.end();
-
-      for (ImGuiGDXVisualizer visualizer : visualizers)
-      {
          if (visualizer.isActive())
          {
             visualizer.update();
          }
+      }
+   }
+
+   public void renderImGuiWidgets()
+   {
+      for (ImGuiGDXVisualizer visualizer : visualizers)
+      {
+         visualizer.renderImGuiWidgets();
+         ImGui.separator();
       }
    }
 

@@ -2,7 +2,6 @@ package us.ihmc.gdx.imgui;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.internal.ImGui;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 
@@ -27,6 +26,11 @@ public class ImGuiPanelManager
       this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
    }
 
+   public void addPanel(ImGuiPanel panel)
+   {
+      panels.add(panel);
+   }
+
    public void addPanel(String windowName, Runnable render)
    {
       panels.add(new ImGuiPanel(windowName, render));
@@ -41,10 +45,7 @@ public class ImGuiPanelManager
    {
       for (ImGuiPanel panel : panels)
       {
-         if (panel.isTogglable())
-         {
-            ImGui.menuItem(panel.getPanelName(), "", panel.getEnabled());
-         }
+         panel.renderMenuItem();
       }
    }
 
@@ -52,10 +53,7 @@ public class ImGuiPanelManager
    {
       for (ImGuiPanel panel : panels)
       {
-         if (panel.isTogglable() && panel.getEnabled().get())
-         {
-            panel.render();
-         }
+         panel.renderPanelAndChildren();
       }
    }
 
@@ -72,13 +70,10 @@ public class ImGuiPanelManager
          JsonNode windowsNode = jsonNode.get("windows");
          for (Iterator<Map.Entry<String, JsonNode>> it = windowsNode.fields(); it.hasNext(); )
          {
-            Map.Entry<String, JsonNode> panel = it.next();
-            for (ImGuiPanel imGuiPanel : panels)
+            Map.Entry<String, JsonNode> panelEntry = it.next();
+            for (ImGuiPanel panel : panels)
             {
-               if (imGuiPanel.getPanelName().equals(panel.getKey()))
-               {
-                  imGuiPanel.getEnabled().set(panel.getValue().asBoolean());
-               }
+               panel.load(panelEntry);
             }
          }
       });
@@ -90,12 +85,9 @@ public class ImGuiPanelManager
       {
          ObjectNode anchorJSON = root.putObject("windows");
 
-         for (ImGuiPanel window : this.panels)
+         for (ImGuiPanel panel : panels)
          {
-            if (window.isTogglable())
-            {
-               anchorJSON.put(window.getPanelName(), window.getEnabled().get());
-            }
+            panel.save(anchorJSON);
          }
       };
       String saveFileNameString = settingsPath.getFileName().toString().replace("Settings.ini", "Panels.json");

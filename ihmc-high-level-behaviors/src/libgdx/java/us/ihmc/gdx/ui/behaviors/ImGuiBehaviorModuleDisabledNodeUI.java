@@ -30,7 +30,13 @@ public class ImGuiBehaviorModuleDisabledNodeUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderTreeNode()
+   public void update()
+   {
+
+   }
+
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       if (ImGui.checkbox(labels.get("Enabled"), imEnabled))
       {
@@ -41,7 +47,7 @@ public class ImGuiBehaviorModuleDisabledNodeUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
 
    }

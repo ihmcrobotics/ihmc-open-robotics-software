@@ -16,9 +16,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImGuiGDXYoGraphPanel
@@ -166,10 +164,8 @@ public class ImGuiGDXYoGraphPanel
       }
    }
 
-   public void render()
+   public void renderImGuiWidgets()
    {
-      ImGui.begin(title);
-
       ImGui.text("Controller host: " + controllerHost);
 
       ImGui.combo(ImGuiTools.uniqueIDOnly(this, "Profile"), graphGroupSelectedIndex, graphGroupNames, graphGroupNames.length);
@@ -204,8 +200,6 @@ public class ImGuiGDXYoGraphPanel
             graph.run();
          }
       }
-
-      ImGui.end();
    }
 
    public void graphVariable(String groupName, String yoVariableName)
