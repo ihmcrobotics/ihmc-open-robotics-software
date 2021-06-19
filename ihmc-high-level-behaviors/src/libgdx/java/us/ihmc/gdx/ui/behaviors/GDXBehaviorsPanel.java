@@ -96,6 +96,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    public void create(GDXImGuiBasedUI baseUI)
    {
       behaviorTreePanel.create();
+      addChildPanelsIncludingChildren(panel);
       highestLevelUI.create(baseUI);
    }
 

@@ -55,9 +55,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
    private final AtomicReference<Boolean> impassibilityDetected;
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
-   private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
-   private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
    private final ImBoolean stopForImpassibilities = new ImBoolean(true);
    private final ImGuiYoDoublePlot footholdVolumePlot;
 
@@ -165,7 +162,16 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void update()
    {
+      obstacleBoxVisualizer.update();
 
+      if (areGraphicsEnabled())
+      {
+         footstepPlanGraphic.update();
+         commandedFootstepsGraphic.update();
+         startAndGoalFootstepsGraphic.update();
+         planarRegionsGraphic.update();
+         bodyPathPlanGraphic.update();
+      }
    }
 
    @Override
@@ -259,23 +265,15 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void renderRegularPanelImGuiWidgets()
    {
-      if (showLookAndStepParametersTuner.get())
-         lookAndStepParameterTuner.renderImGuiWidgets();
-      if (showFootstepPlanningParametersTuner.get())
-         footstepPlannerParameterTuner.renderImGuiWidgets();
-      if (showSwingPlanningParametersTuner.get())
-         swingPlannerParameterTuner.renderImGuiWidgets();
 
-      obstacleBoxVisualizer.update();
+   }
 
-      if (areGraphicsEnabled())
-      {
-         footstepPlanGraphic.update();
-         commandedFootstepsGraphic.update();
-         startAndGoalFootstepsGraphic.update();
-         planarRegionsGraphic.update();
-         bodyPathPlanGraphic.update();
-      }
+   @Override
+   public void addChildPanels(ImGuiPanel parentPanel)
+   {
+      parentPanel.addChild(lookAndStepParameterTuner);
+      parentPanel.addChild(footstepPlannerParameterTuner);
+      parentPanel.addChild(swingPlannerParameterTuner);
    }
 
    private boolean areGraphicsEnabled()
