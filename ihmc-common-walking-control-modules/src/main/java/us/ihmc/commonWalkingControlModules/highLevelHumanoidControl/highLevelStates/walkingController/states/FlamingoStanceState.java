@@ -91,7 +91,6 @@ public class FlamingoStanceState extends SingleSupportState
       {
          FrameConvexPolygon2DReadOnly supportPolygonInWorld = bipedSupportPolygons.getSupportPolygonInWorld();
          FrameConvexPolygon2D combinedFootPolygon = failureDetectionControlModule.getCombinedFootPolygon();
-         boolean isPointInsideSupport = supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2);
          if (!supportPolygonInWorld.isPointInside(capturePoint2d, 2.0e-2) && combinedFootPolygon.isPointInside(capturePoint2d))
          {
             feetManager.requestMoveStraightTouchdownForDisturbanceRecovery(swingSide);
