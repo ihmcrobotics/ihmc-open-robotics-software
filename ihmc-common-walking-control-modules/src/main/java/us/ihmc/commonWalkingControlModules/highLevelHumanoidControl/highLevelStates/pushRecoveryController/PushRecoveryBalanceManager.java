@@ -149,8 +149,6 @@ public class PushRecoveryBalanceManager
    private final BooleanProvider maintainInitialCoMVelocityContinuitySingleSupport;
    private final BooleanProvider maintainInitialCoMVelocityContinuityTransfer;
 
-   private PushRecoveryStateEnum initialPushRecoveryState = null;
-
    public PushRecoveryBalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox,
                                      PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                      CoPTrajectoryParameters copTrajectoryParameters,
@@ -231,23 +229,6 @@ public class PushRecoveryBalanceManager
       copTrajectoryState.addFootstepTiming(timing);
       footsteps.add(footstep);
       footstepTimings.add(timing);
-   }
-
-   public void setStartingStateForPushRecovery()
-   {
-      YoPlaneContactState leftFootContact = controllerToolbox.getFootContactStates().get(RobotSide.LEFT);
-      YoPlaneContactState rightFootContact = controllerToolbox.getFootContactStates().get(RobotSide.RIGHT);
-      if(leftFootContact.inContact())
-         initialPushRecoveryState = PushRecoveryStateEnum.TO_PUSH_RECOVERY_LEFT_SUPPORT;
-      else if(rightFootContact.inContact())
-         initialPushRecoveryState = PushRecoveryStateEnum.TO_PUSH_RECOVERY_RIGHT_SUPPORT;
-      else
-         initialPushRecoveryState = null;
-   }
-
-   public PushRecoveryStateEnum getInitialPushRecoveryState()
-   {
-      return initialPushRecoveryState;
    }
 
    public void clearICPPlan()
@@ -523,7 +504,6 @@ public class PushRecoveryBalanceManager
    {
       comTrajectoryPlanner.removeCompletedSegments(totalStateDuration.getDoubleValue());
 
-//      copTrajectoryState.setInitialCoP(yoPerfectCoP);
       copTrajectoryState.setIcpAtStartOfState(controllerToolbox.getCapturePoint());
       copTrajectoryState.initializeStance(bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleFrames);
       comTrajectoryPlanner.setInitialCenterOfMassState(yoDesiredCoMPosition, yoDesiredCoMVelocity);
