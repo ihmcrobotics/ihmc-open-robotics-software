@@ -40,7 +40,7 @@ public class TraverseStairsPlanStepsState implements State
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
    private final IHMCROS2Publisher<FootstepDataListMessage> footstepListPublisher;
 
-   private final ROS2SyncedRobotModel ROS2SyncedRobotModel;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule planningModule;
    private FootstepPlannerOutput output;
 
@@ -60,7 +60,7 @@ public class TraverseStairsPlanStepsState implements State
       });
       helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
 
-      ROS2SyncedRobotModel = helper.getOrCreateRobotInterface().newSyncedRobot();
+      syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
       FootstepPlannerParametersBasics footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters("_Stairs");
       planningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
@@ -138,12 +138,12 @@ public class TraverseStairsPlanStepsState implements State
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalInput.get());
       request.setPlanBodyPath(false);
 
-      ROS2SyncedRobotModel.update();
+      syncedRobot.update();
       SideDependentList<Pose3D> solePoses = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         MovingReferenceFrame soleFrame = ROS2SyncedRobotModel.getReferenceFrames().getSoleFrame(robotSide);
+         MovingReferenceFrame soleFrame = syncedRobot.getReferenceFrames().getSoleFrame(robotSide);
          FramePose3D solePose = new FramePose3D(soleFrame);
          solePose.changeFrame(ReferenceFrame.getWorldFrame());
          solePoses.put(robotSide, new Pose3D(solePose));
