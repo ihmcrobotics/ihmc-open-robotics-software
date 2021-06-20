@@ -115,7 +115,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
             String name = jointMap.getLegJointName(robotSide, legJointName);
             YoDouble bias = new YoDouble("q_offset_" + name, registry);
             if (legJointName == LegJointName.HIP_ROLL && robotSide == RobotSide.RIGHT)
-               bias.set(0.03);
+               bias.set(0.02);
 
             sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
          }
