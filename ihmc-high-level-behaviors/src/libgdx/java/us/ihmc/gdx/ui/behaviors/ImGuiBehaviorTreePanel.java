@@ -280,7 +280,10 @@ public class ImGuiBehaviorTreePanel
       else
       {
          ImVec2 size = nametagSize.get(nodeIndex);
-         ImGui.dummy(size.x, size.y);
+         if (size != null)
+         {
+            ImGui.dummy(size.x, size.y);
+         }
       }
 
       if (parentPin != -1)

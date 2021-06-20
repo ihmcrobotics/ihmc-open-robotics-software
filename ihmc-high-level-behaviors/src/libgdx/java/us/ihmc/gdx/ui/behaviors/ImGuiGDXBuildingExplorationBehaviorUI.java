@@ -10,6 +10,8 @@ import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -49,6 +51,8 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       addChild(traverseStairsUI);
 
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS,
+                                  regions -> goalAffordance.setLatestRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions)));
    }
 
    @Override
