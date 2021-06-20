@@ -46,12 +46,13 @@ import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 {
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
-   private final ImFloat goalZ = new ImFloat(0.0f);
+   private final ImFloat goalZOffset = new ImFloat(0.0f);
    private ModelInstance sphere;
    private ModelInstance arrow;
    private GDXUIActionMap placeGoalActionMap;
    private boolean placingGoal = false;
    private boolean placingPosition = true;
+   private Point3D lastObjectIntersection;
    private final Pose3D goalPoseForReading = new Pose3D();
    private final Point3D32 tempSpherePosition = new Point3D32();
    private final Vector3D32 tempRotationVector = new Vector3D32();
@@ -144,6 +145,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
                         pickPoint = intersection;
                      }
                   }
+                  lastObjectIntersection = pickPoint;
                }
             }
          }
@@ -156,14 +158,15 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
                                                                                 pickRayInWorld.getDirection());
          }
 
+         double z = (lastObjectIntersection != null ? lastObjectIntersection.getZ() : 0.0) + goalZOffset.get();
          if (placingPosition)
          {
             if (ImGui.getIO().getKeyCtrl())
             {
-               goalZ.set(goalZ.get() - (input.getMouseWheelDelta() / 30.0f));
+               goalZOffset.set(goalZOffset.get() - (input.getMouseWheelDelta() / 30.0f));
             }
 
-            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) goalZ.get());
+            sphere.transform.setTranslation(pickPoint.getX32(), pickPoint.getY32(), (float) z);
 
             if (input.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -173,7 +176,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
          else // placing orientation
          {
             GDXTools.toEuclid(sphere.transform, tempSpherePosition);
-            tempSpherePosition.setZ(goalZ.get());
+            tempSpherePosition.setZ(z);
             GDXTools.toGDX(tempSpherePosition, arrow.transform);
 
             tempRotationVector.set(pickPoint);
@@ -236,8 +239,13 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       }
       else
       {
+         if (ImGui.button(labels.get("Clear")))
+         {
+            clear();
+         }
+         ImGui.sameLine();
          ImGui.pushItemWidth(50.0f);
-         ImGui.dragFloat("Goal Z", goalZ.getData(), 0.01f);
+         ImGui.dragFloat("Goal Z Offset", goalZOffset.getData(), 0.01f);
          ImGui.popItemWidth();
       }
    }
@@ -261,7 +269,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
    {
       if (sphere != null)
          sphere.transform.val[Matrix4.M03] = Float.NaN;
-      goalZ.set(0.0f);
+      goalZOffset.set(0.0f);
    }
 
    public void setLatestRegions(PlanarRegionsList latestRegions)
@@ -283,7 +291,7 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
       else
       {
          GDXTools.toGDX(pose.getPosition(), sphere.transform);
-         goalZ.set((float) pose.getZ());
+         goalZOffset.set((float) pose.getZ());
          GDXTools.toGDX(pose, tempTransform, arrow.transform);
       }
       goalPoseForReading.set(pose);
