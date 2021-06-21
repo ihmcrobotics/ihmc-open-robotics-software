@@ -14,6 +14,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.mutable.MutableInt;
 
 import gnu.trove.list.array.TIntArrayList;
+import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -483,14 +484,14 @@ public class PlanarRegionFileTools
    {
       OutputStreamWriter ow = new OutputStreamWriter(ostream);
 
-      HashMap<Integer, PlanarRegion> writeQueue = writePlanarRegionHeader(ow, planarRegionData);
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writePlanarRegionHeader(ow, planarRegionData);
 
-      for (Map.Entry<Integer, PlanarRegion> entry : writeQueue.entrySet())
+      for (Map.Entry<String, Pair<PlanarRegion, Integer>> entry : writeQueue.entrySet())
       {
-         int regionIndex = entry.getKey();
-         PlanarRegion region = entry.getValue();
+         int regionIndex = entry.getValue().getSecond();
+         PlanarRegion region = entry.getValue().getFirst();
 
-         ow.write("*\nregion" + region.getRegionId() + "_" + regionIndex + "\n"); //Separate entries
+         ow.write("*\nregion" + entry.getKey() + "\n"); //Separate entries
          writePlanarRegionVertices(ow, region);
       }
 
@@ -502,24 +503,24 @@ public class PlanarRegionFileTools
       File header = new File(folderPath.toFile(), "header.txt");
 
       FileWriter headerWriter = new FileWriter(header);
-      HashMap<Integer, PlanarRegion> writeQueue = writePlanarRegionHeader(headerWriter, planarRegionData);
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = writePlanarRegionHeader(headerWriter, planarRegionData);
       headerWriter.close();
 
-      for (Map.Entry<Integer, PlanarRegion> entry : writeQueue.entrySet())
+      for (Map.Entry<String, Pair<PlanarRegion, Integer>> entry : writeQueue.entrySet())
       {
-         int regionIndex = entry.getKey();
-         PlanarRegion region = entry.getValue();
+         int regionIndex = entry.getValue().getSecond();
+         PlanarRegion region = entry.getValue().getFirst();
 
-         File regionFile = new File(folderPath.toFile(), "region" + region.getRegionId() + "_" + regionIndex);
+         File regionFile = new File(folderPath.toFile(), "region" + entry.getKey());
          FileWriter fileWriter = new FileWriter(regionFile);
          writePlanarRegionVertices(fileWriter, region);
          fileWriter.close();
       }
    }
 
-   private static HashMap<Integer, PlanarRegion> writePlanarRegionHeader(OutputStreamWriter fw, PlanarRegionsList planarRegionData) throws IOException
+   private static HashMap<String, Pair<PlanarRegion, Integer>> writePlanarRegionHeader(OutputStreamWriter fw, PlanarRegionsList planarRegionData) throws IOException
    {
-      HashMap<Integer, PlanarRegion> writeQueue = new HashMap<>();
+      HashMap<String, Pair<PlanarRegion, Integer>> writeQueue = new HashMap<>();
       Map<Integer, MutableInt> regionIdToIndex = new HashMap<>();
 
       for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
@@ -549,7 +550,7 @@ public class PlanarRegionFileTools
 
          fw.write("\n");
 
-         writeQueue.put(regionIndex.getValue(), region);
+         writeQueue.put(region.getRegionId() + "_" + regionIndex, new Pair<PlanarRegion, Integer>(region, regionIndex.getValue()));
       }
 
       return writeQueue;

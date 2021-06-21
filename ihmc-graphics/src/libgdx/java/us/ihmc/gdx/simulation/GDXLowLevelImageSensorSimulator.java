@@ -6,8 +6,6 @@ import com.badlogic.gdx.graphics.GL30;
 import com.badlogic.gdx.graphics.PerspectiveCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.g3d.ModelBatch;
-import com.badlogic.gdx.graphics.g3d.shaders.DefaultShader;
-import com.badlogic.gdx.graphics.g3d.utils.DefaultShaderProvider;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBuffer;
 import com.badlogic.gdx.graphics.glutils.SensorFrameBufferBuilder;
 import com.badlogic.gdx.math.Matrix4;
@@ -15,7 +13,7 @@ import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import org.lwjgl.opengl.GL32;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.tools.Timer;
@@ -44,7 +42,7 @@ public class GDXLowLevelImageSensorSimulator
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
 
-   private ImGuiVideoWindow colorWindow;
+   private final ImGuiVideoPanel colorPanel;
 
    private ByteBuffer rawColorByteBuffer;
    private IntBuffer rawColorIntBuffer;
@@ -58,6 +56,7 @@ public class GDXLowLevelImageSensorSimulator
       this.minRange = (float) minRange;
       this.maxRange = (float) maxRange;
       this.updatePeriod = UnitConversions.hertzToSeconds(30.0);
+      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
    }
 
    public void create()
@@ -83,7 +82,7 @@ public class GDXLowLevelImageSensorSimulator
       rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
-      colorWindow = new ImGuiVideoWindow(colorWindowName, frameBuffer.getColorTexture(), true);
+      colorPanel.setTexture(frameBuffer.getColorTexture());
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -114,11 +113,6 @@ public class GDXLowLevelImageSensorSimulator
       Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, rawColorByteBuffer);
 
       frameBuffer.end();
-   }
-
-   public void renderImGuiColorWindow()
-   {
-      colorWindow.render();
    }
 
    public void dispose()
@@ -160,8 +154,8 @@ public class GDXLowLevelImageSensorSimulator
       return maxRange;
    }
 
-   public String getColorWindowName()
+   public ImGuiVideoPanel getColorPanel()
    {
-      return colorWindowName;
+      return colorPanel;
    }
 }

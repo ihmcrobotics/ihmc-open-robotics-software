@@ -19,7 +19,7 @@ public class GDXBehaviorTreeDevelopmentUI
 
    private final GDXImGuiBasedUI baseUI;
 
-   private final ImGuiBehaviorTreePanel treePanel;
+   private final ImGuiNodeEditorBehaviorTreePanel treePanel;
    private final BehaviorTreeControlFlowNode tree;
    private final GDXBehaviorUIInterface treeGui;
 
@@ -107,7 +107,7 @@ public class GDXBehaviorTreeDevelopmentUI
          }
       });
 
-      treePanel = new ImGuiBehaviorTreePanel("Test");
+      treePanel = new ImGuiNodeEditorBehaviorTreePanel("Test");
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
       GDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
@@ -153,8 +153,6 @@ public class GDXBehaviorTreeDevelopmentUI
 
          private void renderPanel()
          {
-            ImGui.begin("Tree Control");
-
             ImGui.text("Fallback Node");
             ImGui.checkbox("FB Primary", FALLBACK_PRIMARY);
             ImGui.checkbox("FB Secondary", FALLBACK_SECONDARY);
@@ -162,8 +160,6 @@ public class GDXBehaviorTreeDevelopmentUI
 
             ImGui.text("Sequence Node");
             ImGui.checkbox("S Secondary", SEQUENCE_SECONDARY);
-
-            ImGui.end();
          }
 
          @Override
