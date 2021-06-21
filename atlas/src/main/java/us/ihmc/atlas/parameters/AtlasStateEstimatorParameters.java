@@ -28,6 +28,8 @@ import us.ihmc.sensorProcessing.sensorProcessors.SensorProcessing;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 import us.ihmc.sensorProcessing.stateEstimation.IMUBasedJointStateEstimatorParameters;
 import us.ihmc.sensorProcessing.stateEstimation.StateEstimatorParameters;
+import us.ihmc.yoVariables.euclid.YoVector3D;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameVector3D;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -64,6 +66,8 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
 
    private final boolean applyJointPositionPolynomialApproximation;
 
+   private final String chestIMU;
+
    public AtlasStateEstimatorParameters(HumanoidJointNameMap jointMap, AtlasSensorInformation sensorInformation, boolean runningOnRealRobot, double estimatorDT)
    {
       this.jointMap = jointMap;
@@ -92,7 +96,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       //      jointSpecificStiffness.put(jointMap.getSpineJointName(SpineJointName.SPINE_ROLL), 8000.0);
 
       String pelvisIMU = sensorInformation.getPrimaryBodyImu();
-      String chestIMU = sensorInformation.getChestImu();
+      chestIMU = sensorInformation.getChestImu();
       double breakFrequencyForVelocityEstimation = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.85, 0.001);
       double breakFrequencyForPositionEstimation = AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(runningOnRealRobot ? 0.995 : 0.0, 0.001);
       imuBasedJointStateEstimatorParameters.add(new IMUBasedJointStateEstimatorParameters("Spine",
@@ -115,7 +119,7 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
             String name = jointMap.getLegJointName(robotSide, legJointName);
             YoDouble bias = new YoDouble("q_offset_" + name, registry);
             if (legJointName == LegJointName.HIP_ROLL && robotSide == RobotSide.RIGHT)
-               bias.set(0.02);
+               bias.set(0.025);
 
             sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
          }
@@ -189,6 +193,10 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
       sensorProcessing.addJointVelocityBacklashFilterOnlyForSpecifiedJoints(armJointVelocitySlopTime, false, armJointNames);
 
       sensorProcessing.computeJointAccelerationFromFiniteDifference(jointVelocityAlphaFilter, false);
+
+      YoVector3D chestIMUBias = new YoVector3D("chestIMUAngularVelocityBias", registry);
+      chestIMUBias.set(0.0075,0.0,-0.008);
+      sensorProcessing.addIMUAngularVelocityBiasOnlyForSpecifiedSensors(chestIMUBias, false, chestIMU);
 
       sensorProcessing.addSensorAlphaFilter(orientationAlphaFilter, false, IMU_ORIENTATION);
       sensorProcessing.addSensorAlphaFilter(angularVelocityAlphaFilter, false, IMU_ANGULAR_VELOCITY);
