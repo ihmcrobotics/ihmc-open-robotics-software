@@ -47,6 +47,8 @@ public class ImGuiImNodesBehaviorTreePanel
    private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
    private final HashMap<Integer, Boolean> nodeSizeHasChanged = new HashMap<>();
 
+   private final Class<?> parent;
+
    private static final String propertiesDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + ImGuiImNodesBehaviorTreePanel.class.getSimpleName() + "Settings" + File.separator;
 
    /***
@@ -54,9 +56,10 @@ public class ImGuiImNodesBehaviorTreePanel
     *
     * @param name The name of the window
     */
-   public ImGuiImNodesBehaviorTreePanel(String name)
+   public ImGuiImNodesBehaviorTreePanel(String name, Class<?> parent)
    {
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
+      this.parent = parent;
    }
 
    private void resetNodeIndex(GDXBehaviorUIInterface tree)
@@ -90,7 +93,7 @@ public class ImGuiImNodesBehaviorTreePanel
 
       if (firstRun)
       {
-         Path treeProperties = Paths.get(propertiesDirectory, "tree" + Integer.toString(tree.generateUID()));
+         Path treeProperties = Paths.get(propertiesDirectory, "tree" + parent.getSimpleName());
 
          if (Files.exists(treeProperties)) {
             layoutNodesFromFile(treeProperties);
