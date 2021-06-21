@@ -61,7 +61,11 @@ public class ImGuiBehaviorTreePanel
       ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackground, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
       ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackgroundHovered, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
       ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackgroundSelected, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
+      ImNodes.pushColorStyle(ImNodesColorStyle.Link, ImColor.floatToColor(0, 0, 0));
+      ImNodes.pushColorStyle(ImNodesColorStyle.LinkHovered, ImColor.floatToColor(0, 0, 0));
+      ImNodes.pushColorStyle(ImNodesColorStyle.LinkSelected, ImColor.floatToColor(0, 0, 0));
       ImNodes.pushStyleVar(ImNodesStyleVar.NodeBorderThickness, 5);
+      ImNodes.pushStyleVar(ImNodesStyleVar.PinCircleRadius, 0);
    }
 
    public void renderAsWindow(GDXBehaviorUIInterface tree)
