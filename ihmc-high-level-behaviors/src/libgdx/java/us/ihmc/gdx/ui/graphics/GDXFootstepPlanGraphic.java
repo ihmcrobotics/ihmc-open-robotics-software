@@ -35,16 +35,15 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    GDXMultiColorMeshBuilder meshBuilder = new GDXMultiColorMeshBuilder();
 
    // visualization options
-   private Function<Integer, Color> colorFunction = new GDXIDMappedColorFunction();
-
-   private SideDependentList<Color> footstepColors = new SideDependentList<>();
+   private final Function<Integer, Color> colorFunction = new GDXIDMappedColorFunction();
+   private final SideDependentList<Color> footstepColors = new SideDependentList<>();
    {
       footstepColors.set(RobotSide.LEFT, new Color(1.0f, 0.0f, 0.0f, 1.0f));
       footstepColors.set(RobotSide.RIGHT, new Color(0.0f, 0.5019608f, 0.0f, 1.0f));
    }
-   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
+   private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
-   private volatile Runnable toRender = null;
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private ModelInstance modelInstance;
    private Model lastModel;
@@ -80,12 +79,12 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
       sideColor.b = color.b;
    }
 
-   public void render()
+   public void update()
    {
-      if (toRender != null)
+      if (buildMeshAndCreateModelInstance != null)
       {
-         toRender.run();
-         toRender = null;
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
       }
    }
 
@@ -103,7 +102,6 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
 
       for (int i = 0; i < footsteps.size(); i++)
       {
-
          MinimalFootstep minimalFootstep = footsteps.get(i);
          Color regionColor = footstepColors.get(minimalFootstep.getSide());
 
@@ -140,7 +138,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
       }
-      toRender = () ->
+      buildMeshAndCreateModelInstance = () ->
       {
          modelBuilder.begin();
          Mesh mesh = meshBuilder.generateMesh();

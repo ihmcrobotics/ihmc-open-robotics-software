@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.vr.GDXVRManager;
 
@@ -32,17 +33,29 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
-   public abstract void renderTreeNode();
+   public abstract void renderTreeNodeImGuiWidgets();
 
-   public abstract void renderInternal();
+   public abstract void renderRegularPanelImGuiWidgets();
 
-   public void render()
+   public abstract void update();
+
+   public final void updateIncludingChildren()
    {
-      renderInternal();
+      update();
 
       for (GDXBehaviorUIInterface child : children)
       {
-         child.render();
+         child.updateIncludingChildren();
+      }
+   }
+
+   public final void renderRegularPanelImGuiWidgetsAndChildren()
+   {
+      renderRegularPanelImGuiWidgets();
+
+      for (GDXBehaviorUIInterface child : children)
+      {
+         child.renderRegularPanelImGuiWidgetsAndChildren();
       }
    }
 
@@ -58,6 +71,21 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
    public ArrayList<GDXBehaviorUIInterface> getUIChildren()
    {
       return children;
+   }
+
+   public void addChildPanels(ImGuiPanel parentPanel)
+   {
+
+   }
+
+   public final void addChildPanelsIncludingChildren(ImGuiPanel parentPanel)
+   {
+      addChildPanels(parentPanel);
+
+      for (GDXBehaviorUIInterface child : children)
+      {
+         child.addChildPanelsIncludingChildren(parentPanel);
+      }
    }
 
    public void syncTree(BehaviorTreeNodeBasics externalNode)

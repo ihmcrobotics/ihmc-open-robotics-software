@@ -83,7 +83,7 @@ public class GDXROS2PlanarRegionsVisualizer extends ImGuiGDXVisualizer implement
       super.update();
       if (isActive())
       {
-         planarRegionsGraphic.render();
+         planarRegionsGraphic.update();
       }
    }
 

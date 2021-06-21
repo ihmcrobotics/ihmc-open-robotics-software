@@ -86,7 +86,6 @@ public class GDX3DSceneTools
 
    public static void renderTuningSliders()
    {
-      ImGui.begin(TUNING_WINDOW_NAME);
       ImGui.checkbox("Ambient enabled", ambientEnabled);
       ImGui.sliderFloat("Ambient color", ambientColor.getData(), 0.0f, 1.0f);
       ImGui.checkbox("Point enabled", pointEnabled);
@@ -96,6 +95,5 @@ public class GDX3DSceneTools
       ImGui.checkbox("Direction enabled", directionEnabled);
       ImGui.sliderFloat("Direction color", directionColor.getData(), 0.0f, 1.0f);
       ImGui.sliderFloat("Direction distance", directionDistance.getData(), 0.0f, 20.0f);
-      ImGui.end();
    }
 }

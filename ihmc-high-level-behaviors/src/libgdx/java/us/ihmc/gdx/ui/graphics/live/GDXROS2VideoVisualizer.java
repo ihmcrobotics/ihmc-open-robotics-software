@@ -12,7 +12,7 @@ import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.ros2.ROS2Node;
@@ -35,7 +35,8 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private Pixmap pixmap;
    private Texture texture;
-   private ImGuiVideoWindow window;
+   private ImGuiVideoPanel window;
+
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
 //   private Triple<ByteBuffer, Integer, Integer> decompressedImage;
@@ -148,7 +149,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
+               window = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
             }
 
             // unpack BGR
