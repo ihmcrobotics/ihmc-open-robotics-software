@@ -42,7 +42,7 @@ public class GDXLowLevelImageSensorSimulator
    private ScreenViewport viewport;
    private SensorFrameBuffer frameBuffer;
 
-   private ImGuiVideoPanel colorWindow;
+   private final ImGuiVideoPanel colorPanel;
 
    private ByteBuffer rawColorByteBuffer;
    private IntBuffer rawColorIntBuffer;
@@ -56,6 +56,7 @@ public class GDXLowLevelImageSensorSimulator
       this.minRange = (float) minRange;
       this.maxRange = (float) maxRange;
       this.updatePeriod = UnitConversions.hertzToSeconds(30.0);
+      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
    }
 
    public void create()
@@ -81,7 +82,7 @@ public class GDXLowLevelImageSensorSimulator
       rawColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
       rawColorIntBuffer = rawColorByteBuffer.asIntBuffer();
 
-      colorWindow = new ImGuiVideoPanel(colorWindowName, frameBuffer.getColorTexture(), true);
+      colorPanel.setTexture(frameBuffer.getColorTexture());
    }
 
    public void render(GDX3DSceneManager sceneManager)
@@ -112,11 +113,6 @@ public class GDXLowLevelImageSensorSimulator
       Gdx.gl.glReadPixels(0, 0, imageWidth, imageHeight, GL30.GL_RGBA, GL30.GL_UNSIGNED_BYTE, rawColorByteBuffer);
 
       frameBuffer.end();
-   }
-
-   public void renderImGuiColorWindow()
-   {
-      colorWindow.render();
    }
 
    public void dispose()
@@ -158,8 +154,8 @@ public class GDXLowLevelImageSensorSimulator
       return maxRange;
    }
 
-   public String getColorWindowName()
+   public ImGuiVideoPanel getColorPanel()
    {
-      return colorWindowName;
+      return colorPanel;
    }
 }

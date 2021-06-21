@@ -17,6 +17,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.simulation.GDXLowLevelImageSensorSimulator;
@@ -37,10 +38,9 @@ import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 import java.nio.IntBuffer;
 import java.util.function.LongSupplier;
 
-public class GDXHighLevelImageSensorSimulator implements RenderableProvider
+public class GDXHighLevelImageSensorSimulator extends ImGuiPanel implements RenderableProvider
 {
    private static final MutableInt INDEX = new MutableInt();
-   private final String windowName;
    private final ReferenceFrame sensorFrame;
    private final Matrix4 gdxTransform = new Matrix4();
    private final GDXLowLevelImageSensorSimulator imageSensorSimulator;
@@ -83,7 +83,8 @@ public class GDXHighLevelImageSensorSimulator implements RenderableProvider
                                            double maxRange,
                                            double publishRateHz)
    {
-      windowName = ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator");
+      super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
+      setRenderMethod(this::renderImGuiWidgets);
       this.ros1Node = ros1Node;
       this.ros2Node = ros2Node;
       this.sensorFrame = sensorFrame;
@@ -115,6 +116,7 @@ public class GDXHighLevelImageSensorSimulator implements RenderableProvider
    public void create()
    {
       imageSensorSimulator.create();
+      addChild(imageSensorSimulator.getColorPanel());
       if (debugCoordinateFrame)
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
    }
@@ -189,9 +191,8 @@ public class GDXHighLevelImageSensorSimulator implements RenderableProvider
    }
 
 
-   public void renderImGuiWindow()
+   public void renderImGuiWidgets()
    {
-      ImGui.begin(windowName);
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Sensor Enabled"), sensorEnabled);
       ImGui.text("Render:");
       ImGui.sameLine();
@@ -201,10 +202,6 @@ public class GDXHighLevelImageSensorSimulator implements RenderableProvider
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 1)"), publishColorImageROS1);
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
-      ImGui.end();
-
-      if (renderColorVideoDirectly.get())
-         getLowLevelSimulator().renderImGuiColorWindow();
    }
 
    private void publishImageROS2()
@@ -232,7 +229,7 @@ public class GDXHighLevelImageSensorSimulator implements RenderableProvider
 
    public void setRenderColorVideoDirectly(boolean renderColorVideoDirectly)
    {
-      this.renderColorVideoDirectly.set(renderColorVideoDirectly);
+      this.imageSensorSimulator.getColorPanel().getEnabled().set(renderColorVideoDirectly);
    }
 
    public void setPublishColorImageROS2(boolean publish)
@@ -258,10 +255,5 @@ public class GDXHighLevelImageSensorSimulator implements RenderableProvider
    public GDXLowLevelImageSensorSimulator getLowLevelSimulator()
    {
       return imageSensorSimulator;
-   }
-
-   public String getWindowName()
-   {
-      return windowName;
    }
 }
