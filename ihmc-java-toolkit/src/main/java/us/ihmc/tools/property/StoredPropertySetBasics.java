@@ -30,6 +30,8 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    void load(String file);
 
+   void load(String file, boolean crashIfMissingKey);
+
    void save();
 
    StoredPropertyKeyListReadOnly getKeyList();
