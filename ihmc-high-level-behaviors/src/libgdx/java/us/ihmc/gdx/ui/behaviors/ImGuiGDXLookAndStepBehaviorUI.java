@@ -248,10 +248,13 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 //         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
          ImGui.text("Rejection reasons:");
-         for (Pair<Integer, Double> latestFootstepPlannerRejectionReason : latestFootstepPlannerRejectionReasons)
+         for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
          {
-            ImGui.text(latestFootstepPlannerRejectionReason.getRight() + "%: "
-                       + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReason.getLeft()].name());
+            if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
+               ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
+                          + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
+            else
+               ImGui.text("");
          }
 //         ImGui.separator();
 //      }
