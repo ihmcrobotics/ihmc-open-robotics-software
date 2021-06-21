@@ -58,8 +58,8 @@ public class GDXLowLevelDepthSensorSimulator
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
-   private ImGuiVideoPanel depthPanel;
-   private ImGuiVideoPanel colorPanel;
+   private final ImGuiVideoPanel depthPanel;
+   private final ImGuiVideoPanel colorPanel;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
@@ -81,6 +81,9 @@ public class GDXLowLevelDepthSensorSimulator
       this.minRange = (float) minRange;
       this.maxRange = (float) maxRange;
       this.updatePeriod = UnitConversions.hertzToSeconds(30.0);
+
+      depthPanel = new ImGuiVideoPanel(depthWindowName, false);
+      colorPanel = new ImGuiVideoPanel(colorWindowName, true);
    }
 
    public void create()
@@ -110,8 +113,8 @@ public class GDXLowLevelDepthSensorSimulator
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
 
-      depthPanel = new ImGuiVideoPanel(depthWindowName, depthWindowTexture, false);
-      colorPanel = new ImGuiVideoPanel(colorWindowName, frameBuffer.getColorTexture(), true);
+      depthPanel.setTexture(depthWindowTexture);
+      colorPanel.setTexture(frameBuffer.getColorTexture());
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
       colors = new ArrayList<>(imageWidth * imageHeight);

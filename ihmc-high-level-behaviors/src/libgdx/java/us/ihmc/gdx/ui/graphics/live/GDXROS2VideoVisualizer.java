@@ -35,7 +35,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
    private Pixmap pixmap;
    private Texture texture;
-   private ImGuiVideoPanel window;
+   private final ImGuiVideoPanel videoPanel;
 
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
@@ -51,6 +51,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
       new IHMCROS2Callback<>(ros2Node, topic, ROS2QosProfile.BEST_EFFORT(), this::acceptMessage);
+      videoPanel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic.getName()), false);
    }
 
    public void addFiducialSubscription(ROS2Topic<DetectedFiducialPacket> fiducialTopic)
@@ -149,7 +150,7 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
                pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               window = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic.getName()), texture, false);
+               videoPanel.setTexture(texture);
             }
 
             // unpack BGR
@@ -173,11 +174,12 @@ public class GDXROS2VideoVisualizer extends ImGuiGDXVisualizer
             texture.draw(pixmap, 0, 0);
             decompressedImage = null;
          }
-
-         if (window != null)
-         {
-            window.render();
-         }
       }
+   }
+
+   @Override
+   public ImGuiVideoPanel getPanel()
+   {
+      return videoPanel;
    }
 }

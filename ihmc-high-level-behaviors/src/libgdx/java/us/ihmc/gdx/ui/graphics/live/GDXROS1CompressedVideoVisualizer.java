@@ -22,7 +22,7 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
    private final String topic;
    private Pixmap pixmap;
    private Texture texture;
-   private ImGuiVideoPanel window;
+   private final ImGuiVideoPanel panel;
    private volatile CompressedImage image;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
@@ -34,6 +34,7 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
    {
       super(title);
       this.topic = topic;
+      panel = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), false);
    }
 
    public void subscribe(RosNodeInterface ros1Node)
@@ -93,7 +94,7 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
                pixmap = new Pixmap(width, height, Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               window = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), texture, false);
+               panel.setTexture(texture);
             }
 
 
@@ -128,9 +129,13 @@ public class GDXROS1CompressedVideoVisualizer extends ImGuiGDXROS1Visualizer
                }
             }
             texture.draw(pixmap, 0, 0);
-
-            window.render();
          }
       }
+   }
+
+   @Override
+   public ImGuiVideoPanel getPanel()
+   {
+      return panel;
    }
 }
