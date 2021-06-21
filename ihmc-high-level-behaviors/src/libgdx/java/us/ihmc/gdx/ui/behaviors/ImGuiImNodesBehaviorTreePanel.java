@@ -426,4 +426,9 @@ public class ImGuiImNodesBehaviorTreePanel
    {
       ImNodes.destroyContext();
    }
+
+   public String getWindowName()
+   {
+      return windowName;
+   }
 }
