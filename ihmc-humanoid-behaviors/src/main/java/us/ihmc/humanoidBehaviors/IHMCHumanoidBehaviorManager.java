@@ -308,7 +308,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                            wholeBodyControllerParameters,
                                                            atlasPrimitiveActions));
       dispatcher.addBehavior(HumanoidBehaviorType.TEST_HEIGHT,
-                             new FireFighterStanceBehavior(robotName,
+                             new TestSetHeightBehavior(robotName,
                                                            "testheight",
                                                            yoTime,
                                                            ros2Node,

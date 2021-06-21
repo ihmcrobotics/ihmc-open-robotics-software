@@ -161,7 +161,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             referenceFrames.updateFrames();
 
-            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.7, referenceFrames.getMidFeetZUpFrame(),referenceFrames.getMidFeetZUpFrame());
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.8, referenceFrames.getMidFeetZUpFrame(),referenceFrames.getMidFeetZUpFrame());
             atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
             publishTextToSpeech("Decrease heigth");
          }
