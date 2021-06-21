@@ -7,6 +7,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -300,8 +301,85 @@ public class TrajectoryPointOptimizerTest
       }
    }
 
+   private static void runTimingTest()
+   {
+      int maxWaypointsToTest = 12;
+      boolean fixedTimes = true;
+
+      List<Pair<TrajectoryPointOptimizer, TDoubleArrayList>> optimizers = new ArrayList<>();
+      long[] timingData = new long[maxWaypointsToTest];
+
+      for (int i = 0; i < maxWaypointsToTest; i++)
+      {
+         optimizers.add(setupOptimizerForSemicircularTrajectory(i + 1));
+      }
+
+      // do warm-up
+      Pair<TrajectoryPointOptimizer, TDoubleArrayList> tempOptimizer = setupOptimizerForSemicircularTrajectory(1);
+      for (int i = 0; i < 250; i++)
+      {
+         tempOptimizer.getLeft().compute();
+      }
+
+      // do timing test
+      int numberOfOptimizationsToRun = 20;
+      for (int i = 0; i < optimizers.size(); i++)
+      {
+         long start = System.nanoTime();
+
+         Pair<TrajectoryPointOptimizer, TDoubleArrayList> optimizer = optimizers.get(i);
+         if (fixedTimes)
+            optimizer.getLeft().computeForFixedTime(optimizer.getRight());
+         else
+            optimizer.getLeft().compute(numberOfOptimizationsToRun);
+
+         long stop = System.nanoTime();
+
+         long diff = stop - start;
+         timingData[i] = diff;
+      }
+
+      for (int i = 0; i < optimizers.size(); i++)
+      {
+         System.out.println((i+1) + "\t " + (timingData[i]/(numberOfOptimizationsToRun * 1e6)) + " ms");
+      }
+   }
+
+   private static Pair<TrajectoryPointOptimizer, TDoubleArrayList> setupOptimizerForSemicircularTrajectory(int numberOfWaypoints)
+   {
+      int dimensions = 3;
+      TrajectoryPointOptimizer optimizer = new TrajectoryPointOptimizer(dimensions);
+
+      TDoubleArrayList x0 = new TDoubleArrayList(new double[]{0.0, 0.0, 0.0});
+      TDoubleArrayList xd0 = new TDoubleArrayList(new double[]{0.0, 0.0, 1.0});
+      TDoubleArrayList x1 = new TDoubleArrayList(new double[]{1.0, 1.0, 0.0});
+      TDoubleArrayList xd1 = new TDoubleArrayList(new double[]{0.0, 0.0, -1.0});
+
+      List<TDoubleArrayList> waypoints = new ArrayList<>();
+      double theta = Math.PI / (numberOfWaypoints + 1);
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         double xyValue = Math.cos((i + 1) * theta);
+         double zValue = Math.sin((i + 1) * theta);
+         TDoubleArrayList waypoint = new TDoubleArrayList(new double[]{xyValue, xyValue, zValue});
+         waypoints.add(waypoint);
+      }
+
+      optimizer.setEndPoints(x0, xd0, x1, xd1);
+      optimizer.setWaypoints(waypoints);
+
+      TDoubleArrayList times = new TDoubleArrayList();
+      for (int i = 0; i < numberOfWaypoints; i++)
+      {
+         times.add((i + 1) / ((double) (numberOfWaypoints + 1)));
+      }
+
+      return Pair.of(optimizer, times);
+   }
+
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(TrajectoryPointOptimizer.class, TrajectoryPointOptimizerTest.class);
+      runTimingTest();
+//      MutationTestFacilitator.facilitateMutationTestForClass(TrajectoryPointOptimizer.class, TrajectoryPointOptimizerTest.class);
    }
 }

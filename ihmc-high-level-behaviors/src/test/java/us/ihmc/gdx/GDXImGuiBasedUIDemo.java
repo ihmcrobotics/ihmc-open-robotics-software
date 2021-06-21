@@ -3,6 +3,7 @@ package us.ihmc.gdx;
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
@@ -16,6 +17,8 @@ public class GDXImGuiBasedUIDemo
                                                               "Demo");
 
    private final Stopwatch stopwatch = new Stopwatch().start();
+   private final ImGuiMovingPlot renderPlot = new ImGuiMovingPlot("render count", 1000, 300, 30);
+   private long renderCount = 0;
 
    public GDXImGuiBasedUIDemo()
    {
@@ -49,7 +52,6 @@ public class GDXImGuiBasedUIDemo
 
    private void renderPanel()
    {
-      ImGui.begin("Window");
       if (ImGui.beginTabBar("main"))
       {
          if (ImGui.beginTabItem("Window"))
@@ -67,7 +69,7 @@ public class GDXImGuiBasedUIDemo
          values[i] = i;
       }
       ImGui.plotLines("Histogram", values, 100);
-      ImGui.end();
+      renderPlot.calculate(renderCount++);
    }
 
    public static void main(String[] args)

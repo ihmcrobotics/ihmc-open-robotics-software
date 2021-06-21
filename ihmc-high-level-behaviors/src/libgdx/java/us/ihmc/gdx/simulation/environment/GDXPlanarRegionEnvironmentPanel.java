@@ -28,8 +28,6 @@ public class GDXPlanarRegionEnvironmentPanel implements RenderableProvider
 
    public void renderImGuiWindow()
    {
-      ImGui.begin(windowName);
-
       /**
        * Folders:
        * ihmc-path-planning/src/data-sets/resources/us/ihmc/pathPlanning/dataSets/20001201_205030_SingleSquare
@@ -67,14 +65,15 @@ public class GDXPlanarRegionEnvironmentPanel implements RenderableProvider
       renderDataSetPathWidgets(reaDataSetPaths);
 
       //      ImGui.list
+   }
 
-      ImGui.end();
-
+   public void update()
+   {
       for (GDXPlanarRegionsGraphic planarRegionsGraphic : planarRegionGraphics.values())
       {
          if (planarRegionsGraphic != null)
          {
-            planarRegionsGraphic.render();
+            planarRegionsGraphic.update();
          }
       }
    }

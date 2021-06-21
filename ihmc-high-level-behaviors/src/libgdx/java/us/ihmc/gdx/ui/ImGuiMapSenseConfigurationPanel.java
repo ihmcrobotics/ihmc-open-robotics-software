@@ -59,8 +59,6 @@ public class ImGuiMapSenseConfigurationPanel
 
    public void render()
    {
-      ImGui.begin(WINDOW_NAME);
-
       if (ImGui.sliderFloat("Planar region delay offset", planarRegionsDelayOffset.getData(), -0.75f, 0.75f))
       {
          Float64 message = new Float64();
@@ -133,8 +131,6 @@ public class ImGuiMapSenseConfigurationPanel
          packPatchSize
          mergePatchSize
       * */
-
-      ImGui.end();
    }
 
    public String getWindowName()

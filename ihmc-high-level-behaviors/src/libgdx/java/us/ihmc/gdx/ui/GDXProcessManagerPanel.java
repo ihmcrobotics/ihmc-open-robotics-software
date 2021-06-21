@@ -89,10 +89,15 @@ public abstract class GDXProcessManagerPanel
       return RobotTarget.values()[robotTarget.get()];
    }
 
-   public void render()
+   public void renderPanel()
    {
       ImGui.begin(windowName);
+      renderImGuiWidgets();
+      ImGui.end();
+   }
 
+   public void renderImGuiWidgets()
+   {
       ImGui.text("ROS Master URI: " + ROS_URI_STRING);
       ImGui.text("RTPS Domain ID: " + RTPS_DOMAIN_ID_STRING);
       ImGui.text("RTPS Subnet Restriction: " + RTPS_SUBNET_STRING);
@@ -120,8 +125,6 @@ public abstract class GDXProcessManagerPanel
       {
          process.render();
       }
-
-      ImGui.end();
    }
 
    protected abstract ImInt getRobotVersion();
