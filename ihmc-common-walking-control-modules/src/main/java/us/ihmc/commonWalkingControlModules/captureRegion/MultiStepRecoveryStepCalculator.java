@@ -11,10 +11,14 @@ import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
+
+import java.util.function.IntFunction;
 
 public class MultiStepRecoveryStepCalculator
 {
@@ -24,6 +28,7 @@ public class MultiStepRecoveryStepCalculator
 
    private final ReachableFootholdsCalculator reachableFootholdsCalculator;
    private final AchievableCaptureRegionCalculatorWithDelay captureRegionCalculator;
+   private CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider;
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
@@ -34,7 +39,8 @@ public class MultiStepRecoveryStepCalculator
 
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> captureRegionsAtTouchdown = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
-   private final RecyclingArrayList<FrameConvexPolygon2DBasics> intersectingRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableConstrainedCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
    private final FramePose3D stancePose = new FramePose3D();
@@ -44,8 +50,6 @@ public class MultiStepRecoveryStepCalculator
    private final FramePoint2D forwardLineSegmentEnd = new FramePoint2D();
 
    private final FramePoint3D stepPosition = new FramePoint3D();
-   private final FramePoint3D squareUpPosition = new FramePoint3D();
-   private final FrameVector2D squaringStepDirection = new FrameVector2D();
 
    private final ConvexPolygon2DReadOnly defaultFootPolygon;
    private final FramePoint2D icpAtStart = new FramePoint2D();
@@ -55,6 +59,7 @@ public class MultiStepRecoveryStepCalculator
    private final RecyclingArrayList<FootstepTiming> recoveryFootstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
 
    private final PushRecoveryControllerParameters pushRecoveryParameters;
+   private IntFunction<PlanarRegionsList> constraintRegionProvider;
 
    private boolean isStateCapturable = false;
 
@@ -80,11 +85,22 @@ public class MultiStepRecoveryStepCalculator
       this.soleZUpFrames = soleZUpFrames;
       this.defaultFootPolygon = defaultFootPolygon;
       this.pushRecoveryParameters = pushRecoveryParameters;
+
       reachableFootholdsCalculator = new ReachableFootholdsCalculator(maxStepLength,
                                                                       maxBackwardsStepLength,
                                                                       minStepWidth,
                                                                       maxStepWidth);
       captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay();
+   }
+
+   public void setConstraintRegionProvider(IntFunction<PlanarRegionsList> constraintRegionProvider)
+   {
+      this.constraintRegionProvider = constraintRegionProvider;
+   }
+
+   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider)
+   {
+      this.planarRegionDecider = planarRegionDecider;
    }
 
    public void setMaxStepsToGenerateForRecovery(int depth)
@@ -195,7 +211,8 @@ public class MultiStepRecoveryStepCalculator
       capturePointsAtTouchdown.clear();
       reachableRegions.clear();
       captureRegionsAtTouchdown.clear();
-      intersectingRegions.clear();
+      reachableCaptureRegions.clear();
+      reachableConstrainedCaptureRegions.clear();
 
       for (; depthIdx < depth; depthIdx++)
       {
@@ -215,24 +232,24 @@ public class MultiStepRecoveryStepCalculator
          stancePosition.set(stancePose.getPosition());
          numberOfRecoverySteps++;
 
-         FrameConvexPolygon2DBasics intersectingRegion = intersectingRegions.add();
-         polygonTools.computeIntersectionOfPolygons(captureRegionAtTouchdown, reachableRegion, intersectingRegion);
+         FrameConvexPolygon2DBasics reachableCaptureRegion = reachableCaptureRegions.add();
+         polygonTools.computeIntersectionOfPolygons(captureRegionAtTouchdown, reachableRegion, reachableCaptureRegion);
 
          FramePoint2DBasics recoveryStepLocation = recoveryStepLocations.add();
          FramePoint2DBasics capturePointAtTouchdown = capturePointsAtTouchdown.add();
 
-         if (!intersectingRegion.isEmpty())
+         if (!reachableCaptureRegion.isEmpty())
          { // they do intersect
-            FramePoint2DReadOnly centerOfIntersection = intersectingRegion.getCentroid();
+            FramePoint2DReadOnly centerOfIntersection = reachableCaptureRegion.getCentroid();
 
             computeRecoveryStepAtNominalWidth(swingSide, stancePosition, centerOfIntersection, capturePointAtTouchdown);
 
-            if (!intersectingRegion.isPointInside(capturePointAtTouchdown))
+            if (!reachableCaptureRegion.isPointInside(capturePointAtTouchdown))
             {
                EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(stancePosition,
                                                                                              centerOfIntersection,
-                                                                                             intersectingRegion.getPolygonVerticesView(),
-                                                                                             intersectingRegion.getNumberOfVertices(),
+                                                                                             reachableCaptureRegion.getPolygonVerticesView(),
+                                                                                             reachableCaptureRegion.getNumberOfVertices(),
                                                                                              true,
                                                                                              capturePointAtTouchdown,
                                                                                              pointToThrowAway);
@@ -320,6 +337,29 @@ public class MultiStepRecoveryStepCalculator
 
    public FrameConvexPolygon2DReadOnly getIntersectingRegion(int i)
    {
-      return intersectingRegions.get(i);
+      return reachableCaptureRegions.get(i);
+   }
+
+   private final FrameConvexPolygon2DBasics planarRegionConvexHull = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2DBasics tempRegion = new FrameConvexPolygon2D();
+
+   private void computeConstrainedCaptureRegion(int stepNumber, FrameConvexPolygon2DReadOnly reachableCaptureRegion, FrameConvexPolygon2DBasics constrainedCaptureRegionToPack)
+   {
+      if (constraintRegionProvider == null || planarRegionDecider == null)
+      {
+         constrainedCaptureRegionToPack.set(reachableCaptureRegion);
+         return;
+      }
+
+      PlanarRegionsList planarRegions = constraintRegionProvider.apply(stepNumber);
+
+      planarRegionDecider.setConstraintRegions(planarRegions.getPlanarRegionsAsList());
+      planarRegionDecider.setReachableCaptureRegion(reachableCaptureRegion);
+      planarRegionDecider.updatePlanarRegionConstraintForStep(null);
+      PlanarRegion constraintRegion = planarRegionDecider.getConstraintRegion();
+
+      planarRegionConvexHull.set(constraintRegion.getConvexHull());
+      planarRegionConvexHull.applyTransform(constraintRegion.getTransformToWorld(), false);
+      polygonTools.computeIntersectionOfPolygons(reachableCaptureRegion, planarRegionConvexHull, constrainedCaptureRegionToPack);
    }
 }

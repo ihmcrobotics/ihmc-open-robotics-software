@@ -2,7 +2,9 @@ package us.ihmc.avatar.stepAdjustment;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commonWalkingControlModules.captureRegion.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -11,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
@@ -46,8 +49,9 @@ public class CapturabilityBasedPlanarRegionDeciderTest
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
       centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
-      CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
+      CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> constraintCalculator = new CapturabilityBasedPlanarRegionDecider<>(centerOfMassFrame,
                                                                                                              9.81,
+                                                                                                             StepConstraintRegion::new,
                                                                                                              new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
@@ -64,9 +68,9 @@ public class CapturabilityBasedPlanarRegionDeciderTest
 
       constraintCalculator.setOmega0(3.0);
       constraintCalculator.setConstraintRegions(constraintRegions);
-      constraintCalculator.setCaptureRegion(captureRegion);
+      constraintCalculator.setReachableCaptureRegion(captureRegion);
 
-      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose.getPosition());
 
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
    }
@@ -116,8 +120,9 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       captureRegion.update();
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
-      CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
+      CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> constraintCalculator = new CapturabilityBasedPlanarRegionDecider<>(centerOfMassFrame,
                                                                                                              9.81,
+                                                                                                             StepConstraintRegion::new,
                                                                                                              new YoRegistry("Dummy"),
                                                                                                              null);
       constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
@@ -126,8 +131,8 @@ public class CapturabilityBasedPlanarRegionDeciderTest
 
       constraintCalculator.setOmega0(omega);
       constraintCalculator.setConstraintRegions(constraintRegions);
-      constraintCalculator.setCaptureRegion(captureRegion);
-      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
+      constraintCalculator.setReachableCaptureRegion(captureRegion);
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose.getPosition());
 
       assertTrue(smallRegionPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
 
@@ -138,11 +143,13 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       captureRegion.addVertex(stepLength + 0.05 + 0.05, 0.5 * stanceWidth - 0.05 - 0.2);
       captureRegion.update();
 
-      constraintCalculator.setCaptureRegion(captureRegion);
+      constraintCalculator.setReachableCaptureRegion(captureRegion);
 
-      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose, null);
+      constraintCalculator.updatePlanarRegionConstraintForStep(stepPose.getPosition());
 
-      GeometryPolygonTestTools.assertConcavePolygon2DEquals(groundPlane.getConcaveHull(), constraintCalculator.getConstraintRegion().getConcaveHull(), 1e-8);
+      ConcavePolygon2D concaveHullExpected = new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(groundPlane.getConcaveHull()));
+      ConcavePolygon2D concaveHull = new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(constraintCalculator.getConstraintRegion().getConcaveHull()));
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(concaveHullExpected, concaveHull, 1e-8);
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
    }
 }

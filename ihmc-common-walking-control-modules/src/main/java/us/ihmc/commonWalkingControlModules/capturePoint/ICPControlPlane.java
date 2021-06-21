@@ -144,7 +144,7 @@ public class ICPControlPlane
 
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      projectVerticesOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+      projectVerticesOntoControlPlane(planarRegion.getConvexHull().getPolygonVerticesView(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
    public void projectPlanarRegionConvexHullInWorldOntoControlPlane(ConvexPolygon2DReadOnly convexHullInWorld, PlanarRegion heightProvider,
@@ -166,14 +166,14 @@ public class ICPControlPlane
       convexPolygonInControlPlaneToPack.update();
    }
 
-   public void projectVerticesOntoControlPlane(Vertex2DSupplier convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
+   public void projectVerticesOntoControlPlane(List<? extends Point2DReadOnly> convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
                                                ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
       vertexInWorldProvider.clear();
-      for (int i = 0; i < convexHullInLocal.getNumberOfVertices(); i++)
+      for (int i = 0; i < convexHullInLocal.size(); i++)
       {
          Point3D vertexInWorld = vertexInWorldProvider.add();
-         vertexInWorld.set(convexHullInLocal.getVertex(i), 0.0);
+         vertexInWorld.set(convexHullInLocal.get(i), 0.0);
          transformFromLocalToWorld.transform(vertexInWorld);
       }
 

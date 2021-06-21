@@ -308,7 +308,7 @@ public class PlanarRegionConstraintProvider
          footstepPolygon.update();
       }
       scaler.scaleConvexPolygonToContainInteriorPolygon(activePlanarRegion.getConvexHull(), footstepPolygon, distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
+      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon.getPolygonVerticesView(), activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
 
       yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
@@ -351,7 +351,7 @@ public class PlanarRegionConstraintProvider
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
+      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon.getPolygonVerticesView(), activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
       double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
@@ -387,7 +387,7 @@ public class PlanarRegionConstraintProvider
          PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
 
          scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-         icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
+         icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon.getPolygonVerticesView(), activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
          double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 

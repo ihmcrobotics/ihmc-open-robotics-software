@@ -272,8 +272,6 @@ public abstract class DRCPushRecoveryWalkingTest implements MultiRobotTestInterf
       }
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
-//      YoBoolean enable = (YoBoolean) scs.findVariable("PushRecoveryControlModule", "enablePushRecovery");
-//      enable.set(true);
    }
 
    private void walkForward() throws SimulationExceededMaximumTimeException

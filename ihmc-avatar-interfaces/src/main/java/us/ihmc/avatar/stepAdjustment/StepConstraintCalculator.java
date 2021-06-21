@@ -6,6 +6,7 @@ import java.awt.Color;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import us.ihmc.commonWalkingControlModules.captureRegion.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -22,6 +23,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -40,10 +42,11 @@ public class StepConstraintCalculator
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final DoubleProvider timeProvider;
 
-   private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
+   private final CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider;
    private final ReachabilityConstraintCalculator reachabilityConstraintCalculator;
 
    private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
+   private final FrameConvexPolygon2D reachableCaptureRegion = new FrameConvexPolygon2D();
    private final YoFrameConvexPolygon2D yoReachabilityRegion = new YoFrameConvexPolygon2D("reachabilityPolygon", worldFrame, 10, registry);
 
    private static final double defaultMinimumTimeRemainingForSwitch = 0.05;
@@ -57,6 +60,8 @@ public class StepConstraintCalculator
    private final SideDependentList<FrameConvexPolygon2D> supportPolygons = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
+
+   private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
    private SimpleStep currentStep;
    private StepConstraintRegion stepConstraintRegion = null;
@@ -96,7 +101,7 @@ public class StepConstraintCalculator
       this.soleZUpFrames = soleZUpFrames;
       this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, graphicsListRegistry);
-      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, graphicsListRegistry);
+      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider<>(centerOfMassFrame, gravityZ, StepConstraintRegion::new, registry, graphicsListRegistry);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
                                                                                    footLength,
                                                                                    footWidth,
@@ -206,10 +211,12 @@ public class StepConstraintCalculator
          if (timeRemainingInState.getDoubleValue() < minimumTimeRemainingForSwitch.getDoubleValue())
             return;
 
+         polygonTools.computeIntersectionOfPolygons(yoReachabilityRegion, captureRegionCalculator.getCaptureRegion(), reachableCaptureRegion);
+
          planarRegionDecider.setConstraintRegions(steppableRegions);
          planarRegionDecider.setOmega0(omega);
-         planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
-         planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose(), yoReachabilityRegion);
+         planarRegionDecider.setReachableCaptureRegion(reachableCaptureRegion);
+         planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose().getPosition());
 
          updateReachabilityRegionInControlPlane();
 

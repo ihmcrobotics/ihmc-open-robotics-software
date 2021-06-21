@@ -248,7 +248,13 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       originToPack.set(fromLocalToWorldTransform.getTranslation());
    }
 
-   public ConvexPolygon2DReadOnly getConvexHullInConstraintRegion()
+   @Override
+   public ConvexPolygon2D getConvexHull()
+   {
+      return getConvexHullInConstraintRegion();
+   }
+
+   public ConvexPolygon2D getConvexHullInConstraintRegion()
    {
       return convexHull;
    }
@@ -287,9 +293,9 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       return normal;
    }
 
-   public ConcavePolygon2DReadOnly getConcaveHull()
+   public List<? extends Point2DReadOnly> getConcaveHull()
    {
-      return concaveHull;
+      return concaveHull.getPolygonVerticesView();
    }
 
    public Point2DReadOnly getConcaveHullVertexInRegionFrame(int i)

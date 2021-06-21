@@ -1212,7 +1212,7 @@ public class PlanarRegionTools
       return projectPointToPlanesVertically(pointInWorld, regions, null);
    }
 
-   public static <T extends RegionInWorldInterface> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
+   public static <T extends RegionInWorldInterface<T>> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
    {
       Point3D highestIntersection = null;
 
