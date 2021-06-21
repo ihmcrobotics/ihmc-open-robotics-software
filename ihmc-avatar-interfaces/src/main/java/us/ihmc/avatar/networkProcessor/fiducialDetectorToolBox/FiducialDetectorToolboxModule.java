@@ -28,7 +28,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
                                         PubSubImplementation pubSubImplementation)
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 250, pubSubImplementation);
-      controller = new FiducialDetectorToolboxController(fullRobotModel, target, statusOutputManager, registry);
+      controller = new FiducialDetectorToolboxController(target, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(1.2e+6);
    }
 
