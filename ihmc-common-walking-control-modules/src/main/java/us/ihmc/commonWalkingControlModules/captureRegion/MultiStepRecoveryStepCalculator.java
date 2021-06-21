@@ -238,18 +238,21 @@ public class MultiStepRecoveryStepCalculator
          FramePoint2DBasics recoveryStepLocation = recoveryStepLocations.add();
          FramePoint2DBasics capturePointAtTouchdown = capturePointsAtTouchdown.add();
 
-         if (!reachableCaptureRegion.isEmpty())
+         FrameConvexPolygon2DBasics constrainedCaptureRegion = reachableConstrainedCaptureRegions.add();
+         computeConstrainedCaptureRegion(depthIdx, reachableCaptureRegion, constrainedCaptureRegion);
+
+         if (!constrainedCaptureRegion.isEmpty())
          { // they do intersect
-            FramePoint2DReadOnly centerOfIntersection = reachableCaptureRegion.getCentroid();
+            FramePoint2DReadOnly centerOfIntersection = constrainedCaptureRegion.getCentroid();
 
             computeRecoveryStepAtNominalWidth(swingSide, stancePosition, centerOfIntersection, capturePointAtTouchdown);
 
-            if (!reachableCaptureRegion.isPointInside(capturePointAtTouchdown))
+            if (!constrainedCaptureRegion.isPointInside(capturePointAtTouchdown))
             {
                EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(stancePosition,
                                                                                              centerOfIntersection,
-                                                                                             reachableCaptureRegion.getPolygonVerticesView(),
-                                                                                             reachableCaptureRegion.getNumberOfVertices(),
+                                                                                             constrainedCaptureRegion.getPolygonVerticesView(),
+                                                                                             constrainedCaptureRegion.getNumberOfVertices(),
                                                                                              true,
                                                                                              capturePointAtTouchdown,
                                                                                              pointToThrowAway);
@@ -341,9 +344,10 @@ public class MultiStepRecoveryStepCalculator
    }
 
    private final FrameConvexPolygon2DBasics planarRegionConvexHull = new FrameConvexPolygon2D();
-   private final FrameConvexPolygon2DBasics tempRegion = new FrameConvexPolygon2D();
 
-   private void computeConstrainedCaptureRegion(int stepNumber, FrameConvexPolygon2DReadOnly reachableCaptureRegion, FrameConvexPolygon2DBasics constrainedCaptureRegionToPack)
+   private void computeConstrainedCaptureRegion(int stepNumber,
+                                                FrameConvexPolygon2DReadOnly reachableCaptureRegion,
+                                                FrameConvexPolygon2DBasics constrainedCaptureRegionToPack)
    {
       if (constraintRegionProvider == null || planarRegionDecider == null)
       {

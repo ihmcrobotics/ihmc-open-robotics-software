@@ -24,7 +24,6 @@ public class MultiStepPushRecoveryControlModule
 {
    private static final boolean ENABLE_SQUARE_UP = false;
 
-   private final GlitchFilteredYoBoolean isRobotBackToSafeState;
    private final YoBoolean isICPOutside;
    private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
 
@@ -34,7 +33,6 @@ public class MultiStepPushRecoveryControlModule
 
    private final SideDependentList<YoPlaneContactState> contactStates;
    private final BipedSupportPolygons bipedSupportPolygons;
-   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
    private final  DoubleProvider pushRecoveryTransferDuration;
    private final  DoubleProvider pushRecoveryPreferredSwingDuration;
@@ -60,10 +58,8 @@ public class MultiStepPushRecoveryControlModule
    {
       this.contactStates = contactStates;
       this.bipedSupportPolygons = bipedSupportPolygons;
-      this.soleZUpFrames = soleZUpFrames;
 
       isICPOutside = new YoBoolean("isICPOutside", registry);
-      isRobotBackToSafeState = new GlitchFilteredYoBoolean("isRobotBackToSafeState", registry, 100);
 
       swingSideForDoubleSupportRecovery = new YoEnum<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery.set(null);
@@ -170,7 +166,6 @@ public class MultiStepPushRecoveryControlModule
 
       if (!isICPOutside.getBooleanValue())
       {
-         isRobotBackToSafeState.update(true);
          isRecoveryImpossible.set(false);
 
          if (useRecoverySquareUpStep.getBooleanValue())
@@ -189,7 +184,6 @@ public class MultiStepPushRecoveryControlModule
          return;
       }
 
-      isRobotBackToSafeState.set(false);
       isRecoveryImpossible.set(!computeRecoveryStepLocations(capturePoint2d, omega0));
       swingSideForDoubleSupportRecovery.set(computeBestRecoverySide());
 
