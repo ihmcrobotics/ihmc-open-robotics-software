@@ -15,6 +15,7 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.behaviors.tools.behaviorTree.*;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
@@ -93,12 +94,36 @@ public class ImGuiBehaviorTreePanel
          }
 
          if (repositionNodes)
-            layoutNodes(tree);
+         {
+            if (!applyDefaultNodeLayouts(tree)) //Returns false if no default layout exists
+               layoutNodes(tree);
+         }
       }
 
       NodeEditor.end();
       ImGui.popFont();
       firstRun = false;
+   }
+
+   private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree)
+   {
+      return applyDefaultNodeLayouts(tree, tree);
+   }
+
+   private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree, GDXBehaviorUIInterface root) {
+      boolean out = false;
+      Point2D pos = tree.getTreeNodeInitialPosition();
+      if (pos.getX() != 0 || pos.getY() != 0)
+      {
+         out = true;
+         NodeEditor.setNodePosition(getIndexOfNode(tree, root), pos.getX32(), pos.getY32());
+      }
+
+      for (GDXBehaviorUIInterface child : tree.getUIChildren()) {
+         out |= applyDefaultNodeLayouts(child, root);
+      }
+
+      return out;
    }
 
    private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout) {
