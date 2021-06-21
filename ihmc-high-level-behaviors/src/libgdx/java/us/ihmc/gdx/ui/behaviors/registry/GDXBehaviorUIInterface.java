@@ -32,6 +32,9 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
+   /**
+    * For implementing: please ensure that nodes remain at a fixed size when rendering them - ImGui.dummy() can be used if node space should be reserved for later.
+    */
    public abstract void renderTreeNode();
 
    public abstract void renderInternal();

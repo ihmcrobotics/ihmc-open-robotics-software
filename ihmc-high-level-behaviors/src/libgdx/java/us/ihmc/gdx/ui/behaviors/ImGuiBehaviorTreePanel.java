@@ -39,6 +39,7 @@ public class ImGuiBehaviorTreePanel
    private final HashMap<Integer, ImVec2> nametagSize = new HashMap<>();
    private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
    private final HashMap<Integer, ImVec2> nodeSizeCorrection = new HashMap<>();
+   private final HashMap<Integer, Boolean> nodeSizeHasChanged = new HashMap<>();
 
    private NodeEditorContext context = null;
 
@@ -390,10 +391,18 @@ public class ImGuiBehaviorTreePanel
       {
          nodeSize.put(nodeIndex, new ImVec2(NodeEditor.getNodeSizeX(nodeIndex), NodeEditor.getNodeSizeY(nodeIndex)));
          nodeSizeCorrection.put(nodeIndex, new ImVec2(0, 0));
+         nodeSizeHasChanged.put(nodeIndex, false);
       } else if (!shouldRender && nodeSizeCorrection.get(nodeIndex).x == 0) {
          ImVec2 correction = nodeSizeCorrection.get(nodeIndex);
          correction.x = nodeSize.get(nodeIndex).x - ImGui.getStyle().getItemSpacingX() - 8; //8 is probably not arbitrary?
          correction.y = nodeSize.get(nodeIndex).y - NodeEditor.getNodeSizeY(nodeIndex) - 8;
+      } else {
+         ImVec2 size = nodeSize.get(nodeIndex);
+         if ((NodeEditor.getNodeSizeX(nodeIndex) - size.x  > 0.05f || NodeEditor.getNodeSizeY(nodeIndex) - size.y > 0.05f) && !nodeSizeHasChanged.get(nodeIndex))
+         {
+            nodeSizeHasChanged.put(nodeIndex, true);
+            LogTools.warn("Node size has changed for node " + nodeIndex + " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
+         }
       }
 
       nodeIndex++;
