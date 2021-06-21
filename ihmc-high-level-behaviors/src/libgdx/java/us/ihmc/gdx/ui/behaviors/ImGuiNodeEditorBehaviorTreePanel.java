@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ImGuiBehaviorTreePanel
+public class ImGuiNodeEditorBehaviorTreePanel
 {
    private final String windowName;
 
@@ -45,7 +45,7 @@ public class ImGuiBehaviorTreePanel
     *
     * @param name The name of the window
     */
-   public ImGuiBehaviorTreePanel(String name)
+   public ImGuiNodeEditorBehaviorTreePanel(String name)
    {
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
    }
