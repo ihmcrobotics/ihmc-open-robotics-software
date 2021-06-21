@@ -337,7 +337,7 @@ public class ImGuiBehaviorTreePanel
                ImGui.text("Not yet ticked.");
             }
 
-            node.renderTreeNode();
+            node.renderTreeNodeImGuiWidgets();
          }
       }
 
@@ -381,5 +381,10 @@ public class ImGuiBehaviorTreePanel
    public void dispose()
    {
       NodeEditor.destroyEditor(context);
+   }
+
+   public String getWindowName()
+   {
+      return windowName;
    }
 }
