@@ -20,10 +20,13 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.function.Function;
+
 public class MultiStepPushRecoveryController
 {
    private final MultiStepPushRecoveryModule pushRecoveryModule;
 
+   private final SideDependentList<YoPlaneContactState> contactStates;
    public MultiStepPushRecoveryController(SideDependentList<YoPlaneContactState> contactStates,
                                           BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -32,8 +35,10 @@ public class MultiStepPushRecoveryController
                                           YoRegistry parentRegistry,
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
-      this.pushRecoveryModule = new MultiStepPushRecoveryModule(contactStates,
-                                                                bipedSupportPolygons,
+      this.contactStates = contactStates;
+      this.pushRecoveryModule = new MultiStepPushRecoveryModule(new IsInContactFunction(),
+                                                                bipedSupportPolygons.getSupportPolygonInWorld(),
+                                                                bipedSupportPolygons.getFootPolygonsInWorldFrame(),
                                                                 soleZUpFrames,
                                                                 defaultSupportPolygon,
                                                                 pushRecoveryControllerParameters,
@@ -89,5 +94,16 @@ public class MultiStepPushRecoveryController
    public void updateForDoubleSupport(FramePoint2DReadOnly capturePoint2d, double omega0)
    {
       pushRecoveryModule.updateForDoubleSupport(capturePoint2d, omega0);
+   }
+
+   private class IsInContactFunction implements Function<RobotSide, Boolean>
+   {
+      public Boolean apply(RobotSide robotSide)
+      {
+         if (contactStates.get(robotSide).inContact())
+            return Boolean.TRUE;
+         else
+            return Boolean.FALSE;
+      }
    }
 }

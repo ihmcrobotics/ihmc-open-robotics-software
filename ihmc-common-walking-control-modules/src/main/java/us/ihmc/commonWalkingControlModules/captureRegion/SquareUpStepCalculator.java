@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -17,7 +18,7 @@ public class SquareUpStepCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final BipedSupportPolygons bipedSupportPolygons;
+   private final SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorld;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
    private final FramePoint2D leftToRightFootDistance = new FramePoint2D();
@@ -33,10 +34,12 @@ public class SquareUpStepCalculator
    private final DoubleProvider maxAllowedFinalStepXOffset;
    private final FootstepTiming squareUpStepTiming = new FootstepTiming();
 
-   public SquareUpStepCalculator(BipedSupportPolygons bipedSupportPolygons, SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                 PushRecoveryControllerParameters pushRecoveryControllerParameters, YoRegistry registry)
+   public SquareUpStepCalculator(SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorld,
+                                 SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                 PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                                 YoRegistry registry)
    {
-      this.bipedSupportPolygons = bipedSupportPolygons;
+      this.footPolygonsInWorld = footPolygonsInWorld;
       this.soleZUpFrames = soleZUpFrames;
 
       squareUpPreferredStanceWidth = new DoubleParameter("squareUpPreferredStanceWidth", registry, pushRecoveryControllerParameters.getPreferredStepWidth());
@@ -50,17 +53,17 @@ public class SquareUpStepCalculator
       if(isRobotStanceCloseToPreferred())
          return null;
 
-      if(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).isPointInside(capturePoint2d))
+      if(footPolygonsInWorld.get(RobotSide.LEFT).isPointInside(capturePoint2d))
          return RobotSide.LEFT;
-      else if(bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).isPointInside(capturePoint2d))
+      else if(footPolygonsInWorld.get(RobotSide.RIGHT).isPointInside(capturePoint2d))
          return RobotSide.RIGHT;
       return null;
    }
 
    private boolean isRobotStanceCloseToPreferred()
    {
-      FramePoint2DReadOnly leftFootCentroid = bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.LEFT).getCentroid();
-      FramePoint2DReadOnly rightFootCentroid = bipedSupportPolygons.getFootPolygonInWorldFrame(RobotSide.RIGHT).getCentroid();
+      FramePoint2DReadOnly leftFootCentroid = footPolygonsInWorld.get(RobotSide.LEFT).getCentroid();
+      FramePoint2DReadOnly rightFootCentroid = footPolygonsInWorld.get(RobotSide.RIGHT).getCentroid();
 
       leftToRightFootDistance.setToZero();
       double xDistance = leftFootCentroid.getX() - rightFootCentroid.getX();
