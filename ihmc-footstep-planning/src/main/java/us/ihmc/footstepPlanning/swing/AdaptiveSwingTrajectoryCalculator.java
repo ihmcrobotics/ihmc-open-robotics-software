@@ -63,14 +63,14 @@ public class AdaptiveSwingTrajectoryCalculator
    }
 
    public AdaptiveSwingTrajectoryCalculator(SwingPlannerParametersReadOnly swingPlannerParameters,
-                                            FootstepPlannerParametersReadOnly footstpePlannerParameters,
+                                            FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                             WalkingControllerParameters walkingControllerParameters,
                                             TickAndUpdatable tickAndUpdatable,
                                             YoGraphicsListRegistry graphicsListRegistry,
                                             YoRegistry parentRegistry)
    {
       this.swingPlannerParameters = swingPlannerParameters;
-      this.footstepPlannerParameters = footstpePlannerParameters;
+      this.footstepPlannerParameters = footstepPlannerParameters;
       this.walkingControllerParameters = walkingControllerParameters;
 
       if (tickAndUpdatable != null)
@@ -185,7 +185,7 @@ public class AdaptiveSwingTrajectoryCalculator
       this.planarRegionsList = planarRegionsList;
    }
 
-   public void setSwingParameters(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
+   public void computeSwingParameters(SideDependentList<? extends Pose3DReadOnly> initialStanceFootPoses, FootstepPlan footstepPlan)
    {
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {

@@ -71,7 +71,7 @@ public class AdaptiveSwingTrajectoryLogViewer
       SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
 
       adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(planarRegionsList);
-      adaptiveSwingTrajectoryCalculator.setSwingParameters(initialFootPoses, footstepPlan);
+      adaptiveSwingTrajectoryCalculator.computeSwingParameters(initialFootPoses, footstepPlan);
       scs.cropBuffer();
    }
 
