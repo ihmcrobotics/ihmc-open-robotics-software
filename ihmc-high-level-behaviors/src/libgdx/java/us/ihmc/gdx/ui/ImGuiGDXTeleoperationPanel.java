@@ -380,8 +380,6 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          communicationHelper.publishToController(HumanoidMessageTools.createNeckTrajectoryMessage(3.0, new double[] {jointAngle}));
       }
       ImGui.text("Footstep plan:");
-      ImGui.sameLine();
-      footstepGoal.renderPlaceGoalButton();
       if (footstepPlannerOutput != null)
       {
          ImGui.sameLine();
@@ -390,6 +388,8 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
             walk();
          }
       }
+      ImGui.sameLine();
+      footstepGoal.renderPlaceGoalButton();
 
       ImGui.text("Right hand:");
       ImGui.sameLine();
