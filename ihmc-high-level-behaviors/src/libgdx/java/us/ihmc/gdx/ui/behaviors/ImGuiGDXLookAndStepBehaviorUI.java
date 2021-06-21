@@ -250,7 +250,7 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
          ImGui.text("Rejection reasons:");
          for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
          {
-            if (latestFootstepPlannerRejectionReasons.get(i) != null)
+            if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
                ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
                           + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
             else
