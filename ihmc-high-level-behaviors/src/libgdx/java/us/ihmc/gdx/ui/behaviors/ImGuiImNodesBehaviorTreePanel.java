@@ -79,14 +79,7 @@ public class ImGuiImNodesBehaviorTreePanel
       ImNodes.pushStyleVar(ImNodesStyleVar.PinCircleRadius, 0);
    }
 
-   public void renderAsWindow(GDXBehaviorUIInterface tree)
-   {
-      ImGui.begin(windowName);
-      renderWidgetsOnly(tree);
-      ImGui.end();
-   }
-
-   public void renderWidgetsOnly(GDXBehaviorUIInterface tree)
+   public void renderImGuiWidgets(GDXBehaviorUIInterface tree)
    {
       ImGui.pushFont(ImGuiTools.getNodeFont());
       ImNodes.beginNodeEditor();
@@ -97,7 +90,7 @@ public class ImGuiImNodesBehaviorTreePanel
 
       if (firstRun)
       {
-         Path treeProperties = Paths.get(propertiesDirectory, Integer.toString(tree.generateUID()));
+         Path treeProperties = Paths.get(propertiesDirectory, "tree" + Integer.toString(tree.generateUID()));
 
          if (Files.exists(treeProperties)) {
             layoutNodesFromFile(treeProperties);
@@ -105,7 +98,7 @@ public class ImGuiImNodesBehaviorTreePanel
             if (!applyDefaultNodeLayouts(tree)) //Returns false if no default layout exists
                layoutNodes(tree);
 
-            new File(treeProperties.toAbsolutePath().toString()).mkdirs(); //Make necessary directories
+            new File(treeProperties.toAbsolutePath().getParent().toString()).mkdirs(); //Make necessary directories
             saveLayoutToFile(treeProperties);
          }
       }
@@ -122,7 +115,7 @@ public class ImGuiImNodesBehaviorTreePanel
             Map.Entry<String, JsonNode> entry = it.next();
 
             int id = Integer.parseInt(entry.getKey());
-            String[] pos = entry.getValue().get(id).asText().split(",");
+            String[] pos = entry.getValue().asText().split(",");
             float x = Float.parseFloat(pos[0]);
             float y = Float.parseFloat(pos[1]);
 
