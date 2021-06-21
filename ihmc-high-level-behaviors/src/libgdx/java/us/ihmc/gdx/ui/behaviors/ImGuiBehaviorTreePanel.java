@@ -1,11 +1,10 @@
 package us.ihmc.gdx.ui.behaviors;
 
+import imgui.ImColor;
 import imgui.ImVec2;
-import imgui.extension.nodeditor.NodeEditor;
-import imgui.extension.nodeditor.NodeEditorContext;
-import imgui.extension.nodeditor.flag.NodeEditorPinKind;
-import imgui.extension.nodeditor.flag.NodeEditorStyleColor;
-import imgui.extension.nodeditor.flag.NodeEditorStyleVar;
+import imgui.extension.imnodes.ImNodes;
+import imgui.extension.imnodes.flag.ImNodesColorStyle;
+import imgui.extension.imnodes.flag.ImNodesStyleVar;
 import imgui.internal.ImGui;
 import org.abego.treelayout.Configuration;
 import org.abego.treelayout.NodeExtentProvider;
@@ -36,12 +35,8 @@ public class ImGuiBehaviorTreePanel
    private boolean firstRun = true;
    private final HashMap<Integer, ImGuiMovingPlot> tickPlots = new HashMap<>();
 
-   private final HashMap<Integer, ImVec2> nametagSize = new HashMap<>();
    private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
-   private final HashMap<Integer, ImVec2> nodeSizeCorrection = new HashMap<>();
    private final HashMap<Integer, Boolean> nodeSizeHasChanged = new HashMap<>();
-
-   private NodeEditorContext context = null;
 
    /***
     * Note that create() and dispose() should be called for creating and destroying the context.
@@ -53,18 +48,18 @@ public class ImGuiBehaviorTreePanel
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
    }
 
-   private void resetNodeIndex(GDXBehaviorUIInterface tree) {
+   private void resetNodeIndex(GDXBehaviorUIInterface tree)
+   {
       nodeIndex = tree.generateUID();
    }
 
    public void create()
    {
-      context = NodeEditor.createEditor();
-      NodeEditor.setCurrentEditor(context);
+      ImNodes.createContext();
 
-      NodeEditor.pushStyleColor(NodeEditorStyleColor.Bg, 0.9f, 0.9f, 0.9f, 1);
-      NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBg, 0.8f, 0.8f, 0.8f, 1);
-      NodeEditor.pushStyleVar(NodeEditorStyleVar.NodeBorderWidth, 5);
+      ImNodes.pushColorStyle(ImNodesColorStyle.GridBackground, ImColor.floatToColor(0.9f, 0.9f, 0.9f));
+      ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackground, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
+      ImNodes.pushStyleVar(ImNodesStyleVar.NodeBorderThickness, 5);
    }
 
    public void renderAsWindow(GDXBehaviorUIInterface tree)
@@ -76,9 +71,8 @@ public class ImGuiBehaviorTreePanel
 
    public void renderWidgetsOnly(GDXBehaviorUIInterface tree)
    {
-      NodeEditor.setCurrentEditor(context);
       ImGui.pushFont(ImGuiTools.getNodeFont());
-      NodeEditor.begin(windowName);
+      ImNodes.beginNodeEditor();
       resetNodeIndex(tree);
       ArrayList<Pair<Integer, Integer>> links = new ArrayList<>();
       renderNodeAndChildren(tree, -1, links);
@@ -87,8 +81,9 @@ public class ImGuiBehaviorTreePanel
       if (firstRun)
       {
          boolean repositionNodes = true;
-         for (int id : nodeSize.keySet()) {
-            if (NodeEditor.getNodePositionX(id) != 0.0f || NodeEditor.getNodePositionY(id) != 0.0f)
+         for (int id : nodeSize.keySet())
+         {
+            if (ImNodes.getNodeGridSpacePosX(id) != 0.0f || ImNodes.getNodeGridSpacePosY(id) != 0.0f)
             {
                repositionNodes = false;
                break;
@@ -102,7 +97,7 @@ public class ImGuiBehaviorTreePanel
          }
       }
 
-      NodeEditor.end();
+      ImNodes.endNodeEditor();
       ImGui.popFont();
       firstRun = false;
    }
@@ -112,37 +107,44 @@ public class ImGuiBehaviorTreePanel
       return applyDefaultNodeLayouts(tree, tree);
    }
 
-   private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree, GDXBehaviorUIInterface root) {
+   private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree, GDXBehaviorUIInterface root)
+   {
       boolean out = false;
       Point2D pos = tree.getTreeNodeInitialPosition();
       if (pos.getX() != 0 || pos.getY() != 0)
       {
          out = true;
-         NodeEditor.setNodePosition(getIndexOfNode(tree, root), pos.getX32(), pos.getY32());
+         ImNodes.setNodeGridSpacePos(getIndexOfNode(tree, root), pos.getX32(), pos.getY32());
       }
 
-      for (GDXBehaviorUIInterface child : tree.getUIChildren()) {
+      for (GDXBehaviorUIInterface child : tree.getUIChildren())
+      {
          out |= applyDefaultNodeLayouts(child, root);
       }
 
       return out;
    }
 
-   private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout) {
+   private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout)
+   {
       if (tree == null)
          return;
 
-      for (GDXBehaviorUIInterface child : tree.getUIChildren()) {
+      for (GDXBehaviorUIInterface child : tree.getUIChildren())
+      {
          layout.addChild(tree, child);
          constructAbegoTree(child, layout);
       }
    }
 
-   private int getIndexOfNodeInternal(GDXBehaviorUIInterface node, GDXBehaviorUIInterface root) {
+   private int getIndexOfNodeInternal(GDXBehaviorUIInterface node, GDXBehaviorUIInterface root)
+   {
       if (root.equals(node))
          return nodeIndex;
-      else {
-         for (GDXBehaviorUIInterface child : root.getUIChildren()) {
+      else
+      {
+         for (GDXBehaviorUIInterface child : root.getUIChildren())
+         {
             nodeIndex++;
             int val = getIndexOfNodeInternal(node, child);
 
@@ -154,7 +156,8 @@ public class ImGuiBehaviorTreePanel
       return -1;
    }
 
-   private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree) {
+   private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree)
+   {
       resetNodeIndex(tree);
       return getIndexOfNodeInternal(node, tree);
    }
@@ -208,11 +211,12 @@ public class ImGuiBehaviorTreePanel
       });
 
       Map<GDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
-      for (GDXBehaviorUIInterface node : map.keySet()) {
+      for (GDXBehaviorUIInterface node : map.keySet())
+      {
          int index = getIndexOfNode(node, tree);
          Rectangle2D.Double pos = map.get(node);
 
-         NodeEditor.setNodePosition(index, (float)pos.x, (float)pos.y);
+         ImNodes.setNodeGridSpacePos(index, (float) pos.x, (float) pos.y);
       }
    }
 
@@ -220,7 +224,7 @@ public class ImGuiBehaviorTreePanel
    {
       for (Pair<Integer, Integer> p : links)
       {
-         NodeEditor.link(linkIndex++, p.getFirst(), p.getSecond(), 0, 0, 0, 1, 2);
+         ImNodes.link(linkIndex++, p.getFirst(), p.getSecond());
       }
    }
 
@@ -231,20 +235,25 @@ public class ImGuiBehaviorTreePanel
       timeSinceLastTick = System.currentTimeMillis() - node.getLastTickMillis();
       boolean isTickRecent = timeSinceLastTick < 5000;
 
+      int color;
       if (node.getPreviousStatus() == BehaviorTreeNodeStatus.SUCCESS && isTickRecent)
       {
-         NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBorder, 0.19607843f, 0.658823529412f, 0.321568627451f, 1);
+         color = ImColor.floatToColor(0.19607843f, 0.658823529412f, 0.321568627451f);
       }
       else if (node.getPreviousStatus() == BehaviorTreeNodeStatus.FAILURE && isTickRecent)
       {
-         NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBorder, 0.658823529412f, 0.19607843f, 0.19607843f, 1);
+         color = ImColor.floatToColor(0.658823529412f, 0.19607843f, 0.19607843f);
       }
       else
       {
-         NodeEditor.pushStyleColor(NodeEditorStyleColor.NodeBorder, 0.19607843f, 0.321568627451f, 0.921568627451f, 1);
+         color = ImColor.floatToColor(0.19607843f, 0.321568627451f, 0.921568627451f);
       }
 
-      NodeEditor.beginNode(nodeIndex);
+      ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, color);
+      ImNodes.pushColorStyle(ImNodesColorStyle.TitleBarHovered, color);
+      ImNodes.pushColorStyle(ImNodesColorStyle.TitleBarSelected, color);
+
+      ImNodes.beginNode(nodeIndex);
 
       String nodeName;
       String nodeType;
@@ -291,37 +300,15 @@ public class ImGuiBehaviorTreePanel
          nodeType = "[*]";
       }
 
-      if (firstRun)
-      {
-         ImVec2 size = new ImVec2();
-         ImGui.calcTextSize(size, nodeType + " " + nodeName);
-         nametagSize.put(nodeIndex, size);
-      }
-
-      boolean shouldRender = NodeEditor.getCurrentZoom() < 1.5f || firstRun;
-
-      if (shouldRender)
-      {
-         ImGui.textUnformatted(nodeType + " " + nodeName);
-      }
-      else
-      {
-         ImVec2 size = nametagSize.get(nodeIndex);
-         if (size != null)
-         {
-            ImGui.dummy(size.x, size.y);
-         } else {
-            LogTools.warn("No size information exists for node " + nodeIndex + " (" + nodeName + ") - was this node added after tree initialization?");
-         }
-      }
+      ImGui.textUnformatted(nodeType + " " + nodeName);
 
       if (parentPin != -1)
       {
          ImGui.sameLine();
 
-         NodeEditor.beginPin(pinIndex, NodeEditorPinKind.Input);
+         ImNodes.beginInputAttribute(pinIndex);
          ImGui.dummy(1f, 1f);
-         NodeEditor.endPin();
+         ImNodes.endInputAttribute();
 
          links.add(new Pair<>(parentPin, pinIndex++));
       }
@@ -331,9 +318,9 @@ public class ImGuiBehaviorTreePanel
       {
          ImGui.sameLine();
 
-         NodeEditor.beginPin(pinIndex++, NodeEditorPinKind.Output);
+         ImNodes.beginOutputAttribute(pinIndex++);
          ImGui.dummy(1f, 1f);
-         NodeEditor.endPin();
+         ImNodes.endOutputAttribute();
       }
 
       ImGuiMovingPlot tickPlot = tickPlots.get(nodeIndex);
@@ -351,55 +338,37 @@ public class ImGuiBehaviorTreePanel
          boolean tickedRecently = Conversions.millisecondsToSeconds(timeSinceLastTick) < 1.0;
          BehaviorTreeNodeStatus status = node.getPreviousStatus();
          tickPlot.setNextValue(tickedThisFrame && status != null ? (float) (status.ordinal()) : Float.NaN);
-         tickPlot.calculate(status != null && tickedRecently ? status.name() : "", shouldRender);
+         tickPlot.calculate(status != null && tickedRecently ? status.name() : "", true);
 
-         if (shouldRender)
+         if (status != null)
          {
-            if (status != null)
-            {
-               ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
-               ImGui.sameLine();
-               ImGui.text("Last status: " + status.name());
-            }
-            else
-            {
-               ImGui.text("Not yet ticked.");
-            }
-
-            node.renderTreeNode();
+            ImGui.text("Last tick: " + FormattingTools.getFormattedDecimal2D(timeSinceLastTick / 1000.0) + " s ago");
+            ImGui.sameLine();
+            ImGui.text("Last status: " + status.name());
          }
+         else
+         {
+            ImGui.text("Not yet ticked.");
+         }
+
+         node.renderTreeNode();
       }
 
-      if (!shouldRender)
-      {
-         ImVec2 size = nodeSizeCorrection.get(nodeIndex);
-
-         ImGui.pushFont(ImGuiTools.getBigFont());
-
-         ImVec2 textSize = new ImVec2();
-         ImGui.calcTextSize(textSize, nodeName);
-         ImGui.text(nodeName);
-
-         ImGui.popFont();
-
-         ImGui.dummy(size.x, size.y);
-      }
-
-      NodeEditor.endNode();
+      ImNodes.endNode();
 
       if (firstRun)
       {
-         nodeSize.put(nodeIndex, new ImVec2(NodeEditor.getNodeSizeX(nodeIndex), NodeEditor.getNodeSizeY(nodeIndex)));
-         nodeSizeCorrection.put(nodeIndex, new ImVec2(0, 0));
+         ImVec2 size = new ImVec2();
+         ImNodes.getNodeDimensions(nodeIndex, size);
+
+         nodeSize.put(nodeIndex, size);
          nodeSizeHasChanged.put(nodeIndex, false);
-      } else if (!shouldRender && nodeSizeCorrection.get(nodeIndex).x == 0) {
-         ImVec2 correction = nodeSizeCorrection.get(nodeIndex);
-         correction.x = nodeSize.get(nodeIndex).x - ImGui.getStyle().getItemSpacingX() - 8; //8 is probably not arbitrary?
-         correction.y = nodeSize.get(nodeIndex).y - NodeEditor.getNodeSizeY(nodeIndex) - 8;
       } else {
-         ImVec2 size = nodeSize.get(nodeIndex);
-         if ((NodeEditor.getNodeSizeX(nodeIndex) - size.x  > 0.05f || NodeEditor.getNodeSizeY(nodeIndex) - size.y > 0.05f) && !nodeSizeHasChanged.get(nodeIndex))
-         {
+         ImVec2 size = new ImVec2();
+         ImNodes.getNodeDimensions(nodeIndex, size);
+         ImVec2 correct = nodeSize.get(nodeIndex);
+
+         if (size.x - correct.x > 0.5f || size.y - correct.y > 0.5f) {
             nodeSizeHasChanged.put(nodeIndex, true);
             LogTools.warn("Node size has changed for node " + nodeIndex + " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
          }
@@ -407,7 +376,9 @@ public class ImGuiBehaviorTreePanel
 
       nodeIndex++;
 
-      NodeEditor.popStyleColor(1);
+      ImNodes.popColorStyle();
+      ImNodes.popColorStyle();
+      ImNodes.popColorStyle();
 
       for (GDXBehaviorUIInterface child : node.getUIChildren())
       {
@@ -417,6 +388,6 @@ public class ImGuiBehaviorTreePanel
 
    public void dispose()
    {
-      NodeEditor.destroyEditor(context);
+      ImNodes.destroyContext();
    }
 }
