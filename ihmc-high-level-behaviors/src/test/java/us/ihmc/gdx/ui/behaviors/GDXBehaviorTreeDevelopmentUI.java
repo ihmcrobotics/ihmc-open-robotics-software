@@ -137,6 +137,10 @@ public class GDXBehaviorTreeDevelopmentUI
             baseUI.create();
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.getImGuiPanelManager().addPanel("Tree Control", this::renderPanel);
+            baseUI.getImGuiPanelManager().addPanel(treePanel.getWindowName(), () -> {
+               treeGui.syncTree(tree);
+               treePanel.renderImGuiWidgets(treeGui);
+            });
 
             treePanel.create();
          }
@@ -145,9 +149,6 @@ public class GDXBehaviorTreeDevelopmentUI
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
-
-            treeGui.syncTree(tree);
-            treePanel.renderAsWindow(treeGui);
             baseUI.renderEnd();
          }
 
