@@ -74,7 +74,7 @@ public class TestSetHeightBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             
-            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.75, ReferenceFrame.getWorldFrame(), referenceFrames.getMidFeetZUpFrame());
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.8, ReferenceFrame.getWorldFrame(), referenceFrames.getMidFeetZUpFrame());
 
             
             movePelvisBehavior.setInput(message);
