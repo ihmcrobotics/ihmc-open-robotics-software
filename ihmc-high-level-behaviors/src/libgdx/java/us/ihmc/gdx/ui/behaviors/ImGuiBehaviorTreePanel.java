@@ -19,6 +19,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.log.LogTools;
 
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -308,6 +309,8 @@ public class ImGuiBehaviorTreePanel
          if (size != null)
          {
             ImGui.dummy(size.x, size.y);
+         } else {
+            LogTools.warn("No size information exists for node " + nodeIndex + " (" + nodeName + ") - was this node added after tree initialization?");
          }
       }
 
