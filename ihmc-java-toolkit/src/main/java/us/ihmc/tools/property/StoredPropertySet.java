@@ -236,12 +236,18 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load(String fileName)
    {
+      load(fileName, true);
+   }
+
+   @Override
+   public void load(String fileName, boolean crashIfMissingKeys)
+   {
       if (!fileName.startsWith(StringUtils.uncapitalize(classForLoading.getSimpleName())))
          throw new RuntimeException("This filename " + fileName +
                                     " breaks the contract of the StoredPropertySet API. The filename should be the class name + suffix.");
       fileName = fileName.replace(".ini", "");
       updateBackingSaveFile(fileName.substring(StringUtils.uncapitalize(classForLoading.getSimpleName()).length()));
-      load(true);
+      load(crashIfMissingKeys);
    }
 
    public void loadUnsafe()
