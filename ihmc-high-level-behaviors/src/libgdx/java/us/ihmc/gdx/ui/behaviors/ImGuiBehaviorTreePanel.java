@@ -59,6 +59,8 @@ public class ImGuiBehaviorTreePanel
 
       ImNodes.pushColorStyle(ImNodesColorStyle.GridBackground, ImColor.floatToColor(0.9f, 0.9f, 0.9f));
       ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackground, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
+      ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackgroundHovered, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
+      ImNodes.pushColorStyle(ImNodesColorStyle.NodeBackgroundSelected, ImColor.floatToColor(0.8f, 0.8f, 0.8f));
       ImNodes.pushStyleVar(ImNodesStyleVar.NodeBorderThickness, 5);
    }
 
@@ -249,9 +251,7 @@ public class ImGuiBehaviorTreePanel
          color = ImColor.floatToColor(0.19607843f, 0.321568627451f, 0.921568627451f);
       }
 
-      ImNodes.pushColorStyle(ImNodesColorStyle.TitleBar, color);
-      ImNodes.pushColorStyle(ImNodesColorStyle.TitleBarHovered, color);
-      ImNodes.pushColorStyle(ImNodesColorStyle.TitleBarSelected, color);
+      ImNodes.pushColorStyle(ImNodesColorStyle.NodeOutline, color);
 
       ImNodes.beginNode(nodeIndex);
 
@@ -376,8 +376,6 @@ public class ImGuiBehaviorTreePanel
 
       nodeIndex++;
 
-      ImNodes.popColorStyle();
-      ImNodes.popColorStyle();
       ImNodes.popColorStyle();
 
       for (GDXBehaviorUIInterface child : node.getUIChildren())
