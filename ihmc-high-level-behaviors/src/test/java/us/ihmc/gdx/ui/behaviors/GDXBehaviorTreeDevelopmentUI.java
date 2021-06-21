@@ -19,7 +19,7 @@ public class GDXBehaviorTreeDevelopmentUI
 
    private final GDXImGuiBasedUI baseUI;
 
-   private final ImGuiNodeEditorBehaviorTreePanel treePanel;
+   private final ImGuiImNodesBehaviorTreePanel treePanel;
    private final BehaviorTreeControlFlowNode tree;
    private final GDXBehaviorUIInterface treeGui;
 
@@ -107,7 +107,7 @@ public class GDXBehaviorTreeDevelopmentUI
          }
       });
 
-      treePanel = new ImGuiNodeEditorBehaviorTreePanel("Test");
+      treePanel = new ImGuiImNodesBehaviorTreePanel("Test");
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
       GDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
