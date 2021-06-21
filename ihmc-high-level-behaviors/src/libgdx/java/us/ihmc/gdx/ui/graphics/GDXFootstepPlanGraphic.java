@@ -21,6 +21,7 @@ import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
@@ -41,6 +42,7 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
       footstepColors.set(RobotSide.LEFT, new Color(1.0f, 0.0f, 0.0f, 1.0f));
       footstepColors.set(RobotSide.RIGHT, new Color(0.0f, 0.5019608f, 0.0f, 1.0f));
    }
+   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
    private volatile Runnable toRender = null;
 
@@ -48,6 +50,17 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
    private Model lastModel;
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+
+   public GDXFootstepPlanGraphic(SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+         controllerFootGroundContactPoints.get(robotSide).forEach(defaultFoothold::addVertex);
+         defaultFoothold.update();
+         defaultContactPoints.put(robotSide, defaultFoothold);
+      }
+   }
 
    public GDXFootstepPlanGraphic()
    {
@@ -107,6 +120,10 @@ public class GDXFootstepPlanGraphic implements RenderableProvider
             {
                LogTools.error(e.getMessage() + " See https://github.com/ihmcrobotics/euclid/issues/43");
             }
+         }
+         else if (defaultContactPoints.containsKey(minimalFootstep.getSide()))
+         {
+            foothold.set(defaultContactPoints.get(minimalFootstep.getSide()));
          }
          else
          {

@@ -13,7 +13,7 @@ public class Throttler
 
    public boolean run(double period)
    {
-      boolean run = timer.isExpired(period);
+      boolean run = !timer.isRunning(period);
       if (run)
       {
          timer.reset();

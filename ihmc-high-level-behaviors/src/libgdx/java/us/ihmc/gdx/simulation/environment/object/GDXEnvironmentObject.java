@@ -7,26 +7,32 @@ import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.gdx.simulation.environment.GDXModelInstance;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.robotics.referenceFrames.ReferenceFrameMissingTools;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 
 public class GDXEnvironmentObject
 {
+   private static final AtomicInteger INDEX = new AtomicInteger();
    protected Model realisticModel;
-   private final Pose3D pose = new Pose3D();
 
    private GDXModelInstance realisticModelInstance;
    private GDXModelInstance collisionModelInstance;
-   private Vector3D collisionShapeOffset;
+   private RigidBodyTransform collisionShapeOffset;
+   private RigidBodyTransform wholeThingOffset;
    private Sphere3D boundingSphere;
    private Shape3DBasics collisionGeometryObject;
    private Function<Point3DReadOnly, Boolean> isPointInside;
@@ -37,6 +43,14 @@ public class GDXEnvironmentObject
    private final Point3D firstSphereIntersection = new Point3D();
    private final Point3D secondSphereIntersection = new Point3D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
+   private final RigidBodyTransform placementTransform = new RigidBodyTransform();
+   private final ReferenceFrame placementFrame
+         = ReferenceFrameMissingTools.constructFrameWithChangingTransformToParent("placementFrame" + INDEX.getAndIncrement(),
+                                                                                  ReferenceFrame.getWorldFrame(),
+                                                                                  placementTransform);
+   private final FramePose3D placementFramePose = new FramePose3D();
+   private ReferenceFrame realisticModelFrame;
+   private ReferenceFrame collisionModelFrame;
 
    public void create(Model realisticModel)
    {
@@ -45,7 +59,8 @@ public class GDXEnvironmentObject
    }
 
    public void create(Model realisticModel,
-                      Vector3D collisionShapeOffset,
+                      RigidBodyTransform collisionShapeOffset,
+                      RigidBodyTransform wholeThingOffset,
                       Sphere3D boundingSphere,
                       Shape3DBasics collisionGeometryObject,
                       Function<Point3DReadOnly, Boolean> isPointInside,
@@ -53,6 +68,7 @@ public class GDXEnvironmentObject
    {
       this.realisticModel = realisticModel;
       this.collisionShapeOffset = collisionShapeOffset;
+      this.wholeThingOffset = wholeThingOffset;
       this.boundingSphere = boundingSphere;
       this.collisionGeometryObject = collisionGeometryObject;
       this.isPointInside = isPointInside;
@@ -60,6 +76,12 @@ public class GDXEnvironmentObject
       realisticModelInstance = new GDXModelInstance(realisticModel);
       collisionModelInstance = new GDXModelInstance(collisionGraphic);
       originalMaterial = new Material(realisticModelInstance.materials.get(0));
+      realisticModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("realisticModelFrame" + INDEX.getAndIncrement(),
+                                                                                                placementFrame,
+                                                                                                wholeThingOffset);
+      collisionModelFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("collisionModelFrame" + INDEX.getAndIncrement(),
+                                                                                                realisticModelFrame,
+                                                                                                collisionShapeOffset);
    }
 
    /**
@@ -113,7 +135,7 @@ public class GDXEnvironmentObject
       }
    }
 
-   public Vector3D getCollisionShapeOffset()
+   public RigidBodyTransform getCollisionShapeOffset()
    {
       return collisionShapeOffset;
    }
@@ -135,30 +157,44 @@ public class GDXEnvironmentObject
 
    public void set(Point3DReadOnly translation)
    {
-      tempTransform.setToZero();
-      tempTransform.appendTranslation(collisionShapeOffset);
-      tempTransform.appendTranslation(translation);
-      GDXTools.toGDX(translation, getRealisticModelInstance().transform);
-      GDXTools.toGDX(tempTransform, getCollisionModelInstance().transform);
-      getCollisionGeometryObject().getPose().getTranslation().set(tempTransform.getTranslation());
-      boundingSphere.getPosition().set(tempTransform.getTranslation());
+      placementTransform.getTranslation().set(translation);
+      updateRenderablesPoses();
+   }
+
+   public void set(Pose3D pose)
+   {
+      pose.get(placementTransform);
+      updateRenderablesPoses();
    }
 
    public void set(RigidBodyTransform transform)
    {
-      tempTransform.setToZero();
-      tempTransform.appendTranslation(collisionShapeOffset);
-      transform.transform(tempTransform);
-      GDXTools.toGDX(transform, getRealisticModelInstance().transform);
-      GDXTools.toGDX(tempTransform, getCollisionModelInstance().transform);
-      getCollisionGeometryObject().getPose().set(tempTransform);
-      boundingSphere.getPosition().set(tempTransform.getTranslation());
+      placementTransform.set(transform);
+      updateRenderablesPoses();
+   }
+
+   private void updateRenderablesPoses()
+   {
+      placementFrame.update();
+
+      placementFramePose.setFromReferenceFrame(realisticModelFrame);
+      GDXTools.toGDX(placementFramePose, tempTransform, getRealisticModelInstance().transform);
+
+      placementFramePose.setFromReferenceFrame(collisionModelFrame);
+      GDXTools.toGDX(placementFramePose, tempTransform, getCollisionModelInstance().transform);
+      getCollisionGeometryObject().getPose().set(placementFramePose);
+      boundingSphere.getPosition().set(placementFramePose.getPosition());
+   }
+
+   public RigidBodyTransformReadOnly getObjectTransform()
+   {
+      return placementTransform;
    }
 
    public GDXEnvironmentObject duplicate()
    {
       GDXEnvironmentObject duplicate = new GDXEnvironmentObject();
-      duplicate.create(realisticModel, collisionShapeOffset, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
+      duplicate.create(realisticModel, collisionShapeOffset, wholeThingOffset, boundingSphere, collisionGeometryObject, isPointInside, collisionMesh);
       return duplicate;
    }
 
@@ -184,9 +220,13 @@ public class GDXEnvironmentObject
       {
          return new GDXPalletObject();
       }
-      else if (objectClassName.equals(GDXDoorOnlyObject.class.getSimpleName()))
+      else if (objectClassName.equals(GDXStairsObject.class.getSimpleName()))
       {
-         return new GDXDoorOnlyObject();
+         return new GDXStairsObject();
+      }
+      else if (objectClassName.equals(GDXPushHandleRightDoorObject.class.getSimpleName()))
+      {
+         return new GDXPushHandleRightDoorObject();
       }
       else if (objectClassName.equals(GDXDoorFrameObject.class.getSimpleName()))
       {

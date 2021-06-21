@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -16,7 +16,7 @@ public class TraverseStairsSquareUpState implements State
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobotModel;
+   private final ROS2SyncedRobotModel syncedRobotModel;
 
    private static final boolean SEND_PELVIS_AND_CHEST_TRAJECTORIES = false;
 

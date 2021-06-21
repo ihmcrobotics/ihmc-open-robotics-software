@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.partNames.NeckJointName;
@@ -13,7 +13,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
 {
    private volatile PlanarRegionsList map;
 
-   private RemoteSyncedRobotModel syncedRobot;
+   private ROS2SyncedRobotModel syncedRobot;
    private MovingReferenceFrame neckFrame;
    private SimulatedDepthCamera simulatedDepthCamera;
 
@@ -25,7 +25,7 @@ public class MultisenseHeadStereoSimulator implements Supplier<PlanarRegionsList
    {
       this.map = map;
 
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       double verticalFOV = 80.0;
       double horizontalFOV = 80.0;

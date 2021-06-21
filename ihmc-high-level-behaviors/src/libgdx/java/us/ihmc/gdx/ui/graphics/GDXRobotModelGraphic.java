@@ -10,11 +10,13 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationConstructionSetTools.grahics.GraphicsIDRobot;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
+import us.ihmc.tools.thread.Activator;
 
 public class GDXRobotModelGraphic implements RenderableProvider
 {
    private GDXGraphics3DNode robotRootNode;
    private GraphicsRobot graphicsRobot;
+   protected Activator robotLoadedActivator = new Activator();
 
    public void loadRobotModelAndGraphics(RobotDescription robotDescription, RigidBodyBasics rootBody)
    {
@@ -26,6 +28,7 @@ public class GDXRobotModelGraphic implements RenderableProvider
       //      robotRootNode.setMouseTransparent(true);
       addNodesRecursively(graphicsRobot.getRootNode(), robotRootNode);
       robotRootNode.update();
+      robotLoadedActivator.activate();
    }
 
    private void addNodesRecursively(Graphics3DNode graphics3DNode, GDXGraphics3DNode parentNode)
@@ -35,10 +38,22 @@ public class GDXRobotModelGraphic implements RenderableProvider
       graphics3DNode.getChildrenNodes().forEach(child -> addNodesRecursively(child, node));
    }
 
+   public void update()
+   {
+      if (robotLoadedActivator.poll())
+      {
+         graphicsRobot.update();
+         robotRootNode.update();
+      }
+   }
+
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      robotRootNode.getRenderables(renderables, pool);
+      if (robotLoadedActivator.poll())
+      {
+         robotRootNode.getRenderables(renderables, pool);
+      }
    }
 
    public void destroy()

@@ -1,23 +1,22 @@
 package us.ihmc.gdx.ui.yo;
 
-import us.ihmc.behaviors.tools.interfaces.YoVariableClientPublishSubscribeAPI;
+import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
+import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
 import us.ihmc.gdx.imgui.ImGuiPlot;
-
-import java.util.function.DoubleSupplier;
 
 public class ImGuiYoDoublePlot
 {
    private final ImGuiPlot imGuiPlot;
-   private final DoubleSupplier doubleSupplier;
+   private final YoDoubleClientHelper yoDouble;
 
-   public ImGuiYoDoublePlot(String yoVariableName, YoVariableClientPublishSubscribeAPI yoAPI)
+   public ImGuiYoDoublePlot(String yoVariableName, YoVariableClientPublishSubscribeAPI yoAPI, int bufferSize, int width, int height)
    {
-      imGuiPlot = new ImGuiPlot(yoVariableName);
-      doubleSupplier = yoAPI.subscribeViaYoDouble(yoVariableName);
+      imGuiPlot = new ImGuiPlot(yoVariableName, bufferSize, width, height);
+      yoDouble = yoAPI.subscribeToYoDouble(yoVariableName);
    }
 
    public void render()
    {
-      imGuiPlot.render((float) doubleSupplier.getAsDouble());
+      imGuiPlot.render((float) yoDouble.get());
    }
 }

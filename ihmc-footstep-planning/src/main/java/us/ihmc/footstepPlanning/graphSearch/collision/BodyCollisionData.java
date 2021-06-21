@@ -1,5 +1,9 @@
 package us.ihmc.footstepPlanning.graphSearch.collision;
 
+import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.robotics.geometry.PlanarRegion;
+
 public class BodyCollisionData
 {
    /**
@@ -17,6 +21,10 @@ public class BodyCollisionData
     */
    private double distanceOfClosestPointInFront = Double.NaN;
    private double distanceOfClosestPointInBack = Double.NaN;
+
+   private EuclidShape3DCollisionResult collisionResult = null;
+   private final PlanarRegion planarRegion = new PlanarRegion();
+   private final Box3D bodyBox = new Box3D();
 
    public boolean isCollisionDetected()
    {
@@ -56,5 +64,25 @@ public class BodyCollisionData
    public void setDistanceOfClosestPointInBack(double distanceOfClosestPointInBack)
    {
       this.distanceOfClosestPointInBack = distanceOfClosestPointInBack;
+   }
+
+   public EuclidShape3DCollisionResult getCollisionResult()
+   {
+      return collisionResult;
+   }
+
+   public void setCollisionResult(EuclidShape3DCollisionResult collisionResult)
+   {
+      this.collisionResult = collisionResult;
+   }
+
+   public PlanarRegion getPlanarRegion()
+   {
+      return planarRegion;
+   }
+
+   public Box3D getBodyBox()
+   {
+      return bodyBox;
    }
 }

@@ -10,6 +10,7 @@ import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * Supports:

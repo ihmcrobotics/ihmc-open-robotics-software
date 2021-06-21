@@ -43,6 +43,7 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
 
    private final YoDouble ditherAmplitude = new YoDouble("ditherAmplitude", registry);
    private final YoDouble ditherFrequency = new YoDouble("ditherFrequency", registry);
+   private final LinkedHashMap<OneDoFJointBasics, OneDoFJointDitherParameters> jointSpecificDitherParameters = new LinkedHashMap<>();
 
    private final YoDouble maximumTorqueOffset = new YoDouble("maximumTorqueOffset", registry);
 
@@ -98,6 +99,8 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
          desiredPosition.set(wholeBodySetpointParameters.getSetpoint(jointName));
          desiredPositions.put(joint, desiredPosition);
 
+         jointSpecificDitherParameters.put(joint, new OneDoFJointDitherParameters(joint, registry));
+
          if (!hasTorqueOffsetForJoint(joint))
             continue;
 
@@ -112,6 +115,16 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
    {
       ditherAmplitude.set(amplitude);
       ditherFrequency.set(frequency);
+   }
+
+   public void setJointDitherAmplitude(OneDoFJointBasics joint, double amplitude)
+   {
+      jointSpecificDitherParameters.get(joint).setAmplitude(amplitude);
+   }
+   
+   public void setJointDitherPhase(OneDoFJointBasics joint, double phase)
+   {
+      jointSpecificDitherParameters.get(joint).setPhase(phase);
    }
 
    public void attachJointTorqueOffsetProcessor(JointTorqueOffsetProcessor jointTorqueOffsetProcessor)
@@ -204,7 +217,14 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
          }
       }
 
-      double ditherTorque = ditherAmplitude.getDoubleValue() * Math.sin(2.0 * Math.PI * ditherFrequency.getDoubleValue() * timeInCurrentState);
+      OneDoFJointDitherParameters params = jointSpecificDitherParameters.get(oneDoFJoint);
+      double amp = ditherAmplitude.getDoubleValue();
+      if (params.hasAmplitude())
+         amp = params.getAmplitude();
+      double phase = 0.0;
+      if (params.hasPhase())
+         phase = Math.toRadians(params.getPhase());
+      double ditherTorque = amp * Math.sin(2.0 * Math.PI * ditherFrequency.getDoubleValue() * timeInCurrentState + phase);
       oneDoFJoint.setTau(tau + ditherTorque);
    }
 
@@ -395,4 +415,52 @@ public class JointTorqueOffsetEstimatorController implements RobotController, Jo
       return "Controller for estimating the joint torque offsets. It is based on " + DiagnosticsWhenHangingControllerState.class.getSimpleName() + ".";
    }
 
+   private static class OneDoFJointDitherParameters
+   {
+      private final YoDouble amplitude;
+      private final YoDouble phase;
+
+      public OneDoFJointDitherParameters(OneDoFJointBasics joint, YoRegistry registry)
+      {
+         amplitude = new YoDouble(joint.getName() + "DitherAmplitude", registry);
+         phase = new YoDouble(joint.getName() + "DitherPhase", registry);
+         clear();
+      }
+
+      public void clear()
+      {
+         amplitude.setToNaN();
+         phase.setToNaN();
+      }
+
+      public void setAmplitude(double amplitude)
+      {
+         this.amplitude.set(amplitude);
+      }
+
+      public void setPhase(double phase)
+      {
+         this.phase.set(phase);
+      }
+
+      public boolean hasAmplitude()
+      {
+         return !amplitude.isNaN();
+      }
+
+      public double getAmplitude()
+      {
+         return amplitude.getValue();
+      }
+
+      public boolean hasPhase()
+      {
+         return !phase.isNaN();
+      }
+
+      public double getPhase()
+      {
+         return phase.getValue();
+      }
+   }
 }

@@ -7,6 +7,7 @@ import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
@@ -145,6 +146,16 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
+   {
+      return null;
+   }
+
+   default String getStepReachabilityResourceName()
+   {
+      return null;
+   }
+
+   default StepReachabilityData getStepReachabilityData()
    {
       return null;
    }

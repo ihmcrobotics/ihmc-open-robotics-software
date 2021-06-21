@@ -453,4 +453,10 @@ public class AtlasSensorInformation implements HumanoidRobotSensorInformation
    {
       return transformChestToD435DepthCamera;
    }
+
+   @Override
+   public String getHeadCameraName()
+   {
+      return "stereo_camera_left";
+   }
 }

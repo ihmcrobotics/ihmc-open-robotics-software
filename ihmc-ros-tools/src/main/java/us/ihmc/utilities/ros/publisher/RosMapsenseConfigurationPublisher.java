@@ -9,13 +9,16 @@ public class RosMapsenseConfigurationPublisher extends RosTopicPublisher<Mapsens
       super(MapsenseConfiguration._TYPE, false);
    }
 
-   public void publish(byte kernelLevel, byte filterSize, float mergeAngular, float mergeDistance)
+   public void publish(byte kernelLevel, byte filterSize, float mergeAngular, float mergeDistance, float regionGrowthFactor, byte gaussianSize, byte gaussianSigma)
    {
       MapsenseConfiguration message = getMessage();
       message.setKernelLevel(kernelLevel);
       message.setFilterSize(filterSize);
       message.setMergeAngularThreshold(mergeAngular);
       message.setMergeDistanceThreshold(mergeDistance);
+      message.setRegionGrowthFactor(regionGrowthFactor);
+      message.setGaussianSize(gaussianSize);
+      message.setGaussianSigma(gaussianSigma);
       publish(message);
    }
 }

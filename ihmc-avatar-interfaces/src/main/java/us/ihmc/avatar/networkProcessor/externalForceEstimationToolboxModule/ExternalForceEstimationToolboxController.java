@@ -147,7 +147,7 @@ public class ExternalForceEstimationToolboxController extends ToolboxController
       predefinedContactForceSolver = new PredefinedContactExternalForceSolver(joints, updateDT, dynamicMatrixUpdater, graphicsListRegistry, registry);
       contactParticleFilter = new ContactParticleFilter(joints, updateDT, dynamicMatrixUpdater, collidables, graphicsListRegistry, registry);
 
-      // for deubugging
+      // for debugging
       String jointName = "torsoRoll"; Point3D offset = new Point3D(0.137, 0.050, 0.329);
       contactParticleFilter.setActualContactingBodyForDebugging(jointName, offset);
 

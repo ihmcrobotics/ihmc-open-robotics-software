@@ -365,6 +365,12 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    public void wakeUp()
    {
+      if (getToolboxController() == null)
+      {
+         LogTools.info("Toolbox is null!");
+         return;
+      }
+
       if (toolboxTaskScheduled != null)
       {
          if (DEBUG)
@@ -384,7 +390,14 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
    private void reinitialize()
    {
-      getToolboxController().requestInitialize();
+      if (getToolboxController() != null)
+      {
+         getToolboxController().requestInitialize();
+      }
+      else
+      {
+         LogTools.warn("Toolbox is still null");
+      }
    }
 
    public void sleep()

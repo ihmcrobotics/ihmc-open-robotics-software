@@ -16,6 +16,8 @@ import javafx.scene.text.Text;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
+import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOld;
+import us.ihmc.behaviors.demo.BuildingExplorationBehaviorOldAPI;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIDefinition;
 import us.ihmc.behaviors.javafx.JavaFXBehaviorUIInterface;
 import us.ihmc.behaviors.javafx.editors.WalkingGoalPlacementEditor;
@@ -24,8 +26,6 @@ import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI;
-import us.ihmc.behaviors.demo.BuildingExplorationBehavior;
 import us.ihmc.behaviors.demo.BuildingExplorationStateName;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
@@ -37,11 +37,11 @@ import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.ROS2NodeInterface;
 
-import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
+import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorOldAPI.*;
 
 public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 {
-   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(BuildingExplorationBehavior.DEFINITION,
+   public static final JavaFXBehaviorUIDefinition DEFINITION = new JavaFXBehaviorUIDefinition(BuildingExplorationBehaviorOld.DEFINITION,
                                                                                               BuildingExplorationBehaviorUI::new);
 
    @FXML private ComboBox<BuildingExplorationStateName> requestedState;
@@ -76,7 +76,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     controller_msgs.msg.dds.RobotConfigurationData.class,
                                                     ControllerAPIDefinition.getOutputTopic(robotName),
-                                                    s -> getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.RobotConfigurationData,
+                                                    s -> getBehaviorMessager().submitMessage(BuildingExplorationBehaviorOldAPI.RobotConfigurationData,
                                                                                              s.takeNextData()));
 
       lookAndStepVisualizationGroup = new LookAndStepVisualizationGroup(ros2Node, messager);
@@ -128,7 +128,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
          }
          goalGraphic.getPose().setX(newValue);
          goalGraphic.update();
-         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
+         messager.submitMessage(BuildingExplorationBehaviorOldAPI.Goal, new Pose3D(goalGraphic.getPose()));
       });
       goalY.valueProperty().addListener((observable, oldValue, newValue) ->
       {
@@ -139,7 +139,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
          }
          goalGraphic.getPose().setY(newValue);
          goalGraphic.update();
-         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
+         messager.submitMessage(BuildingExplorationBehaviorOldAPI.Goal, new Pose3D(goalGraphic.getPose()));
       });
       goalZ.valueProperty().addListener((observable, oldValue, newValue) ->
       {
@@ -150,7 +150,7 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
          }
          goalGraphic.getPose().setZ(newValue);
          goalGraphic.update();
-         messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, new Pose3D(goalGraphic.getPose()));
+         messager.submitMessage(BuildingExplorationBehaviorOldAPI.Goal, new Pose3D(goalGraphic.getPose()));
       });
 
       goalX.getValueFactory().setValue(14.2);
@@ -182,12 +182,12 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
 
       requestedState.getSelectionModel()
                     .selectedItemProperty()
-                    .addListener((observable, oldState, newState) -> messager.submitMessage(BuildingExplorationBehaviorAPI.RequestedState, newState));
+                    .addListener((observable, oldState, newState) -> messager.submitMessage(BuildingExplorationBehaviorOldAPI.RequestedState, newState));
 
       executeStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.EXECUTE_STEPS);
       replanStairsStepsPublisher = new IHMCROS2Publisher<>(ros2Node, TraverseStairsBehaviorAPI.REPLAN);
 
-      walkingGoalPlacementEditor.init(subScene, placeGoal, placedGoal -> messager.submitMessage(BuildingExplorationBehaviorAPI.Goal, placedGoal));
+      walkingGoalPlacementEditor.init(subScene, placeGoal, placedGoal -> messager.submitMessage(BuildingExplorationBehaviorOldAPI.Goal, placedGoal));
    }
 
    @Override
@@ -206,14 +206,14 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
    public void requestStart()
    {
       LogTools.info("Requesting start");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Start, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorOldAPI.Start, new Object());
    }
 
    @FXML
    public void requestStop()
    {
       LogTools.info("Requesting stop");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.Stop, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorOldAPI.Stop, new Object());
    }
 
    @FXML
@@ -227,14 +227,14 @@ public class BuildingExplorationBehaviorUI extends JavaFXBehaviorUIInterface
    public void ignoreDebris()
    {
       LogTools.info("Ignore debris pressed");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.IgnoreDebris, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorOldAPI.IgnoreDebris, true);
    }
 
    @FXML
    public void confirmDoor()
    {
       LogTools.info("Confirm door pressed");
-      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorAPI.ConfirmDoor, true);
+      getBehaviorMessager().submitMessage(BuildingExplorationBehaviorOldAPI.ConfirmDoor, new Object());
    }
 
    @FXML

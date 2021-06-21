@@ -23,6 +23,40 @@ public class StoredPropertySetTest
    }
 
    @Test
+   public void testLoadingDifferentVersion()
+   {
+      StoredPropertyKeyList keyList = new StoredPropertyKeyList();
+      BooleanStoredPropertyKey keyOne = keyList.addBooleanKey("KeyOne");
+      DoubleStoredPropertyKey keyTwo = keyList.addDoubleKey("KeyTwo");
+      IntegerStoredPropertyKey keyThree = keyList.addIntegerKey("KeyThree");
+
+      StoredPropertySet storedPropertySet = new StoredPropertySet(keyList, StoredPropertySetTest.class, "ihmc-java-toolkit", "src/test/resources");
+      storedPropertySet.load();
+
+      assertEquals(false, storedPropertySet.get(keyOne));
+      assertEquals(0.1, storedPropertySet.get(keyTwo));
+      assertEquals(5, storedPropertySet.get(keyThree));
+
+      storedPropertySet.updateBackingSaveFile("Version2");
+      storedPropertySet.load();
+
+      assertEquals(true, storedPropertySet.get(keyOne));
+      assertEquals(4.3, storedPropertySet.get(keyTwo));
+      assertEquals(1, storedPropertySet.get(keyThree));
+
+      storedPropertySet.set(keyOne, false);
+      storedPropertySet.set(keyTwo, 0.4);
+      storedPropertySet.set(keyThree, 27);
+      storedPropertySet.updateBackingSaveFile("Version3");
+      storedPropertySet.save();
+      storedPropertySet.load();
+
+      assertEquals(false, storedPropertySet.get(keyOne));
+      assertEquals(0.4, storedPropertySet.get(keyTwo));
+      assertEquals(27, storedPropertySet.get(keyThree));
+   }
+
+   @Test
    public void testDefaults()
    {
       StoredPropertyKeyList keyList = new StoredPropertyKeyList();

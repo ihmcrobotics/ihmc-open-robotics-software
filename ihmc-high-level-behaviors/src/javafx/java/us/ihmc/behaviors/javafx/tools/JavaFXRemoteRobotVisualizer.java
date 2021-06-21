@@ -6,7 +6,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.node.JavaFXGraphics3DNode;
@@ -21,7 +21,7 @@ import java.util.concurrent.ExecutorService;
 
 public class JavaFXRemoteRobotVisualizer extends Group
 {
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final ExecutorService executor;
 
    private GraphicsRobot graphicsRobot;
@@ -37,7 +37,7 @@ public class JavaFXRemoteRobotVisualizer extends Group
 
    public JavaFXRemoteRobotVisualizer(DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
 
       executor = ThreadTools.newSingleDaemonThreadExecutor("RobotVisualizerLoading");
       executor.submit(() -> loadRobotModelAndGraphics(robotModel.getRobotDescription()));

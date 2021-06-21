@@ -1,7 +1,7 @@
 package us.ihmc.behaviors.tools.perception;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -12,7 +12,7 @@ public class LightweightCPULidarSimulator implements Supplier<PlanarRegionsList>
 {
    private volatile PlanarRegionsList map;
 
-   private RemoteSyncedRobotModel syncedRobot;
+   private ROS2SyncedRobotModel syncedRobot;
    private MovingReferenceFrame neckFrame;
    private SimulatedLidar simulatedLidar;
 

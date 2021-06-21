@@ -6,13 +6,15 @@ import java.util.concurrent.atomic.AtomicLong;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.log.LogTools;
@@ -27,7 +29,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
-public class StepInPlaceBehavior implements BehaviorInterface
+public class StepInPlaceBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Step in Place", StepInPlaceBehavior::new, API.create());
 
@@ -39,7 +41,7 @@ public class StepInPlaceBehavior implements BehaviorInterface
    private final AtomicLong footstepID = new AtomicLong();
    private final PausablePeriodicThread mainThread;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
 
    public StepInPlaceBehavior(BehaviorHelper helper)
    {
@@ -54,6 +56,12 @@ public class StepInPlaceBehavior implements BehaviorInterface
       helper.subscribeViaCallback(API.Abort, this::doOnAbort);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 1.0, this::stepInPlace);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

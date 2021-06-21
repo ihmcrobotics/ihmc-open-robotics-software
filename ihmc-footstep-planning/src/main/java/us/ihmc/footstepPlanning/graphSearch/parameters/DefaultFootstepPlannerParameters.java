@@ -29,7 +29,7 @@ public class DefaultFootstepPlannerParameters extends StoredPropertySet implemen
       }
       else
       {
-         load();
+         loadUnsafe();
       }
    }
 

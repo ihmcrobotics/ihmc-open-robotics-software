@@ -11,6 +11,8 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -24,7 +26,7 @@ import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.behaviors.tools.footstepPlanner.RemoteFootstepPlannerResult;
 import us.ihmc.behaviors.upDownExploration.UpDownExplorer;
@@ -43,7 +45,7 @@ import us.ihmc.commons.thread.TypedNotification;
 /**
  * Walk through a list of waypoints in order, looping forever.
  */
-public class PatrolBehavior implements BehaviorInterface
+public class PatrolBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Patrol", PatrolBehavior::new, PatrolBehaviorAPI.create());
 
@@ -70,7 +72,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private final BehaviorHelper helper;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private final RemoteREAInterface rea;
 
@@ -171,6 +173,12 @@ public class PatrolBehavior implements BehaviorInterface
    private void patrolThread()   // update the active state
    {
       stateMachine.doActionAndTransition();
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

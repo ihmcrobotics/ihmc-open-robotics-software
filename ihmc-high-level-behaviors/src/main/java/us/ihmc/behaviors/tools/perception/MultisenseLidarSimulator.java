@@ -10,7 +10,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -28,7 +28,7 @@ public class MultisenseLidarSimulator
 {
    public static final double THREAD_PERIOD = UnitConversions.hertzToSeconds(10.0);
 
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final PlanarRegionsList map;
    private final ArrayList<Consumer<ArrayList<Point3DReadOnly>>> scanListeners = new ArrayList<>();
    private final MovingReferenceFrame neckFrame;
@@ -48,7 +48,7 @@ public class MultisenseLidarSimulator
    {
       this.map = map;
       this.scanSize = scanSize;
-      syncedRobot = new RemoteSyncedRobotModel(robotModel, ros2Node);
+      syncedRobot = new ROS2SyncedRobotModel(robotModel, ros2Node);
       neckFrame = syncedRobot.getReferenceFrames().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
       sensorFrame = new PoseReferenceFrame("LidarSensorFrame", neckFrame); // TODO: Add actual Multisense offset
 

@@ -24,6 +24,8 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    void removePropertyChangedListener(StoredPropertyKey key, Runnable onPropertyChanged);
 
+   void updateBackingSaveFile(String versionSuffix);
+
    void load();
 
    void load(String file);
@@ -33,4 +35,14 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
    StoredPropertyKeyListReadOnly getKeyList();
 
    Path findSaveFileDirectory();
+
+   String getCurrentVersionSuffix();
+
+   Class<?> getClassForLoading();
+
+   String getUncapitalizedClassName();
+
+   String getDirectoryNameToAssumePresent();
+
+   String getSubsequentPathToResourceFolder();
 }

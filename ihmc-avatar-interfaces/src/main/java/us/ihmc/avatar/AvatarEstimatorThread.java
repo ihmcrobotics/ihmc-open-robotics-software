@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -17,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.controllers.ControllerStateChangedListener;
 import us.ihmc.robotics.robotController.ModularRobotController;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.ros2.ROS2Topic;
@@ -151,16 +153,18 @@ public class AvatarEstimatorThread extends ModularRobotController
       humanoidRobotContextData.setEstimatorRan(false);
    }
 
-   public void setupHighLevelControllerCallback(String robotName,
-                                                RealtimeROS2Node realtimeROS2Node,
+   public void setupHighLevelControllerCallback(HighLevelHumanoidControllerFactory controllerFactory,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, outputTopic, subscriber ->
+      controllerFactory.attachControllerStateChangedListener(new ControllerStateChangedListener()
       {
-         HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
-         StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));
-         mainStateEstimator.requestStateEstimatorMode(requestedMode);
+         @Override
+         public void controllerStateHasChanged(Enum<?> oldState, Enum<?> newState)
+         {
+            StateEstimatorMode requestedMode = stateModeMap.get(newState);
+            if (requestedMode != null)
+               mainStateEstimator.requestStateEstimatorMode(requestedMode);
+         }
       });
    }
 

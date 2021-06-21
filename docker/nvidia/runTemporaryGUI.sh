@@ -19,4 +19,4 @@ sudo -u root docker run \
     --device /dev/dri:/dev/dri \
     --env DISPLAY \
     --volume /tmp/.X11-unix:/tmp/.X11-unix:rw \
-    ihmcrobotics/nvidia:0.3 bash
+    ihmcrobotics/nvidia:0.4 bash

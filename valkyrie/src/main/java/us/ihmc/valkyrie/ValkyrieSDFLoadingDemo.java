@@ -35,8 +35,8 @@ public class ValkyrieSDFLoadingDemo
    private static final boolean SHOW_ELLIPSOIDS = false;
    private static final boolean SHOW_COORDINATES_AT_JOINT_ORIGIN = false;
    private static final boolean SHOW_INERTIA_ELLIPSOIDS = false;
-   private static final boolean SHOW_KINEMATICS_COLLISIONS = false;
-   private static final boolean SHOW_SIM_COLLISIONS = true;
+   private static final boolean SHOW_KINEMATICS_COLLISIONS = true;
+   private static final boolean SHOW_SIM_COLLISIONS = false;
 
    private SimulationConstructionSet scs;
 

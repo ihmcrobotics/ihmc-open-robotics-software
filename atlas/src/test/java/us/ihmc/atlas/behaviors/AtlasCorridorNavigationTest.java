@@ -6,7 +6,7 @@ import org.junit.jupiter.api.*;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.parameters.AtlasContactPointParameters;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
 import us.ihmc.behaviors.tools.PlanarRegionsMappingModule;
@@ -179,7 +179,7 @@ public class AtlasCorridorNavigationTest
 
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robotInterface = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());
-      RemoteSyncedRobotModel syncedRobot = robotInterface.newSyncedRobot();
+      ROS2SyncedRobotModel syncedRobot = robotInterface.newSyncedRobot();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons();
       //      SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 

@@ -37,8 +37,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 
    public ExternalForceEstimationSimulation()
    {
-//      robot = setupFixedBaseArmRobot();
-      robot = setupMovingBaseRobotArm();
+      robot = setupFixedBaseArmRobot();
+//      robot = setupMovingBaseRobotArm();
 
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 

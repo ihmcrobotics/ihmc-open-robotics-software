@@ -1,6 +1,8 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.*;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
+import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.footstepPlanning.PlannedFootstepReadOnly;
@@ -18,6 +20,7 @@ import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
@@ -31,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepBehavior implements BehaviorInterface
+public class LookAndStepBehavior extends ResettingNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
 
@@ -85,6 +88,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+      LogTools.info("Constructing");
 
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
@@ -125,20 +129,18 @@ public class LookAndStepBehavior implements BehaviorInterface
       lastStanceSide = new AtomicReference<>();
       lastCommandedFootsteps = new SideDependentList<>();
       behaviorStateReference = new BehaviorStateReference<>(State.BODY_PATH_PLANNING, statusLogger, helper::publish);
-      controllerStatusTracker = new ControllerStatusTracker(statusLogger,
-                                                            helper.getROS2Node(),
-                                                            helper.getRobotModel().getSimpleRobotName());
+      controllerStatusTracker = helper.getOrCreateControllerStatusTracker();
       reset.initialize(this);
       helper.subscribeViaCallback(RESET, reset::queueReset);
       helper.subscribeToControllerViaCallback(WalkingControllerFailureStatusMessage.class, message -> reset.queueReset());
 
       bodyPathPlanning.initialize(this);
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathPlanning::acceptMapRegions);
-      helper.subscribeViaCallback(GOAL_INPUT, goal ->
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegionsListMessage ->
       {
-         behaviorStateReference.broadcast();
-         bodyPathPlanning.acceptGoal(goal);
+         bodyPathPlanning.acceptMapRegions(planarRegionsListMessage);
+         footstepPlanning.acceptLidarREARegions(planarRegionsListMessage);
       });
+      helper.subscribeViaCallback(GOAL_INPUT, this::acceptGoal);
 
       bodyPathLocalization.initialize(this);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, bodyPathLocalization::acceptCapturabilityBasedStatus);
@@ -148,6 +150,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       delayFixedPlanarRegionsSubscription = helper.subscribeToPlanarRegionsViaCallback(REGIONS_FOR_FOOTSTEP_PLANNING, footstepPlanning::acceptPlanarRegions);
       delayFixedPlanarRegionsSubscription.subscribe(helper.getROS1Helper());
       delayFixedPlanarRegionsSubscription.setEnabled(true);
+      delayFixedPlanarRegionsSubscription.setPosePublisherEnabled(true);
       helper.subscribeViaCallback(ROS2Tools.getRobotConfigurationDataTopic(helper.getRobotModel().getSimpleRobotName()),
                                   footstepPlanning::acceptRobotConfigurationData);
       helper.subscribeToControllerViaCallback(CapturabilityBasedStatus.class, footstepPlanning::acceptCapturabilityBasedStatus);
@@ -160,6 +163,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       });
 
       stepping.initialize(this);
+
+      reset.queueReset();
    }
 
    void bodyPathPlanInput(List<? extends Pose3DReadOnly> bodyPath)
@@ -169,6 +174,24 @@ public class LookAndStepBehavior implements BehaviorInterface
          behaviorStateReference.set(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          bodyPathLocalization.acceptBodyPathPlan(bodyPath);
       }
+   }
+
+   public void acceptGoal(Pose3DReadOnly goal)
+   {
+      behaviorStateReference.broadcast();
+      bodyPathPlanning.acceptGoal(goal);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.RUNNING;
+   }
+
+   @Override
+   public void reset()
+   {
+      reset.queueReset();
    }
 
    @Override
@@ -192,5 +215,11 @@ public class LookAndStepBehavior implements BehaviorInterface
    public YoRegistry getYoRegistry()
    {
       return yoRegistry;
+   }
+
+   @Override
+   public String getName()
+   {
+      return DEFINITION.getName();
    }
 }

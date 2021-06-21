@@ -62,6 +62,14 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumStepWidth(minStepWidth);
       assertEquals(minStepWidth, parameters.getMinimumStepWidth(), epsilon);
 
+      boolean useReachabilityMap = random.nextBoolean();
+      parameters.setUseReachabilityMap(useReachabilityMap);
+      assertEquals(useReachabilityMap, parameters.getUseStepReachabilityMap());
+
+      double solutionQualityThreshold = RandomNumbers.nextDouble(random, 10.00);
+      parameters.setSolutionQualityThreshold(solutionQualityThreshold);
+      assertEquals(solutionQualityThreshold, parameters.getSolutionQualityThreshold(), epsilon);
+
       double maxStepWidth = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMaximumStepWidth(maxStepWidth);
       assertEquals(maxStepWidth, parameters.getMaximumStepWidth(), epsilon);

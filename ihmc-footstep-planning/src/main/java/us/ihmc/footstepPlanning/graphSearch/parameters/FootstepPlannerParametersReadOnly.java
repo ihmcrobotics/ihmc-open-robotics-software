@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.graphSearch.stepChecking.FootstepPoseChecker;
 import us.ihmc.footstepPlanning.graphSearch.stepChecking.ObstacleBetweenStepsChecker;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -94,6 +93,22 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    ///////////////////////////////////////////////////////////////////////////////////////////////////
    ////////////////////////         Footstep restriction parameters       ////////////////////////////
    ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+   /**
+    * If true, uses IK-based step feasibility check instead of heuristic one
+    */
+   default boolean getUseStepReachabilityMap()
+   {
+      return get(useReachabilityMap);
+   }
+
+   /**
+    * Solution quality threshold when using IK-based feasibility check, only used when {@link #getUseStepReachabilityMap} is true.
+    */
+   default double getSolutionQualityThreshold()
+   {
+      return get(solutionQualityThreshold);
+   }
 
    /**
     * Minimum step width the planner will consider for candidate steps.

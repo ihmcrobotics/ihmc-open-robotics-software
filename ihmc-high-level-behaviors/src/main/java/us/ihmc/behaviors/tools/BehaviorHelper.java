@@ -1,22 +1,37 @@
 package us.ihmc.behaviors.tools;
 
+import com.google.common.base.CaseFormat;
+import controller_msgs.msg.dds.*;
+import org.apache.commons.lang.WordUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.behaviors.BehaviorRegistry;
 import us.ihmc.behaviors.tools.interfaces.MessagerPublishSubscribeAPI;
 import us.ihmc.behaviors.tools.interfaces.StatusLogger;
-import us.ihmc.behaviors.tools.interfaces.YoVariableClientPublishSubscribeAPI;
+import us.ihmc.behaviors.tools.walkingController.ControllerStatusTracker;
+import us.ihmc.behaviors.tools.yo.YoBooleanClientHelper;
+import us.ihmc.behaviors.tools.yo.YoDoubleClientHelper;
+import us.ihmc.behaviors.tools.yo.YoVariableClientPublishSubscribeAPI;
+import us.ihmc.behaviors.tools.yo.YoVariableClientHelper;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
+import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.utilities.ros.ROS1Helper;
 
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.DoubleSupplier;
+import java.util.function.Function;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -55,25 +70,24 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
    private final MessagerHelper messagerHelper = new MessagerHelper(BehaviorRegistry.getActiveRegistry().getMessagerAPI());
    private final YoVariableClientHelper yoVariableClientHelper;
    private StatusLogger statusLogger;
+   private ControllerStatusTracker controllerStatusTracker;
 
    // TODO: Considerations for ROS 1, Messager, and YoVariableClient with reconnecting
-   public BehaviorHelper(DRCRobotModel robotModel, String ros1NodeName, String yoRegistryName, ROS2NodeInterface ros2Node)
+   public BehaviorHelper(String titleCasedBehaviorName, DRCRobotModel robotModel, ROS2NodeInterface ros2Node)
    {
-      this(robotModel, ros1NodeName, yoRegistryName, ros2Node, true);
+      this(titleCasedBehaviorName, robotModel, ros2Node, true);
    }
 
-   public BehaviorHelper(DRCRobotModel robotModel,
-                         String ros1NodeName,
-                         String yoRegistryName,
+   public BehaviorHelper(String titleCasedBehaviorName,
+                         DRCRobotModel robotModel,
                          ROS2NodeInterface ros2Node,
                          boolean commsEnabledToStart)
    {
       super(robotModel, ros2Node, commsEnabledToStart);
+      String ros1NodeName = CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, titleCasedBehaviorName.replace(" ", ""));
+      String yoVariableRegistryName = WordUtils.capitalize(titleCasedBehaviorName).replace(" ", "");
       this.ros1Helper = new ROS1Helper(ros1NodeName);
-
-
-      yoVariableClientHelper = new YoVariableClientHelper(yoRegistryName);
-
+      yoVariableClientHelper = new YoVariableClientHelper(yoVariableRegistryName);
       messagerHelper.setCommunicationCallbacksEnabled(commsEnabledToStart);
    }
 
@@ -84,12 +98,37 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       return statusLogger;
    }
 
+   public ControllerStatusTracker getOrCreateControllerStatusTracker()
+   {
+      if (controllerStatusTracker == null)
+         controllerStatusTracker = new ControllerStatusTracker(getOrCreateStatusLogger(), getROS2Node(), getRobotModel().getSimpleRobotName());
+      return controllerStatusTracker;
+   }
+
    // UI Communication Methods:
 
    @Override
-   public DoubleSupplier subscribeViaYoDouble(String variableName)
+   public DoubleSupplier subscribeToYoVariableDoubleValue(String variableName)
    {
-      return yoVariableClientHelper.subscribeViaYoDouble(variableName);
+      return yoVariableClientHelper.subscribeToYoVariableDoubleValue(variableName);
+   }
+
+   @Override
+   public void publishDoubleValueToYoVariable(String variableName, double value)
+   {
+      yoVariableClientHelper.publishDoubleValueToYoVariable(variableName, value);
+   }
+
+   @Override
+   public YoBooleanClientHelper subscribeToYoBoolean(String variableName)
+   {
+      return yoVariableClientHelper.subscribeToYoBoolean(variableName);
+   }
+
+   @Override
+   public YoDoubleClientHelper subscribeToYoDouble(String variableName)
+   {
+      return yoVariableClientHelper.subscribeToYoDouble(variableName);
    }
 
    @Override
@@ -122,6 +161,13 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       return messagerHelper.subscribeViaReference(topic, initialValue);
    }
 
+   public <T> AtomicReference<T> subscribeViaReference(Function<String, ROS2Topic<T>> topicFunction, T initialValue)
+   {
+      AtomicReference<T> reference = new AtomicReference<>(initialValue);
+      ros2Helper.subscribeViaCallback(topicFunction, reference::set);
+      return reference;
+   }
+
    @Override
    public Notification subscribeTypelessViaNotification(Topic<Object> topic)
    {
@@ -134,6 +180,40 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       TypedNotification<K> typedNotification = new TypedNotification<>();
       subscribeViaCallback(topic, typedNotification::set);
       return typedNotification;
+   }
+
+   public void publishBehaviorControlMode(BehaviorControlModeEnum controlMode)
+   {
+      BehaviorControlModePacket behaviorControlModePacket = new BehaviorControlModePacket();
+      behaviorControlModePacket.setBehaviorControlModeEnumRequest(controlMode.toByte());
+      publish(ROS2Tools.getBehaviorControlModeTopic(getRobotModel().getSimpleRobotName()), behaviorControlModePacket);
+   }
+
+   public void publishBehaviorType(HumanoidBehaviorType type)
+   {
+      HumanoidBehaviorTypePacket humanoidBehaviorTypePacket = new HumanoidBehaviorTypePacket();
+      humanoidBehaviorTypePacket.setHumanoidBehaviorType(type.toByte());
+      publish(ROS2Tools.getBehaviorTypeTopic(getRobotModel().getSimpleRobotName()), humanoidBehaviorTypePacket);
+   }
+
+   public void publishToolboxState(Function<String, ROS2Topic<?>> robotNameConsumer, ToolboxState state)
+   {
+      ToolboxStateMessage toolboxStateMessage = new ToolboxStateMessage();
+      toolboxStateMessage.setRequestedToolboxState(state.toByte());
+      publish(robotNameConsumer.apply(getRobotModel().getSimpleRobotName()).withTypeName(ToolboxStateMessage.class), toolboxStateMessage);
+   }
+
+   public void subscribeToBehaviorStatusViaCallback(Consumer<CurrentBehaviorStatus> callback)
+   {
+      subscribeViaCallback(ROS2Tools.getBehaviorStatusTopic(getRobotModel().getSimpleRobotName()), behaviorStatusPacket ->
+      {
+         callback.accept(CurrentBehaviorStatus.fromByte(behaviorStatusPacket.getCurrentBehaviorStatus()));
+      });
+   }
+
+   public void subscribeToDoorLocationViaCallback(Consumer<DoorLocationPacket> callback)
+   {
+      subscribeViaCallback(ROS2Tools.getDoorLocationTopic(getRobotModel().getSimpleRobotName()), callback);
    }
 
    public void setCommunicationCallbacksEnabled(boolean enabled)
@@ -187,5 +267,6 @@ public class BehaviorHelper extends CommunicationHelper implements MessagerPubli
       super.destroy();
       ros1Helper.destroy();
       messagerHelper.disconnect();
+      yoVariableClientHelper.disconnect();
    }
 }

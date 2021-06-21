@@ -115,4 +115,14 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    {
       return get(swingPlannerType);
    }
+
+   default double getHorizonFromDebrisToStop()
+   {
+      return get(horizonFromDebrisToStop);
+   }
+
+   default boolean getStopForImpassibilities()
+   {
+      return get(stopForImpassibilities);
+   }
 }

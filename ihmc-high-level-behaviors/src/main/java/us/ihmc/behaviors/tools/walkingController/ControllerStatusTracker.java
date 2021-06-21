@@ -9,6 +9,9 @@ import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.ros2.ROS2NodeInterface;
+import us.ihmc.tools.thread.Throttler;
+
+import java.util.ArrayList;
 
 import static us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition.getTopic;
 
@@ -29,6 +32,8 @@ public class ControllerStatusTracker
    private final Timer capturabilityBasedStatusTimer = new Timer();
    private volatile boolean isWalking = false;
    private final Notification finishedWalkingNotification = new Notification();
+   private final ArrayList<Runnable> notWalkingStateAnymoreCallbacks = new ArrayList<>();
+   private Throttler notWalkingStateAnymoreCallbackThrottler = new Throttler();
 
    public ControllerStatusTracker(StatusLogger statusLogger, ROS2NodeInterface ros2Node, String robotName)
    {
@@ -45,6 +50,7 @@ public class ControllerStatusTracker
       new IHMCROS2Callback<>(ros2Node, getTopic(WalkingStatusMessage.class, robotName), this::acceptWalkingStatusMessage);
    }
 
+   // TODO: Make a "snapshot" or "view" that would hold perspective/thread sensitive data?
    public void reset()
    {
       footstepTracker.reset();
@@ -57,12 +63,18 @@ public class ControllerStatusTracker
 
    private void acceptHighLevelStateChangeStatusMessage(HighLevelStateChangeStatusMessage message)
    {
-      currentState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
+      HighLevelControllerName newState = HighLevelControllerName.fromByte(message.getInitialHighLevelControllerName());
+      if (currentState == HighLevelControllerName.WALKING && newState != HighLevelControllerName.WALKING)
+      {
+         triggerNotWalkingStateAnymoreCallbacks();
+      }
+      currentState = newState;
       statusLogger.info("Controller current state: {}", currentState);
    }
 
    private void acceptWalkingControllerFailureStatusMessage(WalkingControllerFailureStatusMessage message)
    {
+      triggerNotWalkingStateAnymoreCallbacks();
       statusLogger.error("Robot is falling! direction: {}", message.getFallingDirection());
    }
 
@@ -77,7 +89,8 @@ public class ControllerStatusTracker
 
    private void acceptControllerCrashNotificationPacket(ControllerCrashNotificationPacket message)
    {
-      statusLogger.error("Controller crashed! {}", () -> message.toString());
+      statusLogger.error("Controller crashed! {}", message::toString);
+      triggerNotWalkingStateAnymoreCallbacks();
    }
 
    private void acceptCapturabilityBasedStatus(CapturabilityBasedStatus message)
@@ -116,6 +129,23 @@ public class ControllerStatusTracker
    public boolean isInWalkingState()
    {
       return capturabilityBasedStatusTimer.isRunning(CAPTURABILITY_BASED_STATUS_EXPIRATION_TIME);
+   }
+
+   private void triggerNotWalkingStateAnymoreCallbacks()
+   {
+      if (notWalkingStateAnymoreCallbackThrottler.run(2.0)) // don't call them more than once every few seconds
+      {
+         statusLogger.info("Calling \"not walking state anymore\" callbacks");
+         for (Runnable notWalkingStateAnymoreCallback : notWalkingStateAnymoreCallbacks)
+         {
+            notWalkingStateAnymoreCallback.run();
+         }
+      }
+   }
+   
+   public void addNotWalkingStateAnymoreCallback(Runnable callback)
+   {
+      notWalkingStateAnymoreCallbacks.add(callback);
    }
 
    public WalkingFootstepTracker getFootstepTracker()

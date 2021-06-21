@@ -3,12 +3,14 @@ package us.ihmc.footstepPlanning;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -88,7 +90,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
            null,
-           PlannerTools.createDefaultFootPolygons());
+           PlannerTools.createDefaultFootPolygons(),
+           null);
    }
 
    public FootstepPlanningModule(String name,
@@ -96,7 +99,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
                                  WalkingControllerParameters walkingControllerParameters,
-                                 SideDependentList<ConvexPolygon2D> footPolygons)
+                                 SideDependentList<ConvexPolygon2D> footPolygons,
+                                 StepReachabilityData stepReachabilityData)
    {
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;
@@ -108,7 +112,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                             registry);
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
-      this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder, swingPlannerParameters, walkingControllerParameters);
+      this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters,
+                                                           footPolygons,
+                                                           bodyPathPlanHolder,
+                                                           swingPlannerParameters,
+                                                           walkingControllerParameters,
+                                                           stepReachabilityData);
       this.variableDescriptors = collectVariableDescriptors(aStarFootstepPlanner.getRegistry());
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));

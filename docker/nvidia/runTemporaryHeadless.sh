@@ -17,4 +17,4 @@ sudo -u root docker run \
     --privileged \
     --gpus all \
     --device /dev/dri:/dev/dri \
-    ihmcrobotics/nvidia:0.3 bash
+    ihmcrobotics/nvidia:0.4 bash

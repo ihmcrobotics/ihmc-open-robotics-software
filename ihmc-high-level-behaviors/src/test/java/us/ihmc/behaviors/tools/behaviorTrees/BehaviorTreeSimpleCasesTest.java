@@ -24,7 +24,7 @@ class BehaviorTreeSimpleCasesTest
          private int numberOfAttempts = 3;
          
          @Override
-         public BehaviorTreeNodeStatus tick()
+         public BehaviorTreeNodeStatus tickInternal()
          {
             output.setValue(output.getValue() + "F");
             
@@ -38,7 +38,7 @@ class BehaviorTreeSimpleCasesTest
       BehaviorTreeAction pickBall = new BehaviorTreeAction()
       {
          @Override
-         public BehaviorTreeNodeStatus tick()
+         public BehaviorTreeNodeStatus tickInternal()
          {
             output.setValue(output.getValue() + "P");
 
@@ -49,7 +49,7 @@ class BehaviorTreeSimpleCasesTest
       BehaviorTreeAction dropBall = new BehaviorTreeAction()
       {
          @Override
-         public BehaviorTreeNodeStatus tick()
+         public BehaviorTreeNodeStatus tickInternal()
          {
             output.setValue(output.getValue() + "D");
 

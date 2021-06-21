@@ -65,17 +65,17 @@ public class ValkyrieExternalForceEstimationSimulation
       //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
 
       // ----- 1DOF Joints ----- //
-//            String endEffectorName = "torsoRoll"; // Chest
+            String endEffectorName = "torsoRoll"; // Chest
 //            String endEffectorName = "rightShoulderRoll"; // Shoulder
-      String endEffectorName = "rightElbowPitch"; // Elbow
+//      String endEffectorName = "rightElbowPitch"; // Elbow
       //      String endEffectorName = "rightForearmYaw"; // Forearm
       //      String endEffectorName = "rightWristRoll"; // Wrist roll
       //      String endEffectorName = "rightWristPitch"; // Wrist pitch
       Joint scsEndEffector = scsRobot.getJoint(endEffectorName);
       RigidBodyBasics endEffector = fullRobotModel.getOneDoFJointByName(endEffectorName).getSuccessor();
 
-      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
-//      Vector3D externalForcePointOffset = new Vector3D(0.3, 0.0, 0.5);
+//      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.0);
+      Vector3D externalForcePointOffset = new Vector3D(0.3, 0.0, 0.5);
 //      Vector3D externalForcePointOffset = new Vector3D(0.0, -0.32, 0.5);
 
       ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", externalForcePointOffset, scsRobot);
