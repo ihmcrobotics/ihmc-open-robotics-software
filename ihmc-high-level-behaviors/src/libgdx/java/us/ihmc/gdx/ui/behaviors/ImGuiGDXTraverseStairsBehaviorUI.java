@@ -20,10 +20,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterK
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParameterKeys;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
-import us.ihmc.gdx.imgui.ImGuiEnumPlot;
-import us.ihmc.gdx.imgui.ImGuiLabelMap;
-import us.ihmc.gdx.imgui.ImGuiMovingPlot;
+import us.ihmc.gdx.imgui.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
@@ -118,7 +115,13 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderTreeNode()
+   public void update()
+   {
+      footstepPlanGraphic.update();
+   }
+
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       goalAffordance.renderPlaceGoalButton();
       if (!currentLifecycleState.isEmpty())
@@ -183,11 +186,16 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
-      footstepPlanGraphic.render();
-      footstepPlannerParameterTuner.render();
-      swingPlannerParameterTuner.render();
+
+   }
+
+   @Override
+   public void addChildPanels(ImGuiPanel parentPanel)
+   {
+      parentPanel.addChild(footstepPlannerParameterTuner);
+      parentPanel.addChild(swingPlannerParameterTuner);
    }
 
    @Override

@@ -104,8 +104,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
 
    public void renderImGuiWindow()
    {
-      ImGui.begin(WINDOW_NAME);
-
       int flags = ImGuiInputTextFlags.None;
       flags += ImGuiInputTextFlags.CallbackResize;
       ImGui.inputText("###loadText", loadString, flags);
@@ -164,8 +162,6 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
       }
 
       modelInput.renderImGuiPanel();
-
-      ImGui.end();
 
 //      pose3DWidget.render();
    }

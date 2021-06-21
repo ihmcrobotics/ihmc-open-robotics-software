@@ -15,7 +15,7 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.tools.GDXTools;
@@ -58,8 +58,8 @@ public class GDXLowLevelDepthSensorSimulator
 
    private Pixmap depthWindowPixmap;
    private Texture depthWindowTexture;
-   private ImGuiVideoWindow depthWindow;
-   private ImGuiVideoWindow colorWindow;
+   private ImGuiVideoPanel depthPanel;
+   private ImGuiVideoPanel colorPanel;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
 
@@ -69,7 +69,6 @@ public class GDXLowLevelDepthSensorSimulator
    private ByteBuffer rawColorByteBuffer;
    private IntBuffer rawColorIntBuffer;
 
-   private boolean depthWindowEnabledOptimization = true;
    private final ImFloat depthPitchTuner = new ImFloat(-0.027f);
 
    public GDXLowLevelDepthSensorSimulator(String sensorName, double fieldOfViewY, int imageWidth, int imageHeight, double minRange, double maxRange)
@@ -111,8 +110,8 @@ public class GDXLowLevelDepthSensorSimulator
       depthWindowPixmap = new Pixmap(imageWidth, imageHeight, Pixmap.Format.RGBA8888);
       depthWindowTexture = new Texture(new PixmapTextureData(depthWindowPixmap, null, false, false));
 
-      depthWindow = new ImGuiVideoWindow(depthWindowName, depthWindowTexture, false);
-      colorWindow = new ImGuiVideoWindow(colorWindowName, frameBuffer.getColorTexture(), true);
+      depthPanel = new ImGuiVideoPanel(depthWindowName, depthWindowTexture, false);
+      colorPanel = new ImGuiVideoPanel(colorWindowName, frameBuffer.getColorTexture(), true);
 
       points = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D32::new);
       colors = new ArrayList<>(imageWidth * imageHeight);
@@ -171,7 +170,7 @@ public class GDXLowLevelDepthSensorSimulator
             eyeDepth += imageY * depthPitchTuner.get();
             eyeDepthMetersBuffer.put(eyeDepth);
 
-            if (depthWindowEnabledOptimization)
+            if (depthPanel.getEnabled().get())
             {
                if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
                   highestValueSeen = eyeDepth;
@@ -207,27 +206,15 @@ public class GDXLowLevelDepthSensorSimulator
          }
       }
 
-      if (depthWindowEnabledOptimization)
+      if (depthPanel.getEnabled().get())
          depthWindowTexture.draw(depthWindowPixmap, 0, 0);
 
-      depthWindowEnabledOptimization = false;
       colorsAreBeingUsed = false;
    }
 
    public void renderTuningSliders()
    {
       ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Depth Pitch Tuner"), depthPitchTuner.getData(), 0.0001f, -0.05f, 0.05f);
-   }
-
-   public void renderImGuiDepthWindow()
-   {
-      depthWindow.render();
-      depthWindowEnabledOptimization = true;
-   }
-
-   public void renderImGuiColorWindow()
-   {
-      colorWindow.render();
    }
 
    public void dispose()
@@ -286,13 +273,13 @@ public class GDXLowLevelDepthSensorSimulator
       return colors;
    }
 
-   public String getDepthWindowName()
+   public ImGuiVideoPanel getDepthPanel()
    {
-      return depthWindowName;
+      return depthPanel;
    }
 
-   public String getColorWindowName()
+   public ImGuiVideoPanel getColorPanel()
    {
-      return colorWindowName;
+      return colorPanel;
    }
 }

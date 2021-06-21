@@ -7,7 +7,6 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.*;
 import imgui.internal.ImGui;
-import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
@@ -40,6 +39,7 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerRejectionReasonReport;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.imgui.ImGuiMovingPlot;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -58,7 +58,7 @@ import us.ihmc.tools.string.StringTools;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class ImGuiGDXTeleoperationPanel implements RenderableProvider
+public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements RenderableProvider
 {
    private static final String WINDOW_NAME = "Teleoperation";
    private static final double MIN_PELVIS_HEIGHT = 0.52;
@@ -87,8 +87,7 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final FootstepPlanningModule footstepPlanner;
    private final ImGuiGDXPoseGoalAffordance footstepGoal = new ImGuiGDXPoseGoalAffordance();
-   private final ImBoolean showFootstepPlanningParametersWindow = new ImBoolean(false);
-   private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Teleoperation");
+   private final ImGuiStoredPropertySetTuner footstepPlanningParametersTuner = new ImGuiStoredPropertySetTuner("Footstep Planner Parameters (Teleoperation)");
    private FootstepPlannerOutput footstepPlannerOutput;
    private final ROS2SyncedRobotModel syncedRobotForFootstepPlanning;
    private final SideDependentList<FramePose3D> startFootPoses = new SideDependentList<>();
@@ -97,6 +96,9 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
 
    public ImGuiGDXTeleoperationPanel(CommunicationHelper communicationHelper)
    {
+      super("Teleoperation");
+      setRenderMethod(this::renderImGuiWidgets);
+      addChild(footstepPlanningParametersTuner);
       this.communicationHelper = communicationHelper;
       String robotName = communicationHelper.getRobotModel().getSimpleRobotName();
       ROS2NodeInterface ros2Node = communicationHelper.getROS2Node();
@@ -246,10 +248,8 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
       footstepPlannerOutput = null;
    }
 
-   public void render()
+   public void renderImGuiWidgets()
    {
-      ImGui.begin(WINDOW_NAME);
-
       if (ImGui.button("Home Pose"))
       {
          double trajectoryTime = 3.5;
@@ -390,7 +390,6 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
             walk();
          }
       }
-      ImGui.checkbox("Tune footstep planning parameters", showFootstepPlanningParametersWindow);
 
       ImGui.text("Right hand:");
       ImGui.sameLine();
@@ -411,15 +410,11 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
          communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE));
       }
+   }
 
-      ImGui.end();
-
-      if (showFootstepPlanningParametersWindow.get())
-      {
-         footstepPlanningParametersTuner.render();
-      }
-
-      footstepPlanGraphic.render();
+   public void update()
+   {
+      footstepPlanGraphic.update();
    }
 
    private boolean imGuiSlider(String label, float[] value)
@@ -446,10 +441,5 @@ public class ImGuiGDXTeleoperationPanel implements RenderableProvider
    {
       footstepPlanGraphic.destroy();
       throttledRobotStateCallback.destroy();
-   }
-
-   public String getWindowName()
-   {
-      return WINDOW_NAME;
    }
 }
