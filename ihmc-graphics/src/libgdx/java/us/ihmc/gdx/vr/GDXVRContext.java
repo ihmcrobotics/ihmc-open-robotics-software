@@ -79,15 +79,19 @@ public class GDXVRContext implements Disposable
    private boolean initialDevicesReported = false;
 
    // ReferenceFrame.getWorldFrame() is Z-up frame
-   // OpenVR is right handed, Thumb: +Y, Index +Z, Middle +X
-   // The default orientation of that frame is such that
-   // your index finger is pointing at your face and your thumb up
-   // IHMC Zup frame is right handed, Thumb +Z, Index +X, Middle +Y
-   // such that your index finger is pointing away from you
-   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(new YawPitchRoll(Math.toRadians(-90.0),
-                                                                                                              Math.toRadians(0.0),
-                                                                                                              Math.toRadians(90.0)),
-                                                                                             new Point3D());
+   // Finger axis definition is right hand, Thumb +Z, Index +X, Middle +Y
+   // The default orientation of the OpenVR frame is such that
+   // your thumb is pointing at your face and your index finger pointing right
+   // The default orientation of the IHMC Zup frame is such that
+   // your thumb is up and your index finger is pointing away from you
+   private final RigidBodyTransformReadOnly openVRYUpToIHMCZUpSpace = new RigidBodyTransform(
+         new YawPitchRoll(          // For this transformation, we start with IHMC ZUp with index forward and thumb up
+            Math.toRadians(-90.0),  // rotating around thumb, index goes forward to right
+            Math.toRadians(0.0),    // no rotation about middle finger
+            Math.toRadians(90.0)    // rotating about index finger, thumb goes up to toward you
+         ),
+         new Point3D()
+   );
    private final RigidBodyTransform tempVRPlayAreaZUp = new RigidBodyTransform();
    /** When the VR player teleports, it adds onto the transform from VR play area frame to world ZUp frame. */
    private final RigidBodyTransform totalTransformFromVRPlayAreaToIHMCZUpWorld = new RigidBodyTransform();
