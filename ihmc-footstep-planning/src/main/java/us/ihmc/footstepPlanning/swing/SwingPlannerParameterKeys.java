@@ -17,12 +17,13 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey waypointProportionShiftForStubAvoidance    = keys.addDoubleKey("Waypoint Proportion Shift For Stub Avoidance", 0.13);
    public static final DoubleStoredPropertyKey collisionBoxGroundClearance                = keys.addDoubleKey("Collision box ground clearance", 0.04);
    public static final DoubleStoredPropertyKey collisionBoxHeight                         = keys.addDoubleKey("Collision box height", 0.25);
-   public static final DoubleStoredPropertyKey midSwingCollisionBoxExtraY                 = keys.addDoubleKey("Mid swing collision box extra y", 0.04);
-   public static final DoubleStoredPropertyKey midSwingCollisionBoxExtraZ                 = keys.addDoubleKey("Mid swing collision box extra z", 0.05);
+   public static final DoubleStoredPropertyKey midSwingCollisionBoxExtraY                 = keys.addDoubleKey("Mid swing collision box extra y", 0.05);
+   public static final DoubleStoredPropertyKey midSwingCollisionBoxExtraZ                 = keys.addDoubleKey("Mid swing collision box extra z", 0.1);
    public static final DoubleStoredPropertyKey xShiftForToeOrHeelCollision                = keys.addDoubleKey("X Shift For Toe Or Heel Collision", 0.06);
    public static final DoubleStoredPropertyKey zShiftForToeOrHeelCollision                = keys.addDoubleKey("Z Shift For Toe Or Heel Collision", 0.05);
-   public static final DoubleStoredPropertyKey zShiftForMidSwingCollision                 = keys.addDoubleKey("Z Shift For Mid Swing Collision", 0.07);
+   public static final DoubleStoredPropertyKey zShiftForMidSwingCollision                 = keys.addDoubleKey("Z Shift For Mid Swing Collision", 0.05);
    public static final DoubleStoredPropertyKey minTranslationToPlanSwing                  = keys.addDoubleKey("Min translation to plan swing", 0.12);
+   public static final DoubleStoredPropertyKey motionCorrelationAlpha                     = keys.addDoubleKey("Motion correlation alpha", 0.6);
 
    // parameters for custom two-waypoint position planner
    public static final BooleanStoredPropertyKey doInitialFastApproximation                = keys.addBooleanKey("Do initial fast approximation", false);

@@ -115,6 +115,11 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.minTranslationToPlanSwing);
    }
 
+   default double getMotionCorrelationAlpha()
+   {
+      return get(SwingPlannerParameterKeys.motionCorrelationAlpha);
+   }
+
    default boolean getDoInitialFastApproximation()
    {
       return get(SwingPlannerParameterKeys.doInitialFastApproximation);
