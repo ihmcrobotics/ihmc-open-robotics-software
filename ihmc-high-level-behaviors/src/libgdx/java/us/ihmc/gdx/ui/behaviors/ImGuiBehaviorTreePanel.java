@@ -1,5 +1,8 @@
 package us.ihmc.gdx.ui.behaviors;
 
+import com.badlogic.gdx.Gdx;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImColor;
 import imgui.ImVec2;
 import imgui.extension.imnodes.ImNodes;
@@ -19,11 +22,18 @@ import us.ihmc.gdx.imgui.ImGuiMovingPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.JSONFileTools;
 
 import java.awt.geom.Rectangle2D;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class ImGuiBehaviorTreePanel
 {
@@ -37,6 +47,8 @@ public class ImGuiBehaviorTreePanel
 
    private final HashMap<Integer, ImVec2> nodeSize = new HashMap<>();
    private final HashMap<Integer, Boolean> nodeSizeHasChanged = new HashMap<>();
+
+   private static final String propertiesDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + ImGuiBehaviorTreePanel.class.getSimpleName() + "Settings" + File.separator;
 
    /***
     * Note that create() and dispose() should be called for creating and destroying the context.
@@ -86,26 +98,49 @@ public class ImGuiBehaviorTreePanel
 
       if (firstRun)
       {
-         boolean repositionNodes = true;
-         for (int id : nodeSize.keySet())
-         {
-            if (ImNodes.getNodeGridSpacePosX(id) != 0.0f || ImNodes.getNodeGridSpacePosY(id) != 0.0f)
-            {
-               repositionNodes = false;
-               break;
-            }
-         }
+         Path treeProperties = Paths.get(propertiesDirectory, Integer.toString(tree.generateUID()));
 
-         if (repositionNodes)
-         {
+         if (Files.exists(treeProperties)) {
+            layoutNodesFromFile(treeProperties);
+         } else {
             if (!applyDefaultNodeLayouts(tree)) //Returns false if no default layout exists
                layoutNodes(tree);
+
+            new File(treeProperties.toAbsolutePath().toString()).mkdirs(); //Make necessary directories
+            saveLayoutToFile(treeProperties);
          }
       }
 
       ImNodes.endNodeEditor();
       ImGui.popFont();
       firstRun = false;
+   }
+
+   private void layoutNodesFromFile(Path file) {
+      JSONFileTools.load(file, jsonNode -> {
+         Iterator<Map.Entry<String, JsonNode>> it = jsonNode.fields();
+         while (it.hasNext()) {
+            Map.Entry<String, JsonNode> entry = it.next();
+
+            int id = Integer.parseInt(entry.getKey());
+            String[] pos = entry.getValue().get(id).asText().split(",");
+            float x = Float.parseFloat(pos[0]);
+            float y = Float.parseFloat(pos[1]);
+
+            ImNodes.setNodeGridSpacePos(id, x, y);
+         }
+      });
+   }
+
+   private void saveLayoutToFile(Path file) {
+      Consumer<ObjectNode> rootConsumer = root ->
+      {
+         for (int node : nodeSize.keySet()) {
+            root.put(Integer.toString(node), ImNodes.getNodeGridSpacePosX(node) + "," + ImNodes.getNodeGridSpacePosY(node));
+         }
+      };
+
+      JSONFileTools.save(file, rootConsumer);
    }
 
    private boolean applyDefaultNodeLayouts(GDXBehaviorUIInterface tree)
@@ -372,7 +407,7 @@ public class ImGuiBehaviorTreePanel
          ImNodes.getNodeDimensions(nodeIndex, size);
          ImVec2 correct = nodeSize.get(nodeIndex);
 
-         if (size.x - correct.x > 0.5f || size.y - correct.y > 0.5f) {
+         if (size.x - correct.x > 0.5f || size.y - correct.y > 0.5f && !nodeSizeHasChanged.get(nodeIndex)) { //query nodeSizeHasChanged to prevent multiple warnings
             nodeSizeHasChanged.put(nodeIndex, true);
             LogTools.warn("Node size has changed for node " + nodeIndex + " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
          }
