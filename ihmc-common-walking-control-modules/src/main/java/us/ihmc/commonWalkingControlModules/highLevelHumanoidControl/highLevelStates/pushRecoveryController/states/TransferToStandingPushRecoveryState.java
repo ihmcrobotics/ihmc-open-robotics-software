@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryController;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -17,7 +17,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToStandingPushRecoveryState extends PushRecoveryState
 {
@@ -34,12 +33,12 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
 
    private final FramePoint2D capturePoint = new FramePoint2D();
 
-   private final MultiStepPushRecoveryControlModule pushRecoveryCalculator;
+   private final MultiStepPushRecoveryController pushRecoveryCalculator;
 
    public TransferToStandingPushRecoveryState(WalkingMessageHandler walkingMessageHandler,
                                               HighLevelHumanoidControllerToolbox controllerToolbox,
                                               PushRecoveryControllerParameters pushRecoveryParameters,
-                                              MultiStepPushRecoveryControlModule pushRecoveryControlModule,
+                                              MultiStepPushRecoveryController pushRecoveryControlModule,
                                               PushRecoveryControlManagerFactory managerFactory,
                                               WalkingFailureDetectionControlModule failureDetectionControlModule,
                                               YoRegistry parentRegistry)

@@ -1,15 +1,15 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions;
 
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.RecoveryTransferState;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 
 public class ContinuePushRecoveryWithNextStepCondition implements StateTransitionCondition
 {
    private final RecoveryTransferState transferState;
-   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+   private final MultiStepPushRecoveryController pushRecoveryControlModule;
 
-   public ContinuePushRecoveryWithNextStepCondition(RecoveryTransferState transferState, MultiStepPushRecoveryControlModule pushRecoveryControlModule)
+   public ContinuePushRecoveryWithNextStepCondition(RecoveryTransferState transferState, MultiStepPushRecoveryController pushRecoveryControlModule)
    {
       this.transferState = transferState;
       this.pushRecoveryControlModule = pushRecoveryControlModule;

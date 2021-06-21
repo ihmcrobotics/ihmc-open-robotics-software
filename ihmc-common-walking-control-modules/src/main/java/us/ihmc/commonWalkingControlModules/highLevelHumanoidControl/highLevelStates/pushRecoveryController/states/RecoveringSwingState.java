@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryController;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
@@ -58,14 +58,14 @@ public class RecoveringSwingState extends PushRecoveryState
    private final SideDependentList<FootSwitchInterface> footSwitches;
    private final FullHumanoidRobotModel fullRobotModel;
 
-   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+   private final MultiStepPushRecoveryController pushRecoveryControlModule;
    private final PushRecoveryBalanceManager balanceManager;
 
    public RecoveringSwingState(PushRecoveryStateEnum stateEnum,
                                WalkingMessageHandler walkingMessageHandler,
                                HighLevelHumanoidControllerToolbox controllerToolbox,
                                PushRecoveryControlManagerFactory managerFactory,
-                               MultiStepPushRecoveryControlModule pushRecoveryControlModule,
+                               MultiStepPushRecoveryController pushRecoveryControlModule,
                                PushRecoveryControllerParameters pushRecoveryParameters,
                                Runnable stepStartedListener,
                                WalkingFailureDetectionControlModule failureDetectionControlModule,

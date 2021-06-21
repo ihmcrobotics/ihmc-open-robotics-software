@@ -4,13 +4,13 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -20,7 +20,7 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
-public class MultiStepPushRecoveryControlModule
+public class MultiStepPushRecoveryModule
 {
    private static final boolean ENABLE_SQUARE_UP = false;
 
@@ -48,13 +48,13 @@ public class MultiStepPushRecoveryControlModule
 
    private final YoBoolean useRecoverySquareUpStep = new YoBoolean("useRecoverySquareUpStep", registry);
 
-   public MultiStepPushRecoveryControlModule(SideDependentList<YoPlaneContactState> contactStates,
-                                             BipedSupportPolygons bipedSupportPolygons,
-                                             SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                             FrameConvexPolygon2DReadOnly defaultSupportPolygon,
-                                             PushRecoveryControllerParameters pushRecoveryControllerParameters,
-                                             YoRegistry parentRegistry,
-                                             YoGraphicsListRegistry graphicsListRegistry)
+   public MultiStepPushRecoveryModule(SideDependentList<YoPlaneContactState> contactStates,
+                                      BipedSupportPolygons bipedSupportPolygons,
+                                      SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                      FrameConvexPolygon2DReadOnly defaultSupportPolygon,
+                                      PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                                      YoRegistry parentRegistry,
+                                      YoGraphicsListRegistry graphicsListRegistry)
    {
       this.contactStates = contactStates;
       this.bipedSupportPolygons = bipedSupportPolygons;

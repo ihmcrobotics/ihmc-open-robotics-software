@@ -5,10 +5,9 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryController;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
@@ -45,7 +44,6 @@ import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.yoVariables.parameters.IntegerParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -54,7 +52,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.*;
-import java.util.function.Function;
 
 public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusProvider
 {
@@ -97,7 +94,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
-   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+   private final MultiStepPushRecoveryController pushRecoveryControlModule;
 
    private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
    private final YoInteger numberOfRecoveryStepsTaken = new YoInteger("numberOfRecoveryStepsTaken", registry);
@@ -123,13 +120,13 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       this.feetManager = managerFactory.getOrCreateFeetManager();
       this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
-      pushRecoveryControlModule = new MultiStepPushRecoveryControlModule(controllerToolbox.getFootContactStates(),
-                                                                         controllerToolbox.getBipedSupportPolygons(),
-                                                                         controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
-                                                                         controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT),
-                                                                         pushRecoveryControllerParameters,
-                                                                         registry,
-                                                                         controllerToolbox.getYoGraphicsListRegistry());
+      pushRecoveryControlModule = new MultiStepPushRecoveryController(controllerToolbox.getFootContactStates(),
+                                                                      controllerToolbox.getBipedSupportPolygons(),
+                                                                      controllerToolbox.getReferenceFrames().getSoleZUpFrames(),
+                                                                      controllerToolbox.getDefaultFootPolygons().get(RobotSide.LEFT),
+                                                                      pushRecoveryControllerParameters,
+                                                                      registry,
+                                                                      controllerToolbox.getYoGraphicsListRegistry());
 
       RigidBodyBasics head = fullRobotModel.getHead();
       RigidBodyBasics chest = fullRobotModel.getChest();

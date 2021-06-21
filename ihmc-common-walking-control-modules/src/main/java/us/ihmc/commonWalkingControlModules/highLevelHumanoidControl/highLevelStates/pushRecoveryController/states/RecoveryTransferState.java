@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryControlModule;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryController;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -43,7 +43,7 @@ public class RecoveryTransferState extends PushRecoveryState
 
    private final FramePoint2D capturePoint = new FramePoint2D();
 
-   private final MultiStepPushRecoveryControlModule pushRecoveryControlModule;
+   private final MultiStepPushRecoveryController pushRecoveryControlModule;
    private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
 
    private final FootstepTiming stepTiming = new FootstepTiming();
@@ -55,7 +55,7 @@ public class RecoveryTransferState extends PushRecoveryState
                                 HighLevelHumanoidControllerToolbox controllerToolbox,
                                 PushRecoveryControllerParameters pushRecoveryParameters,
                                 PushRecoveryControlManagerFactory managerFactory,
-                                MultiStepPushRecoveryControlModule pushRecoveryControlModule,
+                                MultiStepPushRecoveryController pushRecoveryControlModule,
                                 WalkingFailureDetectionControlModule failureDetectionControlModule,
                                 YoRegistry parentRegistry)
    {
