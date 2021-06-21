@@ -16,7 +16,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
-public class MultiStepPushRecoveryCalculator
+public class MultiStepRecoveryStepCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -60,7 +60,7 @@ public class MultiStepPushRecoveryCalculator
 
    private int depth = 3;
 
-   public MultiStepPushRecoveryCalculator(DoubleProvider kinematicsStepRange,
+   public MultiStepRecoveryStepCalculator(DoubleProvider kinematicsStepRange,
                                           DoubleProvider footWidth,
                                           PushRecoveryControllerParameters pushRecoveryParameters,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -69,7 +69,7 @@ public class MultiStepPushRecoveryCalculator
       this(kinematicsStepRange, kinematicsStepRange, footWidth, kinematicsStepRange, pushRecoveryParameters, soleZUpFrames, defaultFootPolygon);
    }
 
-   public MultiStepPushRecoveryCalculator(DoubleProvider maxStepLength,
+   public MultiStepRecoveryStepCalculator(DoubleProvider maxStepLength,
                                           DoubleProvider maxBackwardsStepLength,
                                           DoubleProvider minStepWidth,
                                           DoubleProvider maxStepWidth,
@@ -165,24 +165,6 @@ public class MultiStepPushRecoveryCalculator
    public Footstep getRecoveryStep(int stepIdx)
    {
       return recoveryFootsteps.get(stepIdx);
-   }
-
-   public void computeSquareUpStep(double preferredWidth, RobotSide nextSupportSide, Footstep squareUpStepToPack)
-   {
-      recoveryStepLocations.clear();
-      FramePoint2DBasics squareUpLocation = recoveryStepLocations.add();
-      squareUpLocation.setToZero(soleZUpFrames.get(nextSupportSide));
-      squareUpLocation.changeFrame(worldFrame);
-
-      // set square position at preferred width distance from next support foot
-      squaringStepDirection.setToZero(soleZUpFrames.get(nextSupportSide));
-      squaringStepDirection.add(0.0, nextSupportSide.negateIfLeftSide(preferredWidth));
-      squaringStepDirection.changeFrame(worldFrame);
-      squareUpLocation.add(squaringStepDirection);
-      squareUpPosition.set(squareUpLocation);
-
-      squareUpStepToPack.setPose(squareUpPosition, stancePose.getOrientation());
-      squareUpStepToPack.setRobotSide(nextSupportSide.getOppositeSide());
    }
 
    public FootstepTiming getRecoveryStepTiming(int stepIdx)

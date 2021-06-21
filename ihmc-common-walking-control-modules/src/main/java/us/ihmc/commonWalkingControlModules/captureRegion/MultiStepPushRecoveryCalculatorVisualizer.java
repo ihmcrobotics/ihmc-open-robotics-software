@@ -104,7 +104,7 @@ public class MultiStepPushRecoveryCalculatorVisualizer
       }
    }
 
-   public void visualize(MultiStepPushRecoveryCalculator pushRecoveryCalculator)
+   public void visualize(MultiStepRecoveryStepCalculator pushRecoveryCalculator)
    {
       int depth = Math.min(pushRecoveryCalculator.getNumberOfRecoverySteps(), maxRegionDepth);
 
