@@ -21,6 +21,6 @@ public class ContinuePushRecoveryWithNextStepCondition implements StateTransitio
       if (!transferState.isDone(timeInState))
          return false;
 
-      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport() != null;
+      return pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
    }
 }

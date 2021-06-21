@@ -143,7 +143,7 @@ public class TransferToStandingPushRecoveryState extends PushRecoveryState
       if (!balanceManager.isICPPlanDone())
          return false;
 
-      if (pushRecoveryCalculator.isRobotFallingFromDoubleSupport() != null)
+      if (pushRecoveryCalculator.isRobotFallingFromDoubleSupport())
          return false;
 
       return balanceManager.getNormalizedEllipticICPError() < 1.0;

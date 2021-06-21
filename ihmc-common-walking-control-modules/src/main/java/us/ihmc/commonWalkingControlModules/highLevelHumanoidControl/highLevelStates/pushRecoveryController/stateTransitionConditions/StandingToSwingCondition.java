@@ -20,12 +20,11 @@ public class StandingToSwingCondition implements StateTransitionCondition
    @Override
    public boolean testCondition(double timeInState)
    {
-      RobotSide suggestedSwingSide = pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
-      boolean isRobotFalling = suggestedSwingSide != null;
+      boolean isRobotFalling = pushRecoveryControlModule.isRobotFallingFromDoubleSupport();
 
       if (!isRobotFalling)
          return false;
 
-      return swingSide == suggestedSwingSide;
+      return swingSide == pushRecoveryControlModule.getSwingSideForRecovery();
    }
 }

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculator;
+import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepRecoveryStepCalculator;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculatorVisualizer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
@@ -98,7 +98,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls comTrajectory;
    private final BagOfBalls vrpTrajectory;
 
-   private final MultiStepPushRecoveryCalculator recoveryStepCalculator;
+   private final MultiStepRecoveryStepCalculator recoveryStepCalculator;
    private final MultiStepPushRecoveryCalculatorVisualizer recoveryStepCalculatorVisualizer;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2,
@@ -227,7 +227,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
 
       double footWidth = 0.1;
       double kinematicsStepRange = 1.0;
-      recoveryStepCalculator = new MultiStepPushRecoveryCalculator(() -> kinematicsStepRange,
+      recoveryStepCalculator = new MultiStepRecoveryStepCalculator(() -> kinematicsStepRange,
                                                                    () -> footWidth,
                                                                    new DefaultPushRecoveryControllerParameters(),
                                                                    new SideDependentList<>(leftStepFrame, rightStepFrame),
