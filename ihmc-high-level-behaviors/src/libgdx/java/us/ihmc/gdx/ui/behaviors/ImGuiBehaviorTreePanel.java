@@ -345,15 +345,18 @@ public class ImGuiBehaviorTreePanel
       {
          ImVec2 size = nodeSizeCorrection.get(nodeIndex);
 
-         ImGui.pushFont(ImGuiTools.getBigFont());
+         if (size != null)
+         {
+            ImGui.pushFont(ImGuiTools.getBigFont());
 
-         ImVec2 textSize = new ImVec2();
-         ImGui.calcTextSize(textSize, nodeName);
-         ImGui.text(nodeName);
+            ImVec2 textSize = new ImVec2();
+            ImGui.calcTextSize(textSize, nodeName);
+            ImGui.text(nodeName);
 
-         ImGui.popFont();
+            ImGui.popFont();
 
-         ImGui.dummy(size.x, size.y);
+            ImGui.dummy(size.x, size.y);
+         }
       }
 
       NodeEditor.endNode();
