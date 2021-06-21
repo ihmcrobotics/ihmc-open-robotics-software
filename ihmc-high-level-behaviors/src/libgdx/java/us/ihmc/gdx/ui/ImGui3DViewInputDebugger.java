@@ -38,15 +38,11 @@ public class ImGui3DViewInputDebugger
 
    public void render()
    {
-      ImGui.begin(getWindowName());
-
       screenXPlot.render();
       screenYPlot.render();
       deltaXPlot.render();
       deltaYPlot.render();
       scrolledYPlot.render();
-
-      ImGui.end();
    }
 
    public String getWindowName()

@@ -9,7 +9,7 @@ import org.jboss.netty.buffer.ChannelBuffer;
 import sensor_msgs.Image;
 import us.ihmc.gdx.imgui.ImGuiPlot;
 import us.ihmc.gdx.imgui.ImGuiTools;
-import us.ihmc.gdx.imgui.ImGuiVideoWindow;
+import us.ihmc.gdx.imgui.ImGuiVideoPanel;
 import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
@@ -20,7 +20,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
    private final String topic;
    private Pixmap pixmap;
    private Texture texture;
-   private ImGuiVideoWindow window;
+   private ImGuiVideoPanel window;
    private volatile Image image;
    private float lowestValueSeen = -1.0f;
    private float highestValueSeen = -1.0f;
@@ -84,7 +84,7 @@ public class GDXROS1VideoVisualizer extends ImGuiGDXROS1Visualizer
                pixmap = new Pixmap(image.getWidth(), image.getHeight(), Pixmap.Format.RGBA8888);
                texture = new Texture(new PixmapTextureData(pixmap, null, false, false));
 
-               window = new ImGuiVideoWindow(ImGuiTools.uniqueLabel(this, topic), texture, false);
+               window = new ImGuiVideoPanel(ImGuiTools.uniqueLabel(this, topic), texture, false);
             }
 
             boolean is16BitDepth = image.getEncoding().equals("16UC1");

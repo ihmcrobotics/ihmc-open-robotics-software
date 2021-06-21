@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.*;
 import imgui.type.ImBoolean;
 import imgui.type.ImString;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.behaviors.BehaviorModule;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -56,9 +55,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
    private final AtomicReference<Boolean> impassibilityDetected;
    private final ImBoolean showGraphics = new ImBoolean(true);
-   private final ImBoolean showLookAndStepParametersTuner = new ImBoolean(true);
-   private final ImBoolean showFootstepPlanningParametersTuner = new ImBoolean(true);
-   private final ImBoolean showSwingPlanningParametersTuner = new ImBoolean(true);
    private final ImBoolean stopForImpassibilities = new ImBoolean(true);
    private final ImGuiYoDoublePlot footholdVolumePlot;
 
@@ -163,14 +159,23 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       return nodePosition;
    }
 
-   public void renderAsWindow()
+   @Override
+   public void update()
    {
-      ImGui.begin(getWindowName());
-      renderInternal();
-      ImGui.end();
+      obstacleBoxVisualizer.update();
+
+      if (areGraphicsEnabled())
+      {
+         footstepPlanGraphic.update();
+         commandedFootstepsGraphic.update();
+         startAndGoalFootstepsGraphic.update();
+         planarRegionsGraphic.update();
+         bodyPathPlanGraphic.update();
+      }
    }
 
-   public void renderTreeNode()
+   @Override
+   public void renderTreeNodeImGuiWidgets()
    {
       ImGui.text("Current state:");
       if (!currentState.isEmpty())
@@ -243,10 +248,13 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 //         ImGui.checkbox("Show tuner", showFootstepPlanningParametersTuner);
 
          ImGui.text("Rejection reasons:");
-         for (Pair<Integer, Double> latestFootstepPlannerRejectionReason : latestFootstepPlannerRejectionReasons)
+         for (int i = 0; i < 5; i++) // Variable number of lines was crashing rendering in imgui-node-editor
          {
-            ImGui.text(latestFootstepPlannerRejectionReason.getRight() + "%: "
-                       + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReason.getLeft()].name());
+            if (latestFootstepPlannerRejectionReasons.size() > i && latestFootstepPlannerRejectionReasons.get(i) != null)
+               ImGui.text(latestFootstepPlannerRejectionReasons.get(i).getRight() + "%: "
+                          + BipedalFootstepPlannerNodeRejectionReason.values[latestFootstepPlannerRejectionReasons.get(i).getLeft()].name());
+            else
+               ImGui.text("");
          }
 //         ImGui.separator();
 //      }
@@ -258,25 +266,17 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderInternal()
+   public void renderRegularPanelImGuiWidgets()
    {
-      if (showLookAndStepParametersTuner.get())
-         lookAndStepParameterTuner.render();
-      if (showFootstepPlanningParametersTuner.get())
-         footstepPlannerParameterTuner.render();
-      if (showSwingPlanningParametersTuner.get())
-         swingPlannerParameterTuner.render();
 
-      obstacleBoxVisualizer.render();
+   }
 
-      if (areGraphicsEnabled())
-      {
-         footstepPlanGraphic.render();
-         commandedFootstepsGraphic.render();
-         startAndGoalFootstepsGraphic.render();
-         planarRegionsGraphic.render();
-         bodyPathPlanGraphic.render();
-      }
+   @Override
+   public void addChildPanels(ImGuiPanel parentPanel)
+   {
+      parentPanel.addChild(lookAndStepParameterTuner);
+      parentPanel.addChild(footstepPlannerParameterTuner);
+      parentPanel.addChild(swingPlannerParameterTuner);
    }
 
    private boolean areGraphicsEnabled()

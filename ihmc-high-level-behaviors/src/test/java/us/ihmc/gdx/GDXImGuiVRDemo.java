@@ -43,7 +43,6 @@ public class GDXImGuiVRDemo
 
          private void renderPanel()
          {
-            ImGui.begin("Window");
             if (ImGui.beginTabBar("main"))
             {
                if (ImGui.beginTabItem("Window"))
@@ -61,7 +60,6 @@ public class GDXImGuiVRDemo
                values[i] = i;
             }
             ImGui.plotLines("Histogram", values, 100);
-            ImGui.end();
          }
 
          @Override

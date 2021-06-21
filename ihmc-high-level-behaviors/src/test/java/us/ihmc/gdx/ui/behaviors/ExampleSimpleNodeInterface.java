@@ -18,13 +18,19 @@ public class ExampleSimpleNodeInterface extends GDXBehaviorUIInterface
    }
 
    @Override
-   public void renderTreeNode()
+   public void update()
    {
 
    }
 
    @Override
-   public void renderInternal()
+   public void renderTreeNodeImGuiWidgets()
+   {
+
+   }
+
+   @Override
+   public void renderRegularPanelImGuiWidgets()
    {
       ImGui.dummy(80.0f, 30.0f);
    }
