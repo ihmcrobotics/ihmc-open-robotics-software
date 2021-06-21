@@ -166,4 +166,18 @@ public class AchievableCaptureRegionCalculatorWithDelay
       finalCMPToPack.scaleAdd(exponential * (1.0 - omegaT) - 1.0, initialCMP, finalCMPToPack);
       finalCMPToPack.scale(1.0 / (exponential - 1.0));
    }
+
+   public static void computeCapturePointBeforeTransfer(FramePoint2DReadOnly capturePointAfterTransfer,
+                                                              FramePoint2DReadOnly initialCMP,
+                                                              double omega,
+                                                              double transferDuration,
+                                                              FramePoint2DBasics capturePointAtTouchDown)
+   {
+      capturePointAtTouchDown.setToZero(initialCMP.getReferenceFrame());
+      double omegaT = omega * transferDuration;
+      double exponential = Math.exp(omegaT);
+      capturePointAtTouchDown.setAndScale((exponential - 1.0), capturePointAfterTransfer);
+      capturePointAtTouchDown.scaleAdd(- (exponential * (1.0 - omegaT) - 1.0), initialCMP, capturePointAtTouchDown);
+      capturePointAtTouchDown.scale(1.0 / (omegaT * exponential));
+   }
 }
