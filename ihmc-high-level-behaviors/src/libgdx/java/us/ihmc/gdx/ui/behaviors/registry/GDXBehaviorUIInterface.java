@@ -48,7 +48,10 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    public abstract void destroy();
 
-   public abstract Point2D getTreeNodeInitialPosition();
+   public Point2D getTreeNodeInitialPosition()
+   {
+      return new Point2D(0, 0);
+   }
 
    public void addChild(GDXBehaviorUIInterface child)
    {
