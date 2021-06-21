@@ -25,69 +25,60 @@ import java.util.Random;
 
 public class CollisionFreeSwingCalculatorLogViewer
 {
-//   public CollisionFreeSwingCalculatorLogViewer()
-//   {
-//      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-//      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
-//
-//      if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
-//      {
-//         return;
-//      }
-//
-//      FootstepPlannerLog log = logLoader.getLog();
-//
-//      SwingPlannerParametersBasics swingPlannerParameters = new DefaultSwingPlannerParameters();
-//      swingPlannerParameters.set(log.getSwingPlannerParametersPacket());
-//
-//      swingPlannerParameters.setPercentageLowMaxDisplacement(0.08);
-//      swingPlannerParameters.setMaxDisplacementLow(0.007);
-//      swingPlannerParameters.setExtraSizeHigh(Axis3D.X, 0.24);
-//      swingPlannerParameters.setExtraSizeHigh(Axis3D.Z, 0.18);
-//      swingPlannerParameters.setExtraSizePercentageLow(Axis3D.Z, 0.14);
-//      swingPlannerParameters.setExtraSizePercentageHigh(Axis3D.Z, 0.27);
-//      swingPlannerParameters.setMotionCorrelationAlpha(0.73);
-//
-//      FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
-//      footstepPlannerParameters.set(log.getFootstepParametersPacket());
-//
-//      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
-//      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
-//
-//      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
-//
-//      Graphics3DObject regionsGraphic = new Graphics3DObject();
-//      IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;
-//      Random random = new Random(0xC0FEFE);
-//      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
-//      {
-//         Color color = colorMapper.apply(random.nextInt(200));
-//         Graphics3DObjectTools.addPlanarRegion(regionsGraphic, planarRegionsList.getPlanarRegion(i), 0.01, YoAppearance.RGBColor(color.getRed(), color.getGreen(), color.getBlue()));
-//      }
-//      scs.addStaticLinkGraphics(regionsGraphic);
-//
-//      CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(footstepPlannerParameters,
-//                                                                                      swingPlannerParameters,
-//                                                                                      new ProxyAtlasWalkingControllerParameters(),
-//                                                                                      new SideDependentList<>(ProxyAtlasWalkingControllerParameters::getProxyAtlasFootPolygon),
-//                                                                                      scs,
-//                                                                                      graphicsListRegistry,
-//                                                                                      scs.getRootRegistry());
-//
-//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-//      scs.setGroundVisible(false);
-//      scs.startOnAThread();
-//
-//      FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(log.getStatusPacket().getFootstepDataList());
-//      SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
-//
-//      swingCalculator.setPlanarRegionsList(planarRegionsList);
-//      swingCalculator.computeSwingTrajectories(initialFootPoses, footstepPlan);
-//      scs.cropBuffer();
-//   }
-//
-//   public static void main(String[] args)
-//   {
-//      new CollisionFreeSwingCalculatorLogViewer();
-//   }
+   public CollisionFreeSwingCalculatorLogViewer()
+   {
+      FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
+      FootstepPlannerLogLoader.LoadResult loadResult = logLoader.load();
+
+      if (loadResult != FootstepPlannerLogLoader.LoadResult.LOADED)
+      {
+         return;
+      }
+
+      FootstepPlannerLog log = logLoader.getLog();
+
+      SwingPlannerParametersBasics swingPlannerParameters = new DefaultSwingPlannerParameters();
+      swingPlannerParameters.set(log.getSwingPlannerParametersPacket());
+
+      FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.set(log.getFootstepParametersPacket());
+
+      SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("Dummy"));
+      YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
+
+      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
+
+      Graphics3DObject regionsGraphic = new Graphics3DObject();
+      IdMappedColorFunction colorMapper = IdMappedColorFunction.INSTANCE;
+      Random random = new Random(0xC0FEFE);
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         Color color = colorMapper.apply(random.nextInt(200));
+         Graphics3DObjectTools.addPlanarRegion(regionsGraphic, planarRegionsList.getPlanarRegion(i), 0.01, YoAppearance.RGBColor(color.getRed(), color.getGreen(), color.getBlue()));
+      }
+      scs.addStaticLinkGraphics(regionsGraphic);
+
+      CollisionFreeSwingCalculator swingCalculator = new CollisionFreeSwingCalculator(swingPlannerParameters,
+                                                                                      footstepPlannerParameters,
+                                                                                      new ProxyAtlasWalkingControllerParameters(),
+                                                                                      scs,
+                                                                                      graphicsListRegistry,
+                                                                                      scs.getRootRegistry());
+
+      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+      scs.setGroundVisible(false);
+      scs.startOnAThread();
+
+      FootstepPlan footstepPlan = FootstepDataMessageConverter.convertToFootstepPlan(log.getStatusPacket().getFootstepDataList());
+      SideDependentList<Pose3D> initialFootPoses = new SideDependentList<>(log.getRequestPacket().getStartLeftFootPose(), log.getRequestPacket().getStartRightFootPose());
+
+      swingCalculator.setPlanarRegionsList(planarRegionsList);
+      swingCalculator.computeSwingTrajectories(initialFootPoses, footstepPlan);
+      scs.cropBuffer();
+   }
+
+   public static void main(String[] args)
+   {
+      new CollisionFreeSwingCalculatorLogViewer();
+   }
 }

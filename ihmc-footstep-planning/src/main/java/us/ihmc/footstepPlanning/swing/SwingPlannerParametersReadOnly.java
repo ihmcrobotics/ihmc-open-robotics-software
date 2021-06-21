@@ -107,6 +107,14 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.zShiftForMidSwingCollision);
    }
 
+   /**
+    * Minimum step xy translation to active swing planner
+    */
+   default double getMinTranslationToPlanSwing()
+   {
+      return get(SwingPlannerParameterKeys.minTranslationToPlanSwing);
+   }
+
    default boolean getDoInitialFastApproximation()
    {
       return get(SwingPlannerParameterKeys.doInitialFastApproximation);
