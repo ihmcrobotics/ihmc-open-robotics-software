@@ -1,6 +1,8 @@
 package us.ihmc.avatar.networkProcessor.pushRecoveryToolboxModule;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import controller_msgs.msg.dds.PushRecoveryResultMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
@@ -8,11 +10,15 @@ import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCo
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -43,7 +49,13 @@ public class PushRecoveryToolboxController extends ToolboxController
 
    private final MultiStepPushRecoveryModule pushRecoveryControlModule;
 
+   private final IHMCRealtimeROS2Publisher<PushRecoveryResultMessage> pushRecoveryResultPublisher;
+
+   private final FramePoint2D capturePoint = new FramePoint2D();
+   private double omega;
+
    public PushRecoveryToolboxController(StatusMessageOutputManager statusOutputManager,
+                                        IHMCRealtimeROS2Publisher<PushRecoveryResultMessage> pushRecoveryResultPublisher,
                                         FullHumanoidRobotModel fullRobotModel,
                                         ConvexPolygon2DReadOnly defaultSupportPolygon,
                                         PushRecoveryControllerParameters pushRecoveryControllerParameters,
@@ -51,6 +63,7 @@ public class PushRecoveryToolboxController extends ToolboxController
    {
       super(statusOutputManager, parentRegistry);
 
+      this.pushRecoveryResultPublisher = pushRecoveryResultPublisher;
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
       this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
@@ -91,7 +104,38 @@ public class PushRecoveryToolboxController extends ToolboxController
             isInContactProvider.setCapturabilityBasedStatus(capturabilityBasedStatus);
 
             updateSupportPolygons(capturabilityBasedStatus);
+
+            capturePoint.set(capturabilityBasedStatus.getCapturePoint2d());
+            omega = capturabilityBasedStatus.getOmega();
          }
+
+         pushRecoveryControlModule.updateForDoubleSupport(capturePoint, omega);
+
+         PushRecoveryResultMessage message = new PushRecoveryResultMessage();
+
+         if (pushRecoveryControlModule.isRecoveryImpossible())
+         {
+            message.setIsStepRecoverable(false);
+         }
+         else
+         {
+            message.setIsStepRecoverable(true);
+            for (int i = 0; i < pushRecoveryControlModule.getNumberOfRecoverySteps(); i++)
+            {
+               FootstepTiming recoveryTiming = pushRecoveryControlModule.getRecoveryStepTiming(i);
+               Footstep step = pushRecoveryControlModule.getRecoveryStep(i);
+               FootstepDataMessage stepMessage = message.getRecoverySteps().getFootstepDataList().add();
+
+               stepMessage.setTransferDuration(recoveryTiming.getTransferTime());
+               stepMessage.setSwingDuration(recoveryTiming.getSwingTime());
+               stepMessage.getLocation().set(step.getFootstepPose().getPosition());
+               stepMessage.getOrientation().set(step.getFootstepPose().getOrientation());
+            }
+
+            // todo add the step constraint stuff.
+         }
+
+         pushRecoveryResultPublisher.publish(message);
 
 
       }
@@ -143,7 +187,7 @@ public class PushRecoveryToolboxController extends ToolboxController
       return isDone.getValue();
    }
 
-   private class IsInContactProvider implements Function<RobotSide, Boolean>
+   private static class IsInContactProvider implements Function<RobotSide, Boolean>
    {
       private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 

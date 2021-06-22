@@ -1,0 +1,8 @@
+
+controller_msgs/FootstepDataListMessage recovery_steps
+
+bool is_step_recoverable
+
+controller_msgs/PlanarRegionsListMessage[] step_constraint_list
+
+
