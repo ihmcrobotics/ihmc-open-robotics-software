@@ -126,6 +126,11 @@ public class PlanarRegionsListBuffer
    {
       Container container = new Container(index, time, list);
 
+      if (time < start_time || indexBuffer.size() == 0)
+         start_time = time;
+      else if (time > end_time)
+         end_time = time;
+
       indexBuffer.put(index, container);
       timeBuffer.add(container);
 
@@ -134,11 +139,6 @@ public class PlanarRegionsListBuffer
          indexBuffer.remove(index - buffer_length);
          timeBuffer.remove(timeBuffer.first());
       }
-
-      if (time < start_time)
-         start_time = time;
-      else if (time > end_time)
-         end_time = time;
 
       index++;
    }
