@@ -12,6 +12,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -22,6 +24,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 public class MultiStepPushRecoveryModule
 {
@@ -113,6 +116,18 @@ public class MultiStepPushRecoveryModule
       recoveryTimings.clear();
       if (pushRecoveryCalculatorVisualizer != null)
          pushRecoveryCalculatorVisualizer.reset();
+   }
+
+   public void setConstraintRegionProvider(IntFunction<PlanarRegionsList> constraintRegionProvider)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         pushRecoveryCalculators.get(robotSide).setConstraintRegionProvider(constraintRegionProvider);
+   }
+
+   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider)
+   {
+      for (RobotSide robotSide : RobotSide.values)
+         pushRecoveryCalculators.get(robotSide).setPlanarRegionDecider(planarRegionDecider);
    }
 
    public boolean isRobotFallingFromDoubleSupport()

@@ -1,18 +1,15 @@
 package us.ihmc.avatar.networkProcessor.pushRecoveryToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.PushRecoveryResultMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryController;
+import us.ihmc.commonWalkingControlModules.captureRegion.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -22,6 +19,8 @@ import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -29,6 +28,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
@@ -42,6 +42,8 @@ public class PushRecoveryToolboxController extends ToolboxController
 
    private final AtomicReference<RobotConfigurationData> configurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> mostRecentPlanarRegions = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsList> planarRegionsToUse = new AtomicReference<>();
 
    private final IsInContactProvider isInContactProvider = new IsInContactProvider();
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
@@ -59,6 +61,7 @@ public class PushRecoveryToolboxController extends ToolboxController
                                         FullHumanoidRobotModel fullRobotModel,
                                         ConvexPolygon2DReadOnly defaultSupportPolygon,
                                         PushRecoveryControllerParameters pushRecoveryControllerParameters,
+                                        double gravityZ,
                                         YoRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
@@ -76,6 +79,14 @@ public class PushRecoveryToolboxController extends ToolboxController
                                                                   pushRecoveryControllerParameters,
                                                                   parentRegistry,
                                                                   null);
+      CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider = new CapturabilityBasedPlanarRegionDecider<>(referenceFrames.getCenterOfMassFrame(),
+                                                                                                                            gravityZ,
+                                                                                                                            PlanarRegion::new,
+                                                                                                                            new YoRegistry("registryToThrowAway"),
+                                                                                                                            null);
+      IntFunction<PlanarRegionsList> constraintRegionProvider = (index) -> planarRegionsToUse.get();
+      pushRecoveryControlModule.setPlanarRegionDecider(planarRegionDecider);
+      pushRecoveryControlModule.setConstraintRegionProvider(constraintRegionProvider);
       isDone.set(false);
    }
 
@@ -109,6 +120,12 @@ public class PushRecoveryToolboxController extends ToolboxController
             omega = capturabilityBasedStatus.getOmega();
          }
 
+         PlanarRegionsListMessage planarRegions = this.mostRecentPlanarRegions.getAndSet(null);
+         if (planarRegions != null)
+         {
+            planarRegionsToUse.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions));
+         }
+
          pushRecoveryControlModule.updateForDoubleSupport(capturePoint, omega);
 
          PushRecoveryResultMessage message = new PushRecoveryResultMessage();
@@ -136,8 +153,6 @@ public class PushRecoveryToolboxController extends ToolboxController
          }
 
          pushRecoveryResultPublisher.publish(message);
-
-
       }
       catch (Throwable e)
       {
