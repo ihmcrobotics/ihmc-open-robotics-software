@@ -328,20 +328,20 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
             //RIGHT hand in MultiClickdoor_0_objID316 ( 0.905,  0.161,  0.861 ) orientation -1.6028650668735689, 0.11697876570833832, -0.4508481230631935
             //Sending HandPosePacket with joint angles: [0.9121657167940591, 0.7459740703314905, 1.6321662808749469, -1.8572450854485256, 0.6954361027225711, 0.9566209710658681, 0.6554421664700405]
 
-            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.905,  0.161,  0.861  ,
-                                                                                 -1.6028650668735689, 0.11697876570833832, -0.4508481230631935,
-                                                                                 RobotSide.RIGHT,
-                                                                                 "Turn Door Knob",
-                                                                                 3));
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.905,  0.161,  0.861  ,
+//                                                                                 -1.6028650668735689, 0.11697876570833832, -0.4508481230631935,
+//                                                                                 RobotSide.RIGHT,
+//                                                                                 "Turn Door Knob",
+//                                                                                 3));
 
 
 
             //
-//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.870,  0.143,  0.858 ,
-//                                                                                 -1.5627423555966327, 0.09604417393163554, -0.6296291985824343,
-//                                                                                RobotSide.RIGHT,
-//                                                                                "Turn Door Knob",
-//                                                                                4));
+            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.870,  0.143,  0.858 ,
+                                                                                 -1.5627423555966327, 0.09604417393163554, -0.6296291985824343,
+                                                                                RobotSide.RIGHT,
+                                                                                "Turn Door Knob",
+                                                                                4));
 
          }
       };
