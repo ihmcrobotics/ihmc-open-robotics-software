@@ -40,14 +40,6 @@ public class CollisionFreeSwingCalculatorLogViewer
       SwingPlannerParametersBasics swingPlannerParameters = new DefaultSwingPlannerParameters();
       swingPlannerParameters.set(log.getSwingPlannerParametersPacket());
 
-      swingPlannerParameters.setPercentageLowMaxDisplacement(0.08);
-      swingPlannerParameters.setMaxDisplacementLow(0.007);
-      swingPlannerParameters.setExtraSizeHigh(Axis3D.X, 0.24);
-      swingPlannerParameters.setExtraSizeHigh(Axis3D.Z, 0.18);
-      swingPlannerParameters.setExtraSizePercentageLow(Axis3D.Z, 0.14);
-      swingPlannerParameters.setExtraSizePercentageHigh(Axis3D.Z, 0.27);
-      swingPlannerParameters.setMotionCorrelationAlpha(0.73);
-
       FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
       footstepPlannerParameters.set(log.getFootstepParametersPacket());
 

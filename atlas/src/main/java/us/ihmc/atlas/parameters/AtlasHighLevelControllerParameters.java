@@ -281,11 +281,31 @@ public class AtlasHighLevelControllerParameters implements HighLevelControllerPa
          integrationSettings.add(new GroupParameter<>("SpineAccelerationIntegration", settings, jointMap.getSpineJointNamesAsStrings()));
       }
 
-      { // Leg joints:
+      { // Leg joints (but knee):
+         List<String> legJoints = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+         {
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_YAW));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_ROLL));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.HIP_PITCH));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_PITCH));
+            legJoints.add(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL));
+         }
          JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
          settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
          settings.setMaxVelocity(5.0);
-         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, jointMap.getLegJointNamesAsStrings()));
+         integrationSettings.add(new GroupParameter<>("LegAccelerationIntegration", settings, legJoints));
+      }
+
+      { // Knee joints:
+         List<String> kneeJoints = new ArrayList<>();
+         for (RobotSide robotSide : RobotSide.values)
+            kneeJoints.add(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH));
+         JointAccelerationIntegrationParameters settings = new JointAccelerationIntegrationParameters();
+         settings.setVelocityBreakFrequency(AlphaFilteredYoVariable.computeBreakFrequencyGivenAlpha(0.985, 0.004));
+         settings.setMaxVelocity(5.0);
+         settings.setZeroVelocityReset(true);
+         integrationSettings.add(new GroupParameter<>("KneeAccelerationIntegration", settings, kneeJoints));
       }
 
       return integrationSettings;

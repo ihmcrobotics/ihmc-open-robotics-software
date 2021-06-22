@@ -159,7 +159,9 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          @Override
          protected void setBehaviorInput()
          {
-            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.7, referenceFrames.getWorldFrame(),referenceFrames.getMidFeetZUpFrame());
+            referenceFrames.updateFrames();
+
+            PelvisHeightTrajectoryMessage message = HumanoidMessageTools.createPelvisHeightTrajectoryMessage(1, 0.8, referenceFrames.getMidFeetZUpFrame(),referenceFrames.getMidFeetZUpFrame());
             atlasPrimitiveActions.pelvisHeightTrajectoryBehavior.setInput(message);
             publishTextToSpeech("Decrease heigth");
          }
@@ -323,31 +325,23 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          protected void setBehaviorInput()
          {
             setAutomaticArmAbort(true);
+            //RIGHT hand in MultiClickdoor_0_objID316 ( 0.905,  0.161,  0.861 ) orientation -1.6028650668735689, 0.11697876570833832, -0.4508481230631935
+            //Sending HandPosePacket with joint angles: [0.9121657167940591, 0.7459740703314905, 1.6321662808749469, -1.8572450854485256, 0.6954361027225711, 0.9566209710658681, 0.6554421664700405]
 
-            //            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.780, -0.0635, 0.879, 1.551252338779563, 0.048351007951384285,
-            //                                                                                0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
+//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.905,  0.161,  0.861  ,
+//                                                                                 -1.6028650668735689, 0.11697876570833832, -0.4508481230631935,
+//                                                                                 RobotSide.RIGHT,
+//                                                                                 "Turn Door Knob",
+//                                                                                 3));
 
-            //atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.8, -0.1, 0.879, 1.551252338779563, 0.048351007951384285,0.007252343575301105, RobotSide.RIGHT, "Moving Hand To Door Knob", 2));
 
-            //      RIGHT hand in MultiClickdoor_0_objID1219 ( 0.769, -0.096,  0.932 ) orientation 1.5511648101378044, 0.08462087065219358, 0.03818089607481523
 
+            //
             atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.870,  0.143,  0.858 ,
                                                                                  -1.5627423555966327, 0.09604417393163554, -0.6296291985824343,
                                                                                 RobotSide.RIGHT,
                                                                                 "Turn Door Knob",
                                                                                 4));
-//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand( 0.794,  0.186,  0.792 ,
-//                                                                                 -1.5431936567280218, 0.13501342218408519, -0.7156860167842839,
-//                                                                                RobotSide.RIGHT,
-//                                                                                "Turn Door Knob",
-//                                                                                4));
-
-//            
-//            atlasPrimitiveActions.rightHandTrajectoryBehavior.setInput(moveHand(0.856,  0.125,  0.791,
-//                                                                                -1.2856865907790618, 0.0386255602637629, -0.9492873833196996,
-//                                                                                RobotSide.RIGHT,
-//                                                                                "Turn Door Knob",
-//                                                                                4));
 
          }
       };
@@ -532,6 +526,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          @Override
          protected void setBehaviorInput()
          {
+            referenceFrames.updateFrames();
             Quaternion rot = new Quaternion();
             rot.setEuler(0, Math.toRadians(0), Math.toRadians(-30));
             ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(3, rot, referenceFrames.getPelvisZUpFrame());
@@ -599,6 +594,7 @@ public class OpenPullDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             Quaternion rot = new Quaternion();
             rot.setEuler(0, 0, Math.toRadians(0));
+            referenceFrames.updateFrames();
             ChestTrajectoryMessage chestOrientationPacket = HumanoidMessageTools.createChestTrajectoryMessage(3, rot, referenceFrames.getPelvisZUpFrame());
             atlasPrimitiveActions.chestTrajectoryBehavior.setInput(chestOrientationPacket);
          }
