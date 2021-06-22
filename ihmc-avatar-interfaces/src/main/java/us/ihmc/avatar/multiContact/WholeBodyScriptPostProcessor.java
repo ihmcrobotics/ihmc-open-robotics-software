@@ -64,6 +64,11 @@ public class WholeBodyScriptPostProcessor
       oneDoFJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
       jointNameHash = Arrays.hashCode(oneDoFJoints);
       referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      
+      for (int jointIndex = 0; jointIndex < oneDoFJoints.length; jointIndex++)
+      {
+         System.out.println(oneDoFJoints[jointIndex].getName());
+      }
    }
 
    public WholeBodyTrajectoryMessage generateWholeBodyMessage(List<KinematicsToolboxSnapshotDescription> rawScript, RigidBodyName[] rigidBodiesToControl)
@@ -81,7 +86,7 @@ public class WholeBodyScriptPostProcessor
       TDoubleArrayList targetVelocity = zeros(numberOfJoints);
       List<TDoubleArrayList> waypoints = new ArrayList<>();
 
-      for (int i = 0; i < desiredRobotConfigurations.size() - 1; i++)
+      for (int i = 0; i < desiredRobotConfigurations.size(); i++)
       {
          waypoints.add(toTDoubleArrayList(desiredRobotConfigurations.get(i).getDesiredJointAngles()));
       }
@@ -91,7 +96,7 @@ public class WholeBodyScriptPostProcessor
       trajectoryPointOptimizer.setWaypoints(waypoints);
       trajectoryPointOptimizer.compute(0);
 
-      for (int i = 0; i < 40; i++)
+      for (int i = 0; i < 100; i++)
       {
          if (trajectoryPointOptimizer.doFullTimeUpdate())
             break;
@@ -105,7 +110,8 @@ public class WholeBodyScriptPostProcessor
                                                                   desiredRobotConfigurations,
                                                                   waypoints,
                                                                   trajectoryPointOptimizer,
-                                                                  desiredRobotConfigurations.size());
+                                                                  desiredRobotConfigurations.size(),
+                                                                  0.5);
       return message;
    }
 
@@ -115,7 +121,8 @@ public class WholeBodyScriptPostProcessor
                                                             List<KinematicsToolboxOutputStatus> desiredRobotConfigurations, 
                                                             List<TDoubleArrayList> waypoints, 
                                                             TrajectoryPointOptimizer trajectoryPointOptimizer, 
-                                                            double trajectoryDuration)
+                                                            double trajectoryDuration,
+                                                            double startOffset)
    {
       //helper variables
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
@@ -164,9 +171,9 @@ public class WholeBodyScriptPostProcessor
       
       
       
-      for (int configurationIndex = 0; configurationIndex < desiredRobotConfigurations.size() - 1; configurationIndex++)
+      for (int configurationIndex = 0; configurationIndex < desiredRobotConfigurations.size(); configurationIndex++)
       {
-         double waypointTime = trajectoryPointOptimizer.getWaypointTime(configurationIndex) * trajectoryDuration;
+         double waypointTime = trajectoryPointOptimizer.getWaypointTime(configurationIndex) * trajectoryDuration + startOffset;
          System.out.println("waypointTime: " + waypointTime);
          KinematicsToolboxOutputStatus robotConfiguration = desiredRobotConfigurations.get(configurationIndex);
       
@@ -236,7 +243,7 @@ public class WholeBodyScriptPostProcessor
          switch (rigidBodiesToControl[i])
          {
             case CHEST:
-//               message.getChestTrajectoryMessage().set(chestTrajectoryMessage);
+               message.getChestTrajectoryMessage().set(chestTrajectoryMessage);
                break;
             case PELVIS:
                message.getPelvisTrajectoryMessage().set(pelvisTrajectoryMessage);
