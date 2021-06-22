@@ -43,7 +43,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
    private boolean firstRun = true;
    private boolean mustUpdateFiles = false;
 
-   private ArrayList<File> files;
+   private final ArrayList<File> files = new ArrayList<>();
 
    public ImGuiGDXPlanarRegionLoggingPanel() {
       prlLogger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
@@ -72,12 +72,8 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
    }
 
    private void updateAvailableLogFiles() {
-      if (files == null)
-         files = new ArrayList<>();
-      else
-         files.clear();
-
       File logDirectory = Paths.get(PlanarRegionsListLogger.getLogDirectory()).toFile();
+      files.clear();
 
       try
       {
