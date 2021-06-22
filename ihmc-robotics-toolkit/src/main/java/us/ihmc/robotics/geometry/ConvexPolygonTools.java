@@ -1334,7 +1334,7 @@ public class ConvexPolygonTools
          }
          else if ((v2End - v2Start + numberOfVertices2) % numberOfVertices2 == 1)
          {
-            binaryEliminationCase2(angle2A, angle2B, angle1A, angle1B, v2End, v2MedianIndex, v2Start, v1End, v1MedianIndex, v1Start, polygon1, polygon2,
+            binaryEliminationCase2(angle2A, angle2B, angle1A, angle1B, v2End, v2MedianIndex, v2Start, v1End, v1MedianIndex, v1Start, polygon2, polygon1,
                                    updatedIndicesInBinaryElimination);
             v2End = updatedIndicesInBinaryElimination[0];
             v2Start = updatedIndicesInBinaryElimination[1];
