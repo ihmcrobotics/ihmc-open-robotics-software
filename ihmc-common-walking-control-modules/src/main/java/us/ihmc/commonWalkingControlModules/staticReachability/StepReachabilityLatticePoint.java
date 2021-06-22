@@ -42,6 +42,16 @@ public class StepReachabilityLatticePoint
       return yawIndex;
    }
 
+   public double indexDistanceFrom(StepReachabilityLatticePoint step)
+   {
+      double sum = 0;
+      sum += Math.abs(step.getXIndex() - xIndex);
+      sum += Math.abs(step.getYIndex() - yIndex);
+      sum += Math.abs(step.getZIndex() - zIndex);
+      sum += Math.abs(step.getYawIndex() - yawIndex);
+      return sum/4;
+   }
+
    private static int computeHashCode(StepReachabilityLatticePoint cell)
    {
       int result = 1;
