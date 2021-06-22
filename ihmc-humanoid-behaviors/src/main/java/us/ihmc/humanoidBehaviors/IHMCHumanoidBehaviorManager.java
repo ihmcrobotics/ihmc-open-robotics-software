@@ -307,6 +307,16 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                            referenceFrames,
                                                            wholeBodyControllerParameters,
                                                            atlasPrimitiveActions));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_HEIGHT,
+                             new TestSetHeightBehavior(robotName,
+                                                           "testheight",
+                                                           yoTime,
+                                                           ros2Node,
+                                                           fullRobotModel,
+                                                           referenceFrames,
+                                                           wholeBodyControllerParameters,
+                                                           atlasPrimitiveActions));
+//
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
 //                             new PickUpBallBehaviorStateMachine(robotName,

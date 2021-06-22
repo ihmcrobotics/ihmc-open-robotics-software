@@ -26,6 +26,12 @@ public class AtlasToeOffParameters extends ToeOffParameters
    }
 
    @Override
+   public boolean doToeOffWhenHittingTrailingKneeLowerLimit()
+   {
+      return true;
+   }
+
+   @Override
    public boolean checkECMPLocationToTriggerToeOff()
    {
       return true;

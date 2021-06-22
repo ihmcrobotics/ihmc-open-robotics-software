@@ -25,6 +25,7 @@ import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIRegistry;
 import us.ihmc.gdx.vr.GDXVRManager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.ros2.ROS2Node;
 
@@ -77,6 +78,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       {
          synchronized (logArray)
          {
+            LogTools.info("TextToSpeech: {}", textStatus.getTextToSpeakAsString());
             logArray.addLast(Pair.of(Level.INFO.intLevel(), textStatus.getTextToSpeakAsString()));
          }
       });
