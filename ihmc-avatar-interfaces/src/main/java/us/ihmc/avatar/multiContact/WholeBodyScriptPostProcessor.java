@@ -9,18 +9,14 @@ import controller_msgs.msg.dds.ChestTrajectoryMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
-import controller_msgs.msg.dds.OneDoFJointTrajectoryMessage;
 import controller_msgs.msg.dds.PelvisTrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryMessage;
 import controller_msgs.msg.dds.SE3TrajectoryPointMessage;
 import controller_msgs.msg.dds.SO3TrajectoryMessage;
 import controller_msgs.msg.dds.SO3TrajectoryPointMessage;
-import controller_msgs.msg.dds.TrajectoryPoint1DMessage;
-import controller_msgs.msg.dds.WholeBodyJointspaceTrajectoryMessage;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import gnu.trove.list.array.TDoubleArrayList;
 import gnu.trove.list.array.TFloatArrayList;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -29,7 +25,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -52,9 +47,11 @@ public class WholeBodyScriptPostProcessor
    private final FloatingJointBasics rootJoint;
    private final int jointNameHash;
    private final OneDoFJointBasics[] oneDoFJoints;
-   private double durationPerKeyframe = 1.0;
    private FullHumanoidRobotModel fullRobotModel;
    private HumanoidReferenceFrames referenceFrames;
+
+   private double durationPerKeyframe = 1.0;
+   private double trajectoryInitialDelay = 0.5;
 
    public WholeBodyScriptPostProcessor(FullHumanoidRobotModelFactory fullRobotModelFactory)
    {
@@ -104,14 +101,16 @@ public class WholeBodyScriptPostProcessor
       }
 
 
+      double trajectoryDuration = desiredRobotConfigurations.size() * durationPerKeyframe;
+      
       WholeBodyTrajectoryMessage message = createWholebodyCommands(fullRobotModel,
                                                                   referenceFrames,
                                                                   rigidBodiesToControl,
                                                                   desiredRobotConfigurations,
                                                                   waypoints,
                                                                   trajectoryPointOptimizer,
-                                                                  desiredRobotConfigurations.size(),
-                                                                  0.5);
+                                                                  trajectoryDuration,
+                                                                  trajectoryInitialDelay);
       return message;
    }
 
@@ -153,7 +152,7 @@ public class WholeBodyScriptPostProcessor
       
       ReferenceFrame pelvisTrajectoryReferenceFrame = worldFrame;
       ReferenceFrame footTrajectoryReferenceFrame = worldFrame;
-      ReferenceFrame chestTrajectoryReferenceFrame = pelvisZUpFrame;
+      ReferenceFrame chestTrajectoryReferenceFrame = worldFrame;
       
 
       //set the trajectory frames 
@@ -162,8 +161,8 @@ public class WholeBodyScriptPostProcessor
       pelvisFrameInformation.setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisTrajectoryReferenceFrame));
       
       FrameInformation chestTrajectoryFrameInformation = chestOrientationTrajectory.getFrameInformation();
-      chestTrajectoryFrameInformation.setDataReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
-      chestTrajectoryFrameInformation.setTrajectoryReferenceFrameId(MessageTools.toFrameId(pelvisZUpFrame));
+      chestTrajectoryFrameInformation.setDataReferenceFrameId(MessageTools.toFrameId(chestTrajectoryReferenceFrame));
+      chestTrajectoryFrameInformation.setTrajectoryReferenceFrameId(MessageTools.toFrameId(chestTrajectoryReferenceFrame));
       
       FrameInformation rightFootTrajectoryFrameInformation = rightFootTrajectory.getFrameInformation();
       rightFootTrajectoryFrameInformation.setDataReferenceFrameId(MessageTools.toFrameId(footTrajectoryReferenceFrame));
@@ -214,8 +213,8 @@ public class WholeBodyScriptPostProcessor
          
          //chest message
          chestOrientation.setToZero(chest.getBodyFixedFrame());
-         chestOrientation.changeFrame(pelvisZUpFrame);
-         chest.getBodyFixedFrame().getTwistRelativeToOther(pelvisZUpFrame, twist);
+         chestOrientation.changeFrame(worldFrame);
+         chest.getBodyFixedFrame().getTwistRelativeToOther(worldFrame, twist);
          
          SO3TrajectoryPointMessage chestTrajectoryPoint = chestOrientationTrajectory.getTaskspaceTrajectoryPoints().add();
          chestTrajectoryPoint.setTime(waypointTime);
@@ -293,5 +292,10 @@ public class WholeBodyScriptPostProcessor
    public void setDurationPerKeyframe(double durationPerKeyframe)
    {
       this.durationPerKeyframe = durationPerKeyframe;
+   }
+
+   public void setTrajectoryInitialDelay(double trajectoryInitialDelay)
+   {
+      this.trajectoryInitialDelay = trajectoryInitialDelay;
    }
 }
