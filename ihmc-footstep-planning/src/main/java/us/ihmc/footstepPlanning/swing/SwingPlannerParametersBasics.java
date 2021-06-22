@@ -188,10 +188,14 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.maxDisplacementHigh, maxDisplacementHigh);
    }
 
-
    default void setMotionCorrelationAlpha(double motionCorrelationAlpha)
    {
       set(SwingPlannerParameterKeys.motionCorrelationAlpha, motionCorrelationAlpha);
+   }
+
+   default void setMinXYTranslationToPlanSwing(double minXYTranslationToPlanSwing)
+   {
+      set(SwingPlannerParameterKeys.minXYTranslationToPlanSwing, minXYTranslationToPlanSwing);
    }
 
    default void set(SwingPlannerParametersPacket packet)
@@ -259,5 +263,8 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       setMaxDisplacementHigh(packet.getMaxDisplacementHigh());
       setMotionCorrelationAlpha(packet.getMotionCorrelationAlpha());
       setAllowLateralMotion(packet.getAllowLateralMotion());
+
+      if (packet.getMinXyTranslationToPlanSwing() != -1.0)
+         setMinXYTranslationToPlanSwing(packet.getMinXyTranslationToPlanSwing());
    }
 }

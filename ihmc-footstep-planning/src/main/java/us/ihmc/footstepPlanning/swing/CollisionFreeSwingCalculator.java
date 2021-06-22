@@ -201,6 +201,13 @@ public class CollisionFreeSwingCalculator
          positionTrajectoryGenerator.reset();
          defaultWaypoints.clear();
 
+         double swingReach = startOfSwingPose.getPosition().distanceXY(endOfSwingPose.getPosition());
+         double minXYTranslationToPlanSwing = swingPlannerParameters.getMinXYTranslationToPlanSwing();
+         if (swingReach < minXYTranslationToPlanSwing)
+         {
+            continue;
+         }
+
          /* keep the swing time a simple function of start/end, and set regardless of whether default trajectory is modified */
          double swingDuration = calculateSwingTime(startOfSwingPose.getPosition(), endOfSwingPose.getPosition());
          footstep.setSwingDuration(swingDuration);
@@ -472,11 +479,7 @@ public class CollisionFreeSwingCalculator
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
          footstep.getCustomWaypointPositions().forEach(downSampledWaypoints::setBall);
-
-         for (int i = 0; i < 10; i++)
-         {
-            tickAndUpdatable.tickAndUpdate();
-         }
+         tickAndUpdatable.tickAndUpdate();
       }
    }
 
