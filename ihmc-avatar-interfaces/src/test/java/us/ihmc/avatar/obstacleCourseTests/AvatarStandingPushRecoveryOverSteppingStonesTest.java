@@ -1,7 +1,5 @@
 package us.ihmc.avatar.obstacleCourseTests;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import org.junit.jupiter.api.AfterEach;
@@ -9,20 +7,20 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.MultiRobotTestInterface;
+import us.ihmc.avatar.networkProcessor.pushRecoveryToolboxModule.PushRecoveryToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.referenceFrames.TranslationReferenceFrame;
@@ -35,6 +33,7 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
@@ -48,6 +47,7 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushRobotController;
+   private PushRecoveryToolboxModule pushRecoveryToolboxModule;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
@@ -76,6 +76,11 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
          drcSimulationTestHelper = null;
       }
 
+      if (pushRecoveryToolboxModule != null)
+      {
+         pushRecoveryToolboxModule.closeAndDispose();
+         pushRecoveryToolboxModule = null;
+      }
       if (pushRobotController != null)
       {
          pushRobotController = null;
@@ -97,10 +102,18 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
       drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
+      pushRecoveryToolboxModule = new PushRecoveryToolboxModule(getRobotModel(), true, DomainFactory.PubSubImplementation.INTRAPROCESS, 9.81);
+      pushRecoveryToolboxModule.wakeUp();
+      pushRecoveryToolboxModule.updatePlanarRegion(planarRegionsListMessage);
+
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
       pushRobotController = new PushRobotController(drcSimulationTestHelper.getRobot(), fullRobotModel.getChest().getParentJoint().getName(),
                                                     new Vector3D(0, 0, z));
+
+      YoBoolean enableOnFailure = (YoBoolean) drcSimulationTestHelper.getYoVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
+                                                               "enablePushRecoveryOnFailure");
+      enableOnFailure.set(true);
 
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
@@ -142,7 +155,7 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
       double percentWeight = 0.35;
       double magnitude = percentWeight * totalMass * 9.81;
       double duration = 0.1;
-      pushRobotController.applyForceDelayed(firstPushCondition, delay, firstForceDirection, magnitude, duration);
+      pushRobotController.applyForce(firstForceDirection, magnitude, duration);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
 
