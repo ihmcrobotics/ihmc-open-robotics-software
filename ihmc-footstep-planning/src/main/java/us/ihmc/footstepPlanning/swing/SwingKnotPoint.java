@@ -34,6 +34,12 @@ import static us.ihmc.footstepPlanning.swing.CollisionFreeSwingCalculator.scaleA
 public class SwingKnotPoint
 {
    private static final double collisionBoxHeight = 0.4;
+   private static final FramePose3D nanPose = new FramePose3D();
+
+   static
+   {
+      nanPose.setToNaN();
+   }
 
    private final SwingPlannerParametersReadOnly swingPlannerParameters;
    private final WalkingControllerParameters walkingControllerParameters;
@@ -309,6 +315,12 @@ public class SwingKnotPoint
          yoCollisionBoxGraphic.setPose(boxCenterPose);
       else
          yoCollisionBoxGraphic.setPoseToNaN();
+   }
+
+   public void hide()
+   {
+      adjustmentGraphic.setPose(nanPose);
+      optimizedWaypoint.setToNaN();
    }
 }
 
