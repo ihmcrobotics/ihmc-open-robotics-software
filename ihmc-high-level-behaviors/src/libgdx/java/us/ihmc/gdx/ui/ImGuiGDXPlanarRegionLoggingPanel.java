@@ -62,7 +62,10 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       {
          prlLogger.update(time, prl);
          if (mustUpdateFiles)
+         {
+            mustUpdateFiles = false;
             updateAvailableLogFiles();
+         }
       }
 
       prlRealtimeBuffer.putAndTick(time, prl);
