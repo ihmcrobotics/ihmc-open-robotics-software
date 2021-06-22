@@ -89,23 +89,11 @@ public class PushRecoveryToolboxController extends ToolboxController
          if (capturabilityBasedStatus != null)
          {
             isInContactProvider.setCapturabilityBasedStatus(capturabilityBasedStatus);
-            footSupportPolygonsInWorld.get(RobotSide.LEFT).clear();
-            footSupportPolygonsInWorld.get(RobotSide.RIGHT).clear();
-            supportPolygonInWorld.clear();
-            capturabilityBasedStatus.getLeftFootSupportPolygon3d().forEach(point ->
-                                                                           {
-                                                                              footSupportPolygonsInWorld.get(RobotSide.LEFT).addVertex(point);
-                                                                              supportPolygonInWorld.addVertex(point);
-                                                                           });
-            capturabilityBasedStatus.getRightFootSupportPolygon3d().forEach(point ->
-                                                                            {
-                                                                               footSupportPolygonsInWorld.get(RobotSide.RIGHT).addVertex(point);
-                                                                               supportPolygonInWorld.addVertex(point);
-                                                                            });
-            footSupportPolygonsInWorld.get(RobotSide.LEFT).update();
-            footSupportPolygonsInWorld.get(RobotSide.RIGHT).update();
-            supportPolygonInWorld.update();
+
+            updateSupportPolygons(capturabilityBasedStatus);
          }
+
+
       }
       catch (Throwable e)
       {
@@ -122,6 +110,26 @@ public class PushRecoveryToolboxController extends ToolboxController
 
          isDone.set(true);
       }
+   }
+
+   private void updateSupportPolygons(CapturabilityBasedStatus capturabilityBasedStatus)
+   {
+      footSupportPolygonsInWorld.get(RobotSide.LEFT).clear();
+      footSupportPolygonsInWorld.get(RobotSide.RIGHT).clear();
+      supportPolygonInWorld.clear();
+      capturabilityBasedStatus.getLeftFootSupportPolygon3d().forEach(point ->
+                                                                     {
+                                                                        footSupportPolygonsInWorld.get(RobotSide.LEFT).addVertex(point);
+                                                                        supportPolygonInWorld.addVertex(point);
+                                                                     });
+      capturabilityBasedStatus.getRightFootSupportPolygon3d().forEach(point ->
+                                                                      {
+                                                                         footSupportPolygonsInWorld.get(RobotSide.RIGHT).addVertex(point);
+                                                                         supportPolygonInWorld.addVertex(point);
+                                                                      });
+      footSupportPolygonsInWorld.get(RobotSide.LEFT).update();
+      footSupportPolygonsInWorld.get(RobotSide.RIGHT).update();
+      supportPolygonInWorld.update();
    }
 
    @Override
