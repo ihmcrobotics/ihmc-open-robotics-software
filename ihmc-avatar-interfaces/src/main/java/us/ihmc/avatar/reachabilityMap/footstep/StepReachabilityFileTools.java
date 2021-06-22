@@ -1,5 +1,6 @@
 package us.ihmc.avatar.reachabilityMap.footstep;
 
+import org.apache.commons.io.FilenameUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
 import us.ihmc.avatar.multiContact.MultiContactScriptReader;
@@ -14,6 +15,8 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -57,7 +60,10 @@ public class StepReachabilityFileTools
    public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
    {
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      scriptReader.loadScript(new File(robotModel.getStepReachabilityResourceName()));
+      String pathString = FilenameUtils.separatorsToSystem(robotModel.getStepReachabilityResourceName());
+      Path filePath = Paths.get(pathString);
+
+      scriptReader.loadScript(filePath.toFile());
       return scriptReader.getAllItems();
    }
 
@@ -67,6 +73,17 @@ public class StepReachabilityFileTools
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
       StepReachabilityData reachabilityData = new StepReachabilityData();
 
+      // TODO figure out a way to export this.
+      // It can be a small header file that sits next to the .json file, and we can add a method in DRCRobotModel for it's file name
+      // Or it it's possible to have MultiContactScriptWriter to export it into the json. Maybe MultiContactWriter.writeScript could optionally
+      // take in an extra json node, but it'll need to stay backwards compatible so that might get tricky.
+      double spacingXYZ = 0.1;
+      int yawDivisions = 6;
+      double minimumOffsetYaw = - Math.toRadians(70.0);
+      double maximumOffsetYaw = Math.toRadians(80.0);
+      double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;;
+
+      reachabilityData.setGridData(spacingXYZ, yawSpacing * yawDivisions, yawDivisions);
       for (int i = 0; i < kinematicsSnapshots.size(); i++)
       {
          KinematicsToolboxSnapshotDescription snapshot = kinematicsSnapshots.get(i);
@@ -76,15 +93,6 @@ public class StepReachabilityFileTools
          SixDoFMotionControlAnchorDescription rightFoot = snapshot.getSixDoFAnchors().get(1);
          assert(leftFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
          assert(rightFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.RIGHT).getName()));
-
-         // TODO figure out a way to export this.
-         // It can be a small header file that sits next to the .json file, and we can add a method in DRCRobotModel for it's file name
-         // Or it it's possible to have MultiContactScriptWriter to export it into the json. Maybe MultiContactWriter.writeScript could optionally
-         // take in an extra json node, but it'll need to stay backwards compatible so that might get tricky.
-
-         double spacingXYZ = 0.5;
-         int yawDivisions = 2;
-         double yawSpacing = 2.61799;
 
          // Right foot is at origin. Back out lattice point of left foot
          Point3D leftFootDesiredPosition = leftFoot.getInputMessage().getDesiredPositionInWorld();

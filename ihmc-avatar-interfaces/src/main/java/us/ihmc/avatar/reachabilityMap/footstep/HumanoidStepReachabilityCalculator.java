@@ -481,8 +481,8 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double minimumOffsetYaw = - Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXYZ = 0.3; // 0.05
-   private static final int yawDivisions = 3;   // 10
+   private static final double spacingXYZ = 0.1; // 0.05
+   private static final int yawDivisions = 6;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
