@@ -156,17 +156,17 @@ public class TraverseStairsPlanStepsState implements State
       int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
       planningModule.clearCustomTerminationConditions();
 
-      double onSameStairThreshold = 0.05;
-      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalState, bestPathSize) ->
-                                                   {
-                                                      boolean longEnoughPath = bestPathSize >= targetNumberOfFootsteps;
-                                                      boolean finalStepsOnSameStair = Math.abs(bestPathFinalStep.getTranslationZ() - bestSecondToFinalState.getTranslationZ()) < onSameStairThreshold;
-                                                      return longEnoughPath && finalStepsOnSameStair;
-                                                   });
+      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalState, bestPathSize) -> bestPathSize >= targetNumberOfFootsteps);
 
       LogTools.info(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
-      LogTools.info(getClass().getSimpleName() + " numer of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
+      LogTools.info(getClass().getSimpleName() + " number of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
+
+      // remove extra steps
+      while (output.getFootstepPlan().getNumberOfSteps() > targetNumberOfFootsteps)
+      {
+         output.getFootstepPlan().remove(output.getFootstepPlan().getNumberOfSteps() - 1);
+      }
 
       // lower height of first step down
       mutateFirstStepDownHeight(solePoses.get(request.getRequestedInitialStanceSide()));
