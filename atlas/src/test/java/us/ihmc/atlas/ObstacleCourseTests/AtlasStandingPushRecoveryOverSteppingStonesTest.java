@@ -71,4 +71,11 @@ public class AtlasStandingPushRecoveryOverSteppingStonesTest extends AvatarStand
    {
       super.testWalkingOverSteppingStonesForwardPush();
    }
+
+   @Override
+   @Test
+   public void testWalkingOverSteppingStonesAngledPush() throws SimulationExceededMaximumTimeException
+   {
+      super.testWalkingOverSteppingStonesAngledPush();
+   }
 }

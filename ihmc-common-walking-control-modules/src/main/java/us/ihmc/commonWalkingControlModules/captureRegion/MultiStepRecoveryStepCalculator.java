@@ -364,7 +364,7 @@ public class MultiStepRecoveryStepCalculator
                                                 FrameConvexPolygon2DReadOnly reachableCaptureRegion,
                                                 FrameConvexPolygon2DBasics constrainedCaptureRegionToPack)
    {
-      if (constraintRegionProvider == null || planarRegionDecider == null)
+      if (constraintRegionProvider == null || planarRegionDecider == null || constraintRegionProvider.apply(stepNumber) == null)
       {
          constrainedCaptureRegionToPack.set(reachableCaptureRegion);
          return;
@@ -377,10 +377,14 @@ public class MultiStepRecoveryStepCalculator
       planarRegionDecider.updatePlanarRegionConstraintForStep(null);
       PlanarRegion constraintRegion = planarRegionDecider.getConstraintRegion();
 
-      planarRegionConvexHull.set(constraintRegion.getConvexHull());
-      planarRegionConvexHull.applyTransform(constraintRegion.getTransformToWorld(), false);
-      polygonTools.computeIntersectionOfPolygons(reachableCaptureRegion, planarRegionConvexHull, constrainedCaptureRegionToPack);
-
       constraintRegions.add(constraintRegion);
+
+      if (constraintRegion != null)
+      {
+         planarRegionConvexHull.set(constraintRegion.getConvexHull());
+         planarRegionConvexHull.applyTransform(constraintRegion.getTransformToWorld(), false);
+         polygonTools.computeIntersectionOfPolygons(reachableCaptureRegion, planarRegionConvexHull, constrainedCaptureRegionToPack);
+      }
+
    }
 }

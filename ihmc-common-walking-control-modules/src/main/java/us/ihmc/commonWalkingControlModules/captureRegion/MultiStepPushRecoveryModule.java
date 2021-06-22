@@ -222,6 +222,9 @@ public class MultiStepPushRecoveryModule
       }
 
       isRecoveryImpossible.set(!computeRecoveryStepLocations(capturePoint2d, omega0));
+      if (isRecoveryImpossible.getBooleanValue())
+         return;
+
       swingSideForDoubleSupportRecovery.set(computeBestRecoverySide());
 
       MultiStepRecoveryStepCalculator pushRecoveryCalculator = pushRecoveryCalculators.get(swingSideForDoubleSupportRecovery.getEnumValue());

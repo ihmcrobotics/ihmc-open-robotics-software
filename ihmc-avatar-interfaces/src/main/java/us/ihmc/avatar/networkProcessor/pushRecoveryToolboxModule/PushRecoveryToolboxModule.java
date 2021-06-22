@@ -18,6 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeROS2Node;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -52,6 +53,7 @@ public class PushRecoveryToolboxModule extends ToolboxModule
                                                      gravityZ,
                                                      registry);
 
+      new DefaultParameterReader().readParametersInRegistry(getRegistry());
       startYoVariableServer();
       if (yoVariableServer != null)
       {
