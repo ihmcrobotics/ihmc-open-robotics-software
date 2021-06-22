@@ -228,7 +228,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    @Override
    public void load(String fileName)
    {
-      load(fileName, true);
+      load(fileName, false);
    }
 
    public void loadUnsafe()
