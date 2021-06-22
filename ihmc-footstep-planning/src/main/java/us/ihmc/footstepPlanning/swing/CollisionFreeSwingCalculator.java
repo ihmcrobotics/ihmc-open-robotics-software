@@ -8,9 +8,11 @@ import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTraject
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.shape.collision.EuclidShape3DCollisionResult;
 import us.ihmc.euclid.shape.collision.epa.ExpandingPolytopeAlgorithm;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -24,9 +26,11 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.*;
+import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
@@ -36,10 +40,12 @@ import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CollisionFreeSwingCalculator
 {
@@ -48,6 +54,7 @@ public class CollisionFreeSwingCalculator
    private static final double collisionGradientScale = 0.5;
    private static final double collisionDistanceEpsilon = 1e-4;
    private static final int numberOfKnotPoints = 12;
+   private static final double downSamplePercentage = 0.3;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
    private final YoGraphicsListRegistry graphicsListRegistry;
@@ -82,6 +89,17 @@ public class CollisionFreeSwingCalculator
 
    private final FramePose3D tempPose = new FramePose3D();
    private final PositionOptimizedTrajectoryGenerator positionTrajectoryGenerator;
+   private final YoInteger stepIndex = new YoInteger("stepIndex", registry);
+   private final YoEnum<PlanPhase> planPhase = new YoEnum<>("planPhase", registry, PlanPhase.class, true);
+   private final BagOfBalls downSampledWaypoints;
+
+   private enum PlanPhase
+   {
+      PLAN_NOMINAL_TRAJECTORY,
+      PERFORM_COLLISION_CHECK,
+      RECOMPUTE_FULL_TRAJECTORY,
+      COMPUTE_DOWN_SAMPLED_TRAJECTORY
+   }
 
    public CollisionFreeSwingCalculator(FootstepPlannerParametersReadOnly footstepPlannerParameters,
                                        SwingPlannerParametersReadOnly swingPlannerParameters,
@@ -135,6 +153,8 @@ public class CollisionFreeSwingCalculator
          footPolygonGraphic = new YoGraphicPolygon("soleGraphicPolygon", yoFootPolygon, soleFrameGraphicPose, 1.0, YoAppearance.RGBColorFromHex(0x386166));
          graphicsList.add(footPolygonGraphic);
 
+         downSampledWaypoints = new BagOfBalls(3, 0.015, YoAppearance.White(), registry, graphicsListRegistry);
+
          graphicsListRegistry.registerYoGraphicsList(graphicsList);
          parentRegistry.addChild(registry);
       }
@@ -142,6 +162,7 @@ public class CollisionFreeSwingCalculator
       {
          soleFrameGraphicPose = null;
          footPolygonGraphic = null;
+         downSampledWaypoints = null;
       }
    }
 
@@ -167,6 +188,8 @@ public class CollisionFreeSwingCalculator
       initializeGraphics(initialStanceFootPoses, footstepPlan);
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
+         stepIndex.set(i);
+
          PlannedFootstep footstep = footstepPlan.getFootstep(i);
          footstep.setTrajectoryType(TrajectoryType.DEFAULT);
          footstep.getCustomWaypointPositions().clear();
@@ -177,6 +200,13 @@ public class CollisionFreeSwingCalculator
 
          positionTrajectoryGenerator.reset();
          defaultWaypoints.clear();
+
+         double swingReach = startOfSwingPose.getPosition().distanceXY(endOfSwingPose.getPosition());
+         double minXYTranslationToPlanSwing = swingPlannerParameters.getMinXYTranslationToPlanSwing();
+         if (swingReach < minXYTranslationToPlanSwing)
+         {
+            continue;
+         }
 
          /* keep the swing time a simple function of start/end, and set regardless of whether default trajectory is modified */
          double swingDuration = calculateSwingTime(startOfSwingPose.getPosition(), endOfSwingPose.getPosition());
@@ -197,6 +227,8 @@ public class CollisionFreeSwingCalculator
 
    private void initializeKnotPoints()
    {
+      planPhase.set(PlanPhase.PLAN_NOMINAL_TRAJECTORY);
+
       // see TwoWaypointSwingGenerator.initialize() for trajectoryTypes DEFAULT and OBSTACLE_CLEARANCE
       double[] defaultWaypointProportions = new double[] {0.15, 0.85};
       double defaultSwingHeightFromStanceFoot = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
@@ -252,20 +284,24 @@ public class CollisionFreeSwingCalculator
 
       if (visualize)
       {
-         for (int i = 0; i < numberOfKnotPoints; i++)
-         {
-            swingKnotPoints.get(i).updateGraphics(true);
-         }
-
+         downSampledWaypoints.reset();
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
-         tickAndUpdatable.tickAndUpdate();
+
+         /* Show one collision box at a time */
+         for (int boxToShow = 0; boxToShow < numberOfKnotPoints; boxToShow++)
+         {
+            swingKnotPoints.forEach(kp -> kp.updateGraphics(false));
+            swingKnotPoints.get(boxToShow).updateGraphics(true);
+            tickAndUpdatable.tickAndUpdate();
+         }
       }
    }
 
    private void optimizeKnotPoints()
    {
       collisionFound.set(false);
+      planPhase.set(PlanPhase.PERFORM_COLLISION_CHECK);
       int maxIterations = 30;
 
       for (int i = 0; i < maxIterations; i++)
@@ -372,12 +408,14 @@ public class CollisionFreeSwingCalculator
 
    private void recomputeTrajectory(PlannedFootstep footstep)
    {
+      planPhase.set(PlanPhase.RECOMPUTE_FULL_TRAJECTORY);
       modifiedWaypoints.clear();
       for (int i = 0; i < swingKnotPoints.size(); i++)
       {
          modifiedWaypoints.add(new FramePoint3D(swingKnotPoints.get(i).getOptimizedWaypoint().getPosition()));
       }
 
+      /* Recompute and visualize modified trajectory */
       positionTrajectoryGenerator.reset();
       positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
       positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
@@ -392,13 +430,6 @@ public class CollisionFreeSwingCalculator
             break;
       }
 
-      for (int i = 0; i < swingKnotPoints.size(); i++)
-      {
-         double waypointPercentage = positionTrajectoryGenerator.getWaypointTime(i);
-         positionTrajectoryGenerator.compute(waypointPercentage);
-         footstep.getCustomWaypointPositions().add(new Point3D(swingKnotPoints.get(i).getOptimizedWaypoint().getPosition()));
-      }
-
       if (visualize)
       {
          for (int i = 0; i < numberOfKnotPoints; i++)
@@ -408,11 +439,47 @@ public class CollisionFreeSwingCalculator
 
          soleFrameGraphicPose.setToNaN();
          footPolygonGraphic.update();
+         tickAndUpdatable.tickAndUpdate();
+      }
 
-         for (int i = 0; i < 10; i++)
+      /* Down sample to 3 waypoints */
+      planPhase.set(PlanPhase.COMPUTE_DOWN_SAMPLED_TRAJECTORY);
+
+      positionTrajectoryGenerator.compute(downSamplePercentage);
+      footstep.getCustomWaypointPositions().add(new Point3D(positionTrajectoryGenerator.getPosition()));
+
+      positionTrajectoryGenerator.compute(0.5);
+      footstep.getCustomWaypointPositions().add(new Point3D(positionTrajectoryGenerator.getPosition()));
+
+      positionTrajectoryGenerator.compute(1 - downSamplePercentage);
+      footstep.getCustomWaypointPositions().add(new Point3D(positionTrajectoryGenerator.getPosition()));
+
+      /* Recompute and visualize down-sampled trajectory */
+      positionTrajectoryGenerator.reset();
+      positionTrajectoryGenerator.setEndpointConditions(startOfSwingPose.getPosition(), zeroVector, endOfSwingPose.getPosition(), zeroVector);
+      positionTrajectoryGenerator.setEndpointWeights(infiniteWeight, infiniteWeight, infiniteWeight, infiniteWeight);
+      positionTrajectoryGenerator.setWaypoints(footstep.getCustomWaypointPositions().stream().map(p -> new FramePoint3D(ReferenceFrame.getWorldFrame(), p)).collect(Collectors.toList()));
+      positionTrajectoryGenerator.initialize();
+      positionTrajectoryGenerator.setShouldVisualize(visualize);
+
+      for (int i = 0; i < 30; i++)
+      {
+         boolean isDone = positionTrajectoryGenerator.doOptimizationUpdate();
+         if (isDone)
+            break;
+      }
+
+      if (visualize)
+      {
+         for (int i = 0; i < numberOfKnotPoints; i++)
          {
-            tickAndUpdatable.tickAndUpdate();
+            swingKnotPoints.get(i).hide();
          }
+
+         soleFrameGraphicPose.setToNaN();
+         footPolygonGraphic.update();
+         footstep.getCustomWaypointPositions().forEach(downSampledWaypoints::setBall);
+         tickAndUpdatable.tickAndUpdate();
       }
    }
 
