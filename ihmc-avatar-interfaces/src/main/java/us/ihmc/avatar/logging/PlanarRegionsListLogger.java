@@ -21,6 +21,10 @@ public class PlanarRegionsListLogger
    private static final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
    private static final String logDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
 
+   public static String getLogDirectory() {
+      return logDirectory;
+   }
+
    public PlanarRegionsListLogger(String logName, int maxTicksToRecord)
    {
       this.logName = logName;
