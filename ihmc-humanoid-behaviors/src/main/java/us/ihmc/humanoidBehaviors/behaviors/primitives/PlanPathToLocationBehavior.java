@@ -183,9 +183,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
             request.setTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
-            if (planarRegions.get() != null)
+            if (planarRegions.get() != null && !assumeFlatGround)
             {
                request.getPlanarRegionsListMessage().set(planarRegions.get());
+            }
+            else if (assumeFlatGround)
+            {
+               publishTextToSpeech("PlanPathToLocationBehavior: Assuming flat ground, Requesting Plan without planar regions");
             }
             else
             {

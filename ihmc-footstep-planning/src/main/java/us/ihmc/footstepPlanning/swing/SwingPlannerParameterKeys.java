@@ -48,4 +48,5 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey maxDisplacementHigh = keys.addDoubleKey("Max displacement high", 0.1);
    public static final DoubleStoredPropertyKey motionCorrelationAlpha = keys.addDoubleKey("Motion correlation alpha", 0.65);
    public static final BooleanStoredPropertyKey allowLateralMotion = keys.addBooleanKey("Allow lateral motion", true);
+   public static final DoubleStoredPropertyKey minXYTranslationToPlanSwing = keys.addDoubleKey("Min XY translation to plan swing", 0.15);
 }

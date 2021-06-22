@@ -107,6 +107,11 @@ module controller_msgs
          */
         @defaultValue(value=True)
         boolean allow_lateral_motion;
+        /**
+         * If a footstep has less than this xy displacement during swing, no swing trajectory is planned
+         */
+        @defaultValue(value=-1.0)
+        double min_xy_translation_to_plan_swing;
         @defaultValue(value=-1.0)
         double percentage_extra_size_x_low;
         @defaultValue(value=-1.0)

@@ -3,11 +3,17 @@ package us.ihmc.ihmcPerception.depthData;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.ihmcPerception.depthData.collisionShapes.CollisionShape;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class CollisionShapeTester
 {
@@ -24,12 +30,16 @@ public class CollisionShapeTester
       }
    }
 
-   private void addJoint(CollisionBoxProvider collissionBoxProvider, JointBasics joint)
+   public CollisionShapeTester()
+   {}
+
+   public void addJoint(CollisionBoxProvider collissionBoxProvider, JointBasics joint)
    {
       List<CollisionShape> collisionMesh = collissionBoxProvider.getCollisionMesh(joint.getName());
       if (collisionMesh != null)
       {
-         trackingCollisionShapes.add(new TrackingCollisionShape(joint.getFrameAfterJoint(), collisionMesh));
+         TrackingCollisionShape trackingCollisionShape = new TrackingCollisionShape(joint.getFrameAfterJoint(), collisionMesh);
+         trackingCollisionShapes.add(trackingCollisionShape);
       }
       else
       {
@@ -57,4 +67,23 @@ public class CollisionShapeTester
       return false;
    }
 
+   public boolean contains(PlanarRegion region)
+   {
+      ConvexPolytope3D regionShape = new ConvexPolytope3D();
+      for (int i = 0; i < region.getConvexHull().getNumberOfVertices(); i++)
+      {
+         Point3D vertex = new Point3D(region.getConvexHull().getVertex(i));
+         region.transformFromLocalToWorld(vertex);
+         regionShape.addVertex(vertex);
+      }
+
+      for (int i = 0; i < trackingCollisionShapes.size(); i++)
+      {
+         if (trackingCollisionShapes.get(i).intersects(regionShape))
+         {
+            return true;
+         }
+      }
+      return false;
+   }
 }
