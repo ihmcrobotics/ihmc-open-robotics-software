@@ -20,6 +20,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.Objects;
 
 public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
@@ -144,7 +145,9 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
 
       if (ImGui.beginListBox("Log files")) {
          if (files != null) {
-            for (File f : files) {
+            Iterator<File> it = files.iterator();
+            while (it.hasNext()) { //Use iterator to prevent rare ConcurrentModificationError
+               File f = it.next();
                if (ImGui.selectable(f.getName())) {
                   try
                   {
