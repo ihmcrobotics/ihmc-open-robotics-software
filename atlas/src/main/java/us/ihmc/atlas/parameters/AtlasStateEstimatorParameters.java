@@ -124,6 +124,15 @@ public class AtlasStateEstimatorParameters extends StateEstimatorParameters
             sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
          }
       }
+      for (SpineJointName spineJointName : jointMap.getSpineJointNames())
+      {
+            String name = jointMap.getSpineJointName(spineJointName);
+            YoDouble bias = new YoDouble("q_offset_" + name, registry);
+            if (spineJointName == SpineJointName.SPINE_ROLL)
+               bias.set(-0.05);
+
+            sensorProcessing.addJointPositionAffineTransformOnlyForSpecifiedJoints(null, bias, false, name);
+      }
 
       if (applyJointPositionPolynomialApproximation)
       {
