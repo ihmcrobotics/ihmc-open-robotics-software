@@ -23,6 +23,8 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.IntFunction;
 
@@ -48,6 +50,7 @@ public class MultiStepPushRecoveryModule
    private final FrameConvexPolygon2DReadOnly supportPolygonInWorld;
    private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
    private final RecyclingArrayList<FootstepTiming> recoveryTimings = new RecyclingArrayList<>(FootstepTiming::new);
+   private final List<PlanarRegion> constraintRegions = new ArrayList<>();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isRecoveryImpossible = new YoBoolean("isRecoveryImpossible", registry);
@@ -114,6 +117,7 @@ public class MultiStepPushRecoveryModule
    {
       recoveryFootsteps.clear();
       recoveryTimings.clear();
+      constraintRegions.clear();
       if (pushRecoveryCalculatorVisualizer != null)
          pushRecoveryCalculatorVisualizer.reset();
    }
@@ -171,6 +175,16 @@ public class MultiStepPushRecoveryModule
       return recoveryTimings.get(stepIndex);
    }
 
+   public boolean hasConstraintRegions()
+   {
+      return !constraintRegions.isEmpty();
+   }
+
+   public PlanarRegion getConstraintRegion(int stepIndex)
+   {
+      return constraintRegions.get(stepIndex);
+   }
+
    public boolean isRecoveryImpossible()
    {
       return isRecoveryImpossible.getValue();
@@ -220,6 +234,8 @@ public class MultiStepPushRecoveryModule
       {
          recoveryFootsteps.add().set(pushRecoveryCalculator.getRecoveryStep(i));
          recoveryTimings.add().set(pushRecoveryCalculator.getRecoveryStepTiming(i));
+         if (pushRecoveryCalculator.hasConstraintRegions())
+            constraintRegions.add(pushRecoveryCalculator.getConstraintRegion(i));
       }
    }
 

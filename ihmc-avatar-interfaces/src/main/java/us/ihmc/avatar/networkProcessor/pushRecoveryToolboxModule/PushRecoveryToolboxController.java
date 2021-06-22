@@ -147,9 +147,12 @@ public class PushRecoveryToolboxController extends ToolboxController
                stepMessage.setSwingDuration(recoveryTiming.getSwingTime());
                stepMessage.getLocation().set(step.getFootstepPose().getPosition());
                stepMessage.getOrientation().set(step.getFootstepPose().getOrientation());
-            }
 
-            // todo add the step constraint stuff.
+               if (pushRecoveryControlModule.hasConstraintRegions())
+               {
+                  message.getStepConstraintList().add().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(pushRecoveryControlModule.getConstraintRegion(i)));
+               }
+            }
          }
 
          pushRecoveryResultPublisher.publish(message);
@@ -200,6 +203,21 @@ public class PushRecoveryToolboxController extends ToolboxController
    public boolean isDone()
    {
       return isDone.getValue();
+   }
+
+   public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
+   {
+      this.configurationData.set(newConfigurationData);
+   }
+
+   public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
+   {
+      this.capturabilityBasedStatus.set(newStatus);
+   }
+
+   public void updatePlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      this.mostRecentPlanarRegions.set(planarRegionsListMessage);
    }
 
    private static class IsInContactProvider implements Function<RobotSide, Boolean>

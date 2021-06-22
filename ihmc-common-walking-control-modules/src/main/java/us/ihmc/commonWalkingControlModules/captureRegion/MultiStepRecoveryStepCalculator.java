@@ -18,6 +18,8 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.IntFunction;
 
 public class MultiStepRecoveryStepCalculator
@@ -41,6 +43,7 @@ public class MultiStepRecoveryStepCalculator
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableConstrainedCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final List<PlanarRegion> constraintRegions = new ArrayList<>();
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
    private final FramePose3D stancePose = new FramePose3D();
@@ -214,6 +217,8 @@ public class MultiStepRecoveryStepCalculator
       reachableCaptureRegions.clear();
       reachableConstrainedCaptureRegions.clear();
 
+      constraintRegions.clear();
+
       for (; depthIdx < depth; depthIdx++)
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
@@ -343,6 +348,16 @@ public class MultiStepRecoveryStepCalculator
       return reachableCaptureRegions.get(i);
    }
 
+   public boolean hasConstraintRegions()
+   {
+      return !constraintRegions.isEmpty();
+   }
+
+   public PlanarRegion getConstraintRegion(int i)
+   {
+      return constraintRegions.get(i);
+   }
+
    private final FrameConvexPolygon2DBasics planarRegionConvexHull = new FrameConvexPolygon2D();
 
    private void computeConstrainedCaptureRegion(int stepNumber,
@@ -365,5 +380,7 @@ public class MultiStepRecoveryStepCalculator
       planarRegionConvexHull.set(constraintRegion.getConvexHull());
       planarRegionConvexHull.applyTransform(constraintRegion.getTransformToWorld(), false);
       polygonTools.computeIntersectionOfPolygons(reachableCaptureRegion, planarRegionConvexHull, constrainedCaptureRegionToPack);
+
+      constraintRegions.add(constraintRegion);
    }
 }
