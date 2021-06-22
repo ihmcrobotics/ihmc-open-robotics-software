@@ -1,6 +1,7 @@
 package us.ihmc.avatar.logging;
 
 import org.apache.commons.io.IOUtils;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -92,8 +93,13 @@ public class PlanarRegionsListBuffer
       if (buffer_length < indexBuffer.size())
          buffer_length = indexBuffer.size();
 
-      start_time = timeBuffer.first().getTime();
-      end_time = timeBuffer.last().getTime();
+      if (buffer_length > 0)
+      {
+         start_time = timeBuffer.first().getTime();
+         end_time = timeBuffer.last().getTime();
+      } else {
+         LogTools.warn("Loaded empty log into PlanarRegionsListBuffer");
+      }
    }
 
    public PlanarRegionsListBuffer(File planarRegionListLog) throws IOException
