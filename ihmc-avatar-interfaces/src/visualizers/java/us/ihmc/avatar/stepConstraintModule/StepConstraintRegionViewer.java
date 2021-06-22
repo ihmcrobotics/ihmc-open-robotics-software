@@ -113,7 +113,7 @@ public class StepConstraintRegionViewer
          int regionId = planarRegion.getRegionId();
          RigidBodyTransform transformToWorld = new RigidBodyTransform(planarRegion.getTransformToWorld());
 
-         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull().getVertexBufferView(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
+         meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
          meshBuilder.addPolygon(transformToWorld, planarRegion.getConvexHullInConstraintRegion());
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfHolesInRegion(); polygonIndex++)

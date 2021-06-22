@@ -9,6 +9,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -452,17 +453,17 @@ public class SteppableRegionsCalculatorTest
       for (int i = 0; i < constraintRegions.size(); i++)
       {
          StepConstraintRegion constraintRegion = constraintRegions.get(i);
-         if (expectedGroundRegion.getConcaveHull().epsilonEquals(constraintRegion.getConcaveHull(), epsilon))
+         if (epsilonEquals(expectedGroundRegion.getConcaveHull(), constraintRegion.getConcaveHull(), epsilon))
          {
             assertStepConstraintRegionsEqual(expectedGroundRegion, constraintRegion, epsilon);
             continue;
          }
-         else if (expectedBlockRegion.getConcaveHull().epsilonEquals(constraintRegion.getConcaveHull(), epsilon))
+         else if (epsilonEquals(expectedBlockRegion.getConcaveHull(), constraintRegion.getConcaveHull(), epsilon))
          {
             assertStepConstraintRegionsEqual(expectedBlockRegion, constraintRegion, epsilon);
             continue;
          }
-         else if (expectedBlockRegion2.getConcaveHull().epsilonEquals(constraintRegion.getConcaveHull(), epsilon))
+         else if (epsilonEquals(expectedBlockRegion2.getConcaveHull(), constraintRegion.getConcaveHull(), epsilon))
          {
             assertStepConstraintRegionsEqual(expectedBlockRegion2, constraintRegion, epsilon);
             continue;
@@ -479,6 +480,11 @@ public class SteppableRegionsCalculatorTest
 
       Random random = new Random(1738L);
       SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
+   }
+
+   private static boolean epsilonEquals(List<? extends Point2DReadOnly> concaveHullA, List<? extends Point2DReadOnly> concaveHullB, double epsilon)
+   {
+      return new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullA)).epsilonEquals(new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullB)), epsilon);
    }
 
    @Test
@@ -662,11 +668,11 @@ public class SteppableRegionsCalculatorTest
       for (int i = 0; i < 3; i++)
       {
          StepConstraintRegion returnedGroundRegion = constraintRegions.get(i);
-         if (returnedGroundRegion.getConcaveHull().epsilonEquals(expectedGroundRegion1.getConcaveHull(), epsilon))
+         if (epsilonEquals(returnedGroundRegion.getConcaveHull(), expectedGroundRegion1.getConcaveHull(), epsilon))
             assertStepConstraintRegionsEqual(returnedGroundRegion, expectedGroundRegion1, epsilon);
-         else if (returnedGroundRegion.getConcaveHull().epsilonEquals(expectedGroundRegion2.getConcaveHull(), epsilon))
+         else if (epsilonEquals(returnedGroundRegion.getConcaveHull(), expectedGroundRegion2.getConcaveHull(), epsilon))
             assertStepConstraintRegionsEqual(returnedGroundRegion, expectedGroundRegion2, epsilon);
-         else if (returnedGroundRegion.getConcaveHull().epsilonEquals(expectedGroundRegion3.getConcaveHull(), epsilon))
+         else if (epsilonEquals(returnedGroundRegion.getConcaveHull(), expectedGroundRegion3.getConcaveHull(), epsilon))
             assertStepConstraintRegionsEqual(returnedGroundRegion, expectedGroundRegion3, epsilon);
          else
             fail("Didn't return a region.");
@@ -1102,13 +1108,13 @@ public class SteppableRegionsCalculatorTest
          {
             StepConstraintRegion expectedConstraintRegion = expectedConstraintRegions.get(j);
 
-            if (constraintRegion.getConcaveHull().epsilonEquals(expectedGroundRegion.getConcaveHull(), epsilon))
+            if (epsilonEquals(constraintRegion.getConcaveHull(), expectedGroundRegion.getConcaveHull(), epsilon))
             {
-               GeometryPolygonTestTools.assertConcavePolygon2DEquals(expectedGroundRegion.getConcaveHull(), constraintRegion.getConcaveHull(), epsilon);
+               assertConcavePolygon2DEquals(expectedGroundRegion.getConcaveHull(), constraintRegion.getConcaveHull(), epsilon);
                foundSolution = true;
                break;
             }
-            else if (constraintRegion.getConcaveHull().epsilonEquals(expectedConstraintRegion.getConcaveHull(), epsilon))
+            else if (epsilonEquals(constraintRegion.getConcaveHull(), expectedConstraintRegion.getConcaveHull(), epsilon))
             {
                assertStepConstraintRegionsEqual(expectedConstraintRegion, constraintRegion, epsilon);
                foundSolution = true;
@@ -1166,6 +1172,19 @@ public class SteppableRegionsCalculatorTest
       }
    }
 
+   private static void assertConcavePolygon2DEquals(List<? extends Point2DReadOnly> concaveHullA, List<? extends Point2DReadOnly> concaveHullB, double epsilon)
+   {
+      assertConcavePolygon2DEquals("", concaveHullA, concaveHullB, epsilon);
+   }
+
+   private static void assertConcavePolygon2DEquals(String prefix, List<? extends Point2DReadOnly> concaveHullA, List<? extends Point2DReadOnly> concaveHullB, double epsilon)
+   {
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(prefix,
+                                                            new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullA)),
+                                                            new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullB)),
+                                                            epsilon);
+   }
+
    private static ObstacleExtrusionDistanceCalculator getExtrusionCalculator(double canEasilyStepOverHeight, double minimumDistanceFromCliffBottoms)
    {
       return new ObstacleExtrusionDistanceCalculator()
@@ -1200,7 +1219,7 @@ public class SteppableRegionsCalculatorTest
    {
       assertEquals("Number of holes wrong.", expected.getNumberOfHolesInRegion(), actual.getNumberOfHolesInRegion());
 
-      GeometryPolygonTestTools.assertConcavePolygon2DEquals("concave hull wrong.", expected.getConcaveHull(), actual.getConcaveHull(), epsilon);
+      assertConcavePolygon2DEquals("concave hull wrong.", expected.getConcaveHull(), actual.getConcaveHull(), epsilon);
       for (int i = 0; i < expected.getNumberOfHolesInRegion(); i++)
          GeometryPolygonTestTools.assertConcavePolygon2DEquals("hole wrong.",
                                                                expected.getHoleInConstraintRegion(i),

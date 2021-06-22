@@ -25,8 +25,8 @@ public class SteppableRegionsCalculatorTestHelper
          // check all around the perimeter
          for (int vertexIdx = 0; vertexIdx < steppableRegion.getConcaveHullSize(); vertexIdx++)
          {
-            Point2DReadOnly vertex = steppableRegion.getConcaveHull().getVertex(vertexIdx);
-            Point2DReadOnly nextVertex = steppableRegion.getConcaveHull().getNextVertex(vertexIdx);
+            Point2DReadOnly vertex = steppableRegion.getConcaveHull().get(vertexIdx);
+            Point2DReadOnly nextVertex = steppableRegion.getConcaveHull().get(vertexIdx);
 
             for (int i = 0; i < 100; i++)
             {
