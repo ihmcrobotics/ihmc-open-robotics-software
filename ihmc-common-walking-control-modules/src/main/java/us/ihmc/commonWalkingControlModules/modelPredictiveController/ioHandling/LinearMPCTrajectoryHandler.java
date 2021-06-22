@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling;
 
 import org.ejml.data.DMatrixRMaj;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.*;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ContactPlaneProvider;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.LinearMPCIndexHandler;
@@ -339,7 +338,7 @@ public class LinearMPCTrajectoryHandler
 
    public void removeCompletedSegments(double timeToCrop)
    {
-      throw new NotImplementedException();
+      throw new RuntimeException("Not implemented.");
       /*
       while (comTrajectory.getCurrentNumberOfSegments() > 0 && comTrajectory.getSegment(0).getTimeInterval().getEndTime() <= timeToCrop)
          comTrajectory.removeSegment(0);
