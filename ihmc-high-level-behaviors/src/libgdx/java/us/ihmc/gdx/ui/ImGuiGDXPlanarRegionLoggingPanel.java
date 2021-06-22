@@ -53,7 +53,6 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
    }
 
    public void create(GDXImGuiBasedUI baseUI) {
-      prlLogger.start();
       updateAvailableLogFiles();
    }
 
@@ -108,7 +107,10 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
    public void renderImGuiWidgets() {
       if (ImGui.checkbox("Log Planar Regions", logPlanarRegions)) {
          if (logPlanarRegions.get())
+         {
+            prlLogger.start();
             mustUpdateFiles = true;
+         }
       }
 
       ImGui.text("Max: " + (prlRealtimeBuffer.getEndTime() - prlRealtimeBuffer.getStartTime()));
