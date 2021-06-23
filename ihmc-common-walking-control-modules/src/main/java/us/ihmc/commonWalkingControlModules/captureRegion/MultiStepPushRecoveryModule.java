@@ -118,6 +118,7 @@ public class MultiStepPushRecoveryModule
       recoveryFootsteps.clear();
       recoveryTimings.clear();
       constraintRegions.clear();
+      isRecoveryImpossible.set(false);
       if (pushRecoveryCalculatorVisualizer != null)
          pushRecoveryCalculatorVisualizer.reset();
    }

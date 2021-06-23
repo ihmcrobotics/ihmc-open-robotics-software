@@ -3,30 +3,27 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.math.filters.GlitchFilteredYoBoolean;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.parameters.IntegerParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.function.Function;
 
 public class MultiStepPushRecoveryController
 {
+   private final YoBoolean useExternalRecoveryFootholds;
    private final MultiStepPushRecoveryModule pushRecoveryModule;
+   private final ExternalPushRecoveryStepHandler externalPushRecoveryStepHandler;
 
    private final SideDependentList<YoPlaneContactState> contactStates;
+
    public MultiStepPushRecoveryController(SideDependentList<YoPlaneContactState> contactStates,
                                           BipedSupportPolygons bipedSupportPolygons,
                                           SideDependentList<? extends ReferenceFrame> soleZUpFrames,
@@ -36,19 +33,27 @@ public class MultiStepPushRecoveryController
                                           YoGraphicsListRegistry graphicsListRegistry)
    {
       this.contactStates = contactStates;
+
+      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+
+      externalPushRecoveryStepHandler = new ExternalPushRecoveryStepHandler(pushRecoveryControllerParameters, registry);
+      useExternalRecoveryFootholds = new YoBoolean("useExternalRecoveryFootholds", parentRegistry);
       this.pushRecoveryModule = new MultiStepPushRecoveryModule(new IsInContactFunction(),
                                                                 bipedSupportPolygons.getSupportPolygonInWorld(),
                                                                 bipedSupportPolygons.getFootPolygonsInWorldFrame(),
                                                                 soleZUpFrames,
                                                                 defaultSupportPolygon,
                                                                 pushRecoveryControllerParameters,
-                                                                parentRegistry,
+                                                                registry,
                                                                 graphicsListRegistry);
+
+      parentRegistry.addChild(registry);
    }
 
    public void reset()
    {
       pushRecoveryModule.reset();
+      externalPushRecoveryStepHandler.reset();
    }
 
    public boolean isRobotFallingFromDoubleSupport()
@@ -58,37 +63,60 @@ public class MultiStepPushRecoveryController
 
    public RobotSide getSwingSideForRecovery()
    {
-      return pushRecoveryModule.getSwingSideForRecovery();
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.getSwingSideForRecovery();
+      else
+         return pushRecoveryModule.getSwingSideForRecovery();
    }
 
    public int getNumberOfRecoverySteps()
    {
-      return pushRecoveryModule.getNumberOfRecoverySteps();
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.getNumberOfRecoverySteps();
+      else
+         return pushRecoveryModule.getNumberOfRecoverySteps();
    }
 
    public Footstep pollRecoveryStep()
    {
-      return pushRecoveryModule.pollRecoveryStep();
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.pollRecoveryStep();
+      else
+         return pushRecoveryModule.pollRecoveryStep();
    }
 
    public FootstepTiming pollRecoveryStepTiming()
    {
-      return pushRecoveryModule.pollRecoveryStepTiming();
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.pollRecoveryStepTiming();
+      else
+         return pushRecoveryModule.pollRecoveryStepTiming();
    }
 
    public Footstep getRecoveryStep(int stepIndex)
    {
-      return pushRecoveryModule.getRecoveryStep(stepIndex);
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.getRecoveryStep(stepIndex);
+      else
+         return pushRecoveryModule.getRecoveryStep(stepIndex);
    }
 
    public FootstepTiming getRecoveryStepTiming(int stepIndex)
    {
-      return pushRecoveryModule.getRecoveryStepTiming(stepIndex);
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.getRecoveryStepTiming(stepIndex);
+      else
+         return pushRecoveryModule.getRecoveryStepTiming(stepIndex);
    }
 
    public boolean isRecoveryImpossible()
    {
-      return pushRecoveryModule.isRecoveryImpossible();
+      if (pushRecoveryModule.isRecoveryImpossible())
+         return true;
+      if (useExternalRecoveryFootholds.getValue())
+         return externalPushRecoveryStepHandler.isRecoveryImpossible();
+
+      return false;
    }
 
    public void updateForDoubleSupport(FramePoint2DReadOnly capturePoint2d, double omega0)

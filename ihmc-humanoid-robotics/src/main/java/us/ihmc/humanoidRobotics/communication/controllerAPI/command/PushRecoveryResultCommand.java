@@ -90,4 +90,9 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
    {
       return isStepRecoverable;
    }
+
+   public FootstepDataListCommand getRecoverySteps()
+   {
+      return footstepDataListCommand;
+   }
 }
