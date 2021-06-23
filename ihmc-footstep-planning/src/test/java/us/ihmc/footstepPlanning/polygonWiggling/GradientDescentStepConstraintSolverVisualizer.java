@@ -24,6 +24,7 @@ import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.javafx.IdMappedColorFunction;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -48,6 +49,8 @@ public class GradientDescentStepConstraintSolverVisualizer
 
       FootstepPlannerLog log = logLoader.getLog();
       List<FootstepGraphNode> footstepPlan = log.getFootstepPlan();
+      LogTools.info("Loaded plan with " + footstepPlan.size() + " steps");
+
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(log.getRequestPacket().getPlanarRegionsListMessage());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("testRobot"));
@@ -87,12 +90,15 @@ public class GradientDescentStepConstraintSolverVisualizer
       int maxIndex = footstepPlan.size();
       for (int i = 1; i < maxIndex; i++)
       {
+         LogTools.info("Step " + i);
+
          FootstepGraphNode footstepNode = footstepPlan.get(i);
          FootstepPlannerEdgeData edgeData = log.getEdgeDataMap().get(new GraphEdge<>(footstepPlan.get(i - 1), footstepNode));
          FootstepSnapData snapData = edgeData.getEndStepSnapData();
          int regionIndex = snapData.getRegionIndex();
          if (regionIndex == -1)
          {
+            LogTools.info("Couldn't find region for step " + i);
             // could happen because it's the goal step and the provided snap is trusted
             continue;
          }
