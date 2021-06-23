@@ -25,6 +25,8 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -42,6 +44,7 @@ public class TraverseStairsPlanStepsState implements State
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule planningModule;
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("RegionsRelay", true);
    private FootstepPlannerOutput output;
 
    private final AtomicBoolean executeStepsSignaled = new AtomicBoolean();
@@ -58,7 +61,11 @@ public class TraverseStairsPlanStepsState implements State
          LogTools.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, newValue ->
+      {
+         planarRegions.set(newValue);
+         executor.submit(() -> helper.publish(PlanarRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(newValue)));
+      });
 
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
@@ -237,5 +244,10 @@ public class TraverseStairsPlanStepsState implements State
    public boolean isStillPlanning()
    {
       return isStillPlanning;
+   }
+
+   public void destroy()
+   {
+      executor.destroy();
    }
 }
