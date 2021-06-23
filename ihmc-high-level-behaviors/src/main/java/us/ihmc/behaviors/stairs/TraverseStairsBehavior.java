@@ -83,6 +83,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       /** Executes steps, blocks on this state while steps are being taken */
       EXECUTE_STEPS
    }
+
    public enum TraverseStairsLifecycleStateName
    {
       CRASHED,
@@ -100,9 +101,10 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       statusLogger = helper.getOrCreateStatusLogger();
 
       completedPublisher = ROS2Tools.createPublisher(helper.getROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
-      supportRegionParametersPublisher = ROS2Tools.createPublisherTypeNamed(helper.getROS2Node(), BipedalSupportPlanarRegionParametersMessage.class,
-                                                                            ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER
-                                                                                  .withRobot(helper.getRobotModel().getSimpleRobotName()).withInput());
+      supportRegionParametersPublisher = ROS2Tools.createPublisher(helper.getROS2Node(),
+                                                                   BipedalSupportPlanarRegionParametersMessage.class,
+                                                                   ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(helper.getRobotModel()
+                                                                                                                            .getSimpleRobotName()).withInput());
 
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
