@@ -199,6 +199,26 @@ public abstract class PacketValidityChecker
    }
 
    /**
+    * Checks the validity of a {@link FootstepDataListMessage}.
+    *
+    * @param message
+    * @return null if the packet is valid, or the error message.
+    */
+   public static String validatePushRecoveryResultMessage(PushRecoveryResultMessage message)
+   {
+      String footstepDataListError = validateFootstepDataListMessage(message.getRecoverySteps());
+      if (footstepDataListError != null)
+         return footstepDataListError;
+      /* TODO
+      String planarRegionError = validaPl
+
+
+       */
+
+      return null;
+   }
+
+   /**
     * Checks the validity of a {@link FootstepDataMessage}.
     *
     * @param message
