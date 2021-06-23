@@ -232,6 +232,16 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
 
             // transform from stance snap frame to region local
             tempTransform.set(stanceSnapData.getSnapTransform());
+
+            int stanceRegionIndex = stanceSnapData.getRegionIndex();
+            if (stanceRegionIndex != -1)
+            {
+               PlanarRegion stanceStepRegion = planarRegionsList.getPlanarRegion(stanceRegionIndex);
+               tempTransform.preMultiply(stanceStepRegion.getTransformToLocal());
+               tempTransform.preMultiply(stanceSnapData.getWiggleTransformInWorld());
+               tempTransform.preMultiply(stanceStepRegion.getTransformToWorld());
+            }
+
             tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
 
             Point3D stanceVertex3D = new Point3D();
