@@ -13,7 +13,7 @@ public abstract class RigidBodyTaskspaceControlState extends RigidBodyControlSta
 {
    public static final double timeEpsilonForInitialPoint = 0.05;
    public static final int maxPoints = 10000;
-   public static final int maxPointsInGenerator = 5;
+   public static final int maxPointsInGenerator = 10;
 
    public RigidBodyTaskspaceControlState(RigidBodyControlMode controlMode, String bodyName, YoDouble yoTime, YoRegistry parentRegistry)
    {
