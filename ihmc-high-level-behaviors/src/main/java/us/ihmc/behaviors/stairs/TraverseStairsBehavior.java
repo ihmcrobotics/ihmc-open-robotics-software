@@ -312,4 +312,9 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    {
       return DEFINITION.getName();
    }
+
+   public void destroy()
+   {
+      planStepsState.destroy();
+   }
 }
