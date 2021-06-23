@@ -34,7 +34,7 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
    @Override
    public void setFromMessage(PushRecoveryResultMessage message)
    {
-//      sequenceId = message.getSequenceId();
+      sequenceId = message.getSequenceId();
       isStepRecoverable = message.getIsStepRecoverable();
       footstepDataListCommand.setFromMessage(message.getRecoverySteps());
       stepConstraintCommand.clear();

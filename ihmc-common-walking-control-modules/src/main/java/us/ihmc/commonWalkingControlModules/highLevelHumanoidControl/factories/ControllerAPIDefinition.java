@@ -169,7 +169,7 @@ public class ControllerAPIDefinition
       extractors.put(PelvisHeightTrajectoryMessage.class, m -> ((PelvisHeightTrajectoryMessage) m).getSequenceId());
       extractors.put(StopAllTrajectoryMessage.class, m -> ((StopAllTrajectoryMessage) m).getSequenceId());
       extractors.put(FootstepDataListMessage.class, m -> ((FootstepDataListMessage) m).getSequenceId());
-//      extractors.put(PushRecoveryResultMessage.class, m -> ((PushRecoveryResultMessage) m).getSequenceId());
+      extractors.put(PushRecoveryResultMessage.class, m -> ((PushRecoveryResultMessage) m).getSequenceId());
       extractors.put(AdjustFootstepMessage.class, m -> ((AdjustFootstepMessage) m).getSequenceId());
       extractors.put(GoHomeMessage.class, m -> ((GoHomeMessage) m).getSequenceId());
       extractors.put(FootLoadBearingMessage.class, m -> ((FootLoadBearingMessage) m).getSequenceId());

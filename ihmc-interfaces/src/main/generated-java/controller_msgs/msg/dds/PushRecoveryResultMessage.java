@@ -8,14 +8,15 @@ import us.ihmc.pubsub.TopicDataType;
 
 public class PushRecoveryResultMessage extends Packet<PushRecoveryResultMessage> implements Settable<PushRecoveryResultMessage>, EpsilonComparable<PushRecoveryResultMessage>
 {
+   public long sequence_id_;
    public controller_msgs.msg.dds.FootstepDataListMessage recovery_steps_;
    public boolean is_step_recoverable_;
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionsListMessage>  step_constraint_list_;
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.StepConstraintMessage>  step_constraint_list_;
 
    public PushRecoveryResultMessage()
    {
       recovery_steps_ = new controller_msgs.msg.dds.FootstepDataListMessage();
-      step_constraint_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionsListMessage> (5, new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType());
+      step_constraint_list_ = new us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.StepConstraintMessage> (5, new controller_msgs.msg.dds.StepConstraintMessagePubSubType());
 
    }
 
@@ -27,10 +28,21 @@ public class PushRecoveryResultMessage extends Packet<PushRecoveryResultMessage>
 
    public void set(PushRecoveryResultMessage other)
    {
+      sequence_id_ = other.sequence_id_;
+
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.recovery_steps_, recovery_steps_);
       is_step_recoverable_ = other.is_step_recoverable_;
 
       step_constraint_list_.set(other.step_constraint_list_);
+   }
+
+   public void setSequenceId(long sequence_id)
+   {
+      sequence_id_ = sequence_id;
+   }
+   public long getSequenceId()
+   {
+      return sequence_id_;
    }
 
 
@@ -49,7 +61,7 @@ public class PushRecoveryResultMessage extends Packet<PushRecoveryResultMessage>
    }
 
 
-   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.PlanarRegionsListMessage>  getStepConstraintList()
+   public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.StepConstraintMessage>  getStepConstraintList()
    {
       return step_constraint_list_;
    }
@@ -71,6 +83,8 @@ public class PushRecoveryResultMessage extends Packet<PushRecoveryResultMessage>
    {
       if(other == null) return false;
       if(other == this) return true;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!this.recovery_steps_.epsilonEquals(other.recovery_steps_, epsilon)) return false;
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.is_step_recoverable_, other.is_step_recoverable_, epsilon)) return false;
@@ -95,6 +109,8 @@ public class PushRecoveryResultMessage extends Packet<PushRecoveryResultMessage>
 
       PushRecoveryResultMessage otherMyClass = (PushRecoveryResultMessage) other;
 
+      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
+
       if (!this.recovery_steps_.equals(otherMyClass.recovery_steps_)) return false;
       if(this.is_step_recoverable_ != otherMyClass.is_step_recoverable_) return false;
 
@@ -109,6 +125,8 @@ public class PushRecoveryResultMessage extends Packet<PushRecoveryResultMessage>
       StringBuilder builder = new StringBuilder();
 
       builder.append("PushRecoveryResultMessage {");
+      builder.append("sequence_id=");
+      builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("recovery_steps=");
       builder.append(this.recovery_steps_);      builder.append(", ");
       builder.append("is_step_recoverable=");

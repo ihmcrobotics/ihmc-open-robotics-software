@@ -40,13 +40,15 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5; ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+          current_alignment += controller_msgs.msg.dds.StepConstraintMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
 
       return current_alignment - initial_alignment;
    }
@@ -60,6 +62,9 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getCdrSerializedSize(data.getRecoverySteps(), current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -68,7 +73,7 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getStepConstraintList().size(); ++i0)
       {
-          current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getCdrSerializedSize(data.getStepConstraintList().get(i0), current_alignment);}
+          current_alignment += controller_msgs.msg.dds.StepConstraintMessagePubSubType.getCdrSerializedSize(data.getStepConstraintList().get(i0), current_alignment);}
 
 
       return current_alignment - initial_alignment;
@@ -76,6 +81,8 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.PushRecoveryResultMessage data, us.ihmc.idl.CDR cdr)
    {
+      cdr.write_type_4(data.getSequenceId());
+
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getRecoverySteps(), cdr);
       cdr.write_type_7(data.getIsStepRecoverable());
 
@@ -87,6 +94,8 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.PushRecoveryResultMessage data, us.ihmc.idl.CDR cdr)
    {
+      data.setSequenceId(cdr.read_type_4());
+      	
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getRecoverySteps(), cdr);	
       data.setIsStepRecoverable(cdr.read_type_7());
       	
@@ -97,6 +106,7 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.PushRecoveryResultMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+      ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("recovery_steps", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getRecoverySteps());
 
       ser.write_type_7("is_step_recoverable", data.getIsStepRecoverable());
@@ -106,6 +116,7 @@ public class PushRecoveryResultMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PushRecoveryResultMessage data)
    {
+      data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("recovery_steps", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getRecoverySteps());
 
       data.setIsStepRecoverable(ser.read_type_7("is_step_recoverable"));
