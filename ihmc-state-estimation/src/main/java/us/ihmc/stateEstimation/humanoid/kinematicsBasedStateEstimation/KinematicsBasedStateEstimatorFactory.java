@@ -159,7 +159,7 @@ public class KinematicsBasedStateEstimatorFactory
 
          Set<ContactableFoot> otherFoot = Collections.singleton(bipedFeet.get(robotSide.getOppositeSide()));
          FootSwitchInterface footSwitch = footSwitchFactory.newFootSwitch(namePrefix, bipedFeet.get(robotSide), otherFoot, footForceSensorForEstimator,
-                                                                          totalRobotWeight, null, stateEstimatorRegistry);
+                                                                          totalRobotWeight, stateEstimatorYoGraphicsListRegistry, stateEstimatorRegistry); // TODO Don't merge to develop as is
          footSwitchMap.put(foot, footSwitch);
       }
 
