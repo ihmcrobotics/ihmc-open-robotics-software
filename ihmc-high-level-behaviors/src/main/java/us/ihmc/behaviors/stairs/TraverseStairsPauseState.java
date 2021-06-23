@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.log.LogTools;
@@ -28,6 +29,10 @@ public class TraverseStairsPauseState implements State
    public void onEntry()
    {
       LogTools.info("Entering " + getClass().getSimpleName());
+
+      REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+      clearMessage.setRequestClear(true);
+      helper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
    }
 
    @Override
