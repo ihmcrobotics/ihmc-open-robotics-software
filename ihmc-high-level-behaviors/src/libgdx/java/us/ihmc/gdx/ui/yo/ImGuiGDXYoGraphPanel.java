@@ -7,6 +7,7 @@ import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.extension.implot.flag.ImPlotLocation;
 import imgui.extension.implot.flag.ImPlotStyleVar;
+import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -140,14 +141,13 @@ public class ImGuiGDXYoGraphPanel
                      {
                         Double[] data = ImPlotTools.removeNullElements(values);
                         ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
-                        ImPlot.endPlot();
+                        if (ImPlot.beginLegendPopup(variable.getName())) {
+                           ImGui.text(variable.getFullNameString());
+                           ImPlot.endLegendPopup();
+                        }
+                        ImPlot.endPlot(); //TODO find some way to get rid of the additional margins around the plot
                      }
                      ImPlot.popStyleVar(4);
-                     if (ImGui.beginPopup(variable.getName() + " hover popup"))
-                     {
-                        ImGui.text(variable.getFullNameString());
-                        ImGui.endPopup();
-                     }
 
                      if (currentValueIndex >= bufferSize - 1)
                      {
