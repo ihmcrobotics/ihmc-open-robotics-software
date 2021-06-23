@@ -94,27 +94,10 @@ public class TraverseStairsExecuteStepsState implements State
       boolean hasOutput = output != null;
       if (!hasOutput)
       {
-         statusLogger.info("Stairs behavior does not have planner output");
          return false;
       }
 
-      FootstepPlan footstepPlan = output.getFootstepPlan();
-      Pose3D goal = goalInput.get();
-
-      if (footstepPlan.getNumberOfSteps() >= 2 && goal != null)
-      {
-         PlannedFootstep finalStep = footstepPlan.getFootstep(footstepPlan.getNumberOfSteps() - 1);
-         PlannedFootstep secondToFinalStep = footstepPlan.getFootstep(footstepPlan.getNumberOfSteps() - 2);
-         Pose3D finalMidFootPose = new Pose3D();
-         finalMidFootPose.interpolate(finalStep.getFootstepPose(), secondToFinalStep.getFootstepPose(), 0.5);
-
-         double distanceToGoal = goal.getPosition().distance(finalMidFootPose.getPosition());
-         statusLogger.info("Distance to goal: " + distanceToGoal);
-      }
-
-      boolean solutionReachesGoal = output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION;
-      statusLogger.info("Solution reaches goal: " + solutionReachesGoal);
-      return solutionReachesGoal;
+      return output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION;
    }
 
    boolean walkingIsComplete()

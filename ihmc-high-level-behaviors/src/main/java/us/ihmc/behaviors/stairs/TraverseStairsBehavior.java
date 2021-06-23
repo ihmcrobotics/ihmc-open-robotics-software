@@ -256,6 +256,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       helper.publish(LifecycleState, TraverseStairsLifecycleStateName.RUNNING.name());
 
       planStepsState.reset();
+      pauseState.reset();
       executeStepsState.clearWalkingCompleteFlag();
 
       hasPublishedCompleted.set(false);
