@@ -51,8 +51,7 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       addChild(traverseStairsUI);
 
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS,
-                                  regions -> goalAffordance.setLatestRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions)));
+      helper.subscribeToPlanarRegionsViaCallback(ROS2Tools.LIDAR_REA_REGIONS, goalAffordance::setLatestRegions);
    }
 
    @Override

@@ -21,6 +21,7 @@ public class ImGuiBehaviorModuleDisabledNodeUI extends GDXBehaviorUIInterface
    {
       this.helper = helper;
       yoEnabled = helper.subscribeToYoBoolean("enabled");
+      helper.getOrCreateControllerStatusTracker().addNotWalkingStateAnymoreCallback(() -> yoEnabled.set(false));
    }
 
    @Override

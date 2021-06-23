@@ -7,6 +7,7 @@ import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehavior;
 import us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI;
 import us.ihmc.behaviors.tools.BehaviorHelper;
@@ -27,6 +28,7 @@ import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,12 +42,14 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
 
    private final BehaviorHelper helper;
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
+   private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private Point2D nodePosition = new Point2D(376.0, 517.0);
    private final Stopwatch completedStopwatch = new Stopwatch();
    private String currentState = "";
    private String currentLifecycleState = "";
    private final ImBoolean operatorReviewEnabled = new ImBoolean(true);
+   private final ImBoolean showGraphics = new ImBoolean(true);
    private final AtomicReference<Double> distanceToStairs;
    private final ImGuiEnumPlot currentLifecycleStatePlot = new ImGuiEnumPlot(1000, 250, 15);
    private final ImGuiEnumPlot currentStatePlot = new ImGuiEnumPlot(1000, 250, 15);
@@ -79,6 +83,12 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
             ++numberOfSupportRegionsReceived;
             supportRegionsReceivedTimer.reset();
          }
+      });
+      helper.subscribeToPlanarRegionsViaCallback(ROS2Tools.LIDAR_REA_REGIONS, regions ->
+      {
+         goalAffordance.setLatestRegions(regions);
+         if (regions != null)
+            planarRegionsGraphic.generateMeshesAsync(regions);
       });
    }
 
@@ -117,7 +127,15 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void update()
    {
+
       footstepPlanGraphic.update();
+   }
+
+   private boolean areGraphicsEnabled()
+   {
+      return showGraphics.get()
+             && !currentLifecycleState.isEmpty()
+             && !currentLifecycleState.equals(TraverseStairsBehavior.TraverseStairsLifecycleStateName.NOT_RUNNING.name());
    }
 
    @Override
@@ -147,7 +165,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       pauseTimeLeft.calculate(FormattingTools.getFormattedDecimal2D(timeLeftInPause));
       boolean supportRegionsReceivedRecently = supportRegionsReceivedTimer.isRunning(5.0);
       supportRegionsReceived.setNextValue(numberOfSupportRegionsReceived);
-      supportRegionsReceived.calculate(supportRegionsReceivedRecently ? "DANGER" : "");
+      supportRegionsReceived.calculate(supportRegionsReceivedRecently ? "DANGER! SUPPORT REGIONS PRESENT" : "");
       if (ImGui.button("Disable support regions"))
       {
          disableSupportRegions();
@@ -157,6 +175,8 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
       {
          helper.publish(OperatorReviewEnabled, operatorReviewEnabled.get());
       }
+      ImGui.checkbox("Show graphics", showGraphics);
+      ImGui.sameLine();
       if (ImGui.button(labels.get("Start")))
       {
          helper.publish(TraverseStairsBehaviorAPI.START);
@@ -202,13 +222,21 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    public void destroy()
    {
       footstepPlanGraphic.destroy();
+      planarRegionsGraphic.destroy();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      footstepPlanGraphic.getRenderables(renderables, pool);
-      goalAffordance.getRenderables(renderables, pool);
+      if (showGraphics.get())
+      {
+         goalAffordance.getRenderables(renderables, pool);
+      }
+      if (areGraphicsEnabled())
+      {
+         footstepPlanGraphic.getRenderables(renderables, pool);
+         planarRegionsGraphic.getRenderables(renderables, pool);
+      }
    }
 
    @Override
