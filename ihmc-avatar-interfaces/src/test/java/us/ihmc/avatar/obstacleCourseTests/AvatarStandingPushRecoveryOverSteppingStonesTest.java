@@ -174,6 +174,7 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    @Test
    public void testWalkingOverSteppingStonesAngledPush() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       Vector3D firstForceDirection = new Vector3D(-1.0, -1.0, 0.0);

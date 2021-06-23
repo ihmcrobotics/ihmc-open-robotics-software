@@ -103,6 +103,23 @@ public class PushRecoveryToolboxModule extends ToolboxModule
                                                     REACommunicationProperties.outputTopic,
                                                     s -> updatePlanarRegion(s.takeNextData()));
 
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateMessage.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            controller.updateHighLevelState(s.takeNextData());
+         }
+      });
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            controller.updateFootstepStatus(s.takeNextData());
+         }
+      });
+
+
       constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(realtimeROS2Node,
                                                                      PushRecoveryResultMessage.class,
                                                                      ControllerAPIDefinition.getInputTopic(robotName));

@@ -24,6 +24,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.RecoveryTransferToStandingCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.stateTransitionConditions.StandingToSwingCondition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.states.*;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.WalkingCommandConsumer;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -89,6 +90,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    private final TaskspaceTrajectoryStatusMessage pelvisStatusMessage = new TaskspaceTrajectoryStatusMessage();
 
+   private final PushRecoveryCommandConsumer commandConsumer;
    private final PrivilegedConfigurationCommand privilegedConfigurationCommand = new PrivilegedConfigurationCommand();
    private final ControllerCoreCommand controllerCoreCommand = new ControllerCoreCommand(WholeBodyControllerCoreMode.INVERSE_DYNAMICS);
    private ControllerCoreOutputReadOnly controllerCoreOutput;
@@ -119,6 +121,8 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       this.pelvisOrientationManager = managerFactory.getOrCreatePelvisOrientationManager();
       this.feetManager = managerFactory.getOrCreateFeetManager();
       this.legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
+
+      commandConsumer = new PushRecoveryCommandConsumer(commandInputManager, controllerToolbox.getYoTime());
 
       pushRecoveryControlModule = new MultiStepPushRecoveryController(controllerToolbox.getFootContactStates(),
                                                                       controllerToolbox.getBipedSupportPolygons(),
@@ -339,7 +343,9 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
    public void doAction()
    {
-      PushRecoveryState currentState;
+      PushRecoveryState currentState = stateMachine.getCurrentState();
+      if (currentState.isDoubleSupportState())
+         commandConsumer.consumePushRecoveryResultCommand(pushRecoveryControlModule);
 
       updateFailureDetection();
 

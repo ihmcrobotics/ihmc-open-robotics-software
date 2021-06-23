@@ -302,6 +302,16 @@ public class PushRecoveryToolboxController extends ToolboxController
       this.mostRecentPlanarRegions.set(planarRegionsListMessage);
    }
 
+   public void updateFootstepStatus(FootstepStatusMessage footstepStatusMessage)
+   {
+      this.footstepStatusMessage.set(footstepStatusMessage);
+   }
+
+   public void updateHighLevelState(HighLevelStateMessage highLevelStateMessage)
+   {
+      this.highLevelStateMessage.set(highLevelStateMessage);
+   }
+
    private static List<StepConstraintRegion> convertToStepConstraintRegionsList(PlanarRegionsListMessage message)
    {
       int vertexIndex = 0;
@@ -361,9 +371,9 @@ public class PushRecoveryToolboxController extends ToolboxController
             return true;
 
          if (robotSide == RobotSide.LEFT)
-            return capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
+            return !capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
          else
-            return capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
+            return !capturabilityBasedStatus.getRightFootSupportPolygon3d().isEmpty();
       }
    }
 }

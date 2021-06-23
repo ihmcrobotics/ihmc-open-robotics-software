@@ -171,7 +171,9 @@ public class MultiStepPushRecoveryController
 
       public List<StepConstraintRegion> apply(int index)
       {
-         return planarRegionConstraints.get(index);
+         if (index < planarRegionConstraints.size())
+            return planarRegionConstraints.get(index);
+         return null;
       }
    }
 }
