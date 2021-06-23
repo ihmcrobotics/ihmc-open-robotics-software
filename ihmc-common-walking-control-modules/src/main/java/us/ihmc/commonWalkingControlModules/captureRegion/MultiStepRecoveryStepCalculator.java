@@ -7,12 +7,16 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
+import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -30,7 +34,7 @@ public class MultiStepRecoveryStepCalculator
 
    private final ReachableFootholdsCalculator reachableFootholdsCalculator;
    private final AchievableCaptureRegionCalculatorWithDelay captureRegionCalculator;
-   private CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider;
+   private CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider;
 
    private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
 
@@ -43,7 +47,7 @@ public class MultiStepRecoveryStepCalculator
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableConstrainedCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
-   private final List<PlanarRegion> constraintRegions = new ArrayList<>();
+   private final List<StepConstraintRegion> constraintRegions = new ArrayList<>();
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
    private final FramePose3D stancePose = new FramePose3D();
@@ -62,7 +66,7 @@ public class MultiStepRecoveryStepCalculator
    private final RecyclingArrayList<FootstepTiming> recoveryFootstepTimings = new RecyclingArrayList<>(FootstepTiming::new);
 
    private final PushRecoveryControllerParameters pushRecoveryParameters;
-   private IntFunction<PlanarRegionsList> constraintRegionProvider;
+   private IntFunction<List<StepConstraintRegion>> constraintRegionProvider;
 
    private boolean isStateCapturable = false;
 
@@ -96,12 +100,12 @@ public class MultiStepRecoveryStepCalculator
       captureRegionCalculator = new AchievableCaptureRegionCalculatorWithDelay();
    }
 
-   public void setConstraintRegionProvider(IntFunction<PlanarRegionsList> constraintRegionProvider)
+   public void setConstraintRegionProvider(IntFunction<List<StepConstraintRegion>> constraintRegionProvider)
    {
       this.constraintRegionProvider = constraintRegionProvider;
    }
 
-   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider)
+   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider)
    {
       this.planarRegionDecider = planarRegionDecider;
    }
@@ -353,7 +357,7 @@ public class MultiStepRecoveryStepCalculator
       return !constraintRegions.isEmpty();
    }
 
-   public PlanarRegion getConstraintRegion(int i)
+   public StepConstraintRegion getConstraintRegion(int i)
    {
       return constraintRegions.get(i);
    }
@@ -364,18 +368,29 @@ public class MultiStepRecoveryStepCalculator
                                                 FrameConvexPolygon2DReadOnly reachableCaptureRegion,
                                                 FrameConvexPolygon2DBasics constrainedCaptureRegionToPack)
    {
-      if (constraintRegionProvider == null || planarRegionDecider == null || constraintRegionProvider.apply(stepNumber) == null)
+      if (constraintRegionProvider == null || constraintRegionProvider.apply(stepNumber) == null)
       {
          constrainedCaptureRegionToPack.set(reachableCaptureRegion);
          return;
       }
-
-      PlanarRegionsList planarRegions = constraintRegionProvider.apply(stepNumber);
-
-      planarRegionDecider.setConstraintRegions(planarRegions.getPlanarRegionsAsList());
-      planarRegionDecider.setReachableCaptureRegion(reachableCaptureRegion);
-      planarRegionDecider.updatePlanarRegionConstraintForStep(null);
-      PlanarRegion constraintRegion = planarRegionDecider.getConstraintRegion();
+      List<StepConstraintRegion> planarRegions = constraintRegionProvider.apply(stepNumber);
+      if (planarRegions.size() == 0)
+      {
+         constrainedCaptureRegionToPack.set(reachableCaptureRegion);
+         return;
+      }
+      StepConstraintRegion constraintRegion = null;
+      if (planarRegions.size() == 1)
+      {
+         constraintRegion = planarRegions.get(0);
+      }
+      else if (planarRegionDecider != null)
+      {
+         planarRegionDecider.setConstraintRegions(planarRegions);
+         planarRegionDecider.setReachableCaptureRegion(reachableCaptureRegion);
+         planarRegionDecider.updatePlanarRegionConstraintForStep(null);
+         constraintRegion = planarRegionDecider.getConstraintRegion();
+      }
 
       constraintRegions.add(constraintRegion);
 
@@ -385,6 +400,5 @@ public class MultiStepRecoveryStepCalculator
          planarRegionConvexHull.applyTransform(constraintRegion.getTransformToWorld(), false);
          polygonTools.computeIntersectionOfPolygons(reachableCaptureRegion, planarRegionConvexHull, constrainedCaptureRegionToPack);
       }
-
    }
 }

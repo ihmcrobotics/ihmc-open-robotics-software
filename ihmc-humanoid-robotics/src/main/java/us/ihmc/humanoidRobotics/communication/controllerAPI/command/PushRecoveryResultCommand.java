@@ -4,12 +4,14 @@ import controller_msgs.msg.dds.PushRecoveryResultMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.QueueableCommand;
 
+import java.util.List;
+
 public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryResultCommand, PushRecoveryResultMessage>
 {
    private long sequenceId;
    private boolean isStepRecoverable = false;
    private final FootstepDataListCommand footstepDataListCommand = new FootstepDataListCommand();
-   private final RecyclingArrayList<PlanarRegionsListCommand> planarRegionsListCommand = new RecyclingArrayList<>(PlanarRegionsListCommand::new);
+   private final RecyclingArrayList<StepConstraintRegionCommand> stepConstraintCommand = new RecyclingArrayList<>(StepConstraintRegionCommand::new);
 
    @Override
    public void addTimeOffset(double timeOffset)
@@ -23,9 +25,9 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
       sequenceId = 0;
       isStepRecoverable = false;
       footstepDataListCommand.clear();
-      for (int i = 0; i < planarRegionsListCommand.size(); i++)
-         planarRegionsListCommand.get(i).clear();
-      planarRegionsListCommand.clear();
+      for (int i = 0; i < stepConstraintCommand.size(); i++)
+         stepConstraintCommand.get(i).clear();
+      stepConstraintCommand.clear();
       clearQueuableCommandVariables();
    }
 
@@ -35,10 +37,10 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
 //      sequenceId = message.getSequenceId();
       isStepRecoverable = message.getIsStepRecoverable();
       footstepDataListCommand.setFromMessage(message.getRecoverySteps());
-      planarRegionsListCommand.clear();
+      stepConstraintCommand.clear();
       for (int i = 0; i < message.getStepConstraintList().size(); i++)
       {
-         planarRegionsListCommand.add().setFromMessage(message.getStepConstraintList().get(i));
+         stepConstraintCommand.add().setFromMessage(message.getStepConstraintList().get(i));
       }
    }
 
@@ -55,13 +57,13 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
       {
          if (!footstepDataListCommand.isCommandValid())
             return false;
-         if (!planarRegionsListCommand.isEmpty())
+         if (!stepConstraintCommand.isEmpty())
          {
-            if (planarRegionsListCommand.size() != footstepDataListCommand.getNumberOfFootsteps())
+            if (stepConstraintCommand.size() != footstepDataListCommand.getNumberOfFootsteps())
                return false;
-            for (int i = 0; i < planarRegionsListCommand.size(); i++)
+            for (int i = 0; i < stepConstraintCommand.size(); i++)
             {
-               if (planarRegionsListCommand.get(i).getNumberOfPlanarRegions() < 1 || !planarRegionsListCommand.get(i).isCommandValid())
+               if (!stepConstraintCommand.get(i).isCommandValid())
                   return false;
             }
          }
@@ -79,9 +81,9 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
    public void set(PushRecoveryResultCommand other)
    {
       sequenceId = other.sequenceId;
-      planarRegionsListCommand.clear();
-      for (int i = 0; i < other.planarRegionsListCommand.size(); i++)
-         planarRegionsListCommand.add().set(other.planarRegionsListCommand.get(i));
+      stepConstraintCommand.clear();
+      for (int i = 0; i < other.stepConstraintCommand.size(); i++)
+         stepConstraintCommand.add().set(other.stepConstraintCommand.get(i));
       footstepDataListCommand.set(other.footstepDataListCommand);
       isStepRecoverable = other.isStepRecoverable;
    }
@@ -94,5 +96,10 @@ public class PushRecoveryResultCommand  extends QueueableCommand<PushRecoveryRes
    public FootstepDataListCommand getRecoverySteps()
    {
       return footstepDataListCommand;
+   }
+
+   public List<StepConstraintRegionCommand> getStepConstraintRegions()
+   {
+      return stepConstraintCommand;
    }
 }

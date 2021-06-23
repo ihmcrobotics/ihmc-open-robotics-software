@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -50,7 +51,7 @@ public class MultiStepPushRecoveryModule
    private final FrameConvexPolygon2DReadOnly supportPolygonInWorld;
    private final RecyclingArrayList<Footstep> recoveryFootsteps = new RecyclingArrayList<>(Footstep::new);
    private final RecyclingArrayList<FootstepTiming> recoveryTimings = new RecyclingArrayList<>(FootstepTiming::new);
-   private final List<PlanarRegion> constraintRegions = new ArrayList<>();
+   private final List<StepConstraintRegion> constraintRegions = new ArrayList<>();
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final YoBoolean isRecoveryImpossible = new YoBoolean("isRecoveryImpossible", registry);
@@ -123,13 +124,13 @@ public class MultiStepPushRecoveryModule
          pushRecoveryCalculatorVisualizer.reset();
    }
 
-   public void setConstraintRegionProvider(IntFunction<PlanarRegionsList> constraintRegionProvider)
+   public void setConstraintRegionProvider(IntFunction<List<StepConstraintRegion>> constraintRegionProvider)
    {
       for (RobotSide robotSide : RobotSide.values)
          pushRecoveryCalculators.get(robotSide).setConstraintRegionProvider(constraintRegionProvider);
    }
 
-   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider)
+   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider)
    {
       for (RobotSide robotSide : RobotSide.values)
          pushRecoveryCalculators.get(robotSide).setPlanarRegionDecider(planarRegionDecider);
@@ -181,7 +182,7 @@ public class MultiStepPushRecoveryModule
       return !constraintRegions.isEmpty();
    }
 
-   public PlanarRegion getConstraintRegion(int stepIndex)
+   public StepConstraintRegion getConstraintRegion(int stepIndex)
    {
       return constraintRegions.get(stepIndex);
    }

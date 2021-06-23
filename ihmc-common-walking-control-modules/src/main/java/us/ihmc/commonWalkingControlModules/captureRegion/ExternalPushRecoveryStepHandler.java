@@ -29,6 +29,8 @@ public class ExternalPushRecoveryStepHandler
 
    public void reset()
    {
+      recoveryFootsteps.clear();
+      recoveryFootstepTimings.clear();
       isRecoveryImpossible.set(false);
    }
 

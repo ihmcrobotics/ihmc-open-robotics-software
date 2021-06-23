@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -92,8 +93,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
-      fromLocalToWorldTransform.set(transformToWorld);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+      setTransformToWorld(transformToWorld);
 
       this.concaveHullsVertices = concaveHullVertices;
       //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
@@ -102,6 +102,17 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       convexPolygons = planarRegionConvexPolygons;
       updateBoundingBox();
       updateConvexHull();
+   }
+
+   public void setTransformToWorld(RigidBodyTransformReadOnly transformToWorld)
+   {
+      setTransformToWorld(transformToWorld.getRotation(), transformToWorld.getTranslation());
+   }
+
+   public void setTransformToWorld(Orientation3DReadOnly orientation, Tuple3DReadOnly translation)
+   {
+      fromLocalToWorldTransform.set(orientation, translation);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
    }
 
    /**

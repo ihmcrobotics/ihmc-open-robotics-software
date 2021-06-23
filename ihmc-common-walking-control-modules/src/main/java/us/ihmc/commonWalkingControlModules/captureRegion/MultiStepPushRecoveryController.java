@@ -3,10 +3,14 @@ package us.ihmc.commonWalkingControlModules.captureRegion;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PushRecoveryResultCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StepConstraintRegionCommand;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -14,7 +18,10 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Supplier;
 
 public class MultiStepPushRecoveryController
 {
@@ -22,6 +29,7 @@ public class MultiStepPushRecoveryController
    private final MultiStepPushRecoveryModule pushRecoveryModule;
    private final ExternalPushRecoveryStepHandler externalPushRecoveryStepHandler;
 
+   private final StepConstraintProvider stepConstraintProvider = new StepConstraintProvider();
    private final SideDependentList<YoPlaneContactState> contactStates;
 
    public MultiStepPushRecoveryController(SideDependentList<YoPlaneContactState> contactStates,
@@ -38,14 +46,16 @@ public class MultiStepPushRecoveryController
 
       externalPushRecoveryStepHandler = new ExternalPushRecoveryStepHandler(pushRecoveryControllerParameters, registry);
       useExternalRecoveryFootholds = new YoBoolean("useExternalRecoveryFootholds", parentRegistry);
-      this.pushRecoveryModule = new MultiStepPushRecoveryModule(new IsInContactFunction(),
-                                                                bipedSupportPolygons.getSupportPolygonInWorld(),
-                                                                bipedSupportPolygons.getFootPolygonsInWorldFrame(),
-                                                                soleZUpFrames,
-                                                                defaultSupportPolygon,
-                                                                pushRecoveryControllerParameters,
-                                                                registry,
-                                                                graphicsListRegistry);
+      pushRecoveryModule = new MultiStepPushRecoveryModule(new IsInContactFunction(),
+                                                           bipedSupportPolygons.getSupportPolygonInWorld(),
+                                                           bipedSupportPolygons.getFootPolygonsInWorldFrame(),
+                                                           soleZUpFrames,
+                                                           defaultSupportPolygon,
+                                                           pushRecoveryControllerParameters,
+                                                           registry,
+                                                           graphicsListRegistry);
+
+      pushRecoveryModule.setConstraintRegionProvider(stepConstraintProvider);
 
       parentRegistry.addChild(registry);
    }
@@ -54,6 +64,12 @@ public class MultiStepPushRecoveryController
    {
       pushRecoveryModule.reset();
       externalPushRecoveryStepHandler.reset();
+   }
+
+   public void consumePushRecoveryResultCommand(PushRecoveryResultCommand command)
+   {
+      externalPushRecoveryStepHandler.consumePushRecoveryResultCommand(command);
+      stepConstraintProvider.consumeStepConstraints(command.getStepConstraintRegions());
    }
 
    public boolean isRobotFallingFromDoubleSupport()
@@ -132,6 +148,30 @@ public class MultiStepPushRecoveryController
             return Boolean.TRUE;
          else
             return Boolean.FALSE;
+      }
+   }
+
+   private static class StepConstraintProvider implements IntFunction<List<StepConstraintRegion>>
+   {
+      private final Supplier<RecyclingArrayList<StepConstraintRegion>> listSupplier = () -> new RecyclingArrayList<>(StepConstraintRegion::new);
+      private final RecyclingArrayList<RecyclingArrayList<StepConstraintRegion>> planarRegionConstraints = new RecyclingArrayList<>(listSupplier);
+
+      public void consumeStepConstraints(List<StepConstraintRegionCommand> stepConstraints)
+      {
+         planarRegionConstraints.clear();
+         for (int stepIndex = 0; stepIndex < stepConstraints.size(); stepIndex++)
+         {
+            RecyclingArrayList<StepConstraintRegion> planarRegions = planarRegionConstraints.add();
+            StepConstraintRegionCommand planarRegionToAdd = stepConstraints.get(stepIndex);
+
+            StepConstraintRegion planarRegion = planarRegions.add();
+            planarRegion.set(planarRegionToAdd.getTransformToWorld(), planarRegionToAdd.getConcaveHullsVertices(), planarRegionToAdd.getHolesInRegion());
+         }
+      }
+
+      public List<StepConstraintRegion> apply(int index)
+      {
+         return planarRegionConstraints.get(index);
       }
    }
 }

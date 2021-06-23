@@ -11,14 +11,26 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -26,6 +38,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -43,7 +57,7 @@ public class PushRecoveryToolboxController extends ToolboxController
    private final AtomicReference<RobotConfigurationData> configurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> mostRecentPlanarRegions = new AtomicReference<>();
-   private final AtomicReference<PlanarRegionsList> planarRegionsToUse = new AtomicReference<>();
+   private final AtomicReference<List<StepConstraintRegion>> constraintRegionsToUse = new AtomicReference<>();
 
    private final IsInContactProvider isInContactProvider = new IsInContactProvider();
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
@@ -79,12 +93,18 @@ public class PushRecoveryToolboxController extends ToolboxController
                                                                   pushRecoveryControllerParameters,
                                                                   parentRegistry,
                                                                   null);
-      CapturabilityBasedPlanarRegionDecider<PlanarRegion> planarRegionDecider = new CapturabilityBasedPlanarRegionDecider<>(referenceFrames.getCenterOfMassFrame(),
-                                                                                                                            gravityZ,
-                                                                                                                            PlanarRegion::new,
-                                                                                                                            new YoRegistry("registryToThrowAway"),
-                                                                                                                            null);
-      IntFunction<PlanarRegionsList> constraintRegionProvider = (index) -> planarRegionsToUse.get();
+      CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider = new CapturabilityBasedPlanarRegionDecider<>(referenceFrames.getCenterOfMassFrame(),
+                                                                                                                                    gravityZ,
+                                                                                                                                    StepConstraintRegion::new,
+                                                                                                                                    new YoRegistry("registryToThrowAway"),
+                                                                                                                                    null);
+      IntFunction<List<StepConstraintRegion>> constraintRegionProvider = (index) ->
+      {
+         if (constraintRegionsToUse.get() != null)
+            return constraintRegionsToUse.get();
+         else
+            return null;
+      };
       pushRecoveryControlModule.setPlanarRegionDecider(planarRegionDecider);
       pushRecoveryControlModule.setConstraintRegionProvider(constraintRegionProvider);
       isDone.set(false);
@@ -123,7 +143,7 @@ public class PushRecoveryToolboxController extends ToolboxController
          PlanarRegionsListMessage planarRegions = this.mostRecentPlanarRegions.getAndSet(null);
          if (planarRegions != null)
          {
-            planarRegionsToUse.set(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions));
+            constraintRegionsToUse.set(convertToStepConstraintRegionsList(planarRegions));
          }
 
          pushRecoveryControlModule.updateForDoubleSupport(capturePoint, omega);
@@ -150,7 +170,7 @@ public class PushRecoveryToolboxController extends ToolboxController
 
                if (pushRecoveryControlModule.hasConstraintRegions())
                {
-                  message.getStepConstraintList().add().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(pushRecoveryControlModule.getConstraintRegion(i)));
+                  message.getStepConstraintList().add().set(StepConstraintMessageConverter.convertToStepConstraintMessage(pushRecoveryControlModule.getConstraintRegion(i)));
                }
             }
          }
@@ -218,6 +238,48 @@ public class PushRecoveryToolboxController extends ToolboxController
    public void updatePlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
    {
       this.mostRecentPlanarRegions.set(planarRegionsListMessage);
+   }
+
+   private static List<StepConstraintRegion> convertToStepConstraintRegionsList(PlanarRegionsListMessage message)
+   {
+      int vertexIndex = 0;
+      IDLSequence.Object<Vector3D> normals = message.getRegionNormal();
+      IDLSequence.Object<Point3D> origins = message.getRegionOrigin();
+
+      IDLSequence.Object<Point3D> vertexBuffer = message.getVertexBuffer();
+
+      List<StepConstraintRegion> constraintRegions = new ArrayList<>();
+
+      int upperBound = 0;
+
+      for (int regionIndex = 0; regionIndex < message.getConcaveHullsSize().size(); regionIndex++)
+      {
+         RigidBodyTransform transformToWorld = new RigidBodyTransform();
+         if (message.getRegionOrientation().isEmpty()
+             || Math.abs(AngleTools.trimAngleMinusPiToPi(message.getRegionOrientation().get(regionIndex).getAngle())) < 1.0e-3)
+         {
+            AxisAngle regionOrientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normals.get(regionIndex));
+            transformToWorld.set(regionOrientation, origins.get(regionIndex));
+         }
+         else
+         {
+            transformToWorld.set(message.getRegionOrientation().get(regionIndex), message.getRegionOrigin().get(regionIndex));
+         }
+
+         upperBound += message.getConcaveHullsSize().get(regionIndex);
+         List<Point2D> concaveHullVertices = new ArrayList<>();
+
+         for (; vertexIndex < upperBound; vertexIndex++)
+         {
+            concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
+         }
+
+         StepConstraintRegion planarRegion = new StepConstraintRegion(transformToWorld, Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices), new ArrayList<>());
+         planarRegion.setRegionId(message.getRegionId().get(regionIndex));
+         constraintRegions.add(planarRegion);
+      }
+
+      return constraintRegions;
    }
 
    private static class IsInContactProvider implements Function<RobotSide, Boolean>
