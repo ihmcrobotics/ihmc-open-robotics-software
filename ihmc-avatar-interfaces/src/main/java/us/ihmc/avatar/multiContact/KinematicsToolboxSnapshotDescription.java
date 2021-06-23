@@ -19,6 +19,7 @@ import controller_msgs.msg.dds.KinematicsToolboxPrivilegedConfigurationMessagePu
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.RobotConfigurationDataPubSubType;
 import us.ihmc.euclid.transform.interfaces.Transform;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 
 public class KinematicsToolboxSnapshotDescription
@@ -198,9 +199,17 @@ public class KinematicsToolboxSnapshotDescription
 
    public void applyTransform(Transform transform)
    {
-      controllerConfiguration.getRootTranslation().applyTransform(transform);
+      Point3D point = new Point3D();
+      point.set(controllerConfiguration.getRootTranslation());
+      point.applyTransform(transform);
+//      controllerConfiguration.getRootTranslation().applyTransform(transform);
+      controllerConfiguration.getRootTranslation().set(point);
       controllerConfiguration.getRootOrientation().applyTransform(transform);
-      ikSolution.getDesiredRootTranslation().applyTransform(transform);
+
+      point.set(ikSolution.getDesiredRootTranslation());
+      point.applyTransform(transform);
+//      ikSolution.getDesiredRootTranslation().applyTransform(transform);
+      ikSolution.getDesiredRootTranslation().set(point);
       ikSolution.getDesiredRootOrientation().applyTransform(transform);
       ikPrivilegedConfiguration.getPrivilegedRootJointPosition().applyTransform(transform);
       ikPrivilegedConfiguration.getPrivilegedRootJointOrientation().applyTransform(transform);
