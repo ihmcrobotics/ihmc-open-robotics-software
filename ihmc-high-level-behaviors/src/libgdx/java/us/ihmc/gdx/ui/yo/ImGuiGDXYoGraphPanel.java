@@ -3,7 +3,10 @@ package us.ihmc.gdx.ui.yo;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
+import imgui.extension.implot.flag.ImPlotAxisFlags;
+import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.extension.implot.flag.ImPlotLocation;
+import imgui.extension.implot.flag.ImPlotStyleVar;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -127,13 +130,19 @@ public class ImGuiGDXYoGraphPanel
                      int currentValueIndex = currentIndex.getAndIncrement();
                      values[currentValueIndex] = variable.getValueAsDouble();
                      int graphWidth = 500;
-                     int graphHeight = 250;
-                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", "Time", variable.getName(), new ImVec2(graphWidth, graphHeight)))
+                     int graphHeight = 65;
+                     ImPlot.pushStyleVar(ImPlotStyleVar.PlotPadding, new ImVec2(0, 0));
+                     ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
+                     ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(0, 0));
+                     ImPlot.pushStyleVar(ImPlotStyleVar.FitPadding, new ImVec2(0, 0));
+                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", "", "", new ImVec2(graphWidth, graphHeight), ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect,
+                                          ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit, ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels | ImPlotAxisFlags.AutoFit))
                      {
                         Double[] data = ImPlotTools.removeNullElements(values);
                         ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
                         ImPlot.endPlot();
                      }
+                     ImPlot.popStyleVar(4);
                      if (ImGui.beginPopup(variable.getName() + " hover popup"))
                      {
                         ImGui.text(variable.getFullNameString());
