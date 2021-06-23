@@ -30,7 +30,7 @@ public class BuildingExplorationBehavior extends ResettingNode implements Behavi
    private final DoorBehavior doorBehavior;
    private final ROS2SyncedRobotModel syncedRobot;
    private final AtomicReference<Pose3D> goal = new AtomicReference<>(NAN_POSE);
-   private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(AUTO);
+   private final AtomicReference<BuildingExplorationBehaviorMode> mode = new AtomicReference<>(TELEOP);
    private final TraverseStairsBehavior traverseStairsBehavior;
    private final BuildingExplorationBehaviorParameters parameters;
    private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("CommsRelay", true);
