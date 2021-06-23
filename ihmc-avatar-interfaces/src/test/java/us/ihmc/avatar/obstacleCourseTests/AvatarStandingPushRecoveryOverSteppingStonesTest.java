@@ -115,6 +115,8 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
                                                                "enablePushRecoveryOnFailure");
       enableOnFailure.set(true);
 
+      ((YoBoolean) drcSimulationTestHelper.getYoVariable("useExternalRecoveryFootholds")).set(true);
+
       SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 
       setupCameraForWalkingOverEasySteppingStones(scs);

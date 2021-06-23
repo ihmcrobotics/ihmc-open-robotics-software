@@ -3,8 +3,10 @@ package us.ihmc.avatar.networkProcessor.pushRecoveryToolboxModule;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.avatar.stepAdjustment.SimpleStep;
 import us.ihmc.commonWalkingControlModules.captureRegion.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryModule;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -24,6 +26,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -37,9 +41,11 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -54,14 +60,21 @@ public class PushRecoveryToolboxController extends ToolboxController
    private final OneDoFJointBasics[] oneDoFJoints;
    private final HumanoidReferenceFrames referenceFrames;
 
+   private final YoEnum<HighLevelControllerName> currentState;
+
    private final AtomicReference<RobotConfigurationData> configurationData = new AtomicReference<>();
    private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
    private final AtomicReference<PlanarRegionsListMessage> mostRecentPlanarRegions = new AtomicReference<>();
    private final AtomicReference<List<StepConstraintRegion>> constraintRegionsToUse = new AtomicReference<>();
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
+   private final AtomicReference<HighLevelStateMessage> highLevelStateMessage = new AtomicReference<>();
+
+   private final SideDependentList<AtomicBoolean> feetInContact = new SideDependentList<>(new AtomicBoolean(true), new AtomicBoolean(true));
 
    private final IsInContactProvider isInContactProvider = new IsInContactProvider();
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
-   private final SideDependentList<FrameConvexPolygon2D> footSupportPolygonsInWorld = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
+   private final SideDependentList<FrameConvexPolygon2D> footSupportPolygonsInWorld = new SideDependentList<>(new FrameConvexPolygon2D(),
+                                                                                                              new FrameConvexPolygon2D());
 
    private final MultiStepPushRecoveryModule pushRecoveryControlModule;
 
@@ -96,8 +109,11 @@ public class PushRecoveryToolboxController extends ToolboxController
       CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider = new CapturabilityBasedPlanarRegionDecider<>(referenceFrames.getCenterOfMassFrame(),
                                                                                                                                     gravityZ,
                                                                                                                                     StepConstraintRegion::new,
-                                                                                                                                    new YoRegistry("registryToThrowAway"),
+                                                                                                                                    new YoRegistry(
+                                                                                                                                          "registryToThrowAway"),
                                                                                                                                     null);
+
+      currentState = new YoEnum<>("controllerCurrentState", registry, HighLevelControllerName.class);
       IntFunction<List<StepConstraintRegion>> constraintRegionProvider = (index) ->
       {
          if (constraintRegionsToUse.get() != null)
@@ -114,6 +130,8 @@ public class PushRecoveryToolboxController extends ToolboxController
    public boolean initialize()
    {
       isDone.set(false);
+      for (RobotSide robotSide : RobotSide.values)
+         feetInContact.get(robotSide).set(true);
       return true;
    }
 
@@ -122,60 +140,12 @@ public class PushRecoveryToolboxController extends ToolboxController
    {
       try
       {
-         RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
-         if (configurationData != null)
-         {
-            KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(configurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
-            referenceFrames.updateFrames();
-         }
-
-         CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getAndSet(null);
-         if (capturabilityBasedStatus != null)
-         {
-            isInContactProvider.setCapturabilityBasedStatus(capturabilityBasedStatus);
-
-            updateSupportPolygons(capturabilityBasedStatus);
-
-            capturePoint.set(capturabilityBasedStatus.getCapturePoint2d());
-            omega = capturabilityBasedStatus.getOmega();
-         }
-
-         PlanarRegionsListMessage planarRegions = this.mostRecentPlanarRegions.getAndSet(null);
-         if (planarRegions != null)
-         {
-            constraintRegionsToUse.set(convertToStepConstraintRegionsList(planarRegions));
-         }
+         updateStateFromMessages();
 
          pushRecoveryControlModule.updateForDoubleSupport(capturePoint, omega);
 
-         PushRecoveryResultMessage message = new PushRecoveryResultMessage();
-
-         if (pushRecoveryControlModule.isRecoveryImpossible())
-         {
-            message.setIsStepRecoverable(false);
-         }
-         else
-         {
-            message.setIsStepRecoverable(true);
-            for (int i = 0; i < pushRecoveryControlModule.getNumberOfRecoverySteps(); i++)
-            {
-               FootstepTiming recoveryTiming = pushRecoveryControlModule.getRecoveryStepTiming(i);
-               Footstep step = pushRecoveryControlModule.getRecoveryStep(i);
-               FootstepDataMessage stepMessage = message.getRecoverySteps().getFootstepDataList().add();
-
-               stepMessage.setTransferDuration(recoveryTiming.getTransferTime());
-               stepMessage.setSwingDuration(recoveryTiming.getSwingTime());
-               stepMessage.getLocation().set(step.getFootstepPose().getPosition());
-               stepMessage.getOrientation().set(step.getFootstepPose().getOrientation());
-
-               if (pushRecoveryControlModule.hasConstraintRegions())
-               {
-                  message.getStepConstraintList().add().set(StepConstraintMessageConverter.convertToStepConstraintMessage(pushRecoveryControlModule.getConstraintRegion(i)));
-               }
-            }
-         }
-
-         pushRecoveryResultPublisher.publish(message);
+         if (shouldBroadcastResult())
+            computeAndPublishResultMessage();
       }
       catch (Throwable e)
       {
@@ -191,6 +161,50 @@ public class PushRecoveryToolboxController extends ToolboxController
          }
 
          isDone.set(true);
+      }
+   }
+
+   private void updateStateFromMessages()
+   {
+      if (highLevelStateMessage.get() != null)
+         currentState.set(HighLevelControllerName.fromByte(highLevelStateMessage.getAndSet(null).getHighLevelControllerName()));
+
+      RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
+      if (configurationData != null)
+      {
+         KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(configurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
+         referenceFrames.updateFrames();
+      }
+
+      CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getAndSet(null);
+      if (capturabilityBasedStatus != null)
+      {
+         isInContactProvider.setCapturabilityBasedStatus(capturabilityBasedStatus);
+
+         updateSupportPolygons(capturabilityBasedStatus);
+
+         capturePoint.set(capturabilityBasedStatus.getCapturePoint2d());
+         omega = capturabilityBasedStatus.getOmega();
+      }
+
+      PlanarRegionsListMessage planarRegions = this.mostRecentPlanarRegions.getAndSet(null);
+      if (planarRegions != null)
+      {
+         constraintRegionsToUse.set(convertToStepConstraintRegionsList(planarRegions));
+      }
+
+      FootstepStatusMessage footstepStatusMessage = this.footstepStatusMessage.getAndSet(null);
+      if (footstepStatusMessage != null)
+      {
+         RobotSide side = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
+         if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.STARTED)
+         {
+            feetInContact.get(side).set(false);
+         }
+         else
+         {
+            feetInContact.get(side).set(true);
+         }
       }
    }
 
@@ -212,6 +226,54 @@ public class PushRecoveryToolboxController extends ToolboxController
       footSupportPolygonsInWorld.get(RobotSide.LEFT).update();
       footSupportPolygonsInWorld.get(RobotSide.RIGHT).update();
       supportPolygonInWorld.update();
+   }
+
+   private boolean shouldBroadcastResult()
+   {
+      if (currentState.getEnumValue() != HighLevelControllerName.PUSH_RECOVERY)
+         return false;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         if (!feetInContact.get(robotSide).get())
+            return false;
+      }
+
+      return true;
+   }
+
+   private void computeAndPublishResultMessage()
+   {
+      PushRecoveryResultMessage message = new PushRecoveryResultMessage();
+
+      if (pushRecoveryControlModule.isRecoveryImpossible())
+      {
+         message.setIsStepRecoverable(false);
+      }
+      else
+      {
+         message.setIsStepRecoverable(true);
+         for (int i = 0; i < pushRecoveryControlModule.getNumberOfRecoverySteps(); i++)
+         {
+            FootstepTiming recoveryTiming = pushRecoveryControlModule.getRecoveryStepTiming(i);
+            Footstep step = pushRecoveryControlModule.getRecoveryStep(i);
+            FootstepDataMessage stepMessage = message.getRecoverySteps().getFootstepDataList().add();
+
+            stepMessage.setTransferDuration(recoveryTiming.getTransferTime());
+            stepMessage.setSwingDuration(recoveryTiming.getSwingTime());
+            stepMessage.getLocation().set(step.getFootstepPose().getPosition());
+            stepMessage.getOrientation().set(step.getFootstepPose().getOrientation());
+
+            if (pushRecoveryControlModule.hasConstraintRegions())
+            {
+               message.getStepConstraintList()
+                      .add()
+                      .set(StepConstraintMessageConverter.convertToStepConstraintMessage(pushRecoveryControlModule.getConstraintRegion(i)));
+            }
+         }
+      }
+
+      pushRecoveryResultPublisher.publish(message);
    }
 
    @Override
@@ -274,7 +336,9 @@ public class PushRecoveryToolboxController extends ToolboxController
             concaveHullVertices.add(new Point2D(vertexBuffer.get(vertexIndex)));
          }
 
-         StepConstraintRegion planarRegion = new StepConstraintRegion(transformToWorld, Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices), new ArrayList<>());
+         StepConstraintRegion planarRegion = new StepConstraintRegion(transformToWorld,
+                                                                      Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices),
+                                                                      new ArrayList<>());
          planarRegion.setRegionId(message.getRegionId().get(regionIndex));
          constraintRegions.add(planarRegion);
       }
@@ -282,7 +346,7 @@ public class PushRecoveryToolboxController extends ToolboxController
       return constraintRegions;
    }
 
-   private static class IsInContactProvider implements Function<RobotSide, Boolean>
+   private class IsInContactProvider implements Function<RobotSide, Boolean>
    {
       private final CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
@@ -293,6 +357,9 @@ public class PushRecoveryToolboxController extends ToolboxController
 
       public Boolean apply(RobotSide robotSide)
       {
+         if (!feetInContact.get(robotSide).get())
+            return true;
+
          if (robotSide == RobotSide.LEFT)
             return capturabilityBasedStatus.getLeftFootSupportPolygon3d().isEmpty();
          else
