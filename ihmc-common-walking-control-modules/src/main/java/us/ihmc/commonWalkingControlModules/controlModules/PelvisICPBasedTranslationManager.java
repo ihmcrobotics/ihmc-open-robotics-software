@@ -203,24 +203,27 @@ public class PelvisICPBasedTranslationManager
             statusHelper.updateWithTimeInTrajectory(deltaTime);
             positionTrajectoryGenerator.compute(deltaTime);
 
-            if (positionTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
+            if (positionTrajectoryGenerator.isDone())
             {
-               double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
-               commandBeingProcessed.set(commandQueue.poll());
-               numberOfQueuedCommands.decrement();
-               initializeTrajectoryGenerator(commandBeingProcessed, firstTrajectoryPointTime);
-               positionTrajectoryGenerator.compute(deltaTime);
+               if (!commandQueue.isEmpty())
+               {
+                  double firstTrajectoryPointTime = positionTrajectoryGenerator.getLastWaypointTime();
+                  commandBeingProcessed.set(commandQueue.poll());
+                  numberOfQueuedCommands.decrement();
+                  initializeTrajectoryGenerator(commandBeingProcessed, firstTrajectoryPointTime);
+                  positionTrajectoryGenerator.compute(deltaTime);
 
-               if (positionTrajectoryGenerator.isDone())
+                  if (positionTrajectoryGenerator.isDone())
+                  {
+                     streamTimestampOffset.setToNaN();
+                     streamTimestampSource.setToNaN();
+                  }
+               }
+               else
                {
                   streamTimestampOffset.setToNaN();
                   streamTimestampSource.setToNaN();
                }
-            }
-            else
-            {
-               streamTimestampOffset.setToNaN();
-               streamTimestampSource.setToNaN();
             }
          }
          tempPosition.setIncludingFrame(positionTrajectoryGenerator.getPosition());
