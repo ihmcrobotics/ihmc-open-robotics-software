@@ -170,9 +170,17 @@ public class TraverseStairsPlanStepsState implements State
       LogTools.info(getClass().getSimpleName() + " number of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
 
       // remove extra steps
-      while (output.getFootstepPlan().getNumberOfSteps() > targetNumberOfFootsteps)
+      int numberOfSteps = output.getFootstepPlan().getNumberOfSteps();
+      if (numberOfSteps >= 2)
       {
-         output.getFootstepPlan().remove(output.getFootstepPlan().getNumberOfSteps() - 1);
+         double onSameStairThreshold = 0.05;
+         double lastStepHeight = output.getFootstepPlan().getFootstep(numberOfSteps - 1).getFootstepPose().getZ();
+         double secondStepLastHeight = output.getFootstepPlan().getFootstep(numberOfSteps - 2).getFootstepPose().getZ();
+         boolean lastStepsAreOnSameStair = Math.abs(lastStepHeight - secondStepLastHeight) < onSameStairThreshold;
+         if (!lastStepsAreOnSameStair)
+         {
+            output.getFootstepPlan().remove(numberOfSteps - 1);
+         }
       }
 
       // lower height of first step down
