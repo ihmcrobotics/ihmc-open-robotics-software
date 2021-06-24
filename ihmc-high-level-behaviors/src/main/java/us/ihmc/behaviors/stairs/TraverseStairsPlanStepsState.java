@@ -240,8 +240,7 @@ public class TraverseStairsPlanStepsState implements State
          return false;
       }
 
-      int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
-      return output.getFootstepPlan().getNumberOfSteps() >= targetNumberOfFootsteps - 1;
+      return output.getFootstepPlan().getNumberOfSteps() >= 2;
    }
 
    boolean shouldTransitionToExecute(double timeInState)
