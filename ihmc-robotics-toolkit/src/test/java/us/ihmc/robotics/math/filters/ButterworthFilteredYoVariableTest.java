@@ -18,7 +18,7 @@ public class ButterworthFilteredYoVariableTest
    @Test
    public void testButterWorthFilter()
    {
-      boolean visualize = true;
+      boolean visualize = false;
 
       YoRegistry registry = new YoRegistry("Test");
       double deltaT = 0.002;
