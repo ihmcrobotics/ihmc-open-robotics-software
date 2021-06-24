@@ -80,6 +80,7 @@ import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.tools.io.WorkspacePathTools;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -88,6 +89,8 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -218,7 +221,9 @@ public abstract class HumanoidStepReachabilityCalculator
             FramePose3D rightFootPose = new FramePose3D();
             MultiContactScriptWriter scriptWriter = new MultiContactScriptWriter();
 
-            File reachabilityFile = new File(robotModel.getStepReachabilityResourceName());
+            Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+            Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
+            File reachabilityFile = filePath.toFile();
             scriptWriter.startNewScript(reachabilityFile, true);
 
             // Loop through XYZs, free yaw

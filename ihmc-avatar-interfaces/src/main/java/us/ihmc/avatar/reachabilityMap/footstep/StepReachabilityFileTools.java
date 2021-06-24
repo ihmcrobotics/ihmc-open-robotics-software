@@ -13,6 +13,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -60,9 +61,9 @@ public class StepReachabilityFileTools
    public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
    {
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      String pathString = FilenameUtils.separatorsToSystem(robotModel.getStepReachabilityResourceName());
-      Path filePath = Paths.get(pathString);
 
+      Path rootPath = WorkspacePathTools.handleWorkingDirectoryFuzziness("ihmc-open-robotics-software");
+      Path filePath = Paths.get(rootPath.toString(), robotModel.getStepReachabilityResourceName());
       scriptReader.loadScript(filePath.toFile());
       return scriptReader.getAllItems();
    }
