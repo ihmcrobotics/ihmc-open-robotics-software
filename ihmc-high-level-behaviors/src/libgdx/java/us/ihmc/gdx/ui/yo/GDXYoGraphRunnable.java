@@ -4,6 +4,7 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.flag.*;
+import imgui.flag.ImGuiDragDropFlags;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
@@ -16,6 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GDXYoGraphRunnable implements Runnable
 {
    private boolean shouldGraphExist = true;
+   private boolean requestAddVariable = false;
 
    private final ImPlotContext context;
    private final AtomicInteger currentIndex;
@@ -51,6 +53,20 @@ public class GDXYoGraphRunnable implements Runnable
       return shouldGraphExist;
    }
 
+   public void cancelWantVariable() {
+      requestAddVariable = false;
+   }
+
+   public boolean graphWantsVariable() {
+      return requestAddVariable;
+   }
+
+   public void addVariable(YoVariable variable) {
+      variables.add(variable);
+      values.add(new Double[bufferSize]);
+      requestAddVariable = false;
+   }
+
    @Override
    public void run()
    {
@@ -60,7 +76,7 @@ public class GDXYoGraphRunnable implements Runnable
       ImPlot.setCurrentContext(context);
 
       int currentValueIndex = currentIndex.getAndIncrement();
-      float graphWidth = ImGui.getWindowSizeX() - 45;
+      float graphWidth = ImGui.getColumnWidth() - 60;
       float graphHeight = 60;
       ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
       ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(5, 0));
@@ -82,6 +98,11 @@ public class GDXYoGraphRunnable implements Runnable
             if (ImPlot.beginLegendPopup(variable.getName()))
             {
                ImGui.text(variable.getFullNameString());
+               if (variable.getDescription() != null && !variable.getDescription().isEmpty())
+               {
+                  ImGui.separator();
+                  ImGui.textWrapped(variable.getDescription());
+               }
                if (ImGui.button("Stop tracking variable##" + variable.getName()))
                {
                   itVar.remove();
@@ -103,6 +124,12 @@ public class GDXYoGraphRunnable implements Runnable
          ImPlot.endPlot();
       }
       ImPlot.popStyleVar(2);
+
+      ImGui.sameLine();
+      if (ImGui.button("+##" + plotID, 20, graphHeight))
+      {
+         requestAddVariable = true;
+      }
 
       ImGui.sameLine();
       if (ImGui.button("X##" + plotID, 20, graphHeight))
