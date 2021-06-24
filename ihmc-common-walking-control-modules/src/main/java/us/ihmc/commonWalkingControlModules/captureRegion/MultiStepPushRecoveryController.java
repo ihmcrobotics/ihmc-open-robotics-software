@@ -53,7 +53,7 @@ public class MultiStepPushRecoveryController
                                                            defaultSupportPolygon,
                                                            pushRecoveryControllerParameters,
                                                            registry,
-                                                           graphicsListRegistry);
+                                                           null);
 
       pushRecoveryModule.setConstraintRegionProvider(stepConstraintProvider);
 

@@ -20,6 +20,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.Graphics3DObject;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -29,7 +31,9 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationToolkit.controllers.PushRobotController;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.gui.tools.SimulationOverheadPlotterFactory;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
@@ -94,17 +98,38 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    {
       DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.EASY_STEPPING_STONES;
 
+      pushRecoveryToolboxModule = new PushRecoveryToolboxModule(getRobotModel(), false, DomainFactory.PubSubImplementation.INTRAPROCESS, 9.81);
+      pushRecoveryToolboxModule.wakeUp();
+
+      SimulationConstructionSet visSCS = new SimulationConstructionSet(new Robot("dummY"), simulationTestingParameters);
+      visSCS.addYoRegistry(pushRecoveryToolboxModule.getRegistry());
+      visSCS.addYoGraphicsListRegistry(pushRecoveryToolboxModule.getYoGraphicsListRegistry());
+      visSCS.setPlaybackRealTimeRate(0.75);
+      Graphics3DObject linkGraphics = new Graphics3DObject();
+      linkGraphics.addCoordinateSystem(0.3);
+      visSCS.addStaticLinkGraphics(linkGraphics);
+      visSCS.setCameraFix(0.0, 0.0, 0.5);
+      visSCS.setCameraPosition(-0.5, 0.0, 1.0);
+
+      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = visSCS.createSimulationOverheadPlotterFactory();
+      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(pushRecoveryToolboxModule.getYoGraphicsListRegistry());
+      simulationOverheadPlotterFactory.createOverheadPlotter();
+
+      visSCS.startOnAThread();
+
+      pushRecoveryToolboxModule.attachListener(visSCS::tickAndUpdate);
+
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest");
+      drcSimulationTestHelper.createSimulation("DRCSimpleFlatGroundScriptTest", true, true);
 
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.05));
       PlanarRegionsListMessage planarRegionsListMessage = createPlanarRegionsListMessage();
       drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
-      pushRecoveryToolboxModule = new PushRecoveryToolboxModule(getRobotModel(), true, DomainFactory.PubSubImplementation.INTRAPROCESS, 9.81);
       pushRecoveryToolboxModule.wakeUp();
       pushRecoveryToolboxModule.updatePlanarRegion(planarRegionsListMessage);
+
 
       FullHumanoidRobotModel fullRobotModel = getRobotModel().createFullRobotModel();
       double z = getForcePointOffsetZInChestFrame();
@@ -147,6 +172,7 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
 	@Test
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);

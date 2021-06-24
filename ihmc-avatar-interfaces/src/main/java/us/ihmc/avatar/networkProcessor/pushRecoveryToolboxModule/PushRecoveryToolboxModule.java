@@ -12,6 +12,7 @@ import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -51,7 +52,8 @@ public class PushRecoveryToolboxModule extends ToolboxModule
                                                      defaultFootPolygon,
                                                      robotModel.getPushRecoveryControllerParameters(),
                                                      gravityZ,
-                                                     registry);
+                                                     registry,
+                                                     yoGraphicsListRegistry);
 
       new DefaultParameterReader().readParametersInRegistry(getRegistry());
       startYoVariableServer();
@@ -60,6 +62,11 @@ public class PushRecoveryToolboxModule extends ToolboxModule
          JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(yoVariableServer);
          jvmStatisticsGenerator.start();
       }
+   }
+
+   public void attachListener(Runnable listener)
+   {
+      controller.attachListener(listener);
    }
 
    @Override

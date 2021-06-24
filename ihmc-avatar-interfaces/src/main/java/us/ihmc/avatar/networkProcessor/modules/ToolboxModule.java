@@ -517,6 +517,11 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return registry;
    }
 
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   {
+      return yoGraphicsListRegistry;
+   }
+
    /**
     * @return the collection of commands that cannot wake up this module.
     */

@@ -3,9 +3,9 @@ package us.ihmc.avatar.networkProcessor.pushRecoveryToolboxModule;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
-import us.ihmc.commonWalkingControlModules.captureRegion.CapturabilityBasedPlanarRegionDecider;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
+import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -16,9 +16,11 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -34,8 +36,10 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
@@ -56,6 +60,9 @@ public class PushRecoveryToolboxController extends ToolboxController
    private static final double minimumStepSurface = 0.005;
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
+   private final YoDouble robotTimestamp = new YoDouble("robotTimestamp", registry);
+   private final YoFramePoint2D estimatedICP = new YoFramePoint2D("estimatedICP", ReferenceFrame.getWorldFrame(), registry);
+   private final YoDouble estimatedOmega = new YoDouble("estimatedOmega", registry);
 
    private final FullHumanoidRobotModel fullRobotModel;
    private final OneDoFJointBasics[] oneDoFJoints;
@@ -79,12 +86,10 @@ public class PushRecoveryToolboxController extends ToolboxController
                                                                                                               new FrameConvexPolygon2D());
 
    private final MultiStepPushRecoveryModule pushRecoveryControlModule;
-   private final CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider;
 
    private final IHMCRealtimeROS2Publisher<PushRecoveryResultMessage> pushRecoveryResultPublisher;
 
-   private final FramePoint2D capturePoint = new FramePoint2D();
-   private double omega;
+   private final List<Runnable> listeners = new ArrayList<>();
    private double distanceToShrink;
 
    public PushRecoveryToolboxController(StatusMessageOutputManager statusOutputManager,
@@ -93,7 +98,8 @@ public class PushRecoveryToolboxController extends ToolboxController
                                         ConvexPolygon2DReadOnly defaultSupportPolygon,
                                         PushRecoveryControllerParameters pushRecoveryControllerParameters,
                                         double gravityZ,
-                                        YoRegistry parentRegistry)
+                                        YoRegistry parentRegistry,
+                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -115,13 +121,7 @@ public class PushRecoveryToolboxController extends ToolboxController
                                                                   defaultSupportPolygon,
                                                                   pushRecoveryControllerParameters,
                                                                   parentRegistry,
-                                                                  null);
-      planarRegionDecider = new CapturabilityBasedPlanarRegionDecider<>(referenceFrames.getCenterOfMassFrame(),
-                                                                        gravityZ,
-                                                                        StepConstraintRegion::new,
-                                                                        new YoRegistry("registryToThrowAway"),
-                                                                        null);
-      planarRegionDecider.setSwitchPlanarRegionConstraintsAutomatically(true);
+                                                                  graphicsListRegistry);
 
       currentState = new YoEnum<>("controllerCurrentState", registry, HighLevelControllerName.class);
       IntFunction<List<StepConstraintRegion>> constraintRegionProvider = (index) ->
@@ -133,6 +133,11 @@ public class PushRecoveryToolboxController extends ToolboxController
       };
       pushRecoveryControlModule.setConstraintRegionProvider(constraintRegionProvider);
       isDone.set(false);
+   }
+
+   public void attachListener(Runnable listener)
+   {
+      listeners.add(listener);
    }
 
    @Override
@@ -151,10 +156,12 @@ public class PushRecoveryToolboxController extends ToolboxController
       {
          updateStateFromMessages();
 
-         pushRecoveryControlModule.updateForDoubleSupport(capturePoint, omega);
+         pushRecoveryControlModule.updateForDoubleSupport(estimatedICP, estimatedOmega.getDoubleValue());
 
          if (shouldBroadcastResult())
             computeAndPublishResultMessage();
+
+         listeners.forEach(Runnable::run);
       }
       catch (Throwable e)
       {
@@ -190,6 +197,7 @@ public class PushRecoveryToolboxController extends ToolboxController
       RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
       if (configurationData != null)
       {
+         robotTimestamp.set(Conversions.nanosecondsToSeconds(configurationData.getMonotonicTime()));
          KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(configurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
          referenceFrames.updateFrames();
       }
@@ -201,9 +209,8 @@ public class PushRecoveryToolboxController extends ToolboxController
 
          updateSupportPolygons(capturabilityBasedStatus);
 
-         capturePoint.set(capturabilityBasedStatus.getCapturePoint2d());
-         omega = capturabilityBasedStatus.getOmega();
-         planarRegionDecider.setOmega0(omega);
+         estimatedICP.set(capturabilityBasedStatus.getCapturePoint2d());
+         estimatedOmega.set(capturabilityBasedStatus.getOmega());
       }
 
       PlanarRegionsListMessage planarRegions = this.mostRecentPlanarRegions.getAndSet(null);
