@@ -19,6 +19,7 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 
@@ -230,13 +231,12 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
       List<Collidable> collidables = new ArrayList<>();
       double modelScale = jointMap.getModelScale();
 
-      String leftFootName = "LeftFoot";
-      String rightFootName = "RightFoot";
+      SideDependentList<String> footNames = new SideDependentList<>("LeftLeg", "RightLeg");
 
       // Collision between feet
       { // Left foot
-         long collisionMask = helper.getCollisionMask(leftFootName);
-         long collisionGroup = helper.createCollisionGroup(rightFootName);
+         long collisionMask = helper.getCollisionMask(footNames.get(RobotSide.LEFT));
+         long collisionGroup = helper.createCollisionGroup(footNames.get(RobotSide.RIGHT));
 
          JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(RobotSide.LEFT, LegJointName.ANKLE_ROLL), multiBodySystem);
          MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
@@ -251,8 +251,8 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
       }
 
       { // Right foot
-         long collisionMask = helper.getCollisionMask(rightFootName);
-         long collisionGroup = helper.createCollisionGroup(leftFootName);
+         long collisionMask = helper.getCollisionMask(footNames.get(RobotSide.RIGHT));
+         long collisionGroup = helper.createCollisionGroup(footNames.get(RobotSide.LEFT));
 
          JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.ANKLE_ROLL), multiBodySystem);
          MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
@@ -328,9 +328,9 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
       String leftShinName = "LeftShin";
       String rightShinName = "RightShin";
 
-      { // Left Shin
+      { // Make left shin collidable with right shin and right foot
          long collisionMask = helper.getCollisionMask(leftShinName);
-         long collisionGroup = helper.createCollisionGroup(rightShinName);
+         long collisionGroup = helper.createCollisionGroup(rightShinName, footNames.get(RobotSide.RIGHT));
          RobotSide robotSide = RobotSide.LEFT;
 
          RigidBodyBasics shin = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem).getSuccessor();
@@ -342,9 +342,9 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
          collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape));
       }
 
-      { // Right Shin
-         long collisionMask = helper.getCollisionMask(rightThighName);
-         long collisionGroup = helper.createCollisionGroup(leftThighName);
+      { // Make right shin collidable with left shin and left foot
+         long collisionMask = helper.getCollisionMask(rightShinName);
+         long collisionGroup = helper.createCollisionGroup(leftShinName, footNames.get(RobotSide.LEFT));
          RobotSide robotSide = RobotSide.RIGHT;
 
          RigidBodyBasics shin = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem).getSuccessor();
