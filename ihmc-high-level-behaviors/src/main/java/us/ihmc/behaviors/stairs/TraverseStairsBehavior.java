@@ -59,7 +59,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    private final AtomicBoolean operatorReviewEnabled = new AtomicBoolean(true);
    private final AtomicReference<DetectedFiducialPacket> detectedFiducial = new AtomicReference<>();
 
-   private final StateMachine<TraverseStairsStateName, State> stateMachine;
+   private final StateMachine<TraverseStairsStateName, TraverseStairsState> stateMachine;
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
    private final TraverseStairsSquareUpState squareUpState;
@@ -132,9 +132,9 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
       });
    }
 
-   private StateMachine<TraverseStairsStateName, State> buildStateMachine()
+   private StateMachine<TraverseStairsStateName, TraverseStairsState> buildStateMachine()
    {
-      StateMachineFactory<TraverseStairsStateName, State> factory = new StateMachineFactory<>(TraverseStairsStateName.class);
+      StateMachineFactory<TraverseStairsStateName, TraverseStairsState> factory = new StateMachineFactory<>(TraverseStairsStateName.class);
 
       factory.setNamePrefix("traverseStairs");
       factory.setRegistry(registry);
@@ -155,6 +155,8 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
          currentState = to;
          helper.publish(TraverseStairsBehaviorAPI.State, to.name());
       });
+
+      factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousStateName(from)));
 
       return factory.build(TraverseStairsStateName.SQUARE_UP);
    }
