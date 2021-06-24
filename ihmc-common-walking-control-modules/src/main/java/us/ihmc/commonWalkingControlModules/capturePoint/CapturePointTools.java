@@ -202,8 +202,9 @@ public class CapturePointTools
    public static double computeTimeToReachCapturePointUsingConstantCMP(double omega0, FramePoint2DReadOnly desiredCapturePoint,
                                                                        FramePoint2DReadOnly initialCapturePoint, FramePoint2DReadOnly constantDesiredCMP)
    {
-      return (1.0/omega0) * Math.log( (desiredCapturePoint.getX() - constantDesiredCMP.getX()) /
-              (initialCapturePoint.getX() - constantDesiredCMP.getX())  );
+      double desiredIcpToCMP = desiredCapturePoint.distance(constantDesiredCMP);
+      double initialIcpToCMP = initialCapturePoint.distance(constantDesiredCMP);
+      return (1.0/omega0) * Math.log( desiredIcpToCMP / initialIcpToCMP);
    }
 
    /**
