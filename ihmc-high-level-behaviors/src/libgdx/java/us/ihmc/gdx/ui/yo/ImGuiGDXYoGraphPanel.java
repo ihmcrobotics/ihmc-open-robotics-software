@@ -4,10 +4,7 @@ import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
-import imgui.extension.implot.flag.ImPlotAxisFlags;
-import imgui.extension.implot.flag.ImPlotFlags;
-import imgui.extension.implot.flag.ImPlotLocation;
-import imgui.extension.implot.flag.ImPlotStyleVar;
+import imgui.extension.implot.flag.*;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
@@ -27,6 +24,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImGuiGDXYoGraphPanel
@@ -34,10 +32,11 @@ public class ImGuiGDXYoGraphPanel
    private final String title;
    private final String controllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
    private final int bufferSize;
-   private final ArrayList<Runnable> graphs = new ArrayList<>();
+   private final ArrayList<GDXYoGraphRunnable> graphs = new ArrayList<>();
    private volatile boolean handshakeComplete = false;
    private volatile boolean disconnecting = false;
    private volatile boolean connecting = false;
+   private YoRegistry registry;
    private YoVariableClient yoVariableClient;
 
    private final ImInt graphGroupSelectedIndex = new ImInt(0);
@@ -68,7 +67,7 @@ public class ImGuiGDXYoGraphPanel
    {
       connecting = true;
       handshakeComplete = false;
-      YoRegistry registry = new YoRegistry(getClass().getSimpleName());
+      this.registry = new YoRegistry(getClass().getSimpleName());
       BasicYoVariablesUpdatedListener clientUpdateListener = new BasicYoVariablesUpdatedListener(registry);
       yoVariableClient = new YoVariableClient(clientUpdateListener);
       MissingThreadTools.startAsDaemon("YoVariableClient", DefaultExceptionHandler.MESSAGE_AND_STACKTRACE, () ->
@@ -124,37 +123,9 @@ public class ImGuiGDXYoGraphPanel
             {
                LogTools.info("Setting up graph for variable: {}", variable.getFullName());
                Double[] values = new Double[bufferSize];
-               AtomicInteger currentIndex = new AtomicInteger(0);
                synchronized (graphs)
                {
-                  graphs.add(() ->
-                  {
-                     ImPlot.setCurrentContext(context);
-
-                     int currentValueIndex = currentIndex.getAndIncrement();
-                     values[currentValueIndex] = variable.getValueAsDouble();
-                     int graphWidth = 500;
-                     int graphHeight = 50;
-                     ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
-                     ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(0, 0));
-                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", "", "", new ImVec2(graphWidth, graphHeight), ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect,
-                                          ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit, ImPlotAxisFlags.NoLabel | ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels | ImPlotAxisFlags.AutoFit))
-                     {
-                        Double[] data = ImPlotTools.removeNullElements(values);
-                        ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
-                        if (ImPlot.beginLegendPopup(variable.getName())) {
-                           ImGui.text(variable.getFullNameString());
-                           ImPlot.endLegendPopup();
-                        }
-                        ImPlot.endPlot();
-                     }
-                     ImPlot.popStyleVar(2);
-
-                     if (currentValueIndex >= bufferSize - 1)
-                     {
-                        currentIndex.set(0);
-                     }
-                  });
+                  graphs.add(new GDXYoGraphRunnable(context, variable, values, registry, bufferSize));
                }
             }
             else
@@ -211,12 +182,25 @@ public class ImGuiGDXYoGraphPanel
          }
       }
 
+      ImGui.button("timer");
+      if (ImGui.beginDragDropSource()) {
+         ImGui.setDragDropPayload("ImGuiGDXYoGraphPanel.HumanoidKinematicsSimulationContainer.main.HumanoidKinematicsSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.InverseDynamicsQPSolver.qpSolverTimerCount");
+         ImGui.endDragDropSource();
+      }
+
       synchronized (graphs)
       {
-         for (Runnable graph : graphs)
-         {
+         Iterator<GDXYoGraphRunnable> graphsIt = graphs.iterator();
+         while (graphsIt.hasNext()) {
+            GDXYoGraphRunnable graph = graphsIt.next();
             graph.run();
+            if (!graph.shouldGraphExist())
+               graphsIt.remove();
          }
+      }
+
+      if (ImGui.button("Add new graph")) {
+         graphs.add(new GDXYoGraphRunnable(context, registry, bufferSize));
       }
    }
 
