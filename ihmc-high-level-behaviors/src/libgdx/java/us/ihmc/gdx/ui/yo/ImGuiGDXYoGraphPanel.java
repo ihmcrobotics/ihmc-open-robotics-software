@@ -133,7 +133,7 @@ public class ImGuiGDXYoGraphPanel
 
                      int currentValueIndex = currentIndex.getAndIncrement();
                      values[currentValueIndex] = variable.getValueAsDouble();
-                     int graphWidth = 500;
+                     int graphWidth = -1;
                      int graphHeight = 50;
                      ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
                      ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(0, 0));
