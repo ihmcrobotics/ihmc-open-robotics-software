@@ -3,6 +3,7 @@ package us.ihmc.gdx.ui.yo;
 import imgui.ImVec2;
 import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
+import imgui.extension.implot.ImPlotStyle;
 import imgui.extension.implot.flag.ImPlotAxisFlags;
 import imgui.extension.implot.flag.ImPlotFlags;
 import imgui.extension.implot.flag.ImPlotLocation;
@@ -106,6 +107,8 @@ public class ImGuiGDXYoGraphPanel
       });
 
       context = ImPlot.createContext();
+      ImPlotStyle style = ImPlot.getStyle();
+      style.setPlotPadding(new ImVec2(0, 0));
 
       GDXYoGraphGroup graphGroup = graphGroups.get(graphGroupName);
       for (String variableName : graphGroup.getVariableNames())
@@ -131,13 +134,11 @@ public class ImGuiGDXYoGraphPanel
                      int currentValueIndex = currentIndex.getAndIncrement();
                      values[currentValueIndex] = variable.getValueAsDouble();
                      int graphWidth = 500;
-                     int graphHeight = 65;
-                     ImPlot.pushStyleVar(ImPlotStyleVar.PlotPadding, new ImVec2(0, 0));
+                     int graphHeight = 50;
                      ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
                      ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(0, 0));
-                     ImPlot.pushStyleVar(ImPlotStyleVar.FitPadding, new ImVec2(0, 0));
                      if (ImPlot.beginPlot("##" + variable.getName() + "Plot", "", "", new ImVec2(graphWidth, graphHeight), ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect,
-                                          ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit, ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels | ImPlotAxisFlags.AutoFit))
+                                          ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit, ImPlotAxisFlags.NoLabel | ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels | ImPlotAxisFlags.AutoFit))
                      {
                         Double[] data = ImPlotTools.removeNullElements(values);
                         ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
@@ -145,9 +146,9 @@ public class ImGuiGDXYoGraphPanel
                            ImGui.text(variable.getFullNameString());
                            ImPlot.endLegendPopup();
                         }
-                        ImPlot.endPlot(); //TODO find some way to get rid of the additional margins around the plot
+                        ImPlot.endPlot();
                      }
-                     ImPlot.popStyleVar(4);
+                     ImPlot.popStyleVar(2);
 
                      if (currentValueIndex >= bufferSize - 1)
                      {
