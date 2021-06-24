@@ -13,6 +13,8 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.parameters.DefaultParameterReader;
+import us.ihmc.yoVariables.parameters.XmlParameterReader;
 
 import java.io.*;
 import java.nio.file.Path;
@@ -60,10 +62,16 @@ public class StepReachabilityFileTools
    public static List<KinematicsToolboxSnapshotDescription> loadKinematicsSnapshots(DRCRobotModel robotModel)
    {
       MultiContactScriptReader scriptReader = new MultiContactScriptReader();
-      String pathString = FilenameUtils.separatorsToSystem(robotModel.getStepReachabilityResourceName());
-      Path filePath = Paths.get(pathString);
+      InputStream inputStream = robotModel.getStepReachabilityDataFile();
 
-      scriptReader.loadScript(filePath.toFile());
+      if (inputStream == null)
+      {
+         LogTools.error("No step reachability data file provided.");
+      }
+      else
+      {
+         scriptReader.loadScript(inputStream);
+      }
       return scriptReader.getAllItems();
    }
 

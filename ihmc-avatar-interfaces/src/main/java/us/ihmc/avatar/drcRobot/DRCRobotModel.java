@@ -38,6 +38,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.wholeBodyController.diagnostics.AutomatedDiagnosticAnalysisController;
 import us.ihmc.wholeBodyController.diagnostics.DiagnosticParameters;
 
+import java.io.InputStream;
+
 public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, WholeBodyControllerParameters<RobotSide>
 {
    public default RobotTarget getTarget()
@@ -156,6 +158,11 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    default StepReachabilityData getStepReachabilityData()
+   {
+      return null;
+   }
+
+   default InputStream getStepReachabilityDataFile()
    {
       return null;
    }
