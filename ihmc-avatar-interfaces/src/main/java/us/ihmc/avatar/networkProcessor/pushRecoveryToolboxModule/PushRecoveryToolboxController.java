@@ -3,7 +3,9 @@ package us.ihmc.avatar.networkProcessor.pushRecoveryToolboxModule;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryModule;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -17,10 +19,16 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -36,6 +44,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFramePoint2D;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -50,6 +59,8 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 
+import static us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer.defaultFeetColors;
+import static us.ihmc.graphicsDescription.appearance.YoAppearance.Yellow;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class PushRecoveryToolboxController extends ToolboxController
@@ -82,8 +93,7 @@ public class PushRecoveryToolboxController extends ToolboxController
 
    private final IsInContactProvider isInContactProvider = new IsInContactProvider();
    private final FrameConvexPolygon2D supportPolygonInWorld = new FrameConvexPolygon2D();
-   private final SideDependentList<FrameConvexPolygon2D> footSupportPolygonsInWorld = new SideDependentList<>(new FrameConvexPolygon2D(),
-                                                                                                              new FrameConvexPolygon2D());
+   private final SideDependentList<FixedFrameConvexPolygon2DBasics> footSupportPolygonsInWorld = new SideDependentList<>();
 
    private final MultiStepPushRecoveryModule pushRecoveryControlModule;
 
@@ -133,6 +143,25 @@ public class PushRecoveryToolboxController extends ToolboxController
       };
       pushRecoveryControlModule.setConstraintRegionProvider(constraintRegionProvider);
       isDone.set(false);
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         String robotSidePrefix = robotSide.getCamelCaseNameForStartOfExpression();
+
+         YoFrameConvexPolygon2D footPolygonViz = new YoFrameConvexPolygon2D(robotSidePrefix + "FootPolygon",
+                                                                            "",
+                                                                            ReferenceFrame.getWorldFrame(),
+                                                                            6,
+                                                                            registry);
+         footSupportPolygonsInWorld.put(robotSide, footPolygonViz);
+         YoArtifactPolygon footPolygonArtifact = new YoArtifactPolygon(robotSide.getCamelCaseNameForMiddleOfExpression() + " Foot Polygon",
+                                                                       footPolygonViz,
+                                                                       FootstepListVisualizer.defaultFeetColors.get(robotSide),
+                                                                       false);
+         graphicsListRegistry.registerArtifact("", footPolygonArtifact);
+      }
+      YoGraphicPosition capturePointViz = new YoGraphicPosition("Estimated Capture Point", estimatedICP, 0.01, YoAppearance.Blue(), YoGraphicPosition.GraphicType.BALL_WITH_ROTATED_CROSS);
+      graphicsListRegistry.registerArtifact("", capturePointViz.createArtifact());
    }
 
    public void attachListener(Runnable listener)
