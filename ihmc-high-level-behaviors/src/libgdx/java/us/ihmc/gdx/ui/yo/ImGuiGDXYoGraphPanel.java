@@ -182,12 +182,6 @@ public class ImGuiGDXYoGraphPanel
          }
       }
 
-      ImGui.button("timer");
-      if (ImGui.beginDragDropSource()) {
-         ImGui.setDragDropPayload("ImGuiGDXYoGraphPanel.HumanoidKinematicsSimulationContainer.main.HumanoidKinematicsSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.WholeBodyControllerCore.WholeBodyInverseDynamicsSolver.InverseDynamicsOptimizationControlModule.InverseDynamicsQPSolver.qpSolverTimerCount");
-         ImGui.endDragDropSource();
-      }
-
       synchronized (graphs)
       {
          Iterator<GDXYoGraphRunnable> graphsIt = graphs.iterator();
