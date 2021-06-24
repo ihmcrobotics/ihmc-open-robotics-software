@@ -51,7 +51,7 @@ public class LegElasticityDebuggator
       for (RobotSide robotSide : RobotSide.values)
       {
          footPosesMidZUp.get(robotSide).setFromReferenceFrame(referenceFrames.getSoleFrame(robotSide));
-         footPosesOppFrame.get(robotSide).setFromReferenceFrame(referenceFrames.getSoleFrame(robotSide));
+         footPosesOppFrame.get(robotSide).setFromReferenceFrame(referenceFrames.getSoleFrame(robotSide.getOppositeSide()));
       }
 
       footSpacingMidZUp.sub(footPosesMidZUp.get(RobotSide.LEFT).getPosition(), footPosesMidZUp.get(RobotSide.RIGHT).getPosition());
