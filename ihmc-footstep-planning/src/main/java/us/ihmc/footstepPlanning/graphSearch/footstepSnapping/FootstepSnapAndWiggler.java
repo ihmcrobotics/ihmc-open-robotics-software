@@ -7,15 +7,19 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstep;
 import us.ihmc.footstepPlanning.graphSearch.graph.DiscreteFootstepTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.registry.YoRegistry;
 
 import java.util.HashMap;
 import java.util.function.ToDoubleFunction;
@@ -25,7 +29,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final FootstepPlannerParametersReadOnly parameters;
 
-   private final GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
+   private final GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -33,22 +37,48 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
    private final RigidBodyTransform legCollisionShapeToSoleTransform = new RigidBodyTransform();
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
    private final GradientDescentStepConstraintInput gradientDescentStepConstraintInput = new GradientDescentStepConstraintInput();
+   private double flatGroundHeight = 0.0;
 
    private final HashMap<DiscreteFootstep, FootstepSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
    private final ConvexPolygon2D tempPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
+   // Use this by default
    public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
+   {
+      this(footPolygonsInSoleFrame, parameters, null, null, null);
+   }
+
+   // Call this constructor only for testing
+   public FootstepSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                 FootstepPlannerParametersReadOnly parameters,
+                                 TickAndUpdatable tickAndUpdatable,
+                                 YoGraphicsListRegistry graphicsListRegistry,
+                                 YoRegistry parentRegistry)
    {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
       this.parameters = parameters;
+
+      if (tickAndUpdatable == null)
+      {
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
+      }
+      else
+      {
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(tickAndUpdatable, graphicsListRegistry, parentRegistry);
+      }
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
       snapDataHolder.clear();
+   }
+
+   public void setFlatGroundHeight(double flatGroundHeight)
+   {
+      this.flatGroundHeight = flatGroundHeight;
    }
 
    public void initialize()
@@ -85,7 +115,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       }
       else if (flatGroundMode())
       {
-         return FootstepSnapData.identityData();
+         return FootstepSnapData.identityData(flatGroundHeight);
       }
       else
       {
@@ -192,6 +222,35 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
          gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
 
+         if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+         {
+            FootstepSnapData stanceSnapData = snapDataHolder.get(stanceStep);
+            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
+
+            DiscreteFootstepTools.getFootPolygon(stanceStep, footPolygonsInSoleFrame.get(stanceStep.getRobotSide()), footPolygon);
+            ConvexPolygon2D stancePolygonInStanceSnapFrame = FootstepSnappingTools.computeTransformedPolygon(footPolygon, stanceSnapData.getSnapTransform());
+
+            // transform from stance snap frame to region local
+            tempTransform.set(stanceSnapData.getSnapTransform());
+            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+
+            Point3D stanceVertex3D = new Point3D();
+            ConvexPolygon2D projectedStanceFoot = new ConvexPolygon2D();
+
+            for (int i = 0; i < stancePolygonInStanceSnapFrame.getNumberOfVertices(); i++)
+            {
+               stanceVertex3D.set(footPolygon.getVertex(i).getX(), footPolygon.getVertex(i).getY(), 0.0);
+               tempTransform.transform(stanceVertex3D);
+
+               // project to xy in region local
+               projectedStanceFoot.addVertex(stanceVertex3D.getX(), stanceVertex3D.getY());
+            }
+
+            projectedStanceFoot.update();
+            gradientDescentStepConstraintInput.setStanceFootPolygon(projectedStanceFoot);
+            gradientDescentStepConstraintSolver.setStanceFootClearance(parameters.getMinClearanceFromStance());
+         }
+
          if (parameters.getEnableShinCollisionCheck())
          {
             RigidBodyTransform snappedStepTransform = snapData.getSnappedStepTransform(footstepToWiggle);
@@ -245,7 +304,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
 
-      if (stanceStep != null && snapDataHolder.containsKey(stanceStep))
+      if (!parameters.getEnableConcaveHullWiggler() && stanceStep != null && snapDataHolder.containsKey(stanceStep))
       {
          FootstepSnapData stanceStepSnapData = snapDataHolder.get(stanceStep);
 
@@ -290,13 +349,13 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
       polyon1.applyTransform(transform1, false);
       polyon2.applyTransform(transform2, false);
 
-      boolean intersection = DiscreteFootstepTools.arePolygonsIntersecting(polyon1, polyon2);
+      boolean intersection = StepConstraintPolygonTools.arePolygonsIntersecting(polyon1, polyon2);
       if (intersection)
       {
          return true;
       }
 
-      double distance = DiscreteFootstepTools.distanceBetweenPolygons(polyon1, polyon2);
+      double distance = StepConstraintPolygonTools.distanceBetweenPolygons(polyon1, polyon2);
       return distance < parameters.getMinClearanceFromStance();
    }
 
@@ -343,7 +402,7 @@ public class FootstepSnapAndWiggler implements FootstepSnapperReadOnly
          Vertex2DSupplier concaveHullVertices = Vertex2DSupplier.asVertex2DSupplier(planarRegion.getConcaveHull());
          deltaInsideCalculator = vertex ->
          {
-            boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concaveHullVertices, vertex);
+            boolean pointIsInside = StepConstraintPolygonTools.isPointInsidePolygon(concaveHullVertices, vertex);
             double distanceSquaredFromPerimeter = FootPlacementConstraintCalculator.distanceSquaredFromPerimeter(concaveHullVertices, vertex, null);
             return (pointIsInside ? 1 : -1) * Math.sqrt(distanceSquaredFromPerimeter);
          };

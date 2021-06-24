@@ -612,6 +612,39 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       return Collections.unmodifiableMap(processorIDMap);
    }
 
+   public void addIMUAngularVelocityBiasOnlyForSpecifiedSensors(Vector3DReadOnly bias, boolean forVizOnly, String... sensorsToConsider)
+   {
+      addIMUAngularVelocityBiasWithSensorsToIgnore(bias, forVizOnly, invertSensorSelection(IMU_ANGULAR_VELOCITY, sensorsToConsider));
+   }
+
+   public void addIMUAngularVelocityBiasWithSensorsToIgnore(Vector3DReadOnly bias, boolean forVizOnly, String... sensorsToIgnore)
+   {
+      List<String> sensorToIgnoreList = new ArrayList<>();
+      if (sensorsToIgnore != null && sensorsToIgnore.length > 0)
+         sensorToIgnoreList.addAll(Arrays.asList(sensorsToIgnore));
+
+      for (int i = 0; i < imuSensorDefinitions.size(); i++)
+      {
+         IMUDefinition imuDefinition = imuSensorDefinitions.get(i);
+         String imuName = imuDefinition.getName();
+
+         if (sensorToIgnoreList.contains(imuName))
+            continue;
+
+         YoFrameVector3D intermediateSignal = intermediateAngularVelocities.get(imuDefinition);
+         List<ProcessingYoVariable> processors = processedAngularVelocities.get(imuDefinition);
+
+         String prefix = IMU_ANGULAR_VELOCITY.getProcessorNamePrefix(AFFINE);
+         String suffix = IMU_ANGULAR_VELOCITY.getProcessorNameSuffix(imuName, processors.size());
+         YoFrameVector3D filteredAngularVelocity = new YoFrameVector3D(prefix, suffix, intermediateSignal.getReferenceFrame(), registry);
+         ProcessingYoVariable processor = () -> filteredAngularVelocity.add(intermediateSignal, bias);
+         processors.add(processor);
+
+         if (!forVizOnly)
+            intermediateAngularVelocities.put(imuDefinition, filteredAngularVelocity);
+      }
+   }
+
    private Map<String, Integer> addIMUVectorTypeDataAlphaFilter(DoubleProvider alphaFilter,
                                                                 boolean forVizOnly,
                                                                 SensorType sensorType,
@@ -1676,6 +1709,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
          YoFrameVector3D processedAngularVelocity = new YoFrameVector3D(angularVelocityPrefix, angularVelocitySuffix, sensorFrame, registry);
 
          YoIMUMahonyFilter filter = new YoIMUMahonyFilter(imuName,
+                                                          imuName,
                                                           orientationSuffix,
                                                           updateDT,
                                                           sensorFrame,

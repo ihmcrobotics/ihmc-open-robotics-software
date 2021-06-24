@@ -593,6 +593,16 @@ public class GDXMultiColorMeshBuilder
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
    }
 
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Color color)
+   {
+      addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, 25), color);
+   }
+
+   public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, int resolution, Color color)
+   {
+      addMesh(MeshDataGenerator.ArcTorus(startAngle, endAngle, majorRadius, minorRadius, resolution), color);
+   }
+
    public void addMesh(MeshDataHolder meshDataHolder, Tuple3DReadOnly offset, AxisAngle orientation, Color color)
    {
       meshBuilder.addMesh(createMeshDataWithColor(meshDataHolder, color), offset, orientation);

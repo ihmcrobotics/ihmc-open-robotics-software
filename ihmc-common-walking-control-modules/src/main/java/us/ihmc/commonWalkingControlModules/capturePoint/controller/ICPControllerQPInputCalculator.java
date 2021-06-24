@@ -6,6 +6,7 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.dense.row.misc.UnrolledInverseFromMinor_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
@@ -21,7 +22,7 @@ public class ICPControllerQPInputCalculator
    private final DMatrixRMaj feedbackObjective = new DMatrixRMaj(2, 1);
    private final DMatrixRMaj feedbackJtW = new DMatrixRMaj(6, 2);
 
-   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.linear(2);
+   final DMatrixRMaj directionJacobian = new DMatrixRMaj(1, 6);
 
    private final DMatrixRMaj invertedFeedbackGain = new DMatrixRMaj(2, 2);
 
@@ -112,9 +113,7 @@ public class ICPControllerQPInputCalculator
                                    DMatrixRMaj weight,
                                    boolean useAngularMomentum)
    {
-      invertedFeedbackGain.zero();
-      solver.setA(feedbackGain);
-      solver.invert(invertedFeedbackGain);
+      UnrolledInverseFromMinor_DDRM.inv(feedbackGain, invertedFeedbackGain);
 
       int size = 2;
       if (useAngularMomentum)
@@ -138,6 +137,34 @@ public class ICPControllerQPInputCalculator
       CommonOps_DDRM.multAdd(feedbackJtW, feedbackJacobian, icpQPInput.quadraticTerm);
       CommonOps_DDRM.multAdd(feedbackJtW, feedbackObjective, icpQPInput.linearTerm);
       multAddInner(0.5, feedbackObjective, weight, icpQPInput.residualCost);
+   }
+
+   /**
+    * Computes a task that minimizes the different from the resulting CMP feedback direction from the desired one. This computes the task input as trying to
+    * drive the cross product between the desired feedback and the actual feedback to zero.
+    */
+   public void computeFeedbackDirectionTask(ICPQPInput icpQPInput,
+                                            DMatrixRMaj desiredFeedbackDirection,
+                                            double weight,
+                                            boolean useAngularMomentum)
+   {
+      int size = 2;
+      if (useAngularMomentum)
+         size += 2;
+
+      directionJacobian.reshape(1, size);
+      directionJacobian.zero();
+
+      directionJacobian.set(0, copFeedbackIndex, desiredFeedbackDirection.get(1));
+      directionJacobian.set(0, copFeedbackIndex + 1, -desiredFeedbackDirection.get(0));
+
+      if (useAngularMomentum)
+      {
+         directionJacobian.set(0, cmpFeedbackIndex, desiredFeedbackDirection.get(1));
+         directionJacobian.set(0, cmpFeedbackIndex + 1, -desiredFeedbackDirection.get(0));
+      }
+
+      MatrixTools.multAddInner(weight, directionJacobian, icpQPInput.quadraticTerm);
    }
 
    public void computeResidualDynamicsError(DMatrixRMaj solution, DMatrixRMaj errorToPack)

@@ -72,7 +72,8 @@ public class SwingOverPlanarRegionsLogViewer
                                                                          new DefaultFootstepPlannerParameters(),
                                                                          parameters,
                                                                          walkingControllerParameters,
-                                                                         footPolygons);
+                                                                         footPolygons,
+                                                                         null);
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
@@ -104,7 +105,7 @@ public class SwingOverPlanarRegionsLogViewer
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
-      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.POSITION);
+      planningModule.getSwingPlanningModule().computeSwingWaypoints(request.getPlanarRegionsList(), footstepPlan, request.getStartFootPoses(), SwingPlannerType.TWO_WAYPOINT_POSITION);
 
       scs.startOnAThread();
       scs.cropBuffer();

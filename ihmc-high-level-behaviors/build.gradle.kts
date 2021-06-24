@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.17"
+   id("us.ihmc.ihmc-cd") version "1.20"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -32,6 +32,7 @@ javafxDependencies {
 libgdxDependencies {
    api(ihmc.sourceSetProject("main"))
    api("org.lwjgl:lwjgl-opencl:3.2.3")
+   api("org.abego.treelayout:org.abego.treelayout.core:1.0.3")
    api("us.ihmc:ihmc-graphics-libgdx:source")
    api("us.ihmc:ihmc-perception-javacv:source")
    api("us.ihmc:ihmc-graphics-libgdx:source")

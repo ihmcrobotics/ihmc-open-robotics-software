@@ -5,9 +5,11 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import net.jpountz.lz4.LZ4Compressor;
+import net.jpountz.lz4.LZ4Exception;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
 import net.jpountz.util.Native;
+import us.ihmc.log.LogTools;
 
 /**
  * Helper class to easily switch compression algorithms .
@@ -63,7 +65,23 @@ public class LZ4CompressionImplementation implements CompressionImplementation
    public int compress(ByteBuffer src, ByteBuffer target)
    {
       int targetPosition = target.position();
-      compressor.compress(src, target);
+      try
+      {
+         compressor.compress(src, target);
+      }
+      catch (LZ4Exception e)
+      {
+         LogTools.error("src.capacity = " + src.capacity()
+                        + ", src.position = " + src.position()
+                        + ", src.remaining = {}"
+                        + ", target.capacity = {}"
+                        + ", target.position = " + target.position()
+                        + ", target.remaining = {}",
+                        src.remaining(),
+                        target.capacity(),
+                        target.remaining());
+         e.printStackTrace();
+      }
       return target.position() - targetPosition;
    }
 

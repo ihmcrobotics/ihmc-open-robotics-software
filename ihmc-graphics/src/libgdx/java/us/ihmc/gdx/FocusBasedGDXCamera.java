@@ -208,9 +208,9 @@ public class FocusBasedGDXCamera extends Camera
       cameraPose.appendRotation(rollAxisAngle);
       cameraPose.appendTranslation(0.0, 0.0, -zoom);
 
-      euclidDirection.set(0.0, 0.0, 1.0);
+      euclidDirection.set(Axis3D.Z);
       cameraPose.getOrientation().transform(euclidDirection);
-      euclidUp.set(0.0, 1.0, 0.0);
+      euclidUp.set(Axis3D.Y); // camera is rendered in Y up
       cameraPose.getOrientation().transform(euclidUp);
 
       position.set(cameraPose.getPosition().getX32(), cameraPose.getPosition().getY32(), cameraPose.getPosition().getZ32());
@@ -227,12 +227,12 @@ public class FocusBasedGDXCamera extends Camera
       isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
       isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
 
-      if (input.isDragging())
+      if (input.isDraggingLeft())
       {
          mouseDragged(input.getMouseDraggedX(), input.getMouseDraggedY());
       }
 
-      if (input.isWindowHovered())
+      if (input.isWindowHovered() && !ImGui.getIO().getKeyCtrl())
       {
          scrolled(input.getMouseWheelDelta());
       }

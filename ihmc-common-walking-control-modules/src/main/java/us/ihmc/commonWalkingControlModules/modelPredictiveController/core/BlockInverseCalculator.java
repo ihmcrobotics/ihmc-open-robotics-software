@@ -16,11 +16,13 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
 
    private final NativeMatrix blockToInvert = new NativeMatrix(0, 0);
    private final NativeMatrix invertedBlock = new NativeMatrix(0, 0);
+   private final IntUnaryOperator blockStartProvider;
    private final IntUnaryOperator blockSizeProvider;
 
-   public BlockInverseCalculator(LinearMPCIndexHandler indexHandler, IntUnaryOperator blockSizeProvider)
+   public BlockInverseCalculator(LinearMPCIndexHandler indexHandler, IntUnaryOperator blockStartProvider, IntUnaryOperator blockSizeProvider)
    {
       this.indexHandler = indexHandler;
+      this.blockStartProvider = blockStartProvider;
       this.blockSizeProvider = blockSizeProvider;
    }
 
@@ -32,14 +34,12 @@ public class BlockInverseCalculator implements InverseMatrixCalculator<NativeMat
 
       for (int i = 0; i < indexHandler.getNumberOfSegments(); i++)
       {
-         int start = indexHandler.getComCoefficientStartIndex(i);
+         int start = blockStartProvider.applyAsInt(i);
          int blockSize = blockSizeProvider.applyAsInt(i);
          int end = start + blockSize;
 
          blockToInvert.reshape(blockSize, blockSize);
          invertedBlock.reshape(blockSize, blockSize);
-         blockToInvert.zero();
-         invertedBlock.zero();
 
          blockToInvert.insert(matrix, start, end, start, end, 0, 0);
 

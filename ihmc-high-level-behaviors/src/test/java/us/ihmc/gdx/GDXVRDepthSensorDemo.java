@@ -1,31 +1,32 @@
 package us.ihmc.gdx;
 
 import com.badlogic.gdx.graphics.g3d.ModelInstance;
-import us.ihmc.euclid.transform.RigidBodyTransform;
+import com.badlogic.gdx.math.Matrix4;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
-import us.ihmc.gdx.tools.GDXTools;
-import us.ihmc.gdx.vr.GDXVRContext;
+import us.ihmc.gdx.vr.GDXVRDevice;
 import us.ihmc.gdx.vr.GDXVRManager;
-import us.ihmc.gdx.vr.VRDeviceAdapter;
+import us.ihmc.gdx.vr.GDXVRDeviceAdapter;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import static us.ihmc.gdx.vr.GDXVRContext.VRControllerButtons.SteamVR_Trigger;
+import static us.ihmc.gdx.vr.GDXVRControllerButtons.SteamVR_Trigger;
 
 public class GDXVRDepthSensorDemo
 {
    private ModelInstance cylinder;
    private boolean moveWithController = true;
+   private final Matrix4 tempTransform = new Matrix4();
 
    public GDXVRDepthSensorDemo()
    {
       GDX3DSceneManager sceneManager = new GDX3DSceneManager();
-      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(90.0, 640, 480, 0.05, 10.0);
+      GDXLowLevelDepthSensorSimulator depthSensorSimulator = new GDXLowLevelDepthSensorSimulator("Sensor", 90.0, 640, 480, 0.05, 10.0);
       GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
       GDXVRManager vrManager = new GDXVRManager();
       SideDependentList<ModelInstance> controllerCoordinateFrames = new SideDependentList<>();
@@ -58,10 +59,10 @@ public class GDXVRDepthSensorDemo
                sceneManager.addModelInstance(coordinateFrameInstance, GDXSceneLevel.VIRTUAL);
             }
 
-            vrManager.getContext().addListener(new VRDeviceAdapter()
+            vrManager.getContext().addListener(new GDXVRDeviceAdapter()
             {
                @Override
-               public void buttonPressed(GDXVRContext.VRDevice device, int button)
+               public void buttonPressed(GDXVRDevice device, int button)
                {
                   if (button == SteamVR_Trigger)
                   {
@@ -85,15 +86,15 @@ public class GDXVRDepthSensorDemo
 
             for (RobotSide side : vrManager.getControllers().sides())
             {
-               RigidBodyTransform transformToParent = vrManager.getControllers().get(side).getReferenceFrame().getTransformToParent();
                if (side.equals(RobotSide.LEFT) && moveWithController)
                {
-                  depthSensorSimulator.setCameraWorldTransform(vrManager.getControllers().get(side).getWorldTransformGDX());
-                  GDXTools.toGDX(transformToParent, controllerCoordinateFrames.get(side).transform);
+                  vrManager.getControllers().get(side).getPose(ReferenceFrame.getWorldFrame(), tempTransform);
+                  depthSensorSimulator.setCameraWorldTransform(tempTransform);
+                  controllerCoordinateFrames.get(side).transform.set(tempTransform);
                }
                else
                {
-                  GDXTools.toGDX(transformToParent, cylinder.nodes.get(0).globalTransform);
+                  vrManager.getControllers().get(side).getPose(ReferenceFrame.getWorldFrame(), cylinder.nodes.get(0).globalTransform);
                }
             }
 

@@ -24,7 +24,7 @@ public class AtlasSwingPlannerParameters extends StoredPropertySet implements Sw
    public AtlasSwingPlannerParameters(String projectName, String pathToResources, String fileNameSuffix)
    {
       super(SwingPlannerParameterKeys.keys, AtlasSwingPlannerParameters.class, projectName, pathToResources, fileNameSuffix);
-      load();
+      loadUnsafe();
    }
 
    public static void main(String[] args)

@@ -4,8 +4,6 @@ import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.communication.configuration.NetworkParameters;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
@@ -42,41 +40,36 @@ public class GDXObstacleDetectionUI
       rosTunningParamPublisher = new RosTunningParamPublisher();
       ros1Node.attachPublisher("/TunningParam", rosTunningParamPublisher);
 
-      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer = new GDXROS1PointCloudVisualizer("/downsampled_cloud_road",
-                                                                                             ReferenceFrame.getWorldFrame(),
-                                                                                             new RigidBodyTransform());
+      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer = new GDXROS1PointCloudVisualizer("Road point cloud", "/downsampled_cloud_road");
       ros1PointCloudVisualizer.subscribe(ros1Node);
 
-      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer2 = new GDXROS1PointCloudVisualizer("/downsampled_cloud_obstacle",
-                                                                                              ReferenceFrame.getWorldFrame(),
-                                                                                              new RigidBodyTransform());
+      GDXROS1PointCloudVisualizer ros1PointCloudVisualizer2 = new GDXROS1PointCloudVisualizer("Obstacle point cloud", "/downsampled_cloud_obstacle");
       ros1PointCloudVisualizer2.subscribe(ros1Node);
 
-      GDXROS1BoxVisualizer boxVisualizer = new GDXROS1BoxVisualizer(ros1Node, "/boxes",
-                                                                    ReferenceFrame.getWorldFrame(), new RigidBodyTransform());
-
+      GDXROS1BoxVisualizer boxVisualizer = new GDXROS1BoxVisualizer("Object boxes", "/boxes");
+      boxVisualizer.subscribe(ros1Node);
 
       GDXApplicationCreator.launchGDXApplication(new Lwjgl3ApplicationAdapter()
       {
          public void create()
          {
             baseUI.create();
-            baseUI.getSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
+            baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
 
 
             ros1PointCloudVisualizer.create();
-            ros1PointCloudVisualizer.setEnabled(true);
+            ros1PointCloudVisualizer.setActive(true);
             ros1PointCloudVisualizer2.create();
-            ros1PointCloudVisualizer2.setEnabled(true);
+            ros1PointCloudVisualizer2.setActive(true);
 
             //            ros1BoxVisualizer.create();
 //            ros1BoxVisualizer.setEnabled(true);
 
-            baseUI.getSceneManager().addRenderableProvider(ros1PointCloudVisualizer);
-            baseUI.getSceneManager().addRenderableProvider(ros1PointCloudVisualizer2);
+            baseUI.get3DSceneManager().addRenderableProvider(ros1PointCloudVisualizer);
+            baseUI.get3DSceneManager().addRenderableProvider(ros1PointCloudVisualizer2);
 //            baseUI.getSceneManager().addRenderableProvider(ros1BoxVisualizer);
 
-            baseUI.getSceneManager().addRenderableProvider(boxVisualizer);
+            baseUI.get3DSceneManager().addRenderableProvider(boxVisualizer);
 
 //            baseUI.getSceneManager().addRenderableProvider(ros1BoxVisualizer);
 
@@ -137,7 +130,7 @@ public class GDXObstacleDetectionUI
 
             ros1PointCloudVisualizer.updateMesh(0.0f);
             ros1PointCloudVisualizer2.updateMesh(1.0f);
-            boxVisualizer.render();
+            boxVisualizer.update();
 
             //            ros1BoxVisualizer.updateMesh();
 

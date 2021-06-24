@@ -25,7 +25,7 @@ import us.ihmc.robotics.trajectories.TrajectoryType;
 
 public class Footstep implements Settable<Footstep>
 {
-   public static final int maxNumberOfSwingWaypoints = 10;
+   public static final int maxNumberOfSwingWaypoints = 12;
 
    private final PoseReferenceFrame footstepSoleFrame = new PoseReferenceFrame("FootstepSoleFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D footstepPose = new FramePose3D();

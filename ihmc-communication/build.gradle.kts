@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.17"
+   id("us.ihmc.ihmc-cd") version "1.20"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -34,4 +34,5 @@ mainDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
+   api("us.ihmc:ihmc-ros2-library-test:0.19.4")
 }

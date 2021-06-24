@@ -1,6 +1,7 @@
 package us.ihmc.gdx;
 
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
+import us.ihmc.gdx.tools.BoxesDemoModel;
 import us.ihmc.gdx.tools.GDXApplicationCreator;
 
 public class GDX3DDemo

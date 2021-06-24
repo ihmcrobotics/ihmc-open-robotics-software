@@ -11,6 +11,8 @@ import us.ihmc.avatar.drcRobot.SimulationLowLevelControllerFactory;
 import us.ihmc.avatar.drcRobot.shapeContactSettings.DRCRobotModelShapeCollisionSettings;
 import us.ihmc.avatar.factory.SimulatedHandControlTask;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
+import us.ihmc.commonWalkingControlModules.staticReachability.StepReachabilityData;
+import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.avatar.ros.WallTimeBasedROSClockCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -598,6 +600,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    }
 
    @Override
+   public String getStepReachabilityResourceName()
+   {
+      return "ihmc-open-robotics-software/valkyrie/src/main/resources/us/ihmc/valkyrie/parameters/StepReachabilityMap.csv";
+   }
+
+   @Override
+   public StepReachabilityData getStepReachabilityData()
+   {
+      return StepReachabilityFileTools.loadFromFile(getStepReachabilityResourceName());
+   }
+
+   @Override
    public RobotContactPointParameters<RobotSide> getContactPointParameters()
    {
       if (contactPointParameters == null)
@@ -677,14 +691,7 @@ public class ValkyrieRobotModel implements DRCRobotModel
    @Override
    public RobotCollisionModel getHumanoidRobotKinematicsCollisionModel()
    {
-      if (robotVersion == ValkyrieRobotVersion.ARM_MASS_SIM)
-      {
-         return new ValkyrieArmMassSimCollisionModel(getJointMap());
-      }
-      else
-      {
-         return new ValkyrieKinematicsCollisionModel(getJointMap());
-      }
+      return new ValkyrieKinematicsCollisionModel(getJointMap());
    }
 
    @Override

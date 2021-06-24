@@ -1,10 +1,14 @@
 package us.ihmc.behaviors.lookAndStep;
 
 import controller_msgs.msg.dds.StoredPropertySetMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.behaviors.tools.footstepPlanner.MinimalFootstep;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
@@ -69,9 +73,13 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
+   public static final MessagerAPIFactory.Topic<Boolean> ImpassibilityDetected = topic("ImpassibilityDetected");
+   public static final MessagerAPIFactory.Topic<MutablePair<Pose3D, Vector3D>> Obstacle = topic("Obstacle");
    public static final MessagerAPIFactory.Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
    public static final MessagerAPIFactory.Topic<Object> ResetForUI = topic("ResetForUI");
    public static final MessagerAPIFactory.Topic<Double> MeasuredPlanarRegionDelay = topic("MeasuredPlanarRegionDelay");
+   public static final MessagerAPIFactory.Topic<ArrayList<Pair<Integer, Double>>> FootstepPlannerRejectionReasons = topic("FootstepPlannerRejectionReasons");
+   public static final MessagerAPIFactory.Topic<String> FootstepPlannerLatestLogPath = topic("FootstepPlannerLatestLogPath");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

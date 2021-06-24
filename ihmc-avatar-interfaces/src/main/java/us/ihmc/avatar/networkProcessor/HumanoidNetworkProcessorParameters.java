@@ -10,7 +10,6 @@ public class HumanoidNetworkProcessorParameters
    private URI rosURI;
    private LocalObjectCommunicator simulatedSensorCommunicator;
 
-   private boolean useTextToSpeechEngine;
    private boolean useZeroPoseRobotConfigurationPublisherModule;
    private boolean useWholeBodyTrajectoryToolboxModule, visualizeWholeBodyTrajectoryToolboxModule;
    private boolean useKinematicsToolboxModule, visualizeKinematicsToolboxModule;
@@ -18,6 +17,7 @@ public class HumanoidNetworkProcessorParameters
    private boolean useKinematicsStreamingToolboxModule, visualizeKinematicsStreamingToolboxModule;
    private boolean useFootstepPlanningToolboxModule, visualizeFootstepPlanningToolboxModule;
    private boolean useMocapModule;
+   private boolean useDirectionalControlModule;
    private boolean useBehaviorModule, visualizeBehaviorModule;
    private boolean useAutomaticDiagnostic;
    private double automatedDiagnosticInitialDelay;
@@ -54,11 +54,6 @@ public class HumanoidNetworkProcessorParameters
    public void setSimulatedSensorCommunicator(LocalObjectCommunicator simulatedSensorCommunicator)
    {
       this.simulatedSensorCommunicator = simulatedSensorCommunicator;
-   }
-
-   public void setUseTextToSpeechEngine(boolean enable)
-   {
-      this.useTextToSpeechEngine = enable;
    }
 
    public void setUseZeroPoseRobotConfigurationPublisherModule(boolean enable)
@@ -124,6 +119,11 @@ public class HumanoidNetworkProcessorParameters
    public void setUseMocapModule(boolean enable)
    {
       this.useMocapModule = enable;
+   }
+   
+   public void setUseDirectionalControlModule(boolean enable)
+   {
+	   this.useDirectionalControlModule = enable;
    }
 
    public void setUseBehaviorModule(boolean enable)
@@ -208,11 +208,6 @@ public class HumanoidNetworkProcessorParameters
       return simulatedSensorCommunicator;
    }
 
-   public boolean isUseTextToSpeechEngine()
-   {
-      return useTextToSpeechEngine;
-   }
-
    public boolean isUseZeroPoseRobotConfigurationPublisherModule()
    {
       return useZeroPoseRobotConfigurationPublisherModule;
@@ -271,6 +266,11 @@ public class HumanoidNetworkProcessorParameters
    public boolean isUseMocapModule()
    {
       return useMocapModule;
+   }
+   
+   public boolean isUseDirectionalControlModule()
+   {
+	   return useDirectionalControlModule;
    }
 
    public boolean isUseBehaviorModule()

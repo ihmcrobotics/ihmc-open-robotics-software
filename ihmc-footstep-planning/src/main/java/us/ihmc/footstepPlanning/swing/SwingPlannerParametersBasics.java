@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.swing;
 
 import controller_msgs.msg.dds.SwingPlannerParametersPacket;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public interface SwingPlannerParametersBasics extends SwingPlannerParametersReadOnly, StoredPropertySetBasics
@@ -90,6 +91,113 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded, additionalSwingTimeIfExpanded);
    }
 
+   default void setAllowLateralMotion(boolean allowLateralMotion)
+   {
+      set(SwingPlannerParameterKeys.allowLateralMotion, allowLateralMotion);
+   }
+
+   default void setExtraSizePercentageLow(Axis3D axis, double extraSizePercentageLow)
+   {
+      switch (axis)
+      {
+         case X:
+            set(SwingPlannerParameterKeys.percentageExtraSizeXLow, extraSizePercentageLow);
+            break;
+         case Y:
+            set(SwingPlannerParameterKeys.percentageExtraSizeYLow, extraSizePercentageLow);
+            break;
+         case Z:
+            set(SwingPlannerParameterKeys.percentageExtraSizeZLow, extraSizePercentageLow);
+            break;
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default void setExtraSizePercentageHigh(Axis3D axis, double extraSizePercentageLow)
+   {
+      switch (axis)
+      {
+         case X:
+            set(SwingPlannerParameterKeys.percentageExtraSizeXHigh, extraSizePercentageLow);
+            break;
+         case Y:
+            set(SwingPlannerParameterKeys.percentageExtraSizeYHigh, extraSizePercentageLow);
+            break;
+         case Z:
+            set(SwingPlannerParameterKeys.percentageExtraSizeZHigh, extraSizePercentageLow);
+            break;
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default void setExtraSizeLow(Axis3D axis, double extraSizeLow)
+   {
+      switch (axis)
+      {
+         case X:
+            set(SwingPlannerParameterKeys.extraSizeXLow, extraSizeLow);
+            break;
+         case Y:
+            set(SwingPlannerParameterKeys.extraSizeYLow, extraSizeLow);
+            break;
+         case Z:
+            set(SwingPlannerParameterKeys.extraSizeZLow, extraSizeLow);
+            break;
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default void setExtraSizeHigh(Axis3D axis, double extraSizeHigh)
+   {
+      switch (axis)
+      {
+         case X:
+            set(SwingPlannerParameterKeys.extraSizeXHigh, extraSizeHigh);
+            break;
+         case Y:
+            set(SwingPlannerParameterKeys.extraSizeYHigh, extraSizeHigh);
+            break;
+         case Z:
+            set(SwingPlannerParameterKeys.extraSizeZHigh, extraSizeHigh);
+            break;
+         default:
+            throw new RuntimeException("Unknown axis " + axis);
+      }
+   }
+
+   default void setPercentageLowMaxDisplacement(double percentageLowMaxDisplacement)
+   {
+      set(SwingPlannerParameterKeys.percentageMaxDisplacementLow, percentageLowMaxDisplacement);
+   }
+
+   default void setPercentageHighMaxDisplacement(double percentageHighMaxDisplacement)
+   {
+      set(SwingPlannerParameterKeys.percentageMaxDisplacementHigh, percentageHighMaxDisplacement);
+   }
+
+   default void setMaxDisplacementLow(double maxDisplacementLow)
+   {
+      set(SwingPlannerParameterKeys.maxDisplacementLow, maxDisplacementLow);
+   }
+
+   default void setMaxDisplacementHigh(double maxDisplacementHigh)
+   {
+      set(SwingPlannerParameterKeys.maxDisplacementHigh, maxDisplacementHigh);
+   }
+
+   default void setMotionCorrelationAlpha(double motionCorrelationAlpha)
+   {
+      set(SwingPlannerParameterKeys.motionCorrelationAlpha, motionCorrelationAlpha);
+   }
+
+   default void setMinXYTranslationToPlanSwing(double minXYTranslationToPlanSwing)
+   {
+      set(SwingPlannerParameterKeys.minXYTranslationToPlanSwing, minXYTranslationToPlanSwing);
+   }
+
    default void set(SwingPlannerParametersPacket packet)
    {
       setDoInitialFastApproximation(packet.getDoInitialFastApproximation());
@@ -123,5 +231,40 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
          setMinimumHeightAboveFloorForCollision(packet.getMinimumHeightAboveFloorForCollision());
       if (packet.getAdditionalSwingTimeIfExpanded() != -1.0)
          setAdditionalSwingTimeIfExpanded(packet.getAdditionalSwingTimeIfExpanded());
+
+      if (packet.getPercentageExtraSizeXLow() != -1.0)
+         setExtraSizePercentageLow(Axis3D.X, packet.getPercentageExtraSizeXLow());
+      if (packet.getPercentageExtraSizeXHigh() != -1.0)
+         setExtraSizePercentageHigh(Axis3D.X, packet.getPercentageExtraSizeXHigh());
+      if (packet.getExtraSizeXLow() != -1.0)
+         setExtraSizeLow(Axis3D.X, packet.getExtraSizeXLow());
+      if (packet.getExtraSizeXHigh() != -1.0)
+         setExtraSizeHigh(Axis3D.X, packet.getExtraSizeXHigh());
+      if (packet.getPercentageExtraSizeYLow() != -1.0)
+         setExtraSizePercentageLow(Axis3D.Y, packet.getPercentageExtraSizeYLow());
+      if (packet.getPercentageExtraSizeYHigh() != -1.0)
+         setExtraSizePercentageHigh(Axis3D.Y, packet.getPercentageExtraSizeYHigh());
+      if (packet.getExtraSizeYLow() != -1.0)
+         setExtraSizeLow(Axis3D.Y, packet.getExtraSizeYLow());
+      if (packet.getExtraSizeYHigh() != -1.0)
+         setExtraSizeHigh(Axis3D.Y, packet.getExtraSizeYHigh());
+      if (packet.getPercentageExtraSizeZLow() != -1.0)
+         setExtraSizePercentageLow(Axis3D.Z, packet.getPercentageExtraSizeZLow());
+      if (packet.getPercentageExtraSizeZHigh() != -1.0)
+         setExtraSizePercentageHigh(Axis3D.Z, packet.getPercentageExtraSizeZHigh());
+      if (packet.getExtraSizeZLow() != -1.0)
+         setExtraSizeLow(Axis3D.Z, packet.getExtraSizeZLow());
+      if (packet.getExtraSizeZHigh() != -1.0)
+         setExtraSizeHigh(Axis3D.Z, packet.getExtraSizeZHigh());
+
+      setPercentageLowMaxDisplacement(packet.getPercentageMaxDisplacementLow());
+      setPercentageHighMaxDisplacement(packet.getPercentageMaxDisplacementHigh());
+      setMaxDisplacementLow(packet.getMaxDisplacementLow());
+      setMaxDisplacementHigh(packet.getMaxDisplacementHigh());
+      setMotionCorrelationAlpha(packet.getMotionCorrelationAlpha());
+      setAllowLateralMotion(packet.getAllowLateralMotion());
+
+      if (packet.getMinXyTranslationToPlanSwing() != -1.0)
+         setMinXYTranslationToPlanSwing(packet.getMinXyTranslationToPlanSwing());
    }
 }

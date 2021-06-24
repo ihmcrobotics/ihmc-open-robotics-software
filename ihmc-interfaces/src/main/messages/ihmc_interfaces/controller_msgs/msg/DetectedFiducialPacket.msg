@@ -5,3 +5,4 @@ uint32 sequence_id
 uint32 fiducial_id
 
 geometry_msgs/Pose fiducial_transform_to_world
+geometry_msgs/Point[] bounds

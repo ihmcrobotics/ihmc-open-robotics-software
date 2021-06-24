@@ -20,27 +20,24 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
    private final YoDouble firstOrientationRateVariableRegularization = new YoDouble("firstOrientationRateVariableRegularization", registry);
    private final YoDouble secondOrientationRateVariableRegularization = new YoDouble("secondOrientationRateVariableRegularization", registry);
 
-   private final OrientationInputCalculator orientationInputCalculator;
+   private final OrientationTrajectoryInputCalculator orientationInputCalculator;
 
-   public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, YoRegistry parentRegistry)
+   public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, YoRegistry parentRegistry)
    {
       this(indexHandler,
            dt,
            gravityZ,
-           mass,
-           new BlockInverseCalculator(indexHandler,
-                                      i -> indexHandler.getOrientationTicksInSegment(i) * SE3MPCIndexHandler.variablesPerOrientationTick
-                                           + indexHandler.getRhoCoefficientsInSegment(i) + LinearMPCIndexHandler.comCoefficientsPerSegment),
+           new BlockInverseCalculator(indexHandler, indexHandler::getOrientationStartIndex, indexHandler::getVariablesInSegment),
            parentRegistry);
    }
 
-   public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, double mass, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
+   public SE3MPCQPSolver(SE3MPCIndexHandler indexHandler, double dt, double gravityZ, InverseMatrixCalculator<NativeMatrix> inverseCalculator, YoRegistry parentRegistry)
    {
       super(indexHandler, dt, gravityZ, inverseCalculator, parentRegistry);
 
       this.indexHandler = indexHandler;
 
-      orientationInputCalculator = new OrientationInputCalculator(indexHandler, mass, gravityZ);
+      orientationInputCalculator = new OrientationTrajectoryInputCalculator(indexHandler);
 
       firstOrientationVariableRegularization.set(1e-8);
       secondOrientationVariableRegularization.set(1e-8);
@@ -72,22 +69,17 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
    {
       super.addValueRegularization();
 
+      double firstOrientationCoefficientFactor = firstOrientationVariableRegularization.getDoubleValue();
+      double secondOrientationCoefficientFactor = secondOrientationVariableRegularization.getDoubleValue();
+
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
-         int var = indexHandler.getOrientationStartIndices(segmentId);
-         int ticks = indexHandler.getOrientationTicksInSegment(segmentId);
-         double tickDuration = indexHandler.getOrientationTickDuration(segmentId);
-         double firstOrientationCoefficientFactor = tickDuration * firstOrientationVariableRegularization.getDoubleValue();
-         double secondOrientationCoefficientFactor = tickDuration * secondOrientationVariableRegularization.getDoubleValue();
+         int startVar = indexHandler.getOrientationStartIndex(segmentId);
 
-         for (int tick = 0; tick < ticks; tick++)
+         for (int var = startVar; var < startVar + 3; var++)
          {
-            int end = var + 3;
-            for (; var < end; var++)
-               solverInput_H.add(var, var, firstOrientationCoefficientFactor);
-            end += 3;
-            for (; var < end; var++)
-               solverInput_H.add(var, var, secondOrientationCoefficientFactor);
+            solverInput_H.add(var, var, firstOrientationCoefficientFactor);
+            solverInput_H.add(var + 3, var + 3, secondOrientationCoefficientFactor);
          }
       }
    }
@@ -96,26 +88,25 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
    {
       super.addRateRegularization();
 
-      double firstOrientationCoefficientFactor = dt * dt / firstOrientationRateVariableRegularization.getDoubleValue();
-      double secondOrientationCoefficientFactor = dt * dt / secondOrientationRateVariableRegularization.getDoubleValue();
+      double firstOrientationCoefficientFactor = firstOrientationRateVariableRegularization.getDoubleValue() / dt2;
+      double secondOrientationCoefficientFactor = secondOrientationRateVariableRegularization.getDoubleValue() / dt2;
 
       for (int segmentId = 0; segmentId < indexHandler.getNumberOfSegments(); segmentId++)
       {
-         int var = indexHandler.getOrientationStartIndices(segmentId);
-         int ticks = indexHandler.getOrientationTicksInSegment(segmentId);
-         for (int tick = 0; tick < ticks; tick++)
+         int startVar = indexHandler.getOrientationStartIndex(segmentId);
+
+         for (int var = startVar; var < startVar + 3; var++)
          {
-            int end = var + 3;
-            for (; var < end; var++)
+            if (!Double.isNaN(previousSolution.get(var, 0)))
             {
                solverInput_H.add(var, var, firstOrientationCoefficientFactor);
-               solverInput_f.add(var, 0, -solverOutput.get(var, 0) / firstOrientationCoefficientFactor);
+               solverInput_f.add(var, 0, -previousSolution.get(var, 0) * firstOrientationCoefficientFactor);
             }
-            end += 3;
-            for (; var < end; var++)
+
+            if (!Double.isNaN(previousSolution.get(var + 3, 0)))
             {
-               solverInput_H.add(var, var, secondOrientationCoefficientFactor);
-               solverInput_f.add(var, 0, -solverOutput.get(var, 0) / secondOrientationCoefficientFactor);
+               solverInput_H.add(var + 3, var + 3, secondOrientationCoefficientFactor);
+               solverInput_f.add(var + 3, 0, -previousSolution.get(var + 3, 0) * secondOrientationCoefficientFactor);
             }
          }
       }
@@ -123,20 +114,53 @@ public class SE3MPCQPSolver extends LinearMPCQPSolver
 
    public void submitMPCCommand(MPCCommand<?> command)
    {
-       if (command.getCommandType() == MPCCommandType.ORIENTATION_DYNAMICS)
+      switch (command.getCommandType())
       {
-         submitOrientationDynamicsCommand((DiscreteAngularVelocityOrientationCommand) command);
-         return;
+         case ORIENTATION_TRAJECTORY:
+            submitOrientationTrajectoryCommand((OrientationTrajectoryCommand) command);
+            return;
+         case ORIENTATION_CONTINUITY:
+            submitOrientationContinuityCommand((OrientationContinuityCommand) command);
+            return;
+         case ORIENTATION_VALUE:
+            submitOrientationValueCommand((OrientationValueCommand) command);
+            return;
+         case DIRECT_ORIENTATION_VALUE:
+            submitDirectOrientationValueCommand((DirectOrientationValueCommand) command);
+            return;
       }
 
       super.submitMPCCommand(command);
    }
 
-
-   public void submitOrientationDynamicsCommand(DiscreteAngularVelocityOrientationCommand command)
+   public void submitOrientationValueCommand(OrientationValueCommand command)
    {
       boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
       if (success)
          addInput(qpInputTypeA);
+   }
+
+   public void submitDirectOrientationValueCommand(DirectOrientationValueCommand command)
+   {
+      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
+      if (success)
+         addInput(qpInputTypeA);
+   }
+
+   public void submitOrientationContinuityCommand(OrientationContinuityCommand command)
+   {
+      boolean success = orientationInputCalculator.compute(qpInputTypeA, command);
+      if (success)
+         addInput(qpInputTypeA);
+   }
+
+   public void submitOrientationTrajectoryCommand(OrientationTrajectoryCommand command)
+   {
+      for (int tick = 0; tick < command.getNumberOfTicksInSegment(); tick++)
+      {
+         boolean success = orientationInputCalculator.compute(tick, qpInputTypeA, command);
+         if (success)
+            addInput(qpInputTypeA);
+      }
    }
 }

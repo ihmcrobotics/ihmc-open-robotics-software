@@ -64,6 +64,15 @@ public class LegJointLimitsInspector
     {
         isRearAnklePitchHittingLimit.set(false);
         isRearAnklePitchHittingLimitFilt.set(false);
+        isLeadingKneePitchHittingUpperLimit.set(false);
+        isLeadingKneePitchHittingUpperLimitFilt.set(false);
+        isRearKneePitchHittingLowerLimit.set(false);
+        isRearKneePitchHittingLowerLimitFilt.set(false);
+
+        needToSwitchToToeOffForJointLimit.set(false);
+        needToSwitchToToeOffForTrailingKneeAtLimit.set(false);
+        needToSwitchToToeOffForLeadingKneeAtLimit.set(false);
+        needToSwitchToToeOffForAnkleLimit.set(false);
     }
 
     public void updateTrailingAnkleLowerLimitsStatus(OneDoFJointBasics anklePitch)

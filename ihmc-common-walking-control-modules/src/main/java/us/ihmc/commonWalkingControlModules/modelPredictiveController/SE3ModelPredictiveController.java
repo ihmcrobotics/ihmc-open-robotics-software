@@ -1,20 +1,17 @@
 package us.ihmc.commonWalkingControlModules.modelPredictiveController;
 
 import org.ejml.data.DMatrixRMaj;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.DiscreteAngularVelocityOrientationCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommand;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.MPCCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.commands.*;
+import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.OrientationTrajectoryConstructor;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCIndexHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.SE3MPCQPSolver;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPlane;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.MPCContactPoint;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.ioHandling.OrientationMPCTrajectoryHandler;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.tools.MPCAngleTools;
-import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.LinearMPCTrajectoryViewer;
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.SE3MPCTrajectoryViewer;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -33,10 +30,16 @@ import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 import java.util.List;
+import java.util.function.IntUnaryOperator;
 
 public class SE3ModelPredictiveController extends EuclideanModelPredictiveController
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double defaultOrientationAngleTrackingWeight = 1e-2;
+   private static final double defaultOrientationVelocityTrackingWeight = 1e-6;
+
+   private static final double defaultInitialOrientationWeight = 1e6;
+   private static final double defaultFinalOrientationWeight = 1e-6;
 
    private final double gravityZ;
    protected final double mass;
@@ -44,10 +47,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected final SE3MPCIndexHandler indexHandler;
 
    private final FrameOrientation3DBasics desiredBodyOrientation = new FrameQuaternion(worldFrame);
-   private final FrameOrientation3DBasics desiredBodyOrientationFeedForward = new FrameQuaternion(worldFrame);
+   private final FrameOrientation3DBasics referenceBodyOrientation = new FrameQuaternion(worldFrame);
 
    private final FrameVector3DBasics desiredBodyAngularVelocity = new FrameVector3D(worldFrame);
-   private final FrameVector3DBasics desiredBodyAngularVelocityFeedForward = new FrameVector3D(worldFrame);
+   private final FrameVector3DBasics referenceBodyAngularVelocity = new FrameVector3D(worldFrame);
 
    private final FrameVector3DBasics desiredBodyAngularAcceleration = new FrameVector3D(worldFrame);
 
@@ -59,10 +62,9 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    private final YoFrameQuaternion orientationAtEndOfWindow = new YoFrameQuaternion("orientationAtEndOfWindow", worldFrame, registry);
    private final YoFrameVector3D angularVelocityAtEndOfWindow = new YoFrameVector3D("angularVelocityAtEndOfWindow", worldFrame, registry);
 
-   private final YoDouble orientationPreviewWindowDuration = new YoDouble("orientationPreviewWindowDuration", registry);
-
    protected final YoVector3D currentBodyAxisAngleError = new YoVector3D("currentBodyAxisAngleError", registry);
 
+   private final OrientationTrajectoryConstructor orientationTrajectoryConstructor;
    final OrientationMPCTrajectoryHandler orientationTrajectoryHandler;
    private SE3MPCTrajectoryViewer trajectoryViewer = null;
 
@@ -74,8 +76,18 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    protected final YoVector3D currentBodyAngularVelocityError = new YoVector3D("currentBodyAngularVelocityError", registry);
 
+   private final YoDouble orientationAngleTrackingWeight = new YoDouble("orientationAngleTrackingWeight", registry);
+   private final YoDouble orientationVelocityTrackingWeight = new YoDouble("orientationVelocityTrackingWeight", registry);
+   private final YoDouble initialOrientationWeight = new YoDouble("initialOrientationWeight", registry);
+   private final YoDouble finalOrientationWeight = new YoDouble("finalOrientationWeight", registry);
+
+   private final IntUnaryOperator firstVariableIndex;
+
    public SE3ModelPredictiveController(Matrix3DReadOnly momentOfInertia,
-                                       double gravityZ, double nominalCoMHeight, double mass, double dt,
+                                       double gravityZ,
+                                       double nominalCoMHeight,
+                                       double mass,
+                                       double dt,
                                        YoRegistry parentRegistry)
    {
       this(new SE3MPCIndexHandler(numberOfBasisVectorsPerContactPoint),
@@ -89,7 +101,10 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
 
    public SE3ModelPredictiveController(SE3MPCIndexHandler indexHandler,
                                        Matrix3DReadOnly momentOfInertia,
-                                       double gravityZ, double nominalCoMHeight, double mass, double dt,
+                                       double gravityZ,
+                                       double nominalCoMHeight,
+                                       double mass,
+                                       double dt,
                                        YoRegistry parentRegistry)
    {
       super(indexHandler, mass, gravityZ, nominalCoMHeight, parentRegistry);
@@ -97,19 +112,31 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       this.indexHandler = indexHandler;
       this.gravityZ = Math.abs(gravityZ);
       this.mass = mass;
-      this.orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler);
+
+      firstVariableIndex = indexHandler::getOrientationStartIndex;
+
+      orientationAngleTrackingWeight.set(defaultOrientationAngleTrackingWeight);
+      orientationVelocityTrackingWeight.set(defaultOrientationVelocityTrackingWeight);
+      initialOrientationWeight.set(defaultInitialOrientationWeight);
+      finalOrientationWeight.set(defaultFinalOrientationWeight);
+
+      orientationTrajectoryConstructor = new OrientationTrajectoryConstructor(indexHandler,
+                                                                              orientationAngleTrackingWeight,
+                                                                              orientationVelocityTrackingWeight,
+                                                                              omega,
+                                                                              mass,
+                                                                              gravityZ);
+      this.orientationTrajectoryHandler = new OrientationMPCTrajectoryHandler(indexHandler, orientationTrajectoryConstructor);
 
       registry.addChild(orientationTrajectoryHandler.getRegistry());
 
       this.momentOfInertia = momentOfInertia;
 
-      orientationPreviewWindowDuration.set(0.25);
+      qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, registry);
+      qpSolver.setMaxNumberOfIterations(10);
 
-      qpSolver = new SE3MPCQPSolver(indexHandler, dt, gravityZ, mass, registry);
-      qpSolver.setMaxNumberOfIterations(1000);
-
-      qpSolver.setFirstOrientationVariableRegularization(1e-2);
-      qpSolver.setSecondOrientationVariableRegularization(1e-2);
+      qpSolver.setFirstOrientationVariableRegularization(1e-10);
+      qpSolver.setSecondOrientationVariableRegularization(1e-10);
 
       parentRegistry.addChild(registry);
    }
@@ -119,7 +146,7 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    protected void initializeIndexHandler()
    {
       List<ContactPlaneProvider> planningWindow = previewWindowCalculator.getPlanningWindow();
-      indexHandler.initialize(planningWindow, orientationPreviewWindowDuration.getDoubleValue());
+      indexHandler.initialize(planningWindow);
    }
 
    @Override
@@ -128,8 +155,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       super.solveForTrajectoryOutsidePreviewWindow(contactSequence);
 
       orientationTrajectoryHandler.solveForTrajectoryOutsidePreviewWindow(contactSequence);
-      orientationTrajectoryHandler.computeDesiredTrajectory(currentTimeInState.getDoubleValue());
-      orientationTrajectoryHandler.computeOutsidePreview(orientationPreviewWindowDuration.getDoubleValue() + currentTimeInState.getDoubleValue());
+      orientationTrajectoryHandler.computeDiscretizedReferenceTrajectory(currentTimeInState.getDoubleValue());
+      orientationTrajectoryHandler.computeReferenceValue(previewWindowCalculator.getPreviewWindowDuration() + currentTimeInState.getDoubleValue());
    }
 
 
@@ -138,8 +165,8 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       super.setTerminalConditions();
 
-      orientationAtEndOfWindow.set(orientationTrajectoryHandler.getDesiredBodyOrientation());
-      angularVelocityAtEndOfWindow.set(orientationTrajectoryHandler.getDesiredAngularVelocity());
+      orientationAtEndOfWindow.set(orientationTrajectoryHandler.getReferenceBodyOrientation());
+      angularVelocityAtEndOfWindow.set(orientationTrajectoryHandler.getReferenceBodyVelocity());
    }
 
    @Override
@@ -147,7 +174,11 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       super.extractSolution(solutionCoefficients);
 
-      orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients, currentTimeInState.getDoubleValue(), orientationPreviewWindowDuration.getDoubleValue());
+      orientationTrajectoryHandler.extractSolutionForPreviewWindow(solutionCoefficients,
+                                                                   currentTimeInState.getDoubleValue(),
+                                                                   previewWindowCalculator.getPreviewWindowDuration(),
+                                                                   currentBodyOrientation,
+                                                                   currentBodyAngularVelocity);
    }
 
    @Override
@@ -158,137 +189,88 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       computeOrientationObjectives();
    }
 
+   private final DMatrixRMaj initialError = new DMatrixRMaj(6, 1);
+
    private void computeOrientationObjectives()
    {
-      mpcCommands.addCommand(computeInitialDiscreteOrientationObjective(commandProvider.getNextDiscreteAngularVelocityOrientationCommand()));
-      mpcCommands.addCommandList(computeDiscreteOrientationObjectives());
+      computeInitialError();
+
+      orientationTrajectoryConstructor.compute(previewWindowCalculator.getPlanningWindow(),
+                                               momentOfInertia,
+                                               linearTrajectoryHandler,
+                                               orientationTrajectoryHandler,
+                                               contactHandler.getContactPlanes());
+
+      int numberOfSegments = indexHandler.getNumberOfSegments();
+      for (int i = 0; i < numberOfSegments; i++)
+      {
+         mpcCommands.addCommand(orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(i));
+         if (i < numberOfSegments - 1)
+            mpcCommands.addCommand(computeOrientationContinuityCommand(i, commandProvider.getNextOrientationContinuityCommand()));
+      }
+
+      mpcCommands.addCommand(computeInitialOrientationErrorCommand(commandProvider.getNextDirectOrientationValueCommand()));
+      mpcCommands.addCommand(computeFinalOrientationMinimizationCommand(commandProvider.getNextOrientationValueCommand()));
    }
 
-   private final FrameVector3D tempVector = new FrameVector3D();
-
-   private MPCCommand<?> computeInitialDiscreteOrientationObjective(DiscreteAngularVelocityOrientationCommand objectiveToPack)
+   private void computeInitialError()
    {
-      objectiveToPack.clear();
-      objectiveToPack.setOmega(omega.getValue());
-      objectiveToPack.setSegmentNumber(0);
-      objectiveToPack.setDurationOfHold(indexHandler.getOrientationTickDuration(0));
-      objectiveToPack.setTimeOfConstraint(0.0);
-      objectiveToPack.setEndingDiscreteTickId(0);
+      orientationTrajectoryHandler.computeReferenceValue(currentTimeInState.getDoubleValue());
+      FrameOrientation3DReadOnly referenceOrientation = orientationTrajectoryHandler.getReferenceBodyOrientation();
 
-      linearTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
-      orientationTrajectoryHandler.compute(currentTimeInState.getDoubleValue());
+      angleTools.computeRotationError(referenceOrientation, currentBodyOrientation, currentBodyAxisAngleError);
+      currentBodyAxisAngleError.get(initialError);
 
-      FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientation();
-      objectiveToPack.setDesiredBodyOrientation(desiredOrientation);
-      // angular velocity in body frame
-      tempVector.set(orientationTrajectoryHandler.getDesiredAngularVelocity());
-      desiredOrientation.transform(tempVector);
-      objectiveToPack.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
-
-      tempVector.setToZero();
-      if (orientationTrajectoryHandler.hasInternalAngularMomentum())
-      {
-         objectiveToPack.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-         if (contactPlaneHelperPool.get(0).size() > 0)
-            objectiveToPack.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-         else
-            objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
-      }
-      else
-      {
-         objectiveToPack.setDesiredNetAngularMomentumRate(tempVector);
-         objectiveToPack.setDesiredInternalAngularMomentumRate(tempVector);
-      }
-
-      objectiveToPack.setMomentOfInertiaInBodyFrame(momentOfInertia);
-
-      objectiveToPack.setDesiredCoMPosition(currentCoMPosition);
-      objectiveToPack.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
-
-      angleTools.computeRotationError(desiredOrientation, currentBodyOrientation, currentBodyAxisAngleError);
-
-      objectiveToPack.setCurrentAxisAngleError(currentBodyAxisAngleError);
-
-      currentBodyAngularVelocityError.sub(currentBodyAngularVelocity, orientationTrajectoryHandler.getDesiredAngularVelocity());
-      desiredOrientation.inverseTransform(currentBodyAngularVelocityError);
-      objectiveToPack.setCurrentBodyAngularVelocityErrorInBodyFrame(currentBodyAngularVelocityError);
-
-      for (int i = 0; i < contactPlaneHelperPool.get(0).size(); i++)
-      {
-         objectiveToPack.addContactPlaneHelper(contactPlaneHelperPool.get(0).get(i));
-      }
-
-      return objectiveToPack;
+      currentBodyAngularVelocityError.sub(currentBodyAngularVelocity, orientationTrajectoryHandler.getReferenceBodyVelocity());
+      referenceOrientation.inverseTransform(currentBodyAngularVelocityError);
+      currentBodyAngularVelocityError.get(3, initialError);
    }
 
-   private final MPCCommandList commandList = new MPCCommandList();
-
-   private MPCCommandList computeDiscreteOrientationObjectives()
+   private MPCCommand<?> computeInitialOrientationErrorCommand(DirectOrientationValueCommand commandToPack)
    {
-      commandList.clear();
+      commandToPack.reset();
 
-      int tick = 1;
-      int endTick = 0;
-      double globalTime = currentTimeInState.getDoubleValue();
-      for (int segment = 0; segment < indexHandler.getNumberOfSegments(); segment++)
-      {
-         endTick += indexHandler.getOrientationTicksInSegment(segment);
-         double localTime = 0.0;
-         for (; tick < endTick; tick++)
-         {
-            DiscreteAngularVelocityOrientationCommand objective = commandProvider.getNextDiscreteAngularVelocityOrientationCommand();
+      commandToPack.setSegmentNumber(0);
+      commandToPack.setObjectiveValue(initialError);
+      commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      commandToPack.setObjectiveWeight(initialOrientationWeight.getDoubleValue());
 
-            double tickDuration = indexHandler.getOrientationTickDuration(segment);
-            localTime += tickDuration;
-            globalTime += tickDuration;
+      return commandToPack;
+   }
 
-            objective.clear();
-            objective.setOmega(omega.getValue());
-            objective.setSegmentNumber(segment);
-            objective.setDurationOfHold(tickDuration);
-            objective.setTimeOfConstraint(localTime);
-            objective.setEndingDiscreteTickId(tick);
+   private MPCCommand<?>  computeFinalOrientationMinimizationCommand(OrientationValueCommand commandToPack)
+   {
+      commandToPack.reset();
 
-            linearTrajectoryHandler.compute(globalTime);
-            orientationTrajectoryHandler.computeOutsidePreview(globalTime);
+      int segmentNumber = indexHandler.getNumberOfSegments() - 1;
+      commandToPack.setSegmentNumber(segmentNumber);
 
-            FrameOrientation3DReadOnly desiredOrientation = orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview();
-            objective.setDesiredBodyOrientation(desiredOrientation);
-            // angular velocity in body frame
-            tempVector.set(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
-            desiredOrientation.transform(tempVector);
-            objective.setDesiredBodyAngularVelocityInBodyFrame(tempVector);
+      OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
+      commandToPack.setAMatrix(trajectoryCommand.getLastAMatrix());
+      commandToPack.setBMatrix(trajectoryCommand.getLastBMatrix());
+      commandToPack.setCMatrix(trajectoryCommand.getLastCMatrix());
 
-            tempVector.setToZero();
-            if (orientationTrajectoryHandler.hasInternalAngularMomentum())
-            {
-               objective.setDesiredInternalAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-               if (contactPlaneHelperPool.get(0).size() > 0)
-                  objective.setDesiredNetAngularMomentumRate(orientationTrajectoryHandler.getDesiredInternalAngularMomentumRate());
-               else
-                  objective.setDesiredNetAngularMomentumRate(tempVector);
-            }
-            else
-            {
-               objective.setDesiredNetAngularMomentumRate(tempVector);
-               objective.setDesiredInternalAngularMomentumRate(tempVector);
-            }
+      commandToPack.getObjectiveValue().zero();
+      commandToPack.setConstraintType(ConstraintType.OBJECTIVE);
+      commandToPack.setObjectiveWeight(finalOrientationWeight.getDoubleValue());
 
-            objective.setMomentOfInertiaInBodyFrame(momentOfInertia);
+      return commandToPack;
+   }
 
-            objective.setDesiredCoMPosition(linearTrajectoryHandler.getDesiredCoMPosition());
-            objective.setDesiredCoMAcceleration(linearTrajectoryHandler.getDesiredCoMAcceleration());
+   private MPCCommand<?> computeOrientationContinuityCommand(int segmentNumber, OrientationContinuityCommand commandToPack)
+   {
+      commandToPack.reset();
 
-            for (int i = 0; i < contactPlaneHelperPool.get(segment).size(); i++)
-            {
-               objective.addContactPlaneHelper(contactPlaneHelperPool.get(segment).get(i));
-            }
+      commandToPack.setSegmentNumber(segmentNumber);
 
-            commandList.addCommand(objective);
-         }
-      }
+      OrientationTrajectoryCommand trajectoryCommand = orientationTrajectoryConstructor.getOrientationTrajectoryCommands().get(segmentNumber);
+      commandToPack.setAMatrix(trajectoryCommand.getLastAMatrix());
+      commandToPack.setBMatrix(trajectoryCommand.getLastBMatrix());
+      commandToPack.setCMatrix(trajectoryCommand.getLastCMatrix());
 
-      return commandList;
+      commandToPack.setConstraintType(ConstraintType.EQUALITY);
+
+      return commandToPack;
    }
 
    @Override
@@ -315,11 +297,25 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
    {
       qpSolver.initialize();
       qpSolver.submitMPCCommandList(mpcCommands);
+
+      qpSolver.setUseWarmStart(useWarmStart.getBooleanValue());
+      if (useWarmStart.getBooleanValue())
+      {
+         assembleActiveSet(firstVariableIndex);
+         qpSolver.setPreviousSolution(previousSolution);
+         qpSolver.setActiveInequalityIndices(activeInequalityConstraints);
+         qpSolver.setActiveLowerBoundIndices(activeUpperBoundConstraints);
+         qpSolver.setActiveUpperBoundIndices(activeLowerBoundConstraints);
+      }
+
       if (!qpSolver.solve())
       {
          LogTools.info("Failed to find solution");
+         extractNewActiveSetData(false, qpSolver, firstVariableIndex);
          return null;
       }
+
+      extractNewActiveSetData(true, qpSolver, firstVariableIndex);
 
       return qpSolver.getSolution();
    }
@@ -347,12 +343,11 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       vrpPositionToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredVRPPosition());
       vrpVelocityToPack.setMatchingFrame(linearTrajectoryHandler.getDesiredVRPVelocity());
 
+      referenceBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getReferenceBodyOrientation());
+      referenceBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getReferenceBodyVelocity());
+
       desiredBodyOrientation.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientation());
-      desiredBodyOrientationFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyOrientationOutsidePreview());
-
       desiredBodyAngularVelocity.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularVelocity());
-      desiredBodyAngularVelocityFeedForward.setMatchingFrame(orientationTrajectoryHandler.getDesiredBodyVelocityOutsidePreview());
-
       desiredBodyAngularAcceleration.setMatchingFrame(orientationTrajectoryHandler.getDesiredAngularAcceleration());
 
       desiredWrench.setMatchingFrame(wrenchTrajectoryHandler.getDesiredWrench());
@@ -389,19 +384,9 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       return desiredBodyOrientation;
    }
 
-   public FrameOrientation3DReadOnly getDesiredFeedForwardBodyOrientation()
-   {
-      return desiredBodyOrientationFeedForward;
-   }
-
    public FrameVector3DReadOnly getDesiredBodyAngularVelocitySolution()
    {
       return desiredBodyAngularVelocity;
-   }
-
-   public FrameVector3DReadOnly getDesiredFeedForwardBodyAngularVelocity()
-   {
-      return desiredBodyAngularVelocityFeedForward;
    }
 
    public FrameVector3DReadOnly getDesiredBodyAngularAccelerationSolution()
@@ -409,8 +394,45 @@ public class SE3ModelPredictiveController extends EuclideanModelPredictiveContro
       return desiredBodyAngularAcceleration;
    }
 
+   public FrameOrientation3DReadOnly getReferenceBodyOrientation()
+   {
+      return referenceBodyOrientation;
+   }
+
+   public FrameVector3DReadOnly getReferenceBodyAngularVelocity()
+   {
+      return referenceBodyAngularVelocity;
+   }
+
    public WrenchReadOnly getDesiredWrench()
    {
       return desiredWrench;
+   }
+
+   private final FrameVector3D desiredMomentArm = new FrameVector3D();
+   private final FrameVector3D desiredPointTorque = new FrameVector3D();
+
+   public void computeTorque(double time, FixedFrameVector3DBasics torqueToPack)
+   {
+      List<MPCContactPlane> contactPlanes = contactHandler.getContactPlanesForSegment(0);
+      linearTrajectoryHandler.compute(time);
+
+      torqueToPack.setToZero();
+
+      time -= currentTimeInState.getDoubleValue();
+
+      for (int planeIdx = 0; planeIdx < contactPlanes.size(); planeIdx++)
+      {
+         MPCContactPlane contactPlane = contactPlanes.get(planeIdx);
+         contactPlane.computeContactForce(omega.getValue(), time);
+         for (int pointIdx = 0; pointIdx < contactPlane.getNumberOfContactPoints(); pointIdx++)
+         {
+            desiredMomentArm.sub(contactPlane.getContactPointHelper(pointIdx).getBasisVectorOrigin(), linearTrajectoryHandler.getDesiredCoMPosition());
+            desiredPointTorque.cross(desiredMomentArm, contactPlane.getContactPointHelper(pointIdx).getContactAcceleration());
+            desiredPointTorque.scale(mass);
+
+            torqueToPack.add(desiredPointTorque);
+         }
+      }
    }
 }

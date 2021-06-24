@@ -33,6 +33,17 @@ public class GDXPointCloudRenderer implements RenderableProvider
 
    private RecyclingArrayList<Point3D32> pointsToRender;
    private Color color = Color.RED;
+   private float pointSize = 0.11f;
+
+   private static void enablePointSprites()
+   {
+      Gdx.gl.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
+      if (Gdx.app.getType() == Application.ApplicationType.Desktop)
+      {
+         Gdx.gl.glEnable(0x8861); // GL_POINT_OES
+      }
+      POINT_SPRITES_ENABLED = true;
+   }
 
    public void create(int size)
    {
@@ -52,16 +63,6 @@ public class GDXPointCloudRenderer implements RenderableProvider
       renderable.shader = new ParticleShader(renderable, config);
 //      ((ParticleShader) renderable.shader).set(ShaderProgram.COLOR_ATTRIBUTE., Color.RED);
       renderable.shader.init();
-   }
-
-   public void setColor(Color color)
-   {
-      this.color = color;
-   }
-
-   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
-   {
-      this.pointsToRender = pointsToRender;
    }
 
    public void updateMesh()
@@ -88,7 +89,7 @@ public class GDXPointCloudRenderer implements RenderableProvider
             vertices[offset + 5] = 0.5f; // green
             vertices[offset + 6] = alpha; // alpha
 
-            vertices[offset + 7] = 0.11f; // size
+            vertices[offset + 7] = pointSize; // size
             vertices[offset + 8] = 1.0f; // cosine [0-1]
             vertices[offset + 9] = 0.0f; // sine [0-1]
          }
@@ -111,13 +112,18 @@ public class GDXPointCloudRenderer implements RenderableProvider
          renderable.meshPart.mesh.dispose();
    }
 
-   private static void enablePointSprites()
+   public void setPointsToRender(RecyclingArrayList<Point3D32> pointsToRender)
    {
-      Gdx.gl.glEnable(GL20.GL_VERTEX_PROGRAM_POINT_SIZE);
-      if (Gdx.app.getType() == Application.ApplicationType.Desktop)
-      {
-         Gdx.gl.glEnable(0x8861); // GL_POINT_OES
-      }
-      POINT_SPRITES_ENABLED = true;
+      this.pointsToRender = pointsToRender;
+   }
+
+   public void setColor(Color color)
+   {
+      this.color = color;
+   }
+
+   public void setPointSize(float size)
+   {
+      this.pointSize = size;
    }
 }

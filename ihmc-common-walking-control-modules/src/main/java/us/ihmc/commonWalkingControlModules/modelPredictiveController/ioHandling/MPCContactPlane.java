@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.modelPredictiveController.core.Linear
 import us.ihmc.commonWalkingControlModules.modelPredictiveController.visualization.ContactPlaneForceViewer;
 import us.ihmc.commonWalkingControlModules.wrenchDistribution.FrictionConeRotationCalculator;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -28,14 +29,12 @@ public class MPCContactPlane
    private final MPCContactPoint[] contactPoints;
    private final PoseReferenceFrame planeFrame;
 
+   private final FrameVector3D contactAcceleration = new FrameVector3D();
+   private final FrameVector3D contactJerk = new FrameVector3D();
    private final FrictionConeRotationCalculator coneRotationCalculator;
 
    private final DMatrixRMaj contactWrenchCoefficientMatrix;
 
-   private final DMatrixRMaj rhoMaxMatrix;
-
-   private final DMatrixRMaj accelerationIntegrationHessian;
-   private final DMatrixRMaj accelerationIntegrationGradient;
    private final DMatrixRMaj jerkIntegrationHessian;
 
    private ContactPlaneForceViewer viewer;
@@ -60,10 +59,6 @@ public class MPCContactPlane
 
       int coefficientsSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
-      rhoMaxMatrix = new DMatrixRMaj(rhoSize, 1);
-
-      accelerationIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
-      accelerationIntegrationGradient = new DMatrixRMaj(coefficientsSize, 1);
       jerkIntegrationHessian = new DMatrixRMaj(coefficientsSize, coefficientsSize);
 
       contactWrenchCoefficientMatrix = new DMatrixRMaj(3, 4);
@@ -75,18 +70,6 @@ public class MPCContactPlane
 
       for (MPCContactPoint pointHelper : contactPoints)
          pointHelper.setContactPointForceViewer(viewer.getNextPointForceViewer());
-   }
-
-   /**
-    * Sets the net maximum force allowed for the entire contact plane.
-    *
-    * @param maxNormalForce maximum normal force.
-    */
-   public void setMaxNormalForce(double maxNormalForce)
-   {
-      double pointNormalForce = maxNormalForce / numberOfContactPoints;
-      for (int i = 0; i < numberOfContactPoints; i++)
-         contactPoints[i].setMaxNormalForce(pointNormalForce);
    }
 
    /**
@@ -134,40 +117,11 @@ public class MPCContactPlane
       return contactPoints[index];
    }
 
-   /**
-    * Returns a vector of the maximum generalized contact values that are allowed to achieve the maximum total contact force specified by
-    * {@link #setMaxNormalForce(double)}
-    *
-    * @return vector of maximum generalized contact values.
-    */
-   public DMatrixRMaj getRhoMaxMatrix()
+   public double getRhoNormalZ(int index)
    {
-      return rhoMaxMatrix;
+      return contactPoints[index].getRhoNormalZ();
    }
 
-   /**
-    * Gets the quadratic cost hessian for the cost term that aims at tracking a desired acceleration value over the segment duration.
-    * <p>
-    * The returned matrix should always be square of size {@link #getCoefficientSize()}.
-    *
-    * @return quadratic cost hessian.
-    */
-   public DMatrixRMaj getAccelerationIntegrationHessian()
-   {
-      return accelerationIntegrationHessian;
-   }
-
-   /**
-    * Gets the quadratic cost gradient for the cost term that aims at tracking a desired acceleration value over the segment duration.
-    * <p>
-    * The returned matrix should always be a vector of size {@link #getCoefficientSize()}.
-    *
-    * @return quadratic cost gradient.
-    */
-   public DMatrixRMaj getAccelerationIntegrationGradient()
-   {
-      return accelerationIntegrationGradient;
-   }
 
    private final Point3D point = new Point3D();
 
@@ -189,11 +143,7 @@ public class MPCContactPlane
       rhoSize = numberOfContactPoints * numberOfBasisVectorsPerContactPoint;
       coefficientSize = LinearMPCIndexHandler.coefficientsPerRho * rhoSize;
 
-      rhoMaxMatrix.reshape(rhoSize, 1);
-      rhoMaxMatrix.zero();
-
       int contactPointIndex = 0;
-      int rowStart = 0;
 
       for (; contactPointIndex < numberOfContactPoints; contactPointIndex++)
       {
@@ -205,9 +155,6 @@ public class MPCContactPlane
 
          MPCContactPoint contactPoint = contactPoints[contactPointIndex];
          contactPoint.computeBasisVectors(contactPointLocation, framePose, angleOffset, mu);
-         MatrixTools.setMatrixBlock(rhoMaxMatrix, rowStart, 0, contactPoint.getRhoMaxMatrix(), 0, 0, contactPoint.getRhoSize(), 1, 1.0);
-
-         rowStart += contactPoint.getRhoSize();
       }
 
       // Should not get there as long as the number of contact points of the contactable body is less or equal to maxNumberOfContactPoints.
@@ -237,46 +184,47 @@ public class MPCContactPlane
       return null;
    }
 
-
-   /**
-    * Computes the equivalent quadratic cost function components that minimize the difference from the acceleration and some net goal value for the plane over
-    * some time
-    *
-    * @param duration duration for the integration
-    * @param omega time constant for the motion function
-    * @param goalValueForPlane nominal value for the acceleration to track.
-    */
-   public void computeAccelerationIntegrationMatrix(double duration, double omega, double goalValueForPlane)
+   public FrameVector3DReadOnly getBasisVectorInPlaneFrame(int basisIdx)
    {
-      double goalValueForPoint = goalValueForPlane / numberOfContactPoints;
-      int startIdx = 0;
-      for (int contactPointIdx = 0; contactPointIdx < numberOfContactPoints; contactPointIdx++)
+      int pastBases = 0;
+      for (int pointIdx = 0; pointIdx < getNumberOfContactPoints(); pointIdx++)
       {
-         MPCContactPoint contactPoint = contactPoints[contactPointIdx];
-         contactPoint.computeAccelerationIntegrationMatrix(duration, omega, goalValueForPoint);
+         int localIdx = basisIdx - pastBases;
+         MPCContactPoint contactPoint = getContactPointHelper(pointIdx);
 
-         MatrixTools.setMatrixBlock(accelerationIntegrationHessian,
-                                    startIdx,
-                                    startIdx,
-                                    contactPoint.getAccelerationIntegrationHessian(),
-                                    0,
-                                    0,
-                                    contactPoint.getCoefficientsSize(),
-                                    contactPoint.getCoefficientsSize(),
-                                    1.0);
+         if (localIdx < contactPoint.getRhoSize())
+            return contactPoint.getBasisVectorInPlaneFrame(localIdx);
 
-         MatrixTools.setMatrixBlock(accelerationIntegrationGradient,
-                                    startIdx,
-                                    0,
-                                    contactPoint.getAccelerationIntegrationGradient(),
-                                    0,
-                                    0,
-                                    contactPoint.getCoefficientsSize(),
-                                    1,
-                                    1.0);
-
-         startIdx += contactPoint.getCoefficientsSize();
+         pastBases += contactPoint.getRhoSize();
       }
+
+      return null;
+   }
+
+   public DMatrixRMaj getBasisCoefficients(int rhoIdx)
+   {
+      if (rhoIdx < rhoSize)
+      {
+         int pointIdx = Math.floorDiv(rhoIdx, numberOfBasisVectorsPerContactPoint);
+         int localIdx = rhoIdx - numberOfBasisVectorsPerContactPoint * pointIdx;
+
+         return contactPoints[pointIdx].getBasisCoefficients(localIdx);
+      }
+
+      return null;
+   }
+
+   public FrameVector3DReadOnly getBasisMagnitude(int rhoIdx)
+   {
+      if (rhoIdx < rhoSize)
+      {
+         int pointIdx = Math.floorDiv(rhoIdx, numberOfBasisVectorsPerContactPoint);
+         int localIdx = rhoIdx - numberOfBasisVectorsPerContactPoint * pointIdx;
+
+         return contactPoints[pointIdx].getBasisMagnitude(localIdx);
+      }
+
+      return null;
    }
 
    /**
@@ -317,6 +265,10 @@ public class MPCContactPlane
       contactPoints[contactPointIndex].clear();
    }
 
+   public void reset()
+   {
+   }
+
    /**
     * Computes the collapsed wrench function. That is, it adds all the generalized contact force functions together in Euclidean space to get a much more
     * compact time function.
@@ -350,10 +302,24 @@ public class MPCContactPlane
 
    public void computeContactForce(double omega, double time)
    {
-      for (MPCContactPoint contactPoint : contactPoints)
+      contactAcceleration.setToZero();
+      contactJerk.setToZero();
+      for (int i = 0; i < numberOfContactPoints; i++)
       {
-         contactPoint.computeContactForce(omega, time);
+         contactPoints[i].computeContactForce(omega, time);
+         contactAcceleration.add(contactPoints[i].getContactAcceleration());
+         contactJerk.add(contactPoints[i].getContactJerk());
       }
+   }
+
+   public FrameVector3DReadOnly getContactAcceleration()
+   {
+      return contactAcceleration;
+   }
+
+   public FrameVector3DReadOnly getContactJerk()
+   {
+      return contactJerk;
    }
 
    public void clearViz()

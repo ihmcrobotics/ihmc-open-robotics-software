@@ -164,6 +164,7 @@
                         <CheckBox fx:id="assumeFlatGround" text="Flat ground" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="0" />
                         <CheckBox fx:id="planBodyPath" selected="true" text="Plan body path" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="1" />
                         <CheckBox fx:id="performAStarSearch" selected="true" text="Enable A*" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="2" />
+                        <CheckBox fx:id="planSingleStep" text="Plan single step" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="4" />
                         <CheckBox fx:id="ignorePartialFootholds" text="Ignore partial footholds" GridPane.columnIndex="3" GridPane.columnSpan="2" GridPane.rowIndex="5" />
                     </children>
                 </GridPane>

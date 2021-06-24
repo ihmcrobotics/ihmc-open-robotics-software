@@ -6,14 +6,19 @@ import static us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters.*;
 
 public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySetReadOnly
 {
-   default boolean getAutomaticallyInjectSupportRegions()
+   default boolean getUseInitialSupportRegions()
    {
-      return get(automaticallyInjectSupportRegions);
+      return get(useInitialSupportRegions);
    }
 
-   default boolean getEnableBipedalSupportRegions()
+   default double getSupportRegionScaleFactor()
    {
-      return get(enableBipedalSupportRegions);
+      return get(supportRegionScaleFactor);
+   }
+
+   default int getPlanarRegionsHistorySize()
+   {
+      return get(planarRegionsHistorySize);
    }
 
    default boolean getFlatGroundBodyPathPlan()
@@ -109,5 +114,15 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
    default int getSwingPlannerType()
    {
       return get(swingPlannerType);
+   }
+
+   default double getHorizonFromDebrisToStop()
+   {
+      return get(horizonFromDebrisToStop);
+   }
+
+   default boolean getStopForImpassibilities()
+   {
+      return get(stopForImpassibilities);
    }
 }

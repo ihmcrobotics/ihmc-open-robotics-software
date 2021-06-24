@@ -7,9 +7,11 @@ import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.BufferUtils;
 import com.badlogic.gdx.utils.Pool;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.VideoPacket;
 import imgui.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImFloat;
@@ -17,22 +19,24 @@ import org.apache.commons.lang3.mutable.MutableInt;
 import org.jboss.netty.buffer.ChannelBuffer;
 import org.ros.message.Time;
 import sensor_msgs.Image;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.producers.JPEGCompressor;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.simulation.GDXLowLevelDepthSensorSimulator;
 import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudMessageTools;
@@ -47,18 +51,19 @@ import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.publisher.RosCameraInfoPublisher;
 import us.ihmc.utilities.ros.publisher.RosImagePublisher;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.Arrays;
+import java.util.function.LongSupplier;
 
-public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
+public class GDXHighLevelDepthSensorSimulator extends ImGuiPanel implements RenderableProvider
 {
    private static final MutableInt INDEX = new MutableInt();
-   private static final String WINDOW_NAME = "Depth Sensor";
-   private final String windowName = ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), WINDOW_NAME);
    private final ReferenceFrame sensorFrame;
    private final Matrix4 gdxTransform = new Matrix4();
    private final GDXLowLevelDepthSensorSimulator depthSensorSimulator;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final LongSupplier timestampSupplier;
    private final CameraPinholeBrown depthCameraIntrinsics;
    private final int imageWidth;
    private final int imageHeight;
@@ -66,18 +71,28 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
 
    private final RosNodeInterface ros1Node;
    private RosImagePublisher ros1DepthPublisher;
-   private RosCameraInfoPublisher ros1CameraInfoPublisher;
+   private RosCameraInfoPublisher ros1DepthCameraInfoPublisher;
    private ChannelBuffer ros1DepthChannelBuffer;
+   private RosImagePublisher ros1ColorPublisher;
+   private RosCameraInfoPublisher ros1ColorCameraInfoPublisher;
+   private ChannelBuffer ros1ColorChannelBuffer;
 
    private final ROS2NodeInterface ros2Node;
    private boolean ros2IsLidarScan;
    private IHMCROS2Publisher<?> publisher;
+   private IHMCROS2Publisher<VideoPacket> ros2VideoPublisher;
+   private ByteBuffer flippedColorByteBuffer;
+   private final JPEGCompressor jpegCompressor = new JPEGCompressor();
    private RecyclingArrayList<Point3D> ros2PointsToPublish;
    private int[] ros2ColorsToPublish;
    private final FramePose3D tempSensorFramePose = new FramePose3D();
+   private final FramePose3D tempSensorFramePose2 = new FramePose3D();
 
    private final Timer throttleTimer = new Timer();
-   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService depthExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService colorExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService pointCloudExecutor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
+   private final ResettableExceptionHandlingExecutorService colorROS2Executor = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final double publishRateHz;
    private boolean debugCoordinateFrame;
    private ModelInstance coordinateFrame;
@@ -86,25 +101,28 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    private boolean tuning = false;
    private final ImBoolean sensorEnabled = new ImBoolean(false);
    private final ImBoolean renderPointCloudDirectly = new ImBoolean(false);
-   private final ImBoolean renderDepthVideoDirectly = new ImBoolean(false);
-   private final ImBoolean renderColorVideoDirectly = new ImBoolean(false);
-   private final ImBoolean publishDepthImageROS1 = new ImBoolean(true);
-   private final ImBoolean publishColorImageROS1 = new ImBoolean(true);
-   private final ImBoolean publishPointCloudROS2 = new ImBoolean(true);
+   private final ImBoolean publishDepthImageROS1 = new ImBoolean(false);
+   private final ImBoolean publishColorImageROS1 = new ImBoolean(false);
+   private final ImBoolean publishColorImageROS2 = new ImBoolean(false);
+   private final ImBoolean publishPointCloudROS2 = new ImBoolean(false);
    private final ImFloat fx;
    private final ImFloat fy;
    private final ImFloat skew;
    private final ImFloat cx;
    private final ImFloat cy;
 
-   public GDXHighLevelDepthSensorSimulator(RosNodeInterface ros1Node,
+   public GDXHighLevelDepthSensorSimulator(String sensorName,
+                                           RosNodeInterface ros1Node,
                                            String ros1DepthImageTopic,
-                                           String ros1CameraInfoTopic,
+                                           String ros1DepthCameraInfoTopic,
                                            CameraPinholeBrown depthCameraIntrinsics,
+                                           String ros1ColorImageTopic,
+                                           String ros1ColorCameraInfoTopic,
                                            ROS2NodeInterface ros2Node,
                                            ROS2Topic<?> ros2Topic,
+                                           ROS2Topic<VideoPacket> ros2VideoTopic,
                                            ReferenceFrame sensorFrame,
-                                           RemoteSyncedRobotModel syncedRobot,
+                                           LongSupplier timestampSupplier,
                                            double verticalFOV,
                                            int imageWidth,
                                            int imageHeight,
@@ -113,11 +131,13 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                                            double publishRateHz,
                                            boolean renderPointCloudDirectly)
    {
+      super(ImGuiTools.uniqueLabel(INDEX.getAndIncrement(), sensorName + " Simulator"));
+      setRenderMethod(this::renderImGuiWidgets);
       this.ros1Node = ros1Node;
       this.depthCameraIntrinsics = depthCameraIntrinsics;
       this.ros2Node = ros2Node;
       this.sensorFrame = sensorFrame;
-      this.syncedRobot = syncedRobot;
+      this.timestampSupplier = timestampSupplier;
       this.imageWidth = imageWidth;
       this.imageHeight = imageHeight;
       this.publishRateHz = publishRateHz;
@@ -129,18 +149,24 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       cx = new ImFloat((float) depthCameraIntrinsics.getCx());
       cy = new ImFloat((float) depthCameraIntrinsics.getCy());
 
-      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(verticalFOV, imageWidth, imageHeight, minRange, maxRange);
+      depthSensorSimulator = new GDXLowLevelDepthSensorSimulator(sensorName, verticalFOV, imageWidth, imageHeight, minRange, maxRange);
 
       if (ros1Node != null)
       {
-         LogTools.info("Publishing ROS 1: {} {}", ros1DepthImageTopic, ros1CameraInfoTopic);
+         LogTools.info("Publishing ROS 1 depth: {} {}", ros1DepthImageTopic, ros1DepthCameraInfoTopic);
          ros1DepthPublisher = new RosImagePublisher();
-         ros1CameraInfoPublisher = new RosCameraInfoPublisher();
-         ros1Node.attachPublisher(ros1CameraInfoTopic, ros1CameraInfoPublisher);
+         ros1DepthCameraInfoPublisher = new RosCameraInfoPublisher();
+         ros1Node.attachPublisher(ros1DepthCameraInfoTopic, ros1DepthCameraInfoPublisher);
          ros1Node.attachPublisher(ros1DepthImageTopic, ros1DepthPublisher);
          ros1DepthChannelBuffer = ros1DepthPublisher.getChannelBufferFactory().getBuffer(2 * imageWidth * imageHeight);
+         LogTools.info("Publishing ROS 1 color: {} {}", ros1ColorImageTopic, ros1ColorCameraInfoTopic);
+         ros1ColorPublisher = new RosImagePublisher();
+         ros1ColorCameraInfoPublisher = new RosCameraInfoPublisher();
+         ros1Node.attachPublisher(ros1ColorCameraInfoTopic, ros1ColorCameraInfoPublisher);
+         ros1Node.attachPublisher(ros1ColorImageTopic, ros1ColorPublisher);
+         ros1ColorChannelBuffer = ros1ColorPublisher.getChannelBufferFactory().getBuffer(4 * imageWidth * imageHeight);
       }
-      if (ros2Node != null)
+      if (ros2Node != null && ros2Topic != null)
       {
          ros2PointsToPublish = new RecyclingArrayList<>(imageWidth * imageHeight, Point3D::new);
          ros2IsLidarScan = ros2Topic.getType().equals(LidarScanMessage.class);
@@ -149,6 +175,11 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          LogTools.info("Publishing ROS 2: {}", ros2Topic.getName());
          publisher = ROS2Tools.createPublisher(ros2Node, ros2Topic, ROS2QosProfile.DEFAULT());
       }
+      if (ros2Node != null && ros2VideoTopic != null)
+      {
+         ros2VideoPublisher = ROS2Tools.createPublisher(ros2Node, ros2VideoTopic);
+         flippedColorByteBuffer = BufferUtils.newByteBuffer(imageWidth * imageHeight * 4);
+      }
 
       throttleTimer.reset();
    }
@@ -156,6 +187,8 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    public void create()
    {
       depthSensorSimulator.create();
+      addChild(depthSensorSimulator.getDepthPanel());
+      addChild(depthSensorSimulator.getColorPanel());
       pointCloudRenderer.create(imageWidth * imageHeight);
       if (debugCoordinateFrame)
          coordinateFrame = GDXModelPrimitives.createCoordinateFrameInstance(0.2);
@@ -165,9 +198,6 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    {
       if (sensorEnabled.get())
       {
-         if (syncedRobot != null)
-            syncedRobot.update();
-
          if(sensorFrame != null)
             GDXTools.toGDX(sensorFrame.getTransformToWorldFrame(), gdxTransform);
          else
@@ -176,7 +206,8 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          depthSensorSimulator.setCameraWorldTransform(gdxTransform);
          depthSensorSimulator.render(sceneManager);
 
-         coordinateFrame.transform.set(gdxTransform);
+         if (coordinateFrame != null)
+            coordinateFrame.transform.set(gdxTransform);
 
          if (renderPointCloudDirectly.get())
          {
@@ -189,11 +220,15 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
             {
                if (publishDepthImageROS1.get())
                   publishDepthImageROS1();
+               if (publishColorImageROS1.get())
+                  publishColorImageROS1();
             }
             if (ros2Node != null)
             {
                if (publishPointCloudROS2.get())
                   publishPointCloudROS2();
+               if (publishColorImageROS2.get())
+                  publishColorImageROS2();
             }
             throttleTimer.reset();
          }
@@ -202,9 +237,123 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       }
    }
 
+   private void publishColorImageROS1()
+   {
+      if (ros1ColorPublisher.isConnected() && ros1ColorCameraInfoPublisher.isConnected() && !colorExecutor.isExecuting())
+      {
+//         Pixmap colorPixmap = depthSensorSimulator.getColorPixmap();
+//         ArrayList<Integer> colors = depthSensorSimulator.getColors();
+//
+//         if (colors.isEmpty())
+//            return;
+
+         IntBuffer colorRGB8Buffer = depthSensorSimulator.getColorRGB8Buffer();
+         colorRGB8Buffer.rewind();
+//         ByteBuffer rawColorByteBuffer = depthSensorSimulator.getRawColorByteBuffer();
+//         rawColorByteBuffer.rewind();
+
+         int bytesPerPixel = 4;
+         ros1ColorChannelBuffer.clear();
+         int size = 4 * imageWidth * imageHeight;
+         for (int y = 0; y < imageHeight; y++)
+         {
+            for (int x = 0; x < imageWidth; x++)
+            {
+//               int pixelColor = colorPixmap.getPixel(x, y);
+//               ros1ColorChannelBuffer.writeInt(pixelColor);
+
+try
+{
+               int index = size - (x * bytesPerPixel + (y + 1) * imageHeight * bytesPerPixel);
+//               ros1ColorChannelBuffer.setInt(index, colorRGB8Buffer.get());
+//               ros1ColorChannelBuffer.setBytes(index, rawColorByteBuffer.g);
+//               ros1ColorChannelBuffer.setByte(index, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.setByte(index + 1, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.setByte(index + 2, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.setByte(index + 3, rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+//               ros1ColorChannelBuffer.writeByte(rawColorByteBuffer.get());
+               ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+//               ros1ColorChannelBuffer.setBytes(index, colorRGB8Buffer.get());
+
+}
+catch (IndexOutOfBoundsException e)
+{
+   System.err.println(e.getMessage());
+}
+//                 ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+            }
+         }
+//         for (int i = 0; i < imageWidth * imageHeight; i++)
+//            ros1ColorChannelBuffer.writeInt(colors.get(i));
+//         for (int i = 0; i < imageWidth * imageHeight; i++)
+//            ros1ColorChannelBuffer.writeInt(colorRGB8Buffer.get());
+//
+//         colors.clear();
+
+         ros1ColorChannelBuffer.readerIndex(0);
+         ros1ColorChannelBuffer.writerIndex(size);
+
+         colorExecutor.execute(() ->
+         {
+            Image message = ros1ColorPublisher.createMessage(imageWidth, imageHeight, bytesPerPixel, "rgb8", ros1ColorChannelBuffer);
+
+            if(timestampSupplier != null)
+               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(timestampSupplier.getAsLong())));
+
+            ros1ColorPublisher.publish(message);
+         });
+      }
+   }
+
+   private void publishColorImageROS2()
+   {
+      if (!colorROS2Executor.isExecuting())
+      {
+         ByteBuffer colorRGB8Buffer = depthSensorSimulator.getRawColorByteBuffer();
+         colorRGB8Buffer.rewind();
+         int capacity = colorRGB8Buffer.capacity();
+         for (int y = 0; y < imageHeight; y++)
+         {
+            for (int x = 0; x < imageWidth; x++)
+//            for (int i = 0; i < capacity; i += 4)
+            {
+               int iSrc = (y * imageWidth + x) * 4;
+               int iDest = (y * imageWidth + (imageWidth - x - 1)) * 4;
+
+               // flipping RGBA to BGRA here
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 0, colorRGB8Buffer.get(iSrc + 2));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 1, colorRGB8Buffer.get(iSrc + 1));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 2, colorRGB8Buffer.get(iSrc + 0));
+               flippedColorByteBuffer.put(capacity - iDest - 4 + 3, colorRGB8Buffer.get(iSrc + 3));
+            }
+         }
+         flippedColorByteBuffer.rewind();
+
+         byte[] data = jpegCompressor.convertRGB8ToJPEGData(imageWidth, imageHeight, flippedColorByteBuffer);
+
+         colorROS2Executor.execute(() ->
+         {
+            VideoPacket videoPacket = new VideoPacket();
+            videoPacket.setVideoSource(VideoPacket.VIDEO_SOURCE_MULTISENSE_LEFT_EYE);
+            long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
+            videoPacket.setTimestamp(timestamp);
+            tempSensorFramePose2.setToZero(sensorFrame);
+            tempSensorFramePose2.changeFrame(ReferenceFrame.getWorldFrame());
+            videoPacket.getPosition().set(tempSensorFramePose2.getPosition());
+            videoPacket.getOrientation().set(tempSensorFramePose2.getOrientation());
+            videoPacket.getIntrinsicParameters().set(HumanoidMessageTools.toIntrinsicParametersMessage(depthCameraIntrinsics));
+            videoPacket.getData().add(data);
+            ros2VideoPublisher.publish(videoPacket);
+         });
+      }
+   }
+
    private void publishDepthImageROS1()
    {
-      if (ros1DepthPublisher.isConnected() && ros1CameraInfoPublisher.isConnected() && !executor.isExecuting())
+      if (ros1DepthPublisher.isConnected() && ros1DepthCameraInfoPublisher.isConnected() && !depthExecutor.isExecuting())
       {
          PerspectiveCamera camera = depthSensorSimulator.getCamera();
          FloatBuffer depthFloatBuffer = depthSensorSimulator.getEyeDepthMetersBuffer();
@@ -236,7 +385,7 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
          ros1DepthChannelBuffer.readerIndex(0);
          ros1DepthChannelBuffer.writerIndex(size);
 
-         executor.execute(() ->
+         depthExecutor.execute(() ->
          {
             if (tuning)
             {
@@ -246,34 +395,38 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                depthCameraIntrinsics.setCx(cx.get());
                depthCameraIntrinsics.setCx(cx.get());
             }
-            ros1CameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
-            Image message = ros1DepthPublisher.createMessage(imageWidth, imageHeight, ros1DepthChannelBuffer); // maybe need to copy here if there are errors
+            ros1DepthCameraInfoPublisher.publish("camera_depth_optical_frame", depthCameraIntrinsics, new Time());
+            Image message = ros1DepthPublisher.createMessage(imageWidth, imageHeight, 2, "16UC1", ros1DepthChannelBuffer); // maybe need to copy here if there are errors
 
-            if(syncedRobot != null)
-               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(syncedRobot.getTimestamp())));
+            if(timestampSupplier != null)
+               message.getHeader().setStamp(new Time(Conversions.nanosecondsToSeconds(timestampSupplier.getAsLong())));
 
             ros1DepthPublisher.publish(message);
          });
       }
    }
 
-   public void renderImGuiWindow()
+   public void renderImGuiWidgets()
    {
       tuning = true;
-      ImGui.begin(windowName);
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Sensor Enabled"), sensorEnabled);
       ImGui.text("Render:");
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud"), renderPointCloudDirectly);
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), renderDepthVideoDirectly);
+      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), getLowLevelSimulator().getDepthPanel().getEnabled());
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), renderColorVideoDirectly);
+      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getEnabled());
       ImGui.text("Publish:");
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth image (ROS 1)"), publishDepthImageROS1);
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 1)"), publishColorImageROS1);
+      if (flippedColorByteBuffer != null)
+      {
+         ImGui.sameLine();
+         ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color image (ROS 2)"), publishColorImageROS2);
+      }
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud (ROS 2)"), publishPointCloudROS2);
       getLowLevelSimulator().renderTuningSliders();
@@ -282,17 +435,11 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       ImGui.sliderFloat("Skew", skew.getData(), -1000.0f, 1000.0f);
       ImGui.sliderFloat("Cx", cx.getData(), -1000.0f, 1000.0f);
       ImGui.sliderFloat("Cy", cy.getData(), -1000.0f, 1000.0f);
-      ImGui.end();
-
-      if (renderDepthVideoDirectly.get())
-         getLowLevelSimulator().renderImGuiDepthWindow();
-      if (renderColorVideoDirectly.get())
-         getLowLevelSimulator().renderImGuiColorWindow();
    }
 
    private void publishPointCloudROS2()
    {
-      if (!executor.isExecuting())
+      if (!pointCloudExecutor.isExecuting())
       {
          ros2PointsToPublish.clear();
          for (int i = 0; i < depthSensorSimulator.getPoints().size(); i++)
@@ -302,35 +449,48 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
                ros2ColorsToPublish[i] = depthSensorSimulator.getColors().get(i);
          }
 
-         executor.execute(() ->
+         if (!ros2PointsToPublish.isEmpty())
          {
-            long timestamp = syncedRobot == null ? System.nanoTime() : syncedRobot.getTimestamp();
-            tempSensorFramePose.setToZero(sensorFrame);
-            tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
-            if (ros2IsLidarScan)
+            pointCloudExecutor.execute(() ->
             {
-               LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp, ros2PointsToPublish, tempSensorFramePose);
-               ((IHMCROS2Publisher<LidarScanMessage>) publisher).publish(message);
-            }
-            else
-            {
-               int size = ros2PointsToPublish.size();
-               Point3D[] points = ros2PointsToPublish.toArray(new Point3D[size]);
-               int[] colors = Arrays.copyOf(ros2ColorsToPublish, size);
-               double minimumResolution = 0.005;
-               StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(timestamp, points, colors, size, minimumResolution, null);
-               message.getSensorPosition().set(tempSensorFramePose.getPosition());
-               message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
-               //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
-               ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
-            }
-         });
+               long timestamp = timestampSupplier == null ? System.nanoTime() : timestampSupplier.getAsLong();
+               tempSensorFramePose.setToZero(sensorFrame);
+               tempSensorFramePose.changeFrame(ReferenceFrame.getWorldFrame());
+               if (ros2IsLidarScan)
+               {
+                  LidarScanMessage message = PointCloudMessageTools.toLidarScanMessage(timestamp,
+                                                                                       ros2PointsToPublish,
+                                                                                       tempSensorFramePose);
+                  ((IHMCROS2Publisher<LidarScanMessage>) publisher).publish(message);
+               }
+               else
+               {
+                  int size = ros2PointsToPublish.size();
+                  Point3D[] points = ros2PointsToPublish.toArray(new Point3D[size]);
+                  int[] colors = Arrays.copyOf(ros2ColorsToPublish, size);
+                  double minimumResolution = 0.005;
+                  StereoVisionPointCloudMessage message = StereoPointCloudCompression.compressPointCloud(timestamp,
+                                                                                                         points,
+                                                                                                         colors,
+                                                                                                         size,
+                                                                                                         minimumResolution,
+                                                                                                         null);
+                  message.getSensorPosition().set(tempSensorFramePose.getPosition());
+                  message.getSensorOrientation().set(tempSensorFramePose.getOrientation());
+                  //      LogTools.info("Publishing point cloud of size {}", message.getNumberOfPoints());
+                  ((IHMCROS2Publisher<StereoVisionPointCloudMessage>) publisher).publish(message);
+               }
+            });
+         }
       }
    }
 
    public void dispose()
    {
-      executor.destroy();
+      depthExecutor.destroy();
+      colorExecutor.destroy();
+      pointCloudExecutor.destroy();
+      colorROS2Executor.destroy();
       depthSensorSimulator.dispose();
    }
 
@@ -353,6 +513,36 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
       this.renderPointCloudDirectly.set(renderPointCloudDirectly);
    }
 
+   public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)
+   {
+      getLowLevelSimulator().getDepthPanel().getEnabled().set(renderDepthVideoDirectly);
+   }
+
+   public void setRenderColorVideoDirectly(boolean renderColorVideoDirectly)
+   {
+      getLowLevelSimulator().getColorPanel().getEnabled().set(renderColorVideoDirectly);
+   }
+
+   public void setPublishDepthImageROS1(boolean publish)
+   {
+      publishDepthImageROS1.set(publish);
+   }
+
+   public void setPublishColorImageROS1(boolean publish)
+   {
+      publishColorImageROS1.set(publish);
+   }
+
+   public void setPublishColorImageROS2(boolean publish)
+   {
+      publishColorImageROS2.set(publish);
+   }
+
+   public void setPublishPointCloudROS2(boolean publish)
+   {
+      publishPointCloudROS2.set(publish);
+   }
+
    public void setDebugCoordinateFrame(boolean debugCoordinateFrame)
    {
       this.debugCoordinateFrame = debugCoordinateFrame;
@@ -371,10 +561,5 @@ public class GDXHighLevelDepthSensorSimulator implements RenderableProvider
    public GDXLowLevelDepthSensorSimulator getLowLevelSimulator()
    {
       return depthSensorSimulator;
-   }
-
-   public String getWindowName()
-   {
-      return windowName;
    }
 }

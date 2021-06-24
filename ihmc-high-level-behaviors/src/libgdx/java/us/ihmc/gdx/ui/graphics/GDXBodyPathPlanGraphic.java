@@ -29,7 +29,7 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
    private final float startColorHue = (float) javafx.scene.paint.Color.GREEN.getHue();
    private final float goalColorHue = (float) javafx.scene.paint.Color.RED.getHue();
 
-   private volatile Runnable toRender = null;
+   private volatile Runnable buildMeshAndCreateModelInstance = null;
 
    private final ModelBuilder modelBuilder = new ModelBuilder();
    private ModelInstance modelInstance;
@@ -37,12 +37,12 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
 
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
 
-   public void render()
+   public void update()
    {
-      if (toRender != null)
+      if (buildMeshAndCreateModelInstance != null)
       {
-         toRender.run();
-         toRender = null;
+         buildMeshAndCreateModelInstance.run();
+         buildMeshAndCreateModelInstance = null;
       }
    }
 
@@ -78,7 +78,7 @@ public class GDXBodyPathPlanGraphic implements RenderableProvider
          meshBuilder.addLine(lineStart, lineEnd, LINE_THICKNESS, new Color().fromHsv(lineStartHue, 1.0f, 0.5f), new Color().fromHsv(lineEndHue, 1.0f, 1.0f));
       }
 
-      toRender = () ->
+      buildMeshAndCreateModelInstance = () ->
       {
          modelBuilder.begin();
          Mesh mesh = meshBuilder.generateMesh();

@@ -1,9 +1,9 @@
 # An image for developing GPU accelerated applications on NVIDIA hardware.
 # This image is published to https://hub.docker.com/r/ihmcrobotics/nvidia
-# Current version: 0.2
+# Current version: 0.4
 # Refer to the NVIDIA/CUDA base image here: (https://hub.docker.com/r/nvidia/cuda/)
 # This is currently based on Ubuntu 20.04 Focal Fossa.
-FROM nvidia/cuda:11.2.2-base
+FROM nvidia/cuda:11.2.2-cudnn8-devel
 
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -23,6 +23,8 @@ RUN apt-get --quiet 2 --yes update  \
     curl \
     software-properties-common \
     python3-opencv \
+    sudo \
+    iproute2 \
     > /dev/null \
  && rm -rf /var/lib/apt/lists/*
 
@@ -58,9 +60,13 @@ ENV NVIDIA_DRIVER_CAPABILITIES graphics,utility,compute
 # Setup a robotlab user as the development user, to avoid using root.
 RUN addgroup robotlab \
  && adduser --home /home/robotlab --gecos "Rosie Robot,1117,1234567,2345678" --ingroup robotlab --disabled-password robotlab \
- && chown -R robotlab /home/robotlab
+ && chown -R robotlab /home/robotlab \
+ && adduser robotlab sudo \
+ && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 USER robotlab
 WORKDIR /home/robotlab
 
+# Make sure the .config folder exists and is owned by the robotlab user.
+# This is useful for later installed apps.
 RUN mkdir -p /home/robotlab/.config
 RUN chown -R robotlab:robotlab /home/robotlab/.config

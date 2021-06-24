@@ -35,7 +35,8 @@ public enum HumanoidBehaviorType
    @Deprecated
    PUSH_AND_WALK,
    COLLABORATIVE_TASK,
-   FIRE_FIGHTING,   
+   FIRE_FIGHTING,  
+   TEST_HEIGHT,   
    CUTTING_WALL,
    REPEATEDLY_WALK_FOOTSTEP_LIST;
 

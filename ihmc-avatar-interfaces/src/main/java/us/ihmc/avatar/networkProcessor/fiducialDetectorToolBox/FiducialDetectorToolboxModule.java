@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -29,7 +28,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
                                         PubSubImplementation pubSubImplementation)
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 250, pubSubImplementation);
-      controller = new FiducialDetectorToolboxController(fullRobotModel, target, statusOutputManager, registry);
+      controller = new FiducialDetectorToolboxController(target, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(1.2e+6);
    }
 
@@ -42,11 +41,11 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeROS2Node realtimeROS2Node)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, s ->
+      ROS2Tools.createCallbackSubscription(realtimeROS2Node, ROS2Tools.VIDEO, videoPacket ->
       {
          if (controller != null)
          {
-            controller.receivedPacket(s.takeNextData());
+            controller.receivedPacket(videoPacket.takeNextData());
             receivedInput.set(true);
          }
       });
@@ -74,7 +73,12 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getOutputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
+      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_OUTPUT.withRobot(robotName);
+   }
+
+   public static ROS2Topic<DetectedFiducialPacket> getDetectedFiducialOutputTopic(String robotName)
+   {
+      return getOutputTopic(robotName).withTypeName(DetectedFiducialPacket.class);
    }
 
    @Override
@@ -85,6 +89,6 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic<?> getInputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
+      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX_INPUT.withRobot(robotName);
    }
 }

@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.17"
+   id("us.ihmc.ihmc-cd") version "1.20"
    id("us.ihmc.scs") version "0.4"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
@@ -17,7 +17,7 @@ basicsDependencies {
    api("org.ejml:ejml-core:0.39")
    api("org.ejml:ejml-ddense:0.39")
 
-   api("net.java.jinput:jinput:2.0.6-ihmc2")
+   api("us.ihmc:jinput:2.0.6-ihmc2")
    api("us.ihmc:euclid-frame:0.16.2")
    api("us.ihmc:euclid-frame-shape:0.16.2")
    api("us.ihmc:euclid-shape:0.16.2")
@@ -40,7 +40,7 @@ planningDependencies {
 
    api("us.ihmc:robot-environment-awareness:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.20.7")
+   api("us.ihmc:ihmc-robot-data-logger:0.20.9")
    api("us.ihmc:ihmc-path-planning:source")
 }
 
@@ -82,7 +82,7 @@ communicationTestDependencies {
 roboticsDependencies {
    api(ihmc.sourceSetProject("communication"))
 
-   api("us.ihmc:ihmc-convex-optimization:0.17.4")
+   api("us.ihmc:ihmc-convex-optimization:0.17.8")
    api("us.ihmc:ihmc-state-estimation:source")
    api("us.ihmc:ihmc-simulation-toolkit:source")
    api("us.ihmc:ihmc-system-identification:source")

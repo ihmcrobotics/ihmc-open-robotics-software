@@ -525,7 +525,7 @@ public class FootstepPlannerLogLoader
       startPose.interpolate(requestPacket.getStartLeftFootPose(), requestPacket.getStartRightFootPose(), 0.5);
       goalPose.interpolate(requestPacket.getGoalLeftFootPose(), requestPacket.getGoalRightFootPose(), 0.5);
 
-      String dataSetName = "20210223_155750_Door";
+      String dataSetName = "20210419_111333_GPUCinders1";
       PlanarRegionsListMessage planarRegionsMessage = requestPacket.getPlanarRegionsListMessage();
       PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsMessage);
 

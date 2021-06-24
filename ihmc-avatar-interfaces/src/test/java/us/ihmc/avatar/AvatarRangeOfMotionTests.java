@@ -37,13 +37,18 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
 
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private boolean useExperimentalPhysicsEngine = true;
+
+   public void setUseExperimentalPhysicsEngine(boolean useExperimentalPhysicsEngine)
+   {
+      this.useExperimentalPhysicsEngine = useExperimentalPhysicsEngine;
+   }
 
    public abstract double getDesiredPelvisHeightAboveFoot();
 
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       simulationTestingParameters.setKeepSCSUp(simulationTestingParameters.getKeepSCSUp() && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
    }
 
@@ -67,7 +72,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
 
       ThreadTools.sleep(1000);
@@ -106,7 +111,7 @@ public abstract class AvatarRangeOfMotionTests implements MultiRobotTestInterfac
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
-      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(true);
+      drcSimulationTestHelper.getSCSInitialSetup().setUseExperimentalPhysicsEngine(useExperimentalPhysicsEngine);
       drcSimulationTestHelper.createSimulation("DRCWalkingOffOfLargePlatformTest");
 
       setupCameraForWalkingOffOfLargePlatform();

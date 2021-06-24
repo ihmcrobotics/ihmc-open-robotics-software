@@ -107,7 +107,15 @@ public class XBoxOneJavaFXController
 
    private void connectJoystick() throws JoystickNotFoundException
    {
-      joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+      try
+      {
+         joystick = new Joystick(JoystickModel.XBOX_ONE_S, 0);
+      }
+      catch (JoystickNotFoundException e)
+      {
+         // Try different model of the same controller
+         joystick = new Joystick(JoystickModel.XBOX_ONE, 0);
+      }
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_Y, true, 0.1));
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.LEFT_STICK_X, true, 0.1));
       joystick.setCustomizationFilter(new JoystickCustomizationFilter(XBoxOneMapping.RIGHT_STICK_Y, true, 0.1));

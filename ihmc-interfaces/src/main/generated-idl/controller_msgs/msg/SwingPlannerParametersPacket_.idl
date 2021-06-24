@@ -10,6 +10,9 @@ module controller_msgs
 
       /**
        * This message is part of the IHMC footstep planning module.
+       * The parameters below are used in the class CollisionFreeSwingCalculator, which computes a trajectory with ~10 knot points.
+       * The naming below is used to describe a trapezoid curve, such that parameters have a low and high value, and are interpolated
+       * between them based on a low and high percentage through the trajectory.
        */
       @TypeCode(type="controller_msgs::msg::dds_::SwingPlannerParametersPacket_")
       struct SwingPlannerParametersPacket
@@ -99,6 +102,50 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double additional_swing_time_if_expanded;
+        /**
+         * If true, the swing plan allows lateral relative to the nominal trajectory.
+         */
+        @defaultValue(value=True)
+        boolean allow_lateral_motion;
+        /**
+         * If a footstep has less than this xy displacement during swing, no swing trajectory is planned
+         */
+        @defaultValue(value=-1.0)
+        double min_xy_translation_to_plan_swing;
+        @defaultValue(value=-1.0)
+        double percentage_extra_size_x_low;
+        @defaultValue(value=-1.0)
+        double percentage_extra_size_x_high;
+        @defaultValue(value=-1.0)
+        double extra_size_x_low;
+        @defaultValue(value=-1.0)
+        double extra_size_x_high;
+        @defaultValue(value=-1.0)
+        double percentage_extra_size_y_low;
+        @defaultValue(value=-1.0)
+        double percentage_extra_size_y_high;
+        @defaultValue(value=-1.0)
+        double extra_size_y_low;
+        @defaultValue(value=-1.0)
+        double extra_size_y_high;
+        @defaultValue(value=-1.0)
+        double percentage_extra_size_z_low;
+        @defaultValue(value=-1.0)
+        double percentage_extra_size_z_high;
+        @defaultValue(value=-1.0)
+        double extra_size_z_low;
+        @defaultValue(value=-1.0)
+        double extra_size_z_high;
+        @defaultValue(value=-1.0)
+        double percentage_max_displacement_low;
+        @defaultValue(value=-1.0)
+        double percentage_max_displacement_high;
+        @defaultValue(value=-1.0)
+        double max_displacement_low;
+        @defaultValue(value=-1.0)
+        double max_displacement_high;
+        @defaultValue(value=-1.0)
+        double motion_correlation_alpha;
       };
     };
   };

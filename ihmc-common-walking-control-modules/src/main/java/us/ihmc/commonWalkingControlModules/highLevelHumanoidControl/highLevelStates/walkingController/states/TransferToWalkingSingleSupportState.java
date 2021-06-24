@@ -9,6 +9,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Hi
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
+import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -23,6 +24,7 @@ import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class TransferToWalkingSingleSupportState extends TransferState
@@ -38,9 +40,12 @@ public class TransferToWalkingSingleSupportState extends TransferState
    private final LegConfigurationManager legConfigurationManager;
    private final YoDouble fractionOfTransferToCollapseLeg = new YoDouble("fractionOfTransferToCollapseLeg", registry);
    private final YoDouble currentTransferDuration = new YoDouble("CurrentTransferDuration", registry);
+   private final YoBoolean resubmitStepsInTransferEveryTick = new YoBoolean("resubmitStepsInTransferEveryTick", registry);
 
    private final YoDouble originalTransferTime = new YoDouble("OriginalTransferTime", registry);
    private final BooleanProvider minimizeAngularMomentumRateZDuringTransfer;
+   private final DoubleProvider icpErrorThresholdForSlowTransfer;
+   private final DoubleProvider minimumSlowTransferDuration;
 
    private final FramePoint3D actualFootPositionInWorld = new FramePoint3D();
    private final FrameVector3D tempAngularVelocity = new FrameVector3D();
@@ -54,8 +59,7 @@ public class TransferToWalkingSingleSupportState extends TransferState
                                               WalkingFailureDetectionControlModule failureDetectionControlModule, DoubleProvider minimumTransferTime,
                                               DoubleProvider unloadFraction, DoubleProvider rhoMin, YoRegistry parentRegistry)
    {
-      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction,
-            rhoMin, parentRegistry);
+      super(stateEnum, walkingMessageHandler, controllerToolbox, managerFactory, failureDetectionControlModule, unloadFraction, rhoMin, parentRegistry);
 
       this.minimumTransferTime = minimumTransferTime;
       this.touchdownErrorCompensator = touchdownErrorCompensator;
@@ -63,8 +67,21 @@ public class TransferToWalkingSingleSupportState extends TransferState
       legConfigurationManager = managerFactory.getOrCreateLegConfigurationManager();
 
       fractionOfTransferToCollapseLeg.set(walkingControllerParameters.getLegConfigurationParameters().getFractionOfTransferToCollapseLeg());
-      minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer", registry,
+      minimizeAngularMomentumRateZDuringTransfer = new BooleanParameter("minimizeAngularMomentumRateZDuringTransfer",
+                                                                        registry,
                                                                         walkingControllerParameters.minimizeAngularMomentumRateZDuringTransfer());
+      icpErrorThresholdForSlowTransfer = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
+                                                                                getClass().getSimpleName(),
+                                                                                "icpErrorThresholdForSlowTransfer",
+                                                                                registry,
+                                                                                walkingControllerParameters.getInitialICPErrorToSlowDownTransfer());
+      minimumSlowTransferDuration = ParameterProvider.getOrCreateParameter(parentRegistry.getName(),
+                                                                           getClass().getSimpleName(),
+                                                                           "minimumSlowTransferDuration",
+                                                                           registry,
+                                                                           walkingControllerParameters.getMinimumSlowTransferDuration());
+      resubmitStepsInTransferEveryTick.set(walkingControllerParameters.resubmitStepsInSwingEveryTick());
+
 
       numberOfFootstepsToConsider = balanceManager.getMaxNumberOfStepsToConsider();
       footsteps = Footstep.createFootsteps(numberOfFootstepsToConsider);
@@ -133,6 +150,27 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void doAction(double timeInState)
    {
+      if (resubmitStepsInTransferEveryTick.getBooleanValue())
+      {
+         int stepsToAdd = Math.min(numberOfFootstepsToConsider, walkingMessageHandler.getCurrentNumberOfFootsteps());
+         for (int i = 0; i < stepsToAdd; i++)
+         {
+            Footstep footstep = footsteps[i];
+            FootstepTiming timing = footstepTimings[i];
+            walkingMessageHandler.peekFootstep(i, footstep);
+            walkingMessageHandler.peekTiming(i, timing);
+
+            if (i == 0)
+            {
+               adjustTiming(timing);
+               walkingMessageHandler.adjustTiming(timing.getSwingTime(), timing.getTransferTime());
+            }
+
+            balanceManager.addFootstepToPlan(footstep, timing);
+         }
+      }
+
+
       RobotSide swingSide = transferToSide.getOppositeSide();
       feetManager.updateSwingTrajectoryPreview(swingSide);
       balanceManager.setSwingFootTrajectory(swingSide, feetManager.getSwingTrajectory(swingSide));
@@ -179,6 +217,13 @@ public class TransferToWalkingSingleSupportState extends TransferState
    @Override
    public void onEntry()
    {
+      if (balanceManager.getICPErrorMagnitude() > icpErrorThresholdForSlowTransfer.getValue())
+      {
+         walkingMessageHandler.peekTiming(0, footstepTimings[0]);
+         double transferDuration = Math.max(minimumSlowTransferDuration.getValue(), 2.0 * footstepTimings[0].getTransferTime());
+         walkingMessageHandler.setUpcomingFootstepTransferDuration(transferDuration);
+      }
+
       super.onEntry();
 
       feetManager.initializeSwingTrajectoryPreview(transferToSide.getOppositeSide(), footsteps[0], footstepTimings[0].getSwingTime());

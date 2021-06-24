@@ -1,7 +1,7 @@
 plugins {
    id("us.ihmc.ihmc-build")
    id("us.ihmc.ihmc-ci") version "7.4"
-   id("us.ihmc.ihmc-cd") version "1.17"
+   id("us.ihmc.ihmc-cd") version "1.20"
    id("us.ihmc.log-tools-plugin") version "0.6.1"
 }
 
@@ -16,7 +16,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robot-models:source")
    api("us.ihmc:ihmc-interfaces:source")
    api("us.ihmc:ihmc-java-toolkit:source")
-   api("us.ihmc:ihmc-graphics-description:0.19.3")
+   api("us.ihmc:ihmc-graphics-description:0.19.4")
    api("us.ihmc:ihmc-video-codecs:2.1.6")
 }
 
@@ -48,7 +48,7 @@ jmonkeyengineTestDependencies {
 libgdxDependencies {
    api(ihmc.sourceSetProject("main"))
 
-   val gdxVersion = "1.9.14"
+   val gdxVersion = "1.10.0"
    api("com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion")
    api("com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop")
 
@@ -59,14 +59,12 @@ libgdxDependencies {
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-windows-x86")
    api("org.lwjgl:lwjgl-openvr:$lwjglVersion:natives-macos")
 
-   val imguiVersion = "1.80-1.5.0"
-   api("io.imgui.java:imgui-java-binding:$imguiVersion")
-   api("io.imgui.java:imgui-java-lwjgl3:$imguiVersion")
-   api("io.imgui.java:imgui-java-natives-linux:$imguiVersion")
-   api("io.imgui.java:imgui-java-natives-linux-x86:$imguiVersion")
-   api("io.imgui.java:imgui-java-natives-macos:$imguiVersion")
-   api("io.imgui.java:imgui-java-natives-windows:$imguiVersion")
-   api("io.imgui.java:imgui-java-natives-windows-x86:$imguiVersion")
+   val imguiVersion = "1.83.1"
+   api("io.github.spair:imgui-java-binding:$imguiVersion")
+   api("io.github.spair:imgui-java-lwjgl3:$imguiVersion")
+   api("io.github.spair:imgui-java-natives-linux-ft:$imguiVersion")
+   api("io.github.spair:imgui-java-natives-macos-ft:$imguiVersion")
+   api("io.github.spair:imgui-java-natives-windows-ft:$imguiVersion")
 }
 
 libgdxTestDependencies {

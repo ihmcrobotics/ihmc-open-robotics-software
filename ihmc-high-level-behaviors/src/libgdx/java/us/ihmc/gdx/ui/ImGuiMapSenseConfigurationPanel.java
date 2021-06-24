@@ -10,6 +10,7 @@ import std_msgs.msg.dds.Float64;
 import us.ihmc.avatar.sensors.realsense.DelayFixedPlanarRegionsSubscription;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ros2.ROS2PublisherMap;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.ros2.ROS2NodeInterface;
@@ -37,8 +38,11 @@ public class ImGuiMapSenseConfigurationPanel
    private final ImInt minNumberOfNodesSlider = new ImInt(10);
    private final ImBoolean cutNarrowPassageChecked = new ImBoolean(true);
 
-   private final ImFloat mergeDistanceThresholdSlider = new ImFloat(0.02f);
+   private final ImFloat mergeDistanceThresholdSlider = new ImFloat(0.016f);
    private final ImFloat mergeAngularThresholdSlider = new ImFloat(0.82f);
+   private final ImFloat regionGrowthFactorSlider = new ImFloat(0.01f);
+   private final ImInt gaussianSizeSlider = new ImInt(6);
+   private final ImInt gaussianSigmaSlider = new ImInt(20);
 
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
@@ -55,8 +59,6 @@ public class ImGuiMapSenseConfigurationPanel
 
    public void render()
    {
-      ImGui.begin(WINDOW_NAME);
-
       if (ImGui.sliderFloat("Planar region delay offset", planarRegionsDelayOffset.getData(), -0.75f, 0.75f))
       {
          Float64 message = new Float64();
@@ -107,9 +109,20 @@ public class ImGuiMapSenseConfigurationPanel
       boolean mapSenseParamsChanged = false;
       mapSenseParamsChanged |= ImGui.sliderFloat("Merge Distance Threshold", mergeDistanceThresholdSlider.getData(), 0.0f, 0.1f);
       mapSenseParamsChanged |= ImGui.sliderFloat("Merge Angular Threshold", mergeAngularThresholdSlider.getData(), 0.0f, 1.0f);
+      mapSenseParamsChanged |= ImGui.sliderFloat("Region Growth Factor", regionGrowthFactorSlider.getData(), 0.001f, 0.1f);
+      mapSenseParamsChanged |= ImGui.sliderInt("Gaussian Size", gaussianSizeSlider.getData(), 1, 8);
+      mapSenseParamsChanged |= ImGui.sliderInt("Gaussian Sigma", gaussianSigmaSlider.getData(), 1, 20);
       if (mapSenseParamsChanged)
       {
-         mapSenseConfigurationPublisher.publish((byte) 0, (byte) 0, mergeAngularThresholdSlider.get(), mergeDistanceThresholdSlider.get());
+         mapSenseConfigurationPublisher.publish((byte) 0,
+                                                (byte) 0,
+                                                mergeAngularThresholdSlider.get(),
+                                                mergeDistanceThresholdSlider.get(),
+                                                regionGrowthFactorSlider.get(),
+                                                (byte) gaussianSizeSlider.get(),
+                                                (byte) gaussianSigmaSlider.get());
+
+         LogTools.info("Publishing Values Now");
       }
 
       /*
@@ -118,8 +131,6 @@ public class ImGuiMapSenseConfigurationPanel
          packPatchSize
          mergePatchSize
       * */
-
-      ImGui.end();
    }
 
    public String getWindowName()

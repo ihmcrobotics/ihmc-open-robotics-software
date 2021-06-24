@@ -13,14 +13,14 @@ import us.ihmc.communication.packets.LidarPointCloudCompression;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.gdx.GDXPointCloudRenderer;
 import us.ihmc.gdx.imgui.ImGuiPlot;
-import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXVisualizer;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.StereoPointCloudCompression;
 import us.ihmc.ros2.ROS2Node;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
-public class GDXROS2PointCloudVisualizer implements RenderableProvider
+public class GDXROS2PointCloudVisualizer extends ImGuiGDXVisualizer implements RenderableProvider
 {
    private final ROS2Node ros2Node;
    private final ROS2Topic<?> topic;
@@ -29,14 +29,14 @@ public class GDXROS2PointCloudVisualizer implements RenderableProvider
    private GDXPointCloudRenderer pointCloudRenderer = new GDXPointCloudRenderer();
    private final RecyclingArrayList<Point3D32> pointsToRender = new RecyclingArrayList<>(Point3D32::new);
 
-   private boolean enabled = false;
    private Point3D32[] points;
 
    private long receivedCount = 0;
    private final ImGuiPlot receivedPlot = new ImGuiPlot("", 1000, 230, 20);
 
-   public GDXROS2PointCloudVisualizer(ROS2Node ros2Node, ROS2Topic<?> topic)
+   public GDXROS2PointCloudVisualizer(String title, ROS2Node ros2Node, ROS2Topic<?> topic)
    {
+      super(title);
       this.ros2Node = ros2Node;
       this.topic = topic;
       threadQueue = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
@@ -54,7 +54,7 @@ public class GDXROS2PointCloudVisualizer implements RenderableProvider
    private void queueRenderStereoVisionPointCloud(StereoVisionPointCloudMessage message)
    {
       ++receivedCount;
-      if (enabled)
+      if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
          {
@@ -67,7 +67,7 @@ public class GDXROS2PointCloudVisualizer implements RenderableProvider
    private void queueRenderLidarScan(LidarScanMessage message)
    {
       ++receivedCount;
-      if (enabled)
+      if (isActive())
       {
          threadQueue.clearQueueAndExecute(() ->
          {
@@ -88,14 +88,18 @@ public class GDXROS2PointCloudVisualizer implements RenderableProvider
       }
    }
 
+   @Override
    public void create()
    {
+      super.create();
       pointCloudRenderer.create(50000);
    }
 
-   public void updateMesh()
+   @Override
+   public void update()
    {
-      if (enabled && points != null)
+      super.update();
+      if (isActive() && points != null)
       {
          pointsToRender.clear();
          for (Point3D32 point : points)
@@ -108,8 +112,10 @@ public class GDXROS2PointCloudVisualizer implements RenderableProvider
       }
    }
 
+   @Override
    public void renderImGuiWidgets()
    {
+      super.renderImGuiWidgets();
       ImGui.text(topic.getName());
       receivedPlot.render(receivedCount);
    }
@@ -117,12 +123,7 @@ public class GDXROS2PointCloudVisualizer implements RenderableProvider
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (enabled)
+      if (isActive())
          pointCloudRenderer.getRenderables(renderables, pool);
-   }
-
-   public void setEnabled(boolean enabled)
-   {
-      this.enabled = enabled;
    }
 }

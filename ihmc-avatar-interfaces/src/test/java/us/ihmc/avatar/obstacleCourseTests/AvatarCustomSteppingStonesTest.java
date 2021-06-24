@@ -4,22 +4,18 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
@@ -44,6 +40,7 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
 
    private int numberOfSteps = 1;
    private boolean squareUpOnLastStep = true;
+   private RobotSide firstStepSide = RobotSide.LEFT;
 
    public abstract double getStepLength();
 
@@ -86,6 +83,31 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
    public void setTakeSquareUpStep(boolean squareUp)
    {
       this.squareUpOnLastStep = squareUp;
+   }
+
+   public void testTakingStepOneFootAtATime(TestInfo testInfo, double stepHeight) throws SimulationExceededMaximumTimeException
+   {
+      setTakeSquareUpStep(false);
+
+      StepsEnvironment steps = new StepsEnvironment();
+      double startYPosition = 0.0;
+      double width = 0.6;
+      double depth = 0.15;
+
+      createStepsEnvironment(steps, getStepLength(), startYPosition, width, depth, stepHeight, 0.0);
+      setupTest(testInfo, steps);
+
+      RobotSide nextSuportSide = firstStepSide;
+      for(int i = 0; i < numberOfSteps; i++)
+      {
+         if(i == numberOfSteps-1)
+            walkForward(i*getStepLength(), 1, i*stepHeight, nextSuportSide, 0.0);
+         else
+            walkForward((i+1)*getStepLength(), 1, (i+1)*stepHeight, nextSuportSide, 0.0);
+
+         assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.1));
+         nextSuportSide = nextSuportSide.getOppositeSide();
+      }
    }
 
    public void testTakingStep(TestInfo testInfo, double stepHeight) throws SimulationExceededMaximumTimeException
@@ -133,18 +155,23 @@ public abstract class AvatarCustomSteppingStonesTest implements MultiRobotTestIn
 
    private void walkForward(double stepLength, int steps, double stepHeight, double firstStepYOffset) throws SimulationExceededMaximumTimeException
    {
+      walkForward(stepLength, steps, stepHeight, firstStepSide, firstStepYOffset);
+   }
+
+   private void walkForward(double stepLength, int steps, double stepHeight, RobotSide nextSupportStepSide, double firstStepYOffset) throws SimulationExceededMaximumTimeException
+   {
       double stepWidth = 0.14;
 
       ReferenceFrame pelvisFrame = drcSimulationTestHelper.getSDFFullRobotModel().getPelvis().getBodyFixedFrame();
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
-      RobotSide robotSide = RobotSide.LEFT;
+      RobotSide robotSide = nextSupportStepSide;
       double footstepX, footstepY;
       for (int i = 1; i <= steps; i++)
       {
          if(firstStepYOffset != 0.0)
          {
-            robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
+            robotSide = robotSide.getOppositeSide();
             footstepY = robotSide == RobotSide.LEFT ? (stepWidth+firstStepYOffset) : -stepWidth+firstStepYOffset;
             FramePoint3D location = new FramePoint3D(pelvisFrame, 0.0, footstepY, stepHeight);
             location.changeFrame(ReferenceFrame.getWorldFrame());

@@ -35,7 +35,7 @@ import static us.ihmc.robotics.Assert.assertNotEquals;
 
 public class CoMTrajectoryModelPredictiveControllerTest
 {
-   private static final double epsilon = 1e-3;
+   private static final double epsilon = 5e-3;
    private static final boolean visualize = false;
 
    @Test
@@ -148,7 +148,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
 
       DMatrixRMaj expectedSolutionMatrix = MPCTestHelper.getVectorOfCoefficients(gravityZ, rhoHelper, solutionCoefficients);
       DMatrixRMaj expectedContactForceMatrix = MPCTestHelper.getContactForceCoefficients(rhoHelper, solutionCoefficients);
-      DMatrixRMaj contactForceMatrix = mpc.contactPlaneHelperPool.get(0).get(0).getContactWrenchCoefficientMatrix();
+      DMatrixRMaj contactForceMatrix = mpc.getContactPlanes().get(0).get(0).getContactWrenchCoefficientMatrix();
 
       EjmlUnitTests.assertEquals(expectedContactForceMatrix, contactForceMatrix, epsilon);
 
@@ -307,7 +307,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredDCMPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredVRPPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
-      EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredVRPVelocity(), 2e-3);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredVRPVelocity(), 0.05);
 
       // end of first segment
       mpc.compute(duration - 0.01);
@@ -316,7 +316,7 @@ public class CoMTrajectoryModelPredictiveControllerTest
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredDCMPosition(), epsilon);
       EuclidCoreTestTools.assertPoint3DGeometricallyEquals(initialCoM, mpc.getDesiredVRPPosition(), epsilon);
       EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredCoMVelocity(), epsilon);
-      EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredVRPVelocity(), epsilon);
+      EuclidCoreTestTools.assertVector3DGeometricallyEquals(new FrameVector3D(), mpc.getDesiredVRPVelocity(), 0.05);
 
       // beginning of next segment
       mpc.compute(duration + 0.01);

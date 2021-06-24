@@ -3,6 +3,8 @@ package us.ihmc.behaviors.navigation;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeControlFlowNode;
+import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
@@ -13,8 +15,10 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -28,7 +32,7 @@ import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.tools.behaviorTree.AlwaysSuccessfulAction;
 import us.ihmc.behaviors.tools.behaviorTree.LoopSequenceNode;
 import us.ihmc.log.LogTools;
@@ -49,6 +53,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
+import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +61,7 @@ import java.util.List;
 import static us.ihmc.behaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 import static us.ihmc.pathPlanning.PlannerTestEnvironments.MAZE_CORRIDOR_SQUARE_SIZE;
 
-public class NavigationBehavior implements BehaviorInterface
+public class NavigationBehavior extends BehaviorTreeControlFlowNode implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Navigation", NavigationBehavior::new, NavigationBehaviorAPI.create());
 
@@ -65,7 +70,7 @@ public class NavigationBehavior implements BehaviorInterface
    private final BehaviorHelper helper;
    private final ROS2Input<PlanarRegionsListMessage> mapRegionsInput;
    private final RemoteHumanoidRobotInterface robotInterface;
-   private final RemoteSyncedRobotModel syncedRobot;
+   private final ROS2SyncedRobotModel syncedRobot;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepPlannerParametersBasics footstepPlannerParameters = new DefaultFootstepPlannerParameters();
    private final VisibilityGraphsParametersBasics visibilityGraphParameters = new DefaultVisibilityGraphParameters();
@@ -92,7 +97,14 @@ public class NavigationBehavior implements BehaviorInterface
       robotInterface = helper.getOrCreateRobotInterface();
       syncedRobot = robotInterface.newSyncedRobot();
 
-      footPolygons = helper.createFootPolygons();
+      RobotContactPointParameters<RobotSide> contactPointParameters = helper.getRobotModel().getContactPointParameters();
+      footPolygons = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints().get(side);
+         ConvexPolygon2D scaledFoot = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
+         footPolygons.set(side, scaledFoot);
+      }
 
       stepThroughAlgorithm = helper.subscribeTypelessViaNotification(StepThroughAlgorithm);
 
@@ -107,6 +119,12 @@ public class NavigationBehavior implements BehaviorInterface
       sequence.addChild(new AlwaysSuccessfulAction(this::shortenFootstepPlanAndWalkIt));
 
       mainThread = helper.createPausablePeriodicThread(getClass(), UnitConversions.hertzToSeconds(250), 5, sequence::tick);
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return BehaviorTreeNodeStatus.SUCCESS;
    }
 
    @Override

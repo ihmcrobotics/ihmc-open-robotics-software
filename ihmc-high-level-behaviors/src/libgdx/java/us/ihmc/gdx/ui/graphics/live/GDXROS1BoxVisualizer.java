@@ -20,12 +20,13 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
+import us.ihmc.gdx.ui.visualizers.ImGuiGDXROS1Visualizer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
-import us.ihmc.utilities.ros.RosMainNode;
+import us.ihmc.utilities.ros.RosNodeInterface;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
-public class GDXROS1BoxVisualizer implements RenderableProvider
+public class GDXROS1BoxVisualizer extends ImGuiGDXROS1Visualizer implements RenderableProvider
 {
    private final ResettableExceptionHandlingExecutorService executorService = MissingThreadTools.newSingleThreadExecutor(getClass().getSimpleName(), true, 1);
    private final ModelBuilder modelBuilder = new ModelBuilder();
@@ -33,7 +34,9 @@ public class GDXROS1BoxVisualizer implements RenderableProvider
    private Model lastModel;
    private volatile Runnable toRender = null;
 
-   private final ReferenceFrame sensorFrame;
+   private AbstractRosTopicSubscriber<GDXBoxesMessage> subscriber;
+   private final String ros1BoxTopic;
+   private ReferenceFrame sensorFrame;
    private final FrameBoundingBox3D boundingBox = new FrameBoundingBox3D();
    private final FrameBox3D box = new FrameBox3D();
    private final Point3D center = new Point3D();
@@ -41,28 +44,50 @@ public class GDXROS1BoxVisualizer implements RenderableProvider
    private final Point3D[] vertices = new Point3D[8];
    private Color color = new Color(0.7f, 0.7f, 0.7f, 1.0f);
 
-   public GDXROS1BoxVisualizer(RosMainNode ros1Node, String ros1BoxTopic, ReferenceFrame sensorBaseFrame, RigidBodyTransformReadOnly baseToSensorTransform)
+   public GDXROS1BoxVisualizer(String title, String ros1BoxTopic)
    {
-      sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("baseFrame",
-                                                                                        ReferenceFrame.getWorldFrame(),
-                                                                                        baseToSensorTransform);
+      super(title);
+      this.ros1BoxTopic = ros1BoxTopic;
+
       for (int i = 0; i < vertices.length; i++)
       {
          vertices[i] = new Point3D();
       }
 
-      ros1Node.attachSubscriber(ros1BoxTopic, new AbstractRosTopicSubscriber<GDXBoxesMessage>(GDXBoxesMessage._TYPE)
+      sensorFrame = ReferenceFrame.getWorldFrame();
+   }
+
+   public void setFrame(ReferenceFrame sensorBaseFrame, RigidBodyTransformReadOnly baseToSensorTransform)
+   {
+      sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("baseFrame",
+                                                                                        sensorBaseFrame,
+                                                                                        baseToSensorTransform);
+   }
+
+   @Override
+   public void subscribe(RosNodeInterface ros1Node)
+   {
+      subscriber = new AbstractRosTopicSubscriber<GDXBoxesMessage>(GDXBoxesMessage._TYPE)
       {
          @Override
          public void onNewMessage(GDXBoxesMessage boxes)
          {
             queueRenderBoxesAsync(boxes);
          }
-      });
+      };
+      ros1Node.attachSubscriber(ros1BoxTopic, subscriber);
    }
 
-   public void render()
+   @Override
+   public void unsubscribe(RosNodeInterface ros1Node)
    {
+      ros1Node.removeSubscriber(subscriber);
+   }
+
+   @Override
+   public void update()
+   {
+      super.update();
       if (toRender != null)
       {
          toRender.run();

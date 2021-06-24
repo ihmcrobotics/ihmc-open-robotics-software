@@ -11,6 +11,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.AtlasPerceptionSimulation.Fidelity;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.dynamicsSimulation.HumanoidDynamicsSimulation;
 import us.ihmc.avatar.environments.BehaviorPlanarRegionEnvironments;
 import us.ihmc.avatar.environments.RealisticLabTerrainBuilder;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulation;
@@ -34,7 +35,7 @@ import us.ihmc.behaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorAPI;
 import us.ihmc.behaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.avatar.drcRobot.RemoteSyncedRobotModel;
+import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.behaviors.javafx.behaviors.LookAndStepRemoteVisualizer;
 import us.ihmc.behaviors.simulation.EnvironmentInitialSetup;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
@@ -74,7 +75,7 @@ public class AtlasLookAndStepBehaviorTest
    private PausablePeriodicThread monitorThread;
    private LookAndStepRemoteVisualizer lookAndStepVisualizer;
    private HumanoidKinematicsSimulation kinematicsSimulation;
-   private AtlasDynamicsSimulation dynamicsSimulation;
+   private HumanoidDynamicsSimulation dynamicsSimulation;
    private AtlasPerceptionSimulation perceptionStack;
 
    private static class TestWaypoint
@@ -277,7 +278,7 @@ public class AtlasLookAndStepBehaviorTest
          reachedGoalOrFallen.set();
       });
 
-      RemoteSyncedRobotModel syncedRobot = robot.newSyncedRobot();
+      ROS2SyncedRobotModel syncedRobot = robot.newSyncedRobot();
       monitorThread = new PausablePeriodicThread(
             "RobotStatusThread",
             0.5,
@@ -314,7 +315,7 @@ public class AtlasLookAndStepBehaviorTest
    }
 
    private void monitorThread(AtomicReference<String> currentState,
-                              RemoteSyncedRobotModel syncedRobot,
+                              ROS2SyncedRobotModel syncedRobot,
                               List<TestWaypoint> waypoints)
    {
       syncedRobot.update();
@@ -352,16 +353,16 @@ public class AtlasLookAndStepBehaviorTest
       LogTools.info("Creating dynamics simulation");
       int recordFrequencySpeedup = 50; // Increase to 10 when you want the sims to run a little faster and don't need all of the YoVariable data.
       int scsDataBufferSize = 10;
-      dynamicsSimulation = AtlasDynamicsSimulation.create(createRobotModel(),
-                                                          createCommonAvatarEnvironment(environment),
-                                                          environment.getGroundZ(),
-                                                          environment.getInitialX(),
-                                                          environment.getInitialY(),
-                                                          environment.getInitialYaw(),
-                                                          COMMUNICATION_MODE.getPubSubImplementation(),
-                                                          recordFrequencySpeedup,
-                                                          scsDataBufferSize,
-                                                          true);
+      dynamicsSimulation = HumanoidDynamicsSimulation.create(createRobotModel(),
+                                                             createCommonAvatarEnvironment(environment),
+                                                             environment.getGroundZ(),
+                                                             environment.getInitialX(),
+                                                             environment.getInitialY(),
+                                                             environment.getInitialYaw(),
+                                                             COMMUNICATION_MODE.getPubSubImplementation(),
+                                                             recordFrequencySpeedup,
+                                                             scsDataBufferSize,
+                                                             true);
       dynamicsSimulation.simulate();
       LogTools.info("Finished setting up dynamics simulation.");
       finishedSettingUp.set();

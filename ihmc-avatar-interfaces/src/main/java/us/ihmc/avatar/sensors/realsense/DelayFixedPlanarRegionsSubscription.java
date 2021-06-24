@@ -3,27 +3,43 @@ package us.ihmc.avatar.sensors.realsense;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import map_sense.RawGPUPlanarRegionList;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.jfree.util.Log;
+import org.ros.message.Time;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanPointFilter;
+import us.ihmc.avatar.networkProcessor.stereoPointCloudPublisher.CollidingScanRegionFilter;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.exceptions.NotARotationMatrixException;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
+import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.GPUPlanarRegionUpdater;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2NodeInterface;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 import us.ihmc.utilities.ros.RosNodeInterface;
+import us.ihmc.utilities.ros.publisher.RosPoseStampedPublisher;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 public class DelayFixedPlanarRegionsSubscription
@@ -32,7 +48,6 @@ public class DelayFixedPlanarRegionsSubscription
 
    private final ResettableExceptionHandlingExecutorService executorService;
    private final GPUPlanarRegionUpdater gpuPlanarRegionUpdater = new GPUPlanarRegionUpdater();
-   private final ReferenceFrame sensorFrame;
    private final RobotConfigurationDataBuffer robotConfigurationDataBuffer;
    private final HumanoidReferenceFrames referenceFrames;
    private final ROS2NodeInterface ros2Node;
@@ -43,6 +58,11 @@ public class DelayFixedPlanarRegionsSubscription
    private final FullHumanoidRobotModel fullRobotModel;
    private final RobotROSClockCalculator rosClockCalculator;
    private IHMCROS2Callback<?> robotConfigurationDataSubscriber;
+   private RosPoseStampedPublisher sensorPosePublisher;
+   private boolean posePublisherEnabled = false;
+
+   private CollisionBoxProvider collisionBoxProvider;
+   private CollidingScanRegionFilter collisionFilter;
 
    private boolean enabled = false;
    private AbstractRosTopicSubscriber<RawGPUPlanarRegionList> subscriber;
@@ -75,17 +95,26 @@ public class DelayFixedPlanarRegionsSubscription
       fullRobotModel = robotModel.createFullRobotModel();
       robotConfigurationDataBuffer = new RobotConfigurationDataBuffer();
 
-      referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      sensorPosePublisher = new RosPoseStampedPublisher(false);
 
-      ReferenceFrame baseFrame = robotModel.getSensorInformation().getSteppingCameraFrame(referenceFrames);
+      referenceFrames = new HumanoidReferenceFrames(fullRobotModel, robotModel.getSensorInformation());
 
-      RigidBodyTransformReadOnly transform = robotModel.getSensorInformation().getSteppingCameraTransform();
-      sensorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("l515", baseFrame, transform);
+      collisionBoxProvider = robotModel.getCollisionBoxProvider();
+      CollisionShapeTester shapeTester = new CollisionShapeTester();
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         List<JointBasics> joints = new ArrayList<>();
+         RigidBodyBasics shin = fullRobotModel.getFoot(robotSide).getParentJoint().getPredecessor().getParentJoint().getPredecessor();
+         MultiBodySystemTools.collectJointPath(fullRobotModel.getPelvis(), shin, joints);
+         joints.forEach(joint -> shapeTester.addJoint(collisionBoxProvider, joint));
+      }
+      collisionFilter = new CollidingScanRegionFilter(shapeTester);
    }
 
    public void subscribe(RosNodeInterface ros1Node)
    {
       this.ros1Node = ros1Node;
+      this.ros1Node.attachPublisher("/atlas/sensors/chest_l515/pose",sensorPosePublisher);
       rosClockCalculator.subscribeToROS1Topics(ros1Node);
       subscriber = MapsenseTools.createROS1Callback(topic, ros1Node, this::acceptRawGPUPlanarRegionsList);
    }
@@ -156,7 +185,19 @@ public class DelayFixedPlanarRegionsSubscription
                try
                {
                   planarRegionsList.applyTransform(MapsenseTools.getTransformFromCameraToWorld());
-                  planarRegionsList.applyTransform(sensorFrame.getTransformToWorldFrame());
+                  planarRegionsList.applyTransform(referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame());
+
+                  collisionFilter.update();
+                  gpuPlanarRegionUpdater.filterCollidingPlanarRegions(planarRegionsList, collisionFilter);
+
+                  if(posePublisherEnabled)
+                  {
+                     RigidBodyTransform transform = referenceFrames.getSteppingCameraFrame().getTransformToWorldFrame();
+                     sensorPosePublisher.publish("chest_l515",
+                                                 (Vector3D) transform.getTranslation(),
+                                                 new Quaternion(transform.getRotation()),
+                                                 new Time(currentTimeInWall));
+                  }
                }
                catch (NotARotationMatrixException e)
                {
@@ -197,5 +238,10 @@ public class DelayFixedPlanarRegionsSubscription
    public double getDelay()
    {
       return delay;
+   }
+
+   public void setPosePublisherEnabled(boolean posePublisherEnabled)
+   {
+      this.posePublisherEnabled = posePublisherEnabled;
    }
 }

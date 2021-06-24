@@ -1,42 +1,162 @@
 package us.ihmc.gdx.ui.behaviors.registry;
 
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.messager.Messager;
-import us.ihmc.ros2.ROS2NodeInterface;
+import com.badlogic.gdx.graphics.g3d.Renderable;
+import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Pool;
+import us.ihmc.behaviors.tools.behaviorTree.*;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.ui.GDXImGuiBasedUI;
+import us.ihmc.gdx.vr.GDXVRManager;
 
-public abstract class GDXBehaviorUIInterface
+import java.util.ArrayList;
+
+/**
+ * The UI has a tree structure, but not a decision or search one.
+ * Currently calls propagate down to all the nodes so they can decide to take action.
+ */
+public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements RenderableProvider
 {
-   private final ROS2NodeInterface ros2Node;
-   private final Messager behaviorMessager;
-   private final DRCRobotModel robotModel;
+   private final ArrayList<GDXBehaviorUIInterface> children = new ArrayList<>();
 
-   protected GDXBehaviorUIInterface(ROS2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   protected GDXBehaviorUIInterface()
    {
-      this.ros2Node = ros2Node;
-      this.behaviorMessager = behaviorMessager;
-      this.robotModel = robotModel;
    }
 
-   public abstract void setEnabled(boolean enabled);
+   public abstract void create(GDXImGuiBasedUI baseUI);
+
+//   public abstract void setEnabled(boolean enabled);
+
+   public void handleVREvents(GDXVRManager vrManager)
+   {
+
+   }
+
+   public abstract void renderTreeNodeImGuiWidgets();
+
+   public abstract void renderRegularPanelImGuiWidgets();
+
+   public abstract void update();
+
+   public final void updateIncludingChildren()
+   {
+      update();
+
+      for (GDXBehaviorUIInterface child : children)
+      {
+         child.updateIncludingChildren();
+      }
+   }
+
+   public final void renderRegularPanelImGuiWidgetsAndChildren()
+   {
+      renderRegularPanelImGuiWidgets();
+
+      for (GDXBehaviorUIInterface child : children)
+      {
+         child.renderRegularPanelImGuiWidgetsAndChildren();
+      }
+   }
 
    public abstract void destroy();
 
-   protected void enable3DVisualizations()
+   public abstract Point2D getTreeNodeInitialPosition();
+
+   public void addChild(GDXBehaviorUIInterface child)
    {
+      children.add(child);
    }
 
-   protected ROS2NodeInterface getRos2Node()
+   public ArrayList<GDXBehaviorUIInterface> getUIChildren()
    {
-      return ros2Node;
+      return children;
    }
 
-   protected Messager getBehaviorMessager()
+   public void addChildPanels(ImGuiPanel parentPanel)
    {
-      return behaviorMessager;
+
    }
 
-   protected DRCRobotModel getRobotModel()
+   public final void addChildPanelsIncludingChildren(ImGuiPanel parentPanel)
    {
-      return robotModel;
+      addChildPanels(parentPanel);
+
+      for (GDXBehaviorUIInterface child : children)
+      {
+         child.addChildPanelsIncludingChildren(parentPanel);
+      }
    }
+
+   public void syncTree(BehaviorTreeNodeBasics externalNode)
+   {
+      setPreviousStatus(externalNode.getPreviousStatus());
+      setName(externalNode.getName());
+      setLastTickMillis(externalNode.getLastTickMillis());
+      setType(externalNode.getType());
+
+      if (externalNode instanceof BehaviorTreeControlFlowNodeBasics)
+      {
+         BehaviorTreeControlFlowNodeBasics externalControlFlowNode = (BehaviorTreeControlFlowNodeBasics) externalNode;
+         for (BehaviorTreeNodeBasics externalChild : externalControlFlowNode.getChildren())
+         {
+            for (GDXBehaviorUIInterface child : children)
+            {
+               if (externalChild.getName().equals(child.getName()))
+               {
+                  child.syncTree(externalChild);
+               }
+            }
+         }
+      }
+   }
+
+   @Override
+   public BehaviorTreeNodeStatus tickInternal()
+   {
+      return null;
+   }
+
+   @Override
+   public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
+   {
+
+   }
+
+   public int generateUID() {
+      return this.toString().hashCode(); //maybe change later? works fine for now
+   }
+
+   @Override
+   public String toString() {
+      StringBuilder out = new StringBuilder();
+
+      out.append(this.getType());
+      out.append("(");
+      for (GDXBehaviorUIInterface child : this.getUIChildren()) {
+         out.append(child.toString()).append(",");
+      }
+      out.append(")");
+
+      return out.toString();
+   }
+
+   //   protected void enable3DVisualizations()
+//   {
+//   }
+//
+//   protected ROS2NodeInterface getRos2Node()
+//   {
+//      return ros2Node;
+//   }
+//
+//   protected Messager getBehaviorMessager()
+//   {
+//      return behaviorMessager;
+//   }
+//
+//   protected DRCRobotModel getRobotModel()
+//   {
+//      return robotModel;
+//   }
 }

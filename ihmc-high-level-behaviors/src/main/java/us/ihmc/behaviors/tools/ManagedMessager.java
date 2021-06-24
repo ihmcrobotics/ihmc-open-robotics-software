@@ -1,67 +1,27 @@
 package us.ihmc.behaviors.tools;
 
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.messager.*;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.tools.thread.ActivationReference;
 
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicReference;
 
 // TODO: This class should only implement a smaller subset of what a messager can do
-public class ManagedMessager implements Messager
+public class ManagedMessager extends MessagerCallbackManager implements Messager
 {
-   private final Messager messager;
-   private volatile boolean enabled = true;
-
-   private final HashSet<Pair<Topic, TopicListener>> topicListeners = new HashSet<>();
-   private final HashSet<Pair<Topic, AtomicReference>> topicInputs = new HashSet<>();
-
    public ManagedMessager(Messager messager)
    {
       this.messager = messager;
    }
 
-   public void setEnabled(boolean enabled)
+   public ManagedMessager()
    {
-      this.enabled = enabled;
 
-      for (Pair<Topic, TopicListener> listenerPair : topicListeners)
-      {
-         updateEnabledForListener(listenerPair);
-      }
-
-      for (Pair<Topic, AtomicReference> inputPair : topicInputs)
-      {
-         updateEnabledForInput(inputPair);
-      }
-   }
-
-   private void updateEnabledForListener(Pair<Topic, TopicListener> listenerPair)
-   {
-      if (enabled)
-         messager.registerTopicListener(listenerPair.getLeft(), listenerPair.getRight());
-      else
-         messager.removeTopicListener(listenerPair.getLeft(), listenerPair.getRight());
-   }
-
-   private void updateEnabledForInput(Pair<Topic, AtomicReference> inputPair)
-   {
-      if (enabled)
-         messager.attachInput(inputPair.getLeft(), inputPair.getRight());
-      else
-         messager.removeInput(inputPair.getLeft(), inputPair.getRight());
-   }
-
-   public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
-   {
-      return new ActivationReference<>(createInput(topic, false), true);
    }
 
    @Override
    public <T> void submitMessage(Topic<T> topic, T message)
    {
-      if (enabled)
+      if (messager != null && enabled && isMessagerOpen())
       {
          messager.submitMessage(topic, message);
       }
@@ -70,7 +30,7 @@ public class ManagedMessager implements Messager
    @Override
    public <T> void submitMessage(Message<T> message)
    {
-      if (enabled)
+      if (messager != null && enabled && isMessagerOpen())
       {
          messager.submitMessage(message);
       }
@@ -90,35 +50,6 @@ public class ManagedMessager implements Messager
       return input;
    }
 
-   @Override
-   public <T> void attachInput(Topic<T> topic, AtomicReference<T> input)
-   {
-      Pair<Topic, AtomicReference> inputPair = Pair.of(topic, input);
-      topicInputs.add(inputPair);
-      updateEnabledForInput(inputPair);
-   }
-
-   @Override
-   public <T> boolean removeInput(Topic<T> topic, AtomicReference<T> input)
-   {
-      topicInputs.remove(Pair.of(topic, input));
-      return messager.removeInput(topic, input);
-   }
-
-   @Override
-   public <T> void registerTopicListener(Topic<T> topic, TopicListener<T> listener)
-   {
-      Pair<Topic, TopicListener> listenerPair = Pair.of(topic, listener);
-      topicListeners.add(listenerPair);
-      updateEnabledForListener(listenerPair);
-   }
-
-   @Override
-   public <T> boolean removeTopicListener(Topic<T> topic, TopicListener<T> listener)
-   {
-      topicListeners.remove(Pair.of(topic, listener));
-      return messager.removeTopicListener(topic, listener);
-   }
 
    public boolean isEnabled()
    {
