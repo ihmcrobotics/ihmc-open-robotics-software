@@ -5,9 +5,12 @@ import imgui.extension.implot.ImPlot;
 import imgui.extension.implot.ImPlotContext;
 import imgui.extension.implot.ImPlotStyle;
 import imgui.extension.implot.flag.*;
+import imgui.flag.ImGuiDragDropFlags;
 import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
+import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
@@ -22,9 +25,7 @@ import us.ihmc.tools.thread.MissingThreadTools;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ImGuiGDXYoGraphPanel
@@ -44,6 +45,11 @@ public class ImGuiGDXYoGraphPanel
    private HashMap<String, GDXYoGraphGroup> graphGroups = new HashMap<>();
 
    private ImPlotContext context = null;
+
+   private final ImBoolean showAllVariables = new ImBoolean(false);
+   private final ImString searchBar = new ImString();
+
+   private GDXYoGraphRunnable graphRequesting = null;
 
    public ImGuiGDXYoGraphPanel(String title, int bufferSize)
    {
@@ -137,24 +143,26 @@ public class ImGuiGDXYoGraphPanel
       }
    }
 
-   private void listVariables(YoRegistry registry, int depth)
+   private void getAllVariablesHelper(YoRegistry registry, ArrayList<YoVariable> output)
    {
-      for (YoVariable variable : registry.getVariables())
-      {
-         System.out.println(variable.getFullNameString());
-      }
+      output.addAll(registry.getVariables());
 
-      if (depth > 0)
+      for (YoRegistry child : registry.getChildren())
       {
-         for (YoRegistry child : registry.getChildren())
-         {
-            listVariables(child, depth - 1);
-         }
+         getAllVariablesHelper(child, output);
       }
+   }
+
+   private List<YoVariable> getAllVariables(YoRegistry registry) {
+      ArrayList<YoVariable> output = new ArrayList<>();
+      getAllVariablesHelper(registry, output);
+      return output;
    }
 
    public void renderImGuiWidgets()
    {
+      ImGui.columns(showAllVariables.get() ? 2 : 1);
+
       ImGui.text("Controller host: " + controllerHost);
 
       ImGui.combo(ImGuiTools.uniqueIDOnly(this, "Profile"), graphGroupSelectedIndex, graphGroupNames, graphGroupNames.length);
@@ -190,11 +198,49 @@ public class ImGuiGDXYoGraphPanel
             graph.run();
             if (!graph.shouldGraphExist())
                graphsIt.remove();
+            else if (graph.graphWantsVariable()) {
+               showAllVariables.set(true);
+               graphRequesting = graph;
+            }
          }
       }
 
       if (ImGui.button("Add new graph")) {
          graphs.add(new GDXYoGraphRunnable(context, registry, bufferSize));
+      }
+
+      if (showAllVariables.get())
+      {
+         ImGui.nextColumn();
+
+         List<YoVariable> vars = getAllVariables(registry);
+         vars.sort(Comparator.comparing(YoVariable::getName));
+
+         ImGui.inputText("Variable Search", searchBar);
+
+         ImGui.sameLine();
+         if (ImGui.button("Cancel")) {
+            showAllVariables.set(false);
+            graphRequesting.cancelWantVariable();
+            graphRequesting = null;
+         }
+
+         if (ImGui.beginListBox("##YoVariables", ImGui.getColumnWidth(), ImGui.getWindowSizeY() - 100))
+         {
+            for (YoVariable variable : vars)
+            {
+               if (!variable.getName().toLowerCase().contains(searchBar.get().toLowerCase()))
+                  continue;
+
+               ImGui.selectable(variable.getName());
+               if (ImGui.isItemClicked()) {
+                  graphRequesting.addVariable(variable);
+                  showAllVariables.set(false);
+                  graphRequesting = null;
+               }
+            }
+            ImGui.endListBox();
+         }
       }
    }
 
@@ -225,5 +271,10 @@ public class ImGuiGDXYoGraphPanel
    public String getWindowName()
    {
       return title;
+   }
+
+   public String getVarWindowName()
+   {
+      return title + " List";
    }
 }
