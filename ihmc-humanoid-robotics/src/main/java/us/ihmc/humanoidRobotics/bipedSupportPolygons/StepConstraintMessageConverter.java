@@ -21,6 +21,9 @@ public class StepConstraintMessageConverter
 {
    public static StepConstraintMessage convertToStepConstraintMessage(StepConstraintRegion constraintRegion)
    {
+      if (constraintRegion == null)
+         return null;
+
       StepConstraintMessage message = new StepConstraintMessage();
 
       message.getRegionOrigin().set(constraintRegion.getRegionOriginInWorld());

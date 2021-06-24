@@ -130,12 +130,6 @@ public class MultiStepPushRecoveryModule
          pushRecoveryCalculators.get(robotSide).setConstraintRegionProvider(constraintRegionProvider);
    }
 
-   public void setPlanarRegionDecider(CapturabilityBasedPlanarRegionDecider<StepConstraintRegion> planarRegionDecider)
-   {
-      for (RobotSide robotSide : RobotSide.values)
-         pushRecoveryCalculators.get(robotSide).setPlanarRegionDecider(planarRegionDecider);
-   }
-
    public boolean isRobotFallingFromDoubleSupport()
    {
       return getSwingSideForRecovery() != null;
@@ -179,7 +173,16 @@ public class MultiStepPushRecoveryModule
 
    public boolean hasConstraintRegions()
    {
-      return !constraintRegions.isEmpty();
+      if (constraintRegions.isEmpty())
+         return false;
+
+      for (int i = 0; i < constraintRegions.size(); i++)
+      {
+         if (constraintRegions.get(i) == null)
+            return false;
+      }
+
+      return true;
    }
 
    public StepConstraintRegion getConstraintRegion(int stepIndex)
@@ -240,7 +243,7 @@ public class MultiStepPushRecoveryModule
          recoveryFootsteps.add().set(pushRecoveryCalculator.getRecoveryStep(i));
          recoveryTimings.add().set(pushRecoveryCalculator.getRecoveryStepTiming(i));
          if (pushRecoveryCalculator.hasConstraintRegions())
-            constraintRegions.add(pushRecoveryCalculator.getConstraintRegion(i));
+            constraintRegions.add(pushRecoveryCalculator.getConstraintRegionInWorld(i));
       }
    }
 

@@ -111,6 +111,14 @@ public class PushRecoveryToolboxModule extends ToolboxModule
          }
       });
 
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            controller.updateHighLevelStateChange(s.takeNextData());
+         }
+      });
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeROS2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
       {
          if (controller != null)
