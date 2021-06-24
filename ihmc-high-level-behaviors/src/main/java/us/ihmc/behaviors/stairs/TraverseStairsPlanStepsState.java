@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
-public class TraverseStairsPlanStepsState implements State
+public class TraverseStairsPlanStepsState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;

@@ -12,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 
-public class TraverseStairsSquareUpState implements State
+public class TraverseStairsSquareUpState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;

@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-public class TraverseStairsExecuteStepsState implements State
+public class TraverseStairsExecuteStepsState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;

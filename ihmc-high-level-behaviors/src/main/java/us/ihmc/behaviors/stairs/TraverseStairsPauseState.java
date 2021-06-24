@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.TimeLeftInPause;
 
-public class TraverseStairsPauseState implements State
+public class TraverseStairsPauseState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
@@ -41,7 +41,8 @@ public class TraverseStairsPauseState implements State
    {
       statusLogger.info("Entering " + getClass().getSimpleName() + ". Pausing for " + getPauseDuration() + "sec");
 
-      if (!firstTick.get())
+      boolean wasPreviouslyMoving = getPreviousStateName() == TraverseStairsBehavior.TraverseStairsStateName.EXECUTE_STEPS || getPreviousStateName() == TraverseStairsBehavior.TraverseStairsStateName.SQUARE_UP;
+      if (firstTick.get() || wasPreviouslyMoving)
       {
          REAStateRequestMessage clearMessage = new REAStateRequestMessage();
          clearMessage.setRequestClear(true);
