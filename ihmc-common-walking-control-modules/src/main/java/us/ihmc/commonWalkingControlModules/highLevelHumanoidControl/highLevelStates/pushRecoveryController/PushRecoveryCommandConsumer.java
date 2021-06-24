@@ -17,6 +17,11 @@ public class PushRecoveryCommandConsumer
       this.commandConsumerWithDelayBuffers = new CommandConsumerWithDelayBuffers(commandInputManager, yoTime);
    }
 
+   public void update()
+   {
+      commandConsumerWithDelayBuffers.update();
+   }
+
    public void consumePushRecoveryResultCommand(MultiStepPushRecoveryController pushRecoveryModule)
    {
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PushRecoveryResultCommand.class))
