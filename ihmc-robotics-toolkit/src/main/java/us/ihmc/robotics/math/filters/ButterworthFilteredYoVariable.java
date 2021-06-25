@@ -3,6 +3,7 @@ package us.ihmc.robotics.math.filters;
 import java.util.ArrayList;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -29,7 +30,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 public class ButterworthFilteredYoVariable extends YoDouble
 {
    private final double alpha;
-   private final YoDouble alphaVariable;
+   private final DoubleProvider alphaVariable;
 
    private final YoDouble position;
    private final YoDouble previousInput;
@@ -87,7 +88,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
       reset();
    }
 
-   public ButterworthFilteredYoVariable(String name, YoRegistry registry, YoDouble alphaVariable, YoDouble positionVariable,
+   public ButterworthFilteredYoVariable(String name, YoRegistry registry, DoubleProvider alphaVariable, YoDouble positionVariable,
          ButterworthFilterType butterworthFilterType)
    {
       super(name, registry);
@@ -147,7 +148,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
       }
       else
       {
-         alphaToUse = alphaVariable.getDoubleValue();
+         alphaToUse = alphaVariable.getValue();
       }
 
       switch (butterworthFilterType)
@@ -361,42 +362,7 @@ public class ButterworthFilteredYoVariable extends YoDouble
 
    public static void main(String[] args)
    {
-      //    testButterWorth();
-
-      ArrayList<Double> alphas = new ArrayList<Double>();
-      ArrayList<Double> breakFreqs = new ArrayList<Double>();
-
-      ArrayList<Double> alphasCalculated = new ArrayList<Double>();
-
-      double deltaT = 0.002;
-
-      for (double alpha = 0.1; alpha <= 0.9; alpha = alpha + 0.1)
-      {
-         double breakFreq = plotBodeForAlpha(alpha, deltaT);
-         alphas.add(alpha);
-         breakFreqs.add(breakFreq);
-
-         double alphaCalculated = computeAlphaGivenBreakFrequency(breakFreq, deltaT);
-         alphasCalculated.add(alphaCalculated);
-         System.out.println("alpha= " + alpha + " , breakFreq= " + breakFreq + ", calculated alpha = " + alphaCalculated);
-      }
-
-      double[][] alphaActual = new double[2][alphas.size()];
-      double[][] alphaPredicted = new double[2][alphasCalculated.size()];
-
-      for (int i = 0; i < alphas.size(); i++)
-      {
-         alphaActual[0][i] = breakFreqs.get(i);
-         alphaActual[1][i] = alphas.get(i);
-
-         alphaPredicted[0][i] = breakFreqs.get(i);
-         alphaPredicted[1][i] = alphasCalculated.get(i);
-      }
-
-      ArrayList<double[][]> listOfXYCurves = new ArrayList<double[][]>();
-
-      listOfXYCurves.add(alphaActual);
-      listOfXYCurves.add(alphaPredicted);
+      System.out.println(computeAlphaGivenBreakFrequency(1, 0.001));
    }
 
 }
