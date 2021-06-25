@@ -197,6 +197,8 @@ public class GDXImGuiBasedUI
       }
       if (ImGui.beginMenu("Panels"))
       {
+         imGuiWindowAndDockSystem.renderMenuDockPanelItems();
+         ImGui.separator();
          imGuiPanelManager.renderPanelMenu();
          ImGui.endMenu();
       }

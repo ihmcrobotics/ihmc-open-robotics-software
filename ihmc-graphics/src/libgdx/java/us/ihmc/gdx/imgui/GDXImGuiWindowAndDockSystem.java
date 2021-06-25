@@ -3,18 +3,19 @@ package us.ihmc.gdx.imgui;
 import imgui.ImFont;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
-import imgui.flag.ImGuiCol;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.flag.ImGuiDockNodeFlags;
+import imgui.flag.*;
 import imgui.gl3.ImGuiImplGl3;
 import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
+import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.WorkspacePathTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.TreeSet;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -28,6 +29,8 @@ public class GDXImGuiWindowAndDockSystem
    private long windowHandle;
    private ImFont imFont;
    private int dockspaceId;
+   private final ImString newDockPanelName = new ImString("", 100);
+   private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
 
    private final Path imGuiUserSettingsPath;
    private final Path imGuiDefaultSettingsPath;
@@ -118,6 +121,39 @@ public class GDXImGuiWindowAndDockSystem
 //      flags += ImGuiDockNodeFlags.AutoHideTabBar;
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
+      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      {
+         dockspacePanel.renderPanel();
+      }
+   }
+
+   public void renderMenuDockPanelItems()
+   {
+      ImGui.text("New dock panel:");
+      ImGui.sameLine();
+      ImGui.pushItemWidth(90.0f);
+      ImGui.inputText("###newDockPanelName", newDockPanelName, ImGuiInputTextFlags.CallbackResize);
+      ImGui.popItemWidth();
+      ImGui.sameLine();
+      if (ImGui.button("Create###createNewDockPanelButton"))
+      {
+         dockPanelSet.add(new ImGuiDockspacePanel(newDockPanelName.get()));
+      }
+
+      ImGuiDockspacePanel dockspacePanelToRemove = null;
+      for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+      {
+         dockspacePanel.renderMenuItem();
+         ImGui.sameLine();
+         if (ImGui.button("X###X" + dockspacePanel.getName()))
+         {
+            dockspacePanelToRemove = dockspacePanel;
+         }
+      }
+      if (dockspacePanelToRemove != null)
+      {
+         dockPanelSet.remove(dockspacePanelToRemove);
+      }
    }
 
    public void loadImGuiLayout(boolean tryLocalFirst)
