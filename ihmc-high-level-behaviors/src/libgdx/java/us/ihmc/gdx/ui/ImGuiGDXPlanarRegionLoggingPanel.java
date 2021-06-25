@@ -97,25 +97,25 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       }
 
       files.sort((o1, o2) -> //Sorts most recent first
-      {
-         BasicFileAttributes left;
-         BasicFileAttributes right;
-         try
-         {
-            left = Files.readAttributes(o1.toPath(), BasicFileAttributes.class);
-            right = Files.readAttributes(o2.toPath(), BasicFileAttributes.class);
-         }
-         catch (IOException ioException)
-         {
-            LogTools.error("Could not sort files");
-            LogTools.error(ioException.getMessage());
-            ioException.printStackTrace();
+                 {
+                    BasicFileAttributes left;
+                    BasicFileAttributes right;
+                    try
+                    {
+                       left = Files.readAttributes(o1.toPath(), BasicFileAttributes.class);
+                       right = Files.readAttributes(o2.toPath(), BasicFileAttributes.class);
+                    }
+                    catch (IOException ioException)
+                    {
+                       LogTools.error("Could not sort files");
+                       LogTools.error(ioException.getMessage());
+                       ioException.printStackTrace();
 
-            return 0;
-         }
+                       return 0;
+                    }
 
-         return right.creationTime().compareTo(left.creationTime());
-      });
+                    return right.creationTime().compareTo(left.creationTime());
+                 });
    }
 
    public void renderImGuiWidgets()
@@ -139,7 +139,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       ImGui.checkbox("Show##1", showRealtime);
       boolean realtime = ImGui.sliderInt("Time:##realtimeSlider",
                                          timeRealtime.getData(),
-                                         (int)(realtimeBuffer.getStartTime() - startTime),
+                                         (int) (realtimeBuffer.getStartTime() - startTime),
                                          (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime()),
                                          "");
       ImGui.sameLine();
@@ -206,8 +206,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
          if (ImGui.button("->##log"))
          {
             long start = logBuffer.getStartTime();
-            timeLog.set(Math.min((int) (logBuffer.getNextTime(start + timeLog.get()) - start),
-                                 (int) (logBuffer.getEndTime() - logBuffer.getStartTime())));
+            timeLog.set(Math.min((int) (logBuffer.getNextTime(start + timeLog.get()) - start), (int) (logBuffer.getEndTime() - logBuffer.getStartTime())));
             log = true;
          }
          ImGui.sameLine();

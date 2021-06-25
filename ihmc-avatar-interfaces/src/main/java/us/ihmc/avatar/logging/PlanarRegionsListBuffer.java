@@ -19,12 +19,14 @@ public class PlanarRegionsListBuffer
 
    private int index = 0;
 
-   private static class Container {
+   private static class Container
+   {
       private PlanarRegionsList list;
       private long time;
       private int index;
 
-      Container(int index, long time, PlanarRegionsList list) {
+      Container(int index, long time, PlanarRegionsList list)
+      {
          this.list = list;
          this.index = index;
          this.time = time;
@@ -153,12 +155,14 @@ public class PlanarRegionsListBuffer
 
       Container value;
 
-      if (lower == null) {
+      if (lower == null)
+      {
          if (higher == null)
             return null;
          else
             value = higher;
-      } else if (higher == null)
+      }
+      else if (higher == null)
          value = lower;
       else if (Math.abs(lower.getTime() - time) > Math.abs(higher.getTime() - time))
          value = higher;
@@ -168,12 +172,14 @@ public class PlanarRegionsListBuffer
       return value;
    }
 
-   public PlanarRegionsList getNearTime(long time) {
+   public PlanarRegionsList getNearTime(long time)
+   {
       Container c = getNearTimeInternal(time);
       return c != null ? c.getList() : null;
    }
 
-   public long getNextTime(long currentTime) {
+   public long getNextTime(long currentTime)
+   {
       if (indexBuffer.size() < 1)
          return -1;
 
@@ -182,7 +188,8 @@ public class PlanarRegionsListBuffer
       return container == null ? Long.MAX_VALUE : container.getTime();
    }
 
-   public long getPreviousTime(long currentTime) {
+   public long getPreviousTime(long currentTime)
+   {
       if (indexBuffer.size() < 1)
          return -1;
 
