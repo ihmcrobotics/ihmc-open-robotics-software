@@ -73,8 +73,8 @@ public class IMUBasedJointStateEstimator
       joints = MultiBodySystemTools.filterJoints(jacobian.getJointsInOrder(), OneDoFJointBasics.class);
       this.velocityEstimator = new IMUBasedJointVelocityEstimator(jacobian, parentIMU, childIMU, registry);
 
-      velocityBreakFrequency = new DoubleParameter(name + "AlphaFuseVelocity", registry, parameters.getBreakFrequencyForVelocityEstimation());
-      positionBreakFrequency = new DoubleParameter(name + "AlphaFusePosition", registry, parameters.getBreakFrequencyForPositionEstimation());
+      velocityBreakFrequency = new DoubleParameter(name + "FuseVelocityBreakFreq", registry, parameters.getBreakFrequencyForVelocityEstimation());
+      positionBreakFrequency = new DoubleParameter(name + "FusePositionBreakFreq", registry, parameters.getBreakFrequencyForPositionEstimation());
 
       DoubleProvider slopTime = new DoubleParameter(name + "SlopTime", registry, parameters.getVelocityEstimationBacklashSlopTime());
 
