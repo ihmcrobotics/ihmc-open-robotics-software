@@ -59,14 +59,14 @@ public class ImGuiGDXYoGraphPanel
 
    public void startYoVariableClient()
    {
-//      Set<String> graphGroupNameKeySet = graphGroups.keySet();
-//      String robotControllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
-//      String graphGroupName;
-//      if (robotControllerHost.trim().toLowerCase().contains("cpu4") && graphGroupNameKeySet.contains("Real robot"))
-//      {
-//         Arrays.asList(graphGroupNames).indexOf("Real robot");
-//         graphGroupSelectedIndex.set(graphGroupNames.);
-//      }
+      //      Set<String> graphGroupNameKeySet = graphGroups.keySet();
+      //      String robotControllerHost = NetworkParameters.getHost(NetworkParameterKeys.robotController);
+      //      String graphGroupName;
+      //      if (robotControllerHost.trim().toLowerCase().contains("cpu4") && graphGroupNameKeySet.contains("Real robot"))
+      //      {
+      //         Arrays.asList(graphGroupNames).indexOf("Real robot");
+      //         graphGroupSelectedIndex.set(graphGroupNames.);
+      //      }
    }
 
    public void startYoVariableClient(String graphGroupName)
@@ -108,7 +108,7 @@ public class ImGuiGDXYoGraphPanel
          LogTools.info("Handshake complete.");
          handshakeComplete = true;
 
-//         listVariables(registry, 4);
+         //         listVariables(registry, 4);
       });
 
       context = ImPlot.createContext();
@@ -153,7 +153,8 @@ public class ImGuiGDXYoGraphPanel
       }
    }
 
-   private List<YoVariable> getAllVariables(YoRegistry registry) {
+   private List<YoVariable> getAllVariables(YoRegistry registry)
+   {
       ArrayList<YoVariable> output = new ArrayList<>();
       getAllVariablesHelper(registry, output);
       return output;
@@ -193,19 +194,22 @@ public class ImGuiGDXYoGraphPanel
       synchronized (graphs)
       {
          Iterator<GDXYoGraphRunnable> graphsIt = graphs.iterator();
-         while (graphsIt.hasNext()) {
+         while (graphsIt.hasNext())
+         {
             GDXYoGraphRunnable graph = graphsIt.next();
             graph.run();
             if (!graph.shouldGraphExist())
                graphsIt.remove();
-            else if (graph.graphWantsVariable()) {
+            else if (graph.graphWantsVariable())
+            {
                showAllVariables.set(true);
                graphRequesting = graph;
             }
          }
       }
 
-      if (ImGui.button("Add new graph")) {
+      if (ImGui.button("Add new graph"))
+      {
          graphs.add(new GDXYoGraphRunnable(context, registry, bufferSize));
       }
 
@@ -219,7 +223,8 @@ public class ImGuiGDXYoGraphPanel
          ImGui.inputText("Variable Search", searchBar);
 
          ImGui.sameLine();
-         if (ImGui.button("Cancel")) {
+         if (ImGui.button("Cancel"))
+         {
             showAllVariables.set(false);
             graphRequesting.cancelWantVariable();
             graphRequesting = null;
@@ -233,7 +238,8 @@ public class ImGuiGDXYoGraphPanel
                   continue;
 
                ImGui.selectable(variable.getName());
-               if (ImGui.isItemClicked()) {
+               if (ImGui.isItemClicked())
+               {
                   graphRequesting.addVariable(variable);
                   showAllVariables.set(false);
                   graphRequesting = null;

@@ -29,7 +29,8 @@ public class GDXYoGraphRunnable implements Runnable
    private final int plotID;
    private static int currentPlotIndex = 0;
 
-   public GDXYoGraphRunnable(ImPlotContext ctx, YoRegistry registry, int bufferSize) {
+   public GDXYoGraphRunnable(ImPlotContext ctx, YoRegistry registry, int bufferSize)
+   {
       this.context = ctx;
       this.registry = registry;
       this.bufferSize = bufferSize;
@@ -38,7 +39,8 @@ public class GDXYoGraphRunnable implements Runnable
       currentIndex = new AtomicInteger(0);
    }
 
-   public GDXYoGraphRunnable(ImPlotContext ctx, YoVariable variable, Double[] values, YoRegistry registry, int bufferSize) {
+   public GDXYoGraphRunnable(ImPlotContext ctx, YoVariable variable, Double[] values, YoRegistry registry, int bufferSize)
+   {
       this.context = ctx;
       this.variables.add(variable);
       this.values.add(values);
@@ -49,19 +51,23 @@ public class GDXYoGraphRunnable implements Runnable
       currentIndex = new AtomicInteger(0);
    }
 
-   public boolean shouldGraphExist() {
+   public boolean shouldGraphExist()
+   {
       return shouldGraphExist;
    }
 
-   public void cancelWantVariable() {
+   public void cancelWantVariable()
+   {
       requestAddVariable = false;
    }
 
-   public boolean graphWantsVariable() {
+   public boolean graphWantsVariable()
+   {
       return requestAddVariable;
    }
 
-   public void addVariable(YoVariable variable) {
+   public void addVariable(YoVariable variable)
+   {
       variables.add(variable);
       values.add(new Double[bufferSize]);
       requestAddVariable = false;
@@ -80,8 +86,14 @@ public class GDXYoGraphRunnable implements Runnable
       float graphHeight = 60;
       ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
       ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(5, 0));
-      if (ImPlot.beginPlot("##GDXYoGraph" + plotID, "", "", new ImVec2(graphWidth, graphHeight),
-                           ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect, ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit, ImPlotAxisFlags.NoLabel | ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels | ImPlotAxisFlags.AutoFit))
+      if (ImPlot.beginPlot("##GDXYoGraph" + plotID,
+                           "",
+                           "",
+                           new ImVec2(graphWidth, graphHeight),
+                           ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect,
+                           ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit,
+                           ImPlotAxisFlags.NoLabel | ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels
+                           | ImPlotAxisFlags.AutoFit))
       {
          ImPlot.setLegendLocation(ImPlotLocation.SouthWest, ImPlotOrientation.Horizontal, true);
 
