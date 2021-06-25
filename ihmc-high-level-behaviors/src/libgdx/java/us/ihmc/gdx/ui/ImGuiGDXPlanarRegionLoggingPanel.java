@@ -27,9 +27,9 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
 {
    public static final String WINDOW_NAME = "Planar Region Logging";
 
-   private final PlanarRegionsListLogger prlLogger;
-   private final PlanarRegionsListBuffer prlRealtimeBuffer;
-   private PlanarRegionsListBuffer prlLogBuffer;
+   private final PlanarRegionsListLogger logger;
+   private final PlanarRegionsListBuffer realtimeBuffer;
+   private PlanarRegionsListBuffer logBuffer;
 
    private final GDXPlanarRegionsGraphic realtimeGraphic;
    private final GDXPlanarRegionsGraphic logGraphic;
@@ -47,8 +47,8 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
 
    public ImGuiGDXPlanarRegionLoggingPanel()
    {
-      prlLogger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
-      prlRealtimeBuffer = new PlanarRegionsListBuffer();
+      logger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
+      realtimeBuffer = new PlanarRegionsListBuffer();
 
       realtimeGraphic = new GDXPlanarRegionsGraphic();
       logGraphic = new GDXPlanarRegionsGraphic();
@@ -59,11 +59,11 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       updateAvailableLogFiles();
    }
 
-   public void update(long time, PlanarRegionsList prl)
+   public void update(long time, PlanarRegionsList planarRegionsList)
    {
       if (logPlanarRegions.get())
       {
-         prlLogger.update(time, prl);
+         logger.update(time, planarRegionsList);
          if (mustUpdateFiles)
          {
             mustUpdateFiles = false;
@@ -71,7 +71,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
          }
       }
 
-      prlRealtimeBuffer.putAndTick(time, prl);
+      realtimeBuffer.putAndTick(time, planarRegionsList);
    }
 
    private void updateAvailableLogFiles()
@@ -83,10 +83,10 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       {
          files.addAll(Arrays.asList(Objects.requireNonNull(logDirectory.listFiles(pathname -> pathname.toString().toLowerCase().endsWith(".prllog")))));
       }
-      catch (NullPointerException ex)
+      catch (NullPointerException nullPointerException)
       {
          LogTools.error("Could not open log directory - does folder exist?");
-         LogTools.error(ex.getStackTrace());
+         LogTools.error(nullPointerException.getStackTrace());
       }
 
       files.sort((o1, o2) -> //Sorts most recent first
@@ -98,10 +98,11 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
             left = Files.readAttributes(o1.toPath(), BasicFileAttributes.class);
             right = Files.readAttributes(o2.toPath(), BasicFileAttributes.class);
          }
-         catch (IOException ex)
+         catch (IOException ioException)
          {
             LogTools.error("Could not sort files");
-            LogTools.error(ex.getStackTrace());
+            LogTools.error(ioException.getMessage());
+            ioException.printStackTrace();
 
             return 0;
          }
@@ -116,7 +117,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       {
          if (logPlanarRegions.get())
          {
-            prlLogger.start();
+            logger.start();
             mustUpdateFiles = true;
          }
       }
@@ -127,7 +128,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       boolean realtime = ImGui.sliderInt("Time:##realtimeSlider",
                                          timeRealtime.getData(),
                                          0,
-                                         (int) (prlRealtimeBuffer.getEndTime() - prlRealtimeBuffer.getStartTime()),
+                                         (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime()),
                                          "");
       ImGui.sameLine();
       realtime |= ImGui.inputInt("##realtimeInput", timeRealtime);
@@ -140,40 +141,40 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       ImGui.sameLine();
       if (ImGui.button("<-##realtime"))
       {
-         long start = prlRealtimeBuffer.getStartTime();
-         timeRealtime.set(Math.max((int) (prlRealtimeBuffer.getPreviousTime(start + timeRealtime.get()) - start), 0));
+         long start = realtimeBuffer.getStartTime();
+         timeRealtime.set(Math.max((int) (realtimeBuffer.getPreviousTime(start + timeRealtime.get()) - start), 0));
          realtime = true;
       }
       ImGui.sameLine();
       if (ImGui.button("->##realtime"))
       {
-         long start = prlRealtimeBuffer.getStartTime();
-         timeRealtime.set(Math.min((int) (prlRealtimeBuffer.getNextTime(start + timeRealtime.get()) - start),
-                                   (int) (prlRealtimeBuffer.getEndTime() - prlRealtimeBuffer.getStartTime())));
+         long start = realtimeBuffer.getStartTime();
+         timeRealtime.set(Math.min((int) (realtimeBuffer.getNextTime(start + timeRealtime.get()) - start),
+                                   (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime())));
          realtime = true;
       }
       ImGui.sameLine();
       if (ImGui.button(">>>##realtime"))
       {
-         timeRealtime.set(Math.min(timeRealtime.get() + 3000, (int) (prlRealtimeBuffer.getEndTime() - prlRealtimeBuffer.getStartTime())));
+         timeRealtime.set(Math.min(timeRealtime.get() + 3000, (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime())));
          realtime = true;
       }
 
       if (realtime || firstRun)
       {
-         PlanarRegionsList list = prlRealtimeBuffer.getNearTime(prlRealtimeBuffer.getStartTime() + timeRealtime.get());
-         if (list != null)
+         PlanarRegionsList regions = realtimeBuffer.getNearTime(realtimeBuffer.getStartTime() + timeRealtime.get());
+         if (regions != null)
          {
-            realtimeGraphic.generateMeshesAsync(list);
+            realtimeGraphic.generateMeshesAsync(regions);
          }
       }
 
       //Log buffer
       ImGui.text("View logged regions:");
       ImGui.checkbox("Show##2", showLog);
-      if (prlLogBuffer != null)
+      if (logBuffer != null)
       {
-         boolean log = ImGui.sliderInt("Time:##logSlider", timeLog.getData(), 0, (int) (prlLogBuffer.getEndTime() - prlLogBuffer.getStartTime()), "");
+         boolean log = ImGui.sliderInt("Time:##logSlider", timeLog.getData(), 0, (int) (logBuffer.getEndTime() - logBuffer.getStartTime()), "");
          ImGui.sameLine();
          log |= ImGui.inputInt("##logInput", timeLog);
 
@@ -185,28 +186,28 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
          ImGui.sameLine();
          if (ImGui.button("<-##log"))
          {
-            long start = prlLogBuffer.getStartTime();
-            timeLog.set(Math.max((int) (prlLogBuffer.getPreviousTime(start + timeLog.get()) - start), 0));
+            long start = logBuffer.getStartTime();
+            timeLog.set(Math.max((int) (logBuffer.getPreviousTime(start + timeLog.get()) - start), 0));
             log = true;
          }
          ImGui.sameLine();
          if (ImGui.button("->##log"))
          {
-            long start = prlLogBuffer.getStartTime();
-            timeLog.set(Math.min((int) (prlLogBuffer.getNextTime(start + timeLog.get()) - start),
-                                 (int) (prlLogBuffer.getEndTime() - prlLogBuffer.getStartTime())));
+            long start = logBuffer.getStartTime();
+            timeLog.set(Math.min((int) (logBuffer.getNextTime(start + timeLog.get()) - start),
+                                 (int) (logBuffer.getEndTime() - logBuffer.getStartTime())));
             log = true;
          }
          ImGui.sameLine();
          if (ImGui.button(">>>##log"))
          {
-            timeLog.set(Math.min(timeLog.get() + 3000, (int) (prlLogBuffer.getEndTime() - prlLogBuffer.getStartTime())));
+            timeLog.set(Math.min(timeLog.get() + 3000, (int) (logBuffer.getEndTime() - logBuffer.getStartTime())));
             log = true;
          }
 
          if (log || firstRun)
          { //Use bitwise or to make sure both are called
-            PlanarRegionsList list = prlLogBuffer.getNearTime(prlLogBuffer.getStartTime() + timeLog.get());
+            PlanarRegionsList list = logBuffer.getNearTime(logBuffer.getStartTime() + timeLog.get());
             if (list != null)
             {
                logGraphic.generateMeshesAsync(list);
@@ -231,20 +232,21 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       ImGui.text("Import log from file:");
       if (ImGui.beginListBox("##filesviewer"))
       {
-         Iterator<File> it = files.iterator();
-         while (it.hasNext())
+         Iterator<File> iterator = files.iterator();
+         while (iterator.hasNext())
          { //Use iterator to prevent rare ConcurrentModificationError
-            File f = it.next();
-            if (ImGui.selectable(f.getName()))
+            File file = iterator.next();
+            if (ImGui.selectable(file.getName()))
             {
                try
                {
-                  prlLogBuffer = new PlanarRegionsListBuffer(f);
+                  logBuffer = new PlanarRegionsListBuffer(file);
                }
-               catch (IOException ex)
+               catch (IOException ioException)
                {
-                  LogTools.error("Could not load file " + f.getName());
-                  LogTools.error(ex);
+                  LogTools.error("Could not load file " + file.getName());
+                  LogTools.error(ioException.getMessage());
+                  ioException.printStackTrace();
                }
             }
          }
