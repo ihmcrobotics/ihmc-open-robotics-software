@@ -82,6 +82,8 @@ public class GDXImGuiWindowAndDockSystem
       io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
       io.setConfigViewportsNoTaskBarIcon(true);
       io.setConfigWindowsMoveFromTitleBarOnly(true);
+      io.setConfigViewportsNoDecoration(false);
+      io.setConfigDockingTransparentPayload(false);
 
       if (!Boolean.parseBoolean(System.getProperty("imgui.dark")))
          ImGui.styleColorsLight();
