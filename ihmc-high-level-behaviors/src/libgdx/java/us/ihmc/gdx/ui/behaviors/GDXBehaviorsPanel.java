@@ -206,8 +206,8 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          {
             ImGui.text("Messager connected to " + messagerConnectedHost + ".");
          }
-
-         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect messager")))
+         ImGui.sameLine();
+         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
          {
             disconnectMessager();
          }
@@ -233,7 +233,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       }
       else
       {
-         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName() + ".");
+         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName());
 
          if (ImGui.button("Disconnect YoVariable client"))
          {
