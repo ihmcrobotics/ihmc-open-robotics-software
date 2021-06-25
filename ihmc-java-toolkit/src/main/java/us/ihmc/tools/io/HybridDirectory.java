@@ -12,6 +12,7 @@ public class HybridDirectory
    private final Path externalDirectory;
    private final Class<?> classForLoading;
    private final Path workspaceDirectory;
+   private final String pathNecessaryForClasspathLoading;
 
    public HybridDirectory(Path externalDirectory,
                           String directoryNameToAssumePresent,
@@ -25,6 +26,9 @@ public class HybridDirectory
            "");
    }
 
+   /**
+    * @deprecated This is broken for some reason.
+    */
    public HybridDirectory(Path externalDirectory,
                           String directoryNameToAssumePresent,
                           String subsequentPathToResourceFolder,
@@ -54,15 +58,21 @@ public class HybridDirectory
          putTogetherResourcePath += classForResourceDirectory.getPackage().getName().replaceAll("\\.", "/");
          putTogetherResourcePath += "/";
          putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath;
+         pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
       }
       else if (isAbsolute)
       {
          putTogetherResourcePath += subsequentOrAbsoluteResourcePackagePath.replaceFirst("/", "");
+         pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
+      }
+      else // class is null & path is relative
+      {
+         pathNecessaryForClasspathLoading = subsequentOrAbsoluteResourcePackagePath;
       }
 
       workspaceDirectory = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent,
-                                                                            subsequentPathToResourceFolder,
-                                                                            putTogetherResourcePath);
+                                                                 subsequentPathToResourceFolder,
+                                                                 putTogetherResourcePath);
    }
 
    public Path getWorkspaceDirectory()
@@ -78,5 +88,10 @@ public class HybridDirectory
    public Class<?> getClassForLoading()
    {
       return classForLoading;
+   }
+
+   public String getPathNecessaryForClasspathLoading()
+   {
+      return pathNecessaryForClasspathLoading;
    }
 }
