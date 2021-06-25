@@ -2,13 +2,11 @@ package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage;
 import controller_msgs.msg.dds.DetectedFiducialPacket;
-import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.behaviors.tools.behaviorTree.BehaviorTreeNodeStatus;
 import us.ihmc.behaviors.tools.behaviorTree.ResettingNode;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.behaviors.BehaviorDefinition;
 import us.ihmc.behaviors.BehaviorInterface;
@@ -19,7 +17,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.tools.Timer;
@@ -50,9 +47,6 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
    private final ScheduledExecutorService executorService = Executors.newSingleThreadScheduledExecutor();
    private ScheduledFuture<?> behaviorTask = null;
    private final AtomicBoolean isRunning = new AtomicBoolean(false);
-
-   private final IHMCROS2Publisher<Empty> completedPublisher;
-   private final IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionParametersPublisher;
 
    private final AtomicBoolean hasPublishedCompleted = new AtomicBoolean();
    private final AtomicBoolean behaviorHasCrashed = new AtomicBoolean();
@@ -99,12 +93,6 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
 
       robotInterface = helper.getOrCreateRobotInterface();
       statusLogger = helper.getOrCreateStatusLogger();
-
-      completedPublisher = ROS2Tools.createPublisher(helper.getROS2Node(), TraverseStairsBehaviorAPI.COMPLETED);
-      supportRegionParametersPublisher = ROS2Tools.createPublisher(helper.getROS2Node(),
-                                                                   BipedalSupportPlanarRegionParametersMessage.class,
-                                                                   ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(helper.getRobotModel()
-                                                                                                                            .getSimpleRobotName()).withInput());
 
       squareUpState = new TraverseStairsSquareUpState(helper, parameters);
       pauseState = new TraverseStairsPauseState(helper, parameters);
@@ -268,7 +256,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
 
       BipedalSupportPlanarRegionParametersMessage supportRegionParametersMessage = new BipedalSupportPlanarRegionParametersMessage();
       supportRegionParametersMessage.setEnable(false);
-      supportRegionParametersPublisher.publish(supportRegionParametersMessage);
+      helper.publish(ROS2Tools::getBipedalSupportRegionParametersTopic, supportRegionParametersMessage);
    }
 
    private void update()
@@ -285,7 +273,7 @@ public class TraverseStairsBehavior extends ResettingNode implements BehaviorInt
 
          if (executeStepsState.planEndsAtGoal() && executeStepsState.walkingIsComplete() && !hasPublishedCompleted.get())
          {
-            completedPublisher.publish(new Empty());
+            helper.publish(TraverseStairsBehaviorAPI.COMPLETED);
             hasPublishedCompleted.set(true);
          }
       }
