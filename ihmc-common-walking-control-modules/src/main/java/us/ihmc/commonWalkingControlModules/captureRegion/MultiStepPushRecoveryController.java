@@ -52,8 +52,7 @@ public class MultiStepPushRecoveryController
                                                            soleZUpFrames,
                                                            defaultSupportPolygon,
                                                            pushRecoveryControllerParameters,
-                                                           registry,
-                                                           null);
+                                                           registry);
 
       pushRecoveryModule.setConstraintRegionProvider(stepConstraintProvider);
 

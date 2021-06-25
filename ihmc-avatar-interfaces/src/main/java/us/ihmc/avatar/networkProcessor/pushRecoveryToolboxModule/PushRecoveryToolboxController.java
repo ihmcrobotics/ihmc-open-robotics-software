@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.captureRegion.FullMultiStepPushRecoveryCalculatorVisualizer;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryModule;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
@@ -42,6 +43,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.euclid.referenceFrame.YoFrameConvexPolygon2D;
@@ -130,8 +132,8 @@ public class PushRecoveryToolboxController extends ToolboxController
                                                                   referenceFrames.getSoleZUpFrames(),
                                                                   defaultSupportPolygon,
                                                                   pushRecoveryControllerParameters,
-                                                                  parentRegistry,
-                                                                  graphicsListRegistry);
+                                                                  parentRegistry);
+      pushRecoveryControlModule.attachVisualizer(new FullMultiStepPushRecoveryCalculatorVisualizer("pushRecovery", 3, parentRegistry, graphicsListRegistry));
 
       currentState = new YoEnum<>("controllerCurrentState", registry, HighLevelControllerName.class);
       IntFunction<List<StepConstraintRegion>> constraintRegionProvider = (index) ->
@@ -185,10 +187,12 @@ public class PushRecoveryToolboxController extends ToolboxController
       {
          updateStateFromMessages();
 
-         pushRecoveryControlModule.updateForDoubleSupport(estimatedICP, estimatedOmega.getDoubleValue());
-
          if (shouldBroadcastResult())
+         {
+            pushRecoveryControlModule.updateForDoubleSupport(estimatedICP, estimatedOmega.getDoubleValue());
+
             computeAndPublishResultMessage();
+         }
 
          listeners.forEach(Runnable::run);
       }
@@ -245,7 +249,8 @@ public class PushRecoveryToolboxController extends ToolboxController
       PlanarRegionsListMessage planarRegions = this.mostRecentPlanarRegions.getAndSet(null);
       if (planarRegions != null)
       {
-         List<StepConstraintRegion> regions = convertToStepConstraintRegionsList(planarRegions);
+         PlanarRegionsList tempList = PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions);
+         List<StepConstraintRegion> regions = convertToStepConstraintRegionsList(tempList);
          constraintRegionsToUse.set(regions);
       }
 
@@ -321,6 +326,8 @@ public class PushRecoveryToolboxController extends ToolboxController
             stepMessage.getLocation().set(step.getFootstepPose().getPosition());
             stepMessage.getOrientation().set(step.getFootstepPose().getOrientation());
 
+            LogTools.info("Stepping to " + stepMessage.getLocation());
+
             if (pushRecoveryControlModule.hasConstraintRegions())
             {
                message.getStepConstraintList()
@@ -374,14 +381,14 @@ public class PushRecoveryToolboxController extends ToolboxController
       this.highLevelStateChangeMessage.set(highLevelStateChangeStatusMessage);
    }
 
-   private List<StepConstraintRegion> convertToStepConstraintRegionsList(PlanarRegionsListMessage message)
+   private List<StepConstraintRegion> convertToStepConstraintRegionsList(PlanarRegionsList planarRegions)
    {
-      List<PlanarRegion> planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(message).getPlanarRegionsAsList();
+      List<PlanarRegion> planarRegionsList = planarRegions.getPlanarRegionsAsList();
       planarRegionsList = planarRegionsList.stream().filter(PushRecoveryToolboxController::isRegionValidForStepping).collect(Collectors.toList());
 
-      return planarRegionsList.stream()
-                              .map(region -> convertToStepConstraintRegion(region, distanceToShrink))
-                              .filter(region -> region.getConvexHull().getArea() > minimumStepSurface)
+      List<StepConstraintRegion> constraintRegions = planarRegionsList.stream().map(region -> convertToStepConstraintRegion(region, distanceToShrink)).collect(
+            Collectors.toList());
+      return constraintRegions.stream().filter(region -> region.getConvexHull().getArea() > minimumStepSurface)
                               .collect(Collectors.toList());
    }
 
@@ -408,7 +415,7 @@ public class PushRecoveryToolboxController extends ToolboxController
       ConvexPolygonScaler scaler = new ConvexPolygonScaler();
       scaler.scaleConvexPolygon(planarRegion.getConvexHull(), distanceToShrink, shrunkenPolygon);
 
-      return new StepConstraintRegion(planarRegion.getTransformToWorld(), planarRegion.getConvexHull(), new ArrayList<>());
+      return new StepConstraintRegion(planarRegion.getTransformToWorld(), shrunkenPolygon, new ArrayList<>());
    }
 
    private class IsInContactProvider implements Function<RobotSide, Boolean>
