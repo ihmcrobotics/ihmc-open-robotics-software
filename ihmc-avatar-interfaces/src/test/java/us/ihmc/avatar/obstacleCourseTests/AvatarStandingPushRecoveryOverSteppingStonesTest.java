@@ -12,6 +12,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -47,11 +48,13 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implements MultiRobotTestInterface
 {
+   private static boolean visualize = false;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    
    private DRCSimulationTestHelper drcSimulationTestHelper;
    private PushRobotController pushRobotController;
    private PushRecoveryToolboxModule pushRecoveryToolboxModule;
+   private SimulationConstructionSet visualizationSCS;
 
    private SideDependentList<StateTransitionCondition> singleSupportStartConditions = new SideDependentList<>();
    private SideDependentList<StateTransitionCondition> doubleSupportStartConditions = new SideDependentList<>();
@@ -61,6 +64,7 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    @BeforeEach
    public void showMemoryUsageBeforeTest()
    {
+      visualize = !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() && visualize;
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
@@ -68,7 +72,12 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    @AfterEach
    public void destroySimulationAndRecycleMemory()
    {
-      if (simulationTestingParameters.getKeepSCSUp())
+      if (pushRecoveryToolboxModule != null)
+      {
+         pushRecoveryToolboxModule.sleep();
+      }
+
+      if (visualize && simulationTestingParameters.getKeepSCSUp())
       {
          ThreadTools.sleepForever();
       }
@@ -78,6 +87,12 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
       {
          drcSimulationTestHelper.destroySimulation();
          drcSimulationTestHelper = null;
+      }
+
+      if (visualizationSCS != null)
+      {
+         visualizationSCS.closeAndDispose();
+         visualizationSCS = null;
       }
 
       if (pushRecoveryToolboxModule != null)
@@ -101,23 +116,28 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
       pushRecoveryToolboxModule = new PushRecoveryToolboxModule(getRobotModel(), false, DomainFactory.PubSubImplementation.INTRAPROCESS, 9.81);
       pushRecoveryToolboxModule.wakeUp();
 
-      SimulationConstructionSet visSCS = new SimulationConstructionSet(new Robot("dummY"), simulationTestingParameters);
-      visSCS.addYoRegistry(pushRecoveryToolboxModule.getRegistry());
-      visSCS.addYoGraphicsListRegistry(pushRecoveryToolboxModule.getYoGraphicsListRegistry());
-      visSCS.setPlaybackRealTimeRate(0.75);
-      Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.addCoordinateSystem(0.3);
-      visSCS.addStaticLinkGraphics(linkGraphics);
-      visSCS.setCameraFix(0.0, 0.0, 0.5);
-      visSCS.setCameraPosition(-0.5, 0.0, 1.0);
+      if (visualize)
+      {
+         visualizationSCS = new SimulationConstructionSet(new Robot("dummY"), simulationTestingParameters);
+         visualizationSCS.addYoRegistry(pushRecoveryToolboxModule.getRegistry());
+         visualizationSCS.addYoGraphicsListRegistry(pushRecoveryToolboxModule.getYoGraphicsListRegistry());
+         visualizationSCS.setPlaybackRealTimeRate(0.75);
+         Graphics3DObject linkGraphics = new Graphics3DObject();
+         linkGraphics.addCoordinateSystem(0.3);
+         visualizationSCS.addStaticLinkGraphics(linkGraphics);
+         visualizationSCS.setCameraFix(0.0, 0.0, 0.5);
+         visualizationSCS.setCameraPosition(-0.5, 0.0, 1.0);
 
-      SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = visSCS.createSimulationOverheadPlotterFactory();
-      simulationOverheadPlotterFactory.addYoGraphicsListRegistries(pushRecoveryToolboxModule.getYoGraphicsListRegistry());
-      simulationOverheadPlotterFactory.createOverheadPlotter();
+         SimulationOverheadPlotterFactory simulationOverheadPlotterFactory = visualizationSCS.createSimulationOverheadPlotterFactory();
+         simulationOverheadPlotterFactory.addYoGraphicsListRegistries(pushRecoveryToolboxModule.getYoGraphicsListRegistry());
+         simulationOverheadPlotterFactory.createOverheadPlotter();
 
-      visSCS.startOnAThread();
+         visualizationSCS.startOnAThread();
 
-      pushRecoveryToolboxModule.attachListener(visSCS::tickAndUpdate);
+         pushRecoveryToolboxModule.attachListener(visualizationSCS::tickAndUpdate);
+      }
+
+
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
       drcSimulationTestHelper.setStartingLocation(selectedLocation);
@@ -164,7 +184,18 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
       swingTime = getRobotModel().getWalkingControllerParameters().getDefaultSwingTime();
       totalMass = fullRobotModel.getTotalMass();
 
-      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25));
+      if (visualize)
+      {
+         drcSimulationTestHelper.getSimulationStarter().attachControllerFailureListener((failure) ->
+                                                                                        {
+                                                                                           pushRecoveryToolboxModule.sleep();
+                                                                                           visualizationSCS.stop();
+                                                                                        });
+      }
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.25);
+
+
+      assertTrue(success);
    }
 
 
@@ -172,13 +203,12 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
 	@Test
    public void testWalkingOverSteppingStonesForwardPush() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       Vector3D firstForceDirection = new Vector3D(-1.0, 0.0, 0.0);
-      double percentWeight = 0.35;
+      double percentWeight = 0.6;
       double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.1;
+      double duration = 0.05;
       pushRobotController.applyForce(firstForceDirection, magnitude, duration);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
@@ -200,13 +230,12 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    @Test
    public void testWalkingOverSteppingStonesAngledPush() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       Vector3D firstForceDirection = new Vector3D(-1.0, -1.0, 0.0);
-      double percentWeight = 0.4;
+      double percentWeight = 0.6;
       double magnitude = percentWeight * totalMass * 9.81;
-      double duration = 0.2;
+      double duration = 0.1;
       pushRobotController.applyForce(firstForceDirection, magnitude, duration);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(5.0);
@@ -262,7 +291,6 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
       PlanarRegion platform = createEndPlanarRegion(locations.get(locations.size() - 2));
       platform.setRegionId(idStart + locations.size() - 2);
 
-      planarRegions.add(platform);
       planarRegions.add(platform);
 
       List<PlanarRegionMessage> planarRegionsAsMessages = new ArrayList<>();
