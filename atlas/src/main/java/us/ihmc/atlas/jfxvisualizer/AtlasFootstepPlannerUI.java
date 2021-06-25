@@ -88,8 +88,7 @@ public class AtlasFootstepPlannerUI extends Application
          {
             if (planSingleStep)
             {
-               int numberOfStepsToPlan = 6;
-               FootstepPlannerTerminationCondition terminationCondition = (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= numberOfStepsToPlan;
+               FootstepPlannerTerminationCondition terminationCondition = (plannerTime, iterations, bestPathFinalStep, bestSecondToFinalStep, bestPathSize) -> bestPathSize >= 1;
                plannerModule.addCustomTerminationCondition(terminationCondition);
             }
             else
