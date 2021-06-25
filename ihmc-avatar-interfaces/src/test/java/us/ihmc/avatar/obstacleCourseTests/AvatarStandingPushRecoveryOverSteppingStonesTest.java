@@ -271,27 +271,34 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    private PlanarRegionsListMessage createPlanarRegionsListMessage()
    {
       List<Point3D> locations = new ArrayList<>();
+      locations.add(new Point3D(-7.0, 0.0, 0.3));
+      locations.add(new Point3D(-7.75, -0.55, 0.3));
       locations.add(new Point3D(-7.75, -0.55, 0.3));
       locations.add(new Point3D(-8.25, -0.95, 0.3));
       locations.add(new Point3D(-8.75, -0.55, 0.3));
       locations.add(new Point3D(-9.25, -0.95, 0.3));
       locations.add(new Point3D(-9.75, -0.55, 0.3));
-      locations.add(new Point3D(-10.25, -1.0, 0.3));
       locations.add(new Point3D(-10.25, -0.65, 0.3));
+      locations.add(new Point3D(-10.5, 0.0, 0.3));
 
       List<PlanarRegion> planarRegions = new ArrayList<>();
       int idStart = 10;
-      for (int i = 0; i < locations.size() - 2; i++)
+
+      PlanarRegion platform = createEndPlanarRegion(locations.get(0));
+      platform.setRegionId(idStart);
+      planarRegions.add(platform);
+
+      for (int i = 1; i < locations.size() - 2; i++)
       {
          PlanarRegion planarRegion = createSteppingStonePlanarRegion(locations.get(i));
          planarRegion.setRegionId(idStart + i);
          planarRegions.add(planarRegion);
       }
 
-      PlanarRegion platform = createEndPlanarRegion(locations.get(locations.size() - 2));
-      platform.setRegionId(idStart + locations.size() - 2);
+      PlanarRegion endPlatform = createEndPlanarRegion(locations.get(locations.size() - 1));
+      endPlatform.setRegionId(idStart + locations.size() - 2);
 
-      planarRegions.add(platform);
+      planarRegions.add(endPlatform);
 
       List<PlanarRegionMessage> planarRegionsAsMessages = new ArrayList<>();
       for (int i = 0; i < planarRegions.size(); i++)
@@ -357,10 +364,10 @@ public abstract class AvatarStandingPushRecoveryOverSteppingStonesTest implement
    private List<Point2D> createPlatformFace()
    {
       ArrayList<Point2D> points = new ArrayList<>();
-      points.add(new Point2D(0.25, 1.0));
-      points.add(new Point2D(-0.25, 1.0));
-      points.add(new Point2D(-0.25, -1.0));
-      points.add(new Point2D(0.25, -1.0));
+      points.add(new Point2D(0.5, 1.5));
+      points.add(new Point2D(-0.5, 1.5));
+      points.add(new Point2D(-0.5, -1.5));
+      points.add(new Point2D(0.5, -1.5));
 
       return points;
    }
