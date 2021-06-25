@@ -1,5 +1,6 @@
 package us.ihmc.robotics.math.filters;
 
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.math.filters.ButterworthFilteredYoVariable.ButterworthFilterType;
@@ -48,7 +49,7 @@ public class ButterworthFusedYoVariable extends YoDouble
       reset();
    }
 
-   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, YoDouble alphaVariable, YoDouble slowSignal,
+   public ButterworthFusedYoVariable(String name, YoRegistry yoVariableRegistry, DoubleProvider alphaVariable, YoDouble slowSignal,
          YoDouble fastSignal)
    {
       super(name, yoVariableRegistry);
