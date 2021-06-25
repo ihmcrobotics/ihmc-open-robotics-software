@@ -40,12 +40,11 @@ public class MultiStepRecoveryStepCalculator
    private final RecyclingArrayList<FramePoint2DBasics> capturePointsAtTouchdown = new RecyclingArrayList<>(FramePoint2D::new);
    private final RecyclingArrayList<FramePoint2DBasics> recoveryStepLocations = new RecyclingArrayList<>(FramePoint2D::new);
 
-   private final RecyclingArrayList<ConstrainedReachableRegion> constrainedReachableRegions = new RecyclingArrayList<>(ConstrainedReachableRegion::new);
-
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> captureRegionsAtTouchdown = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableConstrainedCaptureRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
+   private final RecyclingArrayList<RecyclingArrayList<ConstrainedReachableRegion>> constrainedReachableRegions = new RecyclingArrayList<>(() -> new RecyclingArrayList(ConstrainedReachableRegion::new));
    private final List<ConstrainedReachableRegion> constraintRegions = new ArrayList<>();
 
    private final PoseReferenceFrame stanceFrame = new PoseReferenceFrame("StanceFrame", worldFrame);
@@ -206,6 +205,7 @@ public class MultiStepRecoveryStepCalculator
       reachableConstrainedCaptureRegions.clear();
 
       constraintRegions.clear();
+      constrainedReachableRegions.clear();
 
       for (; depthIdx < depth; depthIdx++)
       {
@@ -234,7 +234,7 @@ public class MultiStepRecoveryStepCalculator
          computeConstrainedReachableRegions(depthIdx, reachableRegion);
 
          FrameConvexPolygon2DBasics constrainedCaptureRegion = reachableConstrainedCaptureRegions.add();
-         computeConstrainedCaptureRegion(reachableCaptureRegion, constrainedCaptureRegion);
+         computeConstrainedCaptureRegion(depthIdx, reachableCaptureRegion, constrainedCaptureRegion);
 
          if (!constrainedCaptureRegion.isEmpty())
          { // they do intersect
@@ -255,22 +255,28 @@ public class MultiStepRecoveryStepCalculator
 
             recoveryStepLocation.set(capturePointAtTouchdown);
             isStateCapturable = true;
-            depthIdx++;
             break;
          }
          else
          {
-            if (constraintRegionProvider == null || constraintRegionProvider.apply(depthIdx) == null || constrainedReachableRegions.size() == 0)
+            boolean definitelyNotCapturable;
+            if (constraintRegionProvider == null || constraintRegionProvider.apply(depthIdx) == null)
             {
-               isStateCapturable = computeUnconstrainedBestEffortStep(captureRegionAtTouchdown, reachableRegion, capturePointAtTouchdown, recoveryStepLocation);
+               definitelyNotCapturable = computeUnconstrainedBestEffortStep(captureRegionAtTouchdown, reachableRegion, capturePointAtTouchdown, recoveryStepLocation);
+            }
+            else if (constrainedReachableRegions.get(depthIdx).size() > 0)
+            {
+               definitelyNotCapturable = computeBestEffortStepWithEnvironmentalConstraints(depthIdx,
+                                                                                           captureRegionAtTouchdown,
+                                                                                           capturePointAtTouchdown,
+                                                                                           recoveryStepLocation);
             }
             else
             {
-               isStateCapturable = computeBestEffortStepWithEnvironmentalConstrains(captureRegionAtTouchdown,
-                                                                                    capturePointAtTouchdown,
-                                                                                    recoveryStepLocation);
+               definitelyNotCapturable = true;
             }
-            if (!isStateCapturable)
+
+            if (definitelyNotCapturable)
                break;
          }
 
@@ -295,7 +301,6 @@ public class MultiStepRecoveryStepCalculator
                                                   FramePoint2DReadOnly pointInDirectionOfStep,
                                                   FramePoint2DBasics recoveryStepLocationToPack)
    {
-
       forwardLineAtNominalWidth.setToZero(stanceFrame);
       forwardLineAtNominalWidth.set(stanceFrame, 0.0, swingSide.negateIfRightSide(pushRecoveryParameters.getPreferredStepWidth()), 1.0, 0.0);
       forwardLineAtNominalWidth.changeFrame(worldFrame);
@@ -334,6 +339,16 @@ public class MultiStepRecoveryStepCalculator
       return reachableCaptureRegions.get(i);
    }
 
+   public int getNumberOfConstraintRegionsForStep(int stepNumber)
+   {
+      return constrainedReachableRegions.get(stepNumber).size();
+   }
+
+   public FrameConvexPolygon2DReadOnly getConstrainedReachableRegion(int stepNumber, int regionNumber)
+   {
+      return constrainedReachableRegions.get(stepNumber).get(regionNumber);
+   }
+
    public boolean hasConstraintRegions()
    {
       return !constraintRegions.isEmpty();
@@ -346,26 +361,28 @@ public class MultiStepRecoveryStepCalculator
       return null;
    }
 
-   private void computeConstrainedCaptureRegion(FrameConvexPolygon2DReadOnly reachableCaptureRegion,
+   private void computeConstrainedCaptureRegion(int stepNumber,
+                                                FrameConvexPolygon2DReadOnly reachableCaptureRegion,
                                                 FrameConvexPolygon2DBasics constrainedCaptureRegionToPack)
    {
-      if (constrainedReachableRegions.size() == 0)
+      // FIXME this logic is bad.
+      if (constrainedReachableRegions.get(stepNumber).size() == 0 && (constraintRegionProvider == null || constraintRegionProvider.apply(stepNumber) == null))
       {
          constrainedCaptureRegionToPack.set(reachableCaptureRegion);
          return;
       }
 
       ConstrainedReachableRegion constraintRegion = null;
-      if (constrainedReachableRegions.size() == 1)
+      if (constrainedReachableRegions.get(stepNumber).size() == 1)
       {
-         constraintRegion = constrainedReachableRegions.get(0);
+         constraintRegion = constrainedReachableRegions.get(stepNumber).get(0);
       }
       else
       {
          double minArea = 0.0;
-         for (int i = 0; i < constrainedReachableRegions.size(); i++)
+         for (int i = 0; i < constrainedReachableRegions.get(stepNumber).size(); i++)
          {
-            ConstrainedReachableRegion region = constrainedReachableRegions.get(i);
+            ConstrainedReachableRegion region = constrainedReachableRegions.get(stepNumber).get(i);
             double area = polygonTools.computeIntersectionAreaOfPolygons(reachableCaptureRegion, region);
             if (area > minArea)
             {
@@ -394,7 +411,7 @@ public class MultiStepRecoveryStepCalculator
    {
       if (captureRegion.getNumberOfVertices() == 0)
       {
-         return false;
+         return true;
       }
       else if (captureRegion.getNumberOfVertices() == 1)
       {
@@ -410,32 +427,33 @@ public class MultiStepRecoveryStepCalculator
          polygonTools.computeMinimumDistancePoints(reachableRegion, captureRegion, recoveryStepLocationToPack, capturePointAtTouchdownToPack);
       }
 
-      return true;
+      return false;
    }
 
    private final FramePoint2D point1ToThrowAway = new FramePoint2D();
    private final FramePoint2D point2ToThrowAway = new FramePoint2D();
 
-   private boolean computeBestEffortStepWithEnvironmentalConstrains(FrameConvexPolygon2DReadOnly captureRegion,
-                                                                    FramePoint2DBasics capturePointAtTouchdownToPack,
-                                                                    FramePoint2DBasics recoveryStepLocationToPack)
+   private boolean computeBestEffortStepWithEnvironmentalConstraints(int stepNumber,
+                                                                     FrameConvexPolygon2DReadOnly captureRegion,
+                                                                     FramePoint2DBasics capturePointAtTouchdownToPack,
+                                                                     FramePoint2DBasics recoveryStepLocationToPack)
    {
       double closestDistance = Double.POSITIVE_INFINITY;
-      boolean isStateCapturable = false;
+      boolean isStateDefinitelyNotCapturable = true;
 
-      for (int i = 0; i < constrainedReachableRegions.size(); i++)
+      for (int i = 0; i < constrainedReachableRegions.get(stepNumber).size(); i++)
       {
-         FrameConvexPolygon2DReadOnly constrainedReachableRegion = constrainedReachableRegions.get(i);
+         FrameConvexPolygon2DReadOnly constrainedReachableRegion = constrainedReachableRegions.get(stepNumber).get(i);
 
          if (constrainedReachableRegion.isEmpty())
             continue;
 
-         boolean regionIsCapturable = computeUnconstrainedBestEffortStep(captureRegion, constrainedReachableRegion, point1ToThrowAway, point2ToThrowAway);
-         if (regionIsCapturable)
-            isStateCapturable = true;
+         boolean regionIsNotCapturable = computeUnconstrainedBestEffortStep(captureRegion, constrainedReachableRegion, point1ToThrowAway, point2ToThrowAway);
+         if (!regionIsNotCapturable)
+            isStateDefinitelyNotCapturable = false;
 
          double distanceSquared = point1ToThrowAway.distanceSquared(point2ToThrowAway);
-         if (!isStateCapturable || regionIsCapturable && (distanceSquared < closestDistance))
+         if (isStateDefinitelyNotCapturable || (!regionIsNotCapturable && distanceSquared < closestDistance))
          {
             closestDistance = distanceSquared;
             capturePointAtTouchdownToPack.set(point1ToThrowAway);
@@ -443,7 +461,7 @@ public class MultiStepRecoveryStepCalculator
          }
       }
 
-      return isStateCapturable;
+      return isStateDefinitelyNotCapturable;
    }
 
    private final FrameConvexPolygon2D constraintRegionHull = new FrameConvexPolygon2D();
@@ -451,7 +469,7 @@ public class MultiStepRecoveryStepCalculator
 
    private void computeConstrainedReachableRegions(int stepNumber, FrameConvexPolygon2DReadOnly reachableRegion)
    {
-      constrainedReachableRegions.clear();
+      constrainedReachableRegions.add().clear();
       if (constraintRegionProvider == null || constraintRegionProvider.apply(stepNumber) == null)
          return;
 
@@ -464,7 +482,7 @@ public class MultiStepRecoveryStepCalculator
          polygonTools.computeIntersectionOfPolygons(reachableRegion, constraintRegionHull, intersectingHull);
          if (intersectingHull.getArea() > 0.0)
          {
-            ConstrainedReachableRegion constrainedReachableRegion = constrainedReachableRegions.add();
+            ConstrainedReachableRegion constrainedReachableRegion = constrainedReachableRegions.get(stepNumber).add();
             constrainedReachableRegion.set(intersectingHull);
             constrainedReachableRegion.setStepConstraintRegion(constraintRegions.get(i));
          }

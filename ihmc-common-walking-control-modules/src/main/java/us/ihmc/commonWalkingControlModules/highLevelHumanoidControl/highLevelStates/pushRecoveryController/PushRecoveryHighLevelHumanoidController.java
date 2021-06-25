@@ -347,6 +347,8 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
       commandConsumer.update();
       if (currentState.isDoubleSupportState())
          commandConsumer.consumePushRecoveryResultCommand(pushRecoveryControlModule);
+      else
+         commandConsumer.clearPushRecoveryResultCommand();
 
       updateFailureDetection();
 
