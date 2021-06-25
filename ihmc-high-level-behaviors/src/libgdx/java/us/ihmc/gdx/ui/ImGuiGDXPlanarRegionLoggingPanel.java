@@ -44,6 +44,8 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
    private boolean firstRun = true;
    private boolean mustUpdateFiles = false;
 
+   private long startTime = -1;
+
    private final ArrayList<File> files = new ArrayList<>();
 
    public ImGuiGDXPlanarRegionLoggingPanel()
@@ -51,7 +53,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       super(WINDOW_NAME);
       setRenderMethod(this::renderImGuiWidgets);
       logger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
-      realtimeBuffer = new PlanarRegionsListBuffer();
+      realtimeBuffer = new PlanarRegionsListBuffer(3000);
 
       realtimeGraphic = new GDXPlanarRegionsGraphic();
       logGraphic = new GDXPlanarRegionsGraphic();
@@ -118,6 +120,11 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
 
    public void renderImGuiWidgets()
    {
+      if (firstRun)
+      {
+         startTime = realtimeBuffer.getStartTime();
+      }
+
       if (ImGui.checkbox("Log Planar Regions", logPlanarRegions))
       {
          if (logPlanarRegions.get())
@@ -132,7 +139,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
       ImGui.checkbox("Show##1", showRealtime);
       boolean realtime = ImGui.sliderInt("Time:##realtimeSlider",
                                          timeRealtime.getData(),
-                                         0,
+                                         (int)(realtimeBuffer.getStartTime() - startTime),
                                          (int) (realtimeBuffer.getEndTime() - realtimeBuffer.getStartTime()),
                                          "");
       ImGui.sameLine();

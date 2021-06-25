@@ -18,8 +18,6 @@ public class PlanarRegionsListBuffer
    private TreeSet<Container> timeBuffer;
 
    private int index = 0;
-   private long start_time;
-   private long end_time;
 
    private static class Container {
       private PlanarRegionsList list;
@@ -93,11 +91,8 @@ public class PlanarRegionsListBuffer
       if (buffer_length < indexBuffer.size())
          buffer_length = indexBuffer.size();
 
-      if (buffer_length > 0)
+      if (buffer_length <= 0)
       {
-         start_time = timeBuffer.first().getTime();
-         end_time = timeBuffer.last().getTime();
-      } else {
          LogTools.warn("Loaded empty log into PlanarRegionsListBuffer");
       }
    }
@@ -131,11 +126,6 @@ public class PlanarRegionsListBuffer
    public void putAndTick(long time, PlanarRegionsList list)
    {
       Container container = new Container(index, time, list);
-
-      if (time < start_time || indexBuffer.size() == 0)
-         start_time = time;
-      else if (time > end_time)
-         end_time = time;
 
       indexBuffer.put(index, container);
       timeBuffer.add(container);
@@ -213,11 +203,17 @@ public class PlanarRegionsListBuffer
 
    public long getStartTime()
    {
-      return start_time;
+      if (timeBuffer.size() == 0)
+         return -1;
+
+      return timeBuffer.first().getTime();
    }
 
    public long getEndTime()
    {
-      return end_time;
+      if (timeBuffer.size() == 0)
+         return -1;
+
+      return timeBuffer.last().getTime();
    }
 }
