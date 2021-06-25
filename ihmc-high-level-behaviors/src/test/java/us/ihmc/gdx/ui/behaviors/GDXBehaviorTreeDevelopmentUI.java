@@ -19,7 +19,7 @@ public class GDXBehaviorTreeDevelopmentUI
 
    private final GDXImGuiBasedUI baseUI;
 
-   private final ImGuiNodeEditorBehaviorTreePanel treePanel;
+   private final ImGuiImNodesBehaviorTreePanel treePanel;
    private final BehaviorTreeControlFlowNode tree;
    private final GDXBehaviorUIInterface treeGui;
 
@@ -107,7 +107,7 @@ public class GDXBehaviorTreeDevelopmentUI
          }
       });
 
-      treePanel = new ImGuiNodeEditorBehaviorTreePanel("Test");
+      treePanel = new ImGuiImNodesBehaviorTreePanel("Test", this.getClass());
 
       treeGui = new ExampleSimpleNodeInterface("SequenceNode");
       GDXBehaviorUIInterface nodeGui = new ExampleSimpleNodeInterface("FallbackNode");
@@ -137,6 +137,10 @@ public class GDXBehaviorTreeDevelopmentUI
             baseUI.create();
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.getImGuiPanelManager().addPanel("Tree Control", this::renderPanel);
+            baseUI.getImGuiPanelManager().addPanel(treePanel.getWindowName(), () -> {
+               treeGui.syncTree(tree);
+               treePanel.renderImGuiWidgets(treeGui);
+            });
 
             treePanel.create();
          }
@@ -145,9 +149,6 @@ public class GDXBehaviorTreeDevelopmentUI
          public void render()
          {
             baseUI.renderBeforeOnScreenUI();
-
-            treeGui.syncTree(tree);
-            treePanel.renderAsWindow(treeGui);
             baseUI.renderEnd();
          }
 

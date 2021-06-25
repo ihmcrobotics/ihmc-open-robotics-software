@@ -50,10 +50,6 @@ public class ImGuiNodeEditorBehaviorTreePanel
       windowName = ImGuiTools.uniqueLabel(getClass(), name);
    }
 
-   private void resetNodeIndex(GDXBehaviorUIInterface tree) {
-      nodeIndex = tree.generateUID();
-   }
-
    public void create()
    {
       context = NodeEditor.createEditor();
@@ -84,7 +80,8 @@ public class ImGuiNodeEditorBehaviorTreePanel
       if (firstRun)
       {
          boolean repositionNodes = true;
-         for (int id : nodeSize.keySet()) {
+         for (int id : nodeSize.keySet())
+         {
             if (NodeEditor.getNodePositionX(id) != 0.0f || NodeEditor.getNodePositionY(id) != 0.0f)
             {
                repositionNodes = false;
@@ -101,21 +98,33 @@ public class ImGuiNodeEditorBehaviorTreePanel
       firstRun = false;
    }
 
-   private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout) {
+   private void resetNodeIndex(GDXBehaviorUIInterface tree)
+   {
+      nodeIndex = tree.generateUID();
+   }
+
+   private void constructAbegoTree(GDXBehaviorUIInterface tree, DefaultTreeForTreeLayout<GDXBehaviorUIInterface> layout)
+   {
       if (tree == null)
          return;
 
-      for (GDXBehaviorUIInterface child : tree.getUIChildren()) {
+      for (GDXBehaviorUIInterface child : tree.getUIChildren())
+      {
          layout.addChild(tree, child);
          constructAbegoTree(child, layout);
       }
    }
 
-   private int getIndexOfNodeInternal(GDXBehaviorUIInterface node, GDXBehaviorUIInterface root) {
+   private int getIndexOfNodeInternal(GDXBehaviorUIInterface node, GDXBehaviorUIInterface root)
+   {
       if (root.equals(node))
+      {
          return nodeIndex;
-      else {
-         for (GDXBehaviorUIInterface child : root.getUIChildren()) {
+      }
+      else
+      {
+         for (GDXBehaviorUIInterface child : root.getUIChildren())
+         {
             nodeIndex++;
             int val = getIndexOfNodeInternal(node, child);
 
@@ -127,7 +136,8 @@ public class ImGuiNodeEditorBehaviorTreePanel
       return -1;
    }
 
-   private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree) {
+   private int getIndexOfNode(GDXBehaviorUIInterface node, GDXBehaviorUIInterface tree)
+   {
       resetNodeIndex(tree);
       return getIndexOfNodeInternal(node, tree);
    }
@@ -137,7 +147,7 @@ public class ImGuiNodeEditorBehaviorTreePanel
       DefaultTreeForTreeLayout<GDXBehaviorUIInterface> treeForLayout = new DefaultTreeForTreeLayout<>(tree);
       constructAbegoTree(tree, treeForLayout);
 
-      TreeLayout<GDXBehaviorUIInterface> layout = new TreeLayout<GDXBehaviorUIInterface>(treeForLayout, new NodeExtentProvider<GDXBehaviorUIInterface>()
+      TreeLayout<GDXBehaviorUIInterface> layout = new TreeLayout<>(treeForLayout, new NodeExtentProvider<GDXBehaviorUIInterface>()
       {
 
          @Override
@@ -181,11 +191,12 @@ public class ImGuiNodeEditorBehaviorTreePanel
       });
 
       Map<GDXBehaviorUIInterface, Rectangle2D.Double> map = layout.getNodeBounds();
-      for (GDXBehaviorUIInterface node : map.keySet()) {
+      for (GDXBehaviorUIInterface node : map.keySet())
+      {
          int index = getIndexOfNode(node, tree);
          Rectangle2D.Double pos = map.get(node);
 
-         NodeEditor.setNodePosition(index, (float)pos.x, (float)pos.y);
+         NodeEditor.setNodePosition(index, (float) pos.x, (float) pos.y);
       }
    }
 
@@ -365,7 +376,9 @@ public class ImGuiNodeEditorBehaviorTreePanel
       {
          nodeSize.put(nodeIndex, new ImVec2(NodeEditor.getNodeSizeX(nodeIndex), NodeEditor.getNodeSizeY(nodeIndex)));
          nodeSizeCorrection.put(nodeIndex, new ImVec2(0, 0));
-      } else if (!shouldRender && nodeSizeCorrection.get(nodeIndex).x == 0) {
+      }
+      else if (!shouldRender && nodeSizeCorrection.get(nodeIndex).x == 0)
+      {
          ImVec2 correction = nodeSizeCorrection.get(nodeIndex);
          correction.x = nodeSize.get(nodeIndex).x - ImGui.getStyle().getItemSpacingX() - 8; //8 is probably not arbitrary?
          correction.y = nodeSize.get(nodeIndex).y - NodeEditor.getNodeSizeY(nodeIndex) - 8;

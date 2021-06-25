@@ -33,6 +33,9 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    }
 
+   /**
+    * For implementing: please ensure that nodes remain at a fixed size when rendering them - ImGui.dummy() can be used if node space should be reserved for later.
+    */
    public abstract void renderTreeNodeImGuiWidgets();
 
    public abstract void renderRegularPanelImGuiWidgets();
@@ -61,7 +64,10 @@ public abstract class GDXBehaviorUIInterface extends BehaviorTreeNode implements
 
    public abstract void destroy();
 
-   public abstract Point2D getTreeNodeInitialPosition();
+   public Point2D getTreeNodeInitialPosition()
+   {
+      return new Point2D(0, 0);
+   }
 
    public void addChild(GDXBehaviorUIInterface child)
    {
