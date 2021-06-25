@@ -115,7 +115,7 @@ public class JointAccelerationIntegrationCalculator
          double maxVelocity = jointSpecificMaxVelocity.get(jointIndex);
 
          // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
-         double velocityReference = 0.0;
+         double velocityReference = joint.getQd(); // TODO Don't merge to develop as is
          desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
          desiredVelocity += desiredAcceleration * controlDT;
          desiredVelocity = MathTools.clamp(desiredVelocity, velocityReference - maxVelocity, velocityReference + maxVelocity);

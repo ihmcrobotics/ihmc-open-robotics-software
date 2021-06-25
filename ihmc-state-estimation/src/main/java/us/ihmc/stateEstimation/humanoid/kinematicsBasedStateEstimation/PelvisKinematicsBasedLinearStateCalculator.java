@@ -526,20 +526,14 @@ public class PelvisKinematicsBasedLinearStateCalculator
       rootJointLinearVelocityNewTwist.setToZero();
    }
 
-   public void getRootJointPositionAndVelocity(FramePoint3D positionToPack, FrameVector3D linearVelocityToPack)
+   public FramePoint3DReadOnly getPelvisPosition()
    {
-      getPelvisPosition(positionToPack);
-      getPelvisVelocity(linearVelocityToPack);
+      return rootJointPosition;
    }
 
-   public void getPelvisPosition(FramePoint3D positionToPack)
+   public FrameVector3DReadOnly getPelvisVelocity()
    {
-      positionToPack.setIncludingFrame(rootJointPosition);
-   }
-
-   public void getPelvisVelocity(FrameVector3D linearVelocityToPack)
-   {
-      linearVelocityToPack.setIncludingFrame(rootJointLinearVelocityNewTwist);
+      return rootJointLinearVelocityNewTwist;
    }
 
    /** Call {@link #getFootToRootJointPosition(FramePoint3D, RigidBodyBasics)} instead */
