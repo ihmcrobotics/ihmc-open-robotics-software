@@ -45,6 +45,7 @@ public class HeightOffsetHandler
    private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class,
                                                                                                              PelvisHeightTrajectoryCommand::set);
 
+   private final FramePoint3D tempPoint = new FramePoint3D();
    private ReferenceFrame internalReferenceFrame;
 
    private final DoubleProvider yoTime;
@@ -291,12 +292,12 @@ public class HeightOffsetHandler
    private void appendTrajectoryPoint(FrameEuclideanTrajectoryPoint trajectoryPoint, double currentDesiredHeight)
    {
       double time = trajectoryPoint.getTime();
-      double z = fromAbsoluteToOffset(trajectoryPoint.getPositionZ(), currentDesiredHeight);
+      tempPoint.setIncludingFrame(trajectoryPoint.getPosition());
+      tempPoint.changeFrame(worldFrame);
+      double z = fromAbsoluteToOffset(tempPoint.getZ(), currentDesiredHeight);
       double zDot = trajectoryPoint.getLinearVelocityZ();
       offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
    }
-
-   private final FramePoint3D tempPoint = new FramePoint3D();
 
    private double fromAbsoluteToOffset(double zInWorld, double currentDesiredHeight)
    {

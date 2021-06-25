@@ -30,7 +30,7 @@ public class AtlasICPSplitFractionCalculatorParameters implements SplitFractionC
    /** {@inheritDoc} */
    public double getStepHeightForLargeStepUp()
    {
-      return 0.1;
+      return 0.5;
    }
 
    /** {@inheritDoc} */
