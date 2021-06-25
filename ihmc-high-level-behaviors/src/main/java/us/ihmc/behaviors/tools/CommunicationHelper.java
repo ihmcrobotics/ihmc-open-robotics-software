@@ -3,6 +3,7 @@ package us.ihmc.behaviors.tools;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
+import org.apache.commons.lang3.tuple.Pair;
 import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.ROS2SyncedRobotModel;
@@ -149,7 +150,7 @@ public class CommunicationHelper implements ROS2PublishSubscribeAPI, ROS2Control
                                      createFootPolygons());
    }
 
-   public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<PlanarRegionsList> callback)
+   public DelayFixedPlanarRegionsSubscription subscribeToPlanarRegionsViaCallback(String topic, Consumer<Pair<Long, PlanarRegionsList>> callback)
    {
       return MapsenseTools.subscribeToPlanarRegionsWithDelayCompensation(ros2Helper.getROS2NodeInterface(), robotModel, topic, callback);
    }
