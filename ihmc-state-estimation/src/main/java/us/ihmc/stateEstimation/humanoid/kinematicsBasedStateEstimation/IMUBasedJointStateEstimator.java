@@ -88,8 +88,8 @@ public class IMUBasedJointStateEstimator
       newIMUPositions = new YoDouble[joints.length];
       newJointPositions = new ButterworthFusedYoVariable[joints.length];
       newJointVelocities = new ButterworthFusedYoVariable[joints.length];
-      DoubleProvider butterAlphaPosition = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getValue(), estimatorDT);
-      DoubleProvider butterAlphaVelocity = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getValue(), estimatorDT);
+      DoubleProvider butterAlphaPosition = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(positionBreakFrequency.getValue(), estimatorDT);
+      DoubleProvider butterAlphaVelocity = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(velocityBreakFrequency.getValue(), estimatorDT);
       butterAlphaLeak = new YoDouble(name + "fooIMUPositionLeak", registry);
       butterAlphaLeak.set(1.0e-4);
 
