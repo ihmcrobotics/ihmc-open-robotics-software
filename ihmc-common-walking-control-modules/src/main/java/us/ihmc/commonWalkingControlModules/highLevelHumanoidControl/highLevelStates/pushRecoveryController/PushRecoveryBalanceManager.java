@@ -477,7 +477,7 @@ public class PushRecoveryBalanceManager
       currentStateDuration.set(currentTiming.getSwingTime());
       totalStateDuration.set(currentTiming.getStepTime());
 
-      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(maintainInitialCoMVelocityContinuitySingleSupport.getValue());
+      comTrajectoryPlanner.setMaintainInitialCoMVelocityContinuity(false);//maintainInitialCoMVelocityContinuitySingleSupport.getValue());
       initializeOnStateChange = true;
       icpPlannerDone.set(false);
    }
