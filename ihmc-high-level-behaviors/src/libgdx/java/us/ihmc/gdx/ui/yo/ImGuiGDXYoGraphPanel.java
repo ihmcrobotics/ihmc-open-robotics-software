@@ -127,22 +127,34 @@ public class ImGuiGDXYoGraphPanel
                AtomicInteger currentIndex = new AtomicInteger(0);
                synchronized (graphs)
                {
+                  int graphWidth = -1;
+                  int graphHeight = 50;
+                  final ImVec2 size = new ImVec2(graphWidth, graphHeight);
+                  final ImVec2 labelPadding = new ImVec2(0, 0);
+                  final ImVec2 legendPadding = new ImVec2(0, 0);
+                  int flags = ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect;
+                  int xFlags = ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit;
+                  int yFlags = ImPlotAxisFlags.NoLabel
+                             | ImPlotAxisFlags.NoGridLines
+                             | ImPlotAxisFlags.NoTickMarks
+                             | ImPlotAxisFlags.NoTickLabels
+                             | ImPlotAxisFlags.AutoFit;
+                  String xLabel = "";
+                  String yLabel = "";
                   graphs.add(() ->
                   {
                      ImPlot.setCurrentContext(context);
+                     ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, labelPadding);
+                     ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, legendPadding);
 
                      int currentValueIndex = currentIndex.getAndIncrement();
                      values[currentValueIndex] = variable.getValueAsDouble();
-                     int graphWidth = -1;
-                     int graphHeight = 50;
-                     ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, new ImVec2(0, 0));
-                     ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, new ImVec2(0, 0));
-                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", "", "", new ImVec2(graphWidth, graphHeight), ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect,
-                                          ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit, ImPlotAxisFlags.NoLabel | ImPlotAxisFlags.NoGridLines | ImPlotAxisFlags.NoTickMarks | ImPlotAxisFlags.NoTickLabels | ImPlotAxisFlags.AutoFit))
+                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", xLabel, yLabel, size, flags, xFlags, yFlags))
                      {
                         Double[] data = ImPlotTools.removeNullElements(values);
                         ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
-                        if (ImPlot.beginLegendPopup(variable.getName())) {
+                        if (ImPlot.beginLegendPopup(variable.getName()))
+                        {
                            ImGui.text(variable.getFullNameString());
                            ImPlot.endLegendPopup();
                         }
