@@ -1,5 +1,14 @@
 package us.ihmc.gdx.ui.yo;
 
+import imgui.ImVec2;
+import imgui.extension.implot.ImPlot;
+import imgui.extension.implot.ImPlotContext;
+import imgui.extension.implot.ImPlotStyle;
+import imgui.extension.implot.flag.ImPlotAxisFlags;
+import imgui.extension.implot.flag.ImPlotFlags;
+import imgui.extension.implot.flag.ImPlotLocation;
+import imgui.extension.implot.flag.ImPlotStyleVar;
+import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImInt;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
@@ -7,6 +16,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.configuration.NetworkParameterKeys;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.gdx.imgui.ImGuiTools;
+import us.ihmc.gdx.ui.tools.ImPlotTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
@@ -33,6 +43,8 @@ public class ImGuiGDXYoGraphPanel
    private final ImInt graphGroupSelectedIndex = new ImInt(0);
    private String[] graphGroupNames = new String[0];
    private HashMap<String, GDXYoGraphGroup> graphGroups = new HashMap<>();
+
+   private ImPlotContext context = null;
 
    public ImGuiGDXYoGraphPanel(String title, int bufferSize)
    {
@@ -94,6 +106,10 @@ public class ImGuiGDXYoGraphPanel
 //         listVariables(registry, 4);
       });
 
+      context = ImPlot.createContext();
+      ImPlotStyle style = ImPlot.getStyle();
+      style.setPlotPadding(new ImVec2(0, 0));
+
       GDXYoGraphGroup graphGroup = graphGroups.get(graphGroupName);
       for (String variableName : graphGroup.getVariableNames())
       {
@@ -107,30 +123,44 @@ public class ImGuiGDXYoGraphPanel
             if (variable != null)
             {
                LogTools.info("Setting up graph for variable: {}", variable.getFullName());
-               float[] values = new float[bufferSize];
+               Double[] values = new Double[bufferSize];
                AtomicInteger currentIndex = new AtomicInteger(0);
                synchronized (graphs)
                {
+                  int graphWidth = -1;
+                  int graphHeight = 50;
+                  final ImVec2 size = new ImVec2(graphWidth, graphHeight);
+                  final ImVec2 labelPadding = new ImVec2(0, 0);
+                  final ImVec2 legendPadding = new ImVec2(0, 0);
+                  int flags = ImPlotFlags.NoMenus | ImPlotFlags.NoBoxSelect;
+                  int xFlags = ImPlotAxisFlags.NoDecorations | ImPlotAxisFlags.AutoFit;
+                  int yFlags = ImPlotAxisFlags.NoLabel
+                             | ImPlotAxisFlags.NoGridLines
+                             | ImPlotAxisFlags.NoTickMarks
+                             | ImPlotAxisFlags.NoTickLabels
+                             | ImPlotAxisFlags.AutoFit;
+                  String xLabel = "";
+                  String yLabel = "";
                   graphs.add(() ->
                   {
+                     ImPlot.setCurrentContext(context);
+                     ImPlot.pushStyleVar(ImPlotStyleVar.LabelPadding, labelPadding);
+                     ImPlot.pushStyleVar(ImPlotStyleVar.LegendPadding, legendPadding);
+
                      int currentValueIndex = currentIndex.getAndIncrement();
-                     values[currentValueIndex] = (float) variable.getValueAsDouble();
-                     int graphWidth = 230;
-                     int graphHeight = 50;
-                     ImGui.plotLines(variable.getName(),
-                                     values,
-                                     bufferSize,
-                                     0,
-                                     "" + values[currentValueIndex],
-                                     Float.MAX_VALUE,
-                                     Float.MAX_VALUE,
-                                     graphWidth,
-                                     graphHeight);
-                     if (ImGui.beginPopup(variable.getName() + " hover popup"))
+                     values[currentValueIndex] = variable.getValueAsDouble();
+                     if (ImPlot.beginPlot("##" + variable.getName() + "Plot", xLabel, yLabel, size, flags, xFlags, yFlags))
                      {
-                        ImGui.text(variable.getFullNameString());
-                        ImGui.endPopup();
+                        Double[] data = ImPlotTools.removeNullElements(values);
+                        ImPlot.plotLine(variable.getName(), ImPlotTools.createIndex(data), data);
+                        if (ImPlot.beginLegendPopup(variable.getName()))
+                        {
+                           ImGui.text(variable.getFullNameString());
+                           ImPlot.endLegendPopup();
+                        }
+                        ImPlot.endPlot();
                      }
+                     ImPlot.popStyleVar(2);
 
                      if (currentValueIndex >= bufferSize - 1)
                      {
@@ -223,6 +253,7 @@ public class ImGuiGDXYoGraphPanel
       yoVariableClient = null;
       handshakeComplete = false;
       disconnecting = false;
+      ImPlot.destroyContext(context);
    }
 
    public String getWindowName()
