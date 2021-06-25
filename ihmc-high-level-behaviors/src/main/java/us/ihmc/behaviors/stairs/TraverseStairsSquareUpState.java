@@ -1,6 +1,7 @@
 package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.HeadTrajectoryMessage;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -11,7 +12,7 @@ import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 
-public class TraverseStairsSquareUpState implements State
+public class TraverseStairsSquareUpState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
@@ -19,6 +20,7 @@ public class TraverseStairsSquareUpState implements State
    private final ROS2SyncedRobotModel syncedRobotModel;
 
    private static final boolean SEND_PELVIS_AND_CHEST_TRAJECTORIES = false;
+   private final StatusLogger statusLogger;
 
    public TraverseStairsSquareUpState(BehaviorHelper helper, TraverseStairsBehaviorParameters parameters)
    {
@@ -26,12 +28,13 @@ public class TraverseStairsSquareUpState implements State
       this.parameters = parameters;
       this.robotInterface = helper.getOrCreateRobotInterface();
       this.syncedRobotModel = robotInterface.newSyncedRobot();
+      this.statusLogger = helper.getOrCreateStatusLogger();
    }
 
    @Override
    public void onEntry()
    {
-      LogTools.info("Entering " + getClass().getSimpleName());
+      statusLogger.info("Entering " + getClass().getSimpleName());
 
       double trajectoryTime = parameters.get(TraverseStairsBehaviorParameters.trajectoryTime);
 
@@ -69,10 +72,15 @@ public class TraverseStairsSquareUpState implements State
    @Override
    public boolean isDone(double timeInState)
    {
+      if (!SEND_PELVIS_AND_CHEST_TRAJECTORIES)
+      {
+         return true;
+      }
+
       double trajectoryTime = parameters.get(TraverseStairsBehaviorParameters.trajectoryTime);
       if (timeInState >= trajectoryTime)
       {
-         LogTools.info(getClass().getSimpleName() + " is done");
+         statusLogger.info(getClass().getSimpleName() + " is done");
          return true;
       }
       else
