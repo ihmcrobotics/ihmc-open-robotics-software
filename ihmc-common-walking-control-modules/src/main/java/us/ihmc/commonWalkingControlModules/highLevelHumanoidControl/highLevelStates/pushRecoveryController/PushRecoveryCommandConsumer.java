@@ -27,5 +27,12 @@ public class PushRecoveryCommandConsumer
       if (!commandConsumerWithDelayBuffers.isNewCommandAvailable(PushRecoveryResultCommand.class))
          return;
       pushRecoveryModule.consumePushRecoveryResultCommand(commandConsumerWithDelayBuffers.pollNewestCommand(PushRecoveryResultCommand.class));
+      commandConsumerWithDelayBuffers.clearCommands(PushRecoveryResultCommand.class); // clear other queued commands
+   }
+
+   public void clearPushRecoveryResultCommand()
+   {
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PushRecoveryResultCommand.class))
+         commandConsumerWithDelayBuffers.clearCommands(PushRecoveryResultCommand.class);
    }
 }

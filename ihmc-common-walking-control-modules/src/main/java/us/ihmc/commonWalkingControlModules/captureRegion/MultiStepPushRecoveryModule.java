@@ -1,11 +1,8 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -13,8 +10,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
@@ -39,7 +34,7 @@ public class MultiStepPushRecoveryModule
    private final SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorld;
    private final SideDependentList<MultiStepRecoveryStepCalculator> pushRecoveryCalculators = new SideDependentList<>();
    private final SquareUpStepCalculator squareUpStepCalculator;
-   private final MultiStepPushRecoveryCalculatorVisualizer pushRecoveryCalculatorVisualizer;
+   private MultiStepPushRecoveryCalculatorVisualizer pushRecoveryCalculatorVisualizer = null;
 
    private final Function<RobotSide, Boolean> isInContact;
 
@@ -64,8 +59,7 @@ public class MultiStepPushRecoveryModule
                                       SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                       ConvexPolygon2DReadOnly defaultSupportPolygon,
                                       PushRecoveryControllerParameters pushRecoveryControllerParameters,
-                                      YoRegistry parentRegistry,
-                                      YoGraphicsListRegistry graphicsListRegistry)
+                                      YoRegistry parentRegistry)
    {
       this.isInContact = isInContact;
       this.supportPolygonInWorld = supportPolygonInWorld;
@@ -97,10 +91,7 @@ public class MultiStepPushRecoveryModule
                                                                                     defaultSupportPolygon));
          pushRecoveryCalculators.get(robotSide).setMaxStepsToGenerateForRecovery(pushRecoveryControllerParameters.getMaxStepsToGenerateForRecovery());
       }
-      if (graphicsListRegistry != null)
-         pushRecoveryCalculatorVisualizer = new MultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry);
-      else
-         pushRecoveryCalculatorVisualizer = null;
+
 
       squareUpStepCalculator = new SquareUpStepCalculator(footPolygonsInWorld, soleZUpFrames, pushRecoveryControllerParameters, registry);
 
@@ -112,6 +103,11 @@ public class MultiStepPushRecoveryModule
 
       useRecoverySquareUpStep.set(ENABLE_SQUARE_UP);
       parentRegistry.addChild(registry);
+   }
+
+   public void attachVisualizer(MultiStepPushRecoveryCalculatorVisualizer visualizer)
+   {
+      pushRecoveryCalculatorVisualizer = visualizer;
    }
 
    public void reset()
