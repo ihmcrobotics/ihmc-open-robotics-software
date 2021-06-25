@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepRecoveryStepCalculator;
-import us.ihmc.commonWalkingControlModules.captureRegion.MultiStepPushRecoveryCalculatorVisualizer;
+import us.ihmc.commonWalkingControlModules.captureRegion.SimpleMultiStepPushRecoveryCalculatorVisualizer;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryCoPTrajectoryGenerator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.bipedPlanning.PushRecoveryState;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.DefaultPushRecoveryControllerParameters;
@@ -99,7 +99,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
    private final BagOfBalls vrpTrajectory;
 
    private final MultiStepRecoveryStepCalculator recoveryStepCalculator;
-   private final MultiStepPushRecoveryCalculatorVisualizer recoveryStepCalculatorVisualizer;
+   private final SimpleMultiStepPushRecoveryCalculatorVisualizer recoveryStepCalculatorVisualizer;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2,
                                                                                                   getClass(),
@@ -232,7 +232,7 @@ public class PushRecoveryCoMTrajectoryPlannerVisualizer
                                                                    new DefaultPushRecoveryControllerParameters(),
                                                                    new SideDependentList<>(leftStepFrame, rightStepFrame),
                                                                    defaultSupportPolygon);
-      recoveryStepCalculatorVisualizer = new MultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry);
+      recoveryStepCalculatorVisualizer = new SimpleMultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry);
 
       shouldReplan = new YoBoolean("shouldReplan", registry);
       replan = new YoBoolean("replan", registry);
