@@ -19,7 +19,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
-import us.ihmc.mecano.algorithms.CenterOfMassCalculator;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -62,6 +61,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class PelvisLinearStateUpdater
 {
    private static final boolean USE_KALMAN_STYLE_FUSING_FILTER = true;
+   private static final boolean ESTIMATE_COM_STATE = false;
 
    private static final double minForceZInPercentThresholdToFilterFoot = 0.0;
    private static final double maxForceZInPercentThresholdToFilterFoot = 0.45;
@@ -72,7 +72,6 @@ public class PelvisLinearStateUpdater
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private final CenterOfMassCalculator centerOfMassCalculator;
    private final CenterOfMassJacobian centerOfMassJacobianWorld;
 
    private final List<RigidBodyBasics> feet = new ArrayList<RigidBodyBasics>();
@@ -80,12 +79,10 @@ public class PelvisLinearStateUpdater
    private final YoFramePoint3D yoRootJointPosition = new YoFramePoint3D("estimatedRootJointPosition", worldFrame, registry);
    private final YoFrameVector3D yoRootJointVelocity = new YoFrameVector3D("estimatedRootJointVelocity", worldFrame, registry);
 
-   private final YoFramePoint3D yoCenterOfMassPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
-   private final YoFrameVector3D yoCenterOfMassVelocityUsingPelvisAndKinematics = new YoFrameVector3D("estimatedCenterOfMassVelocityPelvisAndKin",
-                                                                                                      worldFrame,
-                                                                                                      registry);
-   private final YoFrameVector3D yoCenterOfMassVelocityIntegrateGRF = new YoFrameVector3D("estimatedCenterOfMassVelocityGRF", worldFrame, registry);
-   private final YoFrameVector3D yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
+   private final YoFramePoint3D yoCenterOfMassPosition;
+   private final YoFrameVector3D yoCenterOfMassVelocityUsingPelvisAndKinematics;
+   private final YoFrameVector3D yoCenterOfMassVelocityIntegrateGRF;
+   private final YoFrameVector3D yoCenterOfMassVelocity;
 
    private final CenterOfMassDataHolder estimatorCenterOfMassDataHolderToUpdate;
 
@@ -158,7 +155,6 @@ public class PelvisLinearStateUpdater
    // Temporary variables
    private final FramePoint3D rootJointPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D rootJointVelocity = new FrameVector3D(worldFrame);
-   private final FramePoint3D centerOfMassPosition = new FramePoint3D(worldFrame);
    private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final Vector3D tempRootJointTranslation = new Vector3D();
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
@@ -198,8 +194,23 @@ public class PelvisLinearStateUpdater
       footFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
 
       RigidBodyBasics elevator = inverseDynamicsStructure.getElevator();
-      this.centerOfMassCalculator = new CenterOfMassCalculator(elevator, rootJointFrame);
-      this.centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator, rootJointFrame);
+
+      if (ESTIMATE_COM_STATE)
+      {
+         centerOfMassJacobianWorld = new CenterOfMassJacobian(elevator, rootJointFrame);
+         yoCenterOfMassPosition = new YoFramePoint3D("estimatedCenterOfMassPosition", worldFrame, registry);
+         yoCenterOfMassVelocityUsingPelvisAndKinematics = new YoFrameVector3D("estimatedCenterOfMassVelocityPelvisAndKin", worldFrame, registry);
+         yoCenterOfMassVelocityIntegrateGRF = new YoFrameVector3D("estimatedCenterOfMassVelocityGRF", worldFrame, registry);
+         yoCenterOfMassVelocity = new YoFrameVector3D("estimatedCenterOfMassVelocity", worldFrame, registry);
+      }
+      else
+      {
+         centerOfMassJacobianWorld = null;
+         yoCenterOfMassPosition = null;
+         yoCenterOfMassVelocityUsingPelvisAndKinematics = null;
+         yoCenterOfMassVelocityIntegrateGRF = null;
+         yoCenterOfMassVelocity = null;
+      }
 
       this.gravitationalAcceleration = gravitationalAcceleration;
 
@@ -273,7 +284,12 @@ public class PelvisLinearStateUpdater
                                                                             worldFrame,
                                                                             estimatorDT);
 
-      pelvisLinearVelocityFD = new FilteredVelocityYoFrameVector("bloppyPelvisLinearVelocityFD", "", new YoDouble("bloppyAlphaPelvisVelocityFD", registry), estimatorDT, registry, pelvisPositionEstimate);
+      pelvisLinearVelocityFD = new FilteredVelocityYoFrameVector("bloppyPelvisLinearVelocityFD",
+                                                                 "",
+                                                                 new YoDouble("bloppyAlphaPelvisVelocityFD", registry),
+                                                                 estimatorDT,
+                                                                 registry,
+                                                                 pelvisPositionEstimate);
 
       if (VISUALIZE)
       {
@@ -476,7 +492,7 @@ public class PelvisLinearStateUpdater
       tempVelocity.changeFrame(rootJointTwist.getReferenceFrame());
       rootJointTwist.getLinearPart().set(tempVelocity);
       rootJoint.setJointTwist(rootJointTwist);
-      rootJoint.updateFramesRecursively();
+      rootJoint.updateFrame();
    }
 
    private int setTrustedFeetUsingFootSwitches()
@@ -693,11 +709,11 @@ public class PelvisLinearStateUpdater
       {
          // TODO Check out AlphaFusedYoVariable to that
          pelvisVelocityKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisVelocity());
-         
+
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForVelocityBreakFrequency.getValue(), estimatorDT);
          pelvisVelocityIMUPart.scale(alpha);
          pelvisVelocityKinPart.scale(1.0 - alpha);
-         
+
          rootJointVelocity.add(pelvisVelocityIMUPart, pelvisVelocityKinPart);
          yoRootJointVelocity.set(rootJointVelocity);
       }
@@ -728,11 +744,11 @@ public class PelvisLinearStateUpdater
          rootJointPosition.set(yoRootJointPosition);
          imuBasedLinearStateCalculator.updatePelvisPosition(rootJointPosition, pelvisPositionIMUPart);
          pelvisPositionKinPart.setIncludingFrame(kinematicsBasedLinearStateCalculator.getPelvisPosition());
-         
+
          double alpha = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(imuAgainstKinematicsForPositionBreakFrequency.getValue(), estimatorDT);
          pelvisPositionIMUPart.scale(alpha);
          pelvisPositionKinPart.scale(1.0 - alpha);
-         
+
          rootJointPosition.set(pelvisPositionIMUPart);
          rootJointPosition.add(pelvisPositionKinPart);
          yoRootJointPosition.set(rootJointPosition);
@@ -753,16 +769,13 @@ public class PelvisLinearStateUpdater
 
    private void updateCoMState()
    {
-      centerOfMassCalculator.reset();
-      centerOfMassPosition.setIncludingFrame(centerOfMassCalculator.getCenterOfMass());
-      centerOfMassPosition.changeFrame(worldFrame);
-      yoCenterOfMassPosition.set(centerOfMassPosition);
+      if (!ESTIMATE_COM_STATE)
+         return;
 
       centerOfMassJacobianWorld.reset();
-      centerOfMassVelocityUsingPelvisIMUAndKinematics.setToZero(ReferenceFrame.getWorldFrame());
-      centerOfMassVelocityUsingPelvisIMUAndKinematics.setIncludingFrame(centerOfMassJacobianWorld.getCenterOfMassVelocity());
-      centerOfMassVelocityUsingPelvisIMUAndKinematics.changeFrame(ReferenceFrame.getWorldFrame());
-      yoCenterOfMassVelocityUsingPelvisAndKinematics.set(centerOfMassVelocityUsingPelvisIMUAndKinematics);
+      yoCenterOfMassPosition.setMatchingFrame(centerOfMassJacobianWorld.getCenterOfMass());
+
+      yoCenterOfMassVelocityUsingPelvisAndKinematics.setMatchingFrame(centerOfMassJacobianWorld.getCenterOfMassVelocity());
 
       if (useGroundReactionForcesToComputeCenterOfMassVelocity.getValue())
       {
