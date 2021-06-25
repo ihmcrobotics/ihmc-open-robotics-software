@@ -9,6 +9,7 @@ import imgui.type.ImBoolean;
 import imgui.type.ImInt;
 import us.ihmc.avatar.logging.PlanarRegionsListBuffer;
 import us.ihmc.avatar.logging.PlanarRegionsListLogger;
+import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -23,7 +24,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
 
-public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
+public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements RenderableProvider
 {
    public static final String WINDOW_NAME = "Planar Region Logging";
 
@@ -47,6 +48,8 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
 
    public ImGuiGDXPlanarRegionLoggingPanel()
    {
+      super(WINDOW_NAME);
+      setRenderMethod(this::renderImGuiWidgets);
       logger = new PlanarRegionsListLogger(this.getClass().getSimpleName(), Integer.MAX_VALUE);
       realtimeBuffer = new PlanarRegionsListBuffer();
 
@@ -54,7 +57,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel implements RenderableProvider
       logGraphic = new GDXPlanarRegionsGraphic();
    }
 
-   public void create(GDXImGuiBasedUI baseUI)
+   public void create()
    {
       updateAvailableLogFiles();
    }
