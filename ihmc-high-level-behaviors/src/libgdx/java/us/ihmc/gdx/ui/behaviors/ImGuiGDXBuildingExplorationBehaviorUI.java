@@ -11,7 +11,6 @@ import us.ihmc.behaviors.demo.BuildingExplorationBehaviorMode;
 import us.ihmc.behaviors.demo.BuildingExplorationBehaviorParameters;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.gdx.imgui.ImGuiLabelMap;
 import us.ihmc.gdx.sceneManager.GDXSceneLevel;
@@ -20,6 +19,7 @@ import us.ihmc.gdx.ui.ImGuiStoredPropertySetTuner;
 import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 
 import static us.ihmc.behaviors.demo.BuildingExplorationBehaviorAPI.*;
 
@@ -37,7 +37,9 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    private final Point2D nodePosition = new Point2D(341.0, 5.0);
    private final ImGuiGDXDoorBehaviorUI doorUI;
    private ImGuiLabelMap labels = new ImGuiLabelMap();
-   private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.AUTO;
+   private volatile BuildingExplorationBehaviorMode mode = BuildingExplorationBehaviorMode.TELEOP;
+   private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
+   private String lastTickedThing = "NONE";
 
    public ImGuiGDXBuildingExplorationBehaviorUI(BehaviorHelper helper)
    {
@@ -51,8 +53,13 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       addChild(traverseStairsUI);
 
       helper.subscribeViaCallback(Mode, mode -> this.mode = mode);
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS,
-                                  regions -> goalAffordance.setLatestRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(regions)));
+      helper.subscribeToPlanarRegionsViaCallback(ROS2Tools.LIDAR_REA_REGIONS, regions ->
+      {
+         goalAffordance.setLatestRegions(regions);
+         if (regions != null)
+            planarRegionsGraphic.generateMeshesAsync(regions);
+      });
+      helper.subscribeViaCallback(LastTickedThing, lastTickedThing -> this.lastTickedThing = lastTickedThing);
    }
 
    @Override
@@ -83,13 +90,23 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
    @Override
    public void update()
    {
+      if (areGraphicsEnabled())
+      {
+         planarRegionsGraphic.update();
+      }
+   }
 
+   private boolean areGraphicsEnabled()
+   {
+      return wasTickedRecently(0.5) && lastTickedThing.equals("NONE");
    }
 
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
       goalAffordance.renderPlaceGoalButton();
+      ImGui.sameLine();
+      ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       parameterTuner.renderImGuiWidgets();
       ImGui.text("Mode:");
       for (BuildingExplorationBehaviorMode modeValue : BuildingExplorationBehaviorMode.values())
@@ -113,11 +130,16 @@ public class ImGuiGDXBuildingExplorationBehaviorUI extends GDXBehaviorUIInterfac
       lookAndStepUI.destroy();
       traverseStairsUI.destroy();
       doorUI.destroy();
+      planarRegionsGraphic.destroy();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
+      if (areGraphicsEnabled())
+      {
+         planarRegionsGraphic.getRenderables(renderables, pool);
+      }
       goalAffordance.getRenderables(renderables, pool);
       lookAndStepUI.getRenderables(renderables, pool);
       traverseStairsUI.getRenderables(renderables, pool);
