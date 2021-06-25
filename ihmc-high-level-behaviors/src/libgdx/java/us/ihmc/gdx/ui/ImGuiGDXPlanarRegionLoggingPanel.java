@@ -64,9 +64,11 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
 
    public void update(long time, PlanarRegionsList planarRegionsList)
    {
+      long currentTimeMillis = System.currentTimeMillis(); // TODO: Fix, but probably not too important until we sync it with something else
+
       if (logPlanarRegions.get())
       {
-         logger.update(time, planarRegionsList);
+         logger.update(currentTimeMillis, planarRegionsList);
          if (mustUpdateFiles)
          {
             mustUpdateFiles = false;
@@ -74,7 +76,7 @@ public class ImGuiGDXPlanarRegionLoggingPanel extends ImGuiPanel implements Rend
          }
       }
 
-      realtimeBuffer.putAndTick(time, planarRegionsList);
+      realtimeBuffer.putAndTick(currentTimeMillis, planarRegionsList);
    }
 
    private void updateAvailableLogFiles()
