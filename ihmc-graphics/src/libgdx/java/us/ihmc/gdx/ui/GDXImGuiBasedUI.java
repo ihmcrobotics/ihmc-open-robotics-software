@@ -5,13 +5,16 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Graphics;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.glutils.GLFrameBuffer;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import imgui.flag.ImGuiCond;
+import imgui.flag.ImGuiInputTextFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.flag.ImGuiWindowFlags;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 import imgui.type.ImInt;
+import imgui.type.ImString;
 import us.ihmc.commons.FormattingTools;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.gdx.Lwjgl3ApplicationAdapter;
 import us.ihmc.gdx.imgui.*;
@@ -27,6 +30,8 @@ import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -35,23 +40,19 @@ import java.util.function.Consumer;
 public class GDXImGuiBasedUI
 {
    private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
-
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
-
    private static final String VIEW_3D_WINDOW_NAME = "3D View";
 
    private final GDX3DSceneManager sceneManager = new GDX3DSceneManager();
    private final GDXVRManager vrManager = new GDXVRManager();
-
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-
 //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
    private final String windowTitle;
-   private HybridFile libGDXSettingsFile;
+   private final HybridDirectory configurationDirectory;
+   private final HybridFile libGDXSettingsFile;
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = "";
-
    private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imGuiInputProcessors = new ArrayList<>();
@@ -61,10 +62,14 @@ public class GDXImGuiBasedUI
    private GLFrameBuffer frameBuffer;
    private float sizeX;
    private float sizeY;
-
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
+   private boolean needToReindexPerspectives = true;
+   private final ImString perspectiveNameToSave = new ImString("", 100);
+   private final ImBoolean perspectiveDefaultMode = new ImBoolean(false);
+   private final ArrayList<String> perspectives = new ArrayList<>();
+   private String currentPerspective = "Main";
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -75,7 +80,7 @@ public class GDXImGuiBasedUI
    {
       this.windowTitle = windowTitle;
 
-      HybridDirectory configurationDirectory = new HybridDirectory(Paths.get(System.getProperty("user.home"), ".ihmc"),
+      configurationDirectory = new HybridDirectory(Paths.get(System.getProperty("user.home"), ".ihmc"),
                                                                    directoryNameToAssumePresent,
                                                                    subsequentPathToResourceFolder,
                                                                    classForLoading,
@@ -160,24 +165,70 @@ public class GDXImGuiBasedUI
 
    public void renderEnd()
    {
-      ImGui.beginMainMenuBar();
-      if (ImGui.beginMenu("Window"))
+      if (needToReindexPerspectives)
       {
-         if (ImGui.menuItem("Save Configuration to ~/.ihmc"))
+         needToReindexPerspectives = false;
+         Path directory = perspectiveDefaultMode.get() ? configurationDirectory.getWorkspaceDirectory() : configurationDirectory.getExternalDirectory();
+         perspectives.clear();
+         perspectives.add("Main");
+         PathTools.walkFlat(directory, new BasicPathVisitor()
          {
-            saveApplicationSettings(false);
+            @Override
+            public FileVisitResult visitPath(Path path, PathType pathType)
+            {
+               if (pathType == PathType.DIRECTORY)
+               {
+                  String directoryName = path.getFileName().toString();
+                  String matchString = "Perspective";
+                  if (directoryName.endsWith(matchString))
+                  {
+                     String perspectiveName = directoryName.substring(0, directoryName.lastIndexOf(matchString));
+                     LogTools.info("Found perspective {}", perspectiveName);
+                     perspectives.add(perspectiveName);
+                  }
+               }
+               return FileVisitResult.CONTINUE;
+            }
+         });
+      }
+
+      ImGui.beginMainMenuBar();
+      if (ImGui.beginMenu("Perspective"))
+      {
+         for (String perspective : perspectives)
+         {
+            if (ImGui.radioButton(perspective, currentPerspective == perspective))
+            {
+               currentPerspective = perspective;
+            }
          }
-         if (ImGui.menuItem("Save Configuration as Default"))
+
+         ImGui.text("New:");
+         ImGui.sameLine();
+         ImGui.inputText("###", perspectiveNameToSave , ImGuiInputTextFlags.CallbackResize);
+
+         if (ImGui.button("Save"))
          {
-            saveApplicationSettings(true);
+            saveApplicationSettings(perspectiveDefaultMode.get());
          }
-         if (ImGui.menuItem("Load Layout from ~/.ihmc"))
+         ImGui.sameLine();
+         if (ImGui.button("Load"))
          {
-            imGuiWindowAndDockSystem.loadConfiguration(false);
+            imGuiWindowAndDockSystem.loadConfiguration(perspectiveDefaultMode.get());
          }
-         if (ImGui.menuItem("Load Default Layout"))
+
+         ImGui.separator();
+         ImGui.text("Save location:");
+         if (ImGui.radioButton("User home###PerspectiveUserHomeMode", !perspectiveDefaultMode.get()))
          {
-            imGuiWindowAndDockSystem.loadConfiguration(true);
+            perspectiveDefaultMode.set(false);
+            needToReindexPerspectives = true;
+         }
+         ImGui.sameLine();
+         if (ImGui.radioButton("Version control###PerspectiveDefaultMode", perspectiveDefaultMode.get()))
+         {
+            perspectiveDefaultMode.set(true);
+            needToReindexPerspectives = true;
          }
          ImGui.endMenu();
       }
