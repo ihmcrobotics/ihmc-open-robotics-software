@@ -9,8 +9,11 @@ import imgui.glfw.ImGuiImplGlfw;
 import imgui.internal.ImGui;
 import imgui.type.ImString;
 import org.lwjgl.glfw.GLFWErrorCallback;
+import us.ihmc.commons.exception.DefaultExceptionHandler;
+import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.io.WorkspacePathTools;
+import us.ihmc.tools.io.HybridDirectory;
+import us.ihmc.tools.io.HybridFile;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -24,7 +27,6 @@ public class GDXImGuiWindowAndDockSystem
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
 
-   private boolean isFirstRenderCall = true;
    private String glslVersion; // TODO: ?
    private long windowHandle;
    private ImFont imFont;
@@ -32,23 +34,11 @@ public class GDXImGuiWindowAndDockSystem
    private final ImString newDockPanelName = new ImString("", 100);
    private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
 
-   private final Path imGuiUserSettingsPath;
-   private final Path imGuiDefaultSettingsPath;
-   private final Class<?> classForLoading;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
+   private final HybridFile imGuiSettingsFile;
 
-   public GDXImGuiWindowAndDockSystem(Class<?> classForLoading,
-                                      String directoryNameToAssumePresent,
-                                      String subsequentPathToResourceFolder,
-                                      Path imGuiUserSettingsPath)
+   public GDXImGuiWindowAndDockSystem(HybridDirectory configurationDirectory)
    {
-      this.classForLoading = classForLoading;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
-      this.imGuiUserSettingsPath = imGuiUserSettingsPath;
-      String resourcePathString = "imgui/" + imGuiUserSettingsPath.getFileName().toString();
-      imGuiDefaultSettingsPath = WorkspacePathTools.findPathToResource(directoryNameToAssumePresent, subsequentPathToResourceFolder, resourcePathString);
+      imGuiSettingsFile = new HybridFile(configurationDirectory, "ImGuiSettings.ini");
    }
 
    public void create(long windowHandle)
@@ -104,11 +94,11 @@ public class GDXImGuiWindowAndDockSystem
       imGuiGl3.init(glslVersion);
    }
 
-   public void beforeWindowManagement()
+   public void beforeWindowManagement(boolean isFirstRenderCall)
    {
       if (isFirstRenderCall)
       {
-         loadImGuiLayout(true);
+         loadSettings(true);
       }
 
       imGuiGlfw.newFrame();
@@ -156,46 +146,48 @@ public class GDXImGuiWindowAndDockSystem
       }
    }
 
-   public void loadImGuiLayout(boolean tryLocalFirst)
+   public void loadSettings(boolean tryUserFirst)
    {
-      boolean loaded = tryLocalFirst && loadLocalLayout();
+      boolean loaded = tryUserFirst && loadUserSettings();
       if (!loaded)
       {
-         if (tryLocalFirst)
-            LogTools.info("{} not found", imGuiUserSettingsPath.toString());
-         if (!loadDefaultLayout())
-            LogTools.warn("No saved layouts found");
+         if (tryUserFirst)
+            LogTools.info("{} not found", imGuiSettingsFile.getExternalFile().toString());
+         if (!loadDefaultSettings())
+            LogTools.warn("No saved settings found");
       }
    }
 
-   public boolean loadLocalLayout()
+   public boolean loadUserSettings()
    {
       boolean success = false;
-      if (Files.exists(imGuiUserSettingsPath))
+      if (Files.exists(imGuiSettingsFile.getExternalFile()))
       {
-         LogTools.info("Loading ImGui layout from {}", imGuiUserSettingsPath.toString());
-         ImGui.loadIniSettingsFromDisk(imGuiUserSettingsPath.toString());
+         LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getExternalFile().toString());
+         ImGui.loadIniSettingsFromDisk(imGuiSettingsFile.getExternalFile().toString());
          success = true;
       }
       return success;
    }
 
-   public boolean loadDefaultLayout()
+   public boolean loadDefaultSettings()
    {
       boolean success = false;
-      if (Files.exists(imGuiDefaultSettingsPath)) // see if there are defaults
+      if (Files.exists(imGuiSettingsFile.getWorkspaceFile())) // see if there are defaults
       {
-         LogTools.info("Loading default ImGui layout from {}", imGuiDefaultSettingsPath.toString());
-         ImGui.loadIniSettingsFromDisk(imGuiDefaultSettingsPath.toString());
+         LogTools.info("Loading default ImGui settings from {}", imGuiSettingsFile.getWorkspaceFile().toString());
+         ImGui.loadIniSettingsFromDisk(imGuiSettingsFile.getWorkspaceFile().toString());
          success = true;
       }
       return success;
    }
 
-   public void saveImGuiLayout(boolean saveDefault)
+   public void saveSettings(boolean saveDefault)
    {
-      String settingsPathString = saveDefault ? imGuiDefaultSettingsPath.toString() : imGuiUserSettingsPath.toString();
-      LogTools.info("Saving ImGui layout to {}", settingsPathString);
+      Path saveFile = saveDefault ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
+      String settingsPathString = saveFile.toString();
+      LogTools.info("Saving ImGui settings to {}", settingsPathString);
+      FileTools.ensureDirectoryExists(saveFile.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       ImGui.saveIniSettingsToDisk(settingsPathString);
    }
 
@@ -215,8 +207,6 @@ public class GDXImGuiWindowAndDockSystem
 
       glfwSwapBuffers(windowHandle);
       glfwPollEvents();
-
-      isFirstRenderCall = false;
    }
 
    public void dispose()
@@ -230,11 +220,6 @@ public class GDXImGuiWindowAndDockSystem
    public int getCentralDockspaceId()
    {
       return dockspaceId;
-   }
-
-   public boolean isFirstRenderCall()
-   {
-      return isFirstRenderCall;
    }
 
    public ImGuiImplGl3 getImGuiGl3()
