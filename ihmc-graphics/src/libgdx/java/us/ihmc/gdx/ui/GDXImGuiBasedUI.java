@@ -52,6 +52,7 @@ public class GDXImGuiBasedUI
    private final Stopwatch runTime = new Stopwatch().start();
    private String statusText = "";
 
+   private final ImGuiPanelSizeHandler view3DPanelSizeHandler = new ImGuiPanelSizeHandler();
    private ImGui3DViewInput inputCalculator;
    private final ArrayList<Consumer<ImGui3DViewInput>> imGuiInputProcessors = new ArrayList<>();
    private boolean dragging = false;
@@ -220,7 +221,7 @@ public class GDXImGuiBasedUI
       }
       ImGui.endMainMenuBar();
 
-      ImGui.setNextWindowSize(800.0f, 600.0f, ImGuiCond.FirstUseEver);
+      view3DPanelSizeHandler.handleSizeBeforeBegin();
       ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
       int flags = ImGuiWindowFlags.None;
 //      flags |= ImGuiWindowFlags.NoDecoration;
@@ -230,6 +231,7 @@ public class GDXImGuiBasedUI
 //      flags |= ImGuiWindowFlags.NoTitleBar;
 //      flags |= ImGuiWindowFlags.NoMouseInputs;
       ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
+      view3DPanelSizeHandler.handleSizeAfterBegin();
 
       int antiAliasing = 2;
       float posX = ImGui.getWindowPosX();

@@ -1,12 +1,11 @@
 package us.ihmc.gdx.imgui;
 
-import imgui.flag.ImGuiCond;
 import imgui.flag.ImGuiDockNodeFlags;
 import imgui.flag.ImGuiStyleVar;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
 
-public class ImGuiDockspacePanel
+public class ImGuiDockspacePanel extends ImGuiPanelSizeHandler
 {
    private final String name;
    private final ImBoolean isShowing = new ImBoolean(true);
@@ -25,8 +24,9 @@ public class ImGuiDockspacePanel
          flags2 += ImGuiDockNodeFlags.PassthruCentralNode;
          //      flags2 += ImGuiDockNodeFlags.AutoHideTabBar;
          ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
-         ImGui.setNextWindowSize(300, 200, ImGuiCond.FirstUseEver);
+         handleSizeBeforeBegin();
          ImGui.begin(name, isShowing);
+         handleSizeAfterBegin();
          ImGui.popStyleVar();
          int id = ImGui.getID(name);
          ImGui.dockSpace(id, 0, 0, flags2);
