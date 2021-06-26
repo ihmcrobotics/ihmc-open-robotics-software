@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
 import imgui.type.ImBoolean;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.Map;
@@ -14,6 +15,8 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
    private Runnable render;
    private final ImBoolean isShowing;
    private final ArrayList<ImGuiPanel> children = new ArrayList<>();
+
+   private int lastDockID = -1;
 
    public ImGuiPanel(String panelName)
    {
@@ -45,20 +48,33 @@ public class ImGuiPanel extends ImGuiPanelSizeHandler
       }
    }
 
-   /* package-private */ void renderPanelAndChildren()
+   /* package-private */ void renderPanelAndChildren(ImGuiDockspacePanel justClosedPanel)
    {
       if (isTogglable() && isShowing.get())
       {
          handleSizeBeforeBegin();
          ImGui.begin(panelName, isShowing);
          handleSizeAfterBegin();
+
+         int windowDockID = ImGui.getWindowDockID();
+         if (lastDockID != windowDockID)
+         {
+            LogTools.debug("Dock ID changed. {}: {} -> {}", panelName, lastDockID, windowDockID);
+            if (justClosedPanel != null)
+            {
+               LogTools.info("Closing \"{}\" because containing dockspace \"{}\" closed", panelName, justClosedPanel.getName());
+               isShowing.set(false);
+            }
+         }
+         lastDockID = windowDockID;
+
          render.run();
          ImGui.end();
       }
 
       for (ImGuiPanel child : children)
       {
-         child.renderPanelAndChildren();
+         child.renderPanelAndChildren(justClosedPanel);
       }
    }
 
