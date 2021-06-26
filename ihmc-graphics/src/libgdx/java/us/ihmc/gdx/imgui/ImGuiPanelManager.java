@@ -3,9 +3,10 @@ package us.ihmc.gdx.imgui;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.log.LogTools;
+import us.ihmc.tools.io.HybridDirectory;
+import us.ihmc.tools.io.HybridFile;
 import us.ihmc.tools.io.JSONFileTools;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -14,16 +15,11 @@ import java.util.function.Consumer;
 public class ImGuiPanelManager
 {
    private final ArrayList<ImGuiPanel> panels = new ArrayList<>();
+   private final HybridFile panelsFile;
 
-   private final Class<?> classForLoading;
-   private final String directoryNameToAssumePresent;
-   private final String subsequentPathToResourceFolder;
-
-   public ImGuiPanelManager(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
+   public ImGuiPanelManager(HybridDirectory configurationDirectory)
    {
-      this.classForLoading = classForLoading;
-      this.directoryNameToAssumePresent = directoryNameToAssumePresent;
-      this.subsequentPathToResourceFolder = subsequentPathToResourceFolder;
+      panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
    }
 
    public void addPanel(ImGuiPanel panel)
@@ -57,15 +53,9 @@ public class ImGuiPanelManager
       }
    }
 
-   public void loadConfiguration(Path settingsPath)
+   public void loadConfiguration()
    {
-      Path windowsSettingsPath = settingsPath.getParent().resolve(settingsPath.getFileName().toString().replace("Settings.ini", "Panels.json"));
-      JSONFileTools.loadWithClasspathDefault(windowsSettingsPath,
-                                             classForLoading,
-                                             directoryNameToAssumePresent,
-                                             subsequentPathToResourceFolder,
-                                             "/imgui",
-                                             jsonNode ->
+      JSONFileTools.loadUserWithClasspathDefaultFallback(panelsFile, jsonNode ->
       {
          JsonNode windowsNode = jsonNode.get("windows");
          for (Iterator<Map.Entry<String, JsonNode>> it = windowsNode.fields(); it.hasNext(); )
@@ -79,7 +69,7 @@ public class ImGuiPanelManager
       });
    }
 
-   public void saveConfiguration(Path settingsPath, boolean saveDefault)
+   public void saveConfiguration(boolean saveDefault)
    {
       Consumer<ObjectNode> rootConsumer = root ->
       {
@@ -90,21 +80,14 @@ public class ImGuiPanelManager
             panel.save(anchorJSON);
          }
       };
-      String saveFileNameString = settingsPath.getFileName().toString().replace("Settings.ini", "Panels.json");
       if (saveDefault)
       {
-         JSONFileTools.saveToClasspath(directoryNameToAssumePresent, subsequentPathToResourceFolder, "imgui/" + saveFileNameString, rootConsumer);
+         JSONFileTools.save(panelsFile.getWorkspaceFile(), rootConsumer);
       }
       else
       {
-         Path windowsSettingsPath = settingsPath.getParent().resolve(saveFileNameString);
-         LogTools.info("Saving ImGui windows settings to {}", windowsSettingsPath.toString());
-         JSONFileTools.save(windowsSettingsPath, rootConsumer);
+         LogTools.info("Saving ImGui windows settings to {}", panelsFile.getExternalFile().toString());
+         JSONFileTools.save(panelsFile.getExternalFile(), rootConsumer);
       }
-   }
-
-   public ArrayList<ImGuiPanel> getPanels()
-   {
-      return panels;
    }
 }

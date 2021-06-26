@@ -47,8 +47,10 @@ public class HybridDirectory
                           Class<?> classForResourceDirectory,
                           String subsequentOrAbsoluteResourcePackagePath)
    {
-
-      this.externalDirectory = externalDirectory.toAbsolutePath().normalize();
+      String subsequentExternalPath = subsequentOrAbsoluteResourcePackagePath;
+      if (subsequentExternalPath.startsWith("/"))
+         subsequentExternalPath = subsequentExternalPath.replaceFirst("/", "");
+      this.externalDirectory = externalDirectory.resolve(subsequentExternalPath).toAbsolutePath().normalize();
 
       this.classForLoading = classForResourceDirectory;
       String putTogetherResourcePath = "";
