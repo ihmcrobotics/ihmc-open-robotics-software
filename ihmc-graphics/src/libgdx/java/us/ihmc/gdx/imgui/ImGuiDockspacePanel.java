@@ -39,6 +39,11 @@ public class ImGuiDockspacePanel
       ImGui.checkbox(name + "###DockspacePanel" + name, isShowing);
    }
 
+   public ImBoolean getIsShowing()
+   {
+      return isShowing;
+   }
+
    public String getName()
    {
       return name;
