@@ -1,5 +1,7 @@
 package us.ihmc.gdx.imgui;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.ImFont;
 import imgui.ImGuiIO;
 import imgui.ImGuiStyle;
@@ -14,11 +16,15 @@ import us.ihmc.commons.nio.FileTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.HybridDirectory;
 import us.ihmc.tools.io.HybridFile;
+import us.ihmc.tools.io.JSONFileTools;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.TreeSet;
+import java.util.function.Consumer;
 
 import static org.lwjgl.glfw.GLFW.*;
 
@@ -34,14 +40,14 @@ public class GDXImGuiWindowAndDockSystem
    private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
    private final ImGuiPanelManager panelManager;
    private final HybridFile imGuiSettingsFile;
-   private final HybridFile imGuiDockspacePanelsFile;
+   private final HybridFile panelsFile;
    private boolean isFirstRenderCall = true;
 
    public GDXImGuiWindowAndDockSystem(HybridDirectory configurationDirectory)
    {
       imGuiSettingsFile = new HybridFile(configurationDirectory, "ImGuiSettings.ini");
-      imGuiDockspacePanelsFile = new HybridFile(configurationDirectory, "ImGuiDockspacePanels.ini");
-      panelManager = new ImGuiPanelManager(configurationDirectory);
+      panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.ini");
+      panelManager = new ImGuiPanelManager();
    }
 
    public void create(long windowHandle)
@@ -101,7 +107,7 @@ public class GDXImGuiWindowAndDockSystem
    {
       if (isFirstRenderCall)
       {
-         loadSettings(true);
+         loadUserConfigurationWithDefaultFallback();
       }
 
       imGuiGlfw.newFrame();
@@ -154,38 +160,54 @@ public class GDXImGuiWindowAndDockSystem
       panelManager.renderPanelMenu();
    }
 
-   public void loadSettings(boolean tryUserFirst)
+   public void loadUserConfigurationWithDefaultFallback()
    {
-      boolean loaded = tryUserFirst && loadUserSettings();
+      boolean loaded = loadConfiguration(false);
       if (!loaded)
       {
-         if (tryUserFirst)
-            LogTools.info("{} not found", imGuiSettingsFile.getExternalFile().toString());
-         if (!loadDefaultSettings())
+         LogTools.info("{} not found", imGuiSettingsFile.getExternalFile().toString());
+         if (!loadConfiguration(true))
             LogTools.warn("No saved settings found");
       }
    }
 
-   public boolean loadUserSettings()
+   public boolean loadConfiguration(boolean loadDefault)
    {
       boolean success = false;
-      if (Files.exists(imGuiSettingsFile.getExternalFile()))
+      Path file = loadDefault ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
+      if (Files.exists(file))
       {
-         LogTools.info("Loading ImGui settings from {}", imGuiSettingsFile.getExternalFile().toString());
-         ImGui.loadIniSettingsFromDisk(imGuiSettingsFile.getExternalFile().toString());
+         LogTools.info("Loading ImGui settings from {}", file.toString());
+         ImGui.loadIniSettingsFromDisk(file.toString());
          success = true;
-      }
-      return success;
-   }
 
-   public boolean loadDefaultSettings()
-   {
-      boolean success = false;
-      if (Files.exists(imGuiSettingsFile.getWorkspaceFile())) // see if there are defaults
-      {
-         LogTools.info("Loading default ImGui settings from {}", imGuiSettingsFile.getWorkspaceFile().toString());
-         ImGui.loadIniSettingsFromDisk(imGuiSettingsFile.getWorkspaceFile().toString());
-         success = true;
+         Path fileForDockspacePanels = loadDefault ? panelsFile.getWorkspaceFile() : panelsFile.getExternalFile();
+         JSONFileTools.load(fileForDockspacePanels, jsonNode ->
+         {
+            JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
+            if (dockspacePanelsNode != null)
+            {
+               for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
+               {
+                  Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
+                  ImGuiDockspacePanel dockspacePanel = null;
+                  for (ImGuiDockspacePanel otherDockspacePanel : dockPanelSet)
+                  {
+                     if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
+                     {
+                        dockspacePanel = otherDockspacePanel;
+                     }
+                  }
+                  if (dockspacePanel == null)
+                  {
+                     dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
+                     dockPanelSet.add(dockspacePanel);
+                  }
+                  dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
+               }
+            }
+            panelManager.loadConfiguration(jsonNode);
+         });
       }
       return success;
    }
@@ -198,13 +220,47 @@ public class GDXImGuiWindowAndDockSystem
       FileTools.ensureDirectoryExists(saveFile.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       ImGui.saveIniSettingsToDisk(settingsPathString);
 
-      panelManager.saveConfiguration(saveDefault);
+      Consumer<ObjectNode> rootConsumer = root ->
+      {
+         ObjectNode anchorJSON = root.putObject("dockspacePanels");
+         for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
+         {
+            anchorJSON.put(dockspacePanel.getName(), dockspacePanel.getIsShowing().get());
+         }
+
+         panelManager.saveConfiguration(root);
+      };
+      if (saveDefault)
+      {
+         JSONFileTools.save(panelsFile.getWorkspaceFile(), rootConsumer);
+      }
+      else
+      {
+         LogTools.info("Saving ImGui windows settings to {}", panelsFile.getExternalFile().toString());
+         JSONFileTools.save(panelsFile.getExternalFile(), rootConsumer);
+      }
    }
 
    public void afterWindowManagement()
    {
       if (isFirstRenderCall)
-         panelManager.loadConfiguration();
+      {
+         JSONFileTools.loadUserWithClasspathDefaultFallback(panelsFile, jsonNode ->
+         {
+            JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
+            if (dockspacePanelsNode != null)
+            {
+               for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
+               {
+                  Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
+                  ImGuiDockspacePanel dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
+                  dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
+                  dockPanelSet.add(dockspacePanel);
+               }
+            }
+            panelManager.loadConfiguration(jsonNode);
+         });
+      }
 
       ImGui.popFont();
 
@@ -230,11 +286,6 @@ public class GDXImGuiWindowAndDockSystem
       imGuiGlfw.dispose();
 
       ImGui.destroyContext();
-   }
-
-   public int getCentralDockspaceId()
-   {
-      return dockspaceId;
    }
 
    public ImGuiImplGl3 getImGuiGl3()

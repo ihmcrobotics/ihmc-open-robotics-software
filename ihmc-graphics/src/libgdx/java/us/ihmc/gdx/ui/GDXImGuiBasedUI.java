@@ -172,11 +172,11 @@ public class GDXImGuiBasedUI
          }
          if (ImGui.menuItem("Load Layout from ~/.ihmc"))
          {
-            imGuiWindowAndDockSystem.loadUserSettings();
+            imGuiWindowAndDockSystem.loadConfiguration(false);
          }
          if (ImGui.menuItem("Load Default Layout"))
          {
-            imGuiWindowAndDockSystem.loadDefaultSettings();
+            imGuiWindowAndDockSystem.loadConfiguration(true);
          }
          ImGui.endMenu();
       }
