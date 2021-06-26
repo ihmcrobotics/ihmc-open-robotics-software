@@ -118,14 +118,21 @@ public class GDXImGuiWindowAndDockSystem
       int flags = ImGuiDockNodeFlags.None;
       flags += ImGuiDockNodeFlags.PassthruCentralNode;
 //      flags += ImGuiDockNodeFlags.AutoHideTabBar;
+
       dockspaceId = ImGui.dockSpaceOverViewport(ImGui.getMainViewport(), flags);
 
+      ImGuiDockspacePanel justClosedPanel = null;
       for (ImGuiDockspacePanel dockspacePanel : dockPanelSet)
       {
          dockspacePanel.renderPanel();
+         if (dockspacePanel.getWasJustClosed())
+         {
+            justClosedPanel = dockspacePanel;
+            LogTools.debug("Closed dockspace panel: {}", justClosedPanel.getName());
+         }
       }
 
-      panelManager.renderPanels();
+      panelManager.renderPanels(justClosedPanel);
    }
 
    public void renderMenuDockPanelItems()

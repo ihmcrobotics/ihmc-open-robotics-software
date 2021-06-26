@@ -37,11 +37,11 @@ public class ImGuiPanelManager
       }
    }
 
-   public void renderPanels()
+   public void renderPanels(ImGuiDockspacePanel justClosedPanel)
    {
       for (ImGuiPanel panel : panels)
       {
-         panel.renderPanelAndChildren();
+         panel.renderPanelAndChildren(justClosedPanel);
       }
    }
 
