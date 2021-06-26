@@ -18,8 +18,6 @@ public class ImGuiGlfwWindow
                                                                               classForLoading,
                                                                               "GLFWDemo");
    private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem(configurationDirectory);
-   private final ImGuiPanelManager panelManager = new ImGuiPanelManager(configurationDirectory);
-   private boolean isFirstRenderCall = true;
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
    {
@@ -48,12 +46,11 @@ public class ImGuiGlfwWindow
             configure.run();
          }
 
-         imGuiDockSystem.beforeWindowManagement(isFirstRenderCall);
+         imGuiDockSystem.beforeWindowManagement();
 
          render.run();
 
          imGuiDockSystem.afterWindowManagement();
-         isFirstRenderCall = false;
       }
 
       dispose.run();
@@ -65,7 +62,7 @@ public class ImGuiGlfwWindow
 
    public ImGuiPanelManager getPanelManager()
    {
-      return panelManager;
+      return imGuiDockSystem.getPanelManager();
    }
 
    public GDXImGuiWindowAndDockSystem getImGuiDockSystem()

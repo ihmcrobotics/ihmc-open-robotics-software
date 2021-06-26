@@ -26,19 +26,22 @@ public class GDXImGuiWindowAndDockSystem
 {
    private final ImGuiImplGlfw imGuiGlfw = new ImGuiImplGlfw();
    private final ImGuiImplGl3 imGuiGl3 = new ImGuiImplGl3();
-
    private String glslVersion; // TODO: ?
    private long windowHandle;
    private ImFont imFont;
    private int dockspaceId;
    private final ImString newDockPanelName = new ImString("", 100);
    private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
-
+   private final ImGuiPanelManager panelManager;
    private final HybridFile imGuiSettingsFile;
+   private final HybridFile imGuiDockspacePanelsFile;
+   private boolean isFirstRenderCall = true;
 
    public GDXImGuiWindowAndDockSystem(HybridDirectory configurationDirectory)
    {
       imGuiSettingsFile = new HybridFile(configurationDirectory, "ImGuiSettings.ini");
+      imGuiDockspacePanelsFile = new HybridFile(configurationDirectory, "ImGuiDockspacePanels.ini");
+      panelManager = new ImGuiPanelManager(configurationDirectory);
    }
 
    public void create(long windowHandle)
@@ -94,7 +97,7 @@ public class GDXImGuiWindowAndDockSystem
       imGuiGl3.init(glslVersion);
    }
 
-   public void beforeWindowManagement(boolean isFirstRenderCall)
+   public void beforeWindowManagement()
    {
       if (isFirstRenderCall)
       {
@@ -115,6 +118,8 @@ public class GDXImGuiWindowAndDockSystem
       {
          dockspacePanel.renderPanel();
       }
+
+      panelManager.renderPanels();
    }
 
    public void renderMenuDockPanelItems()
@@ -144,6 +149,9 @@ public class GDXImGuiWindowAndDockSystem
       {
          dockPanelSet.remove(dockspacePanelToRemove);
       }
+
+      ImGui.separator();
+      panelManager.renderPanelMenu();
    }
 
    public void loadSettings(boolean tryUserFirst)
@@ -182,17 +190,22 @@ public class GDXImGuiWindowAndDockSystem
       return success;
    }
 
-   public void saveSettings(boolean saveDefault)
+   public void saveConfiguration(boolean saveDefault)
    {
       Path saveFile = saveDefault ? imGuiSettingsFile.getWorkspaceFile() : imGuiSettingsFile.getExternalFile();
       String settingsPathString = saveFile.toString();
       LogTools.info("Saving ImGui settings to {}", settingsPathString);
       FileTools.ensureDirectoryExists(saveFile.getParent(), DefaultExceptionHandler.PRINT_STACKTRACE);
       ImGui.saveIniSettingsToDisk(settingsPathString);
+
+      panelManager.saveConfiguration(saveDefault);
    }
 
    public void afterWindowManagement()
    {
+      if (isFirstRenderCall)
+         panelManager.loadConfiguration();
+
       ImGui.popFont();
 
       ImGui.render();
@@ -207,6 +220,8 @@ public class GDXImGuiWindowAndDockSystem
 
       glfwSwapBuffers(windowHandle);
       glfwPollEvents();
+
+      isFirstRenderCall = false;
    }
 
    public void dispose()
@@ -225,5 +240,10 @@ public class GDXImGuiWindowAndDockSystem
    public ImGuiImplGl3 getImGuiGl3()
    {
       return imGuiGl3;
+   }
+
+   public ImGuiPanelManager getPanelManager()
+   {
+      return panelManager;
    }
 }

@@ -44,7 +44,6 @@ public class GDXImGuiBasedUI
    private final GDXVRManager vrManager = new GDXVRManager();
 
    private final GDXImGuiWindowAndDockSystem imGuiWindowAndDockSystem;
-   private final ImGuiPanelManager imGuiPanelManager;
 
 //   private final GDXLinuxGUIRecorder guiRecorder;
    private final ArrayList<Runnable> onCloseRequestListeners = new ArrayList<>(); // TODO implement on windows closing
@@ -65,7 +64,6 @@ public class GDXImGuiBasedUI
    private final ImInt foregroundFPS = new ImInt(240);
    private final ImBoolean vsync = new ImBoolean(false);
    private final ImInt libGDXLogLevel = new ImInt(GDXTools.toGDX(LogTools.getLevel()));
-   private boolean isFirstRenderCall = true;
 
    public GDXImGuiBasedUI(Class<?> classForLoading, String directoryNameToAssumePresent, String subsequentPathToResourceFolder)
    {
@@ -84,7 +82,6 @@ public class GDXImGuiBasedUI
       libGDXSettingsFile = new HybridFile(configurationDirectory, "GDXSettings.json");
 
       imGuiWindowAndDockSystem = new GDXImGuiWindowAndDockSystem(configurationDirectory);
-      imGuiPanelManager = new ImGuiPanelManager(configurationDirectory);
 
 //      guiRecorder = new GDXLinuxGUIRecorder(24, 0.8f, getClass().getSimpleName());
 //      onCloseRequestListeners.add(guiRecorder::stop);
@@ -96,7 +93,7 @@ public class GDXImGuiBasedUI
 //         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
       }
 
-      imGuiPanelManager.addPrimaryPanel(VIEW_3D_WINDOW_NAME);
+      imGuiWindowAndDockSystem.getPanelManager().addPrimaryPanel(VIEW_3D_WINDOW_NAME);
    }
 
    public void launchGDXApplication(Lwjgl3ApplicationAdapter applicationAdapter)
@@ -157,8 +154,7 @@ public class GDXImGuiBasedUI
    {
       Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
       GDX3DSceneTools.glClearGray(0.3f);
-      imGuiWindowAndDockSystem.beforeWindowManagement(isFirstRenderCall);
-      imGuiPanelManager.renderPanels();
+      imGuiWindowAndDockSystem.beforeWindowManagement();
    }
 
    public void renderEnd()
@@ -187,8 +183,6 @@ public class GDXImGuiBasedUI
       if (ImGui.beginMenu("Panels"))
       {
          imGuiWindowAndDockSystem.renderMenuDockPanelItems();
-         ImGui.separator();
-         imGuiPanelManager.renderPanelMenu();
          ImGui.endMenu();
       }
       if (ImGui.beginMenu("Settings"))
@@ -286,11 +280,7 @@ public class GDXImGuiBasedUI
       ImGui.end();
       ImGui.popStyleVar();
 
-      if (isFirstRenderCall)
-         imGuiPanelManager.loadConfiguration();
-
       imGuiWindowAndDockSystem.afterWindowManagement();
-      isFirstRenderCall = false;
 
       if (GDXVRManager.isVREnabled())
          vrManager.render(sceneManager);
@@ -298,8 +288,7 @@ public class GDXImGuiBasedUI
 
    private void saveApplicationSettings(boolean saveDefault)
    {
-      imGuiWindowAndDockSystem.saveSettings(saveDefault);
-      imGuiPanelManager.saveConfiguration(saveDefault);
+      imGuiWindowAndDockSystem.saveConfiguration(saveDefault);
       Consumer<ObjectNode> rootConsumer = root ->
       {
          root.put("windowWidth", Gdx.graphics.getWidth());
@@ -341,7 +330,7 @@ public class GDXImGuiBasedUI
 
    public ImGuiPanelManager getImGuiPanelManager()
    {
-      return imGuiPanelManager;
+      return imGuiWindowAndDockSystem.getPanelManager();
    }
 
    public GDX3DSceneManager get3DSceneManager()
