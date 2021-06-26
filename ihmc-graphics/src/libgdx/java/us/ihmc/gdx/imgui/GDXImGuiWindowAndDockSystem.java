@@ -136,7 +136,7 @@ public class GDXImGuiWindowAndDockSystem
       ImGui.inputText("###newDockPanelName", newDockPanelName, ImGuiInputTextFlags.CallbackResize);
       ImGui.popItemWidth();
       ImGui.sameLine();
-      if (ImGui.button("Create###createNewDockPanelButton"))
+      if (ImGui.button("Create###createNewDockPanelButton") && !newDockPanelName.get().isEmpty())
       {
          dockPanelSet.add(new ImGuiDockspacePanel(newDockPanelName.get()));
       }
@@ -187,11 +187,13 @@ public class GDXImGuiWindowAndDockSystem
             JsonNode dockspacePanelsNode = jsonNode.get("dockspacePanels");
             if (dockspacePanelsNode != null)
             {
+               ImGuiDockspacePanel[] priorDockpanelSet = dockPanelSet.toArray(new ImGuiDockspacePanel[0]);
+               dockPanelSet.clear();
                for (Iterator<Map.Entry<String, JsonNode>> it = dockspacePanelsNode.fields(); it.hasNext(); )
                {
                   Map.Entry<String, JsonNode> dockspacePanelEntry = it.next();
                   ImGuiDockspacePanel dockspacePanel = null;
-                  for (ImGuiDockspacePanel otherDockspacePanel : dockPanelSet)
+                  for (ImGuiDockspacePanel otherDockspacePanel : priorDockpanelSet)
                   {
                      if (otherDockspacePanel.getName().equals(dockspacePanelEntry.getKey()))
                      {
@@ -201,8 +203,8 @@ public class GDXImGuiWindowAndDockSystem
                   if (dockspacePanel == null)
                   {
                      dockspacePanel = new ImGuiDockspacePanel(dockspacePanelEntry.getKey());
-                     dockPanelSet.add(dockspacePanel);
                   }
+                  dockPanelSet.add(dockspacePanel);
                   dockspacePanel.getIsShowing().set(dockspacePanelEntry.getValue().asBoolean());
                }
             }
