@@ -27,7 +27,7 @@ public class GDXVRDemo
       public void create()
       {
          sceneManager.create();
-         vrManager.create();
+         vrManager.create(sceneManager.getCamera3D());
 
          sceneManager.addCoordinateFrame(0.3);
          sceneManager.addModelInstance(new BoxesDemoModel().newInstance());

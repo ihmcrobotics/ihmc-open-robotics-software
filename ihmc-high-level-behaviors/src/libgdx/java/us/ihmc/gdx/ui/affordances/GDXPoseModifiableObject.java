@@ -25,7 +25,7 @@ public class GDXPoseModifiableObject
    public void create(GDXImGuiBasedUI baseUI, GDXEnvironmentObject object)
    {
       this.object = object;
-      pose3DWidget.create();
+      pose3DWidget.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
       object.set(pose3DWidget.getTransform());
    }

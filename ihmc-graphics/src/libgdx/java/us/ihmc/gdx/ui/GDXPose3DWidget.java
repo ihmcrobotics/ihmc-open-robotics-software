@@ -33,6 +33,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
@@ -56,11 +57,12 @@ public class GDXPose3DWidget implements RenderableProvider
    private static final Color CENTER_SELECTED_DEFAULT_COLOR = new Color(0.5f, 0.5f, 0.5f, 0.9f);
 
    private final ImFloat torusRadius = new ImFloat(0.5f);
-   private final ImFloat torusTubeRadius = new ImFloat(0.016f);
-   private final ImFloat arrowLengthRatio = new ImFloat(0.3f);
-   private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.3f);
+   private final ImFloat torusCameraSize = new ImFloat(0.067f);
+   private final ImFloat torusTubeRadiusRatio = new ImFloat(0.074f);
+   private final ImFloat arrowLengthRatio = new ImFloat(0.431f);
+   private final ImFloat arrowHeadBodyLengthRatio = new ImFloat(0.480f);
    private final ImFloat arrowHeadBodyRadiusRatio = new ImFloat(2.0f);
-   private final ImFloat arrowSpacingFactor = new ImFloat(2.2f);
+   private final ImFloat arrowSpacingFactor = new ImFloat(2.22f);
    private double animationSpeed = 0.25 * Math.PI;
    private double arrowBodyRadius;
    private double arrowLength;
@@ -112,14 +114,19 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Vector3D axisMoveVector = new Vector3D();
    private final AxisAngle axisAngleToRotateBy = new AxisAngle();
    private final String imGuiWindowName;
+   private FocusBasedGDXCamera camera3D;
+   private final Point3D cameraPosition = new Point3D();
+   private double lastDistanceToCamera = -1.0;
 
    public GDXPose3DWidget(String name)
    {
       imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
    }
 
-   public void create()
+   public void create(FocusBasedGDXCamera camera3D)
    {
+      this.camera3D = camera3D;
+
       axisRotations[0] = new RotationMatrix(0.0, Math.PI / 2.0, 0.0);
       axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
       axisRotations[2] = new RotationMatrix();
@@ -229,6 +236,15 @@ public class GDXPose3DWidget implements RenderableProvider
 
       // after things have been modified, update the derivative stuff
       updateFromSourceTransform();
+
+      GDXTools.toEuclid(camera3D.position, cameraPosition);
+      double distanceToCamera = cameraPosition.distance(pose.getPosition());
+      if (lastDistanceToCamera != distanceToCamera)
+      {
+         lastDistanceToCamera = distanceToCamera;
+         recreateGraphics();
+         updateFromSourceTransform();
+      }
    }
 
    private void updateFromSourceTransform()
@@ -256,11 +272,11 @@ public class GDXPose3DWidget implements RenderableProvider
          GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
 
          angularCollisionTorus.setToZero();
-         angularCollisionTorus.setRadii(torusRadius.get(), torusTubeRadius.get());
+         angularCollisionTorus.setRadii(torusRadius.get(), torusRadius.get() * torusTubeRadiusRatio.get());
          angularCollisionTorus.applyTransform(tempTransform);
 
          angularCollisionSphere.setToZero();
-         angularCollisionSphere.setRadius(torusRadius.get() + torusTubeRadius.get());
+         angularCollisionSphere.setRadius(torusRadius.get() + (torusRadius.get() * torusTubeRadiusRatio.get()));
          angularCollisionSphere.applyTransform(tempTransform);
 
          adjustedRayOrigin.setX(pickRay.getPoint().getX() - angularCollisionSphere.getPosition().getX());
@@ -446,10 +462,11 @@ public class GDXPose3DWidget implements RenderableProvider
       ImGui.pushItemWidth(100.00f);
       boolean proportionsChanged = false;
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus radius"), torusRadius.getData(), 0.001f, 0.0f, 1000.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus tube radius"), torusTubeRadius.getData(), 0.001f, 0.0f, 1000.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus camera size"), torusCameraSize.getData(), 0.001f, 0.0f, 1.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Torus tube radius ratio"), torusTubeRadiusRatio.getData(), 0.001f, 0.0f, 1000.0f);
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow length ratio"), arrowLengthRatio.getData(), 0.001f, 0.0f, 1.0f);
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body length ratio"), arrowHeadBodyLengthRatio.getData(), 0.001f, 0.0f, 1.0f);
-      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.001f, 0.0f, 1.0f);
+      proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow head body radius ratio"), arrowHeadBodyRadiusRatio.getData(), 0.001f, 0.0f, 3.0f);
       proportionsChanged |= ImGui.dragFloat(ImGuiTools.uniqueLabel(this, "Arrow spacing factor"), arrowSpacingFactor.getData(), 0.001f, 0.0f, 1000.0f);
       ImGui.popItemWidth();
 
@@ -463,12 +480,16 @@ public class GDXPose3DWidget implements RenderableProvider
 
    private void recreateGraphics()
    {
-      arrowBodyRadius = (float) torusTubeRadius.get();
+      if (lastDistanceToCamera > 0.0)
+         torusRadius.set(torusCameraSize.get() * (float) lastDistanceToCamera);
+      else
+         torusRadius.set(torusCameraSize.get());
+      arrowBodyRadius = (float) torusTubeRadiusRatio.get() * torusRadius.get();
       arrowLength = arrowLengthRatio.get() * torusRadius.get();
       arrowBodyLength = (1.0 - arrowHeadBodyLengthRatio.get()) * arrowLength;
       arrowHeadRadius = arrowHeadBodyRadiusRatio.get() * arrowBodyRadius;
       arrowHeadLength = arrowHeadBodyLengthRatio.get() * arrowLength;
-      arrowSpacing = arrowSpacingFactor.get() * (torusRadius.get() + torusTubeRadius.get());
+      arrowSpacing = arrowSpacingFactor.get() * (torusRadius.get() + (torusTubeRadiusRatio.get() * torusRadius.get()));
 
       for (Axis3D axis : Axis3D.values)
       {
@@ -502,8 +523,12 @@ public class GDXPose3DWidget implements RenderableProvider
          String axisName = axis.name().toLowerCase();
 
          int resolution = 25;
-         ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-                                                                          meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius.get(), torusTubeRadius.get(), resolution, axisColors[axis.ordinal()]), axisName);
+         ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder -> meshBuilder.addArcTorus(0.0,
+                                                                                                           Math.PI * 2.0f,
+                                                                                                           torusRadius.get(),
+                                                                                                           torusTubeRadiusRatio.get() * torusRadius.get(),
+                                                                                                           resolution,
+                                                                                                           axisColors[axis.ordinal()]), axisName);
          ring.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
          GDXTools.toGDX(axisRotations[axis.ordinal()], ring.transform);
          angularControlModelInstances[axis.ordinal()] = ring;
