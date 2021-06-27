@@ -17,10 +17,11 @@ public class ImGuiGlfwWindow
                                                                               subsequentPathToResourceFolder,
                                                                               classForLoading,
                                                                               "GLFWDemo");
-   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem(configurationDirectory);
+   private final GDXImGuiWindowAndDockSystem imGuiDockSystem = new GDXImGuiWindowAndDockSystem();
 
    public ImGuiGlfwWindow(String windowTitle, int windowWidth, int windowHeight)
    {
+      imGuiDockSystem.setDirectory(configurationDirectory);
       glfwWindowForImGui = new GlfwWindowForImGui(windowTitle, windowWidth, windowHeight);
    }
 
