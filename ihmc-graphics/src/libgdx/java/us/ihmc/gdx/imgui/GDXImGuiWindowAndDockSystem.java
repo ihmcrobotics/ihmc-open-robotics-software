@@ -39,15 +39,19 @@ public class GDXImGuiWindowAndDockSystem
    private final ImString newDockPanelName = new ImString("", 100);
    private final TreeSet<ImGuiDockspacePanel> dockPanelSet = new TreeSet<>(Comparator.comparing(ImGuiDockspacePanel::getName));
    private final ImGuiPanelManager panelManager;
-   private final HybridFile imGuiSettingsFile;
-   private final HybridFile panelsFile;
+   private HybridFile imGuiSettingsFile;
+   private HybridFile panelsFile;
    private boolean isFirstRenderCall = true;
 
-   public GDXImGuiWindowAndDockSystem(HybridDirectory configurationDirectory)
+   public GDXImGuiWindowAndDockSystem()
+   {
+      panelManager = new ImGuiPanelManager();
+   }
+
+   public void setDirectory(HybridDirectory configurationDirectory)
    {
       imGuiSettingsFile = new HybridFile(configurationDirectory, "ImGuiSettings.ini");
-      panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.ini");
-      panelManager = new ImGuiPanelManager();
+      panelsFile = new HybridFile(configurationDirectory, "ImGuiPanels.json");
    }
 
    public void create(long windowHandle)
@@ -167,7 +171,7 @@ public class GDXImGuiWindowAndDockSystem
       panelManager.renderPanelMenu();
    }
 
-   public void loadUserConfigurationWithDefaultFallback()
+   private void loadUserConfigurationWithDefaultFallback()
    {
       boolean loaded = loadConfiguration(false);
       if (!loaded)
