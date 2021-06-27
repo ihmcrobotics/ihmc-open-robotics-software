@@ -158,7 +158,6 @@ public class PelvisLinearStateUpdater
    private final FrameVector3D centerOfMassVelocityUsingPelvisIMUAndKinematics = new FrameVector3D(worldFrame);
    private final Vector3D tempRootJointTranslation = new Vector3D();
    private final FramePoint3D footPositionInWorld = new FramePoint3D();
-   private final FrameVector3D tempVelocity = new FrameVector3D();
 
    private final double gravitationalAcceleration;
 
@@ -399,9 +398,7 @@ public class PelvisLinearStateUpdater
       imuBasedLinearStateCalculator.initialize();
 
       // Set the rootJoint twist to zero.
-      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
-      rootJointTwist.setToZero();
-      rootJoint.setJointTwist(rootJointTwist);
+      rootJoint.getJointTwist().setToZero();
       rootJoint.updateFramesRecursively();
       yoRootJointVelocity.setToZero();
 
@@ -480,18 +477,10 @@ public class PelvisLinearStateUpdater
       updateCoMState();
    }
 
-   private Twist rootJointTwist = new Twist();
-
    private void updateRootJoint()
    {
-      tempRootJointTranslation.set(yoRootJointPosition);
-      rootJoint.setJointPosition(tempRootJointTranslation);
-
-      tempVelocity.setIncludingFrame(rootJointVelocity);
-      rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
-      tempVelocity.changeFrame(rootJointTwist.getReferenceFrame());
-      rootJointTwist.getLinearPart().set(tempVelocity);
-      rootJoint.setJointTwist(rootJointTwist);
+      rootJoint.getJointPose().getPosition().set(yoRootJointPosition);
+      rootJoint.getJointTwist().getLinearPart().setMatchingFrame(rootJointVelocity);
       rootJoint.updateFrame();
    }
 
