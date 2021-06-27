@@ -5,7 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
@@ -43,7 +48,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 /**
  * PelvisKinematicsBasedPositionCalculator estimates the pelvis position and linear velocity using
  * the leg kinematics.
- * 
+ *
  * @author Sylvain
  */
 public class PelvisKinematicsBasedLinearStateCalculator
@@ -57,12 +62,12 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final ReferenceFrame rootJointFrame;
-   private final Map<RigidBodyBasics, ReferenceFrame> soleFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
-   private final Map<RigidBodyBasics, ReferenceFrame> copFrames = new LinkedHashMap<RigidBodyBasics, ReferenceFrame>();
+   private final Map<RigidBodyBasics, ReferenceFrame> soleFrames = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, ReferenceFrame> copFrames = new LinkedHashMap<>();
 
    private final YoFramePoint3D rootJointPosition = new YoFramePoint3D("estimatedRootJointPositionWithKinematics", worldFrame, registry);
 
-   private final Map<RigidBodyBasics, YoFrameVector3D> footVelocitiesInWorld = new LinkedHashMap<RigidBodyBasics, YoFrameVector3D>();
+   private final Map<RigidBodyBasics, YoFrameVector3D> footVelocitiesInWorld = new LinkedHashMap<>();
    private final YoFrameVector3D rootJointLinearVelocityNewTwist = new YoFrameVector3D("estimatedRootJointVelocityNewTwist", worldFrame, registry);
    private final DoubleProvider alphaRootJointLinearVelocityNewTwist;
 
@@ -74,20 +79,20 @@ public class PelvisKinematicsBasedLinearStateCalculator
    private final BacklashCompensatingVelocityYoFrameVector rootJointLinearVelocityBacklashKinematics;
 
    private final DoubleProvider footToRootJointPositionBreakFrequency;
-   private final Map<RigidBodyBasics, AlphaFilteredYoFrameVector> footToRootJointPositions = new LinkedHashMap<RigidBodyBasics, AlphaFilteredYoFrameVector>();
-   private final Map<RigidBodyBasics, YoFramePoint3D> footPositionsInWorld = new LinkedHashMap<RigidBodyBasics, YoFramePoint3D>();
+   private final Map<RigidBodyBasics, AlphaFilteredYoFrameVector> footToRootJointPositions = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> footPositionsInWorld = new LinkedHashMap<>();
    /** Debug variable */
    private final Map<RigidBodyBasics, YoFramePoint3D> rootJointPositionsPerFoot = new LinkedHashMap<>();
    private final BooleanProvider correctTrustedFeetPositions;
 
-   private final Map<RigidBodyBasics, YoFramePoint3D> copPositionsInWorld = new LinkedHashMap<RigidBodyBasics, YoFramePoint3D>();
+   private final Map<RigidBodyBasics, YoFramePoint3D> copPositionsInWorld = new LinkedHashMap<>();
 
    private final DoubleProvider copFilterBreakFrequency;
-   private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint2d> copsFilteredInFootFrame = new LinkedHashMap<RigidBodyBasics, AlphaFilteredYoFramePoint2d>();
-   private final Map<RigidBodyBasics, YoFramePoint2D> copsRawInFootFrame = new LinkedHashMap<RigidBodyBasics, YoFramePoint2D>();
+   private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint2d> copsFilteredInFootFrame = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, YoFramePoint2D> copsRawInFootFrame = new LinkedHashMap<>();
 
-   private final Map<RigidBodyBasics, FrameConvexPolygon2D> footPolygons = new LinkedHashMap<RigidBodyBasics, FrameConvexPolygon2D>();
-   private final Map<RigidBodyBasics, FrameLineSegment2D> footCenterCoPLineSegments = new LinkedHashMap<RigidBodyBasics, FrameLineSegment2D>();
+   private final Map<RigidBodyBasics, FrameConvexPolygon2D> footPolygons = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, FrameLineSegment2D> footCenterCoPLineSegments = new LinkedHashMap<>();
 
    private final YoBoolean kinematicsIsUpToDate = new YoBoolean("kinematicsIsUpToDate", registry);
    private final BooleanProvider useControllerDesiredCoP;
@@ -117,11 +122,11 @@ public class PelvisKinematicsBasedLinearStateCalculator
                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
                                                      YoRegistry parentRegistry)
    {
-      this.rootJoint = inverseDynamicsStructure.getRootJoint();
-      this.rootJointFrame = rootJoint.getFrameAfterJoint();
+      rootJoint = inverseDynamicsStructure.getRootJoint();
+      rootJointFrame = rootJoint.getFrameAfterJoint();
       this.footSwitches = footSwitches;
       this.centerOfPressureDataHolderFromController = centerOfPressureDataHolderFromController;
-      this.feetRigidBodies = new ArrayList<>(feetContactablePlaneBodies.keySet());
+      feetRigidBodies = new ArrayList<>(feetContactablePlaneBodies.keySet());
 
       footToRootJointPositionBreakFrequency = new DoubleParameter("FootToRootJointPositionBreakFrequency",
                                                                   registry,
@@ -232,7 +237,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * Estimates the foot positions corresponding to the given pelvisPosition
-    * 
+    *
     * @param pelvisPosition
     */
    public void initialize(FramePoint3D pelvisPosition)
@@ -261,7 +266,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * Estimates the pelvis position and linear velocity using the leg kinematics
-    * 
+    *
     * @param trustedFoot          is the foot used to estimates the pelvis state
     * @param numberOfTrustedSides is only one or both legs used to estimate the pelvis state
     */
@@ -282,7 +287,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * updates the position of a swinging foot
-    * 
+    *
     * @param swingingFoot   a foot in swing
     * @param pelvisPosition the current pelvis position
     */
@@ -316,7 +321,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
 
    /**
     * Compute the foot CoP. The CoP is the point on the support foot trusted to be not slipping.
-    * 
+    *
     * @param trustedSide
     * @param footSwitch
     */
@@ -389,7 +394,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
    /**
     * Assuming the CoP is not moving, the foot position can be updated. That way we can see if the foot
     * is on the edge.
-    * 
+    *
     * @param plantedFoot
     */
    private void correctFootPositionsUsingCoP(RigidBodyBasics plantedFoot)
@@ -447,7 +452,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
          footTwistInWorld.setBodyFrame(soleFrames.get(foot));
          footTwistInWorld.changeFrame(footTwistInWorld.getBaseFrame());
 
-         tempCoP2d.setIncludingFrame(this.copsFilteredInFootFrame.get(foot));
+         tempCoP2d.setIncludingFrame(copsFilteredInFootFrame.get(foot));
          tempCoP.setIncludingFrame(tempCoP2d, 0.0);
          tempCoP.changeFrame(footTwistInWorld.getReferenceFrame());
          footTwistInWorld.getLinearVelocityAt(tempCoP, tempFrameVector);
