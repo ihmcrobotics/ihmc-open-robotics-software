@@ -41,7 +41,7 @@ public class GDXEnvironmentBuilderPanel implements RenderableProvider
    private final GDXModelInput modelInput = new GDXModelInput();
    private final ArrayList<GDXEnvironmentObject> environmentObjects = new ArrayList<>();
 
-//   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget();
+//   private final GDXPose3DGizmo pose3DWidget = new GDXPose3DGizmo();
 
    public void create(GDXImGuiBasedUI baseUI)
    {

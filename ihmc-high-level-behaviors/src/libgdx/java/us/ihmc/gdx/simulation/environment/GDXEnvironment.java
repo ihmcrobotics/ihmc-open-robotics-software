@@ -29,7 +29,7 @@ import us.ihmc.gdx.simulation.GDXDoorSimulator;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.simulation.environment.object.objects.*;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.GDXPose3DWidget;
+import us.ihmc.gdx.ui.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.io.JSONFileTools;
 import us.ihmc.tools.io.WorkspacePathTools;
@@ -45,7 +45,7 @@ public class GDXEnvironment implements RenderableProvider
    private GDXEnvironmentObject selectedObject;
    private GDXEnvironmentObject intersectedObject;
    private ImBoolean show3DWidgetTuner = new ImBoolean(false);
-   private final GDXPose3DWidget pose3DWidget = new GDXPose3DWidget(getClass().getSimpleName());
+   private final GDXPose3DGizmo pose3DGizmo = new GDXPose3DGizmo(getClass().getSimpleName());
    private boolean placing = false;
    private boolean loadedFilesOnce = false;
    private Path selectedEnvironmentFile = null;
@@ -71,7 +71,7 @@ public class GDXEnvironment implements RenderableProvider
    {
       baseUI.get3DSceneManager().addRenderableProvider(this);
 
-      pose3DWidget.create(baseUI.get3DSceneManager().getCamera3D());
+      pose3DGizmo.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
@@ -87,7 +87,7 @@ public class GDXEnvironment implements RenderableProvider
                                                                                         pickRay.getPoint(),
                                                                                         pickRay.getDirection());
             selectedObject.set(pickPoint);
-            pose3DWidget.getTransform().set(selectedObject.getObjectTransform());
+            pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
 
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
@@ -96,8 +96,8 @@ public class GDXEnvironment implements RenderableProvider
          }
          else
          {
-            pose3DWidget.process3DViewInput(viewInput);
-            selectedObject.set(pose3DWidget.getTransform());
+            pose3DGizmo.process3DViewInput(viewInput);
+            selectedObject.set(pose3DGizmo.getTransform());
 
             intersectedObject = calculatePickedObject(viewInput.getPickRayInWorld());
             if (viewInput.isWindowHovered() && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
@@ -107,7 +107,7 @@ public class GDXEnvironment implements RenderableProvider
                   selectedObject = intersectedObject;
                   if (selectedObject != null)
                   {
-                     pose3DWidget.getTransform().set(selectedObject.getObjectTransform());
+                     pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
                   }
                }
             }
@@ -122,7 +122,7 @@ public class GDXEnvironment implements RenderableProvider
             if (intersectedObject != null && viewInput.mouseReleasedWithoutDrag(ImGuiMouseButton.Left))
             {
                selectedObject = intersectedObject;
-               pose3DWidget.getTransform().set(selectedObject.getObjectTransform());
+               pose3DGizmo.getTransform().set(selectedObject.getObjectTransform());
             }
          }
       }
@@ -256,7 +256,7 @@ public class GDXEnvironment implements RenderableProvider
 
       ImGui.checkbox("Show 3D Widget Tuner", show3DWidgetTuner);
       if (show3DWidgetTuner.get())
-         pose3DWidget.renderImGuiTuner();
+         pose3DGizmo.renderImGuiTuner();
 
       if (doorSimulator != null)
          doorSimulator.renderImGuiWidgets();
@@ -343,7 +343,7 @@ public class GDXEnvironment implements RenderableProvider
       if (selectedObject != null)
       {
          selectedObject.getCollisionModelInstance().getRenderables(renderables, pool);
-         pose3DWidget.getRenderables(renderables, pool);
+         pose3DGizmo.getRenderables(renderables, pool);
       }
       if (intersectedObject != null && intersectedObject != selectedObject)
       {
