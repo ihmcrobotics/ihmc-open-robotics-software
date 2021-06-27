@@ -153,7 +153,7 @@ public class GDXImGuiBasedUI
 
    private void enableVR()
    {
-      vrManager.create();
+      vrManager.create(sceneManager.getCamera3D());
       sceneManager.addRenderableProvider(vrManager, GDXSceneLevel.VIRTUAL);
       addImGui3DViewInputProcessor(vrManager::process3DViewInput);
    }

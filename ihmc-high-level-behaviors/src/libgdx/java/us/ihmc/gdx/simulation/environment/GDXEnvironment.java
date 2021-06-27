@@ -71,7 +71,7 @@ public class GDXEnvironment implements RenderableProvider
    {
       baseUI.get3DSceneManager().addRenderableProvider(this);
 
-      pose3DWidget.create();
+      pose3DWidget.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(this::process3DViewInput);
    }
 
