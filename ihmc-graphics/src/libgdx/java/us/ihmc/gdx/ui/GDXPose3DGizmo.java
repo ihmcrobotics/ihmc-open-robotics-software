@@ -44,7 +44,7 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class GDXPose3DWidget implements RenderableProvider
+public class GDXPose3DGizmo implements RenderableProvider
 {
    private static final Color X_AXIS_DEFAULT_COLOR = new Color(0.9f, 0.4f, 0.4f, 0.4f);
    private static final Color Y_AXIS_DEFAULT_COLOR = new Color(0.4f, 0.9f, 0.4f, 0.4f);
@@ -118,7 +118,7 @@ public class GDXPose3DWidget implements RenderableProvider
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
 
-   public GDXPose3DWidget(String name)
+   public GDXPose3DGizmo(String name)
    {
       imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
    }

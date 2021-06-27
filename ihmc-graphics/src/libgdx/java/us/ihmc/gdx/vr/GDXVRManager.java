@@ -14,7 +14,7 @@ import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGui3DViewInput;
 import us.ihmc.gdx.sceneManager.GDX3DSceneManager;
 import us.ihmc.gdx.sceneManager.GDX3DSceneTools;
-import us.ihmc.gdx.ui.GDXPose3DWidget;
+import us.ihmc.gdx.ui.GDXPose3DGizmo;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -41,7 +41,7 @@ public class GDXVRManager implements RenderableProvider
    private final Point3D resultVRSpacePosition = new Point3D();
    private final Point3D lastVRSpacePosition = new Point3D();
    private final ArrayList<Runnable> thingsToCreateOnEnable = new ArrayList<>();
-   private final GDXPose3DWidget scenePose = new GDXPose3DWidget("VR Space");
+   private final GDXPose3DGizmo scenePoseGizmo = new GDXPose3DGizmo("VR Space");
 
    public void create(FocusBasedGDXCamera camera3D)
    {
@@ -50,7 +50,7 @@ public class GDXVRManager implements RenderableProvider
 
       context = new GDXVRContext();
 
-      scenePose.create(camera3D);
+      scenePoseGizmo.create(camera3D);
 
       context.getPerEyeData().get(RobotSide.LEFT).getCamera().far = 100f;
       context.getPerEyeData().get(RobotSide.RIGHT).getCamera().far = 100f;
@@ -157,7 +157,7 @@ public class GDXVRManager implements RenderableProvider
       if (context.getDeviceByType(GDXVRDeviceType.HeadMountedDisplay) == null)
          return;
 
-      context.teleport(scenePose.getTransform());
+      context.teleport(scenePoseGizmo.getTransform());
 
       if (holdingTouchpadToMove)
       {
@@ -226,7 +226,7 @@ public class GDXVRManager implements RenderableProvider
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      scenePose.process3DViewInput(input);
+      scenePoseGizmo.process3DViewInput(input);
    }
 
    @Override
@@ -240,7 +240,7 @@ public class GDXVRManager implements RenderableProvider
          }
       }
 
-      scenePose.getRenderables(renderables, pool);
+      scenePoseGizmo.getRenderables(renderables, pool);
    }
 
    public GDXVRContext getContext()
