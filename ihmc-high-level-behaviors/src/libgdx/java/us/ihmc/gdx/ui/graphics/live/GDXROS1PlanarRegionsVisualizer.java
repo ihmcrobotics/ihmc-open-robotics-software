@@ -146,7 +146,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
          ImGui.text("Delay:");
          delayPlot.render((float) delayFixedPlanarRegionsSubscription.getDelay());
       }
-      ImGui.checkbox(labels.get("Show logging panel"), loggingPanel.getEnabled());
+      ImGui.checkbox(labels.get("Show logging panel"), loggingPanel.isTogglable());
    }
 
    @Override
@@ -155,7 +155,7 @@ public class GDXROS1PlanarRegionsVisualizer extends ImGuiGDXROS1Visualizer imple
       if (isActive())
       {
          planarRegionsGraphic.getRenderables(renderables, pool);
-         if (loggingPanel.getEnabled().get())
+         if (loggingPanel.getIsShowing().get())
          {
             loggingPanel.getRenderables(renderables, pool);
          }
