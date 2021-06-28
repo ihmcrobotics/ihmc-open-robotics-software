@@ -87,6 +87,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Point3D closestCollision = new Point3D();
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
+   private boolean dragging = false;
    private final Line3D axisDragLine = new Line3D();
    private final Plane3D axisDragPlane = new Plane3D();
    private final Point3D axisDragLineClosest = new Point3D();
@@ -122,7 +123,11 @@ public class GDXPose3DGizmo implements RenderableProvider
       boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
       boolean isWindowHovered = ImGui.isWindowHovered();
 
-      if (isWindowHovered && !input.isDragging(ImGuiMouseButton.Right))
+      if (!rightMouseDown)
+      {
+         dragging = false;
+      }
+      if (isWindowHovered && !dragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
@@ -131,11 +136,12 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             if (closestCollisionSelection != null)
             {
+               dragging = true;
                angularDragPlaneIntersectionPrevious.setToNaN();
             }
          }
       }
-      if (input.isDragging(ImGuiMouseButton.Right))
+      if (dragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
