@@ -172,9 +172,19 @@ public class GDXImGuiBasedUI
       Gdx.graphics.setTitle(windowTitle + " - " + Gdx.graphics.getFramesPerSecond() + " FPS");
       GDX3DSceneTools.glClearGray(0.3f);
       imGuiWindowAndDockSystem.beforeWindowManagement();
+      render3DView();
+      renderMenuBar();
    }
 
    public void renderEnd()
+   {
+      imGuiWindowAndDockSystem.afterWindowManagement();
+
+      if (GDXVRManager.isVREnabled())
+         vrManager.render(sceneManager);
+   }
+
+   private void renderMenuBar()
    {
       if (needToReindexPerspectives)
       {
@@ -305,16 +315,19 @@ public class GDXImGuiBasedUI
          ImGui.setTooltip("It is recommended to start SteamVR and power on the VR controllers before clicking this button.");
       }
       ImGui.endMainMenuBar();
+   }
 
+   private void render3DView()
+   {
       view3DPanelSizeHandler.handleSizeBeforeBegin();
       ImGui.pushStyleVar(ImGuiStyleVar.WindowPadding, 0.0f, 0.0f);
       int flags = ImGuiWindowFlags.None;
-//      flags |= ImGuiWindowFlags.NoDecoration;
-//      flags |= ImGuiWindowFlags.NoBackground;
-//      flags |= ImGuiWindowFlags.NoDocking;
-//      flags |= ImGuiWindowFlags.MenuBar;
-//      flags |= ImGuiWindowFlags.NoTitleBar;
-//      flags |= ImGuiWindowFlags.NoMouseInputs;
+      //      flags |= ImGuiWindowFlags.NoDecoration;
+      //      flags |= ImGuiWindowFlags.NoBackground;
+      //      flags |= ImGuiWindowFlags.NoDocking;
+      //      flags |= ImGuiWindowFlags.MenuBar;
+      //      flags |= ImGuiWindowFlags.NoTitleBar;
+      //      flags |= ImGuiWindowFlags.NoMouseInputs;
       ImGui.begin(VIEW_3D_WINDOW_NAME, flags);
       view3DPanelSizeHandler.handleSizeAfterBegin();
 
@@ -366,11 +379,6 @@ public class GDXImGuiBasedUI
 
       ImGui.end();
       ImGui.popStyleVar();
-
-      imGuiWindowAndDockSystem.afterWindowManagement();
-
-      if (GDXVRManager.isVREnabled())
-         vrManager.render(sceneManager);
    }
 
    private void applyPerspectiveDirectory()
