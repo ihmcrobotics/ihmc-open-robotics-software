@@ -190,6 +190,8 @@ public class MultiStepPushRecoveryCalculator
       return recoveryFootstepTimings.get(stepIdx);
    }
 
+   private final FramePoint2D pointToThrowAway = new FramePoint2D();
+
    private int calculateRecoveryStepLocations(RobotSide swingSide,
                                               double nextTransferDuration,
                                               TDoubleArrayList candidateSwingTimes,
@@ -251,7 +253,7 @@ public class MultiStepPushRecoveryCalculator
                                                                                              intersectingRegion.getNumberOfVertices(),
                                                                                              true,
                                                                                              capturePointAtTouchdown,
-                                                                                             null);
+                                                                                             pointToThrowAway);
             }
 
             recoveryStepLocation.set(capturePointAtTouchdown);
