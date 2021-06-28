@@ -115,7 +115,7 @@ public abstract class HumanoidStepReachabilityCalculator
    private static final double RIGID_BODY_FEET_WEIGHT = 40.0;
    private static final double RIGID_BODY_OTHER_WEIGHT = 20.0;
    private static final double JOINT_WEIGHT = 10.0;
-   private static final double SOLUTION_QUALITY_THRESHOLD = 5;
+   private static final double SOLUTION_QUALITY_THRESHOLD = 2.2;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final YoAppearanceRGBColor ghostAppearance = new YoAppearanceRGBColor(Color.YELLOW, 0.75);
@@ -250,6 +250,11 @@ public abstract class HumanoidStepReachabilityCalculator
                   }
                }
             }
+            double[] gridData = new double[3];
+            gridData[0] = spacingXYZ;
+            gridData[1] = maximumOffsetYaw - minimumOffsetYaw;
+            gridData[2] = yawDivisions;
+            scriptWriter.addGridData(gridData);
 
             scriptWriter.writeScript();
             break;
@@ -387,7 +392,7 @@ public abstract class HumanoidStepReachabilityCalculator
          commandInputManager.submitMessage(footObjective);
          sixDoFMotionControlAnchorDescriptions.add(sixDoFMessageToDescription(targetFullRobotModel.getFoot(robotSide), footObjective));
 
-         // OneDoFJoint objective for each knee joint
+         // OneDoFJoint objective for each knee joint TODO Find a way to prevent straight legs
 //         OneDoFJoint kneeJoint = (OneDoFJoint) targetFullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH);
 //         KinematicsToolboxOneDoFJointMessage jointMessage = newOneDoFJointMessage(kneeJoint, JOINT_WEIGHT, 1.04);
 //         commandInputManager.submitMessage(jointMessage);
@@ -477,17 +482,17 @@ public abstract class HumanoidStepReachabilityCalculator
       finalSolutionQuality.set(toolboxController.getSolution().getSolutionQuality());
    }
 
-   private static final double minimumOffsetX = -0.7;
-   private static final double maximumOffsetX = 0.7;
+   private static final double minimumOffsetX = -0.6;
+   private static final double maximumOffsetX = 0.6;
    private static final double minimumOffsetY = -0.4;
-   private static final double maximumOffsetY = 0.9;
+   private static final double maximumOffsetY = 0.7;
    private static final double minimumOffsetZ = 0.0;
    private static final double maximumOffsetZ = 0.4;
    private static final double minimumOffsetYaw = - Math.toRadians(70.0);
    private static final double maximumOffsetYaw = Math.toRadians(80.0);
 
-   private static final double spacingXYZ = 0.1; // 0.05
-   private static final int yawDivisions = 6;   // 10
+   private static final double spacingXYZ = 0.3; // 0.05
+   private static final int yawDivisions = 2;   // 10
    private static final double yawSpacing = (maximumOffsetYaw - minimumOffsetYaw) / yawDivisions;
 
    private static List<StepReachabilityLatticePoint> createLeftFootPoseList()
