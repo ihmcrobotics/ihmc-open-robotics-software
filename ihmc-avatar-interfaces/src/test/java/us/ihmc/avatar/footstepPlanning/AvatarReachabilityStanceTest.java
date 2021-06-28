@@ -104,7 +104,11 @@ public abstract class AvatarReachabilityStanceTest implements MultiRobotTestInte
    private void performStanceCheck(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions)
          throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
+      LogTools.info("Number of feasible solutions: " + feasibleSolutions.size());
+
       int indexToTest = random.nextInt(feasibleSolutions.size());
+      LogTools.info("Random index chosen: " + indexToTest);
+
       KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
       feasibleSolutions.remove(indexToTest);
 
