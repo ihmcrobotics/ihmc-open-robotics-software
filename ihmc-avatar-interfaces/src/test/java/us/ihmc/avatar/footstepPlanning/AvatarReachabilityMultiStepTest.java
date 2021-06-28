@@ -16,10 +16,9 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -34,7 +33,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
-import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -44,26 +42,25 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static us.ihmc.robotics.Assert.assertTrue;
 
-public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterface
+public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestInterface
 {
    private static final boolean visualize = true;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
    private DRCSimulationTestHelper drcSimulationTestHelper;
 
    private static final int numberOfStancesToCheck = 10;
+   private static final int numberOfStepsToTake = 5;
    private static final double solutionQualityThreshold = 2.2;
    private static final double initialStanceTime = 1.0;
-   private static final double stepTime = 5.0;
+   private static final double stepTime = 10.0;
    private static final double finalStanceTime = 2.0;
    private static final Random random = new Random(3920);
 
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.getKeepSCSUp();
-//      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -85,7 +82,7 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
    protected abstract HumanoidRobotMutableInitialSetup createInitialSetup(HumanoidJointNameMap jointNameMap);
 
    @Test
-   public void testSingleStep() throws Exception
+   public void testMultipleSteps() throws Exception
    {
       DRCRobotModel robotModel = getRobotModel();
       List<KinematicsToolboxSnapshotDescription> snapShots = StepReachabilityFileTools.loadKinematicsSnapshots(robotModel);
@@ -118,22 +115,12 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
    private void testSteps(DRCRobotModel robotModel, List<KinematicsToolboxSnapshotDescription> feasibleSolutions)
          throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
-      int indexToTest = random.nextInt(feasibleSolutions.size());
-
-      KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
-      feasibleSolutions.remove(indexToTest);
-
-      IDLSequence.Float jointAngles = snapshotToTest.getIkSolution().getDesiredJointAngles();
-      Vector3D rootPosition = snapshotToTest.getIkSolution().getDesiredRootTranslation();
-      Quaternion rootOrientation = snapshotToTest.getIkSolution().getDesiredRootOrientation();
+      int startIndex = random.nextInt(feasibleSolutions.size());
+      KinematicsToolboxSnapshotDescription frameToStart = feasibleSolutions.get(startIndex);
+      Vector3D rootPosition = frameToStart.getIkSolution().getDesiredRootTranslation();
+      Quaternion rootOrientation = frameToStart.getIkSolution().getDesiredRootOrientation();
 
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
-      OneDoFJointBasics[] ikJoints = FullRobotModelUtils.getAllJointsExcludingHands(fullRobotModel);
-      for (int i = 0; i < jointAngles.size(); i++)
-      {
-         ikJoints[i].setQ(jointAngles.get(i));
-      }
-
       fullRobotModel.getRootJoint().setJointConfiguration(rootOrientation, rootPosition);
       fullRobotModel.updateFrames();
 
@@ -147,21 +134,49 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
          generator.addRectangle(0.4, 0.4);
       }
 
-      int indexToStep = random.nextInt(feasibleSolutions.size());
+      // this is the ROS message to command footsteps to the robot
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      Point3D previousPose = new Point3D();
 
-      // Get location and orientation of step
-      KinematicsToolboxSnapshotDescription snapshotToStep = feasibleSolutions.get(indexToStep);
-      feasibleSolutions.remove(indexToStep);
-      SixDoFMotionControlAnchorDescription leftStep = snapshotToStep.getSixDoFAnchors().get(0);
-      assert (leftStep.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
-      Point3D desiredPose = leftStep.getInputMessage().getDesiredPositionInWorld();
-      Quaternion orientation = leftStep.getInputMessage().getDesiredOrientationInWorld();
+      for (int i = 0; i < numberOfStepsToTake; i++)
+      {
+         int randomStepIndex = random.nextInt(feasibleSolutions.size());
+         RobotSide robotSide = i % 2 == 0 ? RobotSide.LEFT : RobotSide.RIGHT;
 
-      // Create a stepping stone at the end of the step
-      generator.identity();
-      FramePoint3D step = new FramePoint3D(ReferenceFrame.getWorldFrame(), desiredPose.getX(), desiredPose.getY(), desiredPose.getZ());
-      generator.translate(step.getX(), step.getY(), step.getZ());
-      generator.addRectangle(0.4, 0.4);
+         // Get location and orientation of steps
+         KinematicsToolboxSnapshotDescription snapshotToStep = feasibleSolutions.get(randomStepIndex);
+         feasibleSolutions.remove(randomStepIndex);
+         SixDoFMotionControlAnchorDescription footstep = snapshotToStep.getSixDoFAnchors().get(0);
+         assert (footstep.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
+         Point3D desiredPose = footstep.getInputMessage().getDesiredPositionInWorld();
+         Quaternion orientation = footstep.getInputMessage().getDesiredOrientationInWorld();
+
+         // Adjust candidate foot position if right step
+         if (robotSide == RobotSide.RIGHT)
+         {
+            double stepY = desiredPose.getY();
+            desiredPose.setY(-stepY);
+
+            double stepYaw = orientation.getYaw();
+            double stepPitch = orientation.getPitch();
+            double stepRoll = orientation.getRoll();
+            orientation.setYawPitchRoll(-stepYaw, stepPitch, stepRoll);
+         }
+
+         desiredPose.setX(desiredPose.getX() + previousPose.getX());
+         desiredPose.setY(desiredPose.getY() + previousPose.getY());
+         desiredPose.setZ(desiredPose.getZ() + previousPose.getZ());
+
+         // Create stepping stones at the end of each step
+         generator.identity();
+         FramePoint3D step = new FramePoint3D(ReferenceFrame.getWorldFrame(), desiredPose.getX(), desiredPose.getY(), desiredPose.getZ());
+         generator.translate(step.getX(), step.getY(), step.getZ());
+         generator.addRectangle(0.4, 0.4);
+
+         // Add to footstep command list
+         FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, step, orientation);
+         footstepDataListMessage.getFootstepDataList().add().set(footstepData);
+      }
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.015, false);
@@ -170,19 +185,9 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
       initialSetup.getRootJointPosition().set(rootPosition);
       initialSetup.getRootJointOrientation().set(rootOrientation);
 
-      for (int i = 0; i < ikJoints.length; i++)
-      {
-         initialSetup.getJointPositions().put(ikJoints[i].getName(), ikJoints[i].getQ());
-      }
-
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setInitialSetup(initialSetup);
       drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
-
-      // this is the ROS message to command footsteps to the robot
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, step, orientation);
-      footstepDataListMessage.getFootstepDataList().add().set(footstepData);
 
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialStanceTime);
       if (!visualize)
