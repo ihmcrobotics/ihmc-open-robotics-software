@@ -7,15 +7,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.core.JsonFactory;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import us.ihmc.commons.nio.FileTools;
 
 public class MultiContactScriptWriter
 {
    private File scriptFile = null;
    private final List<KinematicsToolboxSnapshotDescription> messagesToWrite = new ArrayList<>();
+   private double[] gridData = null;
 
    public MultiContactScriptWriter()
    {
@@ -68,6 +71,11 @@ public class MultiContactScriptWriter
       messagesToWrite.add(description);
    }
 
+   public void addGridData(double[] gridData)
+   {
+      this.gridData = gridData;
+   }
+
    public boolean isEmpty()
    {
       return messagesToWrite.isEmpty();
@@ -86,6 +94,17 @@ public class MultiContactScriptWriter
       return true;
    }
 
+   public JsonNode gridDataToJSON(ObjectMapper objectMapper)
+   {
+      ObjectNode root = objectMapper.createObjectNode();
+      ObjectNode configurationJSON = root.putObject("Reachability Grid Data");
+
+      configurationJSON.put("spacingXYZ", gridData[0]);
+      configurationJSON.put("gridSizeYaw", gridData[1]);
+      configurationJSON.put("yawDivisions", gridData[2]);
+      return root;
+   }
+
    public boolean writeScript()
    {
       PrintStream printStream = null;
@@ -99,6 +118,11 @@ public class MultiContactScriptWriter
 
          for (KinematicsToolboxSnapshotDescription message : messagesToWrite)
             arrayNode.add(message.toJSON(objectMapper));
+
+         if (gridData != null)
+         {
+            arrayNode.add(gridDataToJSON(objectMapper));
+         }
 
          objectMapper.writerWithDefaultPrettyPrinter().writeValue(printStream, arrayNode);
          printStream.close();
