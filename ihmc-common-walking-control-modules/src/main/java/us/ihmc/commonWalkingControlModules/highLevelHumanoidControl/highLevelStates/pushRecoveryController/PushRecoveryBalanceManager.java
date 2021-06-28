@@ -174,8 +174,8 @@ public class PushRecoveryBalanceManager
       maxICPErrorBeforeSingleSupportInnerY = new DoubleParameter("maxICPErrorBeforeSingleSupportInnerY", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportInnerY());
       maxICPErrorBeforeSingleSupportOuterY = new DoubleParameter("maxICPErrorBeforeSingleSupportOuterY", registry, pushRecoveryControllerParameters.getMaxICPErrorBeforeSingleSupportOuterY());
 
-      maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, true);
-      maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, true);
+      maintainInitialCoMVelocityContinuitySingleSupport = new BooleanParameter("maintainInitialCoMVelocityContinuitySingleSupport", registry, false);
+      maintainInitialCoMVelocityContinuityTransfer = new BooleanParameter("maintainInitialCoMVelocityContinuityTransfer", registry, false);
 
       comTrajectoryPlanner = new CoMTrajectoryPlanner(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry);
       comTrajectoryPlanner.setComContinuityCalculator(new CoMContinuousContinuityCalculator(controllerToolbox.getGravityZ(), controllerToolbox.getOmega0Provider(), registry));
@@ -285,7 +285,7 @@ public class PushRecoveryBalanceManager
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
-      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(false); // TODO
+      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(true); // TODO
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setPerfectCMP(perfectCMP2d);
