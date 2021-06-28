@@ -10,13 +10,19 @@ import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.HumanoidRobotMutableInitialSetup;
 import us.ihmc.avatar.multiContact.KinematicsToolboxSnapshotDescription;
+import us.ihmc.avatar.multiContact.SixDoFMotionControlAnchorDescription;
 import us.ihmc.avatar.reachabilityMap.footstep.StepReachabilityFileTools;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
@@ -28,6 +34,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
+import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
@@ -37,6 +44,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterface
 {
@@ -46,14 +54,16 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
 
    private static final int numberOfStancesToCheck = 10;
    private static final double solutionQualityThreshold = 2.2;
-   private static final double initialStanceTime = 5.0;
-   private static final double finalStanceTime = 5.0;
+   private static final double initialStanceTime = 1.0;
+   private static final double stepTime = 5.0;
+   private static final double finalStanceTime = 2.0;
    private static final Random random = new Random(3920);
 
    @BeforeEach
    public void setup()
    {
-      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
+      simulationTestingParameters.getKeepSCSUp();
+//      simulationTestingParameters.setKeepSCSUp(visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer());
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
    }
 
@@ -110,8 +120,6 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
    {
       int indexToTest = random.nextInt(feasibleSolutions.size());
 
-      // TODO sample ending configuration
-
       KinematicsToolboxSnapshotDescription snapshotToTest = feasibleSolutions.get(indexToTest);
       feasibleSolutions.remove(indexToTest);
 
@@ -139,10 +147,27 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
          generator.addRectangle(0.4, 0.4);
       }
 
+      ReferenceFrame leftFoot = fullRobotModel.getFoot(RobotSide.LEFT).getBodyFixedFrame();
+
+      int indexToStep = random.nextInt(feasibleSolutions.size());
+
+      // Get location and orientation of step
+      KinematicsToolboxSnapshotDescription snapshotToStep = feasibleSolutions.get(indexToTest);
+      feasibleSolutions.remove(indexToStep);
+      SixDoFMotionControlAnchorDescription leftStep = snapshotToStep.getSixDoFAnchors().get(0);
+      assert (leftStep.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
+      Point3D desiredPose = leftStep.getInputMessage().getDesiredPositionInWorld();
+      Quaternion orientation = leftStep.getInputMessage().getDesiredOrientationInWorld();
+
+      // Create a stepping stone at the end of the step
+      generator.identity();
+      FramePoint3D step = new FramePoint3D(leftFoot, desiredPose.getX(), desiredPose.getY(), desiredPose.getZ());
+      step.changeFrame(ReferenceFrame.getWorldFrame());
+      generator.translate(step.getX(), step.getY(), step.getZ());
+      generator.addRectangle(0.4, 0.4);
+
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment(planarRegionsList, 0.015, false);
-
-      // TODO create a stepping stone at the end of the step
 
       HumanoidRobotMutableInitialSetup initialSetup = createInitialSetup(robotModel.getJointMap());
       initialSetup.getRootJointPosition().set(rootPosition);
@@ -153,24 +178,21 @@ public abstract class AvatarReachabilityStepTest implements MultiRobotTestInterf
          initialSetup.getJointPositions().put(ikJoints[i].getName(), ikJoints[i].getQ());
       }
 
-      // this is the ROS message to command footsteps to the robot
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      FootstepDataMessage step = footstepDataListMessage.getFootstepDataList().add();
-      Point3D locationOfStep = step.getLocation();
-      Quaternion orientationOfStep = step.getOrientation();
-
-      // TODO set location and orientation of step
-
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, environment);
       drcSimulationTestHelper.setInitialSetup(initialSetup);
       drcSimulationTestHelper.createSimulation(robotModel.getSimpleRobotName() + "FlatGroundWalking");
 
+      // this is the ROS message to command footsteps to the robot
+      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
+      FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(RobotSide.LEFT, step, orientation);
+      footstepDataListMessage.getFootstepDataList().add().set(footstepData);
+
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(initialStanceTime);
       if (!visualize)
          Assertions.assertTrue(success);
+
       drcSimulationTestHelper.publishToController(footstepDataListMessage);
 
-      double stepTime = 10.0;
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(stepTime);
       if (!visualize)
          Assertions.assertTrue(success);
