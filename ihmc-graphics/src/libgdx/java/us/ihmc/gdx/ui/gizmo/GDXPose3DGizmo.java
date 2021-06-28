@@ -25,7 +25,6 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.shape.primitives.Torus3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -67,8 +66,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Axis3DRotations axisRotations = new Axis3DRotations();
    private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
    private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
-   private final Torus3D angularCollisionTorus = new Torus3D();
-   private final Sphere3D angularCollisionSphere = new Sphere3D();
+   private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final Cylinder3D arrowBaseCollisionCylinder = new Cylinder3D();
    private final Sphere3D arrowHeadCollisionSphere = new Sphere3D();
    private final Plane3D arrowHeadCollisionBaseFacingTip = new Plane3D();
@@ -242,44 +240,13 @@ public class GDXPose3DGizmo implements RenderableProvider
       for (Axis3D axis : Axis3D.values)
       {
          GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
-
-         angularCollisionTorus.setToZero();
-         angularCollisionTorus.setRadii(torusRadius.get(), torusRadius.get() * torusTubeRadiusRatio.get());
-         angularCollisionTorus.applyTransform(tempTransform);
-
-         angularCollisionSphere.setToZero();
-         angularCollisionSphere.setRadius(torusRadius.get() + (torusRadius.get() * torusTubeRadiusRatio.get()));
-         angularCollisionSphere.applyTransform(tempTransform);
-
-         adjustedRayOrigin.setX(pickRay.getPoint().getX() - angularCollisionSphere.getPosition().getX());
-         adjustedRayOrigin.setY(pickRay.getPoint().getY() - angularCollisionSphere.getPosition().getY());
-         adjustedRayOrigin.setZ(pickRay.getPoint().getZ() - angularCollisionSphere.getPosition().getZ());
-         int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(angularCollisionSphere.getRadius(),
-                                                                                                angularCollisionSphere.getRadius(),
-                                                                                                angularCollisionSphere.getRadius(),
-                                                                                                adjustedRayOrigin,
-                                                                                                pickRay.getDirection(),
-                                                                                                firstIntersectionToPack,
-                                                                                                secondIntersectionToPack);
-         if (numberOfIntersections == 2)
+         torusIntersection.setupTorus(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
+         double distance = torusIntersection.intersect(pickRay, 100);
+         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
          {
-            firstIntersectionToPack.add(angularCollisionSphere.getPosition());
-            secondIntersectionToPack.add(angularCollisionSphere.getPosition());
-            for (int i = 0; i < 100; i++)
-            {
-               interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
-               if (angularCollisionTorus.isPointInside(interpolatedPoint))
-               {
-                  double distance = interpolatedPoint.distance(pickRay.getPoint());
-                  if (distance < closestCollisionDistance)
-                  {
-                     closestCollisionDistance = distance;
-                     closestCollisionSelection = SixDoFSelection.toAngularSelection(axis);
-                     closestCollision.set(interpolatedPoint);
-                  }
-                  break;
-               }
-            }
+            closestCollisionDistance = distance;
+            closestCollisionSelection = SixDoFSelection.toAngularSelection(axis);
+            closestCollision.set(torusIntersection.getClosestIntersection());
          }
       }
 
