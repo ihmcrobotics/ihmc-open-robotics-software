@@ -410,6 +410,14 @@ public class ImGuiGDXTeleoperationPanel extends ImGuiPanel implements Renderable
          communicationHelper.publish(ROS2Tools::getHandConfigurationTopic,
                                      HumanoidMessageTools.createHandDesiredConfigurationMessage(RobotSide.RIGHT, HandConfiguration.CLOSE));
       }
+      ImGui.text("Lidar REA:");
+      ImGui.sameLine();
+      if (ImGui.button(labels.get("Clear")))
+      {
+         REAStateRequestMessage clearMessage = new REAStateRequestMessage();
+         clearMessage.setRequestClear(true);
+         communicationHelper.publish(ROS2Tools.REA_STATE_REQUEST, clearMessage);
+      }
    }
 
    public void update()

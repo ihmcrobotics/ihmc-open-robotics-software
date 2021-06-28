@@ -152,7 +152,8 @@ public class ImGuiGDXPoseGoalAffordance implements RenderableProvider
 
          if (pickPoint == null)
          {
-            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(EuclidCoreTools.origin3D,
+            pickPoint = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(lastObjectIntersection != null
+                                                                                      ? lastObjectIntersection : EuclidCoreTools.origin3D,
                                                                                 Axis3D.Z,
                                                                                 pickRayInWorld.getPoint(),
                                                                                 pickRayInWorld.getDirection());

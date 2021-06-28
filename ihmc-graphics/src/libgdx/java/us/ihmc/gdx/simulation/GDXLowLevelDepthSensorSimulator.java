@@ -173,7 +173,7 @@ public class GDXLowLevelDepthSensorSimulator
             eyeDepth += imageY * depthPitchTuner.get();
             eyeDepthMetersBuffer.put(eyeDepth);
 
-            if (depthPanel.getEnabled().get())
+            if (depthPanel.getIsShowing().get())
             {
                if (highestValueSeen < 0 || eyeDepth > highestValueSeen)
                   highestValueSeen = eyeDepth;
@@ -209,7 +209,7 @@ public class GDXLowLevelDepthSensorSimulator
          }
       }
 
-      if (depthPanel.getEnabled().get())
+      if (depthPanel.getIsShowing().get())
          depthWindowTexture.draw(depthWindowPixmap, 0, 0);
 
       colorsAreBeingUsed = false;
