@@ -160,6 +160,8 @@ public class MultiStepPushRecoveryControlModule
 
    public void updateForDoubleSupport(FramePoint2DReadOnly capturePoint2d, double omega0)
    {
+      reset();
+
       // Initialize variables
       pushRecoveryCalculatorVisualizer.reset();
       swingSideForDoubleSupportRecovery.set(null);

@@ -23,7 +23,7 @@ public class ValkyriePushRecoveryControllerParameters implements PushRecoveryCon
    @Override
    public double getRecoveryTransferDuration()
    {
-      return 0.15;
+      return 0.1;
    }
 
    @Override
