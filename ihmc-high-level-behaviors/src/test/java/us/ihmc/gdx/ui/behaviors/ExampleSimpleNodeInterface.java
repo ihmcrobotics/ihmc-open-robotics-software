@@ -40,10 +40,4 @@ public class ExampleSimpleNodeInterface extends GDXBehaviorUIInterface
    {
 
    }
-
-   @Override
-   public Point2D getTreeNodeInitialPosition()
-   {
-      return new Point2D(0, 0);
-   }
 }

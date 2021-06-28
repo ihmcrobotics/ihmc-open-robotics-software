@@ -816,8 +816,46 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          doorPose.setPoseAndUpdate(unrotatedDoor);
 
          RobotSide startStep = RobotSide.LEFT;
-
          FootstepDataMessage fs1 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(-0.124 + offsetLeftRight, 0.592160790421584, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+         FootstepDataMessage fs2 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.1 + offsetLeftRight, 0.592160790421584, -0),
+                                                          new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+         FootstepDataMessage fs3 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(footSpread + offsetLeftRight, 0.23597592988662308, -0),
+                                                          new Quaternion(-1.5943418991263463E-13,
+                                                                         2.75059506574629E-13,
+                                                                         -0.7043243641759355,
+                                                                         0.7098782924052293));
+
+         FootstepDataMessage fs4 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(-footSpread + offsetLeftRight, -0.26851462759487155, -0),
+                                                          new Quaternion(-3.236982396751798E-13,
+                                                                         3.899712427026468E-14,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         FootstepDataMessage fs5 = createRelativeFootStep(doorPose,
+                                                          startStep.getOppositeSide(),
+                                                          new Point3D(-0.124 + offsetLeftRight, -0.7234607322382425, -0),
+                                                          new Quaternion(1.7351711631778928E-14,
+                                                                         -1.6924263791365571E-13,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         FootstepDataMessage fs6 = createRelativeFootStep(doorPose,
+                                                          startStep,
+                                                          new Point3D(0.124 + offsetLeftRight, -0.7199905519593679, -0),
+                                                          new Quaternion(2.5501844493298926E-13,
+                                                                         -3.0463423083022023E-13,
+                                                                         -0.7043243760613419,
+                                                                         0.7098782806128114));
+         /*FootstepDataMessage fs1 = createRelativeFootStep(doorPose,
                                                           startStep.getOppositeSide(),
                                                           new Point3D(-0.124 + offsetLeftRight, 0.592160790421584, -0),
                                                           new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
@@ -855,7 +893,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                                           new Quaternion(2.5501844493298926E-13,
                                                                          -3.0463423083022023E-13,
                                                                          -0.7043243760613419,
-                                                                         0.7098782806128114));
+                                                                         0.7098782806128114));*/
 
          message.getFootstepDataList().add().set(fs1);
          message.getFootstepDataList().add().set(fs2);

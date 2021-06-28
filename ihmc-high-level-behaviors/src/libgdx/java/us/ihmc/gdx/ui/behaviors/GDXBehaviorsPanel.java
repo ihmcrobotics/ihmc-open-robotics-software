@@ -56,7 +56,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
    private final ImGuiBehaviorModuleDisabledNodeUI disabledNodeUI;
    private final BehaviorHelper behaviorHelper;
    private final LinkedList<Pair<Integer, String>> logArray = new LinkedList<>();
-   private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree");
+   private final ImGuiImNodesBehaviorTreePanel behaviorTreePanel = new ImGuiImNodesBehaviorTreePanel("Behavior Tree", this.getClass());
    private final ImGuiPanel panel = new ImGuiPanel(windowName, this::renderRegularPanelImGuiWidgetsAndChildren);
 
    public GDXBehaviorsPanel(ROS2Node ros2Node,
@@ -87,7 +87,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          statusStopwatch.reset();
          behaviorTreeStatus.set(status);
       });
-      panel.addChild(new ImGuiPanel(behaviorTreePanel.getWindowName(), () -> behaviorTreePanel.renderWidgetsOnly(this)));
+      panel.addChild(new ImGuiPanel(behaviorTreePanel.getWindowName(), () -> behaviorTreePanel.renderImGuiWidgets(this)));
       disabledNodeUI = new ImGuiBehaviorModuleDisabledNodeUI(behaviorHelper);
       addChild(disabledNodeUI);
       highestLevelUI = behaviorRegistry.getHighestLevelNode().getBehaviorUISupplier().create(behaviorHelper);
@@ -206,8 +206,8 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
          {
             ImGui.text("Messager connected to " + messagerConnectedHost + ".");
          }
-
-         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect messager")))
+         ImGui.sameLine();
+         if (ImGui.button(ImGuiTools.uniqueLabel(this, "Disconnect")))
          {
             disconnectMessager();
          }
@@ -233,7 +233,7 @@ public class GDXBehaviorsPanel extends GDXBehaviorUIInterface
       }
       else
       {
-         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName() + ".");
+         ImGui.text("YoVariable client connected to: " + yoVariableClientHelper.getServerName());
 
          if (ImGui.button("Disconnect YoVariable client"))
          {

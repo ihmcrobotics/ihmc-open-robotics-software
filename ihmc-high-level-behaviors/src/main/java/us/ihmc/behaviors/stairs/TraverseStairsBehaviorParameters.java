@@ -9,8 +9,8 @@ public class TraverseStairsBehaviorParameters extends StoredPropertySet
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
-   public static final DoubleStoredPropertyKey pauseTime = keys.addDoubleKey("Pause time", 3.5);
-   public static final IntegerStoredPropertyKey numberOfStairsPerExecution = keys.addIntegerKey("Number Of Stairs Per Execution", 2);
+   public static final DoubleStoredPropertyKey pauseTime = keys.addDoubleKey("Pause time", 10.0);
+   public static final IntegerStoredPropertyKey numberOfStairsPerExecution = keys.addIntegerKey("Number Of Stairs Per Execution", 3);
    public static final DoubleStoredPropertyKey planningTimeout = keys.addDoubleKey("Planning timeout", 10.0);
 
    // TODO look back at logs for these

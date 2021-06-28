@@ -54,7 +54,6 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
    private final ImGuiPlot steppingRegionsPlot = new ImGuiPlot("", 1000, 250, 15);
    private final ImGuiMovingPlot impassibilityDetectedPlot = new ImGuiMovingPlot("Impassibility", 1000, 250, 15);
    private final AtomicReference<Boolean> impassibilityDetected;
-   private final ImBoolean showGraphics = new ImBoolean(true);
    private final ImBoolean stopForImpassibilities = new ImBoolean(true);
    private final ImGuiYoDoublePlot footholdVolumePlot;
 
@@ -195,6 +194,8 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       ImGui.sameLine();
 
       goalAffordance.renderPlaceGoalButton();
+      ImGui.sameLine();
+      ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
 
       if (ImGui.checkbox("Operator review", operatorReview))
       {
@@ -219,8 +220,9 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
       impassibilityDetectedPlot.calculate(impassibilityDetected.get() ? "OBSTRUCTED" : "ALL CLEAR");
       footholdVolumePlot.render();
 
-      ImGui.checkbox("Show graphics", showGraphics);
-      ImGui.sameLine();
+
+//      ImGui.checkbox("Show graphics", showGraphics);
+//      ImGui.sameLine();
       if (ImGui.button("Add support regions once"))
       {
          helper.publish(PublishSupportRegions);
@@ -281,20 +283,17 @@ public class ImGuiGDXLookAndStepBehaviorUI extends GDXBehaviorUIInterface
 
    private boolean areGraphicsEnabled()
    {
-      return showGraphics.get() && !currentState.isEmpty() && !currentState.equals(LookAndStepBehavior.State.RESET.name());
+      return wasTickedRecently(0.5) && !currentState.isEmpty() && !currentState.equals(LookAndStepBehavior.State.RESET.name());
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      if (showGraphics.get())
+      if (areGraphicsEnabled())
       {
          goalAffordance.getRenderables(renderables, pool);
          if (impassibilityDetected.get())
             obstacleBoxVisualizer.getRenderables(renderables, pool);
-      }
-      if (areGraphicsEnabled())
-      {
          footstepPlanGraphic.getRenderables(renderables, pool);
          commandedFootstepsGraphic.getRenderables(renderables, pool);
          startAndGoalFootstepsGraphic.getRenderables(renderables, pool);
