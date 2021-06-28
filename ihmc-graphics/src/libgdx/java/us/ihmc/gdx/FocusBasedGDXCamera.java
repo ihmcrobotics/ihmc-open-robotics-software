@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.g3d.model.MeshPart;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector3;
+import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
@@ -24,7 +25,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 
 public class FocusBasedGDXCamera extends Camera
@@ -227,9 +228,9 @@ public class FocusBasedGDXCamera extends Camera
       isQPressed = input.isWindowHovered() && ImGui.isKeyDown('Q');
       isZPressed = input.isWindowHovered() && ImGui.isKeyDown('Z');
 
-      if (input.isDraggingLeft())
+      if (input.isDragging(ImGuiMouseButton.Left))
       {
-         mouseDragged(input.getMouseDraggedX(), input.getMouseDraggedY());
+         mouseDragged(input.getMouseDraggedX(ImGuiMouseButton.Left), input.getMouseDraggedY(ImGuiMouseButton.Left));
       }
 
       if (input.isWindowHovered() && !ImGui.getIO().getKeyCtrl())

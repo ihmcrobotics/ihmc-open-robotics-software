@@ -1,4 +1,4 @@
-package us.ihmc.gdx.ui;
+package us.ihmc.gdx.ui.gizmo;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
@@ -23,7 +23,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.shape.primitives.Torus3D;
@@ -34,7 +33,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
@@ -44,18 +43,11 @@ import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import static us.ihmc.gdx.ui.gizmo.GDXGizmoTools.AXIS_COLORS;
+import static us.ihmc.gdx.ui.gizmo.GDXGizmoTools.AXIS_SELECTED_COLORS;
+
 public class GDXPose3DGizmo implements RenderableProvider
 {
-   private static final Color X_AXIS_DEFAULT_COLOR = new Color(0.9f, 0.4f, 0.4f, 0.4f);
-   private static final Color Y_AXIS_DEFAULT_COLOR = new Color(0.4f, 0.9f, 0.4f, 0.4f);
-   private static final Color Z_AXIS_DEFAULT_COLOR = new Color(0.4f, 0.4f, 0.9f, 0.4f);
-   private static final Color CENTER_DEFAULT_COLOR = new Color(0.7f, 0.7f, 0.7f, 0.4f);
-
-   private static final Color X_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.9f, 0.3f, 0.3f, 0.9f);
-   private static final Color Y_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.3f, 0.9f, 0.3f, 0.9f);
-   private static final Color Z_AXIS_SELECTED_DEFAULT_COLOR = new Color(0.3f, 0.3f, 0.9f, 0.9f);
-   private static final Color CENTER_SELECTED_DEFAULT_COLOR = new Color(0.5f, 0.5f, 0.5f, 0.9f);
-
    private final ImFloat torusRadius = new ImFloat(0.5f);
    private final ImFloat torusCameraSize = new ImFloat(0.067f);
    private final ImFloat torusTubeRadiusRatio = new ImFloat(0.074f);
@@ -70,11 +62,9 @@ public class GDXPose3DGizmo implements RenderableProvider
    private double arrowHeadRadius;
    private double arrowHeadLength;
    private double arrowSpacing;
-   private final Color[] axisColors = {X_AXIS_DEFAULT_COLOR, Y_AXIS_DEFAULT_COLOR, Z_AXIS_DEFAULT_COLOR};
-   private final Color[] axisSelectedColors = {X_AXIS_SELECTED_DEFAULT_COLOR, Y_AXIS_SELECTED_DEFAULT_COLOR, Z_AXIS_SELECTED_DEFAULT_COLOR};
    private final Material[] normalMaterials = new Material[3];
    private final Material[] highlightedMaterials = new Material[3];
-   private final RotationMatrix[] axisRotations = new RotationMatrix[3];
+   private final Axis3DRotations axisRotations = new Axis3DRotations();
    private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
    private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
    private final Torus3D angularCollisionTorus = new Torus3D();
@@ -97,11 +87,6 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Point3D closestCollision = new Point3D();
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
-   private boolean dragging = false;
-   private float mouseDraggedX = 0.0f;
-   private float mouseDraggedY = 0.0f;
-   private float dragBucketX;
-   private float dragBucketY;
    private final Line3D axisDragLine = new Line3D();
    private final Plane3D axisDragPlane = new Plane3D();
    private final Point3D axisDragLineClosest = new Point3D();
@@ -127,27 +112,17 @@ public class GDXPose3DGizmo implements RenderableProvider
    {
       this.camera3D = camera3D;
 
-      axisRotations[0] = new RotationMatrix(0.0, Math.PI / 2.0, 0.0);
-      axisRotations[1] = new RotationMatrix(0.0, 0.0, -Math.PI / 2.0);
-      axisRotations[2] = new RotationMatrix();
-
       recreateGraphics();
    }
 
    public void process3DViewInput(ImGui3DViewInput input)
    {
-      boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
-      float mouseDragDeltaX = ImGui.getMouseDragDeltaX(ImGuiMouseButton.Right);
-      float mouseDragDeltaY = ImGui.getMouseDragDeltaY(ImGuiMouseButton.Right);
-      boolean isWindowHovered = ImGui.isWindowHovered();
-
       updateFromSourceTransform();
 
-      if (!rightMouseDown)
-      {
-         dragging = false;
-      }
-      if (isWindowHovered && !dragging)
+      boolean rightMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Right);
+      boolean isWindowHovered = ImGui.isWindowHovered();
+
+      if (isWindowHovered && !input.isDragging(ImGuiMouseButton.Right))
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
          determineCurrentSelectionFromPickRay(pickRay);
@@ -156,26 +131,17 @@ public class GDXPose3DGizmo implements RenderableProvider
          {
             if (closestCollisionSelection != null)
             {
-               dragging = true;
-               dragBucketX = 0.0f;
-               dragBucketY = 0.0f;
                angularDragPlaneIntersectionPrevious.setToNaN();
             }
          }
       }
-      if (dragging)
+      if (input.isDragging(ImGuiMouseButton.Right))
       {
-         mouseDraggedX = mouseDragDeltaX - dragBucketX;
-         mouseDraggedY = mouseDragDeltaY - dragBucketY;
-
-         dragBucketX += mouseDraggedX;
-         dragBucketY += mouseDraggedY;
-
          Line3DReadOnly pickRay = input.getPickRayInWorld();
 
          axisDragLine.getPoint().set(transform.getTranslation());
          axisDragLine.getDirection().set(Axis3D.Z);
-         axisRotations[closestCollisionSelection.toAxis3D().ordinal()].transform(axisDragLine.getDirection());
+         axisRotations.get(closestCollisionSelection.toAxis3D()).transform(axisDragLine.getDirection());
          transform.getRotation().transform(axisDragLine.getDirection());
 
          if (closestCollisionSelection.isLinear())
@@ -253,7 +219,7 @@ public class GDXPose3DGizmo implements RenderableProvider
       {
          pose.set(transform);
          tempTransform.set(transform);
-         tempTransform.appendOrientation(axisRotations[axis.ordinal()]);
+         tempTransform.appendOrientation(axisRotations.get(axis));
          GDXTools.toGDX(tempTransform, linearControlModelInstances[axis.ordinal()].transform);
          GDXTools.toGDX(tempTransform, angularControlModelInstances[axis.ordinal()].transform);
       }
@@ -451,8 +417,6 @@ public class GDXPose3DGizmo implements RenderableProvider
       ImGui.begin(imGuiWindowName);
 
       ImGui.text("Use the right mouse button to manipulate the widget.");
-      ImGui.text("X: " + mouseDraggedX);
-      ImGui.text("Y: " + mouseDraggedY);
 
       if (ImGui.button("Reset"))
       {
@@ -498,7 +462,7 @@ public class GDXPose3DGizmo implements RenderableProvider
 
          String axisName = axis.name().toLowerCase();
 
-         Color color = axisColors[axis.ordinal()];
+         Color color = AXIS_COLORS[axis.ordinal()];
          ModelInstance arrow = GDXModelPrimitives.buildModelInstance(meshBuilder ->
          {
             // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
@@ -506,13 +470,13 @@ public class GDXPose3DGizmo implements RenderableProvider
             meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
             meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
          }, axisName);
-         arrow.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
+         arrow.materials.get(0).set(new BlendingAttribute(true, AXIS_COLORS[axis.ordinal()].a));
          normalMaterials[axis.ordinal()] = new Material(arrow.materials.get(0));
          highlightedMaterials[axis.ordinal()] = new Material();
          Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
          highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(paletteTexture));
-         highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, axisSelectedColors[axis.ordinal()].a));
-         GDXTools.toGDX(axisRotations[axis.ordinal()], arrow.transform);
+         highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
+         GDXTools.toGDX(axisRotations.get(axis), arrow.transform);
          linearControlModelInstances[axis.ordinal()] = arrow;
       }
       for (Axis3D axis : Axis3D.values)
@@ -528,9 +492,9 @@ public class GDXPose3DGizmo implements RenderableProvider
                                                                                                            torusRadius.get(),
                                                                                                            torusTubeRadiusRatio.get() * torusRadius.get(),
                                                                                                            resolution,
-                                                                                                           axisColors[axis.ordinal()]), axisName);
-         ring.materials.get(0).set(new BlendingAttribute(true, axisColors[axis.ordinal()].a));
-         GDXTools.toGDX(axisRotations[axis.ordinal()], ring.transform);
+                                                                                                           AXIS_COLORS[axis.ordinal()]), axisName);
+         ring.materials.get(0).set(new BlendingAttribute(true, AXIS_COLORS[axis.ordinal()].a));
+         GDXTools.toGDX(axisRotations.get(axis), ring.transform);
          angularControlModelInstances[axis.ordinal()] = ring;
       }
    }
