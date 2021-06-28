@@ -17,6 +17,8 @@ public class ImGuiGlfwWindowDemo
       ImGui.begin("Window");
       ImGui.text("Text");
       ImGui.end();
+
+      ImGui.showDemoWindow();
    }
 
    public void dispose()
