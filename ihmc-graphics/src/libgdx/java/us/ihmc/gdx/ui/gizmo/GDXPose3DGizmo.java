@@ -260,12 +260,8 @@ public class GDXPose3DGizmo implements RenderableProvider
             // collide arrow body cylinder
             {
                arrowBaseCollisionCylinder.setToZero();
-               //               double aLittleMoreToAvoidArrow
                arrowBaseCollisionCylinder.setSize(arrowBodyLength, arrowBodyRadius);
-               if (side == RobotSide.LEFT)
-                  arrowBaseCollisionCylinder.getPosition().addZ(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
-               else
-                  arrowBaseCollisionCylinder.getPosition().subZ(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+               arrowBaseCollisionCylinder.getPosition().addZ(side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength));
                arrowBaseCollisionCylinder.applyTransform(tempTransform);
 
                int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndCylinder3D(arrowBaseCollisionCylinder.getLength(),
