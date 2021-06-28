@@ -32,7 +32,9 @@ public class GDXImGuiBasedUIDemo
             baseUI.get3DSceneManager().addModelInstance(new ModelInstance(GDXModelPrimitives.createCoordinateFrame(0.3)));
             baseUI.get3DSceneManager().addModelInstance(new BoxesDemoModel().newInstance());
 
-            baseUI.getImGuiPanelManager().addPanel("Window", GDXImGuiBasedUIDemo.this::renderPanel);
+            baseUI.getImGuiPanelManager().addPanel("Window 1", GDXImGuiBasedUIDemo.this::renderWindow1);
+            baseUI.getImGuiPanelManager().addPanel("Window 2", GDXImGuiBasedUIDemo.this::renderWindow2);
+            baseUI.getImGuiPanelManager().addPanel("Window 3", GDXImGuiBasedUIDemo.this::renderWindow3);
          }
 
          @Override
@@ -50,7 +52,7 @@ public class GDXImGuiBasedUIDemo
       });
    }
 
-   private void renderPanel()
+   private void renderWindow1()
    {
       if (ImGui.beginTabBar("main"))
       {
@@ -70,6 +72,14 @@ public class GDXImGuiBasedUIDemo
       }
       ImGui.plotLines("Histogram", values, 100);
       renderPlot.calculate(renderCount++);
+   }
+
+   private void renderWindow2()
+   {
+   }
+
+   private void renderWindow3()
+   {
    }
 
    public static void main(String[] args)

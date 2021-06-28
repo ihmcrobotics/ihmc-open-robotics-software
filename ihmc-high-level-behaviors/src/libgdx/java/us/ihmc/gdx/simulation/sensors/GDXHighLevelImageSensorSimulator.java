@@ -229,7 +229,7 @@ public class GDXHighLevelImageSensorSimulator extends ImGuiPanel implements Rend
 
    public void setRenderColorVideoDirectly(boolean renderColorVideoDirectly)
    {
-      this.imageSensorSimulator.getColorPanel().getEnabled().set(renderColorVideoDirectly);
+      this.imageSensorSimulator.getColorPanel().getIsShowing().set(renderColorVideoDirectly);
    }
 
    public void setPublishColorImageROS2(boolean publish)
