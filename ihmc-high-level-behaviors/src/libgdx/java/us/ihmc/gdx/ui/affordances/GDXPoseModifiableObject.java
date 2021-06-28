@@ -5,10 +5,10 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.gdx.imgui.ImGui3DViewInput;
+import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.simulation.environment.object.GDXEnvironmentObject;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.GDXPose3DGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXPose3DGizmo;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

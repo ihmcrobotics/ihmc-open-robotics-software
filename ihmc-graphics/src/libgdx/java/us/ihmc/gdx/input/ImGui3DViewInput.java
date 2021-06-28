@@ -1,4 +1,4 @@
-package us.ihmc.gdx.imgui;
+package us.ihmc.gdx.input;
 
 import com.badlogic.gdx.math.Vector3;
 import imgui.flag.ImGuiMouseButton;
@@ -6,6 +6,7 @@ import imgui.internal.ImGui;
 import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.gdx.FocusBasedGDXCamera;
+import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.tools.GDXTools;
 
 import java.util.function.Supplier;
@@ -20,11 +21,10 @@ public class ImGui3DViewInput
    private final FocusBasedGDXCamera camera;
    private final Supplier<Float> viewportSizeXSupplier;
    private final Supplier<Float> viewportSizeYSupplier;
-   private boolean draggingLeft = false;
-   private float dragBucketX;
-   private float dragBucketY;
-   private float mouseDraggedX = 0.0f;
-   private float mouseDraggedY = 0.0f;
+   private final ImGuiMouseDragData mouseDragDataLeft = new ImGuiMouseDragData(ImGuiMouseButton.Left);
+   private final ImGuiMouseDragData mouseDragDataRight = new ImGuiMouseDragData(ImGuiMouseButton.Right);
+   private final ImGuiMouseDragData mouseDragDataMiddle = new ImGuiMouseDragData(ImGuiMouseButton.Middle);
+   private final ImGuiMouseDragData[] mouseDragData = new ImGuiMouseDragData[] {mouseDragDataLeft, mouseDragDataRight, mouseDragDataMiddle};
    private float mousePosX = 0.0f;
    private float mousePosY = 0.0f;
    private boolean isWindowHovered;
@@ -45,32 +45,13 @@ public class ImGui3DViewInput
    {
       computedPickRay = false;
 
-      boolean leftMouseDown = ImGui.getIO().getMouseDown(ImGuiMouseButton.Left);
-      float mouseDragDeltaX = ImGui.getMouseDragDeltaX();
-      float mouseDragDeltaY = ImGui.getMouseDragDeltaY();
       isWindowHovered = ImGui.isWindowHovered();
       mousePosX = (int) ImGui.getMousePosX() - (int) ImGui.getWindowPosX();
       mousePosY = (int) ImGui.getMousePosY() - (int) ImGui.getWindowPosY() - (int) ImGuiTools.TAB_BAR_HEIGHT;
       mouseWheelDelta = -ImGui.getIO().getMouseWheel();
 
-      if (!leftMouseDown)
-      {
-         draggingLeft = false;
-      }
-      else if (isWindowHovered && !draggingLeft)
-      {
-         draggingLeft = true;
-         dragBucketX = 0.0f;
-         dragBucketY = 0.0f;
-      }
-      if (draggingLeft)
-      {
-         mouseDraggedX = mouseDragDeltaX - dragBucketX;
-         mouseDraggedY = mouseDragDeltaY - dragBucketY;
-
-         dragBucketX += mouseDraggedX;
-         dragBucketY += mouseDraggedY;
-      }
+      for (ImGuiMouseDragData mouseDragDatum : mouseDragData)
+         mouseDragDatum.update(isWindowHovered);
    }
 
    public Line3DReadOnly getPickRayInWorld()
@@ -113,19 +94,19 @@ public class ImGui3DViewInput
       return isWindowHovered;
    }
 
-   public boolean isDraggingLeft()
+   public boolean isDragging(int imGuiMouseButton)
    {
-      return draggingLeft;
+      return mouseDragData[imGuiMouseButton].isDragging();
    }
 
-   public float getMouseDraggedX()
+   public float getMouseDraggedX(int imGuiMouseButton)
    {
-      return mouseDraggedX;
+      return mouseDragData[imGuiMouseButton].getMouseDraggedX();
    }
 
-   public float getMouseDraggedY()
+   public float getMouseDraggedY(int imGuiMouseButton)
    {
-      return mouseDraggedY;
+      return mouseDragData[imGuiMouseButton].getMouseDraggedY();
    }
 
    public float getMousePosX()
