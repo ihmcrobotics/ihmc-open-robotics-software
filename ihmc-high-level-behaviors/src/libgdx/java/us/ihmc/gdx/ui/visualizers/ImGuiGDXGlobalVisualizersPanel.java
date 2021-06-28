@@ -49,7 +49,7 @@ public class ImGuiGDXGlobalVisualizersPanel extends ImGuiPanel implements Render
             ((ImGuiGDXROS1Visualizer) visualizer).updateSubscribers(ros1Helper);
          }
          if (visualizer.getPanel() != null)
-            visualizer.getPanel().getEnabled().set(visualizer.isActive());
+            visualizer.getPanel().getIsShowing().set(visualizer.isActive());
          if (visualizer.isActive())
          {
             visualizer.update();

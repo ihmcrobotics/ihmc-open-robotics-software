@@ -414,9 +414,9 @@ catch (IndexOutOfBoundsException e)
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Point cloud"), renderPointCloudDirectly);
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), getLowLevelSimulator().getDepthPanel().getEnabled());
+      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth video"), getLowLevelSimulator().getDepthPanel().getIsShowing());
       ImGui.sameLine();
-      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getEnabled());
+      ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Color video"), getLowLevelSimulator().getColorPanel().getIsShowing());
       ImGui.text("Publish:");
       ImGui.sameLine();
       ImGui.checkbox(ImGuiTools.uniqueLabel(this, "Depth image (ROS 1)"), publishDepthImageROS1);
@@ -515,12 +515,12 @@ catch (IndexOutOfBoundsException e)
 
    public void setRenderDepthVideoDirectly(boolean renderDepthVideoDirectly)
    {
-      getLowLevelSimulator().getDepthPanel().getEnabled().set(renderDepthVideoDirectly);
+      getLowLevelSimulator().getDepthPanel().getIsShowing().set(renderDepthVideoDirectly);
    }
 
    public void setRenderColorVideoDirectly(boolean renderColorVideoDirectly)
    {
-      getLowLevelSimulator().getColorPanel().getEnabled().set(renderColorVideoDirectly);
+      getLowLevelSimulator().getColorPanel().getIsShowing().set(renderColorVideoDirectly);
    }
 
    public void setPublishDepthImageROS1(boolean publish)
