@@ -447,9 +447,12 @@ public class PlanarRegionFileTools
 
       String cvsSplitBy = ",";
 
+      boolean version2 = line.contains("orientation: ");
+
       line = line.replaceAll("regionId: ", "");
       line = line.replaceAll("index: ", "");
       line = line.replaceAll("origin: ", "");
+      line = line.replaceAll("normal: ", "");
       line = line.replaceAll("orientation: ", "");
       line = line.replaceAll("\\[", "");
       line = line.replaceAll("\\]", "");
@@ -471,7 +474,7 @@ public class PlanarRegionFileTools
       double xOrientation = Double.parseDouble(values[i++]);
       double yOrientation = Double.parseDouble(values[i++]);
       double zOrientation = Double.parseDouble(values[i++]);
-      double angleOrientation = Double.parseDouble(values[i++]);
+      double angleOrientation = version2 ? Double.parseDouble(values[i++]) : 0.0;
       orientationToPack.set(xOrientation, yOrientation, zOrientation, angleOrientation);
 
       concaveHullSizeToPack.setValue(Integer.parseInt(values[i++]));
