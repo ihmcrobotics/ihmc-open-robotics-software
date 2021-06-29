@@ -169,7 +169,7 @@ public class RecoveringSwingState extends PushRecoveryState
 
       updateHeightManager();
 
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime, balanceManager.getFinalDesiredCoMVelocity(), balanceManager.getFinalDesiredCoMAcceleration());
+      feetManager.requestSwing(swingSide, nextFootstep, swingTime, null, null);
 
       pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, Double.NaN);
 
