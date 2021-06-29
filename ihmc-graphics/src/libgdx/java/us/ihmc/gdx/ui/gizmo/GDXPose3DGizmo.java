@@ -59,6 +59,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Axis3DRotations axisRotations = new Axis3DRotations();
    private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
    private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
+   private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    private final Pose3D pose = new Pose3D();
@@ -166,38 +167,41 @@ public class GDXPose3DGizmo implements RenderableProvider
       closestCollisionSelection = null;
       double closestCollisionDistance = Double.POSITIVE_INFINITY;
 
-      // Optimization: could do one large sphere collision to avoid completely far off picks
-
-      // collide tori
-      for (Axis3D axis : Axis3D.values)
+      // Optimization: Do one large sphere collision to avoid completely far off picks
+      boundingSphereIntersection.setup(1.5 * torusRadius.get(), transform);
+      if (boundingSphereIntersection.intersect(pickRay))
       {
-         GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
-         torusIntersection.setupTorus(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
-         double distance = torusIntersection.intersect(pickRay, 100);
-         if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+         // collide tori
+         for (Axis3D axis : Axis3D.values)
          {
-            closestCollisionDistance = distance;
-            closestCollisionSelection = SixDoFSelection.toAngularSelection(axis);
-            closestCollision.set(torusIntersection.getClosestIntersection());
-         }
-      }
-
-      // collide arrows
-      for (Axis3D axis : Axis3D.values)
-      {
-         GDXTools.toEuclid(linearControlModelInstances[axis.ordinal()].transform, tempTransform);
-
-         for (RobotSide side : RobotSide.values)
-         {
-            double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
-            arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
-            double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
-
+            GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
+            torusIntersection.setupTorus(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
+            double distance = torusIntersection.intersect(pickRay, 100);
             if (!Double.isNaN(distance) && distance < closestCollisionDistance)
             {
                closestCollisionDistance = distance;
-               closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
-               closestCollision.set(arrowIntersection.getIntersection());
+               closestCollisionSelection = SixDoFSelection.toAngularSelection(axis);
+               closestCollision.set(torusIntersection.getClosestIntersection());
+            }
+         }
+
+         // collide arrows
+         for (Axis3D axis : Axis3D.values)
+         {
+            GDXTools.toEuclid(linearControlModelInstances[axis.ordinal()].transform, tempTransform);
+
+            for (RobotSide side : RobotSide.values)
+            {
+               double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+               arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
+               double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
+
+               if (!Double.isNaN(distance) && distance < closestCollisionDistance)
+               {
+                  closestCollisionDistance = distance;
+                  closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
+                  closestCollision.set(arrowIntersection.getIntersection());
+               }
             }
          }
       }
