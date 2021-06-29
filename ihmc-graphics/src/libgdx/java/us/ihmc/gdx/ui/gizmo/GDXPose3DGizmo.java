@@ -23,9 +23,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.shape.primitives.Cylinder3D;
-import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -67,21 +64,11 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
    private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
-   private final Cylinder3D arrowBaseCollisionCylinder = new Cylinder3D();
-   private final Sphere3D arrowHeadCollisionSphere = new Sphere3D();
-   private final Plane3D arrowHeadCollisionBaseFacingTip = new Plane3D();
-   private final Plane3D arrowHeadCollisionTipFacingBase = new Plane3D();
-   private final Line3D arrowHeadCollisionAxis = new Line3D();
-   private final Point3D arrowHeadCollisionAxisPoint = new Point3D();
+   private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
    private final Pose3D pose = new Pose3D();
    /** The main, source, true, base transform that this thing represents. */
    private final RigidBodyTransform transform = new RigidBodyTransform();
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
-   private final RigidBodyTransform tempPolytopeTransform = new RigidBodyTransform();
-   private final Point3D firstIntersectionToPack = new Point3D();
-   private final Point3D secondIntersectionToPack = new Point3D();
-   private final Point3D interpolatedPoint = new Point3D();
-   private final Point3D adjustedRayOrigin = new Point3D();
    private final Point3D closestCollision = new Point3D();
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
@@ -257,102 +244,15 @@ public class GDXPose3DGizmo implements RenderableProvider
 
          for (RobotSide side : RobotSide.values)
          {
-            // collide arrow body cylinder
+            double zOffset = side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength);
+            arrowIntersection.setupShapes(arrowBodyLength, arrowBodyRadius, arrowHeadRadius, arrowHeadLength, zOffset, tempTransform);
+            double distance = arrowIntersection.intersect(pickRay, 100, side == RobotSide.LEFT); // only show the cones in the positive direction
+
+            if (!Double.isNaN(distance) && distance < closestCollisionDistance)
             {
-               arrowBaseCollisionCylinder.setToZero();
-               arrowBaseCollisionCylinder.setSize(arrowBodyLength, arrowBodyRadius);
-               arrowBaseCollisionCylinder.getPosition().addZ(side.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength));
-               arrowBaseCollisionCylinder.applyTransform(tempTransform);
-
-               int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndCylinder3D(arrowBaseCollisionCylinder.getLength(),
-                                                                                                     arrowBaseCollisionCylinder.getRadius(),
-                                                                                                     arrowBaseCollisionCylinder.getPosition(),
-                                                                                                     arrowBaseCollisionCylinder.getAxis(),
-                                                                                                     pickRay.getPoint(),
-                                                                                                     pickRay.getDirection(),
-                                                                                                     firstIntersectionToPack,
-                                                                                                     secondIntersectionToPack);
-
-               if (numberOfIntersections == 2)
-               {
-                  double distance = firstIntersectionToPack.distance(pickRay.getPoint());
-                  if (distance < closestCollisionDistance)
-                  {
-                     closestCollisionDistance = distance;
-                     closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
-                     closestCollision.set(firstIntersectionToPack);
-                  }
-               }
-            }
-
-            // collide arrow head cone
-            {
-               // update cone
-               tempPolytopeTransform.setToZero();
-               if (side == RobotSide.LEFT) // only show the cones in the positive direction
-               {
-                  tempPolytopeTransform.getTranslation().addZ(0.5 * arrowSpacing + arrowBodyLength);
-                  tempTransform.transform(tempPolytopeTransform);
-
-                  arrowHeadCollisionSphere.setToZero();
-                  double arrowSurroundingSphereRadius;
-                  if (arrowHeadRadius > (0.5 * arrowHeadLength))
-                     arrowSurroundingSphereRadius = arrowHeadRadius / Math.sin(Math.atan(2.0 * arrowHeadRadius / arrowHeadLength));
-                  else
-                     arrowSurroundingSphereRadius = 0.5 * arrowHeadLength;
-                  arrowHeadCollisionSphere.setRadius(arrowSurroundingSphereRadius);
-                  arrowHeadCollisionSphere.getPosition().addZ(0.5 * arrowSpacing + arrowBodyLength + 0.5 * arrowHeadLength);
-                  arrowHeadCollisionSphere.applyTransform(tempTransform);
-
-                  adjustedRayOrigin.setX(pickRay.getPoint().getX() - arrowHeadCollisionSphere.getPosition().getX());
-                  adjustedRayOrigin.setY(pickRay.getPoint().getY() - arrowHeadCollisionSphere.getPosition().getY());
-                  adjustedRayOrigin.setZ(pickRay.getPoint().getZ() - arrowHeadCollisionSphere.getPosition().getZ());
-                  int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndEllipsoid3D(arrowHeadCollisionSphere.getRadius(),
-                                                                                                         arrowHeadCollisionSphere.getRadius(),
-                                                                                                         arrowHeadCollisionSphere.getRadius(),
-                                                                                                         adjustedRayOrigin,
-                                                                                                         pickRay.getDirection(),
-                                                                                                         firstIntersectionToPack,
-                                                                                                         secondIntersectionToPack);
-                  if (numberOfIntersections == 2)
-                  {
-                     firstIntersectionToPack.add(arrowHeadCollisionSphere.getPosition());
-                     secondIntersectionToPack.add(arrowHeadCollisionSphere.getPosition());
-
-                     arrowHeadCollisionBaseFacingTip.setToZero();
-                     arrowHeadCollisionBaseFacingTip.applyTransform(tempPolytopeTransform);
-
-                     arrowHeadCollisionTipFacingBase.setToZero();
-                     arrowHeadCollisionTipFacingBase.getPoint().addZ(arrowHeadLength);
-                     arrowHeadCollisionTipFacingBase.getNormal().set(0.0, 0.0, -1.0);
-                     arrowHeadCollisionTipFacingBase.applyTransform(tempPolytopeTransform);
-
-                     arrowHeadCollisionAxis.set(arrowHeadCollisionBaseFacingTip.getPoint(), arrowHeadCollisionBaseFacingTip.getNormal());
-
-                     for (int i = 0; i < 100; i++)
-                     {
-                        interpolatedPoint.interpolate(firstIntersectionToPack, secondIntersectionToPack, i / 100.0);
-
-                        if (arrowHeadCollisionBaseFacingTip.isOnOrAbove(interpolatedPoint) && arrowHeadCollisionTipFacingBase.isOnOrAbove(interpolatedPoint))
-                        {
-                           arrowHeadCollisionAxis.orthogonalProjection(interpolatedPoint, arrowHeadCollisionAxisPoint);
-                           double distanceFromBase = arrowHeadCollisionAxisPoint.distance(arrowHeadCollisionBaseFacingTip.getPoint());
-                           double radiusBoundsAtTier = EuclidCoreTools.interpolate(arrowHeadRadius, 0.0, distanceFromBase / arrowHeadLength);
-                           if (arrowHeadCollisionAxisPoint.distance(interpolatedPoint) <= radiusBoundsAtTier)
-                           {
-                              double distance = interpolatedPoint.distance(pickRay.getPoint());
-                              if (distance < closestCollisionDistance)
-                              {
-                                 closestCollisionDistance = distance;
-                                 closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
-                                 closestCollision.set(interpolatedPoint);
-                              }
-                              break;
-                           }
-                        }
-                     }
-                  }
-               }
+               closestCollisionDistance = distance;
+               closestCollisionSelection = SixDoFSelection.toLinearSelection(axis);
+               closestCollision.set(arrowIntersection.getIntersection());
             }
          }
       }
