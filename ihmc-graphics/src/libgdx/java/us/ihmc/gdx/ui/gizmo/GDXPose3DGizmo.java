@@ -16,16 +16,11 @@ import imgui.flag.ImGuiMouseButton;
 import imgui.internal.ImGui;
 import imgui.type.ImFloat;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Line3D;
-import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
@@ -75,17 +70,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private boolean dragging = false;
    private final LineMouseDragAlgorithm lineDragAlgorithm = new LineMouseDragAlgorithm();
-   private final Line3D axisDragLine = new Line3D();
-   private final Plane3D axisDragPlane = new Plane3D();
-   private final Point3D axisDragLineClosest = new Point3D();
-   private final Point3D axisCollisionWithAngularPickPlane = new Point3D();
-   private final Point3D angularDragPlaneIntersection = new Point3D();
-   private final Point3D angularDragPlaneIntersectionPrevious = new Point3D();
-   private final Vector3D clockHandVector = new Vector3D();
-   private final Vector3D previousClockHandVector = new Vector3D();
-   private final Vector3D crossProduct = new Vector3D();
-   private final Vector3D axisMoveVector = new Vector3D();
-   private final AxisAngle axisAngleToRotateBy = new AxisAngle();
+   private final ClockFaceRotationMouseDragAlgorithm clockFaceDragAlgorithm = new ClockFaceRotationMouseDragAlgorithm();
    private final String imGuiWindowName;
    private FocusBasedGDXCamera camera3D;
    private final Point3D cameraPosition = new Point3D();
@@ -124,18 +109,13 @@ public class GDXPose3DGizmo implements RenderableProvider
             if (closestCollisionSelection != null)
             {
                dragging = true;
-               angularDragPlaneIntersectionPrevious.setToNaN();
+               clockFaceDragAlgorithm.reset();
             }
          }
       }
       if (dragging)
       {
          Line3DReadOnly pickRay = input.getPickRayInWorld();
-
-         axisDragLine.getPoint().set(transform.getTranslation());
-         axisDragLine.getDirection().set(Axis3D.Z);
-         axisRotations.get(closestCollisionSelection.toAxis3D()).transform(axisDragLine.getDirection());
-         transform.getRotation().transform(axisDragLine.getDirection());
 
          if (closestCollisionSelection.isLinear())
          {
@@ -149,43 +129,9 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
          else if (closestCollisionSelection.isAngular())
          {
-            if (angularDragPlaneIntersectionPrevious.containsNaN())
+            if (clockFaceDragAlgorithm.calculate(pickRay, closestCollision, axisRotations.get(closestCollisionSelection.toAxis3D()), transform))
             {
-               axisDragPlane.set(closestCollision, axisDragLine.getDirection());
-               axisDragPlane.intersectionWith(axisDragLine, axisCollisionWithAngularPickPlane);
-               axisDragPlane.getPoint().set(axisCollisionWithAngularPickPlane);
-
-               angularDragPlaneIntersectionPrevious.set(closestCollision);
-            }
-            else
-            {
-               axisDragPlane.intersectionWith(angularDragPlaneIntersection, pickRay.getPoint(), pickRay.getDirection());
-
-               clockHandVector.set(angularDragPlaneIntersection.getX() - axisDragPlane.getPoint().getX(),
-                                   angularDragPlaneIntersection.getY() - axisDragPlane.getPoint().getY(),
-                                   angularDragPlaneIntersection.getZ() - axisDragPlane.getPoint().getZ());
-               previousClockHandVector.set(angularDragPlaneIntersectionPrevious.getX() - axisDragPlane.getPoint().getX(),
-                                           angularDragPlaneIntersectionPrevious.getY() - axisDragPlane.getPoint().getY(),
-                                           angularDragPlaneIntersectionPrevious.getZ() - axisDragPlane.getPoint().getZ());
-
-               double deltaAngle = EuclidGeometryTools.angleFromFirstToSecondVector3D(previousClockHandVector.getX(),
-                                                                                      previousClockHandVector.getY(),
-                                                                                      previousClockHandVector.getZ(),
-                                                                                      clockHandVector.getX(),
-                                                                                      clockHandVector.getY(),
-                                                                                      clockHandVector.getZ());
-
-               if (!Double.isNaN(deltaAngle))
-               {
-                  crossProduct.cross(previousClockHandVector, clockHandVector);
-                  if (crossProduct.dot(axisDragPlane.getNormal()) < 0.0)
-                     deltaAngle = -deltaAngle;
-
-                  axisAngleToRotateBy.set(axisDragPlane.getNormal(), deltaAngle);
-                  axisAngleToRotateBy.transform(transform.getRotation());
-               }
-
-               angularDragPlaneIntersectionPrevious.set(angularDragPlaneIntersection);
+               clockFaceDragAlgorithm.getMotion().transform(transform.getRotation());
             }
          }
       }
