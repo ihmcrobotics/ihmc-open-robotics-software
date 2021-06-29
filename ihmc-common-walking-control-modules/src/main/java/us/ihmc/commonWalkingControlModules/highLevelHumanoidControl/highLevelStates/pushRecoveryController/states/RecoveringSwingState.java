@@ -136,6 +136,8 @@ public class RecoveringSwingState extends PushRecoveryState
 
       comHeightManager.setSupportLeg(swingSide.getOppositeSide());
 
+      pushRecoveryControlModule.setLastSwingSide(swingSide);
+
       nextFootstep.set(pushRecoveryControlModule.getRecoveryStep(0));
       footstepTiming.set(pushRecoveryControlModule.getRecoveryStepTiming(0));
 

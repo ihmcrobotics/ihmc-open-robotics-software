@@ -225,6 +225,8 @@ public class PushRecoveryToolboxController extends ToolboxController
       {
          currentState.set(HighLevelControllerName.fromByte(highLevelStateChangeMessage.getAndSet(null).getEndHighLevelControllerName()));
          LogTools.info("Moved into current state " + currentState.getEnumValue());
+         if (currentState.getEnumValue() != HighLevelControllerName.PUSH_RECOVERY)
+            pushRecoveryControlModule.reset();
       }
 
       RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
@@ -260,6 +262,7 @@ public class PushRecoveryToolboxController extends ToolboxController
          RobotSide side = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
          if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.STARTED)
          {
+            pushRecoveryControlModule.setLastSwingSide(side);
             feetInContact.get(side).set(false);
          }
          else

@@ -30,6 +30,7 @@ public class MultiStepPushRecoveryModule
 
    private final YoBoolean isICPOutside;
    private final YoEnum<RobotSide> swingSideForDoubleSupportRecovery;
+   private final YoEnum<RobotSide> lastSwingSide;
 
    private final SideDependentList<? extends FrameConvexPolygon2DReadOnly> footPolygonsInWorld;
    private final SideDependentList<MultiStepRecoveryStepCalculator> pushRecoveryCalculators = new SideDependentList<>();
@@ -69,6 +70,8 @@ public class MultiStepPushRecoveryModule
 
       swingSideForDoubleSupportRecovery = new YoEnum<>("swingSideForDoubleSupportRecovery", registry, RobotSide.class, true);
       swingSideForDoubleSupportRecovery.set(null);
+      lastSwingSide = new YoEnum<>("lastSwingSide", registry, RobotSide.class, true);
+      lastSwingSide.set(null);
 
       pushRecoveryTransferDuration = new DoubleParameter("pushRecoveryTransferDuration", registry, pushRecoveryControllerParameters.getRecoveryTransferDuration());
       pushRecoveryMinSwingDuration = new DoubleParameter("pushRecoveryMinSwingDuration", registry, pushRecoveryControllerParameters.getMinimumRecoverySwingDuration());
@@ -112,10 +115,16 @@ public class MultiStepPushRecoveryModule
 
    public void reset()
    {
+      isRecoveryImpossible.set(false);
+      lastSwingSide.set(null);
+      clear();
+   }
+
+   private void clear()
+   {
       recoveryFootsteps.clear();
       recoveryTimings.clear();
       constraintRegions.clear();
-      isRecoveryImpossible.set(false);
       if (pushRecoveryCalculatorVisualizer != null)
          pushRecoveryCalculatorVisualizer.reset();
    }
@@ -191,9 +200,14 @@ public class MultiStepPushRecoveryModule
       return isRecoveryImpossible.getValue();
    }
 
+   public void setLastSwingSide(RobotSide lastSwingSide)
+   {
+      this.lastSwingSide.set(lastSwingSide);
+   }
+
    public void updateForDoubleSupport(FramePoint2DReadOnly capturePoint2d, double omega0)
    {
-      reset();
+      clear();
 
       // Initialize variables
       if (pushRecoveryCalculatorVisualizer != null)
@@ -249,7 +263,7 @@ public class MultiStepPushRecoveryModule
 
       for (RobotSide swingSide : RobotSide.values)
       {
-         if (!isInContact.apply(swingSide.getOppositeSide()))
+         if (!isInContact.apply(swingSide.getOppositeSide()) || swingSide == lastSwingSide.getEnumValue())
             continue;
 
          MultiStepRecoveryStepCalculator pushRecoveryCalculator = pushRecoveryCalculators.get(swingSide);
@@ -269,7 +283,7 @@ public class MultiStepPushRecoveryModule
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         if (!isInContact.apply(robotSide))
+         if (!isInContact.apply(robotSide) || (lastSwingSide.getEnumValue() != null && robotSide == lastSwingSide.getEnumValue().getOppositeSide()))
             return robotSide;
       }
 

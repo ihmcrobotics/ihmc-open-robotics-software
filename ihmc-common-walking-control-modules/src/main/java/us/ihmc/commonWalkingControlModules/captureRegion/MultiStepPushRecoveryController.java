@@ -53,6 +53,7 @@ public class MultiStepPushRecoveryController
                                                            defaultSupportPolygon,
                                                            pushRecoveryControllerParameters,
                                                            registry);
+      pushRecoveryModule.attachVisualizer(new SimpleMultiStepPushRecoveryCalculatorVisualizer("", 3, registry, graphicsListRegistry));
 
       pushRecoveryModule.setConstraintRegionProvider(stepConstraintProvider);
 
@@ -122,6 +123,11 @@ public class MultiStepPushRecoveryController
          return externalPushRecoveryStepHandler.getRecoveryStepTiming(stepIndex);
       else
          return pushRecoveryModule.getRecoveryStepTiming(stepIndex);
+   }
+
+   public void setLastSwingSide(RobotSide lastSwingSide)
+   {
+      pushRecoveryModule.setLastSwingSide(lastSwingSide);
    }
 
    public boolean isRecoveryImpossible()
