@@ -1,45 +1,61 @@
 package us.ihmc.gdx.ui.gizmo;
 
 import us.ihmc.euclid.geometry.interfaces.Line3DReadOnly;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.robotics.robotSide.RobotSide;
 
 public class DiscreteArrowRayIntersection
 {
-   private final Cylinder3D arrowBaseCollisionCylinder = new Cylinder3D();
-   private final Point3D firstIntersectionToPack = new Point3D();
-   private final Point3D secondIntersectionToPack = new Point3D();
+   private final DiscreteCylinderRayIntersection cylinderIntersection = new DiscreteCylinderRayIntersection();
+   private final DiscreteConeRayIntersection coneRayIntersection = new DiscreteConeRayIntersection();
+   private final Point3D intersection = new Point3D();
 
    public void setupShapes(double arrowBodyLength,
                            double arrowBodyRadius,
-                           double arrowSpacing,
-                           RobotSide arrowDirection,
+                           double arrowHeadRadius,
+                           double arrowHeadLength,
+                           double zOffset,
                            RigidBodyTransformReadOnly transform)
    {
-      arrowBaseCollisionCylinder.setToZero();
-      arrowBaseCollisionCylinder.setSize(arrowBodyLength, arrowBodyRadius);
-      arrowBaseCollisionCylinder.getPosition().addZ(arrowDirection.negateIfRightSide(0.5 * arrowSpacing + 0.5 * arrowBodyLength));
-      arrowBaseCollisionCylinder.applyTransform(transform);
+      cylinderIntersection.setup(arrowBodyLength, arrowBodyRadius, zOffset, transform);
+      coneRayIntersection.setupCone(arrowHeadRadius, arrowHeadLength, zOffset + Math.signum(zOffset) * 0.5 * arrowBodyLength, transform);
    }
 
-   public double intersect(Line3DReadOnly pickRay, int resolution)
+   public double intersect(Line3DReadOnly pickRay, int resolution, boolean collideArrowHead)
    {
-      // collide arrow body cylinder
-      int numberOfIntersections = EuclidGeometryTools.intersectionBetweenRay3DAndCylinder3D(arrowBaseCollisionCylinder.getLength(),
-                                                                                            arrowBaseCollisionCylinder.getRadius(),
-                                                                                            arrowBaseCollisionCylinder.getPosition(),
-                                                                                            arrowBaseCollisionCylinder.getAxis(),
-                                                                                            pickRay.getPoint(),
-                                                                                            pickRay.getDirection(),
-                                                                                            firstIntersectionToPack,
-                                                                                            secondIntersectionToPack);
-      boolean collidedWithArrowBase = numberOfIntersections == 2;
+      double cylinderDistance = cylinderIntersection.intersect(pickRay);
 
+      if (collideArrowHead)
+      {
+         double coneDistance = coneRayIntersection.intersect(pickRay, resolution);
 
+         if (Double.isNaN(cylinderDistance) && Double.isNaN(coneDistance))
+         {
+            return Double.NaN;
+         }
+         else if (Double.isNaN(cylinderDistance) || coneDistance < cylinderDistance)
+         {
+            intersection.set(coneRayIntersection.getIntersectionPoint());
+            return coneDistance;
+         }
+         else
+         {
+            intersection.set(cylinderIntersection.getClosestIntersection());
+            return cylinderDistance;
+         }
+      }
+      else
+      {
+         if (!Double.isNaN(cylinderDistance))
+         {
+            intersection.set(cylinderIntersection.getClosestIntersection());
+         }
+         return cylinderDistance;
+      }
+   }
 
-      return Double.NaN;
+   public Point3D getIntersection()
+   {
+      return intersection;
    }
 }
