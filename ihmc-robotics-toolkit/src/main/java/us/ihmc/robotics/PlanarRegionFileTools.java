@@ -18,7 +18,9 @@ import org.apache.commons.math3.util.Pair;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -277,12 +279,12 @@ public class PlanarRegionFileTools
       while (true)
       {
          Point3D origin = new Point3D();
-         Vector3D normal = new Vector3D();
+         AxisAngle orientation = new AxisAngle();
          MutableInt regionId = new MutableInt();
          MutableInt concaveHullSize = new MutableInt();
          TIntArrayList convexPolygonsSize = new TIntArrayList();
 
-         String fileName = readHeaderLine(bufferedReader, origin, normal, regionId, concaveHullSize, convexPolygonsSize);
+         String fileName = readHeaderLine(bufferedReader, origin, orientation, regionId, concaveHullSize, convexPolygonsSize);
 
          if (fileName == null)
             break;
@@ -295,7 +297,7 @@ public class PlanarRegionFileTools
                                                               convexPolygonsSize.toArray(),
                                                               regionId.intValue(),
                                                               origin,
-                                                              normal);
+                                                              orientation);
          regionBufferedReader.close();
 
          if (loadedRegion != null)
@@ -334,12 +336,12 @@ public class PlanarRegionFileTools
       while (true)
       {
          Point3D origin = new Point3D();
-         Vector3D normal = new Vector3D();
+         AxisAngle orientation = new AxisAngle();
          MutableInt regionId = new MutableInt();
          MutableInt concaveHullSize = new MutableInt();
          TIntArrayList convexPolygonsSize = new TIntArrayList();
 
-         String regionName = readHeaderLine(headerBufferedReader, origin, normal, regionId, concaveHullSize, convexPolygonsSize);
+         String regionName = readHeaderLine(headerBufferedReader, origin, orientation, regionId, concaveHullSize, convexPolygonsSize);
 
          if (regionName == null)
             break;
@@ -353,7 +355,7 @@ public class PlanarRegionFileTools
                                                               convexPolygonsSize.toArray(),
                                                               regionId.intValue(),
                                                               origin,
-                                                              normal);
+                                                              orientation);
          regionBufferedReader.close();
 
          if (loadedRegion != null)
@@ -389,12 +391,12 @@ public class PlanarRegionFileTools
       while (true)
       {
          Point3D origin = new Point3D();
-         Vector3D normal = new Vector3D();
+         AxisAngle orientation = new AxisAngle();
          MutableInt regionId = new MutableInt();
          MutableInt concaveHullSize = new MutableInt();
          TIntArrayList convexPolygonsSize = new TIntArrayList();
 
-         String fileName = readHeaderLine(headerFile, origin, normal, regionId, concaveHullSize, convexPolygonsSize);
+         String fileName = readHeaderLine(headerFile, origin, orientation, regionId, concaveHullSize, convexPolygonsSize);
 
          if (fileName == null)
             break;
@@ -408,7 +410,7 @@ public class PlanarRegionFileTools
                                                               convexPolygonsSize.toArray(),
                                                               regionId.intValue(),
                                                               origin,
-                                                              normal);
+                                                              orientation);
          regionFile.close();
 
          if (loadedRegion != null)
@@ -434,7 +436,7 @@ public class PlanarRegionFileTools
 
    private static String readHeaderLine(BufferedReader bufferedReader,
                                         Point3D originToPack,
-                                        Vector3D normalToPack,
+                                        AxisAngle orientationToPack,
                                         MutableInt regionIdToPack,
                                         MutableInt concaveHullSizeToPack,
                                         TIntArrayList convexPolygonsSizeToPack) throws IOException
@@ -448,7 +450,7 @@ public class PlanarRegionFileTools
       line = line.replaceAll("regionId: ", "");
       line = line.replaceAll("index: ", "");
       line = line.replaceAll("origin: ", "");
-      line = line.replaceAll("normal: ", "");
+      line = line.replaceAll("orientation: ", "");
       line = line.replaceAll("\\[", "");
       line = line.replaceAll("\\]", "");
       line = line.replaceAll("concave hull size: ", "");
@@ -466,10 +468,11 @@ public class PlanarRegionFileTools
       float zOrigin = Float.parseFloat(values[i++]);
       originToPack.set(xOrigin, yOrigin, zOrigin);
 
-      float xNormal = Float.parseFloat(values[i++]);
-      float yNormal = Float.parseFloat(values[i++]);
-      float zNormal = Float.parseFloat(values[i++]);
-      normalToPack.set(xNormal, yNormal, zNormal);
+      double xOrientation = Double.parseDouble(values[i++]);
+      double yOrientation = Double.parseDouble(values[i++]);
+      double zOrientation = Double.parseDouble(values[i++]);
+      double angleOrientation = Double.parseDouble(values[i++]);
+      orientationToPack.set(xOrientation, yOrientation, zOrientation, angleOrientation);
 
       concaveHullSizeToPack.setValue(Integer.parseInt(values[i++]));
       int numberOfConvexPolygons = Integer.parseInt(values[i++]);
@@ -526,9 +529,9 @@ public class PlanarRegionFileTools
       for (PlanarRegion region : planarRegionData.getPlanarRegionsAsList())
       {
          Point3D origin = new Point3D();
-         Vector3D normal = new Vector3D();
          region.getPointInRegion(origin);
-         region.getNormal(normal);
+         AxisAngle orientation = new AxisAngle();
+         region.getTransformToWorld().getRotation().get(orientation);
 
          int numberOfConvexPolygons = region.getNumberOfConvexPolygons();
 
@@ -544,7 +547,7 @@ public class PlanarRegionFileTools
          fw.write("regionId: " + Integer.toString(regionId));
          fw.write(", index: " + Integer.toString(regionIndex.getValue().intValue()));
          fw.write(", origin: " + origin.getX() + ", " + origin.getY() + ", " + origin.getZ());
-         fw.write(", normal: " + normal.getX() + ", " + normal.getY() + ", " + normal.getZ());
+         fw.write(", orientation: " + orientation.getX() + ", " + orientation.getY() + ", " + orientation.getZ() + ", " + orientation.getAngle());
          fw.write(", concave hull size: " + region.getConcaveHullSize());
          fw.write(", number of convex polygons: " + numberOfConvexPolygons + ", " + Arrays.toString(convexPolygonsSizes));
 
@@ -580,7 +583,7 @@ public class PlanarRegionFileTools
                                                         int[] convexPolygonsSize,
                                                         int regionId,
                                                         Point3D origin,
-                                                        Vector3D normal)
+                                                        AxisAngle orientation)
    {
       if (regionFile == null)
          return null;
@@ -590,7 +593,6 @@ public class PlanarRegionFileTools
          String line = "";
          String cvsSplitBy = ",";
 
-         AxisAngle orientation = EuclidGeometryTools.axisAngleFromZUpToVector3D(normal);
          RigidBodyTransform transformToWorld = new RigidBodyTransform(orientation, origin);
 
          List<Point2D> loadedPoints = new ArrayList<>();
