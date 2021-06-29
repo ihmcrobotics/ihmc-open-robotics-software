@@ -26,12 +26,13 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class RecoveringSwingState extends PushRecoveryState
 {
+   private static final double swingDurationScaleFactor = 0.8;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final int additionalFootstepsToConsider;
    private final Footstep nextFootstep = new Footstep();
    private final FootstepTiming footstepTiming = new FootstepTiming();
-   private double swingTime;
 
    private final Footstep[] footsteps;
    private final FootstepTiming[] footstepTimings;
@@ -53,6 +54,7 @@ public class RecoveringSwingState extends PushRecoveryState
 
    private final YoBoolean hasMinimumTimePassed = new YoBoolean("hasMinimumTimePassed", registry);
    protected final YoDouble minimumReactionTime = new YoDouble("minimumReactionTime", registry);
+   private final YoDouble scaledSwingDuration = new YoDouble("scaledSwingDuration", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
    private final SideDependentList<FootSwitchInterface> footSwitches;
@@ -72,7 +74,7 @@ public class RecoveringSwingState extends PushRecoveryState
                                YoRegistry parentRegistry)
    {
       super(stateEnum, parentRegistry);
-      minimumReactionTime.set(0.15);
+      minimumReactionTime.set(0.35);
 
       this.supportSide = stateEnum.getSupportSide();
       this.pushRecoveryControlModule = pushRecoveryControlModule;
@@ -142,7 +144,7 @@ public class RecoveringSwingState extends PushRecoveryState
       footstepTiming.set(pushRecoveryControlModule.getRecoveryStepTiming(0));
 
       nextFootstep.setTrajectoryType(TrajectoryType.DEFAULT);
-      swingTime = footstepTiming.getSwingTime();
+      scaledSwingDuration.set(swingDurationScaleFactor * footstepTiming.getSwingTime());
 
       failureDetectionControlModule.setNextFootstep(nextFootstep);
 
@@ -169,13 +171,13 @@ public class RecoveringSwingState extends PushRecoveryState
 
       updateHeightManager();
 
-      feetManager.requestSwing(swingSide, nextFootstep, swingTime, null, null);
+      feetManager.requestSwing(swingSide, nextFootstep, scaledSwingDuration.getDoubleValue(), null, null);
 
-      pelvisOrientationManager.initializeSwing(supportSide, swingTime, finalTransferTime, Double.NaN);
+      pelvisOrientationManager.initializeSwing(supportSide, footstepTiming.getSwingTime(), finalTransferTime, Double.NaN);
 
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepStarted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, footstepTiming.getSwingTime());
    }
 
    @Override
@@ -183,7 +185,7 @@ public class RecoveringSwingState extends PushRecoveryState
    {
       actualFootPoseInWorld.setFromReferenceFrame(fullRobotModel.getSoleFrame(swingSide));
 
-      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, swingTime);
+      walkingMessageHandler.reportFootstepCompleted(swingSide, nextFootstep.getFootstepPose(), actualFootPoseInWorld, footstepTiming.getSwingTime());
       walkingMessageHandler.registerCompletedDesiredFootstep(nextFootstep);
 
       feetManager.touchDown(swingSide, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
@@ -196,7 +198,7 @@ public class RecoveringSwingState extends PushRecoveryState
       controllerToolbox.updateContactPointsForUpcomingFootstep(nextFootstep);
       controllerToolbox.updateBipedSupportPolygons();
 
-      pelvisOrientationManager.setTrajectoryTime(swingTime);
+      pelvisOrientationManager.setTrajectoryTime(footstepTiming.getSwingTime());
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
    }

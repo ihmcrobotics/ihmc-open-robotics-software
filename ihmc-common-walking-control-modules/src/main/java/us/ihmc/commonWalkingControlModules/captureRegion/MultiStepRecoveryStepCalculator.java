@@ -24,6 +24,7 @@ import java.util.function.IntFunction;
 
 public class MultiStepRecoveryStepCalculator
 {
+   private static final double initialFootScaleFactor = 0.75;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
@@ -195,6 +196,11 @@ public class MultiStepRecoveryStepCalculator
 
       int depthIdx = 0;
       stancePolygon.setIncludingFrame(footPolygon);
+      stancePolygon.changeFrameAndProjectToXYPlane(stanceFrame);
+      stancePolygon.scale(stancePolygon.getCentroid(), initialFootScaleFactor);
+      stancePolygon.update();
+      stancePolygon.changeFrameAndProjectToXYPlane(worldFrame);
+
 
       int numberOfRecoverySteps = 0;
       isStateCapturable = false;

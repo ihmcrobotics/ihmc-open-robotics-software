@@ -22,12 +22,24 @@ public class AtlasPushRecoveryControllerParameters implements PushRecoveryContro
    }
 
    @Override
+   public int getMaxStepsToGenerateForRecovery()
+   {
+      return 1;
+   }
+
+   @Override
    public double getMinimumRecoverySwingDuration()
    {
       if (target == RobotTarget.SCS)
          return 0.3;
       else
          return 0.6;
+   }
+
+   @Override
+   public double getRecoveryTransferDuration()
+   {
+      return 0.2;
    }
 
    @Override
@@ -39,7 +51,7 @@ public class AtlasPushRecoveryControllerParameters implements PushRecoveryContro
    @Override
    public double getMaxStepLength()
    {
-      return 1.0;
+      return 0.6;
    }
 
    @Override
@@ -58,5 +70,11 @@ public class AtlasPushRecoveryControllerParameters implements PushRecoveryContro
    public double getMaxBackwardsStepLength()
    {
       return 0.6;
+   }
+
+   @Override
+   public double getTransferDurationAfterRecovery()
+   {
+      return 1.5;
    }
 }

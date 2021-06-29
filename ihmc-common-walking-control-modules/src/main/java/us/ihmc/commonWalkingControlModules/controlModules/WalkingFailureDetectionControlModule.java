@@ -63,7 +63,7 @@ public class WalkingFailureDetectionControlModule
       isFallDetectionActivated.set(true);
 
       icpDistanceFromFootPolygonThreshold = new YoDouble("icpDistanceFromFootPolygonThreshold", registry);
-      icpDistanceFromFootPolygonThreshold.set(0.05);
+      icpDistanceFromFootPolygonThreshold.set(0.01);
       icpDistanceFromFootPolygon = new YoDouble("icpDistanceFromFootPolygon", registry);
       isRobotFalling = new YoBoolean("isRobotFalling", registry);
 

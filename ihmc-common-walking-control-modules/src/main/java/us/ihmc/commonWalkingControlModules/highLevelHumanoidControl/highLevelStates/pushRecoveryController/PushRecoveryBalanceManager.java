@@ -285,7 +285,7 @@ public class PushRecoveryBalanceManager
       linearMomentumRateControlModuleInput.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       linearMomentumRateControlModuleInput.setControlHeightWithMomentum(controlHeightWithMomentum);
       linearMomentumRateControlModuleInput.setOmega0(omega0);
-      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(false); // TODO
+      linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(true); // TODO
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(yoDesiredCapturePoint);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(yoDesiredICPVelocity);
       linearMomentumRateControlModuleInput.setPerfectCMP(perfectCMP2d);
