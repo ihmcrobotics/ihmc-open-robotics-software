@@ -165,8 +165,6 @@ public class MultiStepPushRecoveryControlModule
       // Initialize variables
       pushRecoveryCalculatorVisualizer.reset();
       swingSideForDoubleSupportRecovery.set(null);
-      recoveryTimings.clear();
-      recoveryFootsteps.clear();
 
       isICPOutside.set(!bipedSupportPolygons.getSupportPolygonInWorld().isPointInside(capturePoint2d));
 
