@@ -26,6 +26,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
@@ -73,6 +74,7 @@ public class GDXPose3DGizmo implements RenderableProvider
    private SixDoFSelection closestCollisionSelection;
    private static final YawPitchRoll FLIP_180 = new YawPitchRoll(0.0, Math.PI, 0.0);
    private boolean dragging = false;
+   private final LineMouseDragAlgorithm lineDragAlgorithm = new LineMouseDragAlgorithm();
    private final Line3D axisDragLine = new Line3D();
    private final Plane3D axisDragPlane = new Plane3D();
    private final Point3D axisDragLineClosest = new Point3D();
@@ -137,16 +139,13 @@ public class GDXPose3DGizmo implements RenderableProvider
 
          if (closestCollisionSelection.isLinear())
          {
-            axisDragLine.getPoint().set(closestCollision);
-            axisDragPlane.set(axisDragLine.getPoint(), axisDragLine.getDirection());
+            Vector3DReadOnly linearMotion = lineDragAlgorithm.calculate(pickRay,
+                                                                        closestCollision,
+                                                                        axisRotations.get(closestCollisionSelection.toAxis3D()),
+                                                                        transform);
 
-            pickRay.closestPointsWith(axisDragLine, null, axisDragLineClosest);
-            double distanceToMove = axisDragPlane.signedDistance(axisDragLineClosest);
-            axisMoveVector.set(axisDragLine.getDirection());
-            axisMoveVector.scale(distanceToMove);
-
-            transform.getTranslation().add(axisMoveVector);
-            closestCollision.add(axisMoveVector);
+            transform.getTranslation().add(linearMotion);
+            closestCollision.add(linearMotion);
          }
          else if (closestCollisionSelection.isAngular())
          {
