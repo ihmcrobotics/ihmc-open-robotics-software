@@ -246,23 +246,6 @@ public class MultiStepPushRecoveryModule
    private boolean computeRecoveryStepLocations(FramePoint2DReadOnly currentICP, double omega0)
    {
       boolean isStateCapturable = false;
-      for (RobotSide swingSide : RobotSide.values)
-      {
-         if (!isInContact.apply(swingSide.getOppositeSide()))
-            continue;
-
-         MultiStepRecoveryStepCalculator pushRecoveryCalculator = pushRecoveryCalculators.get(swingSide);
-
-         isStateCapturable |= pushRecoveryCalculator.computePreferredRecoverySteps(swingSide,
-                                                                                   pushRecoveryTransferDuration.getValue(),
-                                                                                   pushRecoveryPreferredSwingDuration.getValue(),
-                                                                                   currentICP,
-                                                                                   omega0,
-                                                                                   footPolygonsInWorld.get(swingSide.getOppositeSide()));
-      }
-
-      if (isStateCapturable)
-         return isStateCapturable;
 
       for (RobotSide swingSide : RobotSide.values)
       {

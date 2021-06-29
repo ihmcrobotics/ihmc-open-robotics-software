@@ -1,16 +1,14 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -39,6 +37,7 @@ public class MultiStepRecoveryStepCalculator
 
    private final RecyclingArrayList<FramePoint2DBasics> capturePointsAtTouchdown = new RecyclingArrayList<>(FramePoint2D::new);
    private final RecyclingArrayList<FramePoint2DBasics> recoveryStepLocations = new RecyclingArrayList<>(FramePoint2D::new);
+   private final TDoubleArrayList recoverySwingDurations = new TDoubleArrayList();
 
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> captureRegionsAtTouchdown = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
    private final RecyclingArrayList<FrameConvexPolygon2DBasics> reachableRegions = new RecyclingArrayList<>(FrameConvexPolygon2D::new);
@@ -143,6 +142,8 @@ public class MultiStepRecoveryStepCalculator
                                        double omega0,
                                        FrameConvexPolygon2DReadOnly footPolygon)
    {
+      recoverySwingDurations.reset();
+
       int numberOfRecoverySteps = calculateRecoveryStepLocations(swingSide, nextTransferDuration, candidateSwingTimes, currentICP, omega0, footPolygon);
 
       recoveryFootsteps.clear();
@@ -155,7 +156,7 @@ public class MultiStepRecoveryStepCalculator
          recoveryFootstep.setPose(stepPosition, stancePose.getOrientation());
          recoveryFootstep.setRobotSide(swingSide);
 
-         recoveryFootstepTimings.add().setTimings(swingTimeToSet, nextTransferDuration);
+         recoveryFootstepTimings.add().setTimings(recoverySwingDurations.get(i), nextTransferDuration);
 
          swingSide = swingSide.getOppositeSide();
       }
@@ -182,7 +183,7 @@ public class MultiStepRecoveryStepCalculator
 
    private int calculateRecoveryStepLocations(RobotSide swingSide,
                                               double nextTransferDuration,
-                                              TDoubleArrayList candidateSwingTimes,
+                                              TDoubleArrayList candidateSwingTimeRange,
                                               FramePoint2DReadOnly currentICP,
                                               double omega0,
                                               FrameConvexPolygon2DReadOnly footPolygon)
@@ -190,6 +191,7 @@ public class MultiStepRecoveryStepCalculator
       icpAtStart.set(currentICP);
       stancePose.setToZero(soleZUpFrames.get(swingSide.getOppositeSide()));
       stancePose.changeFrame(worldFrame);
+      stanceFrame.setPoseAndUpdate(stancePose);
 
       int depthIdx = 0;
       stancePolygon.setIncludingFrame(footPolygon);
@@ -211,7 +213,7 @@ public class MultiStepRecoveryStepCalculator
       {
          reachableFootholdsCalculator.calculateReachableRegion(swingSide, stancePose.getPosition(), stancePose.getOrientation(), reachableRegion);
 
-         if (captureRegionCalculator.calculateCaptureRegion(nextTransferDuration, candidateSwingTimes, icpAtStart, omega0, stancePose, stancePolygon))
+         if (captureRegionCalculator.calculateCaptureRegion(nextTransferDuration, candidateSwingTimeRange, icpAtStart, omega0, stancePose, stancePolygon))
          {
             isStateCapturable = true;
             break;
@@ -253,6 +255,9 @@ public class MultiStepRecoveryStepCalculator
                                                                                              pointToThrowAway);
             }
 
+            double swingDuration = computeSwingDuration(nextTransferDuration, candidateSwingTimeRange.get(0), icpAtStart, capturePointAtTouchdown, omega0, stancePolygon);
+            recoverySwingDurations.add(swingDuration);
+
             recoveryStepLocation.set(capturePointAtTouchdown);
             isStateCapturable = true;
             break;
@@ -275,6 +280,9 @@ public class MultiStepRecoveryStepCalculator
             {
                definitelyNotCapturable = true;
             }
+
+            double swingDuration = computeSwingDuration(nextTransferDuration, candidateSwingTimeRange.get(0), icpAtStart, capturePointAtTouchdown, omega0, stancePolygon);
+            recoverySwingDurations.add(swingDuration);
 
             if (definitelyNotCapturable)
                break;
@@ -312,6 +320,34 @@ public class MultiStepRecoveryStepCalculator
                                                         forwardLineAtNominalWidth.getPoint(),
                                                         forwardLineSegmentEnd,
                                                         recoveryStepLocationToPack);
+   }
+
+   private final FrameVector2D icpDynamicsDirection = new FrameVector2D();
+   private final FramePoint2D icpBeforeTransfer = new FramePoint2D();
+   private final FramePoint2D nominalCMP = new FramePoint2D();
+
+   private double computeSwingDuration(double nextTransferDuration,
+                                       double minSwingDuration,
+                                       FramePoint2DReadOnly icpAtStart,
+                                       FramePoint2DReadOnly icpAtEnd,
+                                       double omega0,
+                                       FrameConvexPolygon2DReadOnly stancePolygon)
+   {
+      int lineOfSightStartIndex = stancePolygon.lineOfSightStartIndex(icpAtStart);
+      int lineOfSightEndIndex = stancePolygon.lineOfSightEndIndex(icpAtStart);
+      if (lineOfSightStartIndex == -1 || lineOfSightEndIndex == -1)
+         return minSwingDuration;
+
+      icpDynamicsDirection.sub(icpAtEnd, icpAtStart);
+      EuclidGeometryTools.intersectionBetweenLine2DAndLineSegment2D(icpAtStart,
+                                                                    icpDynamicsDirection,
+                                                                    stancePolygon.getVertex(lineOfSightStartIndex),
+                                                                    stancePolygon.getVertex(lineOfSightEndIndex),
+                                                                    nominalCMP);
+      AchievableCaptureRegionCalculatorWithDelay.computeCapturePointBeforeTransfer(icpAtEnd, nominalCMP, omega0, nextTransferDuration, icpBeforeTransfer);
+      double idealSwingDuration = CapturePointTools.computeTimeToReachCapturePointUsingConstantCMP(omega0, icpBeforeTransfer, icpAtStart, nominalCMP);
+
+      return Math.max(idealSwingDuration, minSwingDuration);
    }
 
    FramePoint2DReadOnly getCapturePointAtTouchdown(int i)
