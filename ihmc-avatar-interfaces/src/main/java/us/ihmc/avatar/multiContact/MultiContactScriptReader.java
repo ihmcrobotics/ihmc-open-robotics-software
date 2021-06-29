@@ -90,7 +90,7 @@ public class MultiContactScriptReader
             double[] gridData = new double[3];
             gridData[0] = gridDataJsonNode.get("spacingXYZ").asDouble();
             gridData[1] = gridDataJsonNode.get("gridSizeYaw").asDouble();
-            gridData[2] = gridDataJsonNode.get("yawSpacing").asDouble();
+            gridData[2] = gridDataJsonNode.get("yawDivisions").asDouble();
             this.gridData = gridData;
          }
 

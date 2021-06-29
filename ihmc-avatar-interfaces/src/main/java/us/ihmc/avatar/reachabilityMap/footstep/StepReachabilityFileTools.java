@@ -107,7 +107,7 @@ public class StepReachabilityFileTools
       {
          KinematicsToolboxSnapshotDescription snapshot = kinematicsSnapshots.get(i);
 
-         // Exporter should do left foot at 0 index then right foot at 1 index. Double check this is the case.
+         // Exports left foot at 0 index then right foot at 1 index
          SixDoFMotionControlAnchorDescription leftFoot = snapshot.getSixDoFAnchors().get(0);
          SixDoFMotionControlAnchorDescription rightFoot = snapshot.getSixDoFAnchors().get(1);
          assert(leftFoot.getRigidBodyName().equals(fullRobotModel.getFoot(RobotSide.LEFT).getName()));
