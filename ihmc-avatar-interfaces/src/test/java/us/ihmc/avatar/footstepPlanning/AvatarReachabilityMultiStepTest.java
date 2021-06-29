@@ -18,6 +18,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -134,9 +135,11 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          generator.addRectangle(0.4, 0.4);
       }
 
+      RigidBodyTransform leftSoleFrame = fullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+
       // this is the ROS message to command footsteps to the robot
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      Point3D previousPose = new Point3D();
+      Point3D previousPose = new Point3D(leftSoleFrame.getTranslationX(), leftSoleFrame.getTranslationY(), leftSoleFrame.getTranslationZ());
 
       for (int i = 0; i < numberOfStepsToTake; i++)
       {
@@ -163,9 +166,16 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
             orientation.setYawPitchRoll(-stepYaw, stepPitch, stepRoll);
          }
 
-         desiredPose.setX(desiredPose.getX() + previousPose.getX());
-         desiredPose.setY(desiredPose.getY() + previousPose.getY());
-         desiredPose.setZ(desiredPose.getZ() + previousPose.getZ());
+//         LogTools.info("desiredPose: " + desiredPose);
+
+         double newX = desiredPose.getX() + previousPose.getX();
+         double newY = desiredPose.getY() + previousPose.getY();
+         double newZ = desiredPose.getZ() + previousPose.getZ();
+         desiredPose.setX(newX);
+         desiredPose.setY(newY);
+         desiredPose.setZ(newZ);
+
+//         LogTools.info("desiredPose: " + desiredPose);
 
          // Create stepping stones at the end of each step
          generator.identity();
@@ -176,6 +186,12 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          // Add to footstep command list
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, step, orientation);
          footstepDataListMessage.getFootstepDataList().add().set(footstepData);
+
+         previousPose.setX(desiredPose.getX());
+         previousPose.setY(desiredPose.getY());
+         previousPose.setZ(desiredPose.getZ());
+
+//         LogTools.info("previousPose: " + previousPose);
       }
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
