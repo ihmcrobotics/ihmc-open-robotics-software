@@ -181,6 +181,24 @@ public abstract class DRCPushRecoveryTest
    }
 
    @Test
+   public void testSidewaysPushWhileStanding() throws SimulationExceededMaximumTimeException
+   {
+      simulationTestingParameters.setKeepSCSUp(true);
+      setupTest(null, true);
+      assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
+
+      // push timing:
+      StateTransitionCondition pushCondition = null;
+      double delay = 0.5;
+
+      // push parameters:
+      Vector3D forceDirection = new Vector3D(0.0, -1.0, 0.0);
+      double magnitude = 400.0;
+      double duration = 0.35;
+      applyPushAndCheckFinalState(pushCondition, delay, forceDirection, magnitude, duration, simulationTime);
+   }
+
+   @Test
    public void testPushWhileStandingRecoveringAfterControllerFailureKickedIn() throws SimulationExceededMaximumTimeException
    {
       setupTest(null, true);
@@ -317,6 +335,7 @@ public abstract class DRCPushRecoveryTest
    @Test
    public void testRecoveryForwardWhileInFlamingoStance() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest(null, true);
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0));
       RobotSide footSide = RobotSide.LEFT;
