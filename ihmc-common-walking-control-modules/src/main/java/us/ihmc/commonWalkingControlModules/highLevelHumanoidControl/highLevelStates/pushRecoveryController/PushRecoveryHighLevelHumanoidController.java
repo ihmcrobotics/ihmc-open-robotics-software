@@ -273,7 +273,7 @@ public class PushRecoveryHighLevelHumanoidController implements JointLoadStatusP
 
          factory.addTransition(transferStateEnum,
                                singleSupportStateEnum,
-                               new ContinuePushRecoveryWithNextStepCondition(transferState, pushRecoveryControlModule));
+                               new ContinuePushRecoveryWithNextStepCondition(transferState, singleSupportStateEnum, pushRecoveryControlModule));
 
          factory.addTransition(transferStateEnum,
                                PushRecoveryStateEnum.TO_STANDING,
