@@ -5,7 +5,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Mesh;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
-import com.badlogic.gdx.graphics.g3d.ModelInstance;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
 import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
@@ -29,7 +28,6 @@ import us.ihmc.gdx.input.ImGui3DViewInput;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.mesh.GDXMeshBuilder;
 import us.ihmc.gdx.mesh.GDXMeshDataInterpreter;
-import us.ihmc.gdx.tools.GDXModelPrimitives;
 import us.ihmc.gdx.tools.GDXTools;
 import us.ihmc.graphicsDescription.MeshDataGenerator;
 import us.ihmc.graphicsDescription.MeshDataHolder;
@@ -57,8 +55,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    private final Material[] normalMaterials = new Material[3];
    private final Material[] highlightedMaterials = new Material[3];
    private final Axis3DRotations axisRotations = new Axis3DRotations();
-   private final ModelInstance[] angularControlModelInstances = new ModelInstance[3];
-   private final ModelInstance[] linearControlModelInstances = new ModelInstance[3];
+   private final DynamicGDXModel[] arrowModels = new DynamicGDXModel[3];
+   private final DynamicGDXModel[] torusModels = new DynamicGDXModel[3];
    private final BoundingSphereIntersection boundingSphereIntersection = new BoundingSphereIntersection();
    private final DiscreteTorusRayIntersection torusIntersection = new DiscreteTorusRayIntersection();
    private final DiscreteArrowRayIntersection arrowIntersection = new DiscreteArrowRayIntersection();
@@ -85,6 +83,29 @@ public class GDXPose3DGizmo implements RenderableProvider
    public void create(FocusBasedGDXCamera camera3D)
    {
       this.camera3D = camera3D;
+
+      for (Axis3D axis : Axis3D.values)
+      {
+         Color color = AXIS_COLORS[axis.ordinal()];
+         normalMaterials[axis.ordinal()] = new Material();
+         normalMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(new Texture(Gdx.files.classpath("palette.png"))));
+         normalMaterials[axis.ordinal()].set(new BlendingAttribute(true, color.a));
+         highlightedMaterials[axis.ordinal()] = new Material();
+         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(new Texture(Gdx.files.classpath("palette.png"))));
+         highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
+         arrowModels[axis.ordinal()] = new DynamicGDXModel();
+         arrowModels[axis.ordinal()].setMesh(meshBuilder ->
+         {
+            // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
+            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
+            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
+            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
+         });
+         torusModels[axis.ordinal()] = new DynamicGDXModel();
+         int resolution = 25;
+         torusModels[axis.ordinal()].setMesh(
+            meshBuilder -> meshBuilder.addArcTorus(0.0, Math.PI * 2.0f, torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), resolution, color));
+      }
 
       recreateGraphics();
    }
@@ -157,8 +178,8 @@ public class GDXPose3DGizmo implements RenderableProvider
          pose.set(transform);
          tempTransform.set(transform);
          tempTransform.appendOrientation(axisRotations.get(axis));
-         GDXTools.toGDX(tempTransform, linearControlModelInstances[axis.ordinal()].transform);
-         GDXTools.toGDX(tempTransform, angularControlModelInstances[axis.ordinal()].transform);
+         GDXTools.toGDX(tempTransform, arrowModels[axis.ordinal()].getOrCreateModelInstance().transform);
+         GDXTools.toGDX(tempTransform, torusModels[axis.ordinal()].getOrCreateModelInstance().transform);
       }
    }
 
@@ -174,7 +195,7 @@ public class GDXPose3DGizmo implements RenderableProvider
          // collide tori
          for (Axis3D axis : Axis3D.values)
          {
-            GDXTools.toEuclid(angularControlModelInstances[axis.ordinal()].transform, tempTransform);
+            GDXTools.toEuclid(torusModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
             torusIntersection.setupTorus(torusRadius.get(), torusTubeRadiusRatio.get() * torusRadius.get(), tempTransform);
             double distance = torusIntersection.intersect(pickRay, 100);
             if (!Double.isNaN(distance) && distance < closestCollisionDistance)
@@ -188,7 +209,7 @@ public class GDXPose3DGizmo implements RenderableProvider
          // collide arrows
          for (Axis3D axis : Axis3D.values)
          {
-            GDXTools.toEuclid(linearControlModelInstances[axis.ordinal()].transform, tempTransform);
+            GDXTools.toEuclid(arrowModels[axis.ordinal()].getOrCreateModelInstance().transform, tempTransform);
 
             for (RobotSide side : RobotSide.values)
             {
@@ -206,29 +227,33 @@ public class GDXPose3DGizmo implements RenderableProvider
          }
       }
 
+      updateMaterialHighlighting();
+   }
+
+   private void updateMaterialHighlighting()
+   {
       // could only do this when selection changed
       for (Axis3D axis : Axis3D.values)
       {
          if (closestCollisionSelection != null && closestCollisionSelection.isAngular() && closestCollisionSelection.toAxis3D() == axis)
          {
-            angularControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[axis.ordinal()]);
+            torusModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
          else
          {
-            angularControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(normalMaterials[axis.ordinal()]);
+            torusModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
 
          if (closestCollisionSelection != null && closestCollisionSelection.isLinear() && closestCollisionSelection.toAxis3D() == axis)
          {
-            linearControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(highlightedMaterials[axis.ordinal()]);
+            arrowModels[axis.ordinal()].setMaterial(highlightedMaterials[axis.ordinal()]);
          }
          else
          {
-            linearControlModelInstances[axis.ordinal()].nodes.get(0).parts.get(0).material.set(normalMaterials[axis.ordinal()]);
+            arrowModels[axis.ordinal()].setMaterial(normalMaterials[axis.ordinal()]);
          }
       }
    }
-
 
    public void renderImGuiTuner()
    {
@@ -273,47 +298,12 @@ public class GDXPose3DGizmo implements RenderableProvider
       arrowHeadLength = arrowHeadBodyLengthRatio.get() * arrowLength;
       arrowSpacing = arrowSpacingFactor.get() * (torusRadius.get() + (torusTubeRadiusRatio.get() * torusRadius.get()));
 
+      updateMaterialHighlighting();
+
       for (Axis3D axis : Axis3D.values)
       {
-         if (linearControlModelInstances[axis.ordinal()] != null)
-            linearControlModelInstances[axis.ordinal()].model.dispose();
-
-         String axisName = axis.name().toLowerCase();
-
-         Color color = AXIS_COLORS[axis.ordinal()];
-         ModelInstance arrow = GDXModelPrimitives.buildModelInstance(meshBuilder ->
-         {
-            // Euclid cylinders are defined from the center, but mesh builder defines them from the bottom
-            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing), color);
-            meshBuilder.addCone(arrowHeadLength, arrowHeadRadius, new Point3D(0.0, 0.0, 0.5 * arrowSpacing + arrowBodyLength), color);
-            meshBuilder.addCylinder(arrowBodyLength, arrowBodyRadius, new Point3D(0.0, 0.0, -0.5 * arrowSpacing), FLIP_180, color);
-         }, axisName);
-         arrow.materials.get(0).set(new BlendingAttribute(true, AXIS_COLORS[axis.ordinal()].a));
-         normalMaterials[axis.ordinal()] = new Material(arrow.materials.get(0));
-         highlightedMaterials[axis.ordinal()] = new Material();
-         Texture paletteTexture = new Texture(Gdx.files.classpath("palette.png"));
-         highlightedMaterials[axis.ordinal()].set(TextureAttribute.createDiffuse(paletteTexture));
-         highlightedMaterials[axis.ordinal()].set(new BlendingAttribute(true, AXIS_SELECTED_COLORS[axis.ordinal()].a));
-         GDXTools.toGDX(axisRotations.get(axis), arrow.transform);
-         linearControlModelInstances[axis.ordinal()] = arrow;
-      }
-      for (Axis3D axis : Axis3D.values)
-      {
-         if (angularControlModelInstances[axis.ordinal()] != null)
-            angularControlModelInstances[axis.ordinal()].model.dispose();
-
-         String axisName = axis.name().toLowerCase();
-
-         int resolution = 25;
-         ModelInstance ring = GDXModelPrimitives.buildModelInstance(meshBuilder -> meshBuilder.addArcTorus(0.0,
-                                                                                                           Math.PI * 2.0f,
-                                                                                                           torusRadius.get(),
-                                                                                                           torusTubeRadiusRatio.get() * torusRadius.get(),
-                                                                                                           resolution,
-                                                                                                           AXIS_COLORS[axis.ordinal()]), axisName);
-         ring.materials.get(0).set(new BlendingAttribute(true, AXIS_COLORS[axis.ordinal()].a));
-         GDXTools.toGDX(axisRotations.get(axis), ring.transform);
-         angularControlModelInstances[axis.ordinal()] = ring;
+         arrowModels[axis.ordinal()].invalidateMesh();
+         torusModels[axis.ordinal()].invalidateMesh();
       }
    }
 
@@ -322,8 +312,8 @@ public class GDXPose3DGizmo implements RenderableProvider
    {
       for (Axis3D axis : Axis3D.values)
       {
-         linearControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
-         angularControlModelInstances[axis.ordinal()].getRenderables(renderables, pool);
+         arrowModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
+         torusModels[axis.ordinal()].getOrCreateModelInstance().getRenderables(renderables, pool);
       }
    }
 
