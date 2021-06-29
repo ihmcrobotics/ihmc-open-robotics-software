@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.captureRegion;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import us.ihmc.commonWalkingControlModules.capturePoint.CapturePointTools;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.pushRecoveryController.PushRecoveryControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -19,6 +20,12 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 public class MultiStepPushRecoveryCalculator
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final boolean useCentroidOfIntersectingRegionAsCapturePointAfterTransfer = false;
+   private boolean useCentroidAsCapturePoint = false;
+   private final FramePoint2D tmpCapturePointForTime = new FramePoint2D();
+   private final FramePoint2DBasics cmpToCentroidOfIntersectionRegion = new FramePoint2D();
+   private final FramePoint2DBasics cmpToCentroidOfIntersectionRegionSecond = new FramePoint2D();
+   private final FrameVector2D intersectionRegionCentroidToICPRay = new FrameVector2D();
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
@@ -103,6 +110,7 @@ public class MultiStepPushRecoveryCalculator
    {
       candidateSwingTimes.reset();
       candidateSwingTimes.add(swingTimeRemaining);
+      useCentroidAsCapturePoint = false;
 
       return computeRecoverySteps(swingSide, nextTransferDuration, swingTimeRemaining, candidateSwingTimes,
          currentICP, omega0, footPolygon);
@@ -119,6 +127,7 @@ public class MultiStepPushRecoveryCalculator
       candidateSwingTimes.reset();
       candidateSwingTimes.add(minSwingTimeRemaining);
       candidateSwingTimes.add(maxSwingTimeRemaining);
+      useCentroidAsCapturePoint = false;
 
       return computeRecoverySteps(swingSide, nextTransferDuration, minSwingTimeRemaining, candidateSwingTimes,
                                   currentICP, omega0, footPolygon);
@@ -149,7 +158,16 @@ public class MultiStepPushRecoveryCalculator
          recoveryFootstep.setPose(stepPosition, stancePose.getOrientation());
          recoveryFootstep.setRobotSide(swingSide);
 
-         recoveryFootstepTimings.add().setTimings(swingTimeToSet, nextTransferDuration);
+         if(useCentroidAsCapturePoint)
+         {
+            double swingTimeToCentroid = CapturePointTools.computeTimeToReachCapturePointUsingConstantCMP(
+                    omega0, tmpCapturePointForTime, currentICP, cmpToCentroidOfIntersectionRegion);
+            recoveryFootstepTimings.add().setTimings(swingTimeToCentroid, nextTransferDuration);
+         }
+         else
+         {
+            recoveryFootstepTimings.add().setTimings(swingTimeToSet, nextTransferDuration);
+         }
 
          swingSide = swingSide.getOppositeSide();
       }
@@ -247,13 +265,34 @@ public class MultiStepPushRecoveryCalculator
 
             if (!intersectingRegion.isPointInside(capturePointAtTouchdown))
             {
-               EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(stancePosition,
-                                                                                             centerOfIntersection,
-                                                                                             intersectingRegion.getPolygonVerticesView(),
-                                                                                             intersectingRegion.getNumberOfVertices(),
-                                                                                             true,
-                                                                                             capturePointAtTouchdown,
-                                                                                             pointToThrowAway);
+               if(useCentroidOfIntersectingRegionAsCapturePointAfterTransfer)
+               {
+                  intersectionRegionCentroidToICPRay.setToZero(worldFrame);
+                  intersectionRegionCentroidToICPRay.add(currentICP);
+                  intersectionRegionCentroidToICPRay.sub(centerOfIntersection);
+                  EuclidGeometryPolygonTools.intersectionBetweenRay2DAndConvexPolygon2D(centerOfIntersection,
+                          intersectionRegionCentroidToICPRay,
+                          footPolygon.getPolygonVerticesView(),
+                          footPolygon.getNumberOfVertices(),
+                          true,
+                          cmpToCentroidOfIntersectionRegion,
+                          cmpToCentroidOfIntersectionRegionSecond);
+                  AchievableCaptureRegionCalculatorWithDelay.computeCapturePointBeforeTransfer(
+                          centerOfIntersection, cmpToCentroidOfIntersectionRegion, omega0,
+                          nextTransferDuration, tmpCapturePointForTime);
+                  capturePointAtTouchdown.set(centerOfIntersection);
+                  useCentroidAsCapturePoint = true;
+               }
+               else
+               {
+                  EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(stancePosition,
+                          centerOfIntersection,
+                          intersectingRegion.getPolygonVerticesView(),
+                          intersectingRegion.getNumberOfVertices(),
+                          true,
+                          capturePointAtTouchdown,
+                          pointToThrowAway);
+               }
             }
 
             recoveryStepLocation.set(capturePointAtTouchdown);
