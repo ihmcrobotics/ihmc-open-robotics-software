@@ -7,11 +7,11 @@ import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiPanel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
-import us.ihmc.gdx.ui.gizmo.GDXPositionAndYaw3DGizmo;
+import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 
 public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderableProvider
 {
-   private final GDXPositionAndYaw3DGizmo goalGizmo = new GDXPositionAndYaw3DGizmo(getClass().getSimpleName());
+   private final GDXFootstepPlannerGoalGizmo goalGizmo = new GDXFootstepPlannerGoalGizmo(getClass().getSimpleName());
 
    public GDXFootstepPlannerPanel()
    {
