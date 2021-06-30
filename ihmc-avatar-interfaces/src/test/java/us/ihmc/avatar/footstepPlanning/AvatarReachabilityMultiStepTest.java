@@ -16,19 +16,15 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.partNames.HumanoidJointNameMap;
@@ -54,9 +50,9 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
    private static final int numberOfStepsToTake = 5;
    private static final double solutionQualityThreshold = 2.2;
    private static final double initialStanceTime = 1.0;
-   private static final double stepTime = 10.0;
+   private static final double stepTime = 15;
    private static final double finalStanceTime = 2.0;
-   private static final Random random = new Random(3920);
+   private static final Random random = new Random(1033);
 
    @BeforeEach
    public void setup()
@@ -117,6 +113,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          throws BlockingSimulationRunner.SimulationExceededMaximumTimeException
    {
       int startIndex = random.nextInt(feasibleSolutions.size());
+      LogTools.info("startIndex: " + startIndex);
       KinematicsToolboxSnapshotDescription frameToStart = feasibleSolutions.get(startIndex);
       Vector3D rootPosition = frameToStart.getIkSolution().getDesiredRootTranslation();
       Quaternion rootOrientation = frameToStart.getIkSolution().getDesiredRootOrientation();
@@ -135,11 +132,12 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          generator.addRectangle(0.4, 0.4);
       }
 
-      RigidBodyTransform leftSoleFrame = fullRobotModel.getSoleFrame(RobotSide.LEFT).getTransformToWorldFrame();
+      // Should be in reference to right foot frame (at origin)? Check this
+      RigidBodyTransform rightSoleFrame = fullRobotModel.getSoleFrame(RobotSide.RIGHT).getTransformToWorldFrame();
 
       // this is the ROS message to command footsteps to the robot
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      Point3D previousPose = new Point3D(leftSoleFrame.getTranslationX(), leftSoleFrame.getTranslationY(), leftSoleFrame.getTranslationZ());
+      Point3D previousPose = new Point3D(rightSoleFrame.getTranslationX(), rightSoleFrame.getTranslationY(), rightSoleFrame.getTranslationZ());
 
       for (int i = 0; i < numberOfStepsToTake; i++)
       {
@@ -165,17 +163,12 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
             double stepRoll = orientation.getRoll();
             orientation.setYawPitchRoll(-stepYaw, stepPitch, stepRoll);
          }
-
-//         LogTools.info("desiredPose: " + desiredPose);
-
          double newX = desiredPose.getX() + previousPose.getX();
          double newY = desiredPose.getY() + previousPose.getY();
          double newZ = desiredPose.getZ() + previousPose.getZ();
          desiredPose.setX(newX);
          desiredPose.setY(newY);
          desiredPose.setZ(newZ);
-
-//         LogTools.info("desiredPose: " + desiredPose);
 
          // Create stepping stones at the end of each step
          generator.identity();
@@ -190,8 +183,6 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
          previousPose.setX(desiredPose.getX());
          previousPose.setY(desiredPose.getY());
          previousPose.setZ(desiredPose.getZ());
-
-//         LogTools.info("previousPose: " + previousPose);
       }
 
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
