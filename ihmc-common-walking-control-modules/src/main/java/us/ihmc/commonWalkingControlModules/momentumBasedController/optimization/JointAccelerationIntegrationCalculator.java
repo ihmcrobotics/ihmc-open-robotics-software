@@ -19,7 +19,8 @@ public class JointAccelerationIntegrationCalculator
    public static final double DEFAULT_POSITION_BREAK_FREQUENCY = 0.016;
    public static final double DEFAULT_VELOCITY_BREAK_FREQUENCY = 2.04;
    public static final double DEFAULT_MAX_POSITION_ERROR = 0.2;
-   public static final double DEFAULT_MAX_VELOCITY = 2.0;
+   public static final double DEFAULT_MAX_VELOCITY_ERROR = 2.0;
+   public static final double DEFAULT_VELOCITY_REFERENCE_ALPHA = 0.0;
 
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -27,12 +28,14 @@ public class JointAccelerationIntegrationCalculator
    private final TDoubleArrayList jointSpecificPositionBreakFrequency = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificVelocityBreakFrequency = new TDoubleArrayList();
    private final TDoubleArrayList jointSpecificMaxPositionError = new TDoubleArrayList();
-   private final TDoubleArrayList jointSpecificMaxVelocity = new TDoubleArrayList();
+   private final TDoubleArrayList jointSpecificMaxVelocityError = new TDoubleArrayList();
+   private final TDoubleArrayList jointSpecificVelocityReferenceAlpha = new TDoubleArrayList();
 
    private final YoDouble defaultPositionBreakFrequency = new YoDouble("defaultPositionBreakFrequencyIntegration", registry);
    private final YoDouble defaultVelocityBreakFrequency = new YoDouble("defaultVelocityBreakFrequencyIntegration", registry);
    private final YoDouble defaultIntegrationMaxVelocity = new YoDouble("defaultIntegrationMaxVelocity", registry);
    private final YoDouble defaultIntegrationMaxPositionError = new YoDouble("defaultIntegrationMaxPositionError", registry);
+   private final YoDouble defaultVelocityReferenceAlpha = new YoDouble("defaultVelocityReferenceAlpha", registry);
 
    private final double controlDT;
 
@@ -42,7 +45,8 @@ public class JointAccelerationIntegrationCalculator
       defaultPositionBreakFrequency.set(DEFAULT_POSITION_BREAK_FREQUENCY);
       defaultVelocityBreakFrequency.set(DEFAULT_VELOCITY_BREAK_FREQUENCY);
       defaultIntegrationMaxPositionError.set(DEFAULT_MAX_POSITION_ERROR);
-      defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY);
+      defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY_ERROR);
+      defaultVelocityReferenceAlpha.set(DEFAULT_VELOCITY_REFERENCE_ALPHA);
 
       parentRegistry.addChild(registry);
    }
@@ -67,9 +71,13 @@ public class JointAccelerationIntegrationCalculator
          if (Double.isNaN(newMaxPositionError) || newMaxPositionError < 0.0)
             newMaxPositionError = defaultIntegrationMaxPositionError.getDoubleValue();
 
-         double newMaxVelocity = jointParameters.getMaxVelocity();
-         if (Double.isNaN(newMaxVelocity) || newMaxVelocity < 0.0)
-            newMaxVelocity = defaultIntegrationMaxVelocity.getDoubleValue();
+         double newMaxVelocityError = jointParameters.getMaxVelocityError();
+         if (Double.isNaN(newMaxVelocityError) || newMaxVelocityError < 0.0)
+            newMaxVelocityError = defaultIntegrationMaxVelocity.getDoubleValue();
+
+         double newVelocityReferenceAlpha = jointParameters.getVelocityReferenceAlpha();
+         if (Double.isNaN(newVelocityReferenceAlpha) || newVelocityReferenceAlpha < 0.0)
+            newVelocityReferenceAlpha = defaultVelocityReferenceAlpha.getDoubleValue();
 
          if (localJointIndex < 0)
          {
@@ -77,14 +85,16 @@ public class JointAccelerationIntegrationCalculator
             jointSpecificPositionBreakFrequency.add(newPositionBreakFrequency);
             jointSpecificVelocityBreakFrequency.add(newVelocityBreakFrequency);
             jointSpecificMaxPositionError.add(newMaxPositionError);
-            jointSpecificMaxVelocity.add(newMaxVelocity);
+            jointSpecificMaxVelocityError.add(newMaxVelocityError);
+            jointSpecificVelocityReferenceAlpha.add(newVelocityReferenceAlpha);
          }
          else
          {
             jointSpecificPositionBreakFrequency.set(localJointIndex, newPositionBreakFrequency);
             jointSpecificVelocityBreakFrequency.set(localJointIndex, newVelocityBreakFrequency);
             jointSpecificMaxPositionError.set(localJointIndex, newMaxPositionError);
-            jointSpecificMaxVelocity.set(localJointIndex, newMaxVelocity);
+            jointSpecificMaxVelocityError.set(localJointIndex, newMaxVelocityError);
+            jointSpecificVelocityReferenceAlpha.set(localJointIndex, newVelocityReferenceAlpha);
          }
       }
    }
@@ -97,31 +107,33 @@ public class JointAccelerationIntegrationCalculator
 
          JointDesiredOutputBasics lowLevelJointData = lowLevelJointDataHolderToUpdate.getJointDesiredOutput(joint);
          if (lowLevelJointData == null || !lowLevelJointData.hasDesiredAcceleration())
-        	 continue;
+            continue;
+
+         double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificPositionBreakFrequency.get(jointIndex), controlDT);
+         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificVelocityBreakFrequency.get(jointIndex), controlDT);
+         double maxPositionError = jointSpecificMaxPositionError.get(jointIndex);
+         double maxVelocityError = jointSpecificMaxVelocityError.get(jointIndex);
+         double velocityReferenceAlpha = jointSpecificVelocityReferenceAlpha.get(jointIndex);
+
+         double velocityReference = velocityReferenceAlpha * joint.getQd();
+         double positionReference = joint.getQ();
 
          boolean resetIntegrators = lowLevelJointData.pollResetIntegratorsRequest();
          if (!lowLevelJointData.hasDesiredVelocity() || resetIntegrators)
-            lowLevelJointData.setDesiredVelocity(joint.getQd());
+            lowLevelJointData.setDesiredVelocity(velocityReference);
          if (!lowLevelJointData.hasDesiredPosition() || resetIntegrators)
-            lowLevelJointData.setDesiredPosition(joint.getQ());
+            lowLevelJointData.setDesiredPosition(positionReference);
 
          double desiredAcceleration = lowLevelJointData.getDesiredAcceleration();
          double desiredVelocity = lowLevelJointData.getDesiredVelocity();
          double desiredPosition = lowLevelJointData.getDesiredPosition();
 
-         double alphaPosition = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificPositionBreakFrequency.get(jointIndex), controlDT);
-         double alphaVelocity = AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(jointSpecificVelocityBreakFrequency.get(jointIndex), controlDT);
-         double maxPositionError = jointSpecificMaxPositionError.get(jointIndex);
-         double maxVelocity = jointSpecificMaxVelocity.get(jointIndex);
-
          // Decay desiredVelocity towards the velocityReference and then predict the desired velocity.
-         double velocityReference = joint.getQd(); // TODO Don't merge to develop as is
          desiredVelocity = desiredVelocity * alphaVelocity + (1.0 - alphaVelocity) * velocityReference;
          desiredVelocity += desiredAcceleration * controlDT;
-         desiredVelocity = MathTools.clamp(desiredVelocity, velocityReference - maxVelocity, velocityReference + maxVelocity);
+         desiredVelocity = MathTools.clamp(desiredVelocity, velocityReference - maxVelocityError, velocityReference + maxVelocityError);
 
          // Decay desiredPosition towards the positionReference and then predict the desired position.
-         double positionReference = joint.getQ();
          desiredPosition = desiredPosition * alphaPosition + (1.0 - alphaPosition) * positionReference;
          desiredPosition += desiredVelocity * controlDT;
          desiredPosition = MathTools.clamp(desiredPosition, positionReference - maxPositionError, positionReference + maxPositionError);
@@ -130,7 +142,7 @@ public class JointAccelerationIntegrationCalculator
          desiredPosition = MathTools.clamp(desiredPosition, joint.getJointLimitLower(), joint.getJointLimitUpper());
 
          // June 20, 2018: Removed this as is seems to cause instability.
-//         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
+         //         desiredVelocity = (desiredPosition - lowLevelJointData.getDesiredPosition()) / controlDT;
 
          lowLevelJointData.setDesiredVelocity(desiredVelocity);
          lowLevelJointData.setDesiredPosition(desiredPosition);

@@ -88,10 +88,11 @@ public interface JointAccelerationIntegrationParametersReadOnly
     */
    double getMaxPositionError();
 
+   // TODO Update doc
    /**
     * This is a safety parameter that is relevant to the tuning process for a joint. The default
     * value used by the calculator should be adequate in most situations: {@code maxVelocity} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY}.
+    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY_ERROR}.
     * <p>
     * The maximum velocity parameter is used to saturate the value of the desired velocity computed.
     * It can be increased once the acceleration integration is proven to be working properly on a
@@ -100,5 +101,22 @@ public interface JointAccelerationIntegrationParametersReadOnly
     *
     * @return maxVelocity limits the maximum value of the desired joint velocity.
     */
-   double getMaxVelocity();
+   double getMaxVelocityError();
+
+   /**
+    * Factor used for computing the reference velocity towards which the integrator will bleed the
+    * desired velocity.
+    * <p>
+    * The value should be in [0, 1]. A value of 0 indicates that the reference velocity should be zero
+    * while a value of 1 indicates that the reference velocity should be the measured joint velocity.
+    * </p>
+    * <p>
+    * A lower value for this parameter will increase stability as the computed desired velocity will
+    * contain less noise. However, a low value also makes it harder for the desired velocity to reach
+    * high values.
+    * </p>
+    * 
+    * @return
+    */
+   double getVelocityReferenceAlpha();
 }

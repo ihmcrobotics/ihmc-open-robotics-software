@@ -439,7 +439,7 @@ public class CrossRobotCommandRandomTools
       next.setPositionBreakFrequency(random.nextDouble());
       next.setVelocityBreakFrequency(random.nextDouble());
       next.setMaxPositionError(random.nextDouble());
-      next.setMaxVelocity(random.nextDouble());
+      next.setMaxVelocityError(random.nextDouble());
       return next;
    }
 

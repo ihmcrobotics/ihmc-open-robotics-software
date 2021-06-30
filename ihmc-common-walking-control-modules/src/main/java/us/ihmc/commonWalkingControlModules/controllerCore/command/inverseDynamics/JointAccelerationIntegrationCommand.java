@@ -119,7 +119,7 @@ public class JointAccelerationIntegrationCommand
     * <p>
     * The maximum velocity parameter is used to saturate the value of the desired velocity computed.
     * If not specified otherwise, {@code maxVelocity} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY}. It can be increased once
+    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY_ERROR}. It can be increased once
     * the acceleration integration is proven to be working properly on a specific robot to allow the
     * joint to reach higher velocities.
     * </p>
