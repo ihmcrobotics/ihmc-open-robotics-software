@@ -27,6 +27,8 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    private final Point3D cameraPosition = new Point3D();
    private double lastDistanceToCamera = -1.0;
 
+   private DynamicGDXModel discModel;
+
    public GDXFootstepPlannerGoalGizmo(String name)
    {
       imGuiWindowName = ImGuiTools.uniqueLabel("3D Widget (" + name + ")");
@@ -35,6 +37,12 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
    public void create(FocusBasedGDXCamera camera3D)
    {
       this.camera3D = camera3D;
+
+      discModel = new DynamicGDXModel();
+      discModel.setMesh(meshBuilder ->
+                        {
+
+                        });
 
       recreateGraphics();
    }
