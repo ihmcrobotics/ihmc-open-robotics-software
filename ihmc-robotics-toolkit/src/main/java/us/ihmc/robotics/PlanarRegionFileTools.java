@@ -474,8 +474,15 @@ public class PlanarRegionFileTools
       double xOrientation = Double.parseDouble(values[i++]);
       double yOrientation = Double.parseDouble(values[i++]);
       double zOrientation = Double.parseDouble(values[i++]);
-      double angleOrientation = version2 ? Double.parseDouble(values[i++]) : 0.0;
-      orientationToPack.set(xOrientation, yOrientation, zOrientation, angleOrientation);
+      if (version2)
+      {
+         double angleOrientation = Double.parseDouble(values[i++]);
+         orientationToPack.set(xOrientation, yOrientation, zOrientation, angleOrientation);
+      }
+      else
+      {
+         orientationToPack.set(EuclidGeometryTools.axisAngleFromZUpToVector3D(new Vector3D(xOrientation, yOrientation, zOrientation)));
+      }
 
       concaveHullSizeToPack.setValue(Integer.parseInt(values[i++]));
       int numberOfConvexPolygons = Integer.parseInt(values[i++]);
