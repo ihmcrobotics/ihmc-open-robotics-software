@@ -264,7 +264,7 @@ public class PelvisLinearStateUpdater
 
       //      requestStopEstimationOfPelvisLinearState.set(true);
 
-      linearVelocityKp.set(0.0025); // Tested with 0.001 and looked fine at first glance.
+      linearVelocityKp.set(0.0075); // Tested with 0.001 and looked fine at first glance.
       linearVelocityKi.set(1.0e-4);
       positionKp.set(0.01);
       positionKi.set(1.0e-4);
@@ -458,6 +458,7 @@ public class PelvisLinearStateUpdater
          if (imuBasedLinearStateCalculator.isEstimationEnabled())
          {
             computeLinearStateFromMergingMeasurements();
+            kinematicsBasedLinearStateCalculator.correctTrustedLegJointStates(listOfTrustedFeet, yoRootJointPosition, yoRootJointVelocity);
          }
          else
          {
