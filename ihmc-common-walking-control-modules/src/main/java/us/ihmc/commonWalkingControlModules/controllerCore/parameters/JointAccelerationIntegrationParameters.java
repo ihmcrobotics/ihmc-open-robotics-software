@@ -8,7 +8,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    private double positionBreakFrequency;
    private double velocityBreakFrequency;
    private double maxPositionError;
-   private double maxVelocity;
+   private double maxVelocityError;
+   private double velocityReferenceAlpha;
 
    /**
     * Creates a new sets of parameters for acceleration integration.
@@ -42,6 +43,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    {
       positionBreakFrequency = Double.NaN;
       velocityBreakFrequency = Double.NaN;
+      velocityReferenceAlpha = 0.0;
    }
 
    /**
@@ -51,7 +53,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    public void resetMaxima()
    {
       maxPositionError = Double.NaN;
-      maxVelocity = Double.NaN;
+      maxVelocityError = Double.NaN;
    }
 
    /**
@@ -75,7 +77,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
       positionBreakFrequency = other.getPositionBreakFrequency();
       velocityBreakFrequency = other.getVelocityBreakFrequency();
       maxPositionError = other.getMaxPositionError();
-      maxVelocity = other.getMaxVelocity();
+      maxVelocityError = other.getMaxVelocityError();
    }
 
    /**
@@ -105,7 +107,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     * <p>
     * The maximum velocity parameter is used to saturate the value of the desired velocity computed. If
     * not specified otherwise, {@code maxVelocity} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY}. It can be increased once the
+    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY_ERROR}. It can be increased once the
     * acceleration integration is proven to be working properly on a specific robot to allow the joint
     * to reach higher velocities.
     * </p>
@@ -118,13 +120,13 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     * </p>
     *
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
-    *           position.
-    * @param maxVelocity limits the maximum value of the desired joint velocity.
+    *                         position.
+    * @param maxVelocityError limits the maximum value of the desired joint velocity.
     */
-   public void setMaxima(double maxPositionError, double maxVelocity)
+   public void setMaxima(double maxPositionError, double maxVelocityError)
    {
       this.maxPositionError = maxPositionError;
-      this.maxVelocity = maxVelocity;
+      this.maxVelocityError = maxVelocityError;
    }
 
    /**
@@ -154,9 +156,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     * the integrated desired.
     * 
     * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
-    *
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
-    *           position.
+    *                         position.
     */
    public void setMaxPositionError(double maxPositionError)
    {
@@ -167,12 +168,22 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     * Sets the safety parameter that limits the integrated velocity.
     * 
     * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
-    *
-    * @param maxVelocity limits the maximum value of the desired joint velocity.
+    * @param maxVelocityError limits the maximum value of the desired joint velocity.
     */
-   public void setMaxVelocity(double maxVelocity)
+   public void setMaxVelocityError(double maxVelocityError)
    {
-      this.maxVelocity = maxVelocity;
+      this.maxVelocityError = maxVelocityError;
+   }
+
+   /**
+    * For the usage of this parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityReferenceAlpha()}
+    *
+    * @param velocityBreakFrequency the break frequency used to compute the desired velocity.
+    */
+   public void setVelocityReferenceAlpha(double velocityReferenceAlpha)
+   {
+      this.velocityReferenceAlpha = velocityReferenceAlpha;
    }
 
    /** {@inheritDoc} */
@@ -198,9 +209,15 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
 
    /** {@inheritDoc} */
    @Override
-   public double getMaxVelocity()
+   public double getMaxVelocityError()
    {
-      return maxVelocity;
+      return maxVelocityError;
+   }
+
+   @Override
+   public double getVelocityReferenceAlpha()
+   {
+      return velocityReferenceAlpha;
    }
 
    @Override
@@ -219,7 +236,9 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
             return false;
          if (maxPositionError != other.getMaxPositionError())
             return false;
-         if (maxVelocity != other.getMaxVelocity())
+         if (maxVelocityError != other.getMaxVelocityError())
+            return false;
+         if (velocityReferenceAlpha != other.getVelocityReferenceAlpha())
             return false;
          return true;
       }
@@ -233,6 +252,6 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    public String toString()
    {
       return getClass().getSimpleName() + ": position break frequency: " + positionBreakFrequency + ", velocity break frequency: " + velocityBreakFrequency
-            + ", max position error: " + maxPositionError + ", max velocity: " + maxVelocity;
+            + ", max position error: " + maxPositionError + ", maxVelocityError: " + maxVelocityError + ", velocityReferenceAlpha: " + velocityReferenceAlpha;
    }
 }
