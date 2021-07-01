@@ -214,9 +214,9 @@ public class GDXMultiColorMeshBuilder
 
    public static MeshDataHolder HollowCylinder(float outerRadius, float innerRadius, float height, int N)
    {
-      Point3D32 points[] = new Point3D32[4 * N + 2];
-      Vector3D32 normals[] = new Vector3D32[4 * N + 2];
-      TexCoord2f textPoints[] = new TexCoord2f[4 * N + 2];
+      Point3D32[] points = new Point3D32[8 * N];
+      Vector3D32[] normals = new Vector3D32[8 * N];
+      TexCoord2f[] textPoints = new TexCoord2f[8 * N];
 
       for (int i = 0; i < N; i++)
       {
@@ -268,35 +268,28 @@ public class GDXMultiColorMeshBuilder
          normals[i + 5 * N] = new Vector3D32(0.0f, 0.0f, 1.0f);
          textPoints[i + 5 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
 
-         // Outer vertices
+         // Inner vertices
          // Bottom
          points[i + 6 * N] = new Point3D32(vertexX, vertexY, 0.0f);
-         normals[i + 6 * N] = new Vector3D32(cosAngle, sinAngle, 0.0f);
+         normals[i + 6 * N] = new Vector3D32(-cosAngle, -sinAngle, 0.0f);
          textPoints[i + 6 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
 
          // Top
          points[i + 7 * N] = new Point3D32(vertexX, vertexY, height);
-         normals[i + 7 * N] = new Vector3D32(cosAngle, sinAngle, 0.0f);
+         normals[i + 7 * N] = new Vector3D32(-cosAngle, -sinAngle, 0.0f);
          textPoints[i + 7 * N] = new TexCoord2f(0.5f * cosAngle + 0.5f, 0.5f * sinAngle + 0.5f);
       }
-
-//      // Center of bottom cap
-//      points[4 * N] = new Point3D32(0.0f, 0.0f, 0.0f);
-//      normals[4 * N] = new Vector3D32(0.0f, 0.0f, -1.0f);
-//      textPoints[4 * N] = new TexCoord2f(0.5f, 0.5f);
-//      // Center of top cap
-//      points[4 * N + 1] = new Point3D32(0.0f, 0.0f, height);
-//      normals[4 * N + 1] = new Vector3D32(0.0f, 0.0f, 1.0f);
-//      textPoints[4 * N + 1] = new TexCoord2f(0.5f, 0.5f);
 
       int numberOfTriangles = 4 * N;
       int[] triangleIndices = new int[6 * numberOfTriangles];
 
       int index = 0;
 
+      // counter clockwise winding order
       for (int i = 0; i < N; i++)
       { // The bottom cap
          triangleIndices[index++] = i;
+         triangleIndices[index++] = i + 4 * N;
          triangleIndices[index++] = (i + 1) % N;
          triangleIndices[index++] = i + 4 * N;
          triangleIndices[index++] = (i + 1) % N + 4 * N;
@@ -308,12 +301,13 @@ public class GDXMultiColorMeshBuilder
          triangleIndices[index++] = i + N;
          triangleIndices[index++] = (i + 1) % N + N;
          triangleIndices[index++] = i + 5 * N;
-         triangleIndices[index++] = (i + 1) % N + 5 * N;
+         triangleIndices[index++] = i + 5 * N;
          triangleIndices[index++] = (i + 1) % N + N;
+         triangleIndices[index++] = (i + 1) % N + 5 * N;
       }
 
       for (int i = 0; i < N; i++)
-      { // The cylinder part
+      { // The outer cylinder part
          // Lower triangle
          triangleIndices[index++] = i + 2 * N;
          triangleIndices[index++] = (i + 1) % N + 2 * N;
@@ -322,6 +316,18 @@ public class GDXMultiColorMeshBuilder
          triangleIndices[index++] = (i + 1) % N + 2 * N;
          triangleIndices[index++] = (i + 1) % N + 3 * N;
          triangleIndices[index++] = i + 3 * N;
+      }
+
+      for (int i = 0; i < N; i++)
+      { // The inner cylinder part
+         // Lower triangle
+         triangleIndices[index++] = i + 6 * N;
+         triangleIndices[index++] = i + 7 * N;
+         triangleIndices[index++] = (i + 1) % N + 6 * N;
+         // Upper triangle
+         triangleIndices[index++] = (i + 1) % N + 6 * N;
+         triangleIndices[index++] = i + 7 * N;
+         triangleIndices[index++] = (i + 1) % N + 7 * N;
       }
 
       return new MeshDataHolder(points, textPoints, triangleIndices, normals);
