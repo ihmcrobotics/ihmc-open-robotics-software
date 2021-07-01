@@ -47,7 +47,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    }
 
    /**
-    * Resets the values for {@code maxPositionError} and {@code maxVelocity} to {@link Double#NaN}
+    * Resets the values for {@code maxPositionError} and {@code maxVelocityError} to {@link Double#NaN}
     * notifying the {@link JointAccelerationIntegrationCalculator} to use its default values.
     */
    public void resetMaxima()
@@ -98,30 +98,19 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    }
 
    /**
-    * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values for the
-    * {@code jointIndex}<sup>th</sup> of this command.
+    * Provides to the {@link JointAccelerationIntegrationCalculator} specific parameter values.
     * <p>
     * These two parameters are safety parameters that are relevant to the tuning process for a joint.
     * The default values used by the calculator should be adequate in most situation.
     * </p>
-    * <p>
-    * The maximum velocity parameter is used to saturate the value of the desired velocity computed. If
-    * not specified otherwise, {@code maxVelocity} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_VELOCITY_ERROR}. It can be increased once the
-    * acceleration integration is proven to be working properly on a specific robot to allow the joint
-    * to reach higher velocities.
-    * </p>
-    * <p>
-    * The maximum position error parameter is used to limit the gap between the desired position
-    * computed and the actual joint position. This is a critical parameter and should be only changed
-    * once heavy testing has been performed on the robot knowing that the effects of this parameter may
-    * show up only under specific circumstances. If not specified otherwise {@code maxPositionError} =
-    * {@link JointAccelerationIntegrationCalculator#DEFAULT_MAX_POSITION_ERROR}.
-    * </p>
     *
     * @param maxPositionError limits the gap between the desired joint position and the actual joint
     *                         position.
-    * @param maxVelocityError limits the maximum value of the desired joint velocity.
+    * @param maxVelocityError limits the gap between the desired joint velocity and the reference joint
+    *                         velocity.
+    * @see JointAccelerationIntegrationParametersReadOnly#getMaxPositionError()
+    * @see JointAccelerationIntegrationParametersReadOnly#getMaxVelocityError()
+    * @see JointAccelerationIntegrationParametersReadOnly#getVelocityReferenceAlpha()
     */
    public void setMaxima(double maxPositionError, double maxVelocityError)
    {
@@ -168,7 +157,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
     * Sets the safety parameter that limits the integrated velocity.
     * 
     * @see JointAccelerationIntegrationParameters#setMaxima(double, double)
-    * @param maxVelocityError limits the maximum value of the desired joint velocity.
+    * @param maxVelocityError limits the gap between the desired joint velocity and the reference joint
+    *                         velocity.
     */
    public void setMaxVelocityError(double maxVelocityError)
    {
@@ -214,6 +204,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
       return maxVelocityError;
    }
 
+   /** {@inheritDoc} */
    @Override
    public double getVelocityReferenceAlpha()
    {

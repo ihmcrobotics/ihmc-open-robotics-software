@@ -33,7 +33,7 @@ public class JointAccelerationIntegrationCalculator
 
    private final YoDouble defaultPositionBreakFrequency = new YoDouble("defaultPositionBreakFrequencyIntegration", registry);
    private final YoDouble defaultVelocityBreakFrequency = new YoDouble("defaultVelocityBreakFrequencyIntegration", registry);
-   private final YoDouble defaultIntegrationMaxVelocity = new YoDouble("defaultIntegrationMaxVelocity", registry);
+   private final YoDouble defaultIntegrationMaxVelocityError = new YoDouble("defaultIntegrationMaxVelocityError", registry);
    private final YoDouble defaultIntegrationMaxPositionError = new YoDouble("defaultIntegrationMaxPositionError", registry);
    private final YoDouble defaultVelocityReferenceAlpha = new YoDouble("defaultVelocityReferenceAlpha", registry);
 
@@ -45,7 +45,7 @@ public class JointAccelerationIntegrationCalculator
       defaultPositionBreakFrequency.set(DEFAULT_POSITION_BREAK_FREQUENCY);
       defaultVelocityBreakFrequency.set(DEFAULT_VELOCITY_BREAK_FREQUENCY);
       defaultIntegrationMaxPositionError.set(DEFAULT_MAX_POSITION_ERROR);
-      defaultIntegrationMaxVelocity.set(DEFAULT_MAX_VELOCITY_ERROR);
+      defaultIntegrationMaxVelocityError.set(DEFAULT_MAX_VELOCITY_ERROR);
       defaultVelocityReferenceAlpha.set(DEFAULT_VELOCITY_REFERENCE_ALPHA);
 
       parentRegistry.addChild(registry);
@@ -62,22 +62,27 @@ public class JointAccelerationIntegrationCalculator
          double newPositionBreakFrequency = jointParameters.getPositionBreakFrequency();
          if (Double.isNaN(newPositionBreakFrequency) || newPositionBreakFrequency < 0.0)
             newPositionBreakFrequency = defaultPositionBreakFrequency.getDoubleValue();
+         newPositionBreakFrequency = Math.max(0.0, newPositionBreakFrequency);
 
          double newVelocityBreakFrequency = jointParameters.getVelocityBreakFrequency();
          if (Double.isNaN(newVelocityBreakFrequency) || newVelocityBreakFrequency < 0.0)
             newVelocityBreakFrequency = defaultVelocityBreakFrequency.getDoubleValue();
+         newVelocityBreakFrequency = Math.max(0.0, newVelocityBreakFrequency);
 
          double newMaxPositionError = jointParameters.getMaxPositionError();
          if (Double.isNaN(newMaxPositionError) || newMaxPositionError < 0.0)
             newMaxPositionError = defaultIntegrationMaxPositionError.getDoubleValue();
+         newMaxPositionError = Math.max(0.0, newMaxPositionError);
 
          double newMaxVelocityError = jointParameters.getMaxVelocityError();
          if (Double.isNaN(newMaxVelocityError) || newMaxVelocityError < 0.0)
-            newMaxVelocityError = defaultIntegrationMaxVelocity.getDoubleValue();
+            newMaxVelocityError = defaultIntegrationMaxVelocityError.getDoubleValue();
+         newMaxVelocityError = Math.max(0.0, newMaxVelocityError);
 
          double newVelocityReferenceAlpha = jointParameters.getVelocityReferenceAlpha();
          if (Double.isNaN(newVelocityReferenceAlpha) || newVelocityReferenceAlpha < 0.0)
             newVelocityReferenceAlpha = defaultVelocityReferenceAlpha.getDoubleValue();
+         newVelocityReferenceAlpha = MathTools.clamp(newVelocityReferenceAlpha, 0.0, 1.0);
 
          if (localJointIndex < 0)
          {
