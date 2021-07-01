@@ -7,6 +7,7 @@ import us.ihmc.behaviors.door.DoorType;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 
 import java.util.List;
@@ -56,6 +57,7 @@ public class TraverseStairsBehaviorAPI
    public static final MessagerAPIFactory.Topic<List<String>> SwingPlannerParameters = topic("SwingPlannerParameters");
    public static final MessagerAPIFactory.Topic<Pose3D> DetectedStairsPose = topic("DetectedStairsPose");
    public static final MessagerAPIFactory.Topic<Double> DistanceToStairs = topic("DistanceToStairs");
+   public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionsForUI = topic("PlanarRegionsForUI");
 
    private static <T> MessagerAPIFactory.Topic<T> topic(String name)
    {

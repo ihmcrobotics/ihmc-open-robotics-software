@@ -27,6 +27,7 @@ import us.ihmc.gdx.ui.affordances.ImGuiGDXPoseGoalAffordance;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIDefinition;
 import us.ihmc.gdx.ui.behaviors.registry.GDXBehaviorUIInterface;
 import us.ihmc.gdx.ui.graphics.GDXFootstepPlanGraphic;
+import us.ihmc.gdx.visualizers.GDXPlanarRegionsGraphic;
 import us.ihmc.tools.Timer;
 
 import java.util.concurrent.atomic.AtomicReference;
@@ -40,6 +41,7 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
 
    private final BehaviorHelper helper;
    private final GDXFootstepPlanGraphic footstepPlanGraphic = new GDXFootstepPlanGraphic();
+   private final GDXPlanarRegionsGraphic planarRegionsGraphic = new GDXPlanarRegionsGraphic();
    private final ImGuiLabelMap labels = new ImGuiLabelMap();
    private Point2D nodePosition = new Point2D(376.0, 517.0);
    private final Stopwatch completedStopwatch = new Stopwatch();
@@ -80,6 +82,12 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
             supportRegionsReceivedTimer.reset();
          }
       });
+      helper.subscribeViaCallback(PlanarRegionsForUI, regions ->
+      {
+         goalAffordance.setLatestRegions(regions);
+         if (regions != null)
+            planarRegionsGraphic.generateMeshesAsync(regions);
+      });
    }
 
    public void setGoal(Pose3D goal)
@@ -117,13 +125,24 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    @Override
    public void update()
    {
-      footstepPlanGraphic.update();
+      if (areGraphicsEnabled())
+      {
+         footstepPlanGraphic.update();
+         planarRegionsGraphic.update();
+      }
+   }
+
+   private boolean areGraphicsEnabled()
+   {
+      return wasTickedRecently(0.5);
    }
 
    @Override
    public void renderTreeNodeImGuiWidgets()
    {
       goalAffordance.renderPlaceGoalButton();
+      ImGui.sameLine();
+      ImGui.text(areGraphicsEnabled() ? "Showing graphics." : "Graphics hidden.");
       if (!currentLifecycleState.isEmpty())
       {
          TraverseStairsBehavior.TraverseStairsLifecycleStateName state = TraverseStairsBehavior.TraverseStairsLifecycleStateName.valueOf(currentLifecycleState);
@@ -202,13 +221,18 @@ public class ImGuiGDXTraverseStairsBehaviorUI extends GDXBehaviorUIInterface
    public void destroy()
    {
       footstepPlanGraphic.destroy();
+      planarRegionsGraphic.destroy();
    }
 
    @Override
    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool)
    {
-      footstepPlanGraphic.getRenderables(renderables, pool);
-      goalAffordance.getRenderables(renderables, pool);
+      if (areGraphicsEnabled())
+      {
+         footstepPlanGraphic.getRenderables(renderables, pool);
+         goalAffordance.getRenderables(renderables, pool);
+         planarRegionsGraphic.getRenderables(renderables, pool);
+      }
    }
 
    @Override
