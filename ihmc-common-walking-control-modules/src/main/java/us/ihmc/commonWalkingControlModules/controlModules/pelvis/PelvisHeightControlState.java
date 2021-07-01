@@ -252,6 +252,12 @@ public class PelvisHeightControlState implements PelvisAndCenterOfMassHeightCont
       statusHelper.updateWithTimeInTrajectory(positionController.getTimeInTrajectory());
    }
 
+   @Override
+   public void onExit(double timeInState)
+   {
+      positionController.onExit();
+   }
+
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
       EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();

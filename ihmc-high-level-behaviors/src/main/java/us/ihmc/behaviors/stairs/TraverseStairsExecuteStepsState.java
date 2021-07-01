@@ -2,24 +2,27 @@ package us.ihmc.behaviors.stairs;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlannerOutput;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.footstepPlanning.*;
 import us.ihmc.behaviors.tools.BehaviorHelper;
 import us.ihmc.behaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
 
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
-public class TraverseStairsExecuteStepsState implements State
+public class TraverseStairsExecuteStepsState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
    private final Supplier<FootstepPlannerOutput> footstepPlannerOutput;
    private final RemoteHumanoidRobotInterface robotInterface;
+   private final AtomicReference<Pose3D> goalInput = new AtomicReference<>();
+   private final StatusLogger statusLogger;
 
    private final AtomicBoolean walkingComplete = new AtomicBoolean();
 
@@ -29,6 +32,7 @@ public class TraverseStairsExecuteStepsState implements State
       this.parameters = parameters;
       this.footstepPlannerOutput = footstepPlannerOutput;
       this.robotInterface = helper.getOrCreateRobotInterface();
+      this.statusLogger = helper.getOrCreateStatusLogger();
 
       helper.subscribeToControllerViaCallback(WalkingStatusMessage.class, message ->
       {
@@ -36,6 +40,12 @@ public class TraverseStairsExecuteStepsState implements State
          {
             walkingComplete.set(true);
          }
+      });
+
+      helper.subscribeViaCallback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
+      {
+         LogTools.info("Received goal input: " + goalPose);
+         goalInput.set(goalPose);
       });
    }
 
@@ -80,7 +90,14 @@ public class TraverseStairsExecuteStepsState implements State
 
    boolean planEndsAtGoal()
    {
-      return footstepPlannerOutput.get() != null && footstepPlannerOutput.get().getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION;
+      FootstepPlannerOutput output = this.footstepPlannerOutput.get();
+      boolean hasOutput = output != null;
+      if (!hasOutput)
+      {
+         return false;
+      }
+
+      return output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION;
    }
 
    boolean walkingIsComplete()

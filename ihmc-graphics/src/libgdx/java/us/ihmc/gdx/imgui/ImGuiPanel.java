@@ -3,21 +3,20 @@ package us.ihmc.gdx.imgui;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import imgui.internal.ImGui;
-import imgui.flag.ImGuiCond;
 import imgui.type.ImBoolean;
+import us.ihmc.log.LogTools;
 
 import java.util.ArrayList;
 import java.util.Map;
 
-public class ImGuiPanel
+public class ImGuiPanel extends ImGuiPanelSizeHandler
 {
    private final String panelName;
-   private int firstTimeWidth = 300;
-   private int firstTimeHeight = 200;
    private Runnable render;
-   private final ImBoolean enabled;
-
+   private final ImBoolean isShowing;
    private final ArrayList<ImGuiPanel> children = new ArrayList<>();
+
+   private int lastDockID = -1;
 
    public ImGuiPanel(String panelName)
    {
@@ -29,18 +28,18 @@ public class ImGuiPanel
       this(panelName, render, false);
    }
 
-   public ImGuiPanel(String panelName, Runnable render, boolean enabled)
+   public ImGuiPanel(String panelName, Runnable render, boolean isShowing)
    {
       this.panelName = panelName;
       this.render = render;
-      this.enabled = new ImBoolean(enabled);
+      this.isShowing = new ImBoolean(isShowing);
    }
 
    /* package-private */ void renderMenuItem()
    {
       if (isTogglable())
       {
-         ImGui.menuItem(panelName, "", enabled);
+         ImGui.menuItem(panelName, "", isShowing);
 
          for (ImGuiPanel child : children)
          {
@@ -49,19 +48,33 @@ public class ImGuiPanel
       }
    }
 
-   /* package-private */ void renderPanelAndChildren()
+   /* package-private */ void renderPanelAndChildren(ImGuiDockspacePanel justClosedPanel)
    {
-      if (isTogglable() && enabled.get())
+      if (isTogglable() && isShowing.get())
       {
-         ImGui.setNextWindowSize(firstTimeWidth, firstTimeHeight, ImGuiCond.FirstUseEver);
-         ImGui.begin(panelName, enabled);
+         handleSizeBeforeBegin();
+         ImGui.begin(panelName, isShowing);
+         handleSizeAfterBegin();
+
+         int windowDockID = ImGui.getWindowDockID();
+         if (lastDockID != windowDockID)
+         {
+            LogTools.debug("Dock ID changed. {}: {} -> {}", panelName, lastDockID, windowDockID);
+            if (justClosedPanel != null)
+            {
+               LogTools.info("Closing \"{}\" because containing dockspace \"{}\" closed", panelName, justClosedPanel.getName());
+               isShowing.set(false);
+            }
+         }
+         lastDockID = windowDockID;
+
          render.run();
          ImGui.end();
       }
 
       for (ImGuiPanel child : children)
       {
-         child.renderPanelAndChildren();
+         child.renderPanelAndChildren(justClosedPanel);
       }
    }
 
@@ -74,7 +87,7 @@ public class ImGuiPanel
    {
       if (panelName.equals(panelEntry.getKey()))
       {
-         enabled.set(panelEntry.getValue().asBoolean());
+         isShowing.set(panelEntry.getValue().asBoolean());
       }
 
       for (ImGuiPanel child : children)
@@ -87,7 +100,7 @@ public class ImGuiPanel
    {
       if (isTogglable())
       {
-         anchorJSON.put(panelName, enabled.get());
+         anchorJSON.put(panelName, isShowing.get());
       }
 
       for (ImGuiPanel child : children)
@@ -106,23 +119,13 @@ public class ImGuiPanel
       return render != null;
    }
 
-   public ImBoolean getEnabled()
+   public ImBoolean getIsShowing()
    {
-      return enabled;
+      return isShowing;
    }
 
    public String getPanelName()
    {
       return panelName;
-   }
-
-   public void setFirstTimeWidth(int firstTimeWidth)
-   {
-      this.firstTimeWidth = firstTimeWidth;
-   }
-
-   public void setFirstTimeHeight(int firstTimeHeight)
-   {
-      this.firstTimeHeight = firstTimeHeight;
    }
 }

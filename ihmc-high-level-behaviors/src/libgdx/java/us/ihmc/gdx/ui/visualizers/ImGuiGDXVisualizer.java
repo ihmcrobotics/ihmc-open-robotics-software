@@ -26,7 +26,7 @@ public abstract class ImGuiGDXVisualizer implements RenderableProvider
       createdYet = true;
       if (getPanel() != null)
       {
-         active = getPanel().getEnabled();
+         active = getPanel().getIsShowing();
       }
    }
 

@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
+import us.ihmc.behaviors.tools.interfaces.StatusLogger;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -25,13 +26,16 @@ import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.State;
+import us.ihmc.tools.TimerSnapshot;
+import us.ihmc.tools.thread.MissingThreadTools;
+import us.ihmc.tools.thread.ResettableExceptionHandlingExecutorService;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.behaviors.stairs.TraverseStairsBehaviorAPI.*;
 
-public class TraverseStairsPlanStepsState implements State
+public class TraverseStairsPlanStepsState extends TraverseStairsState
 {
    private final BehaviorHelper helper;
    private final TraverseStairsBehaviorParameters parameters;
@@ -42,23 +46,31 @@ public class TraverseStairsPlanStepsState implements State
 
    private final ROS2SyncedRobotModel syncedRobot;
    private final FootstepPlanningModule planningModule;
+   private final ResettableExceptionHandlingExecutorService executor = MissingThreadTools.newSingleThreadExecutor("RegionsRelay", true);
    private FootstepPlannerOutput output;
 
    private final AtomicBoolean executeStepsSignaled = new AtomicBoolean();
    private final AtomicBoolean planSteps = new AtomicBoolean();
    private boolean isStillPlanning = false;
+   private final StatusLogger statusLogger;
 
    public TraverseStairsPlanStepsState(BehaviorHelper helper, TraverseStairsBehaviorParameters parameters, AtomicBoolean operatorReviewEnabled)
    {
       this.helper = helper;
       this.parameters = parameters;
       this.operatorReviewEnabled = operatorReviewEnabled;
+      this.statusLogger = helper.getOrCreateStatusLogger();
+
       helper.subscribeViaCallback(TraverseStairsBehaviorAPI.GOAL_INPUT, goalPose ->
       {
-         LogTools.info("Received goal input: " + goalPose);
+         statusLogger.info("Received goal input: " + goalPose);
          goalInput.set(goalPose);
       });
-      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, planarRegions::set);
+      helper.subscribeViaCallback(ROS2Tools.LIDAR_REA_REGIONS, newValue ->
+      {
+         planarRegions.set(newValue);
+         executor.submit(() -> helper.publish(PlanarRegionsForUI, PlanarRegionMessageConverter.convertToPlanarRegionsList(newValue)));
+      });
 
       syncedRobot = helper.getOrCreateRobotInterface().newSyncedRobot();
       planningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
@@ -68,12 +80,12 @@ public class TraverseStairsPlanStepsState implements State
       planningModule.getSwingPlannerParameters().set(swingPlannerParameters);
       helper.subscribeViaCallback(FootstepPlannerParameters, parametersAsStrings ->
       {
-         helper.getOrCreateStatusLogger().info("Accepting new footstep planner parameters");
+         statusLogger.info("Accepting new footstep planner parameters");
          planningModule.getFootstepPlannerParameters().setAllFromStrings(parametersAsStrings);
       });
       helper.subscribeViaCallback(SwingPlannerParameters, parametersAsStrings ->
       {
-         helper.getOrCreateStatusLogger().info("Accepting new swing planner parameters");
+         statusLogger.info("Accepting new swing planner parameters");
          planningModule.getSwingPlannerParameters().setAllFromStrings(parametersAsStrings);
       });
 
@@ -85,20 +97,18 @@ public class TraverseStairsPlanStepsState implements State
    @Override
    public void onEntry()
    {
-      LogTools.info("Entering " + getClass().getSimpleName());
+      statusLogger.info("Entering " + getClass().getSimpleName());
       reset();
 
       if (goalInput.get() == null)
       {
          String message = "No goal received in traverse stairs behavior";
-         LogTools.info(message);
-//         throw new RuntimeException(message);
+         statusLogger.info(message);
       }
       else if (planarRegions.get() == null)
       {
          String message = "No regions received in traverse stairs behavior";
-         LogTools.info(message);
-//         throw new RuntimeException(message);
+         statusLogger.info(message);
       }
    }
 
@@ -129,8 +139,16 @@ public class TraverseStairsPlanStepsState implements State
       while (planningModule.isPlanning())
       {
          // wait...
-         LogTools.info("Waiting for previous plan to complete...");
+         statusLogger.info("Waiting for previous plan to complete...");
          ThreadTools.sleep(10);
+      }
+
+      TimerSnapshot timerSnapshot = syncedRobot.getDataReceptionTimerSnapshot();
+      boolean hasReceivedRecentData = timerSnapshot.isRunning(0.5);
+      if (!hasReceivedRecentData)
+      {
+         statusLogger.info("Has not received robot configuration data recently");
+         return;
       }
 
       FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -156,17 +174,31 @@ public class TraverseStairsPlanStepsState implements State
       int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
       planningModule.clearCustomTerminationConditions();
 
-      double onSameStairThreshold = 0.05;
-      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalState, bestPathSize) ->
-                                                   {
-                                                      boolean longEnoughPath = bestPathSize >= targetNumberOfFootsteps;
-                                                      boolean finalStepsOnSameStair = Math.abs(bestPathFinalStep.getTranslationZ() - bestSecondToFinalState.getTranslationZ()) < onSameStairThreshold;
-                                                      return longEnoughPath && finalStepsOnSameStair;
-                                                   });
+      planningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestSecondToFinalState, bestPathSize) -> bestPathSize >= targetNumberOfFootsteps);
 
-      LogTools.info(getClass().getSimpleName() + ": planning");
+      statusLogger.info(getClass().getSimpleName() + ": planning");
       this.output = planningModule.handleRequest(request);
-      LogTools.info(getClass().getSimpleName() + " numer of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
+      statusLogger.info(getClass().getSimpleName() + " number of steps in plan: " + output.getFootstepPlan().getNumberOfSteps());
+
+      // remove extra steps
+      while (output.getFootstepPlan().getNumberOfSteps() > targetNumberOfFootsteps)
+      {
+         output.getFootstepPlan().remove(output.getFootstepPlan().getNumberOfSteps() - 1);
+      }
+
+      // remove final step if on different stair
+      int numberOfSteps = output.getFootstepPlan().getNumberOfSteps();
+      if (numberOfSteps >= 2)
+      {
+         double onSameStairThreshold = 0.05;
+         double lastStepHeight = output.getFootstepPlan().getFootstep(numberOfSteps - 1).getFootstepPose().getZ();
+         double secondStepLastHeight = output.getFootstepPlan().getFootstep(numberOfSteps - 2).getFootstepPose().getZ();
+         boolean lastStepsAreOnSameStair = Math.abs(lastStepHeight - secondStepLastHeight) < onSameStairThreshold;
+         if (!lastStepsAreOnSameStair)
+         {
+            output.getFootstepPlan().remove(numberOfSteps - 1);
+         }
+      }
 
       // lower height of first step down
       mutateFirstStepDownHeight(solePoses.get(request.getRequestedInitialStanceSide()));
@@ -174,7 +206,6 @@ public class TraverseStairsPlanStepsState implements State
       // generate log
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(planningModule);
       footstepPlannerLogger.logSession();
-      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(50), "FootstepPlanLogDeletion");
 
       // publish to ui
       FootstepPlanningToolboxOutputStatus outputStatus = new FootstepPlanningToolboxOutputStatus();
@@ -204,19 +235,12 @@ public class TraverseStairsPlanStepsState implements State
 
    public boolean searchWasSuccessful()
    {
-      if (output != null && output.getFootstepPlanningResult() == FootstepPlanningResult.FOUND_SOLUTION)
-      {
-         return true;
-      }
-      else if (output != null && output.getFootstepPlanningResult() == FootstepPlanningResult.HALTED)
-      {
-         int targetNumberOfFootsteps = 2 * parameters.get(TraverseStairsBehaviorParameters.numberOfStairsPerExecution);
-         return output.getFootstepPlan().getNumberOfSteps() >= targetNumberOfFootsteps;
-      }
-      else
+      if (output == null)
       {
          return false;
       }
+
+      return output.getFootstepPlan().getNumberOfSteps() >= 2;
    }
 
    boolean shouldTransitionToExecute(double timeInState)
@@ -237,5 +261,10 @@ public class TraverseStairsPlanStepsState implements State
    public boolean isStillPlanning()
    {
       return isStillPlanning;
+   }
+
+   public void destroy()
+   {
+      executor.destroy();
    }
 }
