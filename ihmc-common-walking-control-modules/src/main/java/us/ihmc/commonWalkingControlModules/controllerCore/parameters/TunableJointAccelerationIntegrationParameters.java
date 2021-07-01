@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.parameters;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointAccelerationIntegrationCalculator;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.parameters.EnumParameter;
 import us.ihmc.yoVariables.registry.YoRegistry;
 
 /**
@@ -21,6 +22,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    private static final String POSITION_INTEGRATION_MAX_ERROR_NAME = "PositionIntegrationMaxError";
    private static final String VELOCITY_INTEGRATION_MAX_ERROR_NAME = "VelocityIntegrationMaxError";
    private static final String VELOCITY_REFERENCE_ALPHA_NAME = "VelocityReferenceAlpha";
+   private static final String VELOCITY_RESET_MODE_NAME = "VelocityResetMode";
 
    private static final double SUGGESTED_MAXIMUM_POSITION_ERROR = 2.0 * Math.PI;
    private static final double SUGGESTED_MAXIMUM_VELOCITY = SUGGESTED_MAXIMUM_POSITION_ERROR / 0.1;
@@ -31,6 +33,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    private final DoubleParameter maxPositionError;
    private final DoubleParameter maxVelocityError;
    private final DoubleParameter velocityReferenceAlpha;
+   private final EnumParameter<JointVelocityIntegratorResetMode> velocityResetMode;
 
    /**
     * Creates a new sets of parameters for acceleration integration.
@@ -46,7 +49,8 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    {
       this(namePrefix, JointAccelerationIntegrationCalculator.DEFAULT_POSITION_BREAK_FREQUENCY,
            JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_BREAK_FREQUENCY, JointAccelerationIntegrationCalculator.DEFAULT_MAX_POSITION_ERROR,
-           JointAccelerationIntegrationCalculator.DEFAULT_MAX_VELOCITY_ERROR, JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_REFERENCE_ALPHA, registry);
+           JointAccelerationIntegrationCalculator.DEFAULT_MAX_VELOCITY_ERROR, JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_REFERENCE_ALPHA,
+           JointAccelerationIntegrationCalculator.DEFAULT_VELOCITY_RESET_MODE, registry);
    }
 
    /**
@@ -63,7 +67,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    public TunableJointAccelerationIntegrationParameters(String namePrefix, YoRegistry registry, JointAccelerationIntegrationParametersReadOnly defaults)
    {
       this(namePrefix, defaults.getPositionBreakFrequency(), defaults.getVelocityBreakFrequency(), defaults.getMaxPositionError(),
-           defaults.getMaxVelocityError(), defaults.getVelocityReferenceAlpha(), registry);
+           defaults.getMaxVelocityError(), defaults.getVelocityReferenceAlpha(), defaults.getVelocityResetMode(), registry);
    }
 
    /**
@@ -81,8 +85,12 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
     *                               {@link #getVelocityBreakFrequency()}.
     * @param maxPositionError       the default maximum position error used to saturate the desired
     *                               position, see {@link #getMaxPositionError()}.
-    * @param maxVelocityError       the maximum default desired velocity, see
-    *                               {@link #getMaxVelocityError()}.
+    * @param maxPositionError       the default maximum velocity error used to saturate the desired
+    *                               velocity, see {@link #getMaxVelocityError()}.
+    * @param velocityReferenceAlpha the default ratio used for computing the reference velocity, see
+    *                               {@link #getVelocityReferenceAlpha()}.
+    * @param velocityResetMode      the default integrator's behavior when resetting the desired
+    *                               velocity, see {@link #getVelocityResetMode()}.
     * @param registry               the registry to which the {@code YoVariable}s of this class are
     *                               registered to.
     */
@@ -92,6 +100,7 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
                                                         double maxPositionError,
                                                         double maxVelocityError,
                                                         double velocityReferenceAlpha,
+                                                        JointVelocityIntegratorResetMode velocityResetMode,
                                                         YoRegistry registry)
    {
       this.positionBreakFrequency = new DoubleParameter(namePrefix
@@ -103,6 +112,8 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
       this.maxVelocityError = new DoubleParameter(namePrefix
             + VELOCITY_INTEGRATION_MAX_ERROR_NAME, registry, maxVelocityError, 0.0, SUGGESTED_MAXIMUM_VELOCITY);
       this.velocityReferenceAlpha = new DoubleParameter(namePrefix + VELOCITY_REFERENCE_ALPHA_NAME, registry, velocityReferenceAlpha, 0.0, 1.0);
+      this.velocityResetMode = new EnumParameter<>(namePrefix
+            + VELOCITY_RESET_MODE_NAME, registry, JointVelocityIntegratorResetMode.class, false, velocityResetMode);
    }
 
    /** {@inheritDoc} */
@@ -138,5 +149,12 @@ public class TunableJointAccelerationIntegrationParameters implements JointAccel
    public double getVelocityReferenceAlpha()
    {
       return velocityReferenceAlpha.getValue();
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public JointVelocityIntegratorResetMode getVelocityResetMode()
+   {
+      return velocityResetMode.getValue();
    }
 }

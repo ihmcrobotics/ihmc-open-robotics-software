@@ -10,6 +10,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    private double maxPositionError;
    private double maxVelocityError;
    private double velocityReferenceAlpha;
+   private JointVelocityIntegratorResetMode velocityResetMode;
 
    /**
     * Creates a new sets of parameters for acceleration integration.
@@ -32,6 +33,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    {
       resetAlphas();
       resetMaxima();
+      velocityResetMode = null;
    }
 
    /**
@@ -78,6 +80,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
       velocityBreakFrequency = other.getVelocityBreakFrequency();
       maxPositionError = other.getMaxPositionError();
       maxVelocityError = other.getMaxVelocityError();
+      velocityReferenceAlpha = other.getVelocityReferenceAlpha();
+      velocityResetMode = other.getVelocityResetMode();
    }
 
    /**
@@ -141,6 +145,19 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    }
 
    /**
+    * For the usage of this parameters see<br>
+    * {@link JointAccelerationIntegrationParametersReadOnly#getVelocityResetMode()}
+    * 
+    * @param velocityResetMode the integrator's behavior for when resetting the desired velocity.
+    *                          Default value is
+    *                          {@link JointVelocityIntegratorResetMode.CURRENT_VELOCITY}.
+    */
+   public void setVelocityResetMode(JointVelocityIntegratorResetMode velocityResetMode)
+   {
+      this.velocityResetMode = velocityResetMode;
+   }
+
+   /**
     * Sets the safety parameter that limits the position error between the actual joint position and
     * the integrated desired.
     * 
@@ -174,6 +191,12 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    public void setVelocityReferenceAlpha(double velocityReferenceAlpha)
    {
       this.velocityReferenceAlpha = velocityReferenceAlpha;
+   }
+
+   @Override
+   public JointVelocityIntegratorResetMode getVelocityResetMode()
+   {
+      return velocityResetMode;
    }
 
    /** {@inheritDoc} */
@@ -231,6 +254,8 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
             return false;
          if (velocityReferenceAlpha != other.getVelocityReferenceAlpha())
             return false;
+         if (velocityResetMode != other.getVelocityResetMode())
+            return false;
          return true;
       }
       else
@@ -243,6 +268,7 @@ public class JointAccelerationIntegrationParameters implements JointAcceleration
    public String toString()
    {
       return getClass().getSimpleName() + ": position break frequency: " + positionBreakFrequency + ", velocity break frequency: " + velocityBreakFrequency
-            + ", max position error: " + maxPositionError + ", maxVelocityError: " + maxVelocityError + ", velocityReferenceAlpha: " + velocityReferenceAlpha;
+            + ", max position error: " + maxPositionError + ", maxVelocityError: " + maxVelocityError + ", velocityReferenceAlpha: " + velocityReferenceAlpha
+            + ", velocityResetMode: " + velocityResetMode;
    }
 }
