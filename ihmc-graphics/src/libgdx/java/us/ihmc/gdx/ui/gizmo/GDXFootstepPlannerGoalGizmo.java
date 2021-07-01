@@ -1,10 +1,14 @@
 package us.ihmc.gdx.ui.gizmo;
 
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g3d.Material;
 import com.badlogic.gdx.graphics.g3d.Renderable;
 import com.badlogic.gdx.graphics.g3d.RenderableProvider;
+import com.badlogic.gdx.graphics.g3d.attributes.BlendingAttribute;
+import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.flag.ImGuiMouseButton;
@@ -19,10 +23,22 @@ import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.gdx.FocusBasedGDXCamera;
 import us.ihmc.gdx.imgui.ImGuiTools;
 import us.ihmc.gdx.input.ImGui3DViewInput;
+import us.ihmc.gdx.mesh.GDXMultiColorMeshBuilder;
 import us.ihmc.gdx.tools.GDXTools;
 
 public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
 {
+   public static final Color DISC_NORMAL_COLOR = Color.LIGHT_GRAY;
+   public static final Color DISC_HIGHLIGHTED_COLOR = Color.LIGHT_GRAY;
+   public static final Color ARROW_NORMAL_COLOR = Color.YELLOW;
+   public static final Color ARROW_HIGHLIGHTED_COLOR = Color.YELLOW;
+   static
+   {
+      DISC_NORMAL_COLOR.a = 0.4f;
+      ARROW_NORMAL_COLOR.a = 0.4f;
+      DISC_HIGHLIGHTED_COLOR.a = 0.9f;
+      ARROW_HIGHLIGHTED_COLOR.a = 0.9f;
+   }
    private final double QUARTER_TURN = Math.PI / 2.0;
    private final ImFloat discOuterRadius = new ImFloat(0.426f);
    private final ImFloat discInnerRadius = new ImFloat(0.290f);
@@ -61,16 +77,24 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
       this.camera3D = camera3D;
 
       normalDiscMaterial = new Material();
+      normalDiscMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
+      normalDiscMaterial.set(new BlendingAttribute(true, DISC_NORMAL_COLOR.a));
       normalArrowMaterial = new Material();
+      normalArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
+      normalArrowMaterial.set(new BlendingAttribute(true, ARROW_NORMAL_COLOR.a));
       highlightedDiscMaterial = new Material();
+      highlightedDiscMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
+      highlightedDiscMaterial.set(new BlendingAttribute(true, DISC_HIGHLIGHTED_COLOR.a));
       highlightedArrowMaterial = new Material();
+      highlightedArrowMaterial.set(TextureAttribute.createDiffuse(GDXMultiColorMeshBuilder.loadPaletteTexture()));
+      highlightedArrowMaterial.set(new BlendingAttribute(true, ARROW_HIGHLIGHTED_COLOR.a));
       discModel.setMesh(meshBuilder ->
       {
          meshBuilder.addHollowCylinder(discThickness.get(),
                                        discOuterRadius.get(),
                                        discInnerRadius.get(),
                                        new Point3D(0.0, 0.0, -discThickness.get() / 2.0),
-                                       Color.LIGHT_GRAY);
+                                       DISC_NORMAL_COLOR);
       });
       positiveXArrowModel.setMesh(meshBuilder ->
       {
@@ -79,7 +103,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                                  discThickness.get(),
                                                  new Point3D(discOuterRadius.get() + arrowSpacing.get(), 0.0, -discThickness.get() / 2.0),
                                                  new YawPitchRoll(-QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                                 Color.YELLOW);
+                                                 ARROW_NORMAL_COLOR);
       });
       positiveYArrowModel.setMesh(meshBuilder ->
       {
@@ -88,7 +112,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                                  discThickness.get(),
                                                  new Point3D(0.0, discOuterRadius.get() + arrowSpacing.get(), -discThickness.get() / 2.0),
                                                  new YawPitchRoll(0.0, 0.0, -QUARTER_TURN),
-                                                 Color.YELLOW);
+                                                 ARROW_NORMAL_COLOR);
       });
       negativeXArrowModel.setMesh(meshBuilder ->
       {
@@ -97,7 +121,7 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                                  discThickness.get(),
                                                  new Point3D(-discOuterRadius.get() - arrowSpacing.get(), 0.0, -discThickness.get() / 2.0),
                                                  new YawPitchRoll(QUARTER_TURN, 0.0, -QUARTER_TURN),
-                                                 Color.YELLOW);
+                                                 ARROW_NORMAL_COLOR);
       });
       negativeYArrowModel.setMesh(meshBuilder ->
       {
@@ -106,9 +130,8 @@ public class GDXFootstepPlannerGoalGizmo implements RenderableProvider
                                                  discThickness.get(),
                                                  new Point3D(0.0, -discOuterRadius.get() - arrowSpacing.get(), -discThickness.get() / 2.0),
                                                  new YawPitchRoll(0.0, 0.0, QUARTER_TURN),
-                                                 Color.YELLOW);
+                                                 ARROW_NORMAL_COLOR);
       });
-
 
       recreateGraphics();
    }
