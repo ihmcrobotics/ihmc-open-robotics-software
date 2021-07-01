@@ -44,10 +44,10 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
 {
    private enum Mode
    {
-      FLAT_FORWARD, FLAT_BACKWARDS, FLAT_LEFT, FLAT_RIGHT, FLAT_RANDOM, FORWARD_STAIRS, BACKWARDS_STAIRS, RANDOM
+      FLAT_FORWARD, FLAT_BACKWARDS, FLAT_LEFT, FLAT_RIGHT, FLAT_RANDOM, STAIRS_FORWARD, STAIRS_BACKWARDS, RANDOM
    }
 
-   private static final Mode mode = Mode.FLAT_RANDOM;
+   private static final Mode mode = Mode.STAIRS_FORWARD;
 
    private static final boolean visualize = true;
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromSystemProperties();
@@ -110,7 +110,7 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
       {
          testSteps(robotModel, feasibleSolutions);
 
-//         drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
+         drcSimulationTestHelper.getBlockingSimulationRunner().destroySimulation();
          drcSimulationTestHelper.getAvatarSimulation().dispose();
          drcSimulationTestHelper.getSimulationStarter().close();
          drcSimulationTestHelper.getROS2Node().destroy();
@@ -259,11 +259,11 @@ public abstract class AvatarReachabilityMultiStepTest implements MultiRobotTestI
                if (leftFootDesiredPosition.getZ() == 0)
                   return randIndex;
                break;
-            case FORWARD_STAIRS:
+            case STAIRS_FORWARD:
                if (leftFootDesiredPosition.getX() >= 0 && leftFootDesiredPosition.getZ() > 0)
                   return randIndex;
                break;
-            case BACKWARDS_STAIRS:
+            case STAIRS_BACKWARDS:
                if (leftFootDesiredPosition.getX() <= 0 && leftFootDesiredPosition.getZ() > 0)
                   return randIndex;
                break;
