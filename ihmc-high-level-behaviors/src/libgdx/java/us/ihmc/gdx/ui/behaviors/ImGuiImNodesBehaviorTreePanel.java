@@ -49,7 +49,9 @@ public class ImGuiImNodesBehaviorTreePanel
 
    private final Class<?> parent;
 
-   private static final String propertiesDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + ImGuiImNodesBehaviorTreePanel.class.getSimpleName() + "Settings" + File.separator;
+   private static final String propertiesDirectory = System.getProperty("user.home") + File.separator + ".ihmc"
+                                                     + File.separator + ImGuiImNodesBehaviorTreePanel.class.getSimpleName() + "Settings" + File.separator;
+   private boolean hasPrintedWarning = false;
 
    /***
     * Note that create() and dispose() should be called for creating and destroying the context.
@@ -404,7 +406,11 @@ public class ImGuiImNodesBehaviorTreePanel
 
          if (size.x - correct.x > 0.5f || size.y - correct.y > 0.5f && !nodeSizeHasChanged.get(nodeIndex)) { //query nodeSizeHasChanged to prevent multiple warnings
             nodeSizeHasChanged.put(nodeIndex, true);
-            LogTools.warn("Node size has changed for node " + nodeIndex + " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
+            if (!hasPrintedWarning)
+            {
+               hasPrintedWarning = true;
+               LogTools.warn("Node size has changed for node " + nodeIndex + " (" + nodeName + ") - when implementing renderTreeNode(), ensure the node renders at a fixed size.");
+            }
          }
       }
 
