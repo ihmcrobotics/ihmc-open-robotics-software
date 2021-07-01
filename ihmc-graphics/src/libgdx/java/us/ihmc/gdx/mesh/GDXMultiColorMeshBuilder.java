@@ -549,7 +549,6 @@ public class GDXMultiColorMeshBuilder
     * @param eightVertices
     * @param lineWidth
     * @param color
-    * @param close
     */
    public void addMultiLineBox(Point3DReadOnly[] eightVertices, double lineWidth, Color color)
    {
@@ -749,6 +748,166 @@ public class GDXMultiColorMeshBuilder
    public void addTetrahedron(float edgeLength, Tuple3DReadOnly offset, Color color)
    {
       addMesh(MeshDataGenerator.Tetrahedron(edgeLength), offset, color);
+   }
+
+   public void addWedge(double lx, double ly, double lz, Color color)
+   {
+      addMesh(MeshDataGenerator.Wedge(lx, ly, lz), color);
+   }
+
+   /**
+    * Add a isosceles triangular prism to this builder. The prism's origin is at the center of it's base face with the peak on top
+    * like a roofline along the Y axis. The depth of the prism is along the Y axis.
+    *
+    * @param triangleWidth   The width/base of the upward pointing isosceles triangle
+    * @param triangleHeight  The height of the upward pointing isosceles triangle
+    * @param prismThickness  The thichness/depth extruded by the triangle to make a prism
+    * @param offset          Coordinates of the origin
+    */
+   public void addIsoscelesTriangularPrism(double triangleWidth, double triangleHeight, double prismThickness, Tuple3DReadOnly offset, Color color)
+   {
+      addMesh(IsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness), offset, color);
+   }
+
+   /**
+    * Add a isosceles triangular prism to this builder. The prism's origin is at the center of it's base face with the peak on top
+    * like a roofline along the Y axis. The depth of the prism is along the Y axis.
+    *
+    * @param triangleWidth   The width/base of the upward pointing isosceles triangle
+    * @param triangleHeight  The height of the upward pointing isosceles triangle
+    * @param prismThickness  The thichness/depth extruded by the triangle to make a prism
+    * @param offset          Coordinates of the origin
+    * @param orientation     Orientation of the origin
+    */
+   public void addIsoscelesTriangularPrism(double triangleWidth,
+                                           double triangleHeight,
+                                           double prismThickness,
+                                           Tuple3DReadOnly offset,
+                                           Orientation3DReadOnly orientation,
+                                           Color color)
+   {
+      addMesh(IsoscelesTriangularPrism(triangleWidth, triangleHeight, prismThickness), offset, orientation, color);
+   }
+
+   public static MeshDataHolder IsoscelesTriangularPrism(double triangleWidth, double triangleHeight, double prismThickness)
+   {
+      return IsoscelesTriangularPrism((float) triangleWidth, (float) triangleHeight, (float) prismThickness);
+   }
+
+   public static MeshDataHolder IsoscelesTriangularPrism(float triangleWidth, float triangleHeight, float prismThickness)
+   {
+      Point3D32[] points = new Point3D32[18];
+      Vector3D32[] normals = new Vector3D32[18];
+      TexCoord2f[] textPoints = new TexCoord2f[18];
+
+      // Bottom face vertices
+      points[0] = new Point3D32(-triangleWidth / 2.0f, -prismThickness / 2.0f, 0.0f);
+      normals[0] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[0] = new TexCoord2f(0.0f, 0.0f);
+      points[1] = new Point3D32(triangleWidth / 2.0f, -prismThickness / 2.0f, 0.0f);
+      normals[1] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[1] = new TexCoord2f(1.0f, 0.0f);
+      points[2] = new Point3D32(triangleWidth / 2.0f, prismThickness / 2.0f, 0.0f);
+      normals[2] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[2] = new TexCoord2f(1.0f, 1.0f);
+      points[3] = new Point3D32(-triangleWidth / 2.0f, prismThickness / 2.0f, 0.0f);
+      normals[3] = new Vector3D32(0.0f, 0.0f, -1.0f);
+      textPoints[3] = new TexCoord2f(0.0f, 1.0f);
+
+      // Back face vertices
+      points[4] = new Point3D32(0.0f, -prismThickness / 2.0f, triangleHeight);
+      normals[4] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[4] = new TexCoord2f(0.0f, 1.0f);
+      points[5] = new Point3D32(0.0f, prismThickness / 2.0f, triangleHeight);
+      normals[5] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[5] = new TexCoord2f(1.0f, 1.0f);
+      points[6] = new Point3D32(points[2]);
+      normals[6] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[6] = new TexCoord2f(textPoints[2]);
+      points[7] = new Point3D32(points[1]);
+      normals[7] = new Vector3D32(1.0f, 0.0f, 0.0f);
+      textPoints[7] = new TexCoord2f(textPoints[1]);
+
+      // Top face vertices
+      float wedgeAngle = (float) Math.atan2(triangleHeight, triangleWidth / 2.0);
+      points[8] = new Point3D32(points[0]);
+      normals[8] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[8] = new TexCoord2f(textPoints[0]);
+      points[9] = new Point3D32(points[4]);
+      normals[9] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[9] = new TexCoord2f(textPoints[4]);
+      points[10] = new Point3D32(points[5]);
+      normals[10] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[10] = new TexCoord2f(textPoints[5]);
+      points[11] = new Point3D32(points[3]);
+      normals[11] = new Vector3D32(-(float) Math.sin(wedgeAngle), (float) Math.cos(wedgeAngle), 0.0f);
+      textPoints[11] = new TexCoord2f(textPoints[3]);
+
+      // Right face vertices
+      points[12] = new Point3D32(points[0]);
+      normals[12] = new Vector3D32(0.0f, -1.0f, 0.0f);
+      textPoints[12] = new TexCoord2f(textPoints[0]);
+      points[13] = new Point3D32(points[1]);
+      normals[13] = new Vector3D32(0.0f, -1.0f, 0.0f);
+      textPoints[13] = new TexCoord2f(textPoints[1]);
+      points[14] = new Point3D32(points[4]);
+      normals[14] = new Vector3D32(0.0f, -1.0f, 0.0f);
+      textPoints[14] = new TexCoord2f(textPoints[4]);
+
+      // Left face vertices
+      points[15] = new Point3D32(points[2]);
+      normals[15] = new Vector3D32(0.0f, 1.0f, 0.0f);
+      textPoints[15] = new TexCoord2f(textPoints[2]);
+      points[16] = new Point3D32(points[3]);
+      normals[16] = new Vector3D32(0.0f, 1.0f, 0.0f);
+      textPoints[16] = new TexCoord2f(textPoints[3]);
+      points[17] = new Point3D32(points[5]);
+      normals[17] = new Vector3D32(0.0f, 1.0f, 0.0f);
+      textPoints[17] = new TexCoord2f(textPoints[5]);
+
+      int numberOfTriangles = 2 * 3 + 2;
+      int[] triangleIndices = new int[3 * numberOfTriangles];
+
+      int index = 0;
+
+      // Bottom face
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 2;
+      triangleIndices[index++] = 1;
+
+      triangleIndices[index++] = 0;
+      triangleIndices[index++] = 3;
+      triangleIndices[index++] = 2;
+
+      // Back face
+      triangleIndices[index++] = 7;
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 4;
+
+      triangleIndices[index++] = 5;
+      triangleIndices[index++] = 7;
+      triangleIndices[index++] = 6;
+
+      // Top face
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 9;
+      triangleIndices[index++] = 10;
+
+      triangleIndices[index++] = 8;
+      triangleIndices[index++] = 10;
+      triangleIndices[index++] = 11;
+
+      // Right face
+      triangleIndices[index++] = 12;
+      triangleIndices[index++] = 13;
+      triangleIndices[index++] = 14;
+
+      // Left face
+      triangleIndices[index++] = 15;
+      triangleIndices[index++] = 16;
+      triangleIndices[index++] = 17;
+
+      return new MeshDataHolder(points, textPoints, triangleIndices, normals);
    }
 
    public void addArcTorus(double startAngle, double endAngle, double majorRadius, double minorRadius, Color color)
