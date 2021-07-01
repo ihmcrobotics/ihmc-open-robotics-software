@@ -120,4 +120,22 @@ public interface JointAccelerationIntegrationParametersReadOnly
     * @return velocityReferenceAlpha the ratio of measured velocity to be used as reference.
     */
    double getVelocityReferenceAlpha();
+
+   /**
+    * This is to configure how the desired velocity is to be reset upon receiving
+    * {@link JointDesiredOutputReadOnly#peekResetIntegratorsRequest()} in
+    * {@link JointAccelerationIntegrationCalculator}.
+    * <ul>
+    * <li>{@link JointVelocityIntegratorResetMode#CURRENT_VELOCITY} (default behavior), the desired
+    * velocity is reset to the current joint velocity.
+    * <li>{@link JointVelocityIntegratorResetMode#ZERO_VELOCITY} when {@code true}, the desired
+    * velocity is reset to zero.
+    * <li>{@link JointVelocityIntegratorResetMode#REFERENCE_VELOCITY} when {@code true}, the desired
+    * velocity is reset to the reference velocity, see {@link #getVelocityReferenceAlpha()}.
+    * </ul>
+    * 
+    * @return specifies the integrator's behavior for when resetting the desired velocity. Default
+    *         value is {@link JointVelocityIntegratorResetMode#CURRENT_VELOCITY}.
+    */
+   JointVelocityIntegratorResetMode getVelocityResetMode();
 }
