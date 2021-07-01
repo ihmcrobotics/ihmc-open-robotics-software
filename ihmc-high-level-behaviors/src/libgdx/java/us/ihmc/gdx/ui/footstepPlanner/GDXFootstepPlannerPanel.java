@@ -6,6 +6,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import imgui.internal.ImGui;
 import us.ihmc.gdx.imgui.ImGuiPanel;
+import us.ihmc.gdx.sceneManager.GDXSceneLevel;
 import us.ihmc.gdx.ui.GDXImGuiBasedUI;
 import us.ihmc.gdx.ui.gizmo.GDXFootstepPlannerGoalGizmo;
 
@@ -23,6 +24,7 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
    {
       goalGizmo.create(baseUI.get3DSceneManager().getCamera3D());
       baseUI.addImGui3DViewInputProcessor(goalGizmo::process3DViewInput);
+      baseUI.get3DSceneManager().addRenderableProvider(this, GDXSceneLevel.VIRTUAL);
    }
 
    private void renderImGuiWidgets()
@@ -31,6 +33,8 @@ public class GDXFootstepPlannerPanel extends ImGuiPanel implements RenderablePro
       {
 
       }
+
+      goalGizmo.renderImGuiTuner();
    }
 
    @Override
