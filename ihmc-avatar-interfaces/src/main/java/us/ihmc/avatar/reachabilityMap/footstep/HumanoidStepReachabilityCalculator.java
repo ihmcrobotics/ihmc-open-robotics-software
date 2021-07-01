@@ -157,6 +157,8 @@ public abstract class HumanoidStepReachabilityCalculator
       DRCRobotModel robotModel = getRobotModel();
       DRCRobotModel ghostRobotModel = getRobotModel();
 
+      imposeJointLimitRestrictions(robotModel);
+
       FullHumanoidRobotModel desiredFullRobotModel = robotModel.createFullRobotModel();
       commandInputManager = new CommandInputManager(KinematicsToolboxModule.supportedCommands());
       commandInputManager.registerConversionHelper(new KinematicsToolboxCommandConverter(desiredFullRobotModel));
@@ -272,6 +274,10 @@ public abstract class HumanoidStepReachabilityCalculator
    }
 
    protected abstract DRCRobotModel getRobotModel();
+
+   protected void imposeJointLimitRestrictions(DRCRobotModel robotModel)
+   {
+   }
 
    protected abstract RobotCollisionModel getRobotCollisionModel(HumanoidJointNameMap jointMap);
 
